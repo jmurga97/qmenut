@@ -1,0 +1,7 @@
+dist
+node_modules
+.wrangler
+apps/*/src/app/route-tree.gen.ts
+apps/*/src/app/routeTree.gen.ts
+worker-configuration.d.ts
+bun.lock

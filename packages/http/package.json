@@ -1,0 +1,74 @@
+{
+  "name": "@qmenut/http",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./app": {
+      "types": "./src/app/index.ts",
+      "import": "./src/app/index.ts"
+    },
+    "./env/base": {
+      "types": "./src/env/base.ts",
+      "import": "./src/env/base.ts"
+    },
+    "./errors/http-error": {
+      "types": "./src/errors/http-error.ts",
+      "import": "./src/errors/http-error.ts"
+    },
+    "./errors/map-error": {
+      "types": "./src/errors/map-error.ts",
+      "import": "./src/errors/map-error.ts"
+    },
+    "./handlers/create-default-validation-hook": {
+      "types": "./src/handlers/create-default-validation-hook.ts",
+      "import": "./src/handlers/create-default-validation-hook.ts"
+    },
+    "./handlers/create-not-found-handler": {
+      "types": "./src/handlers/create-not-found-handler.ts",
+      "import": "./src/handlers/create-not-found-handler.ts"
+    },
+    "./handlers/create-on-error-handler": {
+      "types": "./src/handlers/create-on-error-handler.ts",
+      "import": "./src/handlers/create-on-error-handler.ts"
+    },
+    "./handlers/types": {
+      "types": "./src/handlers/types.ts",
+      "import": "./src/handlers/types.ts"
+    },
+    "./openapi/create-api-route": {
+      "types": "./src/openapi/create-api-route.ts",
+      "import": "./src/openapi/create-api-route.ts"
+    },
+    "./request": {
+      "types": "./src/request.ts",
+      "import": "./src/request.ts"
+    },
+    "./responses": {
+      "types": "./src/responses.ts",
+      "import": "./src/responses.ts"
+    },
+    "./status-codes": {
+      "types": "./src/status-codes.ts",
+      "import": "./src/status-codes.ts"
+    },
+    "./validation": {
+      "types": "./src/validation.ts",
+      "import": "./src/validation.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/zod-openapi": "^1.4.0",
+    "hono": "^4.12.25",
+    "hono-pino": "^0.10.3",
+    "pino": "^10.3.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

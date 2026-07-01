@@ -1,0 +1,21 @@
+name = "qmenut-api"
+main = "src/index.ts"
+compatibility_date = "2026-06-16"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = false
+upload_source_maps = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "qmenut-db"
+database_id = "f3138d43-a32e-46f2-a9d9-b4e777b02d8a"
+migrations_dir = "migrations"
+
+[observability]
+enabled = true
+
+[vars]
+ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:5174"
+BETTER_AUTH_URL = "http://localhost:8787"
+LOG_LEVEL = "info"
+NODE_ENV = "production"

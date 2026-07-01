@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["./worker-configuration.d.ts", "@types/bun"],
+    "lib": ["esnext"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "worker-configuration.d.ts"],
+  "exclude": ["dist"]
+}
