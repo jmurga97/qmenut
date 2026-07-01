@@ -2,8 +2,8 @@ import { html, LitElement, nothing } from "lit";
 import { property } from "lit/decorators.js";
 
 import componentStylesText from "./styles.css?inline";
-import { qmHostResetStyles } from "../../internal/base-styles";
-import { createComponentStyles } from "../../internal/component-styles";
+import { qmHostResetStyles } from "../../../internal/base-styles";
+import { createComponentStyles } from "../../../internal/component-styles";
 
 export const QM_HEADING_TAG_NAME = "qm-heading";
 

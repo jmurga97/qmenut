@@ -6,10 +6,12 @@ import pluginRouter from "@tanstack/eslint-plugin-router";
 import { defineConfig } from "eslint/config";
 import importPlugin from "eslint-plugin-import";
 import jsxA11y from "eslint-plugin-jsx-a11y";
+import pluginLit from "eslint-plugin-lit";
 import pluginReact from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import storybook from "eslint-plugin-storybook";
+import pluginWc from "eslint-plugin-wc";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -30,6 +32,7 @@ const typeScriptFiles = [...appFiles, ...packageFiles];
 
 const reactFiles = ["apps/web/src/**/*.{ts,tsx}"];
 const workerFiles = ["apps/api/src/**/*.ts"];
+const litFiles = ["packages/ui/src/components/**/*.ts"];
 
 const tsconfigPaths = [
   "apps/web/tsconfig.json",
@@ -230,6 +233,20 @@ export default defineConfig(
     rules: {
       "@typescript-eslint/await-thenable": "off",
       "@typescript-eslint/require-await": "off",
+    },
+  },
+  {
+    files: litFiles,
+    languageOptions: {
+      globals: globals.browser,
+    },
+    plugins: {
+      lit: pluginLit,
+      wc: pluginWc,
+    },
+    rules: {
+      ...pluginLit.configs["flat/recommended"].rules,
+      ...pluginWc.configs["flat/recommended"].rules,
     },
   },
   ...storybook.configs["flat/recommended"],

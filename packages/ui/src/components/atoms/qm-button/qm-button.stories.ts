@@ -1,6 +1,6 @@
 import { html } from "lit";
 
-import { archetypeGrid } from "../../../.storybook/all-archetypes";
+import { archetypeGrid } from "../../../../.storybook/all-archetypes";
 
 import type { QmButtonArgs } from "./index";
 import type { Meta, StoryObj } from "@storybook/web-components-vite";

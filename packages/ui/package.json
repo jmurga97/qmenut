@@ -25,20 +25,20 @@
       "import": "./src/theme/apply-theme.ts"
     },
     "./components/qm-wordmark": {
-      "types": "./src/components/qm-wordmark/index.ts",
-      "import": "./src/components/qm-wordmark/index.ts"
+      "types": "./src/components/atoms/qm-wordmark/index.ts",
+      "import": "./src/components/atoms/qm-wordmark/index.ts"
     },
     "./components/qm-heading": {
-      "types": "./src/components/qm-heading/index.ts",
-      "import": "./src/components/qm-heading/index.ts"
+      "types": "./src/components/atoms/qm-heading/index.ts",
+      "import": "./src/components/atoms/qm-heading/index.ts"
     },
     "./components/qm-section-num": {
-      "types": "./src/components/qm-section-num/index.ts",
-      "import": "./src/components/qm-section-num/index.ts"
+      "types": "./src/components/atoms/qm-section-num/index.ts",
+      "import": "./src/components/atoms/qm-section-num/index.ts"
     },
     "./components/qm-button": {
-      "types": "./src/components/qm-button/index.ts",
-      "import": "./src/components/qm-button/index.ts"
+      "types": "./src/components/atoms/qm-button/index.ts",
+      "import": "./src/components/atoms/qm-button/index.ts"
     }
   },
   "scripts": {

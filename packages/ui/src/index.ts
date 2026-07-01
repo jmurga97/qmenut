@@ -1,15 +1,15 @@
-import { QM_BUTTON_TAG_NAME, QmButton, defineQmButton } from "./components/qm-button";
-import { QM_HEADING_TAG_NAME, QmHeading, defineQmHeading } from "./components/qm-heading";
-import { QM_SECTION_NUM_TAG_NAME, QmSectionNum, defineQmSectionNum } from "./components/qm-section-num";
-import { QM_WORDMARK_TAG_NAME, QmWordmark, defineQmWordmark } from "./components/qm-wordmark";
+import { QM_BUTTON_TAG_NAME, QmButton, defineQmButton } from "./components/atoms/qm-button";
+import { QM_HEADING_TAG_NAME, QmHeading, defineQmHeading } from "./components/atoms/qm-heading";
+import { QM_SECTION_NUM_TAG_NAME, QmSectionNum, defineQmSectionNum } from "./components/atoms/qm-section-num";
+import { QM_WORDMARK_TAG_NAME, QmWordmark, defineQmWordmark } from "./components/atoms/qm-wordmark";
 import { applyQmTheme, buildQmThemeVars } from "./theme/apply-theme";
 import { deriveQmTheme, mix } from "./theme/derive";
 import { ARCHETYPES } from "./theme/presets";
 
-import type { QmButtonArgs, QmButtonSize, QmButtonVariant } from "./components/qm-button";
-import type { QmHeadingArgs } from "./components/qm-heading";
-import type { QmSectionNumArgs } from "./components/qm-section-num";
-import type { QmWordmarkArgs } from "./components/qm-wordmark";
+import type { QmButtonArgs, QmButtonSize, QmButtonVariant } from "./components/atoms/qm-button";
+import type { QmHeadingArgs } from "./components/atoms/qm-heading";
+import type { QmSectionNumArgs } from "./components/atoms/qm-section-num";
+import type { QmWordmarkArgs } from "./components/atoms/qm-wordmark";
 import type { QmThemeInput } from "./theme/apply-theme";
 import type { QmDerivedColors, QmThemeConfig } from "./theme/derive";
 import type {
