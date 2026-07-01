@@ -15,7 +15,7 @@
  * `theme/derive.ts`.
  *
  * The photography, badge, and navigation groups below are *expansions*: a single
- * `photoMode` / `badgeShape` / `navStyle` choice on a `QmArchetypePreset` (see
+ * `photoMode` / `badgeShape` / `navStyle` choice on a `QmTemplatePreset` (see
  * `theme/presets.ts`) fans out into the concrete tokens components actually consume, via
  * `theme/apply-theme.ts`.
  */

@@ -4,7 +4,7 @@ import { QM_SECTION_NUM_TAG_NAME, QmSectionNum, defineQmSectionNum } from "./com
 import { QM_WORDMARK_TAG_NAME, QmWordmark, defineQmWordmark } from "./components/atoms/qm-wordmark";
 import { applyQmTheme, buildQmThemeVars } from "./theme/apply-theme";
 import { deriveQmTheme, mix } from "./theme/derive";
-import { ARCHETYPES } from "./theme/presets";
+import { TEMPLATES } from "./theme/presets";
 
 import type { QmButtonArgs, QmButtonSize, QmButtonVariant } from "./components/atoms/qm-button";
 import type { QmHeadingArgs } from "./components/atoms/qm-heading";
@@ -13,17 +13,16 @@ import type { QmWordmarkArgs } from "./components/atoms/qm-wordmark";
 import type { QmThemeInput } from "./theme/apply-theme";
 import type { QmDerivedColors, QmThemeConfig } from "./theme/derive";
 import type {
-  QmArchetypeName,
-  QmArchetypePreset,
   QmBadgeShape,
   QmNavStyle,
   QmPhotoMode,
+  QmTemplateName,
+  QmTemplatePreset,
   QmToneMix,
 } from "./theme/presets";
 import type { QmThemeTokens } from "./theme/tokens";
 
 export {
-  ARCHETYPES,
   applyQmTheme,
   buildQmThemeVars,
   defineQmButton,
@@ -40,11 +39,10 @@ export {
   QmHeading,
   QmSectionNum,
   QmWordmark,
+  TEMPLATES,
 };
 
 export type {
-  QmArchetypeName,
-  QmArchetypePreset,
   QmBadgeShape,
   QmButtonArgs,
   QmButtonSize,
@@ -54,6 +52,8 @@ export type {
   QmNavStyle,
   QmPhotoMode,
   QmSectionNumArgs,
+  QmTemplateName,
+  QmTemplatePreset,
   QmThemeConfig,
   QmThemeInput,
   QmThemeTokens,

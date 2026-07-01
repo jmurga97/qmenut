@@ -1,6 +1,6 @@
 /**
- * The 5 QMenut archetypes — everything a tenant does NOT choose. A tenant only supplies an
- * archetype name plus `primary`/`secondary` colors (see `theme/derive.ts`); every other
+ * The 5 QMenut templates — everything a tenant does NOT choose. A tenant only supplies a
+ * template name plus `primary`/`secondary` colors (see `theme/derive.ts`); every other
  * visual decision (typography, geometry, photo layout, badge shape, nav chrome) comes from
  * here.
  *
@@ -8,7 +8,7 @@
  * `QMenut Variantes Standalone.html` design-doc bundle) — do not "clean up" or re-derive
  * them, they're the validated source of truth.
  */
-export type QmArchetypeName = "fine" | "her" | "fast" | "cafe" | "tapas";
+export type QmTemplateName = "fine" | "her" | "fast" | "cafe" | "tapas";
 
 export type QmPhotoMode = "none" | "thumb" | "hero" | "heroxl";
 export type QmBadgeShape = "outline" | "block" | "pill";
@@ -23,7 +23,7 @@ export interface QmToneMix {
   mutedMix: number;
 }
 
-export interface QmArchetypePreset {
+export interface QmTemplatePreset {
   label: string;
   heading: string;
   body: string;
@@ -49,7 +49,7 @@ export interface QmArchetypePreset {
   tone: QmToneMix;
 }
 
-export const ARCHETYPES: Record<QmArchetypeName, QmArchetypePreset> = {
+export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
   fine: {
     label: "Alta cocina",
     heading: "'Cormorant Garamond',serif",

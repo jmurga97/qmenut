@@ -10,7 +10,7 @@ export const QM_WORDMARK_TAG_NAME = "qm-wordmark";
 const componentStyles = createComponentStyles(componentStylesText);
 
 /**
- * Brand/restaurant name set in the archetype's heading type. Size is a local custom
+ * Brand/restaurant name set in the template's heading type. Size is a local custom
  * property (`--qm-wordmark-size`, default `1.5rem`) so callers can resize it per context
  * (nav bar vs. hero) without a `size` prop.
  */

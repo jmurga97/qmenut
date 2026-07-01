@@ -43,22 +43,14 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "check": "tsc --noEmit",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "check": "tsc --noEmit"
   },
   "dependencies": {
     "culori": "^4.0.2",
     "lit": "^3.3.3"
   },
   "devDependencies": {
-    "@storybook/addon-a11y": "^10.4.6",
-    "@storybook/addon-docs": "^10.4.6",
-    "@storybook/web-components": "^10.4.6",
-    "@storybook/web-components-vite": "^10.4.6",
     "@types/culori": "^4.0.1",
-    "storybook": "^10.4.6",
-    "typescript": "^5.9.3",
-    "vite": "^7.1.12"
+    "typescript": "^5.9.3"
   }
 }

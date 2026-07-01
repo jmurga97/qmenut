@@ -10,7 +10,6 @@ import pluginLit from "eslint-plugin-lit";
 import pluginReact from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
-import storybook from "eslint-plugin-storybook";
 import pluginWc from "eslint-plugin-wc";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -23,11 +22,7 @@ const sharedParserOptions = {
 };
 
 const appFiles = ["apps/*/src/**/*.{ts,tsx}", "apps/*/tests/**/*.{ts,tsx}"];
-const packageFiles = [
-  "packages/*/src/**/*.{ts,tsx}",
-  "packages/*/tests/**/*.{ts,tsx}",
-  "packages/*/.storybook/**/*.ts",
-];
+const packageFiles = ["packages/*/src/**/*.{ts,tsx}", "packages/*/tests/**/*.{ts,tsx}"];
 const typeScriptFiles = [...appFiles, ...packageFiles];
 
 const reactFiles = ["apps/web/src/**/*.{ts,tsx}"];
@@ -149,7 +144,6 @@ export default defineConfig(
   {
     ignores: [
       "**/dist/**",
-      "**/storybook-static/**",
       "**/.wrangler/**",
       "**/node_modules/**",
       "**/worker-configuration.d.ts",
@@ -249,5 +243,4 @@ export default defineConfig(
       ...pluginWc.configs["flat/recommended"].rules,
     },
   },
-  ...storybook.configs["flat/recommended"],
 );

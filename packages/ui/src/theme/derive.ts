@@ -1,8 +1,8 @@
 import { converter } from "culori";
 
-import { ARCHETYPES } from "./presets";
+import { TEMPLATES } from "./presets";
 
-import type { QmArchetypeName, QmToneMix } from "./presets";
+import type { QmTemplateName, QmToneMix } from "./presets";
 
 const toOklch = converter("oklch");
 
@@ -11,11 +11,11 @@ const DEFAULT_SECONDARY = "#7E8C5A";
 const DARK_INK = "#16110D";
 const WHITE = "#FFFFFF";
 const ON_COLOR_LIGHTNESS_THRESHOLD = 0.62;
-/** `--qm-emph-ink` mix percent of secondary over ink — fixed, not archetype-tunable. */
+/** `--qm-emph-ink` mix percent of secondary over ink — fixed, not template-tunable. */
 const EMPH_INK_MIX = 82;
 
 export interface QmThemeConfig {
-  archetype: QmArchetypeName;
+  template: QmTemplateName;
   /** Tenant's first brand color. Falls back to a neutral dark if omitted. */
   primary?: string;
   /** Tenant's second brand color. Falls back to a neutral sage if omitted. */
@@ -23,7 +23,7 @@ export interface QmThemeConfig {
   paper?: string;
   onPrimary?: string;
   onSecondary?: string;
-  /** Overrides the archetype's OKLCH chroma cap. `null` disables clamping entirely. */
+  /** Overrides the template's OKLCH chroma cap. `null` disables clamping entirely. */
   saturationCap?: number | null;
   tone?: Partial<QmToneMix>;
 }
@@ -67,19 +67,19 @@ function onColor(hex: string): string {
 }
 
 /**
- * Governed derivation: an archetype + 2 tenant colors → the full color group. Mirrors the
+ * Governed derivation: a template + 2 tenant colors → the full color group. Mirrors the
  * reference `qmenut-theme.js` engine's `derive()` exactly, including its choice to emit
  * live `color-mix()`/`oklch()` CSS strings instead of pre-resolving to hex.
  */
 export function deriveQmTheme(cfg: QmThemeConfig): QmDerivedColors {
-  const archetype = ARCHETYPES[cfg.archetype];
-  const cap = cfg.saturationCap !== undefined ? cfg.saturationCap : archetype.saturationCap;
+  const template = TEMPLATES[cfg.template];
+  const cap = cfg.saturationCap !== undefined ? cfg.saturationCap : template.saturationCap;
   const rawPrimary = cfg.primary || DEFAULT_PRIMARY;
   const rawSecondary = cfg.secondary || DEFAULT_SECONDARY;
   const primary = clampChroma(rawPrimary, cap);
   const secondary = clampChroma(rawSecondary, cap);
-  const paper = cfg.paper || archetype.paper;
-  const tone = { ...archetype.tone, ...cfg.tone };
+  const paper = cfg.paper || template.paper;
+  const tone = { ...template.tone, ...cfg.tone };
 
   const bg = mix(primary, tone.bgMix, paper);
   const card = WHITE;

@@ -1,11 +1,4 @@
 {
   "version": "0.0.1",
-  "configurations": [
-    {
-      "name": "storybook-ui",
-      "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "--filter=@qmenut/ui", "storybook"],
-      "port": 6006
-    }
-  ]
+  "configurations": []
 }

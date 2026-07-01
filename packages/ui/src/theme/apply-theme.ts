@@ -1,15 +1,15 @@
 import { deriveQmTheme, mix } from "./derive";
-import { ARCHETYPES } from "./presets";
+import { TEMPLATES } from "./presets";
 
 import type { QmDerivedColors, QmThemeConfig } from "./derive";
-import type { QmArchetypePreset, QmBadgeShape, QmNavStyle, QmPhotoMode } from "./presets";
+import type { QmBadgeShape, QmNavStyle, QmPhotoMode, QmTemplatePreset } from "./presets";
 
 /**
- * Tenant input: an archetype name + color overrides (`QmThemeConfig`), plus optional
- * per-tenant overrides of any archetype default (typography, geometry, photo/badge/nav
- * mode). Anything omitted falls back to the archetype preset.
+ * Tenant input: a template name + color overrides (`QmThemeConfig`), plus optional
+ * per-tenant overrides of any template default (typography, geometry, photo/badge/nav
+ * mode). Anything omitted falls back to the template preset.
  */
-export type QmThemeInput = QmThemeConfig & Partial<Omit<QmArchetypePreset, "tone" | "saturationCap" | "paper">>;
+export type QmThemeInput = QmThemeConfig & Partial<Omit<QmTemplatePreset, "tone" | "saturationCap" | "paper">>;
 
 const PHOTO_GROUPS: Record<QmPhotoMode, Record<string, string>> = {
   none: {
@@ -172,41 +172,41 @@ function buildNavTokens({ navStyle, colors, rule }: BuildNavTokensArgs): Record<
   return navByStyle[navStyle];
 }
 
-/** Archetype preset with any tenant-supplied field (typography/geometry/mode) overlaid. */
-function resolveArchetype(input: QmThemeInput): QmArchetypePreset {
-  const archetype = ARCHETYPES[input.archetype];
+/** Template preset with any tenant-supplied field (typography/geometry/mode) overlaid. */
+function resolveTemplate(input: QmThemeInput): QmTemplatePreset {
+  const template = TEMPLATES[input.template];
   return {
-    label: input.label ?? archetype.label,
-    heading: input.heading ?? archetype.heading,
-    body: input.body ?? archetype.body,
-    headingWeight: input.headingWeight ?? archetype.headingWeight,
-    dishWeight: input.dishWeight ?? archetype.dishWeight,
-    fontScale: input.fontScale ?? archetype.fontScale,
-    tracking: input.tracking ?? archetype.tracking,
-    eyebrowCase: input.eyebrowCase ?? archetype.eyebrowCase,
-    eyebrowSpacing: input.eyebrowSpacing ?? archetype.eyebrowSpacing,
-    radius: input.radius ?? archetype.radius,
-    borderWidth: input.borderWidth ?? archetype.borderWidth,
-    rule: input.rule ?? archetype.rule,
-    photoMode: input.photoMode ?? archetype.photoMode,
-    badgeShape: input.badgeShape ?? archetype.badgeShape,
-    navStyle: input.navStyle ?? archetype.navStyle,
-    numbers: input.numbers ?? archetype.numbers,
-    saturationCap: archetype.saturationCap,
-    paper: archetype.paper,
-    cardShadow: input.cardShadow ?? archetype.cardShadow,
-    rowPad: input.rowPad ?? archetype.rowPad,
-    tone: archetype.tone,
+    label: input.label ?? template.label,
+    heading: input.heading ?? template.heading,
+    body: input.body ?? template.body,
+    headingWeight: input.headingWeight ?? template.headingWeight,
+    dishWeight: input.dishWeight ?? template.dishWeight,
+    fontScale: input.fontScale ?? template.fontScale,
+    tracking: input.tracking ?? template.tracking,
+    eyebrowCase: input.eyebrowCase ?? template.eyebrowCase,
+    eyebrowSpacing: input.eyebrowSpacing ?? template.eyebrowSpacing,
+    radius: input.radius ?? template.radius,
+    borderWidth: input.borderWidth ?? template.borderWidth,
+    rule: input.rule ?? template.rule,
+    photoMode: input.photoMode ?? template.photoMode,
+    badgeShape: input.badgeShape ?? template.badgeShape,
+    navStyle: input.navStyle ?? template.navStyle,
+    numbers: input.numbers ?? template.numbers,
+    saturationCap: template.saturationCap,
+    paper: template.paper,
+    cardShadow: input.cardShadow ?? template.cardShadow,
+    rowPad: input.rowPad ?? template.rowPad,
+    tone: template.tone,
   };
 }
 
 /**
- * Builds the full `--qm-*` variable map for a tenant: archetype defaults + tenant color
+ * Builds the full `--qm-*` variable map for a tenant: template defaults + tenant color
  * derivation (`deriveQmTheme`) + the photo/badge/nav group expansions. Pure function — no
  * DOM access — so it can also be used to preview or diff a theme before applying it.
  */
 export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
-  const resolved = resolveArchetype(input);
+  const resolved = resolveTemplate(input);
   const colors = deriveQmTheme(input);
   const hasDivider = resolved.photoMode === "none" || resolved.photoMode === "thumb";
 
@@ -238,7 +238,7 @@ export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
     "--qm-bw": `${resolved.borderWidth}px`,
     "--qm-rule": `${resolved.rule}px`,
     "--qm-num": resolved.numbers ? "inline" : "none",
-    // 13px for every archetype except tapas (10px), independent of --qm-divider — matches
+    // 13px for every template except tapas (10px), independent of --qm-divider — matches
     // the token spec table, not the demo prototype's divider-conditional row-pad.
     "--qm-row-pad": `${resolved.rowPad ?? 13}px`,
     "--qm-card-shadow": resolved.cardShadow ?? "none",

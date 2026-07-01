@@ -14,11 +14,11 @@ This document defines the mandatory rules for contributing components to this Li
 
 This package exports a collection of Web Components built with **Lit 3**. Unlike some component libraries, it does not depend on an external CSS or icon package — styling and theming are fully self-contained:
 
-- **`src/theme/`** — the design-token engine (`tokens.ts`, `presets.ts`, `derive.ts`, `apply-theme.ts`). Archetype presets (`fine`, `her`, `fast`, `cafe`, `tapas`) and tenant colors drive CSS custom properties applied at runtime via `applyQmTheme()` — components must never hardcode colors/typography, only reference `var(--qm-*, fallback)`.
+- **`src/theme/`** — the design-token engine (`tokens.ts`, `presets.ts`, `derive.ts`, `apply-theme.ts`). Template presets (`fine`, `her`, `fast`, `cafe`, `tapas`) and tenant colors drive CSS custom properties applied at runtime via `applyQmTheme()` — components must never hardcode colors/typography, only reference `var(--qm-*, fallback)`.
 - **`src/internal/component-styles.ts`** (`createComponentStyles()`) + **`src/internal/base-styles.ts`** (`qmHostResetStyles`) — every component composes `static styles = [qmHostResetStyles, componentStyles]`, where `componentStyles` comes from the component's own co-located `styles.css` (imported with the `?inline` Vite suffix).
 - Icons are not a separate package — compose them via slots (see `qm-button`'s `icon-start`/`icon-end` slots) so any icon source the consumer already has works.
 
-The build pipeline uses **Vite** + **TypeScript**. Component previews/visual QA happen in **Storybook** (`packages/ui/.storybook`). This package does not currently ship automated component tests — do not add a test suite unless explicitly requested.
+This package has no bundler or preview tooling of its own — `bun run check`/`build` is just `tsc --noEmit`; the `?inline` CSS import suffix is resolved by whichever Vite-based app consumes the component (e.g. `apps/web`). This package does not currently ship automated component tests — do not add a test suite unless explicitly requested.
 
 Key internal utilities every contributor must know (all under `src/internal/`):
 
@@ -560,4 +560,3 @@ Before opening a PR, confirm all of the following:
 - [ ] No dead imports or commented-out code left after refactoring
 - [ ] `bun run lint` passes with no errors
 - [ ] `bun run check` (`tsc --noEmit`) passes with no errors
-- [ ] `bun run build-storybook` completes without errors

@@ -11,7 +11,7 @@ const componentStyles = createComponentStyles(componentStylesText);
 
 /**
  * Section header row: "01 · Degustación · 7 pases". The number hides itself via
- * `display: var(--qm-num, inline)` — archetypes like `fast`/`cafe`/`tapas` set that to
+ * `display: var(--qm-num, inline)` — templates like `fast`/`cafe`/`tapas` set that to
  * `none`.
  */
 export class QmSectionNum extends LitElement {
