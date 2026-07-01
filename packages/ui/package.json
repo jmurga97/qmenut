@@ -1,0 +1,64 @@
+{
+  "name": "@qmenut/ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./theme/tokens": {
+      "types": "./src/theme/tokens.ts",
+      "import": "./src/theme/tokens.ts"
+    },
+    "./theme/presets": {
+      "types": "./src/theme/presets.ts",
+      "import": "./src/theme/presets.ts"
+    },
+    "./theme/derive": {
+      "types": "./src/theme/derive.ts",
+      "import": "./src/theme/derive.ts"
+    },
+    "./theme/apply-theme": {
+      "types": "./src/theme/apply-theme.ts",
+      "import": "./src/theme/apply-theme.ts"
+    },
+    "./components/qm-wordmark": {
+      "types": "./src/components/qm-wordmark/index.ts",
+      "import": "./src/components/qm-wordmark/index.ts"
+    },
+    "./components/qm-heading": {
+      "types": "./src/components/qm-heading/index.ts",
+      "import": "./src/components/qm-heading/index.ts"
+    },
+    "./components/qm-section-num": {
+      "types": "./src/components/qm-section-num/index.ts",
+      "import": "./src/components/qm-section-num/index.ts"
+    },
+    "./components/qm-button": {
+      "types": "./src/components/qm-button/index.ts",
+      "import": "./src/components/qm-button/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "check": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "culori": "^4.0.2",
+    "lit": "^3.3.3"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "^10.4.6",
+    "@storybook/addon-docs": "^10.4.6",
+    "@storybook/web-components": "^10.4.6",
+    "@storybook/web-components-vite": "^10.4.6",
+    "@types/culori": "^4.0.1",
+    "storybook": "^10.4.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12"
+  }
+}

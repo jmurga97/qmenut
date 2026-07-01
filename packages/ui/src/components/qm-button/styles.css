@@ -1,0 +1,56 @@
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 20px;
+  border: var(--qm-bw, 1px) solid transparent;
+  border-radius: var(--qm-radius, 0px);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition:
+    opacity 150ms,
+    border-color 150ms;
+}
+
+button[data-variant="primary"] {
+  background: var(--qm-primary, #1c1815);
+  color: var(--qm-on-primary, #ffffff);
+}
+
+button[data-variant="secondary"] {
+  background: transparent;
+  color: var(--qm-ink, #1c1815);
+  border-color: var(--qm-ink, #1c1815);
+}
+
+button[data-variant="ghost"] {
+  padding-inline: 0;
+  background: transparent;
+  color: var(--qm-ink, #1c1815);
+  border-color: transparent;
+}
+
+button[data-size="sm"] {
+  min-height: 36px;
+  padding: 8px 14px;
+  font-size: 11px;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon,
+.label {
+  display: inline-flex;
+  align-items: center;
+}

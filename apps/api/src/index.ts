@@ -1,8 +1,8 @@
+import { createDb } from "@qmenut/db";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 import { createAuth } from "@/auth/create-auth";
 import { parseEnv } from "@/config/env";
-import { createDb } from "@/db";
 import { applyCorsHeaders, createOptionsResponse } from "@/http/cors";
 import { jsonResponse } from "@/http/json";
 import { createContext } from "@/trpc/context";

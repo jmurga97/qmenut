@@ -1,50 +1,19 @@
+import { getPublicBranch, getPublicMenu } from "@qmenut/db/repositories/public-menu";
 import { TRPCError } from "@trpc/server";
-import { and, eq, isNull } from "drizzle-orm";
+import { z } from "zod";
 
-import { branches } from "@/db";
-import { resolveTenantFromRequest } from "@/tenant/resolve-tenant";
-
+import { resolveTenantFromRequest } from "../../tenant/resolve-tenant";
 import { publicProcedure, router } from "../trpc";
 
-interface BranchRow {
-  address: string | null;
-  currency: string;
-  customDomain: string | null;
-  id: string;
-  name: string;
-  phone: string | null;
-  socialLinksJson: string | null;
-  whatsapp: string | null;
-}
-
-function parseSocialLinks(socialLinksJson: string | null): unknown {
-  if (!socialLinksJson) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(socialLinksJson) as unknown;
-  } catch {
-    return null;
-  }
-}
-
-function mapBranch(row: BranchRow) {
-  return {
-    id: row.id,
-    name: row.name,
-    address: row.address,
-    phone: row.phone,
-    whatsapp: row.whatsapp,
-    socialLinks: parseSocialLinks(row.socialLinksJson),
-    customDomain: row.customDomain,
-    currency: row.currency,
-  };
-}
+const publicMenuInputSchema = z
+  .object({
+    host: z.string().trim().min(1).optional(),
+  })
+  .optional();
 
 export const menuRouter = router({
   branch: publicProcedure.query(async ({ ctx }) => {
-    const tenant = await resolveTenantFromRequest(ctx.env.DB, ctx.request);
+    const tenant = await resolveTenantFromRequest({ db: ctx.db, request: ctx.request });
 
     if (!tenant) {
       throw new TRPCError({
@@ -53,32 +22,19 @@ export const menuRouter = router({
       });
     }
 
-    const row = await ctx.db
-      .select({
-        id: branches.id,
-        name: branches.name,
-        address: branches.address,
-        phone: branches.phone,
-        whatsapp: branches.whatsapp,
-        socialLinksJson: branches.socialLinksJson,
-        customDomain: branches.customDomain,
-        currency: branches.currency,
-      })
-      .from(branches)
-      .where(
-        and(
-          eq(branches.id, tenant.branchId),
-          eq(branches.restaurantId, tenant.restaurantId),
-          isNull(branches.deletedAt),
-          eq(branches.isActive, true),
-        ),
-      )
-      .get();
+    return getPublicBranch({ db: ctx.db, tenant });
+  }),
+  publicData: publicProcedure.input(publicMenuInputSchema).query(async ({ ctx, input }) => {
+    const tenant = await resolveTenantFromRequest({
+      db: ctx.db,
+      request: ctx.request,
+      host: input?.host,
+    });
 
-    if (!row) {
+    if (!tenant) {
       return null;
     }
 
-    return mapBranch(row);
+    return getPublicMenu({ db: ctx.db, tenant, nowMs: Date.now() });
   }),
 });

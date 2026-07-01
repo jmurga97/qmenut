@@ -9,6 +9,7 @@ import jsxA11y from "eslint-plugin-jsx-a11y";
 import pluginReact from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import storybook from "eslint-plugin-storybook";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -20,15 +21,24 @@ const sharedParserOptions = {
 };
 
 const appFiles = ["apps/*/src/**/*.{ts,tsx}", "apps/*/tests/**/*.{ts,tsx}"];
-const packageFiles = ["packages/*/src/**/*.{ts,tsx}", "packages/*/tests/**/*.{ts,tsx}"];
+const packageFiles = [
+  "packages/*/src/**/*.{ts,tsx}",
+  "packages/*/tests/**/*.{ts,tsx}",
+  "packages/*/.storybook/**/*.ts",
+];
 const typeScriptFiles = [...appFiles, ...packageFiles];
 
 const reactFiles = ["apps/web/src/**/*.{ts,tsx}"];
 const workerFiles = ["apps/api/src/**/*.ts"];
 
-const tsconfigPaths = ["apps/web/tsconfig.json", "apps/api/tsconfig.json", "packages/http/tsconfig.json"].map(
-  (projectPath) => path.join(rootDir, projectPath),
-);
+const tsconfigPaths = [
+  "apps/web/tsconfig.json",
+  "apps/api/tsconfig.json",
+  "packages/auth/tsconfig.json",
+  "packages/db/tsconfig.json",
+  "packages/http/tsconfig.json",
+  "packages/ui/tsconfig.json",
+].map((projectPath) => path.join(rootDir, projectPath));
 
 const importSettings = {
   ...importPlugin.flatConfigs.typescript.settings,
@@ -136,6 +146,7 @@ export default defineConfig(
   {
     ignores: [
       "**/dist/**",
+      "**/storybook-static/**",
       "**/.wrangler/**",
       "**/node_modules/**",
       "**/worker-configuration.d.ts",
@@ -221,4 +232,5 @@ export default defineConfig(
       "@typescript-eslint/require-await": "off",
     },
   },
+  ...storybook.configs["flat/recommended"],
 );

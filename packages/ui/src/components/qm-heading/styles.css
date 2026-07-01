@@ -1,0 +1,32 @@
+:host {
+  --qm-heading-size: 2rem;
+  display: block;
+}
+
+.eyebrow {
+  display: block;
+  margin: 0 0 6px;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--qm-eyebrow-ls, 1.5px);
+  text-transform: var(--qm-eyebrow-tt, uppercase);
+  color: var(--qm-muted, #8c857b);
+}
+
+.title {
+  display: block;
+  font-family: var(--qm-heading, serif);
+  font-size: calc(var(--qm-heading-size) * var(--qm-fs, 1));
+  font-weight: var(--qm-hw, 600);
+  letter-spacing: var(--qm-name-ls, 0px);
+  line-height: 0.98;
+  color: var(--qm-ink, #1c1815);
+}
+
+.rule {
+  height: 0;
+  margin: 12px 0 0;
+  border: none;
+  border-top: var(--qm-rule, 1.5px) solid var(--qm-ink, #1c1815);
+}

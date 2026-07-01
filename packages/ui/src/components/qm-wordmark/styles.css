@@ -1,0 +1,13 @@
+:host {
+  --qm-wordmark-size: 1.5rem;
+}
+
+.text {
+  display: inline-block;
+  font-family: var(--qm-heading, serif);
+  font-size: var(--qm-wordmark-size);
+  font-weight: var(--qm-hw, 600);
+  letter-spacing: var(--qm-name-ls, 0px);
+  line-height: 1;
+  color: var(--qm-ink, #1c1815);
+}

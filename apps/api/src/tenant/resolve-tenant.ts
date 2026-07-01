@@ -1,12 +1,6 @@
-export interface ResolvedTenant {
-  branchId: string;
-  restaurantId: string;
-}
+import { normalizeTenantHost, resolveTenantByHost } from "@qmenut/db/repositories/public-menu";
 
-interface BranchTenantRow {
-  id: string;
-  restaurant_id: string;
-}
+import type { DrizzleDb, ResolvedTenant } from "@qmenut/db";
 
 function getRequestHostname(request: Request): string {
   const forwardedHost = request.headers.get("x-forwarded-host");
@@ -19,16 +13,26 @@ function getRequestHostname(request: Request): string {
   return new URL(request.url).hostname;
 }
 
-export async function resolveTenantFromRequest(db: D1Database, request: Request): Promise<ResolvedTenant | null> {
-  const host = getRequestHostname(request);
-  const row = await db
-    .prepare("SELECT id, restaurant_id FROM branches WHERE custom_domain = ? AND deleted_at IS NULL AND is_active = 1")
-    .bind(host)
-    .first<BranchTenantRow>();
+interface ResolveTenantFromRequestInput {
+  db: DrizzleDb;
+  host?: string | undefined;
+  request: Request;
+}
 
-  if (!row) {
-    return null;
+export function resolveRequestTenantHost({ host, request }: Omit<ResolveTenantFromRequestInput, "db">): string {
+  const inputHost = host ? normalizeTenantHost(host) : "";
+
+  if (inputHost) {
+    return inputHost;
   }
 
-  return { branchId: row.id, restaurantId: row.restaurant_id };
+  return normalizeTenantHost(getRequestHostname(request));
+}
+
+export async function resolveTenantFromRequest({
+  db,
+  host,
+  request,
+}: ResolveTenantFromRequestInput): Promise<ResolvedTenant | null> {
+  return resolveTenantByHost({ db, host: resolveRequestTenantHost({ host, request }) });
 }

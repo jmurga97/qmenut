@@ -11,6 +11,11 @@ database_name = "qmenut-db"
 database_id = "f3138d43-a32e-46f2-a9d9-b4e777b02d8a"
 migrations_dir = "migrations"
 
+[[services]]
+binding = "EMAIL_WORKER"
+service = "ming-email-worker"
+remote = true
+
 [observability]
 enabled = true
 
