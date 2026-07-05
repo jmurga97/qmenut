@@ -1,0 +1,68 @@
+.card {
+  display: flex;
+  flex-direction: var(--qm-featured-dir, row);
+  background: var(--qm-card, #fff);
+  border: var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8);
+  /* Slim brand cap: marks this as the featured dish and gives the tenant's primary a
+     visible role on the page's hero element across every template. */
+  border-top: 2px solid var(--qm-accent, #1c1815);
+  border-radius: var(--qm-radius, 0px);
+  overflow: hidden;
+  font-family: var(--qm-body, sans-serif);
+  box-shadow: var(--qm-card-shadow, none);
+}
+
+.photo {
+  display: var(--qm-featured-img, none);
+  order: var(--qm-featured-img-order, 0);
+  flex: none;
+  align-self: stretch;
+  width: var(--qm-featured-iw, 88px);
+  height: var(--qm-featured-ih, 88px);
+  background: var(--qm-ph, #e5e0d8);
+  overflow: hidden;
+}
+
+.photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--qm-tag-color, #fff);
+  background: var(--qm-tag-bg, var(--qm-emph, #1c1815));
+  border: var(--qm-tag-bd, none);
+  padding: 3px 8px;
+  border-radius: var(--qm-badge-radius, 0px);
+  margin-bottom: 8px;
+}
+
+.name {
+  font-family: var(--qm-heading, serif);
+  font-size: calc(19px * var(--qm-fs, 1));
+  font-weight: var(--qm-hw, 700);
+  letter-spacing: -0.4px;
+  color: var(--qm-ink, #1c1815);
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.desc {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--qm-muted, #8c857b);
+  margin-bottom: 9px;
+}

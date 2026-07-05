@@ -24,6 +24,18 @@
       "types": "./src/theme/apply-theme.ts",
       "import": "./src/theme/apply-theme.ts"
     },
+    "./jsx-types": {
+      "types": "./src/jsx-types.ts",
+      "import": "./src/jsx-types.ts"
+    },
+    "./react": {
+      "types": "./src/react.ts",
+      "import": "./src/react.ts"
+    },
+    "./components/qm-allergen": {
+      "types": "./src/components/atoms/qm-allergen/index.ts",
+      "import": "./src/components/atoms/qm-allergen/index.ts"
+    },
     "./components/qm-wordmark": {
       "types": "./src/components/atoms/qm-wordmark/index.ts",
       "import": "./src/components/atoms/qm-wordmark/index.ts"
@@ -39,6 +51,134 @@
     "./components/qm-button": {
       "types": "./src/components/atoms/qm-button/index.ts",
       "import": "./src/components/atoms/qm-button/index.ts"
+    },
+    "./components/qm-eyebrow": {
+      "types": "./src/components/atoms/qm-eyebrow/index.ts",
+      "import": "./src/components/atoms/qm-eyebrow/index.ts"
+    },
+    "./components/qm-divider": {
+      "types": "./src/components/atoms/qm-divider/index.ts",
+      "import": "./src/components/atoms/qm-divider/index.ts"
+    },
+    "./components/qm-price": {
+      "types": "./src/components/atoms/qm-price/index.ts",
+      "import": "./src/components/atoms/qm-price/index.ts"
+    },
+    "./components/qm-badge": {
+      "types": "./src/components/atoms/qm-badge/index.ts",
+      "import": "./src/components/atoms/qm-badge/index.ts"
+    },
+    "./components/qm-chip": {
+      "types": "./src/components/atoms/qm-chip/index.ts",
+      "import": "./src/components/atoms/qm-chip/index.ts"
+    },
+    "./components/qm-pin": {
+      "types": "./src/components/atoms/qm-pin/index.ts",
+      "import": "./src/components/atoms/qm-pin/index.ts"
+    },
+    "./components/qm-skeleton": {
+      "types": "./src/components/atoms/qm-skeleton/index.ts",
+      "import": "./src/components/atoms/qm-skeleton/index.ts"
+    },
+    "./components/qm-image": {
+      "types": "./src/components/atoms/qm-image/index.ts",
+      "import": "./src/components/atoms/qm-image/index.ts"
+    },
+    "./components/qm-tab": {
+      "types": "./src/components/atoms/qm-tab/index.ts",
+      "import": "./src/components/atoms/qm-tab/index.ts"
+    },
+    "./components/qm-tab/react": {
+      "types": "./src/components/atoms/qm-tab/react.ts",
+      "import": "./src/components/atoms/qm-tab/react.ts"
+    },
+    "./components/qm-field": {
+      "types": "./src/components/atoms/qm-field/index.ts",
+      "import": "./src/components/atoms/qm-field/index.ts"
+    },
+    "./components/qm-field/react": {
+      "types": "./src/components/atoms/qm-field/react.ts",
+      "import": "./src/components/atoms/qm-field/react.ts"
+    },
+    "./components/qm-lang": {
+      "types": "./src/components/atoms/qm-lang/index.ts",
+      "import": "./src/components/atoms/qm-lang/index.ts"
+    },
+    "./components/qm-lang/react": {
+      "types": "./src/components/atoms/qm-lang/react.ts",
+      "import": "./src/components/atoms/qm-lang/react.ts"
+    },
+    "./components/qm-section-header": {
+      "types": "./src/components/molecules/qm-section-header/index.ts",
+      "import": "./src/components/molecules/qm-section-header/index.ts"
+    },
+    "./components/qm-dish-row": {
+      "types": "./src/components/molecules/qm-dish-row/index.ts",
+      "import": "./src/components/molecules/qm-dish-row/index.ts"
+    },
+    "./components/qm-featured": {
+      "types": "./src/components/molecules/qm-featured/index.ts",
+      "import": "./src/components/molecules/qm-featured/index.ts"
+    },
+    "./components/qm-promo": {
+      "types": "./src/components/molecules/qm-promo/index.ts",
+      "import": "./src/components/molecules/qm-promo/index.ts"
+    },
+    "./components/qm-location": {
+      "types": "./src/components/molecules/qm-location/index.ts",
+      "import": "./src/components/molecules/qm-location/index.ts"
+    },
+    "./components/qm-field-group": {
+      "types": "./src/components/molecules/qm-field-group/index.ts",
+      "import": "./src/components/molecules/qm-field-group/index.ts"
+    },
+    "./components/qm-field-group/react": {
+      "types": "./src/components/molecules/qm-field-group/react.ts",
+      "import": "./src/components/molecules/qm-field-group/react.ts"
+    },
+    "./components/qm-hero-header": {
+      "types": "./src/components/organisms/qm-hero-header/index.ts",
+      "import": "./src/components/organisms/qm-hero-header/index.ts"
+    },
+    "./components/qm-hero-header/react": {
+      "types": "./src/components/organisms/qm-hero-header/react.ts",
+      "import": "./src/components/organisms/qm-hero-header/react.ts"
+    },
+    "./components/qm-page-header": {
+      "types": "./src/components/organisms/qm-page-header/index.ts",
+      "import": "./src/components/organisms/qm-page-header/index.ts"
+    },
+    "./components/qm-page-header/react": {
+      "types": "./src/components/organisms/qm-page-header/react.ts",
+      "import": "./src/components/organisms/qm-page-header/react.ts"
+    },
+    "./components/qm-menu-list": {
+      "types": "./src/components/organisms/qm-menu-list/index.ts",
+      "import": "./src/components/organisms/qm-menu-list/index.ts"
+    },
+    "./components/qm-promo-list": {
+      "types": "./src/components/organisms/qm-promo-list/index.ts",
+      "import": "./src/components/organisms/qm-promo-list/index.ts"
+    },
+    "./components/qm-contact-panel": {
+      "types": "./src/components/organisms/qm-contact-panel/index.ts",
+      "import": "./src/components/organisms/qm-contact-panel/index.ts"
+    },
+    "./components/qm-contact-panel/react": {
+      "types": "./src/components/organisms/qm-contact-panel/react.ts",
+      "import": "./src/components/organisms/qm-contact-panel/react.ts"
+    },
+    "./components/qm-nav-bar": {
+      "types": "./src/components/organisms/qm-nav-bar/index.ts",
+      "import": "./src/components/organisms/qm-nav-bar/index.ts"
+    },
+    "./components/qm-dish-modal": {
+      "types": "./src/components/organisms/qm-dish-modal/index.ts",
+      "import": "./src/components/organisms/qm-dish-modal/index.ts"
+    },
+    "./components/qm-dish-modal/react": {
+      "types": "./src/components/organisms/qm-dish-modal/react.ts",
+      "import": "./src/components/organisms/qm-dish-modal/react.ts"
     }
   },
   "scripts": {
@@ -46,11 +186,17 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
+    "@lit/react": "^1.0.8",
     "culori": "^4.0.2",
     "lit": "^3.3.3"
   },
+  "peerDependencies": {
+    "react": "^19.2.3"
+  },
   "devDependencies": {
     "@types/culori": "^4.0.1",
+    "@types/react": "^19.2.9",
+    "react": "^19.2.3",
     "typescript": "^5.9.3"
   }
 }

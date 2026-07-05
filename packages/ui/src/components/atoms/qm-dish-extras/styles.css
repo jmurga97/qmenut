@@ -1,0 +1,42 @@
+:host {
+  display: grid;
+  gap: 8px;
+}
+
+.label {
+  margin: 0;
+  font-family: var(--qm-heading, serif);
+  font-size: calc(13px * var(--qm-fs, 1));
+  font-weight: var(--qm-hw, 700);
+  line-height: 1.15;
+  letter-spacing: 0;
+  color: var(--qm-ink, #1c1815);
+}
+
+.list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.name {
+  min-width: 0;
+  color: var(--qm-muted, #8c857b);
+}
+
+.price {
+  flex: none;
+  font-size: 12px;
+  font-weight: var(--qm-price-weight, 700);
+  color: var(--qm-price, var(--qm-ink, #1c1815));
+}

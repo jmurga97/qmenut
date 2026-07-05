@@ -1,0 +1,41 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.map {
+  position: relative;
+  height: 116px;
+  border: var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8);
+  border-radius: var(--qm-radius, 0px);
+  overflow: hidden;
+}
+
+.map-image {
+  position: absolute;
+  inset: 0;
+}
+
+.map-image::part(frame) {
+  height: 100%;
+}
+
+.map-pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sedes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

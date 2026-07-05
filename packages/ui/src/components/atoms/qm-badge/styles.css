@@ -1,0 +1,16 @@
+:host {
+  display: inline-block;
+}
+
+.text {
+  display: inline-block;
+  padding: 3px 8px;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 11px;
+  font-weight: var(--qm-badge-weight, 700);
+  letter-spacing: -0.5px;
+  background: var(--qm-badge-bg, transparent);
+  color: var(--qm-badge-color, #1c1815);
+  border: var(--qm-badge-bd, 1px solid #1c1815);
+  border-radius: var(--qm-badge-radius, 0px);
+}

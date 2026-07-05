@@ -1,0 +1,200 @@
+:host {
+  --qm-hero-compact-h: 72px;
+  --qm-hero-photo-exit-y: calc(0px - var(--qm-hero-h, 180px) - 12px);
+  display: block;
+}
+
+.frame {
+  position: relative;
+  height: var(--qm-hero-h, 180px);
+  overflow: hidden;
+  background: var(--qm-bg, #ffffff);
+  transition:
+    height 260ms ease,
+    border-radius 260ms ease;
+}
+
+:host([compact]) .frame {
+  height: var(--qm-hero-compact-h);
+  border-radius: 0;
+}
+
+.photo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: var(--qm-hero-h, 180px);
+  transform: translate3d(0, 0, 0) scale(1);
+  transform-origin: center top;
+  transition: transform 260ms ease;
+  will-change: transform;
+}
+
+:host([compact]) .photo {
+  transform: translate3d(0, var(--qm-hero-photo-exit-y), 0) scale(1.03);
+}
+
+.photo::part(frame) {
+  height: 100%;
+  border-radius: 0;
+}
+
+.scrim {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: var(--qm-hero-h, 180px);
+  background: linear-gradient(180deg, rgba(15, 11, 8, 0.1), rgba(15, 11, 8, 0.66));
+  pointer-events: none;
+  transform: translate3d(0, 0, 0);
+  transition: transform 260ms ease;
+  will-change: transform;
+}
+
+:host([compact]) .scrim {
+  transform: translate3d(0, var(--qm-hero-photo-exit-y), 0);
+}
+
+.hero-label {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+  transform: translate3d(0, 0, 0);
+  transition: transform 180ms ease;
+  will-change: transform;
+}
+
+:host([compact]) .hero-label {
+  transform: translate3d(0, -32px, 0);
+}
+
+.lang-wrap {
+  position: absolute;
+  top: 11px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 20px;
+  /* No backdrop-filter: blurring a moving backdrop every frame is the hero's single biggest paint
+     cost. A slightly more opaque fill keeps the chip legible over the photo without the blur. */
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateY(0);
+  transition:
+    top 260ms ease,
+    right 260ms ease,
+    transform 260ms ease,
+    background-color 260ms ease,
+    padding 260ms ease;
+  --qm-emph-ink: #fff;
+}
+
+:host([compact]) .lang-wrap {
+  top: 50%;
+  right: 14px;
+  padding: 5px 8px;
+  background: var(--qm-fill, rgba(0, 0, 0, 0.06));
+  transform: translateY(-50%);
+  --qm-emph-ink: var(--qm-ink, #17211d);
+}
+
+.footer {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  display: flex;
+  height: 48px;
+  align-items: flex-end;
+  gap: 12px;
+  transition:
+    right 260ms ease,
+    bottom 260ms ease,
+    height 260ms ease,
+    gap 260ms ease;
+}
+
+:host([compact]) .footer {
+  right: 72px;
+  bottom: 0;
+  height: var(--qm-hero-compact-h);
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: calc(var(--qm-radius, 0px) + 4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+  /* box-shadow is intentionally left out of the transition: animating a blurred shadow repaints
+     every frame. It snaps between states instead, which reads as instant against the 260ms move. */
+  transition:
+    width 260ms ease,
+    height 260ms ease,
+    border-radius 260ms ease;
+  /* The fallback initials render via qm-image's muted label — recolor it for the brand tile. */
+  --qm-muted: var(--qm-on-accent, #fff);
+}
+
+:host([compact]) .logo {
+  width: 42px;
+  height: 42px;
+  border-radius: calc(var(--qm-radius, 0px) + 2px);
+  box-shadow: none;
+}
+
+.logo::part(frame) {
+  height: 100%;
+  background: var(--qm-accent, rgba(255, 255, 255, 0.92));
+}
+
+.text {
+  min-width: 0;
+  padding-bottom: 1px;
+  transition: padding-bottom 260ms ease;
+}
+
+:host([compact]) .text {
+  padding-bottom: 0;
+}
+
+.name {
+  --qm-wordmark-size: calc(24px * var(--qm-fs, 1));
+  --qm-ink: #fff;
+  display: block;
+}
+
+:host([compact]) .name {
+  --qm-wordmark-size: calc(18px * var(--qm-fs, 1));
+  --qm-ink: inherit;
+}
+
+.tagline {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.86);
+  margin-top: 5px;
+  transition:
+    color 260ms ease,
+    margin-top 260ms ease;
+}
+
+:host([compact]) .tagline {
+  margin-top: 2px;
+  color: var(--qm-muted, #6d746f);
+}

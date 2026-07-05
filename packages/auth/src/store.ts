@@ -1,5 +1,5 @@
 const OTP_EXPIRES_IN_SECONDS = 300;
-const OTP_EXPIRES_IN_LABEL = "5 minutes";
+const OTP_EXPIRES_IN_LABEL = "5 minutos";
 const OTP_LENGTH = 6;
 const OTP_MAX_ATTEMPTS = 3;
 const SESSION_EXPIRES_IN_SECONDS = 60 * 60 * 24 * 7;

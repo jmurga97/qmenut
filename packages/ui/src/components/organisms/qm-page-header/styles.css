@@ -1,0 +1,42 @@
+:host {
+  display: block;
+  padding: 20px 20px 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--qm-muted, #8c857b);
+}
+
+.title-wrap {
+  margin-top: 9px;
+}
+
+.title {
+  --qm-wordmark-size: calc(38px * var(--qm-fs, 1));
+}
+
+.title[data-size="md"] {
+  --qm-wordmark-size: calc(34px * var(--qm-fs, 1));
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: var(--qm-eyebrow-tt, uppercase);
+  color: var(--qm-muted, #8c857b);
+}
+
+.rule {
+  margin-top: 12px;
+}

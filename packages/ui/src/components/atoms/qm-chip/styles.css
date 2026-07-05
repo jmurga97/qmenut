@@ -1,0 +1,24 @@
+:host {
+  display: inline-block;
+}
+
+.text {
+  display: inline-block;
+  padding: 4px 8px;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: var(--qm-badge-radius, 0px);
+}
+
+.text[data-variant="default"] {
+  border: 1px solid var(--qm-ink, #1c1815);
+  color: var(--qm-ink, #1c1815);
+}
+
+.text[data-variant="muted"] {
+  border: 1px solid var(--qm-hairline, #e5e0d8);
+  color: var(--qm-muted, #8c857b);
+}

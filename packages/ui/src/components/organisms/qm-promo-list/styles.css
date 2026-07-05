@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty {
+  margin: 0;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 12px;
+  color: var(--qm-muted, #8c857b);
+  text-align: center;
+  padding: 24px 0;
+}

@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 60px;
+  margin: var(--qm-nav-m, 0px);
+  padding: 0 6px;
+  background: var(--qm-nav-bg, #fff);
+  border-top: var(--qm-nav-bt, none);
+  border-radius: var(--qm-nav-radius, 0px);
+  box-shadow: var(--qm-nav-shadow, none);
+  backdrop-filter: var(--qm-nav-backdrop, none);
+  -webkit-backdrop-filter: var(--qm-nav-backdrop, none);
+}

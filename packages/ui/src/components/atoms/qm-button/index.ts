@@ -46,9 +46,9 @@ export class QmButton extends LitElement {
         ?disabled=${this.disabled}
         aria-label=${this.ariaLabel ?? nothing}
       >
-        <span class="icon" part="icon-start"><slot name="icon-start"></slot></span>
+        <span class="icon" part="icon-start"><slot name="icon-start" aria-hidden="true"></slot></span>
         <span class="label" part="label"><slot></slot></span>
-        <span class="icon" part="icon-end"><slot name="icon-end"></slot></span>
+        <span class="icon" part="icon-end"><slot name="icon-end" aria-hidden="true"></slot></span>
       </button>
     `;
   }

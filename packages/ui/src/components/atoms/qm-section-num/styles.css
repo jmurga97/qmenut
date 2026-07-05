@@ -14,10 +14,10 @@
 
 .num {
   display: var(--qm-num, inline);
-  font-family: var(--qm-body, sans-serif);
-  font-size: 12px;
-  font-weight: 900;
-  color: var(--qm-emph-ink, currentColor);
+  font-family: var(--qm-heading, serif);
+  font-size: 14px;
+  font-weight: var(--qm-num-weight, 700);
+  color: var(--qm-accent-ink, currentColor);
 }
 
 .label {

@@ -1,11 +1,14 @@
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 
-import appCss from "../styles.css?url";
+import appCss from "~/app/styles.css?url";
+import { useRegisterQmComponents } from "~/shared/hooks/use-register-qm-components";
 
-import type { RouterAppContext } from "../lib/trpc-client";
 import type { ReactNode } from "react";
+import type { RouterAppContext } from "~/lib/trpc-client";
 
 function RootRouteComponent() {
+  useRegisterQmComponents();
+
   return (
     <RootDocument>
       <Outlet />
@@ -15,11 +18,11 @@ function RootRouteComponent() {
 
 function RootDocument({ children }: { children: ReactNode }) {
   return (
-    <html>
+    <html lang="es">
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {children}
         <Scripts />
       </body>

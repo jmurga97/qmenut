@@ -1,0 +1,39 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--qm-card, #fff);
+  border: var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8);
+  border-radius: var(--qm-radius, 0px);
+  padding: 16px;
+  font-family: var(--qm-body, sans-serif);
+  box-shadow: var(--qm-card-shadow, none);
+}
+
+.submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 20px;
+  border: var(--qm-bw, 1px) solid transparent;
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-primary, #1c1815);
+  color: var(--qm-on-primary, #ffffff);
+  cursor: pointer;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition:
+    opacity 150ms,
+    border-color 150ms;
+}
+
+.submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

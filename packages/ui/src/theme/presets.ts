@@ -4,9 +4,8 @@
  * visual decision (typography, geometry, photo layout, badge shape, nav chrome) comes from
  * here.
  *
- * Values are transcribed from the reference `qmenut-theme.js` engine (decoded out of the
- * `QMenut Variantes Standalone.html` design-doc bundle) — do not "clean up" or re-derive
- * them, they're the validated source of truth.
+ * Values began from the reference `qmenut-theme.js` engine and are now tuned as product
+ * defaults for the mobile-first client menu view.
  */
 export type QmTemplateName = "fine" | "her" | "fast" | "cafe" | "tapas";
 
@@ -29,6 +28,10 @@ export interface QmTemplatePreset {
   body: string;
   headingWeight: number;
   dishWeight: number;
+  /** Weight of the section numeral ("01"), which is set in the template's heading face. */
+  numWeight: number;
+  /** Weight of the price figure. Calm by default; `fast` stays loud. */
+  priceWeight: number;
   fontScale: number;
   tracking: number;
   eyebrowCase: "uppercase" | "none";
@@ -56,7 +59,9 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     body: "'Jost',sans-serif",
     headingWeight: 600,
     dishWeight: 600,
-    fontScale: 1,
+    numWeight: 500,
+    priceWeight: 600,
+    fontScale: 0.96,
     tracking: 0,
     eyebrowCase: "uppercase",
     eyebrowSpacing: 2.5,
@@ -69,6 +74,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     numbers: true,
     saturationCap: 0.055,
     paper: "#FAF8F3",
+    rowPad: 12,
     tone: { bgMix: 4, inkMix: 16, hairMix: 14, tintMix: 14, mutedMix: 44 },
   },
   her: {
@@ -77,7 +83,9 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     body: "'Spectral',serif",
     headingWeight: 400,
     dishWeight: 500,
-    fontScale: 1,
+    numWeight: 400,
+    priceWeight: 700,
+    fontScale: 0.95,
     tracking: 0,
     eyebrowCase: "uppercase",
     eyebrowSpacing: 1.5,
@@ -98,7 +106,9 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     body: "'Barlow',sans-serif",
     headingWeight: 400,
     dishWeight: 700,
-    fontScale: 1,
+    numWeight: 400,
+    priceWeight: 800,
+    fontScale: 0.94,
     tracking: 0,
     eyebrowCase: "uppercase",
     eyebrowSpacing: 1,
@@ -120,7 +130,9 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     body: "'Nunito Sans',sans-serif",
     headingWeight: 700,
     dishWeight: 700,
-    fontScale: 1,
+    numWeight: 700,
+    priceWeight: 700,
+    fontScale: 0.95,
     tracking: 0,
     eyebrowCase: "none",
     eyebrowSpacing: 0.5,
@@ -142,7 +154,9 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     body: "'Work Sans',sans-serif",
     headingWeight: 400,
     dishWeight: 400,
-    fontScale: 1.12,
+    numWeight: 400,
+    priceWeight: 700,
+    fontScale: 1,
     tracking: 0.5,
     eyebrowCase: "uppercase",
     eyebrowSpacing: 1.5,

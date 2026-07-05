@@ -1,0 +1,33 @@
+:host {
+  display: inline-block;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: var(--qm-nav-active-pad, 6px 10px);
+  border-radius: var(--qm-nav-active-radius, 0px);
+  color: var(--qm-nav-muted, #8c857b);
+  border-bottom: 2px solid transparent;
+}
+
+button[data-active="true"] {
+  background: var(--qm-nav-active-bg, transparent);
+  color: var(--qm-nav-active-color, #1c1815);
+  border-bottom: var(--qm-nav-active-bd, 2px solid currentColor);
+}
+
+.icon,
+.label {
+  display: inline-flex;
+  align-items: center;
+}

@@ -1,0 +1,10 @@
+:host {
+  display: inline-block;
+}
+
+.shape {
+  display: inline-block;
+  border-radius: 50% 50% 50% 0;
+  background: var(--qm-emph, currentColor);
+  transform: rotate(-45deg);
+}

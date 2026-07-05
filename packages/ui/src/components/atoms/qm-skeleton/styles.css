@@ -1,0 +1,26 @@
+:host {
+  display: block;
+}
+
+.bar {
+  display: block;
+  border-radius: var(--qm-radius, 0px);
+  margin-bottom: 6px;
+}
+
+.bar--heading {
+  height: 11px;
+  width: 72%;
+  background: var(--qm-primary, #1c1815);
+}
+
+.bar--body {
+  height: 7px;
+  width: 96%;
+  background: var(--qm-fill, #e8e6e3);
+}
+
+.bar--body[data-last="true"] {
+  width: 58%;
+  margin-bottom: 0;
+}

@@ -43,6 +43,11 @@ export interface QmDerivedColors {
   emph: string;
   emphInk: string;
   price: string;
+  /** Structural accent = the tenant's primary. Numbers, rules, nav/hero accents draw on this. */
+  accent: string;
+  /** Legible primary for small structural text (numerals) — mixed toward ink so a vivid brand
+   *  color pops while a near-neutral primary reads as tasteful ink. */
+  accentInk: string;
   onPrimary: string;
   onSecondary: string;
   saturationCap: number | null;
@@ -123,6 +128,8 @@ class QmColorEngine {
     const tint = this.mix(secondary, tone.tintMix, this.config.white);
     const emph = secondary;
     const emphInk = this.mix(secondary, this.config.emphInkMix, ink);
+    const accent = primary;
+    const accentInk = this.mix(primary, this.config.emphInkMix, ink);
 
     return {
       primary,
@@ -137,6 +144,8 @@ class QmColorEngine {
       emph,
       emphInk,
       price: emphInk,
+      accent,
+      accentInk,
       onPrimary: cfg.onPrimary || this.onColor(rawPrimary),
       onSecondary: cfg.onSecondary || this.onColor(rawSecondary),
       saturationCap: cap,

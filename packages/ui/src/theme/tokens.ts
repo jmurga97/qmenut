@@ -25,6 +25,8 @@ export interface QmThemeTokens {
   "--qm-body": string;
   "--qm-hw": string;
   "--qm-dish-weight": string;
+  "--qm-num-weight": string;
+  "--qm-price-weight": string;
   "--qm-fs": string;
   "--qm-name-ls": string;
   "--qm-eyebrow-tt": "uppercase" | "none";
@@ -47,6 +49,10 @@ export interface QmThemeTokens {
   "--qm-secondary": string;
   "--qm-emph": string;
   "--qm-emph-ink": string;
+  // Structural accent = the tenant's primary (numbers, rules, nav/hero accents, logo).
+  "--qm-accent": string;
+  "--qm-accent-ink": string;
+  "--qm-on-accent": string;
   "--qm-bg": string;
   "--qm-card": string;
   "--qm-ink": string;
@@ -56,6 +62,7 @@ export interface QmThemeTokens {
   "--qm-on-secondary": string;
   "--qm-tint": string;
   "--qm-price": string;
+  "--qm-fill": string;
 
   // Photography — expanded from `photoMode` (`none | thumb | hero | heroxl`).
   "--qm-photo": "block" | "none";
@@ -71,6 +78,11 @@ export interface QmThemeTokens {
   "--qm-item-align": "baseline" | "center";
   "--qm-promo-img": "block" | "none";
   "--qm-hero-h"?: string;
+  "--qm-modal-photo-h"?: string;
+  "--qm-modal-order-photo": string;
+  "--qm-modal-order-desc": string;
+  "--qm-modal-order-extras": string;
+  "--qm-modal-order-allergens": string;
 
   // Badges — expanded from `badgeShape` (`outline | block | pill`).
   "--qm-badge-bg": string;

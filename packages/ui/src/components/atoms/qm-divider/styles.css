@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.rule {
+  margin: 0;
+  border: none;
+}
+
+.rule[data-variant="rule"] {
+  height: 0;
+  border-top: var(--qm-rule, 1.5px) solid var(--qm-ink, #1c1815);
+}
+
+.rule[data-variant="hairline"] {
+  height: 1px;
+  background: var(--qm-hairline, #e5e0d8);
+}

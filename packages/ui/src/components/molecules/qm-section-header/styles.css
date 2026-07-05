@@ -1,0 +1,33 @@
+.row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: var(--qm-rule, 1.5px) solid var(--qm-ink, #1c1815);
+  padding-bottom: 10px;
+}
+
+.left {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.num {
+  display: var(--qm-num, inline);
+  font-family: var(--qm-heading, serif);
+  font-size: 28px;
+  font-weight: var(--qm-num-weight, 700);
+  color: var(--qm-accent-ink, currentColor);
+  line-height: 0.8;
+}
+
+.count {
+  flex: none;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--qm-muted, #8c857b);
+}

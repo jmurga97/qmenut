@@ -18,18 +18,19 @@ export default defineConfig({
         enabled: true,
         crawlLinks: true,
       },
-      pages: [{ path: "/" }, { path: "/promos" }, { path: "/contacto" }],
+      pages: [{ path: "/" }, { path: "/promos" }, { path: "/contacto" }, { path: "/puntos" }],
     }),
     react(),
   ],
   resolve: {
     alias: {
-      "@": path.resolve(appDir, "./src"),
-      "@app": path.resolve(appDir, "./src/app"),
+      "~": path.resolve(appDir, "./src"),
     },
+    dedupe: ["react", "react-dom"],
   },
   server: {
     host: true,
+    port: Number(process.env.PORT) || 5173,
   },
   build: {
     outDir: "dist",

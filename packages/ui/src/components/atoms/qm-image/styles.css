@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.frame {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--qm-image-h, 56px);
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-ph, repeating-linear-gradient(45deg, #ddd 0 9px, #eee 9px 18px));
+  overflow: hidden;
+}
+
+::slotted(img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.label {
+  font-family: var(--qm-body, sans-serif);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--qm-muted, #8c857b);
+}

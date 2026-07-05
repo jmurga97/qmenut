@@ -12,9 +12,89 @@
       "types": "./src/repositories/public-menu.ts",
       "import": "./src/repositories/public-menu.ts"
     },
+    "./repositories/public-menu.repository": {
+      "types": "./src/repositories/public-menu.repository.ts",
+      "import": "./src/repositories/public-menu.repository.ts"
+    },
+    "./repositories/promotions.repository": {
+      "types": "./src/repositories/promotions.repository.ts",
+      "import": "./src/repositories/promotions.repository.ts"
+    },
+    "./repositories/tenant.repository": {
+      "types": "./src/repositories/tenant.repository.ts",
+      "import": "./src/repositories/tenant.repository.ts"
+    },
+    "./repositories/translations.repository": {
+      "types": "./src/repositories/translations.repository.ts",
+      "import": "./src/repositories/translations.repository.ts"
+    },
+    "./domain/promotions": {
+      "types": "./src/domain/promotions.ts",
+      "import": "./src/domain/promotions.ts"
+    },
+    "./domain/tenant": {
+      "types": "./src/domain/tenant.ts",
+      "import": "./src/domain/tenant.ts"
+    },
+    "./mappers/branch.mapper": {
+      "types": "./src/mappers/branch.mapper.ts",
+      "import": "./src/mappers/branch.mapper.ts"
+    },
+    "./mappers/promotion.mapper": {
+      "types": "./src/mappers/promotion.mapper.ts",
+      "import": "./src/mappers/promotion.mapper.ts"
+    },
+    "./mappers/public-menu.mapper": {
+      "types": "./src/mappers/public-menu.mapper.ts",
+      "import": "./src/mappers/public-menu.mapper.ts"
+    },
+    "./models/branch": {
+      "types": "./src/models/branch.ts",
+      "import": "./src/models/branch.ts"
+    },
+    "./models/promotion": {
+      "types": "./src/models/promotion.ts",
+      "import": "./src/models/promotion.ts"
+    },
+    "./models/public-menu": {
+      "types": "./src/models/public-menu.ts",
+      "import": "./src/models/public-menu.ts"
+    },
+    "./models/translation": {
+      "types": "./src/models/translation.ts",
+      "import": "./src/models/translation.ts"
+    },
     "./schema": {
       "types": "./src/schema.ts",
       "import": "./src/schema.ts"
+    },
+    "./schema/auth": {
+      "types": "./src/schema/auth.ts",
+      "import": "./src/schema/auth.ts"
+    },
+    "./schema/branches": {
+      "types": "./src/schema/branches.ts",
+      "import": "./src/schema/branches.ts"
+    },
+    "./schema/index": {
+      "types": "./src/schema/index.ts",
+      "import": "./src/schema/index.ts"
+    },
+    "./schema/menu": {
+      "types": "./src/schema/menu.ts",
+      "import": "./src/schema/menu.ts"
+    },
+    "./schema/promotions": {
+      "types": "./src/schema/promotions.ts",
+      "import": "./src/schema/promotions.ts"
+    },
+    "./schema/restaurants": {
+      "types": "./src/schema/restaurants.ts",
+      "import": "./src/schema/restaurants.ts"
+    },
+    "./schema/translations": {
+      "types": "./src/schema/translations.ts",
+      "import": "./src/schema/translations.ts"
     }
   },
   "scripts": {

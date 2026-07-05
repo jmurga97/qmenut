@@ -1,0 +1,26 @@
+:host {
+  display: inline-block;
+}
+
+.allergen {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-family: var(--qm-body, sans-serif);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--qm-muted, #8c857b);
+  border: 1px solid var(--qm-hairline, #e5e0d8);
+  border-radius: var(--qm-radius, 0px);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.label {
+  white-space: nowrap;
+}

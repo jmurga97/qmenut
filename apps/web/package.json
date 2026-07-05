@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@qmenut/api": "workspace:*",
+    "@qmenut/ui": "workspace:*",
     "@tanstack/react-query": "^5.101.2",
     "@tanstack/react-router": "^1.170.16",
     "@tanstack/react-router-ssr-query": "^1.167.1",
@@ -17,6 +18,7 @@
     "@trpc/client": "11.18.0",
     "@trpc/server": "11.18.0",
     "@trpc/tanstack-react-query": "11.18.0",
+    "lucide-react": "^1.23.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
