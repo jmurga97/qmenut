@@ -9,104 +9,149 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as PuntosRouteImport } from './routes/puntos'
-import { Route as PromosRouteImport } from './routes/promos'
-import { Route as ContactoRouteImport } from './routes/contacto'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as Char123LocaleChar125RouteImport } from './routes/{-$locale}'
+import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}.index'
+import { Route as Char123LocaleChar125PuntosRouteImport } from './routes/{-$locale}.puntos'
+import { Route as Char123LocaleChar125PromosRouteImport } from './routes/{-$locale}.promos'
+import { Route as Char123LocaleChar125ContactoRouteImport } from './routes/{-$locale}.contacto'
 
-const PuntosRoute = PuntosRouteImport.update({
-  id: '/puntos',
-  path: '/puntos',
+const Char123LocaleChar125Route = Char123LocaleChar125RouteImport.update({
+  id: '/{-$locale}',
+  path: '/{-$locale}',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PromosRoute = PromosRouteImport.update({
-  id: '/promos',
-  path: '/promos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactoRoute = ContactoRouteImport.update({
-  id: '/contacto',
-  path: '/contacto',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const Char123LocaleChar125IndexRoute =
+  Char123LocaleChar125IndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
+const Char123LocaleChar125PuntosRoute =
+  Char123LocaleChar125PuntosRouteImport.update({
+    id: '/puntos',
+    path: '/puntos',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
+const Char123LocaleChar125PromosRoute =
+  Char123LocaleChar125PromosRouteImport.update({
+    id: '/promos',
+    path: '/promos',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
+const Char123LocaleChar125ContactoRoute =
+  Char123LocaleChar125ContactoRouteImport.update({
+    id: '/contacto',
+    path: '/contacto',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/contacto': typeof ContactoRoute
-  '/promos': typeof PromosRoute
-  '/puntos': typeof PuntosRoute
+  '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
+  '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
+  '/{-$locale}/promos': typeof Char123LocaleChar125PromosRoute
+  '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
+  '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/contacto': typeof ContactoRoute
-  '/promos': typeof PromosRoute
-  '/puntos': typeof PuntosRoute
+  '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
+  '/{-$locale}/promos': typeof Char123LocaleChar125PromosRoute
+  '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
+  '/{-$locale}': typeof Char123LocaleChar125IndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/contacto': typeof ContactoRoute
-  '/promos': typeof PromosRoute
-  '/puntos': typeof PuntosRoute
+  '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
+  '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
+  '/{-$locale}/promos': typeof Char123LocaleChar125PromosRoute
+  '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
+  '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/contacto' | '/promos' | '/puntos'
+  fullPaths:
+    | '/{-$locale}'
+    | '/{-$locale}/contacto'
+    | '/{-$locale}/promos'
+    | '/{-$locale}/puntos'
+    | '/{-$locale}/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/contacto' | '/promos' | '/puntos'
-  id: '__root__' | '/' | '/contacto' | '/promos' | '/puntos'
+  to:
+    | '/{-$locale}/contacto'
+    | '/{-$locale}/promos'
+    | '/{-$locale}/puntos'
+    | '/{-$locale}'
+  id:
+    | '__root__'
+    | '/{-$locale}'
+    | '/{-$locale}/contacto'
+    | '/{-$locale}/promos'
+    | '/{-$locale}/puntos'
+    | '/{-$locale}/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  ContactoRoute: typeof ContactoRoute
-  PromosRoute: typeof PromosRoute
-  PuntosRoute: typeof PuntosRoute
+  Char123LocaleChar125Route: typeof Char123LocaleChar125RouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/puntos': {
-      id: '/puntos'
-      path: '/puntos'
-      fullPath: '/puntos'
-      preLoaderRoute: typeof PuntosRouteImport
+    '/{-$locale}': {
+      id: '/{-$locale}'
+      path: '/{-$locale}'
+      fullPath: '/{-$locale}'
+      preLoaderRoute: typeof Char123LocaleChar125RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/promos': {
-      id: '/promos'
-      path: '/promos'
-      fullPath: '/promos'
-      preLoaderRoute: typeof PromosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contacto': {
-      id: '/contacto'
-      path: '/contacto'
-      fullPath: '/contacto'
-      preLoaderRoute: typeof ContactoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
+    '/{-$locale}/': {
+      id: '/{-$locale}/'
       path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      fullPath: '/{-$locale}/'
+      preLoaderRoute: typeof Char123LocaleChar125IndexRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/puntos': {
+      id: '/{-$locale}/puntos'
+      path: '/puntos'
+      fullPath: '/{-$locale}/puntos'
+      preLoaderRoute: typeof Char123LocaleChar125PuntosRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/promos': {
+      id: '/{-$locale}/promos'
+      path: '/promos'
+      fullPath: '/{-$locale}/promos'
+      preLoaderRoute: typeof Char123LocaleChar125PromosRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/contacto': {
+      id: '/{-$locale}/contacto'
+      path: '/contacto'
+      fullPath: '/{-$locale}/contacto'
+      preLoaderRoute: typeof Char123LocaleChar125ContactoRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
     }
   }
 }
 
+interface Char123LocaleChar125RouteChildren {
+  Char123LocaleChar125ContactoRoute: typeof Char123LocaleChar125ContactoRoute
+  Char123LocaleChar125PromosRoute: typeof Char123LocaleChar125PromosRoute
+  Char123LocaleChar125PuntosRoute: typeof Char123LocaleChar125PuntosRoute
+  Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
+}
+
+const Char123LocaleChar125RouteChildren: Char123LocaleChar125RouteChildren = {
+  Char123LocaleChar125ContactoRoute: Char123LocaleChar125ContactoRoute,
+  Char123LocaleChar125PromosRoute: Char123LocaleChar125PromosRoute,
+  Char123LocaleChar125PuntosRoute: Char123LocaleChar125PuntosRoute,
+  Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
+}
+
+const Char123LocaleChar125RouteWithChildren =
+  Char123LocaleChar125Route._addFileChildren(Char123LocaleChar125RouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  ContactoRoute: ContactoRoute,
-  PromosRoute: PromosRoute,
-  PuntosRoute: PuntosRoute,
+  Char123LocaleChar125Route: Char123LocaleChar125RouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

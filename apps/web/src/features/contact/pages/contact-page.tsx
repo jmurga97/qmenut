@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 import { ContactPanel } from "~/features/contact/components/contact-panel";
 import { useContactContent } from "~/features/contact/hooks/use-contact-content";
@@ -7,7 +8,7 @@ import { DevTemplateSwitcher } from "~/shared/components/dev-template-switcher";
 import { PublicPageShell } from "~/shared/components/public-page-shell";
 import { PublicPageSkeleton } from "~/shared/components/public-page-skeleton";
 import { ScrollHidePageHeader } from "~/shared/components/scroll-hide-page-header";
-import { useLanguage } from "~/shared/hooks/use-language";
+import { useLocale } from "~/shared/hooks/use-locale";
 import { usePublicTenant } from "~/shared/hooks/use-public-tenant";
 import { useTemplateSelection } from "~/shared/hooks/use-template-selection";
 
@@ -16,7 +17,8 @@ export function ContactPage() {
   const content = useContactContent();
   const { tenant } = usePublicTenant();
   const { setTemplate, template } = useTemplateSelection(tenant);
-  const { handleLanguageChange, lang, langLabel, langOptions } = useLanguage();
+  const { handleLanguageChange, lang, langLabel, langOptions } = useLocale();
+  const { t } = useTranslation();
   const { contactPanelHostRef, messageValue, nameValue, submitted } = useContactForm({
     active: tenant !== null,
   });
@@ -25,7 +27,7 @@ export function ContactPage() {
     return <PublicPageSkeleton />;
   }
 
-  const submitLabel = submitted ? "Enviado" : content.form.submitLabel;
+  const submitLabel = submitted ? t("contact.submittedLabel") : content.form.submitLabel;
 
   return (
     <>

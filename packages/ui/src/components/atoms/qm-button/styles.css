@@ -11,7 +11,7 @@ button {
   background: transparent;
   cursor: pointer;
   font-family: var(--qm-body, sans-serif);
-  font-size: 12px;
+  font-size: var(--qm-text-sm, 12px);
   font-weight: 800;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -41,7 +41,7 @@ button[data-variant="ghost"] {
 button[data-size="sm"] {
   min-height: 36px;
   padding: 8px 14px;
-  font-size: 11px;
+  font-size: var(--qm-text-xs, 11px);
 }
 
 button:disabled {

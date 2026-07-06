@@ -15,14 +15,14 @@
 .num {
   display: var(--qm-num, inline);
   font-family: var(--qm-heading, serif);
-  font-size: 14px;
+  font-size: var(--qm-text-md, 13.5px);
   font-weight: var(--qm-num-weight, 700);
   color: var(--qm-accent-ink, currentColor);
 }
 
 .label {
   font-family: var(--qm-heading, serif);
-  font-size: calc(1.125rem * var(--qm-fs, 1));
+  font-size: var(--qm-text-xl, 17px);
   font-weight: var(--qm-hw, 600);
   letter-spacing: var(--qm-name-ls, 0px);
   color: var(--qm-ink, #1c1815);
@@ -30,7 +30,7 @@
 
 .count {
   font-family: var(--qm-body, sans-serif);
-  font-size: 11px;
+  font-size: var(--qm-text-xs, 11px);
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;

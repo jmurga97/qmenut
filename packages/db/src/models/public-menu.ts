@@ -1,6 +1,5 @@
 import type { PublicBranch } from "./branch";
 import type { PublicDishPromotion, PublicPromotion } from "./promotion";
-import type { PublicTranslation } from "./translation";
 
 export interface PublicDishAvailabilityWindow {
   dayOfWeek: number;
@@ -14,7 +13,6 @@ export interface PublicDishVariantOption {
   name: string;
   position: number;
   priceDelta: number;
-  translations: PublicTranslation[];
 }
 
 export interface PublicDishVariantGroup {
@@ -26,7 +24,6 @@ export interface PublicDishVariantGroup {
   options: PublicDishVariantOption[];
   position: number;
   selectionType: "multiple" | "single";
-  translations: PublicTranslation[];
 }
 
 export interface PublicTag {
@@ -47,7 +44,6 @@ export interface PublicDishExtra {
   name: string;
   position: number;
   price: number;
-  translations: PublicTranslation[];
 }
 
 export interface PublicDish {
@@ -65,7 +61,6 @@ export interface PublicDish {
   price: number;
   promotion: PublicDishPromotion | null;
   tags: PublicTag[];
-  translations: PublicTranslation[];
   variantGroups: PublicDishVariantGroup[];
 }
 
@@ -76,7 +71,18 @@ export interface PublicCategory {
   imageUrl: string | null;
   name: string;
   position: number;
-  translations: PublicTranslation[];
+}
+
+export interface PublicMenuLanguageOption {
+  code: string;
+  isDefault: boolean;
+}
+
+export interface PublicMenuLanguage {
+  available: PublicMenuLanguageOption[];
+  default: string;
+  effective: string;
+  requested: string | null;
 }
 
 export interface PublicMenuData {

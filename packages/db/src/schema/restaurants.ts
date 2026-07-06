@@ -2,7 +2,6 @@ import { index, integer, primaryKey, sqliteTable, text, unique } from "drizzle-o
 
 export const restaurants = sqliteTable("restaurants", {
   id: text("id").primaryKey(),
-  clerkOrgId: text("clerk_org_id").notNull(),
   name: text("name").notNull(),
   defaultLanguageCode: text("default_language_code").notNull(),
   defaultCurrency: text("default_currency").notNull(),
@@ -19,7 +18,7 @@ export const restaurantUsers = sqliteTable(
   {
     id: text("id").primaryKey(),
     restaurantId: text("restaurant_id").notNull(),
-    clerkUserId: text("clerk_user_id").notNull(),
+    userId: text("user_id").notNull(),
     roleCode: text("role_code", { enum: ["owner", "admin", "staff"] }).notNull(),
     isDriver: integer("is_driver", { mode: "boolean" }).notNull(),
     isActive: integer("is_active", { mode: "boolean" }).notNull(),
@@ -27,8 +26,8 @@ export const restaurantUsers = sqliteTable(
     updatedAt: integer("updated_at").notNull(),
   },
   (table) => [
-    unique("ux_restaurant_users_restaurant_clerk").on(table.restaurantId, table.clerkUserId),
-    index("idx_restaurant_users_clerk").on(table.clerkUserId),
+    unique("ux_restaurant_users_restaurant_user").on(table.restaurantId, table.userId),
+    index("idx_restaurant_users_user").on(table.userId),
   ],
 );
 
@@ -39,6 +38,8 @@ export const branchSubscriptions = sqliteTable("branch_subscriptions", {
   planCode: text("plan_code", { enum: ["basic", "business"] }).notNull(),
   status: text("status", { enum: ["trialing", "active", "past_due", "canceled"] }).notNull(),
   stripeSubscriptionId: text("stripe_subscription_id"),
+  stripePriceId: text("stripe_price_id"),
+  cancelAtPeriodEnd: integer("cancel_at_period_end", { mode: "boolean" }).notNull(),
   currentPeriodEnd: integer("current_period_end"),
   createdAt: integer("created_at").notNull(),
   updatedAt: integer("updated_at").notNull(),

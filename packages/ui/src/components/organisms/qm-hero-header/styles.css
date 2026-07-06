@@ -62,7 +62,7 @@
   top: 12px;
   left: 14px;
   font-family: var(--qm-body, sans-serif);
-  font-size: 9px;
+  font-size: var(--qm-text-2xs, 10px);
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -169,13 +169,13 @@
 }
 
 .name {
-  --qm-wordmark-size: calc(24px * var(--qm-fs, 1));
+  --qm-wordmark-size: var(--qm-text-2xl, 22px);
   --qm-ink: #fff;
   display: block;
 }
 
 :host([compact]) .name {
-  --qm-wordmark-size: calc(18px * var(--qm-fs, 1));
+  --qm-wordmark-size: var(--qm-text-xl, 17px);
   --qm-ink: inherit;
 }
 
@@ -185,7 +185,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--qm-body, sans-serif);
-  font-size: 11px;
+  font-size: var(--qm-text-xs, 11px);
   font-weight: 500;
   color: rgba(255, 255, 255, 0.86);
   margin-top: 5px;

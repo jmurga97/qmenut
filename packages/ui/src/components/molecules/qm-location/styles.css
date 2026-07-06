@@ -22,7 +22,7 @@
 
 .name {
   font-family: var(--qm-heading, serif);
-  font-size: calc(16px * var(--qm-fs, 1));
+  font-size: var(--qm-text-lg, 15px);
   font-weight: var(--qm-hw, 700);
   letter-spacing: -0.2px;
   color: var(--qm-ink, #1c1815);
@@ -30,7 +30,7 @@
 }
 
 .addr {
-  font-size: 11.5px;
+  font-size: var(--qm-text-sm, 12px);
   color: var(--qm-muted, #8c857b);
   margin-bottom: 9px;
 }

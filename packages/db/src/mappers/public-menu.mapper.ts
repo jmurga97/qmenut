@@ -24,14 +24,37 @@ import type {
   VariantOptionRow,
 } from "../repositories/public-menu.repository";
 
-export function createTranslationsMap(rows: PublicTranslation[]): Map<string, PublicTranslation[]> {
-  const map = new Map<string, PublicTranslation[]>();
+export type TranslationFieldMap = Map<string, Map<string, string>>;
+
+export function createTranslationFieldMap(rows: PublicTranslation[]): TranslationFieldMap {
+  const map: TranslationFieldMap = new Map();
 
   for (const row of rows) {
-    appendMapValue({ map, key: row.entityId, value: row });
+    const fields = map.get(row.entityId);
+
+    if (fields) {
+      fields.set(row.field, row.value);
+      continue;
+    }
+
+    map.set(row.entityId, new Map([[row.field, row.value]]));
   }
 
   return map;
+}
+
+function translateField<Fallback extends string | null>({
+  entityId,
+  fallback,
+  field,
+  translationsByEntity,
+}: {
+  entityId: string;
+  fallback: Fallback;
+  field: string;
+  translationsByEntity: TranslationFieldMap;
+}): string | Fallback {
+  return translationsByEntity.get(entityId)?.get(field) ?? fallback;
 }
 
 function createAvailabilityByDish(rows: AvailabilityRow[]): Map<string, PublicDishAvailabilityWindow[]> {
@@ -88,7 +111,7 @@ function createExtrasByDish({
   translationsByEntity,
 }: {
   extraRows: ExtraRow[];
-  translationsByEntity: Map<string, PublicTranslation[]>;
+  translationsByEntity: TranslationFieldMap;
 }): Map<string, PublicDishExtra[]> {
   const extrasByDish = new Map<string, PublicDishExtra[]>();
 
@@ -98,10 +121,9 @@ function createExtrasByDish({
       key: row.dishId,
       value: {
         id: row.id,
-        name: row.name,
+        name: translateField({ entityId: row.id, fallback: row.name, field: "name", translationsByEntity }),
         price: row.price,
         position: row.position,
-        translations: translationsByEntity.get(row.id) ?? [],
       },
     });
   }
@@ -114,7 +136,7 @@ function createVariantGroupsByDish({
   variantGroupRows,
   variantOptionRows,
 }: {
-  translationsByEntity: Map<string, PublicTranslation[]>;
+  translationsByEntity: TranslationFieldMap;
   variantGroupRows: VariantGroupRow[];
   variantOptionRows: VariantOptionRow[];
 }): Map<string, PublicDishVariantGroup[]> {
@@ -127,10 +149,9 @@ function createVariantGroupsByDish({
       key: row.groupId,
       value: {
         id: row.id,
-        name: row.name,
+        name: translateField({ entityId: row.id, fallback: row.name, field: "name", translationsByEntity }),
         priceDelta: row.priceDelta,
         position: row.position,
-        translations: translationsByEntity.get(row.id) ?? [],
       },
     });
   }
@@ -141,14 +162,13 @@ function createVariantGroupsByDish({
       key: row.dishId,
       value: {
         id: row.id,
-        name: row.name,
+        name: translateField({ entityId: row.id, fallback: row.name, field: "name", translationsByEntity }),
         selectionType: row.selectionType,
         isRequired: row.isRequired,
         minSelect: row.minSelect,
         maxSelect: row.maxSelect,
         position: row.position,
         options: optionsByGroup.get(row.id) ?? [],
-        translations: translationsByEntity.get(row.id) ?? [],
       },
     });
   }
@@ -175,7 +195,7 @@ export function mapPublicDishes({
   extraRows: ExtraRow[];
   promotionsById: Map<string, PromotionRow>;
   tagRows: TagRow[];
-  translationsByEntity: Map<string, PublicTranslation[]>;
+  translationsByEntity: TranslationFieldMap;
   variantGroupRows: VariantGroupRow[];
   variantOptionRows: VariantOptionRow[];
 }): Map<string, PublicDish[]> {
@@ -196,8 +216,13 @@ export function mapPublicDishes({
       value: {
         id: row.id,
         categoryId: row.categoryId,
-        name: row.name,
-        description: row.description,
+        name: translateField({ entityId: row.id, fallback: row.name, field: "name", translationsByEntity }),
+        description: translateField({
+          entityId: row.id,
+          fallback: row.description,
+          field: "description",
+          translationsByEntity,
+        }),
         price: row.price,
         imageUrl: row.imageUrl,
         position: row.position,
@@ -208,7 +233,6 @@ export function mapPublicDishes({
         variantGroups: groupsByDish.get(row.id) ?? [],
         tags: tagsByDish.get(row.id) ?? [],
         allergens: allergensByDish.get(row.id) ?? [],
-        translations: translationsByEntity.get(row.id) ?? [],
         promotion: candidate && promotion ? mapDishPromotion({ candidate, promotion }) : null,
       },
     });
@@ -224,15 +248,19 @@ export function mapPublicCategories({
 }: {
   categoryRows: CategoryRow[];
   dishesByCategory: Map<string, PublicDish[]>;
-  translationsByEntity: Map<string, PublicTranslation[]>;
+  translationsByEntity: TranslationFieldMap;
 }): PublicCategory[] {
   return categoryRows.map((row) => ({
     id: row.id,
-    name: row.name,
-    description: row.description,
+    name: translateField({ entityId: row.id, fallback: row.name, field: "name", translationsByEntity }),
+    description: translateField({
+      entityId: row.id,
+      fallback: row.description,
+      field: "description",
+      translationsByEntity,
+    }),
     imageUrl: row.imageUrl,
     position: row.position,
-    translations: translationsByEntity.get(row.id) ?? [],
     dishes: dishesByCategory.get(row.id) ?? [],
   }));
 }

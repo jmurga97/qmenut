@@ -16,7 +16,7 @@
 .num {
   display: var(--qm-num, inline);
   font-family: var(--qm-heading, serif);
-  font-size: 28px;
+  font-size: var(--qm-text-2xl, 22px);
   font-weight: var(--qm-num-weight, 700);
   color: var(--qm-accent-ink, currentColor);
   line-height: 0.8;
@@ -25,7 +25,7 @@
 .count {
   flex: none;
   font-family: var(--qm-body, sans-serif);
-  font-size: 10px;
+  font-size: var(--qm-text-2xs, 10px);
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;

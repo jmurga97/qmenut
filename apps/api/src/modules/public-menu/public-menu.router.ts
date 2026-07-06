@@ -6,9 +6,15 @@ import { getPublicMenu } from "./get-public-menu";
 import { resolvePublicTenant } from "./resolve-public-tenant";
 import { publicProcedure, router } from "../../trpc/trpc";
 
+const localeSchema = z
+  .string()
+  .trim()
+  .regex(/^[a-zA-Z]{2,3}(-[a-zA-Z]{2,4})?$/);
+
 const publicMenuInputSchema = z
   .object({
     host: z.string().trim().min(1).optional(),
+    locale: localeSchema.optional(),
   })
   .optional();
 
@@ -36,6 +42,6 @@ export const publicMenuRouter = router({
       return null;
     }
 
-    return getPublicMenu({ db: ctx.db, tenant });
+    return getPublicMenu({ db: ctx.db, tenant, locale: input?.locale });
   }),
 });

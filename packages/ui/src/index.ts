@@ -38,7 +38,20 @@ import { QM_PAGE_HEADER_TAG_NAME, QmPageHeader, defineQmPageHeader } from "./com
 import { QM_PROMO_LIST_TAG_NAME, QmPromoList, defineQmPromoList } from "./components/organisms/qm-promo-list";
 import { applyQmTheme, buildQmThemeVars } from "./theme/apply-theme";
 import { deriveQmTheme, mix } from "./theme/derive";
+import {
+  getFontStack,
+  isBodyFontId,
+  isHeadingFontId,
+  QM_FONT_CATALOG,
+  QM_FONT_IDS,
+} from "./theme/font-catalog";
 import { TEMPLATES } from "./theme/presets";
+import {
+  buildDefaultTenantThemeConfig,
+  DEFAULT_TEMPLATE,
+  DEFAULT_TENANT_COLORS,
+  resolveTenantThemeConfig,
+} from "./theme/tenant-theme-config";
 
 import type { QmAllergenArgs } from "./components/atoms/qm-allergen";
 import type { QmBadgeArgs } from "./components/atoms/qm-badge";
@@ -72,6 +85,7 @@ import type { QmPageHeaderArgs } from "./components/organisms/qm-page-header";
 import type { QmPromoListArgs } from "./components/organisms/qm-promo-list";
 import type { QmThemeInput } from "./theme/apply-theme";
 import type { QmDerivedColors, QmThemeConfig } from "./theme/derive";
+import type { QmFontCatalogEntry, QmFontId, QmFontRole } from "./theme/font-catalog";
 import type {
   QmBadgeShape,
   QmNavStyle,
@@ -80,11 +94,21 @@ import type {
   QmTemplatePreset,
   QmToneMix,
 } from "./theme/presets";
+import type { QmTenantThemeConfig } from "./theme/tenant-theme-config";
 import type { QmThemeTokens } from "./theme/tokens";
 
 export {
   applyQmTheme,
+  buildDefaultTenantThemeConfig,
   buildQmThemeVars,
+  DEFAULT_TEMPLATE,
+  DEFAULT_TENANT_COLORS,
+  resolveTenantThemeConfig,
+  getFontStack,
+  isBodyFontId,
+  isHeadingFontId,
+  QM_FONT_CATALOG,
+  QM_FONT_IDS,
   defineQmAllergen,
   defineQmBadge,
   defineQmButton,
@@ -194,6 +218,9 @@ export type {
   QmDishExtrasArgs,
   QmDerivedColors,
   QmDishModalArgs,
+  QmFontCatalogEntry,
+  QmFontId,
+  QmFontRole,
   QmDishRowArgs,
   QmDividerArgs,
   QmDividerVariant,
@@ -223,6 +250,7 @@ export type {
   QmTabArgs,
   QmTemplateName,
   QmTemplatePreset,
+  QmTenantThemeConfig,
   QmThemeConfig,
   QmThemeInput,
   QmThemeTokens,

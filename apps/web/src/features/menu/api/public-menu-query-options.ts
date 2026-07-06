@@ -1,12 +1,15 @@
-import { getPublicMenuHost } from "~/lib/trpc-client";
-
 import type { TrpcOptionsProxy } from "~/lib/trpc-client";
 
 interface PublicMenuQueryOptionsInput {
-  host?: string;
+  /**
+   * Tenant host resolved by the root route (SSR). Always passed explicitly so server and client
+   * share the same query key — never derived from `window.location` here.
+   */
+  host: string;
+  locale: string | undefined;
   trpc: TrpcOptionsProxy;
 }
 
-export function getPublicMenuQueryOptions({ host = getPublicMenuHost(), trpc }: PublicMenuQueryOptionsInput) {
-  return trpc.menu.publicData.queryOptions(host ? { host } : undefined);
+export function getPublicMenuQueryOptions({ host, locale, trpc }: PublicMenuQueryOptionsInput) {
+  return trpc.menu.publicData.queryOptions({ host, locale });
 }

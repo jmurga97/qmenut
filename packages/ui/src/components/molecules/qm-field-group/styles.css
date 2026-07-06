@@ -24,7 +24,7 @@
   color: var(--qm-on-primary, #ffffff);
   cursor: pointer;
   font-family: var(--qm-body, sans-serif);
-  font-size: 12px;
+  font-size: var(--qm-text-sm, 12px);
   font-weight: 800;
   letter-spacing: 1.5px;
   text-transform: uppercase;

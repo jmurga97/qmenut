@@ -6,7 +6,7 @@ import { DevTemplateSwitcher } from "~/shared/components/dev-template-switcher";
 import { PublicPageShell } from "~/shared/components/public-page-shell";
 import { PublicPageSkeleton } from "~/shared/components/public-page-skeleton";
 import { ScrollHidePageHeader } from "~/shared/components/scroll-hide-page-header";
-import { useLanguage } from "~/shared/hooks/use-language";
+import { useLocale } from "~/shared/hooks/use-locale";
 import { usePublicTenant } from "~/shared/hooks/use-public-tenant";
 import { useTemplateSelection } from "~/shared/hooks/use-template-selection";
 
@@ -15,7 +15,7 @@ export function FidelityPage() {
   const content = useFidelityContent();
   const { tenant } = usePublicTenant();
   const { setTemplate, template } = useTemplateSelection(tenant);
-  const { handleLanguageChange, lang, langLabel, langOptions } = useLanguage();
+  const { handleLanguageChange, lang, langLabel, langOptions } = useLocale();
 
   if (!tenant) {
     return <PublicPageSkeleton />;

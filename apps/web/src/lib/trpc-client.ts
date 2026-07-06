@@ -4,10 +4,12 @@ import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type { AppRouter } from "@qmenut/api/router";
 import type { QueryClient } from "@tanstack/react-query";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
+import type { i18n as I18nInstance } from "i18next";
 
 export type TrpcOptionsProxy = TRPCOptionsProxy<AppRouter>;
 
 export interface RouterAppContext {
+  i18n: I18nInstance;
   queryClient: QueryClient;
   trpc: TrpcOptionsProxy;
 }

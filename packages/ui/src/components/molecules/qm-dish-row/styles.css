@@ -41,16 +41,17 @@
 
 .name {
   font-family: var(--qm-heading, serif);
-  font-size: calc(15px * var(--qm-fs, 1));
+  font-size: var(--qm-text-lg, 15px);
   font-weight: var(--qm-dish-weight, 600);
   letter-spacing: var(--qm-name-ls, 0px);
+  text-transform: var(--qm-dish-tt, none);
   color: var(--qm-ink, #1c1815);
 }
 
 .tag {
   flex: none;
   font-family: var(--qm-body, sans-serif);
-  font-size: 8px;
+  font-size: var(--qm-text-2xs, 10px);
   font-weight: 800;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -63,7 +64,7 @@
 
 .desc {
   font-family: var(--qm-body, sans-serif);
-  font-size: 11.5px;
+  font-size: var(--qm-text-sm, 12px);
   line-height: 1.4;
   color: var(--qm-muted, #8c857b);
 }

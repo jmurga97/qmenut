@@ -5,6 +5,7 @@ import { createAuth } from "@/auth/create-auth";
 import { parseEnv } from "@/config/env";
 import { applyCorsHeaders, createOptionsResponse } from "@/http/cors";
 import { jsonResponse } from "@/http/json";
+import { handleStripeWebhook } from "@/modules/billing/handle-stripe-webhook";
 import { createContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/router";
 
@@ -12,6 +13,7 @@ import type { EnvBindings } from "@/config/env/schema";
 
 const TRPC_ENDPOINT = "/trpc";
 const AUTH_PREFIX = "/api/auth";
+const STRIPE_WEBHOOK_PATH = "/webhooks/stripe";
 
 async function handleRequest(request: Request, rawEnv: EnvBindings): Promise<Response> {
   const env = parseEnv(rawEnv);
@@ -24,6 +26,10 @@ async function handleRequest(request: Request, rawEnv: EnvBindings): Promise<Res
 
   if (url.pathname === "/health") {
     return jsonResponse({ status: "ok" });
+  }
+
+  if (url.pathname === STRIPE_WEBHOOK_PATH && request.method === "POST") {
+    return handleStripeWebhook({ request, env, db: createDb(env.DB) });
   }
 
   if (url.pathname.startsWith(AUTH_PREFIX)) {

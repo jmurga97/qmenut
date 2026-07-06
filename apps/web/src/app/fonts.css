@@ -1,0 +1,68 @@
+/*
+ * Self-hosted @font-face declarations for every family in the QMenut font catalog
+ * (packages/ui/src/theme/font-catalog.ts) — template presets and tenant heading/body
+ * choices both resolve to one of these. Always loading the full set is cheap: fontsource
+ * declares each face with `unicode-range` subsets, so the browser only downloads the
+ * woff2 files for families the rendered page actually uses (~2 per template).
+ *
+ * Weights must stay in sync with the catalog's `weights` field.
+ */
+
+/* Cormorant Garamond — heading (fine) */
+@import "@fontsource/cormorant-garamond/500.css";
+@import "@fontsource/cormorant-garamond/600.css";
+@import "@fontsource/cormorant-garamond/700.css";
+
+/* Playfair Display — heading (catalog) */
+@import "@fontsource/playfair-display/500.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
+
+/* Yeseva One — heading (her); single weight */
+@import "@fontsource/yeseva-one/400.css";
+
+/* Anton — heading (fast); single weight */
+@import "@fontsource/anton/400.css";
+
+/* Bebas Neue — heading (tapas); single weight */
+@import "@fontsource/bebas-neue/400.css";
+
+/* Jost — body (fine) / both */
+@import "@fontsource/jost/400.css";
+@import "@fontsource/jost/500.css";
+@import "@fontsource/jost/600.css";
+
+/* Spectral — body (her) / both */
+@import "@fontsource/spectral/400.css";
+@import "@fontsource/spectral/500.css";
+@import "@fontsource/spectral/600.css";
+@import "@fontsource/spectral/700.css";
+
+/* Barlow — body (fast) / both */
+@import "@fontsource/barlow/400.css";
+@import "@fontsource/barlow/500.css";
+@import "@fontsource/barlow/600.css";
+@import "@fontsource/barlow/700.css";
+@import "@fontsource/barlow/800.css";
+
+/* Quicksand — heading (cafe) / both */
+@import "@fontsource/quicksand/500.css";
+@import "@fontsource/quicksand/600.css";
+@import "@fontsource/quicksand/700.css";
+
+/* Nunito Sans — body (cafe) */
+@import "@fontsource/nunito-sans/400.css";
+@import "@fontsource/nunito-sans/600.css";
+@import "@fontsource/nunito-sans/700.css";
+@import "@fontsource/nunito-sans/800.css";
+
+/* Work Sans — body (tapas) / both */
+@import "@fontsource/work-sans/400.css";
+@import "@fontsource/work-sans/500.css";
+@import "@fontsource/work-sans/600.css";
+@import "@fontsource/work-sans/700.css";
+
+/* DM Sans — body (catalog) */
+@import "@fontsource/dm-sans/400.css";
+@import "@fontsource/dm-sans/500.css";
+@import "@fontsource/dm-sans/700.css";

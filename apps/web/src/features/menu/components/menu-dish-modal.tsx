@@ -1,4 +1,5 @@
 import { QmDishModal } from "@qmenut/ui/react";
+import { useTranslation } from "react-i18next";
 
 import { ALLERGEN_META } from "~/features/menu/constants/allergens";
 
@@ -10,16 +11,19 @@ interface MenuDishModalProps {
 }
 
 export function MenuDishModal({ dish, onClose }: MenuDishModalProps) {
+  const { t } = useTranslation();
+
   return (
     <QmDishModal
       open={dish !== null}
       name={dish?.name ?? ""}
       photoUrl={dish?.photoUrl}
-      photoLabel="Foto del plato"
-      closeLabel="Cerrar"
+      photoLabel={t("menu.photoLabel")}
+      closeLabel={t("menu.closeLabel")}
       onQmClose={onClose}
     >
-      <div>{dish?.desc}</div>
+      {/* Descriptions may contain sanitized rich-text HTML (bold/italic/lists) from the CRM. */}
+      <div dangerouslySetInnerHTML={{ __html: dish?.descHtml ?? "" }} />
       {dish?.extras && dish.extras.length > 0 ? <qm-dish-extras slot="extras" items={dish.extras} /> : null}
       {dish?.allergens?.map((code) => {
         const { label, Icon } = ALLERGEN_META[code];

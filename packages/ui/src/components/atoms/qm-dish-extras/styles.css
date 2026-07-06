@@ -6,7 +6,7 @@
 .label {
   margin: 0;
   font-family: var(--qm-heading, serif);
-  font-size: calc(13px * var(--qm-fs, 1));
+  font-size: var(--qm-text-md, 13.5px);
   font-weight: var(--qm-hw, 700);
   line-height: 1.15;
   letter-spacing: 0;
@@ -36,7 +36,7 @@
 
 .price {
   flex: none;
-  font-size: 12px;
+  font-size: var(--qm-text-sm, 12px);
   font-weight: var(--qm-price-weight, 700);
   color: var(--qm-price, var(--qm-ink, #1c1815));
 }

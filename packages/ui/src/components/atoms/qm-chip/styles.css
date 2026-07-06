@@ -6,7 +6,7 @@
   display: inline-block;
   padding: 4px 8px;
   font-family: var(--qm-body, sans-serif);
-  font-size: 9px;
+  font-size: var(--qm-text-2xs, 10px);
   font-weight: 800;
   letter-spacing: 0.5px;
   text-transform: uppercase;

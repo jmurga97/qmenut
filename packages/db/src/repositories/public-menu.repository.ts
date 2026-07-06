@@ -6,7 +6,7 @@ import { getTranslationRows } from "./translations.repository";
 import { createBestPromotionMap, isPromotionLikeActiveNow } from "../domain/promotions";
 import { mapBranch } from "../mappers/branch.mapper";
 import { mapPromotion } from "../mappers/promotion.mapper";
-import { createTranslationsMap, mapPublicCategories, mapPublicDishes } from "../mappers/public-menu.mapper";
+import { createTranslationFieldMap, mapPublicCategories, mapPublicDishes } from "../mappers/public-menu.mapper";
 import { branchPhotos, branches, branchSchedules } from "../schema/branches";
 import {
   allergens,
@@ -90,6 +90,8 @@ interface TenantIdsInput extends TenantInput {
 }
 
 interface GetPublicMenuInput extends TenantInput {
+  isDefaultLocale: boolean;
+  locale: string;
   nowMs: number;
 }
 
@@ -286,7 +288,13 @@ async function getExtraRows({ db, ids, tenant }: TenantIdsInput): Promise<ExtraR
     .all();
 }
 
-export async function getPublicMenu({ db, nowMs, tenant }: GetPublicMenuInput): Promise<PublicMenuData | null> {
+export async function getPublicMenu({
+  db,
+  isDefaultLocale,
+  locale,
+  nowMs,
+  tenant,
+}: GetPublicMenuInput): Promise<PublicMenuData | null> {
   const branch = await getPublicBranch({ db, tenant });
 
   if (!branch) {
@@ -313,18 +321,21 @@ export async function getPublicMenu({ db, nowMs, tenant }: GetPublicMenuInput): 
     db,
     ids: variantGroupRows.map((row) => row.id),
   });
-  const translationRows = await getTranslationRows({
-    db,
-    tenant,
-    ids: [
-      ...categoryIds,
-      ...dishIds,
-      ...extraRows.map((row) => row.id),
-      ...variantGroupRows.map((row) => row.id),
-      ...variantOptionRows.map((row) => row.id),
-    ],
-  });
-  const translationsByEntity = createTranslationsMap(translationRows);
+  const translationRows = isDefaultLocale
+    ? []
+    : await getTranslationRows({
+        db,
+        tenant,
+        languageCode: locale,
+        ids: [
+          ...categoryIds,
+          ...dishIds,
+          ...extraRows.map((row) => row.id),
+          ...variantGroupRows.map((row) => row.id),
+          ...variantOptionRows.map((row) => row.id),
+        ],
+      });
+  const translationsByEntity = createTranslationFieldMap(translationRows);
   const activePromotions = promotionRows.filter((row) => isPromotionLikeActiveNow({ promotion: row, nowMs }));
   const promotionsById = new Map(activePromotions.map((row) => [row.id, row]));
   const bestPromotionsByDish = createBestPromotionMap({ candidates: promotionCandidateRows, nowMs });

@@ -24,6 +24,14 @@
       "types": "./src/theme/apply-theme.ts",
       "import": "./src/theme/apply-theme.ts"
     },
+    "./theme/tenant-theme-config": {
+      "types": "./src/theme/tenant-theme-config.ts",
+      "import": "./src/theme/tenant-theme-config.ts"
+    },
+    "./theme/font-catalog": {
+      "types": "./src/theme/font-catalog.ts",
+      "import": "./src/theme/font-catalog.ts"
+    },
     "./jsx-types": {
       "types": "./src/jsx-types.ts",
       "import": "./src/jsx-types.ts"

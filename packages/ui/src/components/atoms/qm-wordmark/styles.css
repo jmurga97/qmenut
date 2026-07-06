@@ -1,5 +1,5 @@
 :host {
-  --qm-wordmark-size: 1.5rem;
+  --qm-wordmark-size: var(--qm-text-2xl, 22px);
 }
 
 .text {

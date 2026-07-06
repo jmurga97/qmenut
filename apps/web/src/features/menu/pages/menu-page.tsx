@@ -5,10 +5,10 @@ import { MenuDishModal } from "~/features/menu/components/menu-dish-modal";
 import { useMenuPage } from "~/features/menu/hooks/use-menu-page";
 import { DevTemplateSwitcher } from "~/shared/components/dev-template-switcher";
 import { PublicPageShell } from "~/shared/components/public-page-shell";
-import { PublicPageSkeleton } from "~/shared/components/public-page-skeleton";
 import { ScrollCompactHeroHeader } from "~/shared/components/scroll-compact-hero-header";
 import { ScrollHidePageHeader } from "~/shared/components/scroll-hide-page-header";
-import { useLanguage } from "~/shared/hooks/use-language";
+import { TenantNotFound } from "~/shared/components/tenant-not-found";
+import { useLocale } from "~/shared/hooks/use-locale";
 import { usePublicTenant } from "~/shared/hooks/use-public-tenant";
 import { useTemplateSelection } from "~/shared/hooks/use-template-selection";
 
@@ -16,11 +16,13 @@ export function MenuPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { tenant } = usePublicTenant();
   const { setTemplate, template } = useTemplateSelection(tenant);
-  const { handleLanguageChange, lang, langLabel, langOptions } = useLanguage();
-  const { content, selectedDish, setSelectedDish, showDishPhotos, useHeroHeader } = useMenuPage({ template });
+  const { handleLanguageChange, lang, langLabel, langOptions } = useLocale();
+  const { content, selectedDish, setSelectedDish, showDishPhotos, useHeroHeader } = useMenuPage({
+    template,
+  });
 
-  if (!tenant) {
-    return <PublicPageSkeleton />;
+  if (!tenant || !content) {
+    return <TenantNotFound />;
   }
 
   return (

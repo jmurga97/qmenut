@@ -7,6 +7,18 @@
       "runtimeArgs": ["run", "--cwd", "apps/web", "dev"],
       "port": 5173,
       "autoPort": true
+    },
+    {
+      "name": "api",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "apps/api", "dev"],
+      "port": 8787
+    },
+    {
+      "name": "admin",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "apps/admin", "dev"],
+      "port": 5174
     }
   ]
 }

@@ -8,6 +8,7 @@ export interface MenuDishExtraViewModel {
 export interface MenuDishViewModel {
   allergens?: AllergenCode[];
   desc: string;
+  descHtml: string;
   extras?: MenuDishExtraViewModel[];
   name: string;
   oldPrice?: string;
@@ -17,13 +18,18 @@ export interface MenuDishViewModel {
   tag?: string;
 }
 
-export interface MenuContentViewModel {
+export interface MenuSectionViewModel {
+  count: string;
   dishes: MenuDishViewModel[];
-  featured: MenuDishViewModel;
+  id: string;
+  label: string;
+  num: string;
+  tagline: string;
+}
+
+export interface MenuContentViewModel {
+  featured: MenuDishViewModel | null;
   heroLabel: string;
   logoLabel: string;
-  sectionCount: string;
-  sectionLabel: string;
-  sectionNum: string;
-  sectionTagline: string;
+  sections: MenuSectionViewModel[];
 }

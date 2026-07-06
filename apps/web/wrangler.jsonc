@@ -1,0 +1,27 @@
+// Worker config for the public menu web app. Nitro (preset cloudflare-module) merges this file
+// into the generated .output/server/wrangler.json and redirects wrangler to it via
+// .wrangler/deploy/config.json — so run wrangler from apps/web only AFTER `vite build`.
+//
+// NOTE: redirected (generated) configs cannot contain `env` blocks, so per-tenant instances are
+// pinned via `--var TENANT_HOST:<host>` (see serve:* scripts in package.json). For real deploys,
+// create one worker per tenant with `wrangler deploy --name qmenut-web-<tenant>` and set
+// TENANT_HOST as a dashboard/API var, or drive it from the request Host header (custom domains
+// make TENANT_HOST unnecessary in production).
+//
+// The KV namespace id only needs to be a stable 32-hex value locally (local state is keyed by
+// id and must MATCH apps/tenant-config); replace with the real namespace id when deploying.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "qmenut-web",
+  "compatibility_date": "2026-06-16",
+  "compatibility_flags": ["nodejs_compat"],
+  "kv_namespaces": [
+    {
+      "binding": "TENANT_THEME",
+      "id": "0f5d31e6c4a94b0f8a2d7c1b3e9f6a01",
+    },
+  ],
+  "vars": {
+    "TENANT_HOST": "",
+  },
+}

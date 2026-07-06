@@ -1,0 +1,13 @@
+# apps/api local secrets — copy to `.dev.vars` (gitignored) and fill in.
+# Vars that are NOT secret (STRIPE_PRICE_*, ADMIN_APP_URL, etc.) live in wrangler.toml [vars].
+
+# Better Auth signing secret (any long random string in dev).
+BETTER_AUTH_SECRET=dev-secret-change-me
+
+# Must match apps/tenant-config ADMIN_TOKEN (Bearer token for theme writes).
+THEME_WORKER_TOKEN=dev-token
+
+# Stripe test-mode keys (https://dashboard.stripe.com/test/apikeys).
+STRIPE_SECRET_KEY=sk_test_xxx
+# From `stripe listen --forward-to http://localhost:8787/webhooks/stripe`.
+STRIPE_WEBHOOK_SECRET=whsec_xxx

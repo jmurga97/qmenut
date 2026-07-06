@@ -31,6 +31,18 @@ export interface QmThemeTokens {
   "--qm-name-ls": string;
   "--qm-eyebrow-tt": "uppercase" | "none";
   "--qm-eyebrow-ls": string;
+  "--qm-dish-tt": "uppercase" | "none";
+
+  // Type scale — concrete px values already multiplied by the template's `fontScale`
+  // (components must NOT multiply by `--qm-fs` again). `2xs` has a 10px legibility floor.
+  "--qm-text-2xs": string;
+  "--qm-text-xs": string;
+  "--qm-text-sm": string;
+  "--qm-text-md": string;
+  "--qm-text-lg": string;
+  "--qm-text-xl": string;
+  "--qm-text-2xl": string;
+  "--qm-text-display": string;
 
   // Geometry
   "--qm-radius": string;

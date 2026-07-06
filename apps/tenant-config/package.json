@@ -1,0 +1,21 @@
+{
+  "name": "@qmenut/tenant-config",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8788 --persist-to ../../.wrangler-shared/state",
+    "build": "tsc --noEmit",
+    "check": "tsc --noEmit",
+    "seed:local": "wrangler kv key put tapas.localhost --path seed/tapas.localhost.json --binding TENANT_THEME --local --persist-to ../../.wrangler-shared/state && wrangler kv key put fine.localhost --path seed/fine.localhost.json --binding TENANT_THEME --local --persist-to ../../.wrangler-shared/state && wrangler kv key put cafe.localhost --path seed/cafe.localhost.json --binding TENANT_THEME --local --persist-to ../../.wrangler-shared/state"
+  },
+  "dependencies": {
+    "@qmenut/db": "workspace:*",
+    "@qmenut/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260502.0",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.60.0"
+  }
+}

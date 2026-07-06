@@ -14,12 +14,17 @@
     "build": "wrangler types && tsc --noEmit",
     "check": "tsc --noEmit",
     "db:migrate": "wrangler d1 migrations apply DB --remote",
-    "db:migrations:list": "wrangler d1 migrations list DB --remote"
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrations:list": "wrangler d1 migrations list DB --remote",
+    "db:seed:local": "wrangler d1 execute DB --local --file seed/seed-public-menu.sql"
   },
   "dependencies": {
     "@qmenut/auth": "workspace:*",
     "@qmenut/db": "workspace:*",
+    "@qmenut/ui": "workspace:*",
     "@trpc/server": "11.18.0",
+    "stripe": "^19",
+    "xss": "^1.0.15",
     "zod": "^4.4.3"
   },
   "devDependencies": {

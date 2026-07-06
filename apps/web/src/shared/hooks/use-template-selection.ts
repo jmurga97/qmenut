@@ -9,7 +9,9 @@ interface TemplateSelectionState {
 }
 
 export function useTemplateSelection(tenant: PublicTenant | null): TemplateSelectionState {
-  const [template, setTemplate] = useState<QmTemplateName>("her");
+  // Initialize from the tenant so SSR already renders the tenant's template (effects don't run
+  // on the server); the effect only covers later tenant changes.
+  const [template, setTemplate] = useState<QmTemplateName>(tenant?.template ?? "her");
 
   useEffect(() => {
     if (!tenant) {

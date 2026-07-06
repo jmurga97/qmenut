@@ -34,8 +34,19 @@ import type { DetailedHTMLProps, HTMLAttributes } from "react";
 // same resolution path under this repo's exports-map + moduleResolution combination.
 import type {} from "react/jsx-runtime";
 
+/**
+ * Kebab-case attribute passthrough. Lit properties declared with a custom kebab attribute
+ * (e.g. `section-label`) must be written as attributes from JSX: React serializes camelCase
+ * props as same-named attributes during SSR, which Lit never syncs, and skips property
+ * assignment during hydration — so SSR'd values would be lost until the prop next changes.
+ */
+type KebabAttributes = {
+  [attribute: `${string}-${string}`]: string | number | boolean | undefined;
+};
+
 export type GenericWebComponent<P, T extends HTMLElement = HTMLElement> = DetailedHTMLProps<HTMLAttributes<T>, T> &
-  Omit<P, "ariaLabel">;
+  Omit<P, "ariaLabel"> &
+  KebabAttributes;
 
 declare module "react/jsx-runtime" {
   // Module augmentation follows React's JSX namespace contract.

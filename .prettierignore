@@ -1,6 +1,8 @@
 dist
 node_modules
 .wrangler
+.wrangler-shared
+.output
 apps/*/src/app/route-tree.gen.ts
 apps/*/src/app/routeTree.gen.ts
 worker-configuration.d.ts

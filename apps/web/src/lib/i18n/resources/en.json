@@ -1,0 +1,17 @@
+{
+  "common": {
+    "languageLabel": "Language"
+  },
+  "menu": {
+    "closeLabel": "Close",
+    "dishCount_one": "{{count}} dish",
+    "dishCount_other": "{{count}} dishes",
+    "emptyLabel": "No dishes available",
+    "heroLabel": "Today's menu",
+    "photoLabel": "Dish photo",
+    "recommended": "Recommended"
+  },
+  "contact": {
+    "submittedLabel": "Sent"
+  }
+}

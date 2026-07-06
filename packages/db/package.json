@@ -8,6 +8,38 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts"
     },
+    "./repositories/admin-branches.repository": {
+      "types": "./src/repositories/admin-branches.repository.ts",
+      "import": "./src/repositories/admin-branches.repository.ts"
+    },
+    "./repositories/admin-categories.repository": {
+      "types": "./src/repositories/admin-categories.repository.ts",
+      "import": "./src/repositories/admin-categories.repository.ts"
+    },
+    "./repositories/admin-dishes.repository": {
+      "types": "./src/repositories/admin-dishes.repository.ts",
+      "import": "./src/repositories/admin-dishes.repository.ts"
+    },
+    "./repositories/admin-menu-taxonomy.repository": {
+      "types": "./src/repositories/admin-menu-taxonomy.repository.ts",
+      "import": "./src/repositories/admin-menu-taxonomy.repository.ts"
+    },
+    "./repositories/admin-promotions.repository": {
+      "types": "./src/repositories/admin-promotions.repository.ts",
+      "import": "./src/repositories/admin-promotions.repository.ts"
+    },
+    "./repositories/restaurant-languages.repository": {
+      "types": "./src/repositories/restaurant-languages.repository.ts",
+      "import": "./src/repositories/restaurant-languages.repository.ts"
+    },
+    "./repositories/admin-translations.repository": {
+      "types": "./src/repositories/admin-translations.repository.ts",
+      "import": "./src/repositories/admin-translations.repository.ts"
+    },
+    "./repositories/billing.repository": {
+      "types": "./src/repositories/billing.repository.ts",
+      "import": "./src/repositories/billing.repository.ts"
+    },
     "./repositories/public-menu": {
       "types": "./src/repositories/public-menu.ts",
       "import": "./src/repositories/public-menu.ts"
@@ -19,6 +51,14 @@
     "./repositories/promotions.repository": {
       "types": "./src/repositories/promotions.repository.ts",
       "import": "./src/repositories/promotions.repository.ts"
+    },
+    "./repositories/restaurant-users.repository": {
+      "types": "./src/repositories/restaurant-users.repository.ts",
+      "import": "./src/repositories/restaurant-users.repository.ts"
+    },
+    "./repositories/restaurants.repository": {
+      "types": "./src/repositories/restaurants.repository.ts",
+      "import": "./src/repositories/restaurants.repository.ts"
     },
     "./repositories/tenant.repository": {
       "types": "./src/repositories/tenant.repository.ts",
@@ -71,6 +111,10 @@
     "./schema/auth": {
       "types": "./src/schema/auth.ts",
       "import": "./src/schema/auth.ts"
+    },
+    "./schema/billing": {
+      "types": "./src/schema/billing.ts",
+      "import": "./src/schema/billing.ts"
     },
     "./schema/branches": {
       "types": "./src/schema/branches.ts",

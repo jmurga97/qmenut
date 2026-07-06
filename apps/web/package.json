@@ -6,10 +6,27 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "serve:tapas": "wrangler dev --port 4011 --persist-to ../../.wrangler-shared/state --var TENANT_HOST:tapas.localhost",
+    "serve:fine": "wrangler dev --port 4012 --persist-to ../../.wrangler-shared/state --var TENANT_HOST:fine.localhost",
+    "serve:cafe": "wrangler dev --port 4013 --persist-to ../../.wrangler-shared/state --var TENANT_HOST:cafe.localhost"
   },
   "dependencies": {
+    "@fontsource/anton": "^5.2.7",
+    "@fontsource/barlow": "^5.2.8",
+    "@fontsource/bebas-neue": "^5.2.7",
+    "@fontsource/cormorant-garamond": "^5.2.11",
+    "@fontsource/dm-sans": "^5.2.8",
+    "@fontsource/jost": "^5.2.8",
+    "@fontsource/nunito-sans": "^5.2.7",
+    "@fontsource/playfair-display": "^5.2.8",
+    "@fontsource/quicksand": "^5.2.10",
+    "@fontsource/spectral": "^5.2.8",
+    "@fontsource/work-sans": "^5.2.8",
+    "@fontsource/yeseva-one": "^5.2.7",
+    "@lit-labs/ssr-dom-shim": "^1.6.0",
     "@qmenut/api": "workspace:*",
+    "@qmenut/db": "workspace:*",
     "@qmenut/ui": "workspace:*",
     "@tanstack/react-query": "^5.101.2",
     "@tanstack/react-router": "^1.170.16",
@@ -18,9 +35,11 @@
     "@trpc/client": "11.18.0",
     "@trpc/server": "11.18.0",
     "@trpc/tanstack-react-query": "11.18.0",
+    "i18next": "^26.3.4",
     "lucide-react": "^1.23.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-i18next": "^17.0.8"
   },
   "devDependencies": {
     "@types/react": "^19.2.9",
@@ -28,6 +47,7 @@
     "@vitejs/plugin-react": "^5.0.4",
     "nitro": "^3.0.260610-beta",
     "typescript": "^5.9.3",
-    "vite": "^7.1.12"
+    "vite": "^7.1.12",
+    "wrangler": "^4.60.0"
   }
 }

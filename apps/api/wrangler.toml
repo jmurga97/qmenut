@@ -16,11 +16,19 @@ binding = "EMAIL_WORKER"
 service = "ming-email-worker"
 remote = true
 
+[[services]]
+binding = "THEME_WORKER"
+service = "qmenut-tenant-config"
+
 [observability]
 enabled = true
 
 [vars]
-ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:5174"
+ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:5174,http://tapas.localhost:5173,http://fine.localhost:5173,http://cafe.localhost:5173,http://localhost:4011,http://localhost:4012,http://localhost:4013"
 BETTER_AUTH_URL = "http://localhost:8787"
+ADMIN_APP_URL = "http://localhost:5174"
+DEEPL_API_URL = "https://api-free.deepl.com"
+STRIPE_PRICE_BASIC = "price_basic_replace_me"
+STRIPE_PRICE_BUSINESS = "price_business_replace_me"
 LOG_LEVEL = "info"
 NODE_ENV = "production"

@@ -10,7 +10,7 @@ button {
   cursor: pointer;
   background: transparent;
   font-family: var(--qm-body, sans-serif);
-  font-size: 11px;
+  font-size: var(--qm-text-xs, 11px);
   font-weight: 800;
   letter-spacing: 0.4px;
   text-transform: uppercase;

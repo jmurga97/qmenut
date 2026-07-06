@@ -1,15 +1,21 @@
 import { deriveQmTheme, mix } from "./derive";
+import { getFontStack } from "./font-catalog";
 import { TEMPLATES } from "./presets";
 
 import type { QmDerivedColors, QmThemeConfig } from "./derive";
+import type { QmFontId } from "./font-catalog";
 import type { QmBadgeShape, QmNavStyle, QmPhotoMode, QmTemplatePreset } from "./presets";
 
 /**
  * Tenant input: a template name + color overrides (`QmThemeConfig`), plus optional
  * per-tenant overrides of any template default (typography, geometry, photo/badge/nav
- * mode). Anything omitted falls back to the template preset.
+ * mode) and optional font-catalog picks. Anything omitted falls back to the template preset.
  */
-export type QmThemeInput = QmThemeConfig & Partial<Omit<QmTemplatePreset, "tone" | "saturationCap" | "paper">>;
+export type QmThemeInput = QmThemeConfig &
+  Partial<Omit<QmTemplatePreset, "tone" | "saturationCap" | "paper">> & {
+    headingFont?: QmFontId;
+    bodyFont?: QmFontId;
+  };
 
 const PHOTO_GROUPS: Record<QmPhotoMode, Record<string, string>> = {
   none: {
@@ -198,8 +204,9 @@ function resolveTemplate(input: QmThemeInput): QmTemplatePreset {
   const template = TEMPLATES[input.template];
   return {
     label: input.label ?? template.label,
-    heading: input.heading ?? template.heading,
-    body: input.body ?? template.body,
+    // Catalog font pick wins, then any raw `heading`/`body` override, then the template preset.
+    heading: getFontStack(input.headingFont) ?? input.heading ?? template.heading,
+    body: getFontStack(input.bodyFont) ?? input.body ?? template.body,
     headingWeight: input.headingWeight ?? template.headingWeight,
     dishWeight: input.dishWeight ?? template.dishWeight,
     numWeight: input.numWeight ?? template.numWeight,
@@ -208,6 +215,7 @@ function resolveTemplate(input: QmThemeInput): QmTemplatePreset {
     tracking: input.tracking ?? template.tracking,
     eyebrowCase: input.eyebrowCase ?? template.eyebrowCase,
     eyebrowSpacing: input.eyebrowSpacing ?? template.eyebrowSpacing,
+    dishCase: input.dishCase ?? template.dishCase,
     radius: input.radius ?? template.radius,
     borderWidth: input.borderWidth ?? template.borderWidth,
     rule: input.rule ?? template.rule,
@@ -221,6 +229,30 @@ function resolveTemplate(input: QmThemeInput): QmTemplatePreset {
     rowPad: input.rowPad ?? template.rowPad,
     tone: template.tone,
   };
+}
+
+/**
+ * Mobile-first type scale, in px at `fontScale: 1`. Emitted pre-multiplied by the
+ * template's `fontScale` so component CSS uses `var(--qm-text-*)` directly and never
+ * multiplies by `--qm-fs` again. `2xs` keeps a 10px legibility floor.
+ */
+const TEXT_SCALE = {
+  "--qm-text-2xs": 10,
+  "--qm-text-xs": 11,
+  "--qm-text-sm": 12,
+  "--qm-text-md": 13.5,
+  "--qm-text-lg": 15,
+  "--qm-text-xl": 17,
+  "--qm-text-2xl": 22,
+  "--qm-text-display": 29,
+} as const;
+
+function buildTextScaleTokens(fontScale: number): Record<string, string> {
+  const px = (base: number, floor = 0): string => `${Math.max(floor, Math.round(base * fontScale * 10) / 10)}px`;
+
+  return Object.fromEntries(
+    Object.entries(TEXT_SCALE).map(([token, base]) => [token, px(base, token === "--qm-text-2xs" ? 10 : 0)]),
+  );
 }
 
 /**
@@ -262,6 +294,8 @@ export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
     "--qm-name-ls": `${resolved.tracking}px`,
     "--qm-eyebrow-tt": resolved.eyebrowCase,
     "--qm-eyebrow-ls": `${resolved.eyebrowSpacing}px`,
+    "--qm-dish-tt": resolved.dishCase ?? "none",
+    ...buildTextScaleTokens(resolved.fontScale),
 
     "--qm-radius": `${resolved.radius}px`,
     "--qm-bw": `${resolved.borderWidth}px`,

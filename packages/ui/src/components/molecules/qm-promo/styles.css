@@ -26,7 +26,7 @@
 }
 
 .discount-value {
-  font-size: 17px;
+  font-size: var(--qm-text-xl, 17px);
   font-weight: 900;
   letter-spacing: -0.5px;
   line-height: 0.9;
@@ -40,7 +40,7 @@
 
 .name {
   font-family: var(--qm-heading, serif);
-  font-size: calc(16px * var(--qm-fs, 1));
+  font-size: var(--qm-text-xl, 17px);
   font-weight: var(--qm-hw, 700);
   letter-spacing: -0.3px;
   color: var(--qm-ink, #1c1815);
@@ -49,7 +49,7 @@
 }
 
 .desc {
-  font-size: 11px;
+  font-size: var(--qm-text-xs, 11px);
   line-height: 1.4;
   color: var(--qm-muted, #8c857b);
   margin-bottom: 9px;
@@ -63,7 +63,7 @@
 }
 
 .vigencia {
-  font-size: 9px;
+  font-size: var(--qm-text-2xs, 10px);
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
