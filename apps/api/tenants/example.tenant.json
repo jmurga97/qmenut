@@ -1,0 +1,37 @@
+{
+  "restaurant": {
+    "name": "Bar Ejemplo",
+    "defaultLanguageCode": "es",
+    "defaultCurrency": "EUR",
+    "emailFromName": "Bar Ejemplo",
+    "emailReplyTo": "hola@barejemplo.es",
+    "languages": ["es", "en"]
+  },
+  "branch": {
+    "name": "Bar Ejemplo",
+    "customDomain": "ejemplo.localhost",
+    "address": "Calle Mayor 1, Logroño",
+    "phone": "+34941000000",
+    "whatsapp": "+34600000000",
+    "socialLinks": {
+      "instagram": "https://instagram.com/barejemplo"
+    },
+    "currency": "EUR",
+    "planCode": "basic",
+    "schedules": [
+      { "dayOfWeek": 5, "openMinute": 720, "closeMinute": 1439 },
+      { "dayOfWeek": 6, "openMinute": 720, "closeMinute": 1439 },
+      { "dayOfWeek": 7, "openMinute": 720, "closeMinute": 1020 }
+    ]
+  },
+  "owner": {
+    "name": "Nombre Propietario",
+    "email": "propietario@barejemplo.es"
+  },
+  "theme": {
+    "template": "tapas",
+    "primary": "#9C2B1F",
+    "secondary": "#C99B3F",
+    "tagline": "Cocina de barrio desde 1987"
+  }
+}

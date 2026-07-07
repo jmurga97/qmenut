@@ -1,5 +1,6 @@
 import { useRef } from "react";
 
+import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { FidelityPlaceholder } from "~/features/fidelity/components/fidelity-placeholder";
 import { useFidelityContent } from "~/features/fidelity/hooks/use-fidelity-content";
 import { DevTemplateSwitcher } from "~/shared/components/dev-template-switcher";
@@ -16,6 +17,8 @@ export function FidelityPage() {
   const { tenant } = usePublicTenant();
   const { setTemplate, template } = useTemplateSelection(tenant);
   const { handleLanguageChange, lang, langLabel, langOptions } = useLocale();
+
+  useTrackPageView("fidelity_view");
 
   if (!tenant) {
     return <PublicPageSkeleton />;

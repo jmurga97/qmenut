@@ -38,6 +38,7 @@ export const envSchema = z.object({
   STRIPE_PRICE_BASIC: z.string().min(1),
   STRIPE_PRICE_BUSINESS: z.string().min(1),
   ADMIN_APP_URL: z.string().url(),
+  SENTRY_DSN: z.string().trim().optional(),
   LOG_LEVEL: logLevelSchema.default("info"),
   NODE_ENV: nodeEnvSchema.default("development"),
 });

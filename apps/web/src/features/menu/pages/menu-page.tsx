@@ -3,6 +3,8 @@ import { useRef } from "react";
 import { MenuDishList } from "~/features/menu/components/menu-dish-list";
 import { MenuDishModal } from "~/features/menu/components/menu-dish-modal";
 import { useMenuPage } from "~/features/menu/hooks/use-menu-page";
+import { track } from "~/lib/analytics/posthog";
+import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { DevTemplateSwitcher } from "~/shared/components/dev-template-switcher";
 import { PublicPageShell } from "~/shared/components/public-page-shell";
 import { ScrollCompactHeroHeader } from "~/shared/components/scroll-compact-hero-header";
@@ -11,6 +13,8 @@ import { TenantNotFound } from "~/shared/components/tenant-not-found";
 import { useLocale } from "~/shared/hooks/use-locale";
 import { usePublicTenant } from "~/shared/hooks/use-public-tenant";
 import { useTemplateSelection } from "~/shared/hooks/use-template-selection";
+
+import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
 
 export function MenuPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -21,8 +25,18 @@ export function MenuPage() {
     template,
   });
 
+  useTrackPageView("menu_view");
+
   if (!tenant || !content) {
     return <TenantNotFound />;
+  }
+
+  function handleSelectDish(dish: MenuDishViewModel | null) {
+    if (dish) {
+      track("dish_opened", { dish_id: dish.rowKey, dish_name: dish.name });
+    }
+
+    setSelectedDish(dish);
   }
 
   return (
@@ -61,7 +75,7 @@ export function MenuPage() {
         )}
 
         <div className="home-scroll" ref={scrollRef}>
-          <MenuDishList content={content} showDishPhotos={showDishPhotos} onSelectDish={setSelectedDish} />
+          <MenuDishList content={content} showDishPhotos={showDishPhotos} onSelectDish={handleSelectDish} />
         </div>
       </PublicPageShell>
       <DevTemplateSwitcher currentTemplate={template} onSelectTemplate={setTemplate} />

@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth.index'
 import { Route as AuthThemeRouteImport } from './routes/_auth.theme'
+import { Route as AuthQrRouteImport } from './routes/_auth.qr'
 import { Route as AuthPromotionsRouteImport } from './routes/_auth.promotions'
 import { Route as AuthMenuRouteImport } from './routes/_auth.menu'
 import { Route as AuthLanguagesRouteImport } from './routes/_auth.languages'
@@ -46,6 +47,11 @@ const AuthIndexRoute = AuthIndexRouteImport.update({
 const AuthThemeRoute = AuthThemeRouteImport.update({
   id: '/theme',
   path: '/theme',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthQrRoute = AuthQrRouteImport.update({
+  id: '/qr',
+  path: '/qr',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthPromotionsRoute = AuthPromotionsRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/languages': typeof AuthLanguagesRouteWithChildren
   '/menu': typeof AuthMenuRouteWithChildren
   '/promotions': typeof AuthPromotionsRouteWithChildren
+  '/qr': typeof AuthQrRoute
   '/theme': typeof AuthThemeRoute
   '/languages/$languageCode': typeof AuthLanguagesLanguageCodeRoute
   '/promotions/$promotionId': typeof AuthPromotionsPromotionIdRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/billing': typeof AuthBillingRoute
   '/branch': typeof AuthBranchRoute
+  '/qr': typeof AuthQrRoute
   '/theme': typeof AuthThemeRoute
   '/': typeof AuthIndexRoute
   '/languages/$languageCode': typeof AuthLanguagesLanguageCodeRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/_auth/languages': typeof AuthLanguagesRouteWithChildren
   '/_auth/menu': typeof AuthMenuRouteWithChildren
   '/_auth/promotions': typeof AuthPromotionsRouteWithChildren
+  '/_auth/qr': typeof AuthQrRoute
   '/_auth/theme': typeof AuthThemeRoute
   '/_auth/': typeof AuthIndexRoute
   '/_auth/languages/$languageCode': typeof AuthLanguagesLanguageCodeRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/languages'
     | '/menu'
     | '/promotions'
+    | '/qr'
     | '/theme'
     | '/languages/$languageCode'
     | '/promotions/$promotionId'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/billing'
     | '/branch'
+    | '/qr'
     | '/theme'
     | '/'
     | '/languages/$languageCode'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/_auth/languages'
     | '/_auth/menu'
     | '/_auth/promotions'
+    | '/_auth/qr'
     | '/_auth/theme'
     | '/_auth/'
     | '/_auth/languages/$languageCode'
@@ -280,6 +292,13 @@ declare module '@tanstack/react-router' {
       path: '/theme'
       fullPath: '/theme'
       preLoaderRoute: typeof AuthThemeRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/qr': {
+      id: '/_auth/qr'
+      path: '/qr'
+      fullPath: '/qr'
+      preLoaderRoute: typeof AuthQrRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/promotions': {
@@ -446,6 +465,7 @@ interface AuthRouteChildren {
   AuthLanguagesRoute: typeof AuthLanguagesRouteWithChildren
   AuthMenuRoute: typeof AuthMenuRouteWithChildren
   AuthPromotionsRoute: typeof AuthPromotionsRouteWithChildren
+  AuthQrRoute: typeof AuthQrRoute
   AuthThemeRoute: typeof AuthThemeRoute
   AuthIndexRoute: typeof AuthIndexRoute
 }
@@ -456,6 +476,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthLanguagesRoute: AuthLanguagesRouteWithChildren,
   AuthMenuRoute: AuthMenuRouteWithChildren,
   AuthPromotionsRoute: AuthPromotionsRouteWithChildren,
+  AuthQrRoute: AuthQrRoute,
   AuthThemeRoute: AuthThemeRoute,
   AuthIndexRoute: AuthIndexRoute,
 }

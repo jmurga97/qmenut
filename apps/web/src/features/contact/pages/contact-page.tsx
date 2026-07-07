@@ -1,6 +1,8 @@
+import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { ContactPanel } from "~/features/contact/components/contact-panel";
 import { useContactContent } from "~/features/contact/hooks/use-contact-content";
 import { useContactForm } from "~/features/contact/hooks/use-contact-form";
@@ -18,6 +20,8 @@ export function ContactPage() {
   const { tenant } = usePublicTenant();
   const { setTemplate, template } = useTemplateSelection(tenant);
   const { handleLanguageChange, lang, langLabel, langOptions } = useLocale();
+
+  useTrackPageView("contact_view");
   const { t } = useTranslation();
   const { contactPanelHostRef, messageValue, nameValue, submitted } = useContactForm({
     active: tenant !== null,
@@ -53,6 +57,15 @@ export function ContactPage() {
             nameValue={nameValue}
             submitLabel={submitLabel}
           />
+
+          <nav className="legal-links" aria-label="Páginas legales">
+            <Link to="/{-$locale}/aviso-legal" params={(prev) => prev}>
+              Aviso legal
+            </Link>
+            <Link to="/{-$locale}/privacidad" params={(prev) => prev}>
+              Política de privacidad
+            </Link>
+          </nav>
         </div>
       </PublicPageShell>
       <DevTemplateSwitcher currentTemplate={template} onSelectTemplate={setTemplate} />

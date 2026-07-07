@@ -1,5 +1,6 @@
 import { registerMurgaComponents } from "@murga.ing/components/register";
 import "@murga.ing/components/react";
+import * as Sentry from "@sentry/react";
 import { createBrowserHistory, createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -12,6 +13,15 @@ import { queryClient } from "@lib/query-client";
 import { initializeTheme } from "@lib/theme";
 import { trpc } from "@lib/trpc";
 import "./styles/global.css";
+
+if (import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    environment: import.meta.env.MODE,
+    sendDefaultPii: false,
+    tracesSampleRate: 0,
+  });
+}
 
 registerMurgaComponents();
 initializeTheme();

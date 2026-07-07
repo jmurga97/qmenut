@@ -4,7 +4,7 @@ import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alte
 import { createServerTrpcCaller } from "~/lib/trpc-client";
 import { resolveSsrTenantHost } from "~/server/tenant-host";
 
-const ROUTE_PATHS = ["/", "/contacto", "/promos", "/puntos"];
+const ROUTE_PATHS = ["/", "/contacto", "/promos", "/puntos", "/aviso-legal", "/privacidad"];
 
 function escapeXml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");

@@ -23,5 +23,9 @@
   ],
   "vars": {
     "TENANT_HOST": "",
+    "SENTRY_DSN": "",
+  },
+  "observability": {
+    "enabled": true,
   },
 }

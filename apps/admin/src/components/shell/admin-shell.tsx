@@ -14,6 +14,7 @@ const SECTIONS = [
   { id: "branch", label: "Sucursal", path: "/branch" },
   { id: "promotions", label: "Promociones", path: "/promotions" },
   { id: "theme", label: "Tema", path: "/theme" },
+  { id: "qr", label: "Código QR", path: "/qr" },
   { id: "languages", label: "Idiomas", path: "/languages" },
   { id: "billing", label: "Facturación", path: "/billing" },
 ] as const;

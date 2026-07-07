@@ -1,5 +1,6 @@
 import { useRef } from "react";
 
+import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { PromosList } from "~/features/promos/components/promos-list";
 import { usePromosContent } from "~/features/promos/hooks/use-promos-content";
 import { DevTemplateSwitcher } from "~/shared/components/dev-template-switcher";
@@ -16,6 +17,8 @@ export function PromosPage() {
   const { tenant } = usePublicTenant();
   const { setTemplate, template } = useTemplateSelection(tenant);
   const { handleLanguageChange, lang, langLabel, langOptions } = useLocale();
+
+  useTrackPageView("promo_view");
 
   if (!tenant) {
     return <PublicPageSkeleton />;

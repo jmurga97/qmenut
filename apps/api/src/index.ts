@@ -1,4 +1,5 @@
 import { createDb } from "@qmenut/db";
+import * as Sentry from "@sentry/cloudflare";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 import { createAuth } from "@/auth/create-auth";
@@ -44,17 +45,33 @@ async function handleRequest(request: Request, rawEnv: EnvBindings): Promise<Res
       req: request,
       router: appRouter,
       createContext: () => createContext({ env, request }),
+      onError: ({ error, path, type }) => {
+        // Expected 4xx-class TRPCErrors (UNAUTHORIZED, NOT_FOUND…) are not incidents.
+        if (error.code === "INTERNAL_SERVER_ERROR") {
+          Sentry.captureException(error.cause ?? error, {
+            tags: { trpcPath: path ?? "unknown", trpcType: type },
+          });
+        }
+      },
     });
   }
 
   return jsonResponse({ error: "Not found" }, { status: 404 });
 }
 
-export default {
-  async fetch(request: Request, rawEnv: EnvBindings): Promise<Response> {
-    const env = parseEnv(rawEnv);
-    const response = await handleRequest(request, rawEnv);
+export default Sentry.withSentry(
+  (rawEnv: EnvBindings) => ({
+    dsn: rawEnv.SENTRY_DSN || undefined,
+    environment: rawEnv.NODE_ENV ?? "development",
+    sendDefaultPii: false,
+    tracesSampleRate: 0,
+  }),
+  {
+    async fetch(request: Request, rawEnv: EnvBindings): Promise<Response> {
+      const env = parseEnv(rawEnv);
+      const response = await handleRequest(request, rawEnv);
 
-    return applyCorsHeaders({ env, request, response });
+      return applyCorsHeaders({ env, request, response });
+    },
   },
-};
+);

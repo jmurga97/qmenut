@@ -16,12 +16,14 @@
     "db:migrate": "wrangler d1 migrations apply DB --remote",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrations:list": "wrangler d1 migrations list DB --remote",
-    "db:seed:local": "wrangler d1 execute DB --local --file seed/seed-public-menu.sql"
+    "db:seed:local": "wrangler d1 execute DB --local --file seed/seed-public-menu.sql",
+    "tenant:create": "bun scripts/create-tenant.ts"
   },
   "dependencies": {
     "@qmenut/auth": "workspace:*",
     "@qmenut/db": "workspace:*",
     "@qmenut/ui": "workspace:*",
+    "@sentry/cloudflare": "^10.63.0",
     "@trpc/server": "11.18.0",
     "stripe": "^19",
     "xss": "^1.0.15",

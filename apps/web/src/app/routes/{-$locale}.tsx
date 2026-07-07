@@ -2,6 +2,7 @@ import { Outlet, createFileRoute, notFound, redirect } from "@tanstack/react-rou
 
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { DEFAULT_LOCALE, chromeLocale } from "~/lib/i18n/create-i18n";
+import { AnalyticsBootstrap } from "~/shared/components/analytics-bootstrap";
 import { LocaleDetector } from "~/shared/components/locale-detector";
 
 const LOCALE_PATTERN = /^[a-z]{2,3}(-[a-z]{2,4})?$/i;
@@ -60,6 +61,7 @@ function LocaleLayout() {
     <>
       <Outlet />
       <LocaleDetector />
+      <AnalyticsBootstrap />
     </>
   );
 }

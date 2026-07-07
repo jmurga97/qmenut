@@ -628,3 +628,12 @@ select {
     align-content: start;
   }
 }
+
+.admin-qr-preview {
+  display: flex;
+  width: fit-content;
+  padding: 12px;
+  border: 1px solid var(--mc-border, #e2e2e2);
+  border-radius: 12px;
+  background: #ffffff;
+}

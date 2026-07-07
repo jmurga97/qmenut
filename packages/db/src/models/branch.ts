@@ -19,6 +19,7 @@ export interface PublicBranch {
   name: string;
   phone: string | null;
   photos: PublicBranchPhoto[];
+  restaurantId: string;
   schedules: PublicBranchSchedule[];
   socialLinks: unknown;
   whatsapp: string | null;

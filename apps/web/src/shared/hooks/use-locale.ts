@@ -2,6 +2,8 @@ import { useNavigate, useRouteContext } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
+import { track } from "~/lib/analytics/posthog";
+
 import type { QmLangOption } from "@qmenut/ui";
 
 const CHOICE_STORAGE_KEY = "qm-locale-choice";
@@ -22,6 +24,10 @@ export function useLocale(): LocaleState {
     (event: CustomEvent<{ value: string }>) => {
       const value = event.detail.value;
 
+      if (value !== effectiveLocale) {
+        track("language_changed", { from: effectiveLocale, to: value });
+      }
+
       window.localStorage.setItem(CHOICE_STORAGE_KEY, value);
 
       void navigate({
@@ -29,7 +35,7 @@ export function useLocale(): LocaleState {
         params: (prev) => ({ ...prev, locale: value === defaultLanguage ? undefined : value }),
       });
     },
-    [defaultLanguage, navigate],
+    [defaultLanguage, effectiveLocale, navigate],
   );
 
   return {

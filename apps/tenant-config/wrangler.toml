@@ -8,6 +8,9 @@ compatibility_date = "2026-06-16"
 binding = "TENANT_THEME"
 id = "0f5d31e6c4a94b0f8a2d7c1b3e9f6a01"
 
+[observability]
+enabled = true
+
 [vars]
 # POC only — move to a secret (`wrangler secret put ADMIN_TOKEN`) before any real deploy.
 ADMIN_TOKEN = "dev-token"

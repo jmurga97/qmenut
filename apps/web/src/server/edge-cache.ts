@@ -1,4 +1,4 @@
-const ISR_ROUTE_PATTERN = /^\/(?:[a-z]{2,3}(?:-[a-z]{2,4})?\/)?(?:contacto|promos|puntos)?\/?$/i;
+const ISR_ROUTE_PATTERN = /^\/(?:[a-z]{2,3}(?:-[a-z]{2,4})?\/)?(?:contacto|promos|puntos|aviso-legal|privacidad)?\/?$/i;
 
 async function readMenuVersion(host: string): Promise<string | null> {
   try {
@@ -32,7 +32,7 @@ interface EdgeCacheContext {
 }
 
 /**
- * Only resolves a cache key for the 4 ISR-eligible public routes; everything else (server-fn
+ * Only resolves a cache key for the 6 ISR-eligible public routes; everything else (server-fn
  * RPCs, assets, robots/sitemap) falls straight through to normal rendering.
  */
 async function resolveEdgeCacheContext(request: Request): Promise<EdgeCacheContext | null> {

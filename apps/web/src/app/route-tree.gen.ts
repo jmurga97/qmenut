@@ -15,7 +15,9 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}.index'
 import { Route as Char123LocaleChar125PuntosRouteImport } from './routes/{-$locale}.puntos'
 import { Route as Char123LocaleChar125PromosRouteImport } from './routes/{-$locale}.promos'
+import { Route as Char123LocaleChar125PrivacidadRouteImport } from './routes/{-$locale}.privacidad'
 import { Route as Char123LocaleChar125ContactoRouteImport } from './routes/{-$locale}.contacto'
+import { Route as Char123LocaleChar125AvisoLegalRouteImport } from './routes/{-$locale}.aviso-legal'
 
 const Char123LocaleChar125Route = Char123LocaleChar125RouteImport.update({
   id: '/{-$locale}',
@@ -50,10 +52,22 @@ const Char123LocaleChar125PromosRoute =
     path: '/promos',
     getParentRoute: () => Char123LocaleChar125Route,
   } as any)
+const Char123LocaleChar125PrivacidadRoute =
+  Char123LocaleChar125PrivacidadRouteImport.update({
+    id: '/privacidad',
+    path: '/privacidad',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
 const Char123LocaleChar125ContactoRoute =
   Char123LocaleChar125ContactoRouteImport.update({
     id: '/contacto',
     path: '/contacto',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
+const Char123LocaleChar125AvisoLegalRoute =
+  Char123LocaleChar125AvisoLegalRouteImport.update({
+    id: '/aviso-legal',
+    path: '/aviso-legal',
     getParentRoute: () => Char123LocaleChar125Route,
   } as any)
 
@@ -61,7 +75,9 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
+  '/{-$locale}/aviso-legal': typeof Char123LocaleChar125AvisoLegalRoute
   '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
+  '/{-$locale}/privacidad': typeof Char123LocaleChar125PrivacidadRoute
   '/{-$locale}/promos': typeof Char123LocaleChar125PromosRoute
   '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
@@ -69,7 +85,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/{-$locale}/aviso-legal': typeof Char123LocaleChar125AvisoLegalRoute
   '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
+  '/{-$locale}/privacidad': typeof Char123LocaleChar125PrivacidadRoute
   '/{-$locale}/promos': typeof Char123LocaleChar125PromosRoute
   '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
@@ -79,7 +97,9 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
+  '/{-$locale}/aviso-legal': typeof Char123LocaleChar125AvisoLegalRoute
   '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
+  '/{-$locale}/privacidad': typeof Char123LocaleChar125PrivacidadRoute
   '/{-$locale}/promos': typeof Char123LocaleChar125PromosRoute
   '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
@@ -90,7 +110,9 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/{-$locale}'
+    | '/{-$locale}/aviso-legal'
     | '/{-$locale}/contacto'
+    | '/{-$locale}/privacidad'
     | '/{-$locale}/promos'
     | '/{-$locale}/puntos'
     | '/{-$locale}/'
@@ -98,7 +120,9 @@ export interface FileRouteTypes {
   to:
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/{-$locale}/aviso-legal'
     | '/{-$locale}/contacto'
+    | '/{-$locale}/privacidad'
     | '/{-$locale}/promos'
     | '/{-$locale}/puntos'
     | '/{-$locale}'
@@ -107,7 +131,9 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/{-$locale}'
+    | '/{-$locale}/aviso-legal'
     | '/{-$locale}/contacto'
+    | '/{-$locale}/privacidad'
     | '/{-$locale}/promos'
     | '/{-$locale}/puntos'
     | '/{-$locale}/'
@@ -163,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125PromosRouteImport
       parentRoute: typeof Char123LocaleChar125Route
     }
+    '/{-$locale}/privacidad': {
+      id: '/{-$locale}/privacidad'
+      path: '/privacidad'
+      fullPath: '/{-$locale}/privacidad'
+      preLoaderRoute: typeof Char123LocaleChar125PrivacidadRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
     '/{-$locale}/contacto': {
       id: '/{-$locale}/contacto'
       path: '/contacto'
@@ -170,18 +203,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125ContactoRouteImport
       parentRoute: typeof Char123LocaleChar125Route
     }
+    '/{-$locale}/aviso-legal': {
+      id: '/{-$locale}/aviso-legal'
+      path: '/aviso-legal'
+      fullPath: '/{-$locale}/aviso-legal'
+      preLoaderRoute: typeof Char123LocaleChar125AvisoLegalRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
   }
 }
 
 interface Char123LocaleChar125RouteChildren {
+  Char123LocaleChar125AvisoLegalRoute: typeof Char123LocaleChar125AvisoLegalRoute
   Char123LocaleChar125ContactoRoute: typeof Char123LocaleChar125ContactoRoute
+  Char123LocaleChar125PrivacidadRoute: typeof Char123LocaleChar125PrivacidadRoute
   Char123LocaleChar125PromosRoute: typeof Char123LocaleChar125PromosRoute
   Char123LocaleChar125PuntosRoute: typeof Char123LocaleChar125PuntosRoute
   Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
 }
 
 const Char123LocaleChar125RouteChildren: Char123LocaleChar125RouteChildren = {
+  Char123LocaleChar125AvisoLegalRoute: Char123LocaleChar125AvisoLegalRoute,
   Char123LocaleChar125ContactoRoute: Char123LocaleChar125ContactoRoute,
+  Char123LocaleChar125PrivacidadRoute: Char123LocaleChar125PrivacidadRoute,
   Char123LocaleChar125PromosRoute: Char123LocaleChar125PromosRoute,
   Char123LocaleChar125PuntosRoute: Char123LocaleChar125PuntosRoute,
   Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,

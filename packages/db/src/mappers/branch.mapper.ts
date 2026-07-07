@@ -24,6 +24,7 @@ export function mapBranch({
 }): PublicBranch {
   return {
     id: row.id,
+    restaurantId: row.restaurantId,
     name: row.name,
     address: row.address,
     phone: row.phone,
