@@ -248,6 +248,23 @@ export async function setDishExtras({ db, dishId, ingredientIds }: SetDishExtras
   }
 }
 
+interface GetDishBranchIdInput {
+  db: DrizzleDb;
+  restaurantId: string;
+  dishId: string;
+}
+
+/** Used to resolve which tenant host's menu cache to invalidate for mutations that only carry a dishId. */
+export async function getDishBranchId({ db, restaurantId, dishId }: GetDishBranchIdInput): Promise<string | null> {
+  const row = await db
+    .select({ branchId: dishes.branchId })
+    .from(dishes)
+    .where(and(eq(dishes.id, dishId), eq(dishes.restaurantId, restaurantId)))
+    .get();
+
+  return row?.branchId ?? null;
+}
+
 interface DishBelongsToTenantInput {
   db: DrizzleDb;
   restaurantId: string;

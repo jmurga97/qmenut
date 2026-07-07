@@ -3,8 +3,10 @@ import "~/server/lit-dom-shim";
 
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
 
+import { serveWithEdgeCache } from "~/server/edge-cache";
+
 export default createServerEntry({
   fetch(request) {
-    return handler.fetch(request);
+    return serveWithEdgeCache(request, () => handler.fetch(request));
   },
 });

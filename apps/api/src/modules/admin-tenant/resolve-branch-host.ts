@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
-import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
+import { assertBranchAccess } from "./assert-branch-access";
 
 import type { DrizzleDb } from "@qmenut/db";
 
@@ -25,4 +25,18 @@ export async function resolveBranchHost({ db, restaurantId, branchId }: ResolveB
   }
 
   return branch.customDomain;
+}
+
+/**
+ * Non-throwing variant for cache-invalidation callers: a menu edit must still succeed on a
+ * branch with no domain assigned yet, it just means there's nothing to cache-bust.
+ */
+export async function resolveBranchHostOrNull({
+  db,
+  restaurantId,
+  branchId,
+}: ResolveBranchHostInput): Promise<string | null> {
+  const branch = await assertBranchAccess({ db, restaurantId, branchId });
+
+  return branch.customDomain ?? null;
 }

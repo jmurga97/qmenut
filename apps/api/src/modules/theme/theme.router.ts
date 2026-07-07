@@ -1,10 +1,10 @@
 import { isBodyFontId, isHeadingFontId, QM_FONT_IDS } from "@qmenut/ui/theme/font-catalog";
 import { z } from "zod";
 
-import { resolveBranchHost } from "./resolve-branch-host";
-import { requireRole } from "../admin-tenant/require-role";
 import { ThemeWorkerClient } from "../../lib/theme/theme-worker-client";
 import { router, tenantProcedure } from "../../trpc/trpc";
+import { requireRole } from "../admin-tenant/require-role";
+import { resolveBranchHost } from "../admin-tenant/resolve-branch-host";
 
 const WRITE_ROLES = ["owner", "admin"] as const;
 
@@ -24,9 +24,7 @@ const saveThemeSchema = z.object({
     primary: hexColor,
     secondary: hexColor,
     tagline: z.string().trim().max(120).optional(),
-    headingFont: fontId
-      .refine(isHeadingFontId, { message: "La fuente no es válida para títulos" })
-      .optional(),
+    headingFont: fontId.refine(isHeadingFontId, { message: "La fuente no es válida para títulos" }).optional(),
     bodyFont: fontId.refine(isBodyFontId, { message: "La fuente no es válida para el cuerpo" }).optional(),
   }),
 });

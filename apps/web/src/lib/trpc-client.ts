@@ -60,21 +60,33 @@ export function getPublicMenuHost(): string | undefined {
   return window.location.hostname;
 }
 
+function createRawTrpcClient() {
+  return createTRPCClient<AppRouter>({
+    links: [
+      httpBatchLink({
+        url: `${getApiBaseUrl()}/trpc`,
+        fetch(url, options) {
+          return globalThis.fetch(url, {
+            ...options,
+            credentials: "include",
+          });
+        },
+      }),
+    ],
+  });
+}
+
 export function createTrpcOptionsProxy(queryClient: QueryClient): TrpcOptionsProxy {
   return createTRPCOptionsProxy<AppRouter>({
-    client: createTRPCClient<AppRouter>({
-      links: [
-        httpBatchLink({
-          url: `${getApiBaseUrl()}/trpc`,
-          fetch(url, options) {
-            return globalThis.fetch(url, {
-              ...options,
-              credentials: "include",
-            });
-          },
-        }),
-      ],
-    }),
+    client: createRawTrpcClient(),
     queryClient,
   });
+}
+
+/**
+ * Direct (non-React-Query) tRPC caller for server routes like robots.txt/sitemap.xml that
+ * run outside the router's request/loader lifecycle and don't need query caching.
+ */
+export function createServerTrpcCaller() {
+  return createRawTrpcClient();
 }

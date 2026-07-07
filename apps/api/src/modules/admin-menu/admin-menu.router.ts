@@ -1,13 +1,14 @@
-import { z } from "zod";
-import { softDeleteCategory } from "@qmenut/db/repositories/admin-categories.repository";
-import { softDeleteDish } from "@qmenut/db/repositories/admin-dishes.repository";
+import { getCategoryBranchId, softDeleteCategory } from "@qmenut/db/repositories/admin-categories.repository";
+import { getDishBranchId, softDeleteDish } from "@qmenut/db/repositories/admin-dishes.repository";
 import {
   createIngredient,
   listAllergens,
   listIngredients,
   listTags,
 } from "@qmenut/db/repositories/admin-menu-taxonomy.repository";
+import { z } from "zod";
 
+import { bumpMenuVersionForBranch } from "./bump-menu-version";
 import { getDishDetail } from "./get-dish-detail";
 import { getMenuCatalog } from "./get-menu-catalog";
 import {
@@ -22,8 +23,8 @@ import {
 import { createMenuCategory, updateMenuCategory } from "./save-category";
 import { saveDish } from "./save-dish";
 import { saveDishRelations } from "./save-dish-relations";
-import { requireRole } from "../admin-tenant/require-role";
 import { router, tenantProcedure } from "../../trpc/trpc";
+import { requireRole } from "../admin-tenant/require-role";
 
 const WRITE_ROLES = ["owner", "admin"] as const;
 
@@ -39,27 +40,55 @@ const categoriesRouter = router({
         (catalog) => catalog.categories,
       ),
     ),
-  create: tenantProcedure.input(createCategorySchema).mutation(({ ctx, input }) => {
+  create: tenantProcedure.input(createCategorySchema).mutation(async ({ ctx, input }) => {
     requireRole(ctx.tenant, WRITE_ROLES);
-    return createMenuCategory({
+    const result = await createMenuCategory({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
       data: input.data,
     });
+    await bumpMenuVersionForBranch({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+      branchId: input.branchId,
+    });
+    return result;
   }),
-  update: tenantProcedure.input(updateCategorySchema).mutation(({ ctx, input }) => {
+  update: tenantProcedure.input(updateCategorySchema).mutation(async ({ ctx, input }) => {
     requireRole(ctx.tenant, WRITE_ROLES);
-    return updateMenuCategory({
+    const result = await updateMenuCategory({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       categoryId: input.categoryId,
       data: input.data,
     });
+    const branchId = await getCategoryBranchId({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      categoryId: input.categoryId,
+    });
+
+    if (branchId) {
+      await bumpMenuVersionForBranch({ db: ctx.db, env: ctx.env, restaurantId: ctx.tenant.restaurantId, branchId });
+    }
+
+    return result;
   }),
   remove: tenantProcedure.input(categoryIdInputSchema).mutation(async ({ ctx, input }) => {
     requireRole(ctx.tenant, WRITE_ROLES);
+    const branchId = await getCategoryBranchId({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      categoryId: input.categoryId,
+    });
     await softDeleteCategory({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, categoryId: input.categoryId });
+
+    if (branchId) {
+      await bumpMenuVersionForBranch({ db: ctx.db, env: ctx.env, restaurantId: ctx.tenant.restaurantId, branchId });
+    }
+
     return { id: input.categoryId };
   }),
 });
@@ -77,27 +106,42 @@ const dishesRouter = router({
     .query(({ ctx, input }) =>
       getDishDetail({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, dishId: input.dishId }),
     ),
-  create: tenantProcedure.input(createDishSchema).mutation(({ ctx, input }) => {
+  create: tenantProcedure.input(createDishSchema).mutation(async ({ ctx, input }) => {
     requireRole(ctx.tenant, WRITE_ROLES);
-    return saveDish({
+    const result = await saveDish({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
       data: input.data,
     });
+    await bumpMenuVersionForBranch({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+      branchId: input.branchId,
+    });
+    return result;
   }),
-  update: tenantProcedure.input(updateDishSchema).mutation(({ ctx, input }) => {
+  update: tenantProcedure.input(updateDishSchema).mutation(async ({ ctx, input }) => {
     requireRole(ctx.tenant, WRITE_ROLES);
-    return saveDish({
+    const result = await saveDish({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
       dishId: input.dishId,
       data: input.data,
     });
+    await bumpMenuVersionForBranch({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+      branchId: input.branchId,
+    });
+    return result;
   }),
   saveRelations: tenantProcedure.input(dishRelationsSchema).mutation(async ({ ctx, input }) => {
     requireRole(ctx.tenant, WRITE_ROLES);
+    const branchId = await getDishBranchId({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, dishId: input.dishId });
     await saveDishRelations({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -106,11 +150,22 @@ const dishesRouter = router({
       allergenIds: input.allergenIds,
       extraIngredientIds: input.extraIngredientIds,
     });
+
+    if (branchId) {
+      await bumpMenuVersionForBranch({ db: ctx.db, env: ctx.env, restaurantId: ctx.tenant.restaurantId, branchId });
+    }
+
     return { id: input.dishId };
   }),
   remove: tenantProcedure.input(dishIdInputSchema).mutation(async ({ ctx, input }) => {
     requireRole(ctx.tenant, WRITE_ROLES);
+    const branchId = await getDishBranchId({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, dishId: input.dishId });
     await softDeleteDish({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, dishId: input.dishId });
+
+    if (branchId) {
+      await bumpMenuVersionForBranch({ db: ctx.db, env: ctx.env, restaurantId: ctx.tenant.restaurantId, branchId });
+    }
+
     return { id: input.dishId };
   }),
 });

@@ -118,6 +118,27 @@ export async function updateCategory({ db, restaurantId, categoryId, data }: Upd
     .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId)));
 }
 
+interface GetCategoryBranchIdInput {
+  db: DrizzleDb;
+  restaurantId: string;
+  categoryId: string;
+}
+
+/** Used to resolve which tenant host's menu cache to invalidate for mutations that only carry a categoryId. */
+export async function getCategoryBranchId({
+  db,
+  restaurantId,
+  categoryId,
+}: GetCategoryBranchIdInput): Promise<string | null> {
+  const row = await db
+    .select({ branchId: categories.branchId })
+    .from(categories)
+    .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId)))
+    .get();
+
+  return row?.branchId ?? null;
+}
+
 interface SoftDeleteCategoryInput {
   db: DrizzleDb;
   restaurantId: string;

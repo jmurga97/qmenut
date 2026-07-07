@@ -8,6 +8,7 @@ interface Env {
 }
 
 const THEME_ROUTE = /^\/tenants\/([^/]+)\/theme$/;
+const MENU_VERSION_ROUTE = /^\/tenants\/([^/]+)\/menu-version$/;
 
 function jsonResponse(body: unknown, init?: ResponseInit): Response {
   return new Response(JSON.stringify(body), {
@@ -37,25 +38,13 @@ function parseThemeBody(raw: unknown): { error: string } | { value: string } {
   return { value: JSON.stringify(resolveTenantThemeConfig(raw)) };
 }
 
-async function handleRequest(request: Request, env: Env): Promise<Response> {
-  const url = new URL(request.url);
+interface TenantRequestInput {
+  env: Env;
+  host: string;
+  request: Request;
+}
 
-  if (url.pathname === "/health") {
-    return jsonResponse({ status: "ok" });
-  }
-
-  const match = THEME_ROUTE.exec(url.pathname);
-
-  if (!match?.[1]) {
-    return jsonResponse({ error: "Not found" }, { status: 404 });
-  }
-
-  const host = normalizeTenantHost(decodeURIComponent(match[1]));
-
-  if (!host) {
-    return jsonResponse({ error: "Invalid tenant host" }, { status: 400 });
-  }
-
+async function handleThemeRequest({ request, env, host }: TenantRequestInput): Promise<Response> {
   if (request.method === "GET") {
     const theme = await env.TENANT_THEME.get(host, "json");
 
@@ -97,6 +86,60 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   }
 
   return jsonResponse({ error: "Method not allowed" }, { status: 405 });
+}
+
+function menuVersionKey(host: string): string {
+  return `menuVersion:${host}`;
+}
+
+/**
+ * Bumps to the current timestamp rather than accepting a caller-supplied value — this is a
+ * "something changed" signal for cache invalidation, not a value the caller should control.
+ */
+async function handleMenuVersionRequest({ request, env, host }: TenantRequestInput): Promise<Response> {
+  if (request.method === "GET") {
+    const version = await env.TENANT_THEME.get(menuVersionKey(host));
+
+    return jsonResponse({ host, version });
+  }
+
+  if (!isAuthorized(request, env)) {
+    return jsonResponse({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (request.method === "PUT") {
+    const version = Date.now().toString();
+
+    await env.TENANT_THEME.put(menuVersionKey(host), version);
+
+    return jsonResponse({ host, version, status: "bumped" });
+  }
+
+  return jsonResponse({ error: "Method not allowed" }, { status: 405 });
+}
+
+async function handleRequest(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+
+  if (url.pathname === "/health") {
+    return jsonResponse({ status: "ok" });
+  }
+
+  const themeMatch = THEME_ROUTE.exec(url.pathname);
+  const menuVersionMatch = MENU_VERSION_ROUTE.exec(url.pathname);
+  const match = themeMatch ?? menuVersionMatch;
+
+  if (!match?.[1]) {
+    return jsonResponse({ error: "Not found" }, { status: 404 });
+  }
+
+  const host = normalizeTenantHost(decodeURIComponent(match[1]));
+
+  if (!host) {
+    return jsonResponse({ error: "Invalid tenant host" }, { status: 400 });
+  }
+
+  return themeMatch ? handleThemeRequest({ request, env, host }) : handleMenuVersionRequest({ request, env, host });
 }
 
 export default {

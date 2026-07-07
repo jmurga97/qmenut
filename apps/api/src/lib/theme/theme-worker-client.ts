@@ -17,6 +17,10 @@ function themeUrl(host: string): string {
   return `${THEME_ORIGIN}/tenants/${encodeURIComponent(host)}/theme`;
 }
 
+function menuVersionUrl(host: string): string {
+  return `${THEME_ORIGIN}/tenants/${encodeURIComponent(host)}/menu-version`;
+}
+
 /**
  * Cliente del worker tenant-config (única fuente de escritura del KV TENANT_THEME).
  * Se accede vía service binding, así el ADMIN_TOKEN nunca llega al navegador y la
@@ -61,6 +65,17 @@ export class ThemeWorkerClient {
     if (!response.ok) {
       const detail = await response.text();
       throw new Error(`Theme worker PUT failed (${response.status}): ${detail}`);
+    }
+  }
+
+  async bumpMenuVersion(env: RuntimeEnv, host: string): Promise<void> {
+    const response = await env.THEME_WORKER.fetch(menuVersionUrl(host), {
+      method: "PUT",
+      headers: { authorization: `Bearer ${env.THEME_WORKER_TOKEN}` },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Menu version bump failed (${response.status})`);
     }
   }
 }
