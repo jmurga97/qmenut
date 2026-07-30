@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ContactPage } from "~/features/contact/pages/contact-page";
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
-import { ISR_CACHE_CONTROL } from "~/lib/isr";
+import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 
 export const Route = createFileRoute("/{-$locale}/contacto")({
   loader: async ({ context, params }) =>
@@ -17,10 +17,11 @@ export const Route = createFileRoute("/{-$locale}/contacto")({
 
     const origin = `https://${match.context.tenant.host}`;
     const canonicalUrl = `${origin}${match.pathname}`;
-    const title = `Contacto – ${loaderData.branch.name}`;
-    const description = loaderData.branch.address
-      ? `Dirección, teléfono y contacto de ${loaderData.branch.name}: ${loaderData.branch.address}`
-      : `Contacto de ${loaderData.branch.name}`;
+    const title = match.context.i18n.t("contact.seoTitle", { name: loaderData.branch.name });
+    const description = match.context.i18n.t("contact.seoDescription", {
+      address: loaderData.branch.address ? `: ${loaderData.branch.address}` : "",
+      name: loaderData.branch.name,
+    });
 
     return {
       meta: [
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/{-$locale}/contacto")({
     };
   },
   headers: () => ({
-    "Cache-Control": ISR_CACHE_CONTROL,
+    "Cache-Control": BROWSER_CACHE_CONTROL,
   }),
   component: ContactPage,
 });

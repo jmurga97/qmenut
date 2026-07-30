@@ -3,6 +3,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { restaurantLanguages, restaurants } from "../schema/restaurants";
 
 import type { DrizzleDb } from "../client";
+import type { BatchItem } from "drizzle-orm/batch";
 
 export interface RestaurantLanguage {
   isActive: boolean;
@@ -93,8 +94,12 @@ export async function setRestaurantLanguageActive({
     );
 }
 
-export async function removeRestaurantLanguage({ db, languageCode, restaurantId }: LanguageCodeInput): Promise<void> {
-  await db
+export function removeRestaurantLanguageStatement({
+  db,
+  languageCode,
+  restaurantId,
+}: LanguageCodeInput): BatchItem<"sqlite"> {
+  return db
     .delete(restaurantLanguages)
     .where(
       and(

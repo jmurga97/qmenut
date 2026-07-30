@@ -1,0 +1,70 @@
+{
+  "nodes": [
+    {
+      "id": "archive_intial_design_graphql_gateway",
+      "label": "Abandoned GraphQL/BFF-Gateway Design",
+      "file_type": "document",
+      "source_file": "docs/archive/intial-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "archive_intial_design_private_graphql_worker",
+      "label": "Private GraphQL Worker (abandoned)",
+      "file_type": "concept",
+      "source_file": "docs/archive/intial-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "archive_intial_design_clerk_auth",
+      "label": "Clerk Auth in BFF (abandoned)",
+      "file_type": "concept",
+      "source_file": "docs/archive/intial-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "archive_intial_design_graphql_gateway",
+      "target": "archive_intial_design_private_graphql_worker",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "docs/archive/intial-design.md",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "archive_intial_design_graphql_gateway",
+      "target": "archive_intial_design_clerk_auth",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "docs/archive/intial-design.md",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "archive_intial_design_clerk_auth",
+      "target": "docs_domains_auth_email_otp",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/archive/intial-design.md",
+      "source_location": null,
+      "weight": 1
+    }
+  ],
+  "hyperedges": []
+}

@@ -52,12 +52,17 @@ export class QmDishModal extends QmElement {
   }
 
   private focusTrap?: FocusTrap;
+  private focusTrapFrame?: number;
+  private closeTimer?: ReturnType<typeof setTimeout>;
 
   @state()
   private hasAllergens = false;
 
   @state()
   private hasExtras = false;
+
+  @state()
+  private rendered = false;
 
   private readonly handleAllergensSlotChange = (event: Event) => {
     this.hasAllergens = (event.target as HTMLSlotElement).assignedElements({ flatten: true }).length > 0;
@@ -81,62 +86,91 @@ export class QmDishModal extends QmElement {
     }
   };
 
+  willUpdate(changedProperties: PropertyValues): void {
+    if (changedProperties.has("open") && this.open) {
+      this.rendered = true;
+    }
+  }
+
   updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
 
     if (!changedProperties.has("open")) return;
 
     if (this.open) {
+      if (this.closeTimer !== undefined) {
+        clearTimeout(this.closeTimer);
+        this.closeTimer = undefined;
+      }
       this.addEventListener("keydown", this.handleKeydown);
-      requestAnimationFrame(() => {
+      this.focusTrapFrame = requestAnimationFrame(() => {
+        this.focusTrapFrame = undefined;
         if (!this.focusTrap) {
           this.focusTrap = new FocusTrap(this.renderRoot as HTMLElement);
         }
         this.focusTrap?.activate();
       });
     } else {
+      if (this.focusTrapFrame !== undefined) {
+        cancelAnimationFrame(this.focusTrapFrame);
+        this.focusTrapFrame = undefined;
+      }
       this.removeEventListener("keydown", this.handleKeydown);
       this.focusTrap?.deactivate();
+      this.closeTimer = setTimeout(() => {
+        this.closeTimer = undefined;
+        this.rendered = false;
+      }, 180);
     }
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    if (this.closeTimer !== undefined) {
+      clearTimeout(this.closeTimer);
+      this.closeTimer = undefined;
+    }
+    if (this.focusTrapFrame !== undefined) {
+      cancelAnimationFrame(this.focusTrapFrame);
+      this.focusTrapFrame = undefined;
+    }
     this.removeEventListener("keydown", this.handleKeydown);
     this.focusTrap?.deactivate();
   }
 
-  render() {
-    if (!this.open) return nothing;
+  render(): unknown {
+    if (!this.rendered) return nothing;
 
     return html`
-      <div part="backdrop" class="backdrop" @click=${this.handleBackdropClick}></div>
-      <div part="dialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby=${this.resolvedTitleId}>
-        <div part="header" class="header">
-          <h2 part="title" id=${this.resolvedTitleId} class="title">${this.name}</h2>
-          <button
-            part="close"
-            class="close"
-            type="button"
-            aria-label=${this.closeLabel}
-            @click=${this.handleCloseClick}
-          >
-            <slot name="close-icon" aria-hidden="true"></slot>
-          </button>
-        </div>
-        <div part="photo" class="photo">
-          <qm-image part="image" class="image" label=${this.photoLabel}>
-            ${this.photoUrl ? html`<img src=${this.photoUrl} alt="" />` : nothing}
-          </qm-image>
-        </div>
-        <div part="description" class="description">
-          <slot></slot>
-        </div>
-        <div part="extras" class="extras" ?hidden=${!this.hasExtras}>
-          <slot name="extras" @slotchange=${this.handleExtrasSlotChange}></slot>
-        </div>
-        <div part="allergens" class="allergens" ?hidden=${!this.hasAllergens}>
-          <slot name="allergens" @slotchange=${this.handleAllergensSlotChange}></slot>
+      <div part="surface" class=${`surface ${this.open ? "" : "surface--closing"}`}>
+        <div part="backdrop" class="backdrop" @click=${this.handleBackdropClick}></div>
+        <div part="dialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby=${this.resolvedTitleId}>
+          <div part="header" class="header">
+            <h2 part="title" id=${this.resolvedTitleId} class="title">${this.name}</h2>
+            <button
+              part="close"
+              class="close"
+              type="button"
+              aria-label=${this.closeLabel}
+              @click=${this.handleCloseClick}
+            >
+              <slot name="close-icon" aria-hidden="true"></slot>
+            </button>
+          </div>
+          <div part="photo" class="photo">
+            <qm-image part="image" class="image" label=${this.photoLabel}>
+              ${this.photoUrl ? html`<img src=${this.photoUrl} alt="" />` : nothing}
+            </qm-image>
+          </div>
+          <div part="description" class="description">
+            <slot></slot>
+          </div>
+          <div part="extras" class="extras" ?hidden=${!this.hasExtras}>
+            <slot name="extras" @slotchange=${this.handleExtrasSlotChange}></slot>
+          </div>
+          <div part="allergens" class="allergens" ?hidden=${!this.hasAllergens}>
+            <slot name="allergens" @slotchange=${this.handleAllergensSlotChange}></slot>
+          </div>
         </div>
       </div>
     `;

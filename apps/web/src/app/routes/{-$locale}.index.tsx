@@ -4,7 +4,7 @@ import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query
 import { MenuPage } from "~/features/menu/pages/menu-page";
 import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
 import { buildRestaurantJsonLd } from "~/features/menu/seo/build-restaurant-json-ld";
-import { ISR_CACHE_CONTROL } from "~/lib/isr";
+import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 import { PublicPageSkeleton } from "~/shared/components/public-page-skeleton";
 
 import type { PublicMenuData } from "~/features/menu/api/public-menu-types";
@@ -59,7 +59,7 @@ export const Route = createFileRoute("/{-$locale}/")({
     };
   },
   headers: () => ({
-    "Cache-Control": ISR_CACHE_CONTROL,
+    "Cache-Control": BROWSER_CACHE_CONTROL,
   }),
   pendingComponent: PublicPageSkeleton,
   component: MenuPage,

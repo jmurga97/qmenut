@@ -3,6 +3,7 @@ import { and, asc, eq, isNull } from "drizzle-orm";
 import { categories, dishAllergens, dishExtras, dishTags, dishes } from "../schema/menu";
 
 import type { DrizzleDb } from "../client";
+import type { BatchItem } from "drizzle-orm/batch";
 
 export interface AdminDishListItem {
   id: string;
@@ -158,7 +159,7 @@ export async function getDishTranslatableFields({
   const row = await db
     .select({ name: dishes.name, description: dishes.description })
     .from(dishes)
-    .where(and(eq(dishes.id, dishId), eq(dishes.restaurantId, restaurantId)))
+    .where(and(eq(dishes.id, dishId), eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt)))
     .get();
 
   return row ?? null;
@@ -171,8 +172,8 @@ interface UpdateDishInput {
   data: DishWriteData;
 }
 
-export async function updateDish({ db, restaurantId, dishId, data }: UpdateDishInput): Promise<void> {
-  await db
+export function updateDishStatement({ db, restaurantId, dishId, data }: UpdateDishInput): BatchItem<"sqlite"> {
+  return db
     .update(dishes)
     .set({
       categoryId: data.categoryId,
@@ -186,7 +187,35 @@ export async function updateDish({ db, restaurantId, dishId, data }: UpdateDishI
       isFeatured: data.isFeatured,
       updatedAt: Date.now(),
     })
-    .where(and(eq(dishes.id, dishId), eq(dishes.restaurantId, restaurantId)));
+    .where(and(eq(dishes.id, dishId), eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt)));
+}
+
+interface SetDishAvailabilityInput {
+  branchId: string;
+  db: DrizzleDb;
+  dishId: string;
+  isActive: boolean;
+  restaurantId: string;
+}
+
+export async function setDishAvailability({
+  branchId,
+  db,
+  dishId,
+  isActive,
+  restaurantId,
+}: SetDishAvailabilityInput): Promise<void> {
+  await db
+    .update(dishes)
+    .set({ isActive, updatedAt: Date.now() })
+    .where(
+      and(
+        eq(dishes.id, dishId),
+        eq(dishes.restaurantId, restaurantId),
+        eq(dishes.branchId, branchId),
+        isNull(dishes.deletedAt),
+      ),
+    );
 }
 
 interface SoftDeleteDishInput {
@@ -210,12 +239,16 @@ interface SetDishTagsInput {
   tagIds: string[];
 }
 
-export async function setDishTags({ db, dishId, tagIds }: SetDishTagsInput): Promise<void> {
-  await db.delete(dishTags).where(eq(dishTags.dishId, dishId));
+export function setDishTagsStatements({
+  db,
+  dishId,
+  tagIds,
+}: SetDishTagsInput): [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] {
+  const remove = db.delete(dishTags).where(eq(dishTags.dishId, dishId));
 
-  if (tagIds.length > 0) {
-    await db.insert(dishTags).values(tagIds.map((tagId) => ({ dishId, tagId })));
-  }
+  return tagIds.length > 0
+    ? [remove, db.insert(dishTags).values(tagIds.map((tagId) => ({ dishId, tagId })))]
+    : [remove];
 }
 
 interface SetDishAllergensInput {
@@ -224,12 +257,16 @@ interface SetDishAllergensInput {
   allergenIds: number[];
 }
 
-export async function setDishAllergens({ db, dishId, allergenIds }: SetDishAllergensInput): Promise<void> {
-  await db.delete(dishAllergens).where(eq(dishAllergens.dishId, dishId));
+export function setDishAllergensStatements({
+  db,
+  dishId,
+  allergenIds,
+}: SetDishAllergensInput): [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] {
+  const remove = db.delete(dishAllergens).where(eq(dishAllergens.dishId, dishId));
 
-  if (allergenIds.length > 0) {
-    await db.insert(dishAllergens).values(allergenIds.map((allergenId) => ({ dishId, allergenId })));
-  }
+  return allergenIds.length > 0
+    ? [remove, db.insert(dishAllergens).values(allergenIds.map((allergenId) => ({ dishId, allergenId })))]
+    : [remove];
 }
 
 interface SetDishExtrasInput {
@@ -238,14 +275,21 @@ interface SetDishExtrasInput {
   ingredientIds: string[];
 }
 
-export async function setDishExtras({ db, dishId, ingredientIds }: SetDishExtrasInput): Promise<void> {
-  await db.delete(dishExtras).where(eq(dishExtras.dishId, dishId));
+export function setDishExtrasStatements({
+  db,
+  dishId,
+  ingredientIds,
+}: SetDishExtrasInput): [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] {
+  const remove = db.delete(dishExtras).where(eq(dishExtras.dishId, dishId));
 
-  if (ingredientIds.length > 0) {
-    await db
-      .insert(dishExtras)
-      .values(ingredientIds.map((ingredientId, position) => ({ dishId, ingredientId, position })));
-  }
+  return ingredientIds.length > 0
+    ? [
+        remove,
+        db
+          .insert(dishExtras)
+          .values(ingredientIds.map((ingredientId, position) => ({ dishId, ingredientId, position }))),
+      ]
+    : [remove];
 }
 
 interface GetDishBranchIdInput {

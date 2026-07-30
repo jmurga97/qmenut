@@ -1,9 +1,14 @@
-import { QmDishModal } from "@qmenut/ui/react";
+import { defineQmAllergen } from "@qmenut/ui/components/qm-allergen";
+import { defineQmDishExtras } from "@qmenut/ui/components/qm-dish-extras";
+import { QmDishModal } from "@qmenut/ui/components/qm-dish-modal/react";
 import { useTranslation } from "react-i18next";
 
 import { ALLERGEN_META } from "~/features/menu/constants/allergens";
 
 import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
+
+defineQmDishExtras();
+defineQmAllergen();
 
 interface MenuDishModalProps {
   dish: MenuDishViewModel | null;

@@ -1,0 +1,56 @@
+:host {
+  width: 100%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--qm-stamp-count, 1), minmax(0, 1fr));
+  gap: 5px;
+}
+
+.stamp {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1.5px dashed var(--qm-hairline, #d8d3c8);
+  border-radius: 50%;
+}
+
+.stamp--filled {
+  border-color: transparent;
+  background: var(--qm-emph, #6d7e6b);
+}
+
+.stamp--filled::after {
+  position: absolute;
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--qm-on-secondary, #fff);
+  content: "";
+  inset: 33%;
+}
+
+.stamp--new {
+  animation: qm-pop 500ms ease-out both;
+  box-shadow: 0 0 0 6px color-mix(in oklab, var(--qm-emph, #6d7e6b) 30%, transparent);
+}
+
+@keyframes qm-pop {
+  0% {
+    transform: scale(0) rotate(-25deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.25) rotate(6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp--new {
+    animation: none;
+  }
+}

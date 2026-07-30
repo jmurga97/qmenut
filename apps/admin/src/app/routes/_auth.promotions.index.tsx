@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { PromotionsListView } from "@pages/promotions/promotions-list-view";
+import { PromotionsListPage } from "~/features/promotions/pages/promotion-pages";
 
 export const Route = createFileRoute("/_auth/promotions/")({
-  component: PromotionsListView,
+  component: PromotionsListPage,
 });

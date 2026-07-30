@@ -1,9 +1,9 @@
-import { getRestaurantLanguageInfo } from "@qmenut/db/repositories/restaurant-languages.repository";
 import { getPublicMenu as findPublicMenu } from "@qmenut/db/repositories/public-menu.repository";
+import { getRestaurantLanguageInfo } from "@qmenut/db/repositories/restaurant-languages.repository";
 
 import { sanitizeNullableDescription } from "./sanitize-description";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 import type { ResolvedTenant } from "@qmenut/db/domain/tenant";
 import type { PublicCategory, PublicMenuData, PublicMenuLanguage } from "@qmenut/db/models/public-menu";
 
@@ -11,8 +11,8 @@ export const FALLBACK_LANGUAGE_CODE = "es";
 
 interface GetPublicMenuInput {
   db: DrizzleDb;
-  locale?: string | undefined;
-  nowMs?: number | undefined;
+  locale?: string;
+  nowMs?: number;
   tenant: ResolvedTenant;
 }
 

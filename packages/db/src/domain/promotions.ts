@@ -14,23 +14,43 @@ export interface PromotionCandidateLike extends PromotionLike {
   promotionId: string;
 }
 
+const ISO_DAY: Record<string, number> = {
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6,
+  Sun: 7,
+};
+
 export function parseRecurringDays(value: string | null): number[] {
   return (
     value
       ?.split(",")
-      .map((day) => Number.parseInt(day.trim(), 10))
-      .filter((day) => Number.isInteger(day) && day >= 1 && day <= 7) ?? []
+      .map((day) => Number(day.trim()))
+      .filter((day) => Number.isSafeInteger(day) && day >= 1 && day <= 7) ?? []
   );
 }
 
-function getIsoDay(date: Date): number {
-  const day = date.getUTCDay();
+function getLocalDayAndMinute({ nowMs, timeZone }: { nowMs: number; timeZone: string }): {
+  isoDay: number;
+  minute: number;
+} {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date(nowMs));
+  const getPart = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "";
+  const hour = Number(getPart("hour")) % 24;
 
-  if (day === 0) {
-    return 7;
-  }
-
-  return day;
+  return {
+    isoDay: ISO_DAY[getPart("weekday")] ?? 1,
+    minute: hour * 60 + Number(getPart("minute")),
+  };
 }
 
 function isMinuteInWindow({
@@ -61,7 +81,15 @@ function isMinuteInWindow({
   return currentMinute >= startMinute || currentMinute <= endMinute;
 }
 
-export function isPromotionLikeActiveNow({ nowMs, promotion }: { nowMs: number; promotion: PromotionLike }): boolean {
+export function isPromotionLikeActiveNow({
+  nowMs,
+  promotion,
+  timeZone,
+}: {
+  nowMs: number;
+  promotion: PromotionLike;
+  timeZone: string;
+}): boolean {
   if (promotion.startsAt !== null && nowMs < promotion.startsAt) {
     return false;
   }
@@ -74,15 +102,15 @@ export function isPromotionLikeActiveNow({ nowMs, promotion }: { nowMs: number; 
     return true;
   }
 
-  const now = new Date(nowMs);
+  const localTime = getLocalDayAndMinute({ nowMs, timeZone });
   const recurringDays = parseRecurringDays(promotion.recurringDays);
 
-  if (recurringDays.length > 0 && !recurringDays.includes(getIsoDay(now))) {
+  if (recurringDays.length > 0 && !recurringDays.includes(localTime.isoDay)) {
     return false;
   }
 
   return isMinuteInWindow({
-    currentMinute: now.getUTCHours() * 60 + now.getUTCMinutes(),
+    currentMinute: localTime.minute,
     startMinute: promotion.recurringStartMinute,
     endMinute: promotion.recurringEndMinute,
   });
@@ -113,14 +141,16 @@ function shouldReplacePromotion<TCandidate extends PromotionCandidateLike>({
 export function createBestPromotionMap<TCandidate extends PromotionCandidateLike>({
   candidates,
   nowMs,
+  timeZone,
 }: {
   candidates: TCandidate[];
   nowMs: number;
+  timeZone: string;
 }): Map<string, TCandidate> {
   const map = new Map<string, TCandidate>();
 
   for (const candidate of candidates) {
-    if (!isPromotionLikeActiveNow({ promotion: candidate, nowMs })) {
+    if (!isPromotionLikeActiveNow({ promotion: candidate, nowMs, timeZone })) {
       continue;
     }
 

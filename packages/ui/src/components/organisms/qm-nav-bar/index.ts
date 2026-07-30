@@ -62,7 +62,7 @@ export class QmNavBar extends LitElement {
     const currentIndex = tabs.findIndex((tab) => tab.active);
     const fallbackIndex = currentIndex === -1 ? 0 : currentIndex;
 
-    let nextIndex: number | null = null;
+    let nextIndex: number;
     switch (event.key) {
       case "ArrowRight":
         nextIndex = (fallbackIndex + 1) % tabs.length;

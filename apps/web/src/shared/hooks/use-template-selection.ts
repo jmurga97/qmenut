@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import type { QmTemplateName } from "@qmenut/ui";
+import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 import type { PublicTenant } from "~/shared/types/public-tenant";
 
 interface TemplateSelectionState {

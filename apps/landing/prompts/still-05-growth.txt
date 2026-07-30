@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: 3:2 landing-page scene still and Seedance first frame
+Primary request: Create the qmenut promotions-and-loyalty diorama.
+Style/medium: Isometric glossy vinyl-toy 3D diorama floating as a small rounded island on a plain solid #EFEFEF background with a soft contact shadow beneath it. Smooth molded-resin forms, polished lacquer, subtle chrome highlights, rounded collectible-toy geometry, gentle cool studio lighting, soft long shadows, tilt-shift miniature look. Cohesive palette only: ink navy #02132E, royal blue #325A9F, lavender #A190BA, slate blue #556C97, porcelain #EFEFEF, sky blue #BAD5F6. Highly detailed, centered composition, absolutely no text, no letters, no numbers, no logos, no neon grid, no warm clay colors.
+Subject: A lively miniature restaurant promotion stage where an owner schedules offers on a large elegant clock without numbers. Royal-blue pathways route offer tokens toward a whole branch, a category shelf, or one hero dish. Returning guests collect glossy points and stamp-like tokens at the counter, then redeem a reward through four rotating blank code rollers. Two matching dishes, a special-price plate, and a happy-hour light communicate flexible promotions without written signs. Everything is native to one compact restaurant system.
+Composition/framing: Wide 3:2 landscape, promotion clock and loyalty counter centered, clear flow from scheduled offer to returning guest, focal details inside middle 65% of frame.
+Lighting/mood: Energetic but controlled, rewarding, polished cool highlights.
+Constraints: No currency symbols, no readable interface, no digits, no brand marks, no typography, no labels, no watermark.

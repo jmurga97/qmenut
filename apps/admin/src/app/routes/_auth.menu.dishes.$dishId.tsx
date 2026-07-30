@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { DishEditorView } from "@pages/menu/dish-editor-view";
+import { getDishDetailQueryOptions } from "~/features/menu/api";
+import { DishEditorPage } from "~/features/menu/pages/menu-pages";
 
 export const Route = createFileRoute("/_auth/menu/dishes/$dishId")({
-  component: DishEditorRoute,
+  loader: async ({ context, params }) => {
+    if (!context.menuBranchId) return;
+    await context.queryClient.ensureQueryData(getDishDetailQueryOptions({ dishId: params.dishId, trpc: context.trpc }));
+  },
+  component: function DishRoute() {
+    return <DishEditorPage dishId={Route.useParams().dishId} />;
+  },
 });
-
-function DishEditorRoute() {
-  const { dishId } = Route.useParams();
-  return <DishEditorView dishId={dishId} />;
-}

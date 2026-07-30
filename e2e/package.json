@@ -1,0 +1,15 @@
+{
+  "name": "@qmenut/e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun run reset && bash scripts/run-tests.sh",
+    "test:ui": "bun run reset && bash scripts/run-tests.sh --ui",
+    "reset": "bash scripts/reset-local-state.sh",
+    "cleanup": "bun run --cwd ../apps/api db:cleanup:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^26.0.1"
+  }
+}

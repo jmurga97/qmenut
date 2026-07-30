@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 
 import { assertBranchAccess } from "./assert-branch-access";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 
 interface ResolveBranchHostInput {
   db: DrizzleDb;

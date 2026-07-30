@@ -14,30 +14,46 @@ const logLevelSchema = z.enum(["trace", "debug", "info", "warn", "error", "fatal
 const nodeEnvSchema = z.enum(["development", "test", "production"]);
 
 export const envSchema = z.object({
-  ALLOWED_ORIGINS: z.string().trim().optional(),
+  ALLOWED_ORIGINS: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) =>
+      value
+        ?.split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    ),
   BETTER_AUTH_SECRET: z.string().min(1),
-  BETTER_AUTH_URL: z.string().url(),
+  BETTER_AUTH_URL: z.url(),
   DEEPL_API_KEY: z.string().trim().min(1).optional(),
-  DEEPL_API_URL: z.string().url().default("https://api-free.deepl.com"),
+  DEEPL_API_URL: z.url().default("https://api-free.deepl.com"),
+  E2E_FIXED_OTP: z.string().trim().optional(),
   DB: z.custom<D1Database>((value) => typeof value === "object" && value !== null, {
-    error: "DB binding is required",
+    error: "El binding DB es obligatorio",
   }),
   EMAIL_WORKER: z.custom<EmailWorkerServiceBinding>(
     (value) =>
       typeof value === "object" && value !== null && typeof (value as { fetch?: unknown }).fetch === "function",
-    "EMAIL_WORKER service binding must implement fetch",
+    "El binding de servicio EMAIL_WORKER debe implementar fetch",
   ),
   THEME_WORKER: z.custom<ThemeWorkerServiceBinding>(
     (value) =>
       typeof value === "object" && value !== null && typeof (value as { fetch?: unknown }).fetch === "function",
-    "THEME_WORKER service binding must implement fetch",
+    "El binding de servicio THEME_WORKER debe implementar fetch",
   ),
   THEME_WORKER_TOKEN: z.string().min(1),
+  LOYALTY_TOKEN_SECRET: z.string().min(1),
+  LOYALTY_CODE_LIMITER: z.custom<RateLimit>(
+    (value) =>
+      typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",
+    "El binding LOYALTY_CODE_LIMITER debe implementar limit",
+  ),
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
   STRIPE_PRICE_BASIC: z.string().min(1),
   STRIPE_PRICE_BUSINESS: z.string().min(1),
-  ADMIN_APP_URL: z.string().url(),
+  ADMIN_APP_URL: z.url(),
   SENTRY_DSN: z.string().trim().optional(),
   LOG_LEVEL: logLevelSchema.default("info"),
   NODE_ENV: nodeEnvSchema.default("development"),

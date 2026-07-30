@@ -3,6 +3,7 @@ import { and, asc, eq, isNull } from "drizzle-orm";
 import { promotionTargets, promotions } from "../schema/promotions";
 
 import type { DrizzleDb } from "../client";
+import type { BatchItem } from "drizzle-orm/batch";
 
 export type PromotionType = "percentage_discount" | "special_price" | "daily_menu" | "happy_hour" | "two_for_one";
 export type PromotionScope = "info" | "branch" | "category" | "dish";
@@ -29,6 +30,8 @@ export interface PromotionWriteData {
   description: string | null;
   percentage: number | null;
   specialPrice: number | null;
+  buyQuantity: number | null;
+  paidQuantity: number | null;
   priority: number;
   startsAt: number | null;
   endsAt: number | null;
@@ -77,6 +80,20 @@ interface GetPromotionInput {
   promotionId: string;
 }
 
+export async function getPromotionBranchId({
+  db,
+  restaurantId,
+  promotionId,
+}: GetPromotionInput): Promise<string | null> {
+  const promotion = await db
+    .select({ branchId: promotions.branchId })
+    .from(promotions)
+    .where(and(eq(promotions.id, promotionId), eq(promotions.restaurantId, restaurantId), isNull(promotions.deletedAt)))
+    .get();
+
+  return promotion?.branchId ?? null;
+}
+
 export async function getPromotion({
   db,
   restaurantId,
@@ -106,6 +123,8 @@ export async function getPromotion({
     description: promotion.description,
     percentage: promotion.percentage,
     specialPrice: promotion.specialPrice,
+    buyQuantity: promotion.buyQuantity,
+    paidQuantity: promotion.paidQuantity,
     priority: promotion.priority,
     startsAt: promotion.startsAt,
     endsAt: promotion.endsAt,
@@ -136,7 +155,7 @@ export async function createPromotion({
   const id = crypto.randomUUID();
   const now = Date.now();
 
-  await db.insert(promotions).values({
+  const create = db.insert(promotions).values({
     id,
     restaurantId,
     branchId,
@@ -146,8 +165,8 @@ export async function createPromotion({
     description: data.description,
     percentage: data.percentage,
     specialPrice: data.specialPrice,
-    buyQuantity: null,
-    paidQuantity: null,
+    buyQuantity: data.buyQuantity,
+    paidQuantity: data.paidQuantity,
     priority: data.priority,
     startsAt: data.startsAt,
     endsAt: data.endsAt,
@@ -160,7 +179,7 @@ export async function createPromotion({
     updatedAt: now,
   });
 
-  await replacePromotionTargets({ db, promotionId: id, targets });
+  await db.batch([create, ...replacePromotionTargetsStatements({ db, promotionId: id, targets })]);
 
   return id;
 }
@@ -180,7 +199,7 @@ export async function updatePromotion({
   data,
   targets,
 }: UpdatePromotionInput): Promise<void> {
-  await db
+  const update = db
     .update(promotions)
     .set({
       type: data.type,
@@ -189,6 +208,8 @@ export async function updatePromotion({
       description: data.description,
       percentage: data.percentage,
       specialPrice: data.specialPrice,
+      buyQuantity: data.buyQuantity,
+      paidQuantity: data.paidQuantity,
       priority: data.priority,
       startsAt: data.startsAt,
       endsAt: data.endsAt,
@@ -199,9 +220,11 @@ export async function updatePromotion({
       status: data.status,
       updatedAt: Date.now(),
     })
-    .where(and(eq(promotions.id, promotionId), eq(promotions.restaurantId, restaurantId)));
+    .where(
+      and(eq(promotions.id, promotionId), eq(promotions.restaurantId, restaurantId), isNull(promotions.deletedAt)),
+    );
 
-  await replacePromotionTargets({ db, promotionId, targets });
+  await db.batch([update, ...replacePromotionTargetsStatements({ db, promotionId, targets })]);
 }
 
 interface ReplacePromotionTargetsInput {
@@ -210,18 +233,21 @@ interface ReplacePromotionTargetsInput {
   targets: PromotionTargetRow[];
 }
 
-export async function replacePromotionTargets({
+export function replacePromotionTargetsStatements({
   db,
   promotionId,
   targets,
-}: ReplacePromotionTargetsInput): Promise<void> {
-  await db.delete(promotionTargets).where(eq(promotionTargets.promotionId, promotionId));
+}: ReplacePromotionTargetsInput): [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] {
+  const remove = db.delete(promotionTargets).where(eq(promotionTargets.promotionId, promotionId));
 
-  if (targets.length > 0) {
-    await db
-      .insert(promotionTargets)
-      .values(targets.map((target) => ({ promotionId, targetType: target.targetType, targetId: target.targetId })));
-  }
+  return targets.length > 0
+    ? [
+        remove,
+        db
+          .insert(promotionTargets)
+          .values(targets.map((target) => ({ promotionId, targetType: target.targetType, targetId: target.targetId }))),
+      ]
+    : [remove];
 }
 
 interface SoftDeletePromotionInput {

@@ -23,6 +23,9 @@ pnpm-debug.log*
 .wrangler/
 .wrangler-shared/
 .turbo/
+e2e/.auth/
+e2e/test-results/
+e2e/playwright-report/
 
 # generated types
 worker-configuration.d.ts

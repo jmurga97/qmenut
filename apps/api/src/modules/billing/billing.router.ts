@@ -3,10 +3,8 @@ import { z } from "zod";
 import { createCheckoutSession } from "./create-checkout-session";
 import { createPortalSession } from "./create-portal-session";
 import { getBillingOverview } from "./get-billing-overview";
-import { requireRole } from "../admin-tenant/require-role";
 import { router, tenantProcedure } from "../../trpc/trpc";
-
-const OWNER_ONLY = ["owner"] as const;
+import { requirePermission } from "../admin-tenant/require-permission";
 
 const checkoutSchema = z.object({
   branchId: z.string().trim().min(1),
@@ -14,11 +12,12 @@ const checkoutSchema = z.object({
 });
 
 export const billingRouter = router({
-  overview: tenantProcedure.query(({ ctx }) =>
-    getBillingOverview({ db: ctx.db, restaurantId: ctx.tenant.restaurantId }),
-  ),
+  overview: tenantProcedure.query(({ ctx }) => {
+    requirePermission(ctx.tenant, "billing.manage");
+    return getBillingOverview({ db: ctx.db, restaurantId: ctx.tenant.restaurantId });
+  }),
   checkout: tenantProcedure.input(checkoutSchema).mutation(({ ctx, input }) => {
-    requireRole(ctx.tenant, OWNER_ONLY);
+    requirePermission(ctx.tenant, "billing.manage");
     return createCheckoutSession({
       db: ctx.db,
       env: ctx.env,
@@ -29,7 +28,7 @@ export const billingRouter = router({
     });
   }),
   portal: tenantProcedure.mutation(({ ctx }) => {
-    requireRole(ctx.tenant, OWNER_ONLY);
+    requirePermission(ctx.tenant, "billing.manage");
     return createPortalSession({ db: ctx.db, env: ctx.env, restaurantId: ctx.tenant.restaurantId });
   }),
 });

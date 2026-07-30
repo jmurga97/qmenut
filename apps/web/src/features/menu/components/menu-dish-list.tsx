@@ -1,3 +1,4 @@
+import { defineQmMenuList } from "@qmenut/ui/components/qm-menu-list";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,6 +7,8 @@ import type {
   MenuDishViewModel,
   MenuSectionViewModel,
 } from "~/features/menu/types/menu-view-model";
+
+defineQmMenuList();
 
 interface MenuDishListProps {
   content: MenuContentViewModel;

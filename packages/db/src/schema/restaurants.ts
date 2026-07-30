@@ -1,3 +1,4 @@
+import { ROLE_CODES } from "@qmenut/permissions";
 import { index, integer, primaryKey, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export const restaurants = sqliteTable("restaurants", {
@@ -5,6 +6,7 @@ export const restaurants = sqliteTable("restaurants", {
   name: text("name").notNull(),
   defaultLanguageCode: text("default_language_code").notNull(),
   defaultCurrency: text("default_currency").notNull(),
+  timezone: text("timezone").notNull().default("Europe/Madrid"),
   emailFromName: text("email_from_name"),
   emailFromAddress: text("email_from_address"),
   emailReplyTo: text("email_reply_to"),
@@ -19,7 +21,7 @@ export const restaurantUsers = sqliteTable(
     id: text("id").primaryKey(),
     restaurantId: text("restaurant_id").notNull(),
     userId: text("user_id").notNull(),
-    roleCode: text("role_code", { enum: ["owner", "admin", "staff"] }).notNull(),
+    roleCode: text("role_code", { enum: ROLE_CODES }).notNull(),
     isDriver: integer("is_driver", { mode: "boolean" }).notNull(),
     isActive: integer("is_active", { mode: "boolean" }).notNull(),
     createdAt: integer("created_at").notNull(),

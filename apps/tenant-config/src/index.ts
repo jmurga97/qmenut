@@ -3,24 +3,31 @@ import { TEMPLATES } from "@qmenut/ui/theme/presets";
 import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 
 interface Env {
-  ADMIN_TOKEN: string;
+  THEME_WORKER_TOKEN: string;
   TENANT_THEME: KVNamespace;
 }
 
 const THEME_ROUTE = /^\/tenants\/([^/]+)\/theme$/;
-const MENU_VERSION_ROUTE = /^\/tenants\/([^/]+)\/menu-version$/;
+// Legacy route retained for compatibility with already deployed API workers.
+const PUBLIC_CONTENT_VERSION_ROUTE = /^\/tenants\/([^/]+)\/menu-version$/;
 
 function jsonResponse(body: unknown, init?: ResponseInit): Response {
-  return new Response(JSON.stringify(body), {
+  return Response.json(body, {
     ...init,
     headers: { "content-type": "application/json", ...init?.headers },
   });
 }
 
-function isAuthorized(request: Request, env: Env): boolean {
+async function isAuthorized(request: Request, env: Env): Promise<boolean> {
   const header = request.headers.get("authorization") ?? "";
+  const expected = `Bearer ${env.THEME_WORKER_TOKEN}`;
+  const encoder = new TextEncoder();
+  const [actualDigest, expectedDigest] = await Promise.all([
+    crypto.subtle.digest("SHA-256", encoder.encode(header)),
+    crypto.subtle.digest("SHA-256", encoder.encode(expected)),
+  ]);
 
-  return header === `Bearer ${env.ADMIN_TOKEN}`;
+  return crypto.subtle.timingSafeEqual(actualDigest, expectedDigest);
 }
 
 function parseThemeBody(raw: unknown): { error: string } | { value: string } {
@@ -30,7 +37,7 @@ function parseThemeBody(raw: unknown): { error: string } | { value: string } {
 
   const template = (raw as { template?: unknown }).template;
 
-  if (typeof template !== "string" || !(template in TEMPLATES)) {
+  if (typeof template !== "string" || !Object.hasOwn(TEMPLATES, template)) {
     return { error: `"template" must be one of: ${Object.keys(TEMPLATES).join(", ")}` };
   }
 
@@ -55,7 +62,7 @@ async function handleThemeRequest({ request, env, host }: TenantRequestInput): P
     return jsonResponse(theme);
   }
 
-  if (!isAuthorized(request, env)) {
+  if (!(await isAuthorized(request, env))) {
     return jsonResponse({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -88,7 +95,8 @@ async function handleThemeRequest({ request, env, host }: TenantRequestInput): P
   return jsonResponse({ error: "Method not allowed" }, { status: 405 });
 }
 
-function menuVersionKey(host: string): string {
+function publicContentVersionKey(host: string): string {
+  // Legacy KV key retained to avoid migrating every tenant's existing version entry.
   return `menuVersion:${host}`;
 }
 
@@ -96,21 +104,21 @@ function menuVersionKey(host: string): string {
  * Bumps to the current timestamp rather than accepting a caller-supplied value — this is a
  * "something changed" signal for cache invalidation, not a value the caller should control.
  */
-async function handleMenuVersionRequest({ request, env, host }: TenantRequestInput): Promise<Response> {
+async function handlePublicContentVersionRequest({ request, env, host }: TenantRequestInput): Promise<Response> {
   if (request.method === "GET") {
-    const version = await env.TENANT_THEME.get(menuVersionKey(host));
+    const version = await env.TENANT_THEME.get(publicContentVersionKey(host));
 
     return jsonResponse({ host, version });
   }
 
-  if (!isAuthorized(request, env)) {
+  if (!(await isAuthorized(request, env))) {
     return jsonResponse({ error: "Unauthorized" }, { status: 401 });
   }
 
   if (request.method === "PUT") {
     const version = Date.now().toString();
 
-    await env.TENANT_THEME.put(menuVersionKey(host), version);
+    await env.TENANT_THEME.put(publicContentVersionKey(host), version);
 
     return jsonResponse({ host, version, status: "bumped" });
   }
@@ -126,8 +134,8 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   }
 
   const themeMatch = THEME_ROUTE.exec(url.pathname);
-  const menuVersionMatch = MENU_VERSION_ROUTE.exec(url.pathname);
-  const match = themeMatch ?? menuVersionMatch;
+  const publicContentVersionMatch = PUBLIC_CONTENT_VERSION_ROUTE.exec(url.pathname);
+  const match = themeMatch ?? publicContentVersionMatch;
 
   if (!match?.[1]) {
     return jsonResponse({ error: "Not found" }, { status: 404 });
@@ -139,7 +147,9 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
     return jsonResponse({ error: "Invalid tenant host" }, { status: 400 });
   }
 
-  return themeMatch ? handleThemeRequest({ request, env, host }) : handleMenuVersionRequest({ request, env, host });
+  return themeMatch
+    ? handleThemeRequest({ request, env, host })
+    : handlePublicContentVersionRequest({ request, env, host });
 }
 
 export default {

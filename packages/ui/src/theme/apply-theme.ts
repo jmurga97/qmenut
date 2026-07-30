@@ -204,6 +204,8 @@ function resolveTemplate(input: QmThemeInput): QmTemplatePreset {
   const template = TEMPLATES[input.template];
   return {
     label: input.label ?? template.label,
+    headingFontId: template.headingFontId,
+    bodyFontId: template.bodyFontId,
     // Catalog font pick wins, then any raw `heading`/`body` override, then the template preset.
     heading: getFontStack(input.headingFont) ?? input.heading ?? template.heading,
     body: getFontStack(input.bodyFont) ?? input.body ?? template.body,

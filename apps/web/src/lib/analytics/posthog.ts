@@ -4,20 +4,24 @@
  * emitidos antes de que cargue se encolan y se envían al inicializarse.
  */
 
+import { createClientOnlyFn } from "@tanstack/react-start";
+
 import type { PostHog } from "posthog-js";
 
 type QueuedEvent = { event: string; props?: Record<string, unknown> };
 
-let instance: PostHog | null = null;
-let loading: Promise<void> | null = null;
-let superProps: Record<string, unknown> | null = null;
+const state: {
+  instance: PostHog | null;
+  loading: Promise<void> | null;
+  superProps: Record<string, unknown> | null;
+} = { instance: null, loading: null, superProps: null };
 const queue: QueuedEvent[] = [];
 
 function isEnabled(): boolean {
   return typeof window !== "undefined" && Boolean(import.meta.env.VITE_POSTHOG_KEY);
 }
 
-async function load(): Promise<void> {
+const load = createClientOnlyFn(async (): Promise<void> => {
   const { default: posthog } = await import("posthog-js");
 
   posthog.init(import.meta.env.VITE_POSTHOG_KEY as string, {
@@ -31,31 +35,37 @@ async function load(): Promise<void> {
     person_profiles: "identified_only",
   });
 
-  instance = posthog;
+  state.instance = posthog;
 
-  if (superProps) {
-    instance.register(superProps);
+  if (state.superProps) {
+    state.instance.register(state.superProps);
   }
 
-  for (const queued of queue.splice(0)) {
-    instance.capture(queued.event, queued.props);
+  for (const queued of queue) {
+    state.instance.capture(queued.event, queued.props);
   }
-}
 
-function ensureLoaded(): void {
-  if (!isEnabled() || loading) {
+  queue.length = 0;
+});
+
+async function ensureLoaded(): Promise<void> {
+  if (!isEnabled() || state.loading) {
     return;
   }
 
-  loading = load().catch(() => {
-    loading = null;
-  });
+  state.loading = load();
+
+  try {
+    await state.loading;
+  } catch {
+    state.loading = null;
+  }
 }
 
 /** Propiedades adjuntas a todos los eventos (restaurant_id, branch_id, tenant_host). */
 export function registerTenantProperties(props: Record<string, unknown>): void {
-  superProps = { ...superProps, ...props };
-  instance?.register(props);
+  state.superProps = { ...state.superProps, ...props };
+  state.instance?.register(props);
 }
 
 export function track(event: string, props?: Record<string, unknown>): void {
@@ -63,13 +73,13 @@ export function track(event: string, props?: Record<string, unknown>): void {
     return;
   }
 
-  if (instance) {
-    instance.capture(event, props);
+  if (state.instance) {
+    state.instance.capture(event, props);
     return;
   }
 
   queue.push({ event, props });
-  ensureLoaded();
+  void ensureLoaded();
 }
 
 /** Arranca la carga diferida cuando el hilo principal queda libre tras hidratar. */
@@ -79,8 +89,8 @@ export function scheduleAnalyticsLoad(): void {
   }
 
   if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(() => ensureLoaded(), { timeout: 5000 });
+    window.requestIdleCallback(() => void ensureLoaded(), { timeout: 5000 });
   } else {
-    setTimeout(() => ensureLoaded(), 1500);
+    setTimeout(() => void ensureLoaded(), 1500);
   }
 }

@@ -1,0 +1,119 @@
+:host {
+  width: 100%;
+}
+.card {
+  display: grid;
+  justify-items: center;
+  padding: 22px 16px 18px;
+  border: var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8);
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-card, #fff);
+  box-shadow: var(--qm-card-shadow, none);
+  color: var(--qm-ink, #1c1815);
+  text-align: center;
+}
+.badge {
+  padding: 5px 10px;
+  border-radius: var(--qm-badge-radius, var(--qm-radius, 0px));
+  background: var(--qm-emph, #657763);
+  color: var(--qm-on-secondary, #fff);
+  font-size: var(--qm-text-2xs, 10px);
+  font-weight: 800;
+}
+.spinner,
+.terminal {
+  display: grid;
+  width: 56px;
+  aspect-ratio: 1;
+  place-items: center;
+  margin: 20px 0 14px;
+  border-radius: 50%;
+}
+.spinner {
+  position: relative;
+  border: 2px solid var(--qm-hairline, #d8d3c8);
+}
+.spinner::before {
+  position: absolute;
+  border: 3px solid transparent;
+  border-top-color: var(--qm-emph, #657763);
+  border-radius: 50%;
+  content: "";
+  inset: -3px;
+  animation: qm-spin 900ms linear infinite;
+}
+.spinner span {
+  width: 10px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--qm-emph, #657763);
+  animation: qm-pulse 1.2s ease-in-out infinite;
+}
+.terminal {
+  border: 1.5px dashed var(--qm-hairline, #d8d3c8);
+  color: #b23a2a;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-weight: 900;
+}
+h2 {
+  max-width: 28ch;
+  margin: 0;
+  font-family: var(--qm-heading, serif);
+  font-size: var(--qm-text-xl, 17px);
+  font-weight: var(--qm-hw, 700);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+.hint {
+  margin: 7px 0 18px;
+  color: var(--qm-muted, #777);
+  font-size: var(--qm-text-sm, 12px);
+}
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+}
+.countdown {
+  min-height: 32px;
+  padding: 7px 9px;
+  border: 1px solid var(--qm-hairline, #d8d3c8);
+  border-radius: var(--qm-badge-radius, var(--qm-radius, 0px));
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: var(--qm-text-2xs, 10px);
+}
+button {
+  min-height: 44px;
+  padding: 8px 3px;
+  border: 0;
+  background: transparent;
+  color: var(--qm-primary, #333);
+  cursor: pointer;
+  font-weight: 800;
+  text-decoration: underline;
+}
+button:focus-visible {
+  outline: 2px solid var(--qm-primary, #333);
+  outline-offset: 2px;
+}
+@keyframes qm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes qm-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner::before,
+  .spinner span {
+    animation: none;
+  }
+}

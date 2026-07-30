@@ -1,8 +1,8 @@
 import { useRef } from "react";
 
-import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { PromosList } from "~/features/promos/components/promos-list";
 import { usePromosContent } from "~/features/promos/hooks/use-promos-content";
+import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { DevTemplateSwitcher } from "~/shared/components/dev-template-switcher";
 import { PublicPageShell } from "~/shared/components/public-page-shell";
 import { PublicPageSkeleton } from "~/shared/components/public-page-skeleton";

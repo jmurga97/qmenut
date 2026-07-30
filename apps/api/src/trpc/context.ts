@@ -1,10 +1,10 @@
-import { createDb } from "@qmenut/db";
+import { createDb } from "@qmenut/db/client";
 
 import { createAuth } from "../auth/create-auth";
 
 import type { Auth } from "../auth/create-auth";
 import type { RuntimeEnv } from "../config/env/schema";
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 
 export interface TrpcContext {
   auth: Auth;

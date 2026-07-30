@@ -6,7 +6,7 @@ This is a Bun monorepo orchestrated with Turbo. Application code lives under `ap
 
 - `apps/web`: React 19 + Vite + TanStack Router frontend. Routes and app entry points are in `apps/web/src/app`; generated route files such as `route-tree.gen.ts` should not be edited manually.
 - `apps/api`: Cloudflare Worker backend with native fetch dispatch, tRPC at `/trpc`, Better Auth at `/api/auth/*`, and Drizzle over D1. Source is in `apps/api/src`, Wrangler config in `apps/api/wrangler.toml`, and database migrations live in `apps/api/migrations`.
-- `packages`: shared workspace packages used by multiple apps. `packages/http` holds the shared Hono/OpenAPIHono app factory, env base schema, error handling, and response helpers.
+- `packages`: shared workspace packages used by multiple apps, including `auth`, `db`, `permissions`, and `ui`. The API dispatches requests natively from `apps/api/src/index.ts`.
 
 Generated output such as `apps/web/dist`, `.wrangler`, `.turbo`, and `node_modules` should stay out of source changes.
 
@@ -38,6 +38,13 @@ Avoid barrel imports for everything. Just one barrel for a whole module or packa
 ## Testing Guidelines
 
 DO NOT IMPLEMENT EARLY TESTS IF IM NOT ASKING FOR IT.
+
+Playwright E2E tests live in `e2e/`. Install Chromium once with
+`bunx playwright install chromium`, then run `bun run test:e2e`. The test reset
+recreates local D1 data and shared tenant-theme KV data before starting the API,
+admin, and public-menu workers. E2E auth uses `e2e@test.local` with OTP `000000`.
+The `E2E_FIXED_OTP` flag is local-test-only and must never be configured on a
+deployed worker.
 
 ## Commit & Pull Request Guidelines
 

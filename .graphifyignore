@@ -1,0 +1,32 @@
+# .gitignore is already respected (node_modules, dist, .wrangler, .turbo,
+# .output, logs, .env, worker-configuration.d.ts, lockfiles, etc).
+# These patterns add tracked-but-not-worth-graphing files.
+
+# TanStack Router auto-generated route trees
+**/route-tree.gen.ts
+
+# Generated/auto types elsewhere
+*.gen.ts
+*.gen.tsx
+
+# Lockfile (kept in git, no semantic value)
+bun.lock
+
+# Raw SQL migrations (schema history, not app logic)
+apps/api/migrations/*.sql
+apps/tenant-config/migrations/*.sql
+
+# Seed data
+apps/api/seed/**
+apps/tenant-config/seed/**
+e2e/seed/**
+
+# Playwright/e2e artifacts and snapshots (also mostly gitignored already)
+e2e/playwright-report/**
+e2e/test-results/**
+e2e/.auth/**
+
+# Graphify's own output, don't feed it back to itself
+graphify-out/**
+# Files and pure-declaration-merging files are usually noise for a "what does this codebase actually do"
+**/*.d.ts

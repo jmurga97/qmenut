@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 
+import { LegalLinksNav } from "~/features/legal/components/legal-links-nav";
 import { PublicPageShell } from "~/shared/components/public-page-shell";
 import { PublicPageSkeleton } from "~/shared/components/public-page-skeleton";
 import { ScrollHidePageHeader } from "~/shared/components/scroll-hide-page-header";
@@ -42,16 +42,8 @@ export function LegalPageLayout({ children, subtitle, title }: LegalPageLayoutPr
       />
 
       <div className="home-scroll" ref={scrollRef}>
-        <article className="legal-prose">{children}</article>
-
-        <nav className="legal-links" aria-label="Páginas legales">
-          <Link to="/{-$locale}/aviso-legal" params={(prev) => prev}>
-            Aviso legal
-          </Link>
-          <Link to="/{-$locale}/privacidad" params={(prev) => prev}>
-            Política de privacidad
-          </Link>
-        </nav>
+        {children}
+        <LegalLinksNav />
       </div>
     </PublicPageShell>
   );

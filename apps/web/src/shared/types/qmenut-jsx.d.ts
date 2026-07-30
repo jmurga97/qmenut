@@ -1,1 +1,1 @@
-import type {} from "@qmenut/ui/jsx-types";
+import "@qmenut/ui/jsx-types";

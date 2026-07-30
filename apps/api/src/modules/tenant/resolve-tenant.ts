@@ -1,7 +1,7 @@
 import { normalizeTenantHost } from "@qmenut/db/domain/tenant";
 import { resolveTenantByHost } from "@qmenut/db/repositories/tenant.repository";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 import type { ResolvedTenant } from "@qmenut/db/domain/tenant";
 
 function getRequestHostname(request: Request): string {
@@ -9,7 +9,7 @@ function getRequestHostname(request: Request): string {
   const host = forwardedHost ?? request.headers.get("host");
 
   if (host) {
-    return host.split(":")[0] ?? host;
+    return host.split(":", 1)[0] ?? host;
   }
 
   return new URL(request.url).hostname;
@@ -17,7 +17,7 @@ function getRequestHostname(request: Request): string {
 
 interface ResolveTenantFromRequestInput {
   db: DrizzleDb;
-  host?: string | undefined;
+  host?: string;
   request: Request;
 }
 

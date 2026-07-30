@@ -55,6 +55,24 @@ export default defineConfig({
     rollupOptions: {
       // Runtime module provided by the Workers runtime (nitro shims it in dev).
       external: ["cloudflare:workers"],
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (
+            id.includes("react-dom") ||
+            id.includes("/react/") ||
+            id.includes("/scheduler/") ||
+            id.includes("use-sync-external-store")
+          ) {
+            return "vendor-react";
+          }
+          if (id.includes("@tanstack") || id.includes("@trpc")) return "vendor-data";
+          if (id.includes("i18next")) return "vendor-i18n";
+          if (id.includes("culori") || id.includes("lit-html") || id.includes("@lit")) {
+            return "vendor-ui";
+          }
+        },
+      },
     },
   },
 });

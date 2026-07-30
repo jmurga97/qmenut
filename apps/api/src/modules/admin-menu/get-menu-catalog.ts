@@ -3,7 +3,7 @@ import { listDishes } from "@qmenut/db/repositories/admin-dishes.repository";
 
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 import type { AdminCategory } from "@qmenut/db/repositories/admin-categories.repository";
 import type { AdminDishListItem } from "@qmenut/db/repositories/admin-dishes.repository";
 

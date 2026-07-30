@@ -5,6 +5,7 @@ import { branches } from "../schema/branches";
 import { branchSubscriptions } from "../schema/restaurants";
 
 import type { DrizzleDb } from "../client";
+import type { BatchItem } from "drizzle-orm/batch";
 
 export type PlanCode = "basic" | "business";
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled";
@@ -47,9 +48,20 @@ export async function insertStripeCustomer({
   db,
   restaurantId,
   stripeCustomerId,
-}: InsertStripeCustomerInput): Promise<void> {
+}: InsertStripeCustomerInput): Promise<string> {
   const now = Date.now();
-  await db.insert(stripeCustomers).values({ restaurantId, stripeCustomerId, createdAt: now, updatedAt: now });
+  await db
+    .insert(stripeCustomers)
+    .values({ restaurantId, stripeCustomerId, createdAt: now, updatedAt: now })
+    .onConflictDoNothing();
+
+  const persisted = await getStripeCustomer({ db, restaurantId });
+
+  if (!persisted) {
+    throw new Error("Failed to persist or load Stripe customer");
+  }
+
+  return persisted.stripeCustomerId;
 }
 
 interface ListBranchSubscriptionsInput {
@@ -121,10 +133,10 @@ interface UpsertBranchSubscriptionInput {
 }
 
 /** Upsert por branch_id: la webhook siempre escribe el último estado de Stripe (idempotente). */
-export async function upsertBranchSubscription({ db, data }: UpsertBranchSubscriptionInput): Promise<void> {
+export function upsertBranchSubscriptionStatement({ db, data }: UpsertBranchSubscriptionInput): BatchItem<"sqlite"> {
   const now = Date.now();
 
-  await db
+  return db
     .insert(branchSubscriptions)
     .values({
       id: crypto.randomUUID(),
@@ -160,9 +172,14 @@ interface UpdateBranchPlanInput {
   planCode: PlanCode;
 }
 
-/** Mantiene branches.plan_code sincronizado con la suscripción activa. */
-export async function updateBranchPlan({ db, restaurantId, branchId, planCode }: UpdateBranchPlanInput): Promise<void> {
-  await db
+/** Mantiene branches.plan_code sincronizado con el plan efectivo de la suscripción. */
+export function updateBranchPlanStatement({
+  db,
+  restaurantId,
+  branchId,
+  planCode,
+}: UpdateBranchPlanInput): BatchItem<"sqlite"> {
+  return db
     .update(branches)
     .set({ planCode, updatedAt: Date.now() })
     .where(and(eq(branches.id, branchId), eq(branches.restaurantId, restaurantId)));

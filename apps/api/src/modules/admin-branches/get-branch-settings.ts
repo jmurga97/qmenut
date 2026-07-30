@@ -1,8 +1,10 @@
 import { listBranchPhotos, listBranchSchedules } from "@qmenut/db/repositories/admin-branches.repository";
+import { getRestaurantById } from "@qmenut/db/repositories/restaurants.repository";
+import { TRPCError } from "@trpc/server";
 
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 import type { BranchPhotoRow, BranchScheduleRow } from "@qmenut/db/repositories/admin-branches.repository";
 
 export interface BranchSettings {
@@ -13,6 +15,7 @@ export interface BranchSettings {
   whatsapp: string | null;
   socialLinksJson: string | null;
   customDomain: string | null;
+  timezone: string;
   schedules: BranchScheduleRow[];
   photos: BranchPhotoRow[];
 }
@@ -30,10 +33,15 @@ export async function getBranchSettings({
 }: GetBranchSettingsInput): Promise<BranchSettings> {
   const branch = await assertBranchAccess({ db, restaurantId, branchId });
 
-  const [schedules, photos] = await Promise.all([
+  const [schedules, photos, restaurant] = await Promise.all([
     listBranchSchedules({ db, branchId }),
     listBranchPhotos({ db, branchId }),
+    getRestaurantById({ db, restaurantId }),
   ]);
+
+  if (!restaurant) {
+    throw new TRPCError({ code: "NOT_FOUND", message: "Restaurante no encontrado" });
+  }
 
   return {
     id: branch.id,
@@ -43,6 +51,7 @@ export async function getBranchSettings({
     whatsapp: branch.whatsapp,
     socialLinksJson: branch.socialLinksJson,
     customDomain: branch.customDomain,
+    timezone: restaurant.timezone,
     schedules,
     photos,
   };

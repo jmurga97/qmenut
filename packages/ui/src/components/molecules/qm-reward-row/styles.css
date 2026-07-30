@@ -1,0 +1,81 @@
+:host {
+  display: block;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 58px;
+  padding: 9px 0;
+  border-top: 1px solid var(--qm-hairline, #d8d3c8);
+  color: var(--qm-muted, #777);
+}
+
+.cost {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  color: var(--qm-muted, #777);
+}
+.cost strong {
+  font-size: var(--qm-text-sm, 12px);
+  font-weight: 900;
+}
+.cost span {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: var(--qm-text-2xs, 10px);
+}
+
+.copy {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+h3 {
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--qm-text-sm, 12px);
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+
+:host([unlocked]) .cost {
+  color: var(--qm-emph-ink, var(--qm-secondary, #555));
+}
+:host([unlocked]) h3 {
+  color: var(--qm-ink, #1c1815);
+  font-family: var(--qm-heading, serif);
+  font-weight: var(--qm-hw, 700);
+}
+
+button {
+  min-width: 78px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-primary, #333);
+  color: var(--qm-on-primary, #fff);
+  cursor: pointer;
+  font-size: var(--qm-text-2xs, 10px);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+button:focus-visible {
+  outline: 2px solid var(--qm-ink, #1c1815);
+  outline-offset: 2px;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+.remaining {
+  flex: none;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: var(--qm-text-2xs, 10px);
+}

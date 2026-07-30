@@ -36,31 +36,29 @@ export function buildRestaurantJsonLd({ data, origin }: BuildRestaurantJsonLdInp
     "@type": "Restaurant",
     name: branch.name,
     url: origin,
-    ...(branch.phone ? { telephone: branch.phone } : {}),
-    ...(branch.address ? { address: { "@type": "PostalAddress", streetAddress: branch.address } } : {}),
-    ...(branch.photos.length > 0 ? { image: branch.photos.map((photo) => photo.url) } : {}),
-    ...(branch.schedules.length > 0
-      ? {
+    ...(branch.phone && { telephone: branch.phone }),
+    ...(branch.address && { address: { "@type": "PostalAddress", streetAddress: branch.address } }),
+    ...((branch.photos.length > 0) && { image: branch.photos.map((photo) => photo.url) }),
+    ...((branch.schedules.length > 0) && {
           openingHoursSpecification: branch.schedules.map((schedule) => ({
             "@type": "OpeningHoursSpecification",
             dayOfWeek: SCHEMA_DAY_NAMES[schedule.dayOfWeek],
             opens: minutesToTime(schedule.openMinute),
             closes: minutesToTime(schedule.closeMinute),
           })),
-        }
-      : {}),
+        }),
     hasMenu: {
       "@type": "Menu",
       inLanguage: language.effective,
       hasMenuSection: categories.map((category) => ({
         "@type": "MenuSection",
         name: category.name,
-        ...(category.description ? { description: category.description } : {}),
+        ...(category.description && { description: category.description }),
         hasMenuItem: category.dishes.map((dish) => ({
           "@type": "MenuItem",
           name: dish.name,
-          ...(dish.description ? { description: dish.description } : {}),
-          ...(dish.imageUrl ? { image: dish.imageUrl } : {}),
+          ...(dish.description && { description: dish.description }),
+          ...(dish.imageUrl && { image: dish.imageUrl }),
           offers: {
             "@type": "Offer",
             price: (dish.price / 100).toFixed(2),

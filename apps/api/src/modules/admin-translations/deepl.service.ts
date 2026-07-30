@@ -26,7 +26,8 @@ export async function deeplTranslate({
     return [];
   }
 
-  const response = await fetch(`${apiUrl.replace(/\/+$/, "")}/v2/translate`, {
+  const baseUrl = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
+  const response = await fetch(`${baseUrl}/v2/translate`, {
     method: "POST",
     headers: {
       Authorization: `DeepL-Auth-Key ${apiKey}`,
@@ -35,20 +36,33 @@ export async function deeplTranslate({
     body: JSON.stringify({
       text: texts,
       target_lang: targetLang,
-      ...(sourceLang ? { source_lang: sourceLang } : {}),
-      ...(tagHandling ? { tag_handling: tagHandling } : {}),
+      ...(sourceLang && { source_lang: sourceLang }),
+      ...(tagHandling && { tag_handling: tagHandling }),
     }),
   });
 
   if (response.status === 429 || response.status === 456) {
-    throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "DeepL rate limit or quota exceeded" });
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: "Se ha superado el límite de solicitudes o la cuota de DeepL",
+    });
   }
 
   if (!response.ok) {
-    throw new TRPCError({ code: "BAD_GATEWAY", message: `DeepL request failed (${response.status})` });
+    throw new TRPCError({
+      code: "BAD_GATEWAY",
+      message: `La solicitud a DeepL ha fallado (${response.status})`,
+    });
   }
 
-  const body = (await response.json()) as DeeplResponseBody;
+  const body = await response.json<DeeplResponseBody>();
+
+  if (body.translations.length !== texts.length) {
+    throw new TRPCError({
+      code: "BAD_GATEWAY",
+      message: `DeepL devolvió ${body.translations.length} traducciones para ${texts.length} textos`,
+    });
+  }
 
   return body.translations.map((translation) => translation.text);
 }

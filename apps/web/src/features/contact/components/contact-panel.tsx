@@ -1,4 +1,4 @@
-import { QmContactPanel } from "@qmenut/ui/react";
+import { QmContactPanel } from "@qmenut/ui/components/qm-contact-panel/react";
 
 import type { RefObject } from "react";
 import type { ContactContentViewModel } from "~/features/contact/types/contact-view-model";

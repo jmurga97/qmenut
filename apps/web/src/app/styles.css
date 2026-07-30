@@ -445,39 +445,121 @@ img {
   cursor: pointer;
   font: inherit;
   color: inherit;
+  transform: scale(1);
+  transition: transform 150ms ease-out;
 }
 
-/* ===== Fidelity placeholder ===== */
+.dish-trigger:active {
+  transform: scale(0.98);
+}
 
-.fidelity-placeholder {
+/* ===== Loyalty ===== */
+
+.loyalty-page {
+  width: min(100%, 520px);
+  margin: 0 auto;
+  padding-bottom: 12px;
+}
+
+.loyalty-stage {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 240ms ease,
+    transform 240ms ease;
+}
+
+@starting-style {
+  .loyalty-stage {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.loyalty-status {
   display: grid;
-  gap: 10px;
+  justify-items: start;
+  gap: 9px;
   padding: 22px;
-  border: 1px solid color-mix(in srgb, var(--qm-primary, #a23a28) 22%, transparent);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--qm-bg, #ffffff) 94%, var(--qm-secondary, #3f7a4b));
+  border: var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8);
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-card, #fff);
+  box-shadow: var(--qm-card-shadow, none);
+  color: var(--qm-ink, #1c1815);
 }
 
-.fidelity-placeholder h2,
-.fidelity-placeholder p {
+.loyalty-status h2,
+.loyalty-status p {
   margin: 0;
 }
 
-.fidelity-placeholder h2 {
-  color: var(--qm-text, #17211d);
-  font-size: 1.35rem;
-  line-height: 1.15;
+.loyalty-status h2 {
+  font-family: var(--qm-heading, serif);
+  font-size: var(--qm-text-xl, 17px);
+  font-weight: var(--qm-hw, 700);
 }
 
-.fidelity-placeholder p {
-  color: color-mix(in srgb, var(--qm-text, #17211d) 72%, transparent);
+.loyalty-status p {
+  color: var(--qm-muted, #777);
+  font-size: var(--qm-text-sm, 12px);
 }
 
-.fidelity-placeholder__eyebrow {
-  color: var(--qm-primary, #a23a28);
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
+.loyalty-status__stamp {
+  position: relative;
+  width: 30px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--qm-emph, var(--qm-secondary, #555));
+}
+
+.loyalty-status__stamp::after {
+  position: absolute;
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--qm-on-secondary, #fff);
+  content: "";
+  inset: 33%;
+}
+
+.loyalty-loading {
+  height: 260px;
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-ph, var(--qm-fill, #eee));
+  animation: loyalty-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes loyalty-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dish-trigger:active {
+    transform: scale(0.99);
+  }
+
+  .loyalty-stage {
+    transition:
+      opacity 150ms ease,
+      transform 150ms ease;
+  }
+
+  @starting-style {
+    .loyalty-stage {
+      opacity: 0.7;
+      transform: none;
+    }
+  }
+
+  .loyalty-loading {
+    animation: none;
+  }
 }
 
 /* ===== Home skeleton ===== */

@@ -1,0 +1,93 @@
+:host {
+  width: 100%;
+}
+.card {
+  padding: 24px 18px 18px;
+  border: var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8);
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-card, #fff);
+  box-shadow: var(--qm-card-shadow, none);
+  color: var(--qm-ink, #1c1815);
+}
+.stamp {
+  position: relative;
+  width: 32px;
+  aspect-ratio: 1;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: var(--qm-emph, #687b67);
+}
+.stamp::after {
+  position: absolute;
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--qm-on-secondary, #fff);
+  content: "";
+  inset: 33%;
+}
+h2 {
+  max-width: 24ch;
+  margin: 0;
+  font-family: var(--qm-heading, serif);
+  font-size: var(--qm-text-xl, 17px);
+  font-weight: var(--qm-hw, 700);
+  line-height: 1.18;
+}
+.explainer {
+  margin: 7px 0 18px;
+  color: var(--qm-muted, #777);
+  font-size: var(--qm-text-sm, 12px);
+}
+form {
+  display: grid;
+}
+label {
+  margin-bottom: 6px;
+  font-size: var(--qm-text-xs, 11px);
+  font-weight: 800;
+}
+input {
+  min-height: 44px;
+  padding: 8px 11px;
+  border: 1px solid var(--qm-hairline, #d8d3c8);
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-bg, #fff);
+  color: var(--qm-ink, #1c1815);
+}
+input:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--qm-primary, #333);
+  outline-offset: 2px;
+}
+.error {
+  min-height: 18px;
+  margin: 5px 0;
+  color: #b23a2a;
+  font-size: var(--qm-text-2xs, 10px);
+  font-weight: 700;
+}
+button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-primary, #333);
+  color: var(--qm-on-primary, #fff);
+  cursor: pointer;
+  font-size: var(--qm-text-xs, 11px);
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.reassurance {
+  margin: 11px 0 0;
+  color: var(--qm-muted, #777);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: var(--qm-text-2xs, 10px);
+  text-align: center;
+}

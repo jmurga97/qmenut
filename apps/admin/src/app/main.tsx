@@ -5,13 +5,13 @@ import { createBrowserHistory, createRouter, RouterProvider } from "@tanstack/re
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { AppProviders } from "@app/providers";
-import { routeTree } from "@app/route-tree.gen";
-import { RouteErrorState } from "@components/error/error-state";
-import { LoadingState } from "@components/loading/loading-state";
-import { queryClient } from "@lib/query-client";
-import { initializeTheme } from "@lib/theme";
-import { trpc } from "@lib/trpc";
+import { AppProviders } from "~/app/providers";
+import { routeTree } from "~/app/route-tree.gen";
+import { queryClient } from "~/lib/query-client";
+import { trpc } from "~/lib/trpc";
+import { RouteErrorState } from "~/shared/components/state/error-state";
+import { LoadingState } from "~/shared/components/state/loading-state";
+import { NotFoundState } from "~/shared/components/state/not-found-state";
 import "./styles/global.css";
 
 if (import.meta.env.VITE_SENTRY_DSN) {
@@ -22,10 +22,7 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     tracesSampleRate: 0,
   });
 }
-
 registerMurgaComponents();
-initializeTheme();
-
 const router = createRouter({
   routeTree,
   history: createBrowserHistory(),
@@ -34,23 +31,20 @@ const router = createRouter({
     trpc,
   },
   defaultErrorComponent: RouteErrorState,
+  defaultNotFoundComponent: NotFoundState,
   defaultPendingComponent: () => <LoadingState />,
   defaultPendingMinMs: 200,
   defaultPendingMs: 120,
 });
-
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }
 }
-
-const container = document.getElementById("root");
-
+const container = document.querySelector("#root");
 if (!container) {
   throw new Error("Unable to find root element");
 }
-
 createRoot(container).render(
   <StrictMode>
     <AppProviders>

@@ -5,6 +5,7 @@ import type { TrpcContext } from "./context";
 import type { RestaurantRoleCode } from "@qmenut/db/repositories/restaurant-users.repository";
 
 export interface TenantContext {
+  membershipId: string;
   restaurantId: string;
   roleCode: RestaurantRoleCode;
 }
@@ -33,11 +34,12 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
 export const tenantProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   const membership = await findMembershipByUserId({ db: ctx.db, userId: ctx.session.user.id });
 
-  if (!membership?.isActive) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "No active restaurant membership" });
+  if (!membership) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "No hay ninguna membresía activa en un restaurante" });
   }
 
   const tenant: TenantContext = {
+    membershipId: membership.id,
     restaurantId: membership.restaurantId,
     roleCode: membership.roleCode,
   };

@@ -1,15 +1,7 @@
 import { normalizeTenantHost } from "@qmenut/db/domain/tenant";
 import { getRequestHost } from "@tanstack/react-start/server";
 
-function getEnvString(key: string): string | undefined {
-  const value = (import.meta.env as Record<string, unknown>)[key];
-
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  return value.trim() || undefined;
-}
+import { getEnvString } from "../lib/env";
 
 async function readWorkerVar(key: string): Promise<string | undefined> {
   try {

@@ -1,12 +1,11 @@
 import { isBodyFontId, isHeadingFontId, QM_FONT_IDS } from "@qmenut/ui/theme/font-catalog";
 import { z } from "zod";
 
-import { ThemeWorkerClient } from "../../lib/theme/theme-worker-client";
+import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
+import { getTheme, putTheme } from "../../lib/theme/theme-worker-client";
 import { router, tenantProcedure } from "../../trpc/trpc";
-import { requireRole } from "../admin-tenant/require-role";
+import { requirePermission } from "../admin-tenant/require-permission";
 import { resolveBranchHost } from "../admin-tenant/resolve-branch-host";
-
-const WRITE_ROLES = ["owner", "admin"] as const;
 
 const branchIdSchema = z.object({ branchId: z.string().trim().min(1) });
 
@@ -36,16 +35,22 @@ export const themeRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
-    return ThemeWorkerClient.getInstance().getTheme(ctx.env, host);
+    return getTheme(ctx.env, host);
   }),
   save: tenantProcedure.input(saveThemeSchema).mutation(async ({ ctx, input }) => {
-    requireRole(ctx.tenant, WRITE_ROLES);
+    requirePermission(ctx.tenant, "theme.write");
     const host = await resolveBranchHost({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
-    await ThemeWorkerClient.getInstance().putTheme(ctx.env, host, input.config);
+    await putTheme({ config: input.config, env: ctx.env, host });
+    await bumpPublicContentVersionForBranch({
+      branchId: input.branchId,
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+    });
     return { host };
   }),
 });

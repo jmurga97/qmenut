@@ -43,13 +43,11 @@ export class QmDishRow extends LitElement {
   photoUrl?: string;
 
   render() {
+    const photoImage = this.photoUrl ? html`<img src=${this.photoUrl} alt="" />` : nothing;
+
     return html`
       <div part="row" class="row">
-        ${this.photo
-          ? html`<span part="photo" class="photo"
-              >${this.photoUrl ? html`<img src=${this.photoUrl} alt="" />` : nothing}</span
-            >`
-          : nothing}
+        ${this.photo ? html` <span part="photo" class="photo">${photoImage}</span> ` : nothing}
         <div class="body">
           <div class="name-line">
             <span part="name" class="name">${this.name}</span>

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { OverviewView } from "@pages/overview/overview-view";
+import { OverviewPage } from "~/features/overview/pages/overview-page";
 
 export const Route = createFileRoute("/_auth/")({
-  component: OverviewView,
+  component: OverviewPage,
 });

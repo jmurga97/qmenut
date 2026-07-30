@@ -3,7 +3,7 @@ export function jsonResponse(data: unknown, init?: ResponseInit): Response {
 
   headers.set("content-type", "application/json; charset=utf-8");
 
-  return new Response(JSON.stringify(data), {
+  return Response.json(data, {
     ...init,
     headers,
   });

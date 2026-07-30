@@ -1,12 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { CategoryEditorView } from "@pages/menu/category-editor-view";
+import { CategoryEditorPage } from "~/features/menu/pages/menu-pages";
 
 export const Route = createFileRoute("/_auth/menu/categories/$categoryId")({
-  component: CategoryEditorRoute,
+  component: function CategoryRoute() {
+    return <CategoryEditorPage categoryId={Route.useParams().categoryId} />;
+  },
 });
-
-function CategoryEditorRoute() {
-  const { categoryId } = Route.useParams();
-  return <CategoryEditorView categoryId={categoryId} />;
-}

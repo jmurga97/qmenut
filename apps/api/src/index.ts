@@ -1,4 +1,4 @@
-import { createDb } from "@qmenut/db";
+import { createDb } from "@qmenut/db/client";
 import * as Sentry from "@sentry/cloudflare";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
@@ -10,15 +10,13 @@ import { handleStripeWebhook } from "@/modules/billing/handle-stripe-webhook";
 import { createContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/router";
 
-import type { EnvBindings } from "@/config/env/schema";
+import type { EnvBindings, RuntimeEnv } from "@/config/env/schema";
 
 const TRPC_ENDPOINT = "/trpc";
 const AUTH_PREFIX = "/api/auth";
 const STRIPE_WEBHOOK_PATH = "/webhooks/stripe";
 
-async function handleRequest(request: Request, rawEnv: EnvBindings): Promise<Response> {
-  const env = parseEnv(rawEnv);
-
+async function handleRequest(request: Request, env: RuntimeEnv): Promise<Response> {
   if (request.method === "OPTIONS") {
     return createOptionsResponse(request, env);
   }
@@ -56,7 +54,7 @@ async function handleRequest(request: Request, rawEnv: EnvBindings): Promise<Res
     });
   }
 
-  return jsonResponse({ error: "Not found" }, { status: 404 });
+  return jsonResponse({ error: "No encontrado" }, { status: 404 });
 }
 
 export default Sentry.withSentry(
@@ -69,7 +67,7 @@ export default Sentry.withSentry(
   {
     async fetch(request: Request, rawEnv: EnvBindings): Promise<Response> {
       const env = parseEnv(rawEnv);
-      const response = await handleRequest(request, rawEnv);
+      const response = await handleRequest(request, env);
 
       return applyCorsHeaders({ env, request, response });
     },

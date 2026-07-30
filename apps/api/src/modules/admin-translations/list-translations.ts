@@ -1,6 +1,7 @@
 import { getBranchTranslatableCatalog } from "@qmenut/db/repositories/admin-translations.repository";
 import { listTranslationsForLanguage } from "@qmenut/db/repositories/translations.repository";
 
+import type { DrizzleDb } from "@qmenut/db/client";
 import type {
   TranslatableCategoryRow,
   TranslatableDishRow,
@@ -9,7 +10,6 @@ import type {
   TranslatableVariantOptionRow,
 } from "@qmenut/db/repositories/admin-translations.repository";
 import type { TranslationRow } from "@qmenut/db/repositories/translations.repository";
-import type { DrizzleDb } from "@qmenut/db";
 
 type FieldName = "description" | "name";
 type TranslationEntityType = TranslationRow["entityType"];
@@ -176,7 +176,7 @@ export async function listTranslations({
     };
   }
 
-  const categories = catalog.categories.map(buildCategoryEntity);
+  const categories = catalog.categories.map((row) => buildCategoryEntity(row));
   const ingredients = catalog.ingredients.map((row) => buildNameOnlyEntity("ingredient", row));
 
   return {

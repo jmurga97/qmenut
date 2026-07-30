@@ -71,7 +71,7 @@ export class QmLang extends QmElement {
       <select
         part="select"
         id=${this.resolvedId}
-        aria-label=${!this.label ? (this.ariaLabel ?? nothing) : nothing}
+        aria-label=${this.label ? nothing : (this.ariaLabel ?? nothing)}
         .value=${this.value}
         @change=${this.handleChange}
       >

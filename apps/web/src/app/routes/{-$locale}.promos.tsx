@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
 import { PromosPage } from "~/features/promos/pages/promos-page";
-import { ISR_CACHE_CONTROL } from "~/lib/isr";
+import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 
 export const Route = createFileRoute("/{-$locale}/promos")({
   loader: async ({ context, params }) =>
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/{-$locale}/promos")({
     };
   },
   headers: () => ({
-    "Cache-Control": ISR_CACHE_CONTROL,
+    "Cache-Control": BROWSER_CACHE_CONTROL,
   }),
   component: PromosPage,
 });

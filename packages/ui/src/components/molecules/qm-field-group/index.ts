@@ -1,11 +1,13 @@
 import { html } from "lit";
-import { property } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 
 import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
 import { QmElement } from "../../../internal/qm-element";
 import { defineQmField } from "../../atoms/qm-field";
+
+import type { PropertyValues } from "lit";
 
 export const QM_FIELD_GROUP_TAG_NAME = "qm-field-group";
 
@@ -50,12 +52,58 @@ export class QmFieldGroup extends QmElement {
   @property({ type: Boolean, reflect: true })
   disabled = false;
 
+  @state()
+  private previousSubmitLabel = "";
+
+  @state()
+  private submitLabelChanging = false;
+
+  private labelTimer?: ReturnType<typeof setTimeout>;
+
   private readonly handleSubmit = () => {
     this.postEvent({
       name: "qm-submit",
       detail: { name: this.nameValue, message: this.messageValue },
     });
   };
+
+  willUpdate(changedProperties: PropertyValues): void {
+    if (!changedProperties.has("submitLabel")) return;
+
+    const previousLabel: unknown = changedProperties.get("submitLabel");
+    if (typeof previousLabel !== "string" || previousLabel === this.submitLabel) return;
+
+    if (this.labelTimer !== undefined) {
+      clearTimeout(this.labelTimer);
+    }
+
+    this.previousSubmitLabel = previousLabel;
+    this.submitLabelChanging = true;
+    this.labelTimer = setTimeout(() => {
+      this.labelTimer = undefined;
+      this.previousSubmitLabel = "";
+      this.submitLabelChanging = false;
+    }, 180);
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    if (this.labelTimer !== undefined) {
+      clearTimeout(this.labelTimer);
+      this.labelTimer = undefined;
+    }
+  }
+
+  private renderSubmitLabel() {
+    if (!this.submitLabelChanging) {
+      return html`<span class="submit-label__text">${this.submitLabel}</span>`;
+    }
+
+    return html`
+      <span class="submit-label__text submit-label__text--outgoing">${this.previousSubmitLabel}</span>
+      <span class="submit-label__text submit-label__text--incoming">${this.submitLabel}</span>
+    `;
+  }
 
   render() {
     return html`
@@ -77,7 +125,8 @@ export class QmFieldGroup extends QmElement {
           ?disabled=${this.disabled}
         ></qm-field>
         <button part="submit" class="submit" type="button" ?disabled=${this.disabled} @click=${this.handleSubmit}>
-          ${this.submitLabel}
+          <span class="sr-only">${this.submitLabel}</span>
+          <span class="submit-label" aria-hidden="true">${this.renderSubmitLabel()}</span>
         </button>
       </div>
     `;

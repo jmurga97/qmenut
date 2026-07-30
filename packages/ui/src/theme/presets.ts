@@ -1,3 +1,5 @@
+import type { QmFontId } from "./font-catalog";
+
 /**
  * The 5 QMenut templates — everything a tenant does NOT choose. A tenant only supplies a
  * template name plus `primary`/`secondary` colors (see `theme/derive.ts`); every other
@@ -26,6 +28,9 @@ export interface QmTemplatePreset {
   label: string;
   heading: string;
   body: string;
+  /** Catalog ids used to load the preset's heading and body faces. */
+  headingFontId: QmFontId;
+  bodyFontId: QmFontId;
   headingWeight: number;
   dishWeight: number;
   /** Weight of the section numeral ("01"), which is set in the template's heading face. */
@@ -59,6 +64,8 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     label: "Alta cocina",
     heading: "'Cormorant Garamond',serif",
     body: "'Jost',sans-serif",
+    headingFontId: "cormorant-garamond",
+    bodyFontId: "jost",
     headingWeight: 600,
     dishWeight: 600,
     numWeight: 500,
@@ -83,6 +90,8 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     label: "Herencia",
     heading: "'Yeseva One',serif",
     body: "'Spectral',serif",
+    headingFontId: "yeseva-one",
+    bodyFontId: "spectral",
     headingWeight: 400,
     dishWeight: 500,
     numWeight: 400,
@@ -107,6 +116,8 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     label: "Fast food",
     heading: "'Anton',sans-serif",
     body: "'Barlow',sans-serif",
+    headingFontId: "anton",
+    bodyFontId: "barlow",
     headingWeight: 400,
     dishWeight: 700,
     numWeight: 400,
@@ -131,6 +142,8 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     label: "Cafetería",
     heading: "'Quicksand',sans-serif",
     body: "'Nunito Sans',sans-serif",
+    headingFontId: "quicksand",
+    bodyFontId: "nunito-sans",
     headingWeight: 700,
     dishWeight: 700,
     numWeight: 700,
@@ -156,6 +169,8 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     label: "Bar de tapas",
     heading: "'Bebas Neue',sans-serif",
     body: "'Work Sans',sans-serif",
+    headingFontId: "bebas-neue",
+    bodyFontId: "work-sans",
     headingWeight: 400,
     dishWeight: 600,
     numWeight: 400,

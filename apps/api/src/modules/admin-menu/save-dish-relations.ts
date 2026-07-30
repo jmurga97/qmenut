@@ -1,12 +1,12 @@
-import { TRPCError } from "@trpc/server";
 import {
   dishBelongsToTenant,
-  setDishAllergens,
-  setDishExtras,
-  setDishTags,
+  setDishAllergensStatements,
+  setDishExtrasStatements,
+  setDishTagsStatements,
 } from "@qmenut/db/repositories/admin-dishes.repository";
+import { TRPCError } from "@trpc/server";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 
 interface SaveDishRelationsInput {
   db: DrizzleDb;
@@ -29,10 +29,12 @@ export async function saveDishRelations({
   const belongs = await dishBelongsToTenant({ db, restaurantId, dishId });
 
   if (!belongs) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Dish not found" });
+    throw new TRPCError({ code: "NOT_FOUND", message: "Plato no encontrado" });
   }
 
-  await setDishTags({ db, dishId, tagIds });
-  await setDishAllergens({ db, dishId, allergenIds });
-  await setDishExtras({ db, dishId, ingredientIds: extraIngredientIds });
+  await db.batch([
+    ...setDishTagsStatements({ db, dishId, tagIds }),
+    ...setDishAllergensStatements({ db, dishId, allergenIds }),
+    ...setDishExtrasStatements({ db, dishId, ingredientIds: extraIngredientIds }),
+  ]);
 }

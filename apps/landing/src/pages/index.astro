@@ -1,0 +1,455 @@
+---
+const title = "qmenut — Your restaurant, fully itself";
+const description =
+  "Branded digital menus, promotions, loyalty, translations, and multi-location tools—built for restaurants.";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#EFEFEF" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/assets/scenes/01-restaurant.jpg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" as="image" href="/assets/scenes/01-restaurant.jpg" />
+    <title>{title}</title>
+  </head>
+  <body id="top">
+    <main>
+      <div id="world" aria-label="Explore the qmenut product world"></div>
+    </main>
+
+    <noscript>
+      <section class="no-script">
+        <p class="no-script__eyebrow">qmenut</p>
+        <h1>Your restaurant. Fully itself.</h1>
+        <p>
+          A branded digital menu on your own domain, with everything you need to run it
+          from one dashboard.
+        </p>
+      </section>
+    </noscript>
+
+    <script is:inline src="/scripts/scroll-world.js"></script>
+    <script is:inline>
+      (async () => {
+        let videosReady = false;
+        try {
+          const response = await fetch("/assets/video/manifest.json");
+          const manifest = response.ok ? await response.json() : {};
+          videosReady = manifest.desktop === true;
+        } catch {
+          videosReady = false;
+        }
+
+        const video = (path) => (videosReady ? path : undefined);
+
+        window.mountScrollWorld(document.getElementById("world"), {
+          brand: { name: "qmenut", href: "#top" },
+          cta: { label: "Coming up", href: "#coming-up" },
+          hint: "Scroll to enter",
+          nav: true,
+          atmosphere: false,
+          diveScroll: 1.55,
+          connScroll: 0.82,
+          crossfade: 0.14,
+          sections: [
+          {
+            id: "restaurant",
+            label: "Restaurant",
+            still: "/assets/scenes/01-restaurant.jpg",
+            clip: video("/assets/video/01-restaurant.mp4"),
+            accent: "#325A9F",
+            scroll: 1.85,
+            linger: 0.38,
+            eyebrow: "Your menu. Your domain.",
+            title: "Your restaurant. Fully itself.",
+            body:
+              "Give every location a fast, on-brand menu on its own domain—no app and no generic template.",
+            tags: ["Own domain", "No app", "No commissions"],
+          },
+          {
+            id: "menu-builder",
+            label: "Builder",
+            still: "/assets/scenes/02-menu-builder.jpg",
+            clip: video("/assets/video/02-menu-builder.mp4"),
+            accent: "#556C97",
+            scroll: 1.65,
+            linger: 0.3,
+            eyebrow: "A real menu builder",
+            title: "Built for what kitchens actually sell.",
+            body:
+              "Shape categories, dishes, sizes, options, extras, tags, allergens, and timed availability without flattening your menu into a PDF.",
+            tags: ["Variants + extras", "Allergens", "Timed availability"],
+          },
+          {
+            id: "brand-engine",
+            label: "Brand",
+            still: "/assets/scenes/03-brand-engine.jpg",
+            clip: video("/assets/video/03-brand-engine.mp4"),
+            accent: "#A190BA",
+            scroll: 1.7,
+            linger: 0.42,
+            eyebrow: "Brand in the first byte",
+            title: "Looks yours before it loads.",
+            body:
+              "Choose a restaurant style and two brand colors; qmenut derives an accessible system and renders it at the edge with no wrong-theme flash.",
+            tags: ["5 restaurant styles", "Accessible colors", "Edge-rendered"],
+          },
+          {
+            id: "reach",
+            label: "Reach",
+            still: "/assets/scenes/04-reach.jpg",
+            clip: video("/assets/video/04-reach.mp4"),
+            accent: "#325A9F",
+            scroll: 1.55,
+            linger: 0.28,
+            eyebrow: "Every guest. Every branch.",
+            title: "One dashboard reaches every table.",
+            body:
+              "Publish QR menus across locations and languages, combining machine translation with your own review and edits.",
+            tags: ["DeepL + review", "Instant QR", "Multi-location"],
+          },
+          {
+            id: "growth",
+            label: "Growth",
+            still: "/assets/scenes/05-growth.jpg",
+            clip: video("/assets/video/05-growth.mp4"),
+            accent: "#556C97",
+            scroll: 1.72,
+            linger: 0.4,
+            eyebrow: "Bring them back",
+            title: "Run the offer. Reward the return.",
+            body:
+              "Schedule flexible promotions and run points or stamps with in-person rewards—native to qmenut, not bolted on.",
+            tags: ["Scheduled promos", "Points or stamps", "One simple stack"],
+          },
+          {
+            id: "delivery",
+            label: "Delivery",
+            still: "/assets/scenes/06-delivery.jpg",
+            clip: video("/assets/video/06-delivery.mp4"),
+            accent: "#A190BA",
+            scroll: 2,
+            linger: 0.5,
+            eyebrow: "Coming up",
+            title: "Save 50% on delivery costs.",
+            body:
+              "Delivery for restaurants is coming soon to qmenut—bringing the same direct, restaurant-first approach beyond the menu.",
+            tags: ["Restaurant-first", "Lower delivery costs"],
+            cta: {
+              primary: { label: "Stay for the launch", href: "#coming-up" },
+              secondary: { label: "Back to the start", href: "#top" },
+            },
+          },
+          ],
+          connectors: videosReady
+            ? [
+                "/assets/video/conn-01.mp4",
+                "/assets/video/conn-02.mp4",
+                "/assets/video/conn-03.mp4",
+                "/assets/video/conn-04.mp4",
+                "/assets/video/conn-05.mp4",
+              ]
+            : [],
+        });
+
+        document.querySelectorAll('a[href="#coming-up"]').forEach((link) => {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            const route = document.querySelectorAll(".sw-route__dot");
+            route[route.length - 1]?.click();
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  @font-face {
+    font-family: "Barlow";
+    src: url("/fonts/barlow-800.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 800;
+  }
+
+  @font-face {
+    font-family: "Work Sans";
+    src: url("/fonts/work-sans-400.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  @font-face {
+    font-family: "Work Sans";
+    src: url("/fonts/work-sans-600.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  :root {
+    color: #02132e;
+    background: #efefef;
+    font-family: "Work Sans", sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-width: 320px;
+    margin: 0;
+    background: #efefef;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 3px solid #bad5f6;
+    outline-offset: 4px;
+  }
+
+  .sw-root {
+    --sw-bg: #efefef;
+    --sw-ink: #02132e;
+    --sw-ink-soft: #556c97;
+    --sw-accent: #325a9f;
+    --sw-font-display: "Barlow", sans-serif;
+    --sw-font-body: "Work Sans", sans-serif;
+  }
+
+  .sw-brand__mark {
+    display: none;
+  }
+
+  .sw-brand__name {
+    font-family: "Barlow", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.075em;
+  }
+
+  .sw-topbar {
+    padding-top: max(clamp(16px, 2.4vw, 28px), env(safe-area-inset-top));
+  }
+
+  .sw-nav {
+    border-color: rgb(50 90 159 / 16%);
+    background:
+      linear-gradient(#ffffffa8, #ffffffa8) padding-box,
+      linear-gradient(120deg, #ffffff, #a190ba70, #ffffff) border-box;
+    box-shadow:
+      0 14px 40px rgb(2 19 46 / 6%),
+      inset 0 1px 0 rgb(255 255 255 / 90%);
+  }
+
+  .sw-nav__item,
+  .sw-topcta,
+  .sw-btn,
+  .sw-copy__tags li {
+    border-radius: 999px;
+  }
+
+  .sw-nav__item.is-active {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 35%),
+      0 6px 18px color-mix(in srgb, var(--sw-accent) 24%, transparent);
+  }
+
+  .sw-topcta,
+  .sw-btn--primary {
+    border: 1px solid rgb(255 255 255 / 34%);
+    background: linear-gradient(145deg, #02132e, #325a9f);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 30%),
+      0 12px 26px rgb(2 19 46 / 18%);
+  }
+
+  .sw-scene__still {
+    background: #efefef;
+    filter: saturate(0.98) contrast(1.015);
+  }
+
+  .sw-copylayer::before {
+    width: min(56vw, 760px);
+    background: linear-gradient(
+      90deg,
+      #efefef 0%,
+      rgb(239 239 239 / 93%) 32%,
+      rgb(239 239 239 / 54%) 64%,
+      transparent 100%
+    );
+  }
+
+  .sw-copy {
+    width: min(39vw, 500px);
+  }
+
+  .sw-copy__num {
+    color: #556c97;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+  }
+
+  .sw-copy__eyebrow {
+    font-family: "Work Sans", sans-serif;
+    font-weight: 600;
+  }
+
+  .sw-copy__title {
+    max-width: 11ch;
+    font-size: clamp(2.7rem, 5vw, 5.4rem);
+    line-height: 0.91;
+    letter-spacing: -0.055em;
+    text-wrap: balance;
+  }
+
+  .sw-copy__body {
+    max-width: 43ch;
+    color: #263d62;
+  }
+
+  .sw-copy__tags li {
+    color: #02132e;
+    background: rgb(255 255 255 / 58%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 80%);
+  }
+
+  .sw-route__dot.is-active i {
+    box-shadow:
+      0 0 0 5px color-mix(in srgb, var(--sw-accent) 20%, transparent),
+      0 0 24px color-mix(in srgb, var(--sw-accent) 44%, transparent);
+  }
+
+  .no-script {
+    display: grid;
+    min-height: 100vh;
+    place-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .no-script__eyebrow {
+    color: #325a9f;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .no-script h1 {
+    max-width: 12ch;
+    margin: 0 auto;
+    font-family: "Barlow", sans-serif;
+    font-size: clamp(3rem, 10vw, 7rem);
+    line-height: 0.9;
+    letter-spacing: -0.06em;
+  }
+
+  .no-script p:last-child {
+    max-width: 42rem;
+    margin: 1.5rem auto 0;
+    color: #556c97;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 860px) {
+    .sw-topcta {
+      padding: 9px 16px;
+      font-size: 0.78rem;
+    }
+
+    .sw-scene__still {
+      object-position: center 28%;
+    }
+
+    .sw-copylayer::before {
+      width: 100%;
+      height: 68%;
+      background: linear-gradient(
+        0deg,
+        #efefef 18%,
+        rgb(239 239 239 / 88%) 44%,
+        rgb(239 239 239 / 42%) 70%,
+        transparent 100%
+      );
+    }
+
+    .sw-copy {
+      bottom: calc(clamp(48px, 9dvh, 86px) + env(safe-area-inset-bottom));
+    }
+
+    .sw-copy__eyebrow {
+      margin-top: 12px;
+    }
+
+    .sw-copy__title {
+      max-width: 13ch;
+      margin-top: 8px;
+      font-size: clamp(2.15rem, 10vw, 3.3rem);
+    }
+
+    .sw-copy__body {
+      display: -webkit-box;
+      margin-top: 12px;
+      overflow: hidden;
+      font-size: 0.95rem;
+      line-height: 1.42;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+    }
+
+    .sw-copy__tags {
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .sw-copy__tags li {
+      padding: 5px 10px;
+      font-size: 0.7rem;
+    }
+
+    .sw-copy__cta {
+      margin-top: 16px;
+    }
+  }
+
+  @media (max-width: 430px) and (max-height: 760px) {
+    .sw-copy__body {
+      -webkit-line-clamp: 2;
+    }
+
+    .sw-copy__tags {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+</style>

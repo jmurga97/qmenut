@@ -1,4 +1,4 @@
-import { QmPageHeader } from "@qmenut/ui/react";
+import { QmPageHeader } from "@qmenut/ui/components/qm-page-header/react";
 import { useEffect, useRef, useState } from "react";
 
 import type { ComponentProps, RefObject } from "react";

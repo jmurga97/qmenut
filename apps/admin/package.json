@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@murga.ing/components": "^1.0.0",
+    "@murga.ing/components": "^2.0.0",
     "@qmenut/api": "workspace:*",
     "@qmenut/auth": "workspace:*",
+    "@qmenut/permissions": "workspace:*",
+    "@qmenut/ui": "workspace:*",
     "@sentry/react": "^10.63.0",
     "@tanstack/react-query": "^5.101.2",
     "@tanstack/react-router": "^1.170.16",

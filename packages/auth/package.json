@@ -5,12 +5,16 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./src/index.d.ts",
+      "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
     "./client": {
-      "types": "./src/client.d.ts",
+      "types": "./src/client.ts",
       "default": "./src/client.ts"
+    },
+    "./store": {
+      "types": "./src/store.ts",
+      "default": "./src/store.ts"
     }
   },
   "scripts": {

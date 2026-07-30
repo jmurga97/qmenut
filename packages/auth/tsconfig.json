@@ -4,5 +4,5 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "types": ["@cloudflare/workers-types", "@types/bun"]
   },
-  "files": ["src/client.ts", "src/client.d.ts", "src/index.ts", "src/index.d.ts", "src/store.ts"]
+  "files": ["src/client.ts", "src/index.ts", "src/store.ts"]
 }

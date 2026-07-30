@@ -16,7 +16,7 @@ export const BUNDLED_LOCALES = Object.keys(resources) as (keyof typeof resources
 
 /** Maps any tenant-configured locale (e.g. "en-GB", "pt", "ca") to a bundled chrome locale. */
 export function chromeLocale(locale: string | undefined): (typeof BUNDLED_LOCALES)[number] {
-  const base = locale?.toLowerCase().split("-")[0];
+  const base = locale?.toLowerCase().split("-", 1)[0];
 
   return (BUNDLED_LOCALES as string[]).includes(base ?? "")
     ? (base as (typeof BUNDLED_LOCALES)[number])

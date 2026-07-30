@@ -1,6 +1,8 @@
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 
+import { getEnvString } from "./env";
+
 import type { AppRouter } from "@qmenut/api/router";
 import type { QueryClient } from "@tanstack/react-query";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
@@ -14,25 +16,12 @@ export interface RouterAppContext {
   trpc: TrpcOptionsProxy;
 }
 
-function trimTrailingSlash(value: string): string {
-  return value.replace(/\/+$/, "");
-}
-
-function getEnvString(key: string): string | undefined {
-  const value = (import.meta.env as Record<string, unknown>)[key];
-
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  return value.trim() || undefined;
-}
-
 function getApiBaseUrl(): string {
   const configuredUrl = getEnvString("VITE_API_BASE_URL");
 
   if (configuredUrl) {
-    return trimTrailingSlash(configuredUrl);
+    // eslint-disable-next-line sonarjs/super-linear-regex -- URL length is bounded by deployment config.
+    return configuredUrl.replace(/\/+$/, "");
   }
 
   if (import.meta.env.DEV) {
@@ -44,6 +33,55 @@ function getApiBaseUrl(): string {
   }
 
   return window.location.origin;
+}
+
+interface ApiWorkerBinding {
+  fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
+}
+
+async function getApiWorkerBinding(): Promise<ApiWorkerBinding | undefined> {
+  if (typeof window !== "undefined") {
+    return undefined;
+  }
+
+  try {
+    // eslint-disable-next-line import/no-unresolved -- runtime module provided by workerd
+    const { env } = await import("cloudflare:workers");
+    const binding = (env as { API_WORKER?: ApiWorkerBinding }).API_WORKER;
+
+    return binding && typeof binding.fetch === "function" ? binding : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getRequestUrl(url: RequestInfo | URL): string {
+  if (typeof url === "string") {
+    return url;
+  }
+
+  if (url instanceof URL) {
+    return url.href;
+  }
+
+  return url.url;
+}
+
+async function fetchApi(url: RequestInfo | URL, options?: RequestInit): Promise<Response> {
+  const binding = await getApiWorkerBinding();
+
+  if (binding) {
+    try {
+      const publicUrl = new URL(getRequestUrl(url));
+      const internalUrl = new URL(publicUrl.pathname + publicUrl.search, "https://qmenut-api.internal");
+
+      return await binding.fetch(new Request(internalUrl, options));
+    } catch {
+      // A disconnected local service binding falls back to the configured public API URL.
+    }
+  }
+
+  return fetch(url, options);
 }
 
 export function getPublicMenuHost(): string | undefined {
@@ -66,7 +104,7 @@ function createRawTrpcClient() {
       httpBatchLink({
         url: `${getApiBaseUrl()}/trpc`,
         fetch(url, options) {
-          return globalThis.fetch(url, {
+          return fetchApi(url, {
             ...options,
             credentials: "include",
           });

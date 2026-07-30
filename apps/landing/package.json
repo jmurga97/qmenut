@@ -1,0 +1,20 @@
+{
+  "name": "@qmenut/landing",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "check": "astro check",
+    "preview": "astro preview",
+    "deploy": "astro build && wrangler deploy"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/cloudflare": "^12.6.0",
+    "astro": "^5.16.6",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.60.0"
+  }
+}

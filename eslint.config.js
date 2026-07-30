@@ -1,5 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { fixupPluginRules } from "@eslint/compat";
 import js from "@eslint/js";
 import pluginQuery from "@tanstack/eslint-plugin-query";
 import pluginRouter from "@tanstack/eslint-plugin-router";
@@ -10,6 +11,8 @@ import pluginLit from "eslint-plugin-lit";
 import pluginReact from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import sonarjs from "eslint-plugin-sonarjs";
+import unicorn from "eslint-plugin-unicorn";
 import pluginWc from "eslint-plugin-wc";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -25,16 +28,17 @@ const appFiles = ["apps/*/src/**/*.{ts,tsx}", "apps/*/tests/**/*.{ts,tsx}"];
 const packageFiles = ["packages/*/src/**/*.{ts,tsx}", "packages/*/tests/**/*.{ts,tsx}"];
 const typeScriptFiles = [...appFiles, ...packageFiles];
 
-const reactFiles = ["apps/web/src/**/*.{ts,tsx}"];
+const reactFiles = ["apps/admin/src/**/*.{ts,tsx}", "apps/web/src/**/*.{ts,tsx}"];
 const workerFiles = ["apps/api/src/**/*.ts"];
 const litFiles = ["packages/ui/src/components/**/*.ts"];
 
 const tsconfigPaths = [
+  "apps/admin/tsconfig.json",
   "apps/web/tsconfig.json",
   "apps/api/tsconfig.json",
+  "apps/tenant-config/tsconfig.json",
   "packages/auth/tsconfig.json",
   "packages/db/tsconfig.json",
-  "packages/http/tsconfig.json",
   "packages/ui/tsconfig.json",
 ].map((projectPath) => path.join(rootDir, projectPath));
 
@@ -53,6 +57,10 @@ const importSettings = {
   },
 };
 
+const importPluginCompat = fixupPluginRules(importPlugin);
+const jsxA11yCompat = fixupPluginRules(jsxA11y);
+const pluginReactCompat = fixupPluginRules(pluginReact);
+
 const typeCheckedConfigs = tseslint.configs.recommendedTypeChecked.map((config) => ({
   ...config,
   files: typeScriptFiles,
@@ -60,7 +68,52 @@ const typeCheckedConfigs = tseslint.configs.recommendedTypeChecked.map((config) 
 
 const mergeFlatRules = (configs) => Object.assign({}, ...configs.map((config) => config.rules ?? {}));
 
+const rulesAsErrors = (rules) =>
+  Object.fromEntries(
+    Object.entries(rules).map(([ruleName, ruleConfig]) => {
+      if (ruleConfig === "off" || ruleConfig === 0) {
+        return [ruleName, ruleConfig];
+      }
+
+      if (Array.isArray(ruleConfig)) {
+        return [ruleName, ["error", ...ruleConfig.slice(1)]];
+      }
+
+      return [ruleName, "error"];
+    }),
+  );
+
+const qualityTypeScriptRules = {
+  ...rulesAsErrors(sonarjs.configs.recommended.rules),
+  ...rulesAsErrors(unicorn.configs.recommended.rules),
+  "unicorn/filename-case": [
+    "error",
+    {
+      cases: {
+        kebabCase: true,
+        snakeCase: true,
+      },
+      checkDirectories: false,
+    },
+  ],
+  "sonarjs/prefer-read-only-props": "off",
+  "sonarjs/public-static-readonly": "off",
+  "unicorn/consistent-boolean-name": "off",
+  "unicorn/consistent-class-member-order": "off",
+  "unicorn/name-replacements": "off",
+  "unicorn/no-for-loop": "off",
+  "unicorn/no-non-function-verb-prefix": "off",
+  "unicorn/no-null": "off",
+  "unicorn/no-top-level-side-effects": "off",
+  "unicorn/prefer-export-from": "off",
+  "unicorn/prefer-global-this": "off",
+  "unicorn/prefer-ternary": "off",
+  "unicorn/prefer-top-level-await": "off",
+  "unicorn/switch-case-braces": "off",
+};
+
 const sharedTypeScriptRules = {
+  ...qualityTypeScriptRules,
   eqeqeq: ["error", "always"],
   "max-depth": ["warn", 2],
   "max-lines-per-function": [
@@ -144,6 +197,7 @@ export default defineConfig(
   {
     ignores: [
       "**/dist/**",
+      "**/.output/**",
       "**/.wrangler/**",
       "**/node_modules/**",
       "**/worker-configuration.d.ts",
@@ -166,7 +220,9 @@ export default defineConfig(
       sourceType: "module",
     },
     plugins: {
-      import: importPlugin,
+      import: importPluginCompat,
+      sonarjs,
+      unicorn,
     },
     rules: sharedTypeScriptRules,
     settings: importSettings,
@@ -181,9 +237,9 @@ export default defineConfig(
       parserOptions: sharedParserOptions,
     },
     plugins: {
-      react: pluginReact,
+      react: pluginReactCompat,
       "react-hooks": reactHooks,
-      "jsx-a11y": jsxA11y,
+      "jsx-a11y": jsxA11yCompat,
       "@tanstack/query": pluginQuery,
     },
     rules: reactRules,
@@ -195,7 +251,7 @@ export default defineConfig(
     },
   },
   {
-    files: ["apps/web/src/**/*.{ts,tsx}"],
+    files: reactFiles,
     plugins: {
       "react-refresh": reactRefresh,
       "@tanstack/router": pluginRouter,
@@ -206,9 +262,10 @@ export default defineConfig(
     },
   },
   {
-    files: ["apps/web/src/app/routes/**/*.{ts,tsx}"],
+    files: ["apps/admin/src/app/routes/**/*.{ts,tsx}", "apps/web/src/app/routes/**/*.{ts,tsx}"],
     rules: {
       "react-refresh/only-export-components": "off",
+      "unicorn/filename-case": "off",
     },
   },
   {
