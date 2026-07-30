@@ -1,14 +1,15 @@
 import {
   createCategory,
   getCategoryTranslatableFields,
-  updateCategory,
+  updateCategoryStatement,
 } from "@qmenut/db/repositories/admin-categories.repository";
-import { markTranslationsPendingUpdate } from "@qmenut/db/repositories/translations.repository";
+import { markTranslationsPendingUpdateStatement } from "@qmenut/db/repositories/translations.repository";
 
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 import type { CategoryWriteData } from "@qmenut/db/repositories/admin-categories.repository";
+import type { BatchItem } from "drizzle-orm/batch";
 
 interface CreateCategoryInput {
   db: DrizzleDb;
@@ -43,23 +44,29 @@ export async function updateMenuCategory({
 }: UpdateCategoryInput): Promise<{ id: string }> {
   const previous = await getCategoryTranslatableFields({ categoryId, db, restaurantId });
 
-  await updateCategory({ db, restaurantId, categoryId, data });
-
   const changedFields = ["name", "description"].filter(
     (field) =>
       (field === "name" && previous?.name !== data.name) ||
       (field === "description" && previous?.description !== data.description),
   );
 
+  const statements: [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] = [
+    updateCategoryStatement({ db, restaurantId, categoryId, data }),
+  ];
+
   if (changedFields.length > 0) {
-    await markTranslationsPendingUpdate({
-      db,
-      entityId: categoryId,
-      entityType: "category",
-      fields: changedFields,
-      restaurantId,
-    });
+    statements.push(
+      markTranslationsPendingUpdateStatement({
+        db,
+        entityId: categoryId,
+        entityType: "category",
+        fields: changedFields,
+        restaurantId,
+      }),
+    );
   }
+
+  await db.batch(statements);
 
   return { id: categoryId };
 }

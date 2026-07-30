@@ -1,4 +1,8 @@
+import { defineQmPromoList } from "@qmenut/ui/components/qm-promo-list";
+
 import type { PromosContentViewModel } from "~/features/promos/types/promos-view-model";
+
+defineQmPromoList();
 
 interface PromosListProps {
   content: PromosContentViewModel;

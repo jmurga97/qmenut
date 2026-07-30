@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts"
+    "./client": {
+      "types": "./src/client.ts",
+      "import": "./src/client.ts"
     },
     "./repositories/admin-branches.repository": {
       "types": "./src/repositories/admin-branches.repository.ts",
@@ -28,6 +28,22 @@
       "types": "./src/repositories/admin-promotions.repository.ts",
       "import": "./src/repositories/admin-promotions.repository.ts"
     },
+    "./repositories/customers.repository": {
+      "types": "./src/repositories/customers.repository.ts",
+      "import": "./src/repositories/customers.repository.ts"
+    },
+    "./repositories/loyalty-admin.repository": {
+      "types": "./src/repositories/loyalty-admin.repository.ts",
+      "import": "./src/repositories/loyalty-admin.repository.ts"
+    },
+    "./repositories/loyalty-ledger.repository": {
+      "types": "./src/repositories/loyalty-ledger.repository.ts",
+      "import": "./src/repositories/loyalty-ledger.repository.ts"
+    },
+    "./repositories/loyalty-insights.repository": {
+      "types": "./src/repositories/loyalty-insights.repository.ts",
+      "import": "./src/repositories/loyalty-insights.repository.ts"
+    },
     "./repositories/restaurant-languages.repository": {
       "types": "./src/repositories/restaurant-languages.repository.ts",
       "import": "./src/repositories/restaurant-languages.repository.ts"
@@ -39,10 +55,6 @@
     "./repositories/billing.repository": {
       "types": "./src/repositories/billing.repository.ts",
       "import": "./src/repositories/billing.repository.ts"
-    },
-    "./repositories/public-menu": {
-      "types": "./src/repositories/public-menu.ts",
-      "import": "./src/repositories/public-menu.ts"
     },
     "./repositories/public-menu.repository": {
       "types": "./src/repositories/public-menu.repository.ts",
@@ -92,6 +104,10 @@
       "types": "./src/models/branch.ts",
       "import": "./src/models/branch.ts"
     },
+    "./models/loyalty": {
+      "types": "./src/models/loyalty.ts",
+      "import": "./src/models/loyalty.ts"
+    },
     "./models/promotion": {
       "types": "./src/models/promotion.ts",
       "import": "./src/models/promotion.ts"
@@ -105,8 +121,8 @@
       "import": "./src/models/translation.ts"
     },
     "./schema": {
-      "types": "./src/schema.ts",
-      "import": "./src/schema.ts"
+      "types": "./src/schema/index.ts",
+      "import": "./src/schema/index.ts"
     },
     "./schema/auth": {
       "types": "./src/schema/auth.ts",
@@ -120,9 +136,13 @@
       "types": "./src/schema/branches.ts",
       "import": "./src/schema/branches.ts"
     },
-    "./schema/index": {
-      "types": "./src/schema/index.ts",
-      "import": "./src/schema/index.ts"
+    "./schema/customers": {
+      "types": "./src/schema/customers.ts",
+      "import": "./src/schema/customers.ts"
+    },
+    "./schema/loyalty": {
+      "types": "./src/schema/loyalty.ts",
+      "import": "./src/schema/loyalty.ts"
     },
     "./schema/menu": {
       "types": "./src/schema/menu.ts",
@@ -146,6 +166,7 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
+    "@qmenut/permissions": "workspace:*",
     "drizzle-orm": "^0.44.6"
   },
   "devDependencies": {

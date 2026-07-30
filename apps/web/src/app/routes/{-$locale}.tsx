@@ -2,10 +2,9 @@ import { Outlet, createFileRoute, notFound, redirect } from "@tanstack/react-rou
 
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { DEFAULT_LOCALE, chromeLocale } from "~/lib/i18n/create-i18n";
+import { LOCALE_PATTERN } from "~/lib/i18n/locale-pattern";
 import { AnalyticsBootstrap } from "~/shared/components/analytics-bootstrap";
 import { LocaleDetector } from "~/shared/components/locale-detector";
-
-const LOCALE_PATTERN = /^[a-z]{2,3}(-[a-z]{2,4})?$/i;
 
 export interface LocaleLanguageOption {
   code: string;
@@ -24,7 +23,7 @@ export const Route = createFileRoute("/{-$locale}")({
     const requested = params.locale?.toLowerCase();
 
     if (requested !== undefined && !LOCALE_PATTERN.test(requested)) {
-      throw notFound();
+      notFound({ throw: true });
     }
 
     const data = await context.queryClient.ensureQueryData(
@@ -37,7 +36,7 @@ export const Route = createFileRoute("/{-$locale}")({
     if (requested !== undefined && language && language.effective !== requested) {
       const rest = location.pathname.replace(new RegExp(`^/${requested}`, "i"), "");
 
-      throw redirect({ href: rest || "/" });
+      redirect({ href: rest || "/", throw: true });
     }
 
     const effectiveLocale = language?.effective ?? requested ?? DEFAULT_LOCALE;

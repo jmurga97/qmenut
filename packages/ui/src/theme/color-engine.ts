@@ -78,10 +78,10 @@ class QmColorEngine {
   private constructor() {}
 
   static getInstance(): QmColorEngine {
-    if (!QmColorEngine.instance) {
-      QmColorEngine.instance = new QmColorEngine();
+    if (!this.instance) {
+      this.instance = new QmColorEngine();
     }
-    return QmColorEngine.instance;
+    return this.instance;
   }
 
   /** Overrides engine-wide defaults (fallback brand colors, on-color threshold, etc). */
@@ -98,7 +98,7 @@ class QmColorEngine {
   clampChroma(hex: string, cap: number | null): string {
     const parsed = this.toOklch(hex);
     if (!parsed) return hex;
-    const chroma = cap === null || cap === undefined ? parsed.c : Math.min(parsed.c, cap);
+    const chroma = cap === null ? parsed.c : Math.min(parsed.c, cap);
     const hue = parsed.h ?? 0;
     return `oklch(${parsed.l.toFixed(4)} ${chroma.toFixed(4)} ${hue.toFixed(2)})`;
   }
@@ -112,7 +112,14 @@ class QmColorEngine {
   /** Governed derivation: a template + 2 tenant colors → the full color group. */
   derive(cfg: QmThemeConfig): QmDerivedColors {
     const template = TEMPLATES[cfg.template];
-    const cap = cfg.saturationCap !== undefined ? cfg.saturationCap : template.saturationCap;
+    let cap: number | null;
+
+    if (cfg.saturationCap === undefined) {
+      cap = template.saturationCap;
+    } else {
+      cap = cfg.saturationCap;
+    }
+
     const rawPrimary = cfg.primary || this.config.defaultPrimary;
     const rawSecondary = cfg.secondary || this.config.defaultSecondary;
     const primary = this.clampChroma(rawPrimary, cap);

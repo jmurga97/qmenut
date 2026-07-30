@@ -1,15 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { FidelityPage } from "~/features/fidelity/pages/fidelity-page";
+import { getLoyaltyProgramQueryOptions } from "~/features/loyalty/api/loyalty-query-options";
+import { LoyaltyPage } from "~/features/loyalty/pages/loyalty-page";
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
-import { ISR_CACHE_CONTROL } from "~/lib/isr";
+import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 
 export const Route = createFileRoute("/{-$locale}/puntos")({
-  loader: async ({ context, params }) =>
-    context.queryClient.ensureQueryData(
+  loader: async ({ context, params }) => {
+    const menu = await context.queryClient.ensureQueryData(
       getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
-    ),
+    );
+    await context.queryClient.ensureQueryData(
+      getLoyaltyProgramQueryOptions({ host: context.tenant.host, trpc: context.trpc }),
+    );
+    return menu;
+  },
   head: ({ loaderData, match }) => {
     if (!loaderData) {
       return {};
@@ -17,8 +23,11 @@ export const Route = createFileRoute("/{-$locale}/puntos")({
 
     const origin = `https://${match.context.tenant.host}`;
     const canonicalUrl = `${origin}${match.pathname}`;
-    const title = `Puntos de fidelidad – ${loaderData.branch.name}`;
-    const description = `Programa de puntos y fidelidad de ${loaderData.branch.name}`;
+    const english = loaderData.language.effective.startsWith("en");
+    const title = english ? `Loyalty rewards – ${loaderData.branch.name}` : `Fidelización – ${loaderData.branch.name}`;
+    const description = english
+      ? `Loyalty card and rewards from ${loaderData.branch.name}`
+      : `Tarjeta de fidelización y premios de ${loaderData.branch.name}`;
 
     return {
       meta: [
@@ -38,7 +47,7 @@ export const Route = createFileRoute("/{-$locale}/puntos")({
     };
   },
   headers: () => ({
-    "Cache-Control": ISR_CACHE_CONTROL,
+    "Cache-Control": BROWSER_CACHE_CONTROL,
   }),
-  component: FidelityPage,
+  component: LoyaltyPage,
 });

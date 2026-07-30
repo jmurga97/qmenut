@@ -23,7 +23,7 @@ export function AnalyticsBootstrap() {
 
     registerTenantProperties({
       tenant_host: host,
-      ...(data ? { restaurant_id: data.branch.restaurantId, branch_id: data.branch.id } : {}),
+      ...(data && { restaurant_id: data.branch.restaurantId, branch_id: data.branch.id }),
     });
     scheduleAnalyticsLoad();
   }, [host, locale, queryClient, trpc]);

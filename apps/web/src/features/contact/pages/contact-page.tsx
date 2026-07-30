@@ -1,11 +1,11 @@
-import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { ContactPanel } from "~/features/contact/components/contact-panel";
 import { useContactContent } from "~/features/contact/hooks/use-contact-content";
 import { useContactForm } from "~/features/contact/hooks/use-contact-form";
+import { LegalLinksNav } from "~/features/legal/components/legal-links-nav";
+import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { DevTemplateSwitcher } from "~/shared/components/dev-template-switcher";
 import { PublicPageShell } from "~/shared/components/public-page-shell";
 import { PublicPageSkeleton } from "~/shared/components/public-page-skeleton";
@@ -58,14 +58,7 @@ export function ContactPage() {
             submitLabel={submitLabel}
           />
 
-          <nav className="legal-links" aria-label="Páginas legales">
-            <Link to="/{-$locale}/aviso-legal" params={(prev) => prev}>
-              Aviso legal
-            </Link>
-            <Link to="/{-$locale}/privacidad" params={(prev) => prev}>
-              Política de privacidad
-            </Link>
-          </nav>
+          <LegalLinksNav />
         </div>
       </PublicPageShell>
       <DevTemplateSwitcher currentTemplate={template} onSelectTemplate={setTemplate} />

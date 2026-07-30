@@ -3,7 +3,7 @@ import { getStripeCustomer, insertStripeCustomer } from "@qmenut/db/repositories
 import { StripeProvider } from "../../lib/stripe/stripe-provider";
 
 import type { RuntimeEnv } from "../../config/env/schema";
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 
 interface GetOrCreateCustomerInput {
   db: DrizzleDb;
@@ -28,13 +28,16 @@ export async function getOrCreateStripeCustomer({
   }
 
   const stripe = StripeProvider.getInstance().getClient(env);
-  const customer = await stripe.customers.create({
-    email,
-    name: restaurantName,
-    metadata: { restaurantId },
-  });
+  const customer = await stripe.customers.create(
+    {
+      email,
+      name: restaurantName,
+      metadata: { restaurantId },
+    },
+    {
+      idempotencyKey: `customer:${restaurantId}`,
+    },
+  );
 
-  await insertStripeCustomer({ db, restaurantId, stripeCustomerId: customer.id });
-
-  return customer.id;
+  return insertStripeCustomer({ db, restaurantId, stripeCustomerId: customer.id });
 }

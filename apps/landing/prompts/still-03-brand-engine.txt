@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: 3:2 landing-page scene still and Seedance first frame
+Primary request: Create the qmenut brand-and-speed engine diorama.
+Style/medium: Isometric glossy vinyl-toy 3D diorama floating as a small rounded island on a plain solid #EFEFEF background with a soft contact shadow beneath it. Smooth molded-resin forms, polished lacquer, subtle chrome highlights, rounded collectible-toy geometry, gentle cool studio lighting, soft long shadows, tilt-shift miniature look. Cohesive palette only: ink navy #02132E, royal blue #325A9F, lavender #A190BA, slate blue #556C97, porcelain #EFEFEF, sky blue #BAD5F6. Highly detailed, centered composition, absolutely no text, no letters, no numbers, no logos, no neon grid, no warm clay colors.
+Subject: A miniature brand atelier centered on two oversized glossy color spheres flowing through a chrome prism. The prism projects a complete coordinated palette into five tiny restaurant facades: fine dining, heritage classic, fast food, cafe, and tapas bar. Each facade is unmistakably different in geometry yet belongs to the same cool toy world. Beneath them, a fast luminous edge-delivery track sends finished blank menu screens outward instantly, already wearing the correct colors.
+Composition/framing: Wide 3:2 landscape, centered island, color spheres and chrome prism as the focal point, five restaurant styles arranged cleanly around them without clutter.
+Lighting/mood: Designed, instantaneous, premium, chrome highlights and cool blue reflections.
+Constraints: No readable interface, no brand marks, no typography, no labels, no watermark.

@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNull, or } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, isNull, or } from "drizzle-orm";
 
 import { getPromotionCandidateRows, getPromotionRows } from "./promotions.repository";
 import { resolveTenantByHost } from "./tenant.repository";
@@ -21,9 +21,9 @@ import {
   ingredients,
   tags,
 } from "../schema/menu";
+import { restaurants } from "../schema/restaurants";
 
-import type { DrizzleDb } from "../client";
-import type { ResolvedTenant } from "../domain/tenant";
+import type { IdsInput, TenantIdsInput, TenantInput } from "../domain/tenant";
 import type { PublicBranch, PublicBranchPhoto, PublicBranchSchedule } from "../models/branch";
 import type { PublicPromotion } from "../models/promotion";
 import type { PublicMenuData } from "../models/public-menu";
@@ -75,20 +75,6 @@ export interface ExtraRow {
   price: number;
 }
 
-interface TenantInput {
-  db: DrizzleDb;
-  tenant: ResolvedTenant;
-}
-
-interface IdsInput {
-  db: DrizzleDb;
-  ids: string[];
-}
-
-interface TenantIdsInput extends TenantInput {
-  ids: string[];
-}
-
 interface GetPublicMenuInput extends TenantInput {
   isDefaultLocale: boolean;
   locale: string;
@@ -97,12 +83,17 @@ interface GetPublicMenuInput extends TenantInput {
 
 async function getBranchRow({ db, tenant }: TenantInput) {
   return db
-    .select()
+    .select({
+      ...getTableColumns(branches),
+      timeZone: restaurants.timezone,
+    })
     .from(branches)
+    .innerJoin(restaurants, eq(restaurants.id, branches.restaurantId))
     .where(
       and(
         eq(branches.id, tenant.branchId),
         eq(branches.restaurantId, tenant.restaurantId),
+        isNull(restaurants.deletedAt),
         isNull(branches.deletedAt),
         eq(branches.isActive, true),
       ),
@@ -137,7 +128,10 @@ async function getBranchSchedules({ db, tenant }: TenantInput): Promise<PublicBr
     .all();
 }
 
-export async function getPublicBranch({ db, tenant }: TenantInput): Promise<PublicBranch | null> {
+async function getPublicBranchContext({
+  db,
+  tenant,
+}: TenantInput): Promise<{ branch: PublicBranch; timeZone: string } | null> {
   const row = await getBranchRow({ db, tenant });
 
   if (!row) {
@@ -146,7 +140,16 @@ export async function getPublicBranch({ db, tenant }: TenantInput): Promise<Publ
 
   const [photos, schedules] = await Promise.all([getBranchPhotos({ db, tenant }), getBranchSchedules({ db, tenant })]);
 
-  return mapBranch({ row, photos, schedules });
+  return {
+    branch: mapBranch({ row, photos, schedules }),
+    timeZone: row.timeZone,
+  };
+}
+
+export async function getPublicBranch({ db, tenant }: TenantInput): Promise<PublicBranch | null> {
+  const context = await getPublicBranchContext({ db, tenant });
+
+  return context?.branch ?? null;
 }
 
 async function getCategoryRows({ db, tenant }: TenantInput): Promise<CategoryRow[]> {
@@ -225,6 +228,9 @@ async function getTagRows({ db, ids, tenant }: TenantIdsInput): Promise<TagRow[]
     return [];
   }
 
+  const tagScopeFilter = or(isNull(tags.restaurantId), eq(tags.restaurantId, tenant.restaurantId));
+  const tagFilter = and(inArray(dishTags.dishId, ids), tagScopeFilter);
+
   return db
     .select({
       dishId: dishTags.dishId,
@@ -236,9 +242,7 @@ async function getTagRows({ db, ids, tenant }: TenantIdsInput): Promise<TagRow[]
     })
     .from(dishTags)
     .innerJoin(tags, eq(dishTags.tagId, tags.id))
-    .where(
-      and(inArray(dishTags.dishId, ids), or(isNull(tags.restaurantId), eq(tags.restaurantId, tenant.restaurantId))),
-    )
+    .where(tagFilter)
     .orderBy(asc(tags.isSystem), asc(tags.label), asc(tags.code))
     .all();
 }
@@ -295,12 +299,13 @@ export async function getPublicMenu({
   nowMs,
   tenant,
 }: GetPublicMenuInput): Promise<PublicMenuData | null> {
-  const branch = await getPublicBranch({ db, tenant });
+  const branchContext = await getPublicBranchContext({ db, tenant });
 
-  if (!branch) {
+  if (!branchContext) {
     return null;
   }
 
+  const { branch, timeZone } = branchContext;
   const [categoryRows, dishRows, promotionRows] = await Promise.all([
     getCategoryRows({ db, tenant }),
     getDishRows({ db, tenant }),
@@ -336,9 +341,13 @@ export async function getPublicMenu({
         ],
       });
   const translationsByEntity = createTranslationFieldMap(translationRows);
-  const activePromotions = promotionRows.filter((row) => isPromotionLikeActiveNow({ promotion: row, nowMs }));
+  const activePromotions = promotionRows.filter((row) => isPromotionLikeActiveNow({ promotion: row, nowMs, timeZone }));
   const promotionsById = new Map(activePromotions.map((row) => [row.id, row]));
-  const bestPromotionsByDish = createBestPromotionMap({ candidates: promotionCandidateRows, nowMs });
+  const bestPromotionsByDish = createBestPromotionMap({
+    candidates: promotionCandidateRows,
+    nowMs,
+    timeZone,
+  });
   const dishesByCategory = mapPublicDishes({
     allergenRows,
     availabilityRows,

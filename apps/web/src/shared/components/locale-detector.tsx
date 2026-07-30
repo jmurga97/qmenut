@@ -31,8 +31,8 @@ export function LocaleDetector() {
 
     const activeCodes = new Set(availableLanguages.map((language) => language.code));
     const match = navigator.languages
-      .map((browserLocale) => browserLocale.toLowerCase().split("-")[0])
-      .find((code): code is string => code !== undefined && activeCodes.has(code));
+      .map((browserLocale) => browserLocale.toLowerCase().split("-", 1)[0])
+      .find((code) => activeCodes.has(code));
 
     if (match && match !== defaultLanguage) {
       void navigate({ to: ".", params: (prev) => ({ ...prev, locale: match }), replace: true });

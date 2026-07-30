@@ -10,13 +10,10 @@ import {
   SESSION_EXPIRES_IN_SECONDS,
 } from "./store";
 
-export * from "./store";
-
 const EMAIL_WORKER_SEND_PATH = "https://email-worker.internal/send?productId=qmenut";
 
 type DrizzleAdapterDatabase = Parameters<typeof drizzleAdapter>[0];
 
-export type AuthDatabase = DrizzleAdapterDatabase;
 export type AuthSchema = Record<string, unknown>;
 export type AuthCookieMode = "same-site" | "cross-site";
 export type EmailOtpType = "sign-in" | "email-verification" | "forget-password" | "change-email";
@@ -39,13 +36,17 @@ export interface CreateEmailWorkerOtpSenderOptions {
 }
 
 export interface CreateAuthOptions {
-  db: AuthDatabase;
+  db: DrizzleAdapterDatabase;
   schema?: AuthSchema;
   secret: string;
   baseURL?: string;
   trustedOrigins?: string[];
   emailOtpSender: EmailOtpSender;
   cookieMode?: AuthCookieMode;
+  fixedOtpAccounts?: readonly {
+    email: string;
+    otp: string;
+  }[];
 }
 
 type BetterAuthInstance = ReturnType<typeof betterAuth>;
@@ -151,7 +152,7 @@ export function createEmailWorkerOtpSender(options: CreateEmailWorkerOtpSenderOp
 
 function getAdvancedCookieOptions(cookieMode: AuthCookieMode) {
   if (cookieMode !== "cross-site") {
-    return undefined;
+    return;
   }
 
   return {
@@ -172,7 +173,12 @@ export function createAuth({
   trustedOrigins,
   emailOtpSender,
   cookieMode = "same-site",
+  fixedOtpAccounts,
 }: CreateAuthOptions): Auth {
+  const fixedOtpByEmail = new Map(
+    fixedOtpAccounts?.map((account) => [account.email.toLowerCase(), account.otp] as const),
+  );
+
   return betterAuth({
     secret,
     baseURL,
@@ -194,7 +200,12 @@ export function createAuth({
         expiresIn: OTP_EXPIRES_IN_SECONDS,
         allowedAttempts: OTP_MAX_ATTEMPTS,
         storeOTP: "hashed",
+        generateOTP: ({ email }) => fixedOtpByEmail.get(email.toLowerCase()),
         async sendVerificationOTP({ email, otp, type }) {
+          if (fixedOtpByEmail.has(email.toLowerCase())) {
+            return;
+          }
+
           await emailOtpSender({ email, otp, type });
         },
       }),

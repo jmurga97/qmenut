@@ -15,23 +15,30 @@ import type { QmSectionNum, QmSectionNumArgs } from "./components/atoms/qm-secti
 import type { QmSkeleton, QmSkeletonArgs } from "./components/atoms/qm-skeleton";
 import type { QmTab, QmTabArgs } from "./components/atoms/qm-tab";
 import type { QmWordmark, QmWordmarkArgs } from "./components/atoms/qm-wordmark";
+import type { QmCodeInput, QmCodeInputArgs } from "./components/molecules/qm-code-input";
 import type { QmDishRow, QmDishRowArgs } from "./components/molecules/qm-dish-row";
 import type { QmFeatured, QmFeaturedArgs } from "./components/molecules/qm-featured";
 import type { QmFieldGroup, QmFieldGroupArgs } from "./components/molecules/qm-field-group";
 import type { QmLocation, QmLocationArgs } from "./components/molecules/qm-location";
 import type { QmPromo, QmPromoArgs } from "./components/molecules/qm-promo";
+import type { QmRewardRow, QmRewardRowArgs } from "./components/molecules/qm-reward-row";
 import type { QmSectionHeader, QmSectionHeaderArgs } from "./components/molecules/qm-section-header";
+import type { QmStampGrid, QmStampGridArgs } from "./components/molecules/qm-stamp-grid";
 import type { QmContactPanel, QmContactPanelArgs } from "./components/organisms/qm-contact-panel";
 import type { QmDishModal, QmDishModalArgs } from "./components/organisms/qm-dish-modal";
 import type { QmHeroHeader, QmHeroHeaderArgs } from "./components/organisms/qm-hero-header";
+import type { QmLoyaltyCard, QmLoyaltyCardArgs } from "./components/organisms/qm-loyalty-card";
+import type { QmLoyaltySignup, QmLoyaltySignupArgs } from "./components/organisms/qm-loyalty-signup";
 import type { QmMenuList, QmMenuListArgs } from "./components/organisms/qm-menu-list";
 import type { QmNavBar, QmNavBarArgs } from "./components/organisms/qm-nav-bar";
 import type { QmPageHeader, QmPageHeaderArgs } from "./components/organisms/qm-page-header";
 import type { QmPromoList, QmPromoListArgs } from "./components/organisms/qm-promo-list";
+import type { QmRedeemWait, QmRedeemWaitArgs } from "./components/organisms/qm-redeem-wait";
 import type { DetailedHTMLProps, HTMLAttributes } from "react";
 // Forces TS to fully resolve "react/jsx-runtime" via normal import resolution first —
 // declaring a module augmentation for it directly (below) doesn't reliably trigger the
 // same resolution path under this repo's exports-map + moduleResolution combination.
+// eslint-disable-next-line unicorn/require-module-specifiers -- intentionally empty import, see above
 import type {} from "react/jsx-runtime";
 
 /**
@@ -74,15 +81,21 @@ declare module "react/jsx-runtime" {
       "qm-featured": GenericWebComponent<QmFeaturedArgs, QmFeatured>;
       "qm-field-group": GenericWebComponent<QmFieldGroupArgs, QmFieldGroup>;
       "qm-location": GenericWebComponent<QmLocationArgs, QmLocation>;
+      "qm-code-input": GenericWebComponent<QmCodeInputArgs, QmCodeInput>;
       "qm-promo": GenericWebComponent<QmPromoArgs, QmPromo>;
+      "qm-reward-row": GenericWebComponent<QmRewardRowArgs, QmRewardRow>;
+      "qm-stamp-grid": GenericWebComponent<QmStampGridArgs, QmStampGrid>;
       "qm-section-header": GenericWebComponent<QmSectionHeaderArgs, QmSectionHeader>;
       "qm-contact-panel": GenericWebComponent<QmContactPanelArgs, QmContactPanel>;
       "qm-dish-modal": GenericWebComponent<QmDishModalArgs, QmDishModal>;
       "qm-hero-header": GenericWebComponent<QmHeroHeaderArgs, QmHeroHeader>;
+      "qm-loyalty-card": GenericWebComponent<QmLoyaltyCardArgs, QmLoyaltyCard>;
+      "qm-loyalty-signup": GenericWebComponent<QmLoyaltySignupArgs, QmLoyaltySignup>;
       "qm-menu-list": GenericWebComponent<QmMenuListArgs, QmMenuList>;
       "qm-nav-bar": GenericWebComponent<QmNavBarArgs, QmNavBar>;
       "qm-page-header": GenericWebComponent<QmPageHeaderArgs, QmPageHeader>;
       "qm-promo-list": GenericWebComponent<QmPromoListArgs, QmPromoList>;
+      "qm-redeem-wait": GenericWebComponent<QmRedeemWaitArgs, QmRedeemWait>;
     }
   }
 }

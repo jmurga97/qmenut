@@ -3,15 +3,6 @@ import type { RuntimeEnv } from "@/config/env/schema";
 const DEFAULT_ALLOWED_METHODS = "GET,POST,OPTIONS";
 const DEFAULT_ALLOWED_HEADERS = "Content-Type,Authorization";
 
-function parseAllowedOrigins(value: string | undefined): Set<string> {
-  return new Set(
-    value
-      ?.split(",")
-      .map((origin) => origin.trim())
-      .filter(Boolean) ?? [],
-  );
-}
-
 function resolveOrigin(request: Request, env: RuntimeEnv): string | null {
   const origin = request.headers.get("origin");
 
@@ -23,7 +14,7 @@ function resolveOrigin(request: Request, env: RuntimeEnv): string | null {
     return origin;
   }
 
-  return parseAllowedOrigins(env.ALLOWED_ORIGINS).has(origin) ? origin : null;
+  return new Set(env.ALLOWED_ORIGINS).has(origin) ? origin : null;
 }
 
 interface ApplyCorsHeadersInput {

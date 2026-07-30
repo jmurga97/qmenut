@@ -1,103 +1,49 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { useShallow } from "zustand/react/shallow";
 
-import { MOBILE_MEDIA_QUERY } from "@utils/media-queries";
-import { useMediaQuery } from "@utils/use-media-query";
+import { MOBILE_MEDIA_QUERY } from "~/shared/hooks/media-queries";
+import { useMediaQuery } from "~/shared/hooks/use-media-query";
 
-interface ShellStoreState {
+interface ShellStore {
   isSidebarOpenDesktop: boolean;
   isSidebarOpenMobile: boolean;
-}
-
-interface ShellStoreActions {
   setSidebarOpenDesktop: (isOpen: boolean) => void;
   setSidebarOpenMobile: (isOpen: boolean) => void;
 }
-
-type ShellStore = ShellStoreState & ShellStoreActions;
-
 const SHELL_STORAGE_KEY = "qmenut-admin-shell";
-
 const useShellStore = create<ShellStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       isSidebarOpenDesktop: true,
       isSidebarOpenMobile: false,
-      setSidebarOpenDesktop: (isOpen) => {
-        if (get().isSidebarOpenDesktop === isOpen) {
-          return;
-        }
-
-        set({ isSidebarOpenDesktop: isOpen });
-      },
-      setSidebarOpenMobile: (isOpen) => {
-        if (get().isSidebarOpenMobile === isOpen) {
-          return;
-        }
-
-        set({ isSidebarOpenMobile: isOpen });
-      },
+      setSidebarOpenDesktop: (isSidebarOpenDesktop) => set({ isSidebarOpenDesktop }),
+      setSidebarOpenMobile: (isSidebarOpenMobile) => set({ isSidebarOpenMobile }),
     }),
     {
       name: SHELL_STORAGE_KEY,
-      partialize: (state) => ({
-        isSidebarOpenDesktop: state.isSidebarOpenDesktop,
-      }),
+      partialize: ({ isSidebarOpenDesktop }) => ({ isSidebarOpenDesktop }),
       storage: createJSONStorage(() => localStorage),
     },
   ),
 );
-
 export function useShellMobile() {
   return useMediaQuery(MOBILE_MEDIA_QUERY);
 }
-
 export function useSidebarOpen() {
   const isMobile = useShellMobile();
-  const { isSidebarOpenDesktop, isSidebarOpenMobile } = useShellStore(
-    useShallow((state) => ({
-      isSidebarOpenDesktop: state.isSidebarOpenDesktop,
-      isSidebarOpenMobile: state.isSidebarOpenMobile,
-    })),
-  );
-
-  return isMobile ? isSidebarOpenMobile : isSidebarOpenDesktop;
+  return useShellStore((state) => (isMobile ? state.isSidebarOpenMobile : state.isSidebarOpenDesktop));
 }
-
 export function useShellActions() {
   const isMobile = useShellMobile();
-  const { setSidebarOpenDesktop, setSidebarOpenMobile } = useShellStore(
-    useShallow((state) => ({
-      setSidebarOpenDesktop: state.setSidebarOpenDesktop,
-      setSidebarOpenMobile: state.setSidebarOpenMobile,
-    })),
+  const setSidebarOpen = useShellStore((state) =>
+    isMobile ? state.setSidebarOpenMobile : state.setSidebarOpenDesktop,
   );
-
   return {
-    closeSidebar: () => {
-      if (isMobile) {
-        setSidebarOpenMobile(false);
-        return;
-      }
-
-      setSidebarOpenDesktop(false);
-    },
-    setSidebarOpen: (isOpen: boolean) => {
-      if (isMobile) {
-        setSidebarOpenMobile(isOpen);
-        return;
-      }
-
-      setSidebarOpenDesktop(isOpen);
-    },
+    closeSidebar: () => setSidebarOpen(false),
+    setSidebarOpen,
     toggleSidebar: () => {
-      if (isMobile) {
-        setSidebarOpenMobile(!useShellStore.getState().isSidebarOpenMobile);
-        return;
-      }
-
-      setSidebarOpenDesktop(!useShellStore.getState().isSidebarOpenDesktop);
+      const state = useShellStore.getState();
+      setSidebarOpen(isMobile ? !state.isSidebarOpenMobile : !state.isSidebarOpenDesktop);
     },
   };
 }

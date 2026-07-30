@@ -4,8 +4,14 @@
 # Better Auth signing secret (any long random string in dev).
 BETTER_AUTH_SECRET=dev-secret-change-me
 
-# Must match apps/tenant-config ADMIN_TOKEN (Bearer token for theme writes).
+# Must match apps/tenant-config THEME_WORKER_TOKEN (Bearer token for theme writes).
 THEME_WORKER_TOKEN=dev-token
+
+# Signs loyalty card/redemption QR tokens (any long random string in dev).
+LOYALTY_TOKEN_SECRET=dev-loyalty-secret
+
+# Local Playwright only. Never set this on a deployed worker.
+E2E_FIXED_OTP=false
 
 # Stripe test-mode keys (https://dashboard.stripe.com/test/apikeys).
 STRIPE_SECRET_KEY=sk_test_xxx

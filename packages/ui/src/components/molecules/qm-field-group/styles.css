@@ -33,7 +33,68 @@
     border-color 150ms;
 }
 
+.submit-label {
+  display: grid;
+  align-items: center;
+}
+
+.submit-label__text {
+  grid-area: 1 / 1;
+}
+
+.submit-label__text--outgoing {
+  animation: qm-submit-label-out 150ms ease both;
+}
+
+.submit-label__text--incoming {
+  animation: qm-submit-label-in 180ms ease-out both;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
 .submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+@keyframes qm-submit-label-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes qm-submit-label-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes qm-submit-label-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes qm-submit-label-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit-label__text--outgoing {
+    animation: qm-submit-label-fade-out 150ms ease both;
+  }
+
+  .submit-label__text--incoming {
+    animation: qm-submit-label-fade-in 150ms ease both;
+  }
 }

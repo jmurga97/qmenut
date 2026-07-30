@@ -7,7 +7,7 @@ import { resolveSsrTenantHost } from "~/server/tenant-host";
 const ROUTE_PATHS = ["/", "/contacto", "/promos", "/puntos", "/aviso-legal", "/privacidad"];
 
 function escapeXml(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return value.replaceAll('&', "&amp;").replaceAll('<', "&lt;").replaceAll('>', "&gt;").replaceAll('"', "&quot;");
 }
 
 export const Route = createFileRoute("/sitemap.xml")({

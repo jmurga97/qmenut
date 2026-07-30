@@ -1,7 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { can } from "@qmenut/permissions";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { PromotionEditorView } from "@pages/promotions/promotion-editor-view";
+import { PromotionEditorPage } from "~/features/promotions/pages/promotion-pages";
 
 export const Route = createFileRoute("/_auth/promotions/new")({
-  component: () => <PromotionEditorView />,
+  beforeLoad: ({ context }) => {
+    if (!can(context.roleCode, "promotions.write")) redirect({ to: "/promotions", throw: true });
+  },
+  component: () => <PromotionEditorPage />,
 });

@@ -1,14 +1,19 @@
+import {
+  getPromotion,
+  getPromotionBranchId,
+  listPromotions,
+  softDeletePromotion,
+} from "@qmenut/db/repositories/admin-promotions.repository";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { getPromotion, listPromotions, softDeletePromotion } from "@qmenut/db/repositories/admin-promotions.repository";
 
 import { createPromotionSchema, updatePromotionSchema } from "./promotion-input.schema";
 import { createBranchPromotion, updateBranchPromotion } from "./save-promotion";
-import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
-import { requireRole } from "../admin-tenant/require-role";
+import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
+import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
+import { requirePermission } from "../admin-tenant/require-permission";
 
-const WRITE_ROLES = ["owner", "admin"] as const;
 const branchIdSchema = z.object({ branchId: z.string().trim().min(1) });
 const promotionIdSchema = z.object({ promotionId: z.string().trim().min(1) });
 
@@ -25,34 +30,72 @@ export const adminPromotionsRouter = router({
     });
 
     if (!promotion) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Promotion not found" });
+      throw new TRPCError({ code: "NOT_FOUND", message: "Promoción no encontrada" });
     }
 
     return promotion;
   }),
-  create: tenantProcedure.input(createPromotionSchema).mutation(({ ctx, input }) => {
-    requireRole(ctx.tenant, WRITE_ROLES);
-    return createBranchPromotion({
+  create: tenantProcedure.input(createPromotionSchema).mutation(async ({ ctx, input }) => {
+    requirePermission(ctx.tenant, "promotions.write");
+    const result = await createBranchPromotion({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
       data: input.data,
       targets: input.targets,
     });
+    await bumpPublicContentVersionForBranch({
+      branchId: input.branchId,
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+    });
+    return result;
   }),
-  update: tenantProcedure.input(updatePromotionSchema).mutation(({ ctx, input }) => {
-    requireRole(ctx.tenant, WRITE_ROLES);
-    return updateBranchPromotion({
+  update: tenantProcedure.input(updatePromotionSchema).mutation(async ({ ctx, input }) => {
+    requirePermission(ctx.tenant, "promotions.write");
+    const branchId = await getPromotionBranchId({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      promotionId: input.promotionId,
+    });
+    const result = await updateBranchPromotion({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       promotionId: input.promotionId,
       data: input.data,
       targets: input.targets,
     });
+
+    if (branchId) {
+      await bumpPublicContentVersionForBranch({
+        branchId,
+        db: ctx.db,
+        env: ctx.env,
+        restaurantId: ctx.tenant.restaurantId,
+      });
+    }
+
+    return result;
   }),
   remove: tenantProcedure.input(promotionIdSchema).mutation(async ({ ctx, input }) => {
-    requireRole(ctx.tenant, WRITE_ROLES);
+    requirePermission(ctx.tenant, "promotions.write");
+    const branchId = await getPromotionBranchId({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      promotionId: input.promotionId,
+    });
     await softDeletePromotion({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, promotionId: input.promotionId });
+
+    if (branchId) {
+      await bumpPublicContentVersionForBranch({
+        branchId,
+        db: ctx.db,
+        env: ctx.env,
+        restaurantId: ctx.tenant.restaurantId,
+      });
+    }
+
     return { id: input.promotionId };
   }),
 });

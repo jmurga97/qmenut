@@ -8,44 +8,29 @@ import type { QueryClient } from "@tanstack/react-query";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 
 export type TrpcOptionsProxy = TRPCOptionsProxy<AppRouter>;
-
 export interface AdminRouterContext {
   queryClient: QueryClient;
   trpc: TrpcOptionsProxy;
 }
-
-function trimTrailingSlash(value: string): string {
-  return value.replace(/\/+$/, "");
-}
-
 export function getApiBaseUrl(): string {
   const configuredUrl = import.meta.env.VITE_API_BASE_URL;
-
   if (typeof configuredUrl === "string" && configuredUrl.trim()) {
-    return trimTrailingSlash(configuredUrl.trim());
+    // eslint-disable-next-line sonarjs/super-linear-regex -- URL length is bounded by deployment config.
+    return configuredUrl.trim().replace(/\/+$/, "");
   }
-
   return "http://localhost:8787";
 }
-
-function createTrpcOptionsProxy(queryClient: QueryClient): TrpcOptionsProxy {
-  return createTRPCOptionsProxy<AppRouter>({
-    client: createTRPCClient<AppRouter>({
-      links: [
-        httpBatchLink({
-          url: `${getApiBaseUrl()}/trpc`,
-          fetch(url, options) {
-            return globalThis.fetch(url, {
-              ...options,
-              credentials: "include",
-            });
-          },
-        }),
-      ],
-    }),
-    queryClient,
+function fetchWithCredentials(url: Parameters<typeof fetch>[0], options: Parameters<typeof fetch>[1]) {
+  return fetch(url, {
+    ...options,
+    credentials: "include",
   });
 }
-
-/** Proxy tRPC único de la app: mismo objeto en el router context y en los componentes. */
-export const trpc = createTrpcOptionsProxy(queryClient);
+const trpcLink = httpBatchLink({
+  url: `${getApiBaseUrl()}/trpc`,
+  fetch: fetchWithCredentials,
+});
+const trpcClient = createTRPCClient<AppRouter>({
+  links: [trpcLink],
+});
+export const trpc = createTRPCOptionsProxy<AppRouter>({ client: trpcClient, queryClient });

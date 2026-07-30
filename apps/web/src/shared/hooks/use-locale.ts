@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { track } from "~/lib/analytics/posthog";
 
-import type { QmLangOption } from "@qmenut/ui";
+import type { QmLangOption } from "@qmenut/ui/components/qm-lang";
 
 const CHOICE_STORAGE_KEY = "qm-locale-choice";
 

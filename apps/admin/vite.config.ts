@@ -18,12 +18,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@app": path.resolve(__dirname, "./src/app"),
-      "@components": path.resolve(__dirname, "./src/components"),
-      "@lib": path.resolve(__dirname, "./src/lib"),
-      "@pages": path.resolve(__dirname, "./src/pages"),
-      "@utils": path.resolve(__dirname, "./src/utils"),
+      "~": path.resolve(__dirname, "./src"),
     },
   },
   build: {
@@ -31,11 +26,21 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ["react", "react-dom"],
-          tanstack: ["@tanstack/react-router", "@tanstack/react-query"],
-          forms: ["zod", "react-hook-form", "@hookform/resolvers"],
-          state: ["zustand"],
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (
+            id.includes("react-dom") ||
+            id.includes("/react/") ||
+            id.includes("/scheduler/") ||
+            id.includes("use-sync-external-store")
+          ) {
+            return "vendor-react";
+          }
+          if (id.includes("@tanstack") || id.includes("@trpc")) return "vendor-data";
+          if (id.includes("/zod/") || id.includes("react-hook-form") || id.includes("@hookform")) {
+            return "vendor-forms";
+          }
+          if (id.includes("/zustand/")) return "vendor-state";
         },
       },
     },

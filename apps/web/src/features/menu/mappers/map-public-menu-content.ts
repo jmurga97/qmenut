@@ -1,5 +1,6 @@
 import { ALLERGEN_META } from "~/features/menu/constants/allergens";
 
+import type { TFunction } from "i18next";
 import type { PublicMenuData, PublicMenuDish } from "~/features/menu/api/public-menu-types";
 import type { AllergenCode } from "~/features/menu/constants/allergens";
 import type {
@@ -7,7 +8,6 @@ import type {
   MenuDishViewModel,
   MenuSectionViewModel,
 } from "~/features/menu/types/menu-view-model";
-import type { TFunction } from "i18next";
 
 interface MapPublicMenuContentInput {
   data: PublicMenuData;
@@ -16,11 +16,11 @@ interface MapPublicMenuContentInput {
 }
 
 function isAllergenCode(code: string): code is AllergenCode {
-  return code in ALLERGEN_META;
+  return Object.hasOwn(ALLERGEN_META, code);
 }
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, "");
+  return html.replaceAll(/<[^<>]*>/g, "");
 }
 
 function buildLogoLabel(name: string): string {
@@ -58,8 +58,8 @@ function mapDish({
   const hasDiscount = promotion !== null && promotion.effectiveUnitPrice < promotion.basePrice;
   const allergens = dish.allergens.map((allergen) => allergen.code).filter(isAllergenCode);
   const descHtml = dish.description ?? "";
-  const extras = [...dish.extras]
-    .sort((a, b) => a.position - b.position)
+  const extras = dish.extras
+    .toSorted((a, b) => a.position - b.position)
     .map((extra) => ({
       name: extra.name,
       price: `+${formatPrice(extra.price)}`,

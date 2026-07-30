@@ -1,6 +1,5 @@
-import type { QmFontId } from "@qmenut/ui/theme/font-catalog";
-
 import type { RuntimeEnv } from "../../config/env/schema";
+import type { QmFontId } from "@qmenut/ui/theme/font-catalog";
 
 export interface TenantThemeInput {
   template: string;
@@ -17,65 +16,54 @@ function themeUrl(host: string): string {
   return `${THEME_ORIGIN}/tenants/${encodeURIComponent(host)}/theme`;
 }
 
-function menuVersionUrl(host: string): string {
+// Legacy route retained to keep deployed tenant-config workers backwards compatible.
+function publicContentVersionUrl(host: string): string {
   return `${THEME_ORIGIN}/tenants/${encodeURIComponent(host)}/menu-version`;
 }
 
-/**
- * Cliente del worker tenant-config (única fuente de escritura del KV TENANT_THEME).
- * Se accede vía service binding, así el ADMIN_TOKEN nunca llega al navegador y la
- * normalización del tema vive en un único sitio. Singleton por el patrón de
- * suministradores de infraestructura del proyecto.
- */
-export class ThemeWorkerClient {
-  private static instance: ThemeWorkerClient | null = null;
+export async function getTheme(env: RuntimeEnv, host: string): Promise<TenantThemeInput | null> {
+  const response = await env.THEME_WORKER.fetch(themeUrl(host), { method: "GET" });
 
-  static getInstance(): ThemeWorkerClient {
-    if (!ThemeWorkerClient.instance) {
-      ThemeWorkerClient.instance = new ThemeWorkerClient();
-    }
-
-    return ThemeWorkerClient.instance;
+  if (response.status === 404) {
+    return null;
   }
 
-  async getTheme(env: RuntimeEnv, host: string): Promise<unknown | null> {
-    const response = await env.THEME_WORKER.fetch(themeUrl(host), { method: "GET" });
-
-    if (response.status === 404) {
-      return null;
-    }
-
-    if (!response.ok) {
-      throw new Error(`Theme worker GET failed (${response.status})`);
-    }
-
-    return response.json();
+  if (!response.ok) {
+    throw new Error(`La solicitud GET al worker de temas ha fallado (${response.status})`);
   }
 
-  async putTheme(env: RuntimeEnv, host: string, config: TenantThemeInput): Promise<void> {
-    const response = await env.THEME_WORKER.fetch(themeUrl(host), {
-      method: "PUT",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${env.THEME_WORKER_TOKEN}`,
-      },
-      body: JSON.stringify(config),
-    });
+  return response.json();
+}
 
-    if (!response.ok) {
-      const detail = await response.text();
-      throw new Error(`Theme worker PUT failed (${response.status}): ${detail}`);
-    }
+interface PutThemeInput {
+  config: TenantThemeInput;
+  env: RuntimeEnv;
+  host: string;
+}
+
+export async function putTheme({ config, env, host }: PutThemeInput): Promise<void> {
+  const response = await env.THEME_WORKER.fetch(themeUrl(host), {
+    method: "PUT",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${env.THEME_WORKER_TOKEN}`,
+    },
+    body: JSON.stringify(config),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`La solicitud PUT al worker de temas ha fallado (${response.status}): ${detail}`);
   }
+}
 
-  async bumpMenuVersion(env: RuntimeEnv, host: string): Promise<void> {
-    const response = await env.THEME_WORKER.fetch(menuVersionUrl(host), {
-      method: "PUT",
-      headers: { authorization: `Bearer ${env.THEME_WORKER_TOKEN}` },
-    });
+export async function bumpPublicContentVersion(env: RuntimeEnv, host: string): Promise<void> {
+  const response = await env.THEME_WORKER.fetch(publicContentVersionUrl(host), {
+    method: "PUT",
+    headers: { authorization: `Bearer ${env.THEME_WORKER_TOKEN}` },
+  });
 
-    if (!response.ok) {
-      throw new Error(`Menu version bump failed (${response.status})`);
-    }
+  if (!response.ok) {
+    throw new Error(`La actualización de la versión del contenido público ha fallado (${response.status})`);
   }
 }

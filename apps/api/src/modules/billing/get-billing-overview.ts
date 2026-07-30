@@ -1,7 +1,7 @@
-import { getStripeCustomer, listBranchSubscriptions } from "@qmenut/db/repositories/billing.repository";
 import { listBranches } from "@qmenut/db/repositories/admin-branches.repository";
+import { getStripeCustomer, listBranchSubscriptions } from "@qmenut/db/repositories/billing.repository";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 import type { BranchSubscriptionRow } from "@qmenut/db/repositories/billing.repository";
 
 export interface BillingBranchOverview {

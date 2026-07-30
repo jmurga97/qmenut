@@ -3,6 +3,7 @@ import { and, asc, eq, isNull } from "drizzle-orm";
 import { branchPhotos, branchSchedules, branches } from "../schema/branches";
 
 import type { DrizzleDb } from "../client";
+import type { BatchItem } from "drizzle-orm/batch";
 
 export interface AdminBranchSummary {
   id: string;
@@ -78,23 +79,25 @@ interface UpdateBranchSettingsInput {
   data: BranchSettingsWriteData;
 }
 
-export async function updateBranchSettings({
+export function updateBranchSettingsStatements({
   db,
   restaurantId,
   branchId,
   data,
-}: UpdateBranchSettingsInput): Promise<void> {
-  await db
-    .update(branches)
-    .set({
-      name: data.name,
-      address: data.address,
-      phone: data.phone,
-      whatsapp: data.whatsapp,
-      socialLinksJson: data.socialLinksJson,
-      updatedAt: Date.now(),
-    })
-    .where(and(eq(branches.id, branchId), eq(branches.restaurantId, restaurantId)));
+}: UpdateBranchSettingsInput): [BatchItem<"sqlite">] {
+  return [
+    db
+      .update(branches)
+      .set({
+        name: data.name,
+        address: data.address,
+        phone: data.phone,
+        whatsapp: data.whatsapp,
+        socialLinksJson: data.socialLinksJson,
+        updatedAt: Date.now(),
+      })
+      .where(and(eq(branches.id, branchId), eq(branches.restaurantId, restaurantId), isNull(branches.deletedAt))),
+  ];
 }
 
 interface ListBranchSchedulesInput {
@@ -121,20 +124,27 @@ interface ReplaceBranchSchedulesInput {
   schedules: BranchScheduleRow[];
 }
 
-export async function replaceBranchSchedules({ db, branchId, schedules }: ReplaceBranchSchedulesInput): Promise<void> {
-  await db.delete(branchSchedules).where(eq(branchSchedules.branchId, branchId));
+export function replaceBranchSchedulesStatements({
+  db,
+  branchId,
+  schedules,
+}: ReplaceBranchSchedulesInput): [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] {
+  const remove = db.delete(branchSchedules).where(eq(branchSchedules.branchId, branchId));
 
-  if (schedules.length > 0) {
-    await db.insert(branchSchedules).values(
-      schedules.map((schedule) => ({
-        id: crypto.randomUUID(),
-        branchId,
-        dayOfWeek: schedule.dayOfWeek,
-        openMinute: schedule.openMinute,
-        closeMinute: schedule.closeMinute,
-      })),
-    );
-  }
+  return schedules.length > 0
+    ? [
+        remove,
+        db.insert(branchSchedules).values(
+          schedules.map((schedule) => ({
+            id: crypto.randomUUID(),
+            branchId,
+            dayOfWeek: schedule.dayOfWeek,
+            openMinute: schedule.openMinute,
+            closeMinute: schedule.closeMinute,
+          })),
+        ),
+      ]
+    : [remove];
 }
 
 interface ListBranchPhotosInput {
@@ -157,18 +167,25 @@ interface ReplaceBranchPhotosInput {
   photos: BranchPhotoRow[];
 }
 
-export async function replaceBranchPhotos({ db, branchId, photos }: ReplaceBranchPhotosInput): Promise<void> {
-  await db.delete(branchPhotos).where(eq(branchPhotos.branchId, branchId));
+export function replaceBranchPhotosStatements({
+  db,
+  branchId,
+  photos,
+}: ReplaceBranchPhotosInput): [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] {
+  const remove = db.delete(branchPhotos).where(eq(branchPhotos.branchId, branchId));
 
-  if (photos.length > 0) {
-    await db.insert(branchPhotos).values(
-      photos.map((photo) => ({
-        id: crypto.randomUUID(),
-        branchId,
-        url: photo.url,
-        position: photo.position,
-        createdAt: Date.now(),
-      })),
-    );
-  }
+  return photos.length > 0
+    ? [
+        remove,
+        db.insert(branchPhotos).values(
+          photos.map((photo) => ({
+            id: crypto.randomUUID(),
+            branchId,
+            url: photo.url,
+            position: photo.position,
+            createdAt: Date.now(),
+          })),
+        ),
+      ]
+    : [remove];
 }

@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: 3:2 landing-page scene still and Seedance first frame
+Primary request: Create the qmenut real-menu-builder diorama.
+Style/medium: Isometric glossy vinyl-toy 3D diorama floating as a small rounded island on a plain solid #EFEFEF background with a soft contact shadow beneath it. Smooth molded-resin forms, polished lacquer, subtle chrome highlights, rounded collectible-toy geometry, gentle cool studio lighting, soft long shadows, tilt-shift miniature look. Cohesive palette only: ink navy #02132E, royal blue #325A9F, lavender #A190BA, slate blue #556C97, porcelain #EFEFEF, sky blue #BAD5F6. Highly detailed, centered composition, absolutely no text, no letters, no numbers, no logos, no neon grid, no warm clay colors.
+Subject: An open miniature restaurant kitchen transformed into a satisfying modular menu workshop. A chef and owner arrange glossy dish models onto a branching royal-blue conveyor: categories split into plated dishes, then into different sizes, side options and extras. Small ingredient bins, allergen-safe markers without symbols, tag-like blank chips, and a clock face without numbers show detailed configuration and timed availability. Everything visibly connects back to one blank tablet-shaped menu screen.
+Composition/framing: Wide 3:2 landscape, centered island, layered foreground-to-background depth, the branching menu system clearly readable as a visual process in the middle 65% of frame.
+Lighting/mood: Precise, capable, playful, cool studio light with polished highlights.
+Constraints: No readable interface, no brand marks, no typography, no labels, no watermark.

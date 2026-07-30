@@ -1,7 +1,7 @@
-import { TRPCError } from "@trpc/server";
 import { getDishDetail as findDishDetail } from "@qmenut/db/repositories/admin-dishes.repository";
+import { TRPCError } from "@trpc/server";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 import type { AdminDishDetail } from "@qmenut/db/repositories/admin-dishes.repository";
 
 interface GetDishDetailInput {
@@ -14,7 +14,7 @@ export async function getDishDetail({ db, restaurantId, dishId }: GetDishDetailI
   const dish = await findDishDetail({ db, restaurantId, dishId });
 
   if (!dish) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Dish not found" });
+    throw new TRPCError({ code: "NOT_FOUND", message: "Plato no encontrado" });
   }
 
   return dish;

@@ -1,11 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { LegalNoticePage } from "~/features/legal/pages/legal-notice-page";
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
-import { ISR_CACHE_CONTROL } from "~/lib/isr";
+import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 
 export const Route = createFileRoute("/{-$locale}/aviso-legal")({
+  beforeLoad: ({ params }) => {
+    const locale = params.locale?.toLowerCase();
+
+    if (locale && locale !== "en" && locale !== "es") {
+      redirect({ to: ".", params: { locale: "es" }, throw: true });
+    }
+  },
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
       getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
@@ -17,8 +24,8 @@ export const Route = createFileRoute("/{-$locale}/aviso-legal")({
 
     const origin = `https://${match.context.tenant.host}`;
     const canonicalUrl = `${origin}${match.pathname}`;
-    const title = `Aviso legal – ${loaderData.branch.name}`;
-    const description = `Aviso legal e información del titular de ${loaderData.branch.name}`;
+    const title = match.context.i18n.t("legal.legalNotice.seoTitle", { name: loaderData.branch.name });
+    const description = match.context.i18n.t("legal.legalNotice.seoDescription", { name: loaderData.branch.name });
 
     return {
       meta: [
@@ -31,14 +38,17 @@ export const Route = createFileRoute("/{-$locale}/aviso-legal")({
       ],
       links: [
         { rel: "canonical", href: canonicalUrl },
-        ...buildHreflangAlternates({ language: loaderData.language, origin, path: "/aviso-legal" }).map(
-          ({ hreflang, href }) => ({ rel: "alternate", hrefLang: hreflang, href }),
-        ),
+        ...buildHreflangAlternates({
+          allowedLocales: ["es", "en"],
+          language: loaderData.language,
+          origin,
+          path: "/aviso-legal",
+        }).map(({ hreflang, href }) => ({ rel: "alternate", hrefLang: hreflang, href })),
       ],
     };
   },
   headers: () => ({
-    "Cache-Control": ISR_CACHE_CONTROL,
+    "Cache-Control": BROWSER_CACHE_CONTROL,
   }),
   component: LegalNoticePage,
 });

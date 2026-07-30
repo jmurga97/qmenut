@@ -1,0 +1,2 @@
+# Must match apps/api THEME_WORKER_TOKEN for local service-binding writes.
+THEME_WORKER_TOKEN=dev-token

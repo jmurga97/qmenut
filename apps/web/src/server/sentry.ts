@@ -33,7 +33,7 @@ export async function serveWithSentry(request: Request, next: () => Promise<Resp
   }
 
   const context = runtime?.waitUntil
-    ? ({ waitUntil: runtime.waitUntil, passThroughOnException: () => undefined, props: {} } as ExecutionContext)
+    ? ({ waitUntil: runtime.waitUntil, passThroughOnException: () => {}, props: {} } as ExecutionContext)
     : undefined;
 
   return Sentry.wrapRequestHandler(

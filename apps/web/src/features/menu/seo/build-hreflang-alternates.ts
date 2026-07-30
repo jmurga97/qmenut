@@ -6,6 +6,7 @@ export interface HreflangAlternate {
 }
 
 interface BuildHreflangAlternatesInput {
+  allowedLocales?: readonly string[];
   language: PublicMenuLanguage;
   origin: string;
   /** Locale-independent path suffix, e.g. "/" for the menu route or "/contacto". */
@@ -17,11 +18,23 @@ interface BuildHreflangAlternatesInput {
  * not the app's bundled UI locales — a tenant with only Spanish active must not advertise an
  * `/en/` alternate.
  */
-export function buildHreflangAlternates({ language, origin, path }: BuildHreflangAlternatesInput): HreflangAlternate[] {
-  const alternates = language.available.map((option) => ({
-    hreflang: option.code,
-    href: `${origin}${option.isDefault ? "" : `/${option.code}`}${path}`,
-  }));
+export function buildHreflangAlternates({
+  allowedLocales,
+  language,
+  origin,
+  path,
+}: BuildHreflangAlternatesInput): HreflangAlternate[] {
+  const allowedLocaleSet = allowedLocales ? new Set(allowedLocales.map((locale) => locale.toLowerCase())) : undefined;
+  const alternates = language.available
+    .filter((option) => !allowedLocaleSet || allowedLocaleSet.has(option.code.toLowerCase()))
+    .map((option) => {
+      const localePrefix = option.isDefault ? "" : `/${option.code}`;
+
+      return {
+        hreflang: option.code,
+        href: `${origin}${localePrefix}${path}`,
+      };
+    });
 
   alternates.push({ hreflang: "x-default", href: `${origin}${path}` });
 

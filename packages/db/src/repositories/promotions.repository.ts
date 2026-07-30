@@ -2,18 +2,8 @@ import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
 import { promotions, vDishPromotionPrices } from "../schema/promotions";
 
-import type { DrizzleDb } from "../client";
-import type { ResolvedTenant } from "../domain/tenant";
+import type { TenantIdsInput, TenantInput } from "../domain/tenant";
 import type { PromotionCandidateRow, PromotionRow } from "../mappers/promotion.mapper";
-
-interface TenantInput {
-  db: DrizzleDb;
-  tenant: ResolvedTenant;
-}
-
-interface TenantIdsInput extends TenantInput {
-  ids: string[];
-}
 
 export async function getPromotionRows({ db, tenant }: TenantInput): Promise<PromotionRow[]> {
   return db

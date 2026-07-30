@@ -17,11 +17,11 @@ export class StripeProvider {
   private cryptoProvider: Stripe.CryptoProvider | null = null;
 
   static getInstance(): StripeProvider {
-    if (!StripeProvider.instance) {
-      StripeProvider.instance = new StripeProvider();
+    if (!this.instance) {
+      this.instance = new StripeProvider();
     }
 
-    return StripeProvider.instance;
+    return this.instance;
   }
 
   getClient(env: RuntimeEnv): Stripe {

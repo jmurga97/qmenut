@@ -19,35 +19,37 @@ interface RestaurantInput {
 
 /** Gathers every translatable name/description across all of a restaurant's branches. */
 export async function collectTranslatableTexts({ db, restaurantId }: RestaurantInput): Promise<TranslatableText[]> {
+  const categoryFilter = and(eq(categories.restaurantId, restaurantId), isNull(categories.deletedAt));
+  const dishFilter = and(eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt));
+  const variantGroupFilter = and(eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt));
+  const variantOptionFilter = and(eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt));
+  const ingredientFilter = and(eq(ingredients.restaurantId, restaurantId), isNull(ingredients.deletedAt));
+
   const [categoryRows, dishRows, variantGroupRows, variantOptionRows, ingredientRows] = await Promise.all([
     db
       .select({ id: categories.id, name: categories.name, description: categories.description })
       .from(categories)
-      .where(and(eq(categories.restaurantId, restaurantId), isNull(categories.deletedAt)))
+      .where(categoryFilter)
       .all(),
     db
       .select({ id: dishes.id, name: dishes.name, description: dishes.description })
       .from(dishes)
-      .where(and(eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt)))
+      .where(dishFilter)
       .all(),
     db
       .select({ id: dishVariantGroups.id, name: dishVariantGroups.name })
       .from(dishVariantGroups)
       .innerJoin(dishes, eq(dishVariantGroups.dishId, dishes.id))
-      .where(and(eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt)))
+      .where(variantGroupFilter)
       .all(),
     db
       .select({ id: dishVariantOptions.id, name: dishVariantOptions.name })
       .from(dishVariantOptions)
       .innerJoin(dishVariantGroups, eq(dishVariantOptions.groupId, dishVariantGroups.id))
       .innerJoin(dishes, eq(dishVariantGroups.dishId, dishes.id))
-      .where(and(eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt)))
+      .where(variantOptionFilter)
       .all(),
-    db
-      .select({ id: ingredients.id, name: ingredients.name })
-      .from(ingredients)
-      .where(and(eq(ingredients.restaurantId, restaurantId), isNull(ingredients.deletedAt)))
-      .all(),
+    db.select({ id: ingredients.id, name: ingredients.name }).from(ingredients).where(ingredientFilter).all(),
   ]);
 
   const texts: TranslatableText[] = [];
@@ -133,13 +135,23 @@ export async function getBranchTranslatableCatalog({
   db,
   restaurantId,
 }: BranchInput): Promise<BranchTranslatableCatalog> {
+  const categoryFilter = and(
+    eq(categories.restaurantId, restaurantId),
+    eq(categories.branchId, branchId),
+    isNull(categories.deletedAt),
+  );
+  const dishFilter = and(
+    eq(dishes.restaurantId, restaurantId),
+    eq(dishes.branchId, branchId),
+    isNull(dishes.deletedAt),
+  );
+  const ingredientFilter = and(eq(ingredients.restaurantId, restaurantId), isNull(ingredients.deletedAt));
+
   const [categoryRows, dishRows, ingredientRows] = await Promise.all([
     db
       .select({ id: categories.id, name: categories.name, description: categories.description })
       .from(categories)
-      .where(
-        and(eq(categories.restaurantId, restaurantId), eq(categories.branchId, branchId), isNull(categories.deletedAt)),
-      )
+      .where(categoryFilter)
       .all(),
     db
       .select({
@@ -149,16 +161,13 @@ export async function getBranchTranslatableCatalog({
         description: dishes.description,
       })
       .from(dishes)
-      .where(and(eq(dishes.restaurantId, restaurantId), eq(dishes.branchId, branchId), isNull(dishes.deletedAt)))
+      .where(dishFilter)
       .all(),
-    db
-      .select({ id: ingredients.id, name: ingredients.name })
-      .from(ingredients)
-      .where(and(eq(ingredients.restaurantId, restaurantId), isNull(ingredients.deletedAt)))
-      .all(),
+    db.select({ id: ingredients.id, name: ingredients.name }).from(ingredients).where(ingredientFilter).all(),
   ]);
 
   const dishIds = dishRows.map((row) => row.id);
+  const variantGroupFilter = and(eq(dishes.restaurantId, restaurantId), eq(dishes.branchId, branchId));
   const variantGroupRows =
     dishIds.length === 0
       ? []
@@ -166,10 +175,11 @@ export async function getBranchTranslatableCatalog({
           .select({ id: dishVariantGroups.id, dishId: dishVariantGroups.dishId, name: dishVariantGroups.name })
           .from(dishVariantGroups)
           .innerJoin(dishes, eq(dishVariantGroups.dishId, dishes.id))
-          .where(and(eq(dishes.restaurantId, restaurantId), eq(dishes.branchId, branchId)))
+          .where(variantGroupFilter)
           .all();
 
   const groupIds = variantGroupRows.map((row) => row.id);
+  const variantOptionFilter = and(eq(dishes.restaurantId, restaurantId), eq(dishes.branchId, branchId));
   const variantOptionRows =
     groupIds.length === 0
       ? []
@@ -178,7 +188,7 @@ export async function getBranchTranslatableCatalog({
           .from(dishVariantOptions)
           .innerJoin(dishVariantGroups, eq(dishVariantOptions.groupId, dishVariantGroups.id))
           .innerJoin(dishes, eq(dishVariantGroups.dishId, dishes.id))
-          .where(and(eq(dishes.restaurantId, restaurantId), eq(dishes.branchId, branchId)))
+          .where(variantOptionFilter)
           .all();
 
   return {

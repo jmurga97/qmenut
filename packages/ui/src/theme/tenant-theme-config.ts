@@ -29,7 +29,7 @@ export const DEFAULT_TENANT_COLORS = {
 } as const;
 
 function isTemplateName(value: unknown): value is QmTemplateName {
-  return typeof value === "string" && value in TEMPLATES;
+  return typeof value === "string" && Object.hasOwn(TEMPLATES, value);
 }
 
 function isColor(value: unknown): value is string {
@@ -63,12 +63,24 @@ export function resolveTenantThemeConfig(raw: unknown): QmTenantThemeConfig {
 
   const base = TEMPLATES[candidate.template];
 
+  let primary: string = DEFAULT_TENANT_COLORS.primary;
+
+  if (isColor(candidate.primary)) {
+    primary = candidate.primary;
+  }
+
+  let secondary: string = DEFAULT_TENANT_COLORS.secondary;
+
+  if (isColor(candidate.secondary)) {
+    secondary = candidate.secondary;
+  }
+
   return {
     ...base,
     ...candidate,
     template: candidate.template,
-    primary: isColor(candidate.primary) ? candidate.primary : DEFAULT_TENANT_COLORS.primary,
-    secondary: isColor(candidate.secondary) ? candidate.secondary : DEFAULT_TENANT_COLORS.secondary,
+    primary,
+    secondary,
     tagline: typeof candidate.tagline === "string" ? candidate.tagline : undefined,
     headingFont: isHeadingFontId(candidate.headingFont) ? candidate.headingFont : undefined,
     bodyFont: isBodyFontId(candidate.bodyFont) ? candidate.bodyFont : undefined,

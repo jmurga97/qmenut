@@ -1,9 +1,9 @@
-import { TRPCError } from "@trpc/server";
 import { createPromotion, getPromotion, updatePromotion } from "@qmenut/db/repositories/admin-promotions.repository";
+import { TRPCError } from "@trpc/server";
 
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 import type { PromotionTargetRow, PromotionWriteData } from "@qmenut/db/repositories/admin-promotions.repository";
 
 interface CreatePromotionInput {
@@ -50,7 +50,7 @@ export async function updateBranchPromotion({
   const existing = await getPromotion({ db, restaurantId, promotionId });
 
   if (!existing) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Promotion not found" });
+    throw new TRPCError({ code: "NOT_FOUND", message: "Promoción no encontrada" });
   }
 
   await updatePromotion({ db, restaurantId, promotionId, data, targets: normalizeTargets(data.scope, targets) });

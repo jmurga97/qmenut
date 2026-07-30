@@ -2,7 +2,7 @@ import { syncSubscriptionState } from "./sync-subscription-state";
 import { StripeProvider } from "../../lib/stripe/stripe-provider";
 
 import type { RuntimeEnv } from "../../config/env/schema";
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 import type Stripe from "stripe";
 
 interface HandleStripeWebhookInput {
@@ -12,7 +12,7 @@ interface HandleStripeWebhookInput {
 }
 
 function jsonResponse(body: unknown, status: number): Response {
-  return new Response(JSON.stringify(body), {
+  return Response.json(body, {
     status,
     headers: { "content-type": "application/json" },
   });
@@ -26,7 +26,7 @@ export async function handleStripeWebhook({ request, env, db }: HandleStripeWebh
   const signature = request.headers.get("stripe-signature");
 
   if (!signature) {
-    return jsonResponse({ error: "Missing signature" }, 400);
+    return jsonResponse({ error: "Falta la firma" }, 400);
   }
 
   const provider = StripeProvider.getInstance();
@@ -44,7 +44,7 @@ export async function handleStripeWebhook({ request, env, db }: HandleStripeWebh
       provider.getWebhookCryptoProvider(),
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Invalid signature";
+    const message = error instanceof Error ? error.message : "Firma no válida";
     return jsonResponse({ error: message }, 400);
   }
 
@@ -61,35 +61,33 @@ interface DispatchEventInput {
 }
 
 async function dispatchEvent({ db, env, stripe, event }: DispatchEventInput): Promise<void> {
-  switch (event.type) {
-    case "checkout.session.completed": {
-      const session = event.data.object;
-      if (typeof session.subscription === "string") {
-        const subscription = await stripe.subscriptions.retrieve(session.subscription);
-        await syncSubscriptionState({ db, env, subscription });
-      }
-      return;
-    }
-    case "customer.subscription.updated": {
-      // Re-recupera para neutralizar el desorden de entrega de eventos.
-      const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+    if (typeof session.subscription === "string") {
+      const subscription = await stripe.subscriptions.retrieve(session.subscription);
       await syncSubscriptionState({ db, env, subscription });
-      return;
     }
-    case "customer.subscription.deleted": {
-      await syncSubscriptionState({ db, env, subscription: event.data.object });
-      return;
+    return;
+  }
+
+  if (event.type === "customer.subscription.updated") {
+    // Re-recupera para neutralizar el desorden de entrega de eventos.
+    const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
+    await syncSubscriptionState({ db, env, subscription });
+    return;
+  }
+
+  if (event.type === "customer.subscription.deleted") {
+    await syncSubscriptionState({ db, env, subscription: event.data.object });
+    return;
+  }
+
+  if (event.type === "invoice.payment_failed") {
+    const subscriptionId = resolveInvoiceSubscriptionId(event.data.object);
+    if (subscriptionId) {
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      await syncSubscriptionState({ db, env, subscription });
     }
-    case "invoice.payment_failed": {
-      const subscriptionId = resolveInvoiceSubscriptionId(event.data.object);
-      if (subscriptionId) {
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-        await syncSubscriptionState({ db, env, subscription });
-      }
-      return;
-    }
-    default:
-      return;
   }
 }
 

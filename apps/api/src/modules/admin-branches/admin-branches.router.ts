@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-import { getBranchSettings } from "./get-branch-settings";
 import { saveBranchSettingsSchema } from "./branch-input.schema";
+import { getBranchSettings } from "./get-branch-settings";
 import { saveBranchSettings } from "./save-branch-settings";
-import { requireRole } from "../admin-tenant/require-role";
+import { bumpPublicContentVersionForRestaurant } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
+import { requirePermission } from "../admin-tenant/require-permission";
 
-const WRITE_ROLES = ["owner", "admin"] as const;
 const branchIdSchema = z.object({ branchId: z.string().trim().min(1) });
 
 export const adminBranchesRouter = router({
@@ -16,14 +16,20 @@ export const adminBranchesRouter = router({
       getBranchSettings({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, branchId: input.branchId }),
     ),
   save: tenantProcedure.input(saveBranchSettingsSchema).mutation(async ({ ctx, input }) => {
-    requireRole(ctx.tenant, WRITE_ROLES);
+    requirePermission(ctx.tenant, "branch.write");
     await saveBranchSettings({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
+      timezone: input.timezone,
       info: input.info,
       schedules: input.schedules,
       photos: input.photos,
+    });
+    await bumpPublicContentVersionForRestaurant({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
     });
     return { id: input.branchId };
   }),

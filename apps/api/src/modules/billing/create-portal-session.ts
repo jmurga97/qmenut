@@ -1,10 +1,10 @@
-import { TRPCError } from "@trpc/server";
 import { getStripeCustomer } from "@qmenut/db/repositories/billing.repository";
+import { TRPCError } from "@trpc/server";
 
 import { StripeProvider } from "../../lib/stripe/stripe-provider";
 
 import type { RuntimeEnv } from "../../config/env/schema";
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 
 interface CreatePortalSessionInput {
   db: DrizzleDb;

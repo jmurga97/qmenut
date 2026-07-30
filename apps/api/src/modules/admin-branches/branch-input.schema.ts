@@ -8,6 +8,7 @@ const nullableText = z
   .transform((value) => (value && value.length > 0 ? value : null));
 
 const minuteSchema = z.number().int().min(0).max(1439);
+const supportedTimeZones = new Set([...Intl.supportedValuesOf("timeZone"), "UTC"]);
 
 export const scheduleRowSchema = z
   .object({
@@ -20,12 +21,16 @@ export const scheduleRowSchema = z
   });
 
 export const photoRowSchema = z.object({
-  url: z.string().trim().url(),
+  url: z.url().trim(),
   position: z.number().int().min(0),
 });
 
 export const saveBranchSettingsSchema = z.object({
   branchId: z.string().trim().min(1),
+  timezone: z
+    .string()
+    .trim()
+    .refine((value) => supportedTimeZones.has(value), "Zona horaria no válida"),
   info: z.object({
     name: z.string().trim().min(1).max(200),
     address: nullableText,

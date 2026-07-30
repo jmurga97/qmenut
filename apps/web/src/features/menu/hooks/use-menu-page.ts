@@ -1,9 +1,9 @@
-import { TEMPLATES } from "@qmenut/ui";
+import { TEMPLATES } from "@qmenut/ui/theme/presets";
 import { useState } from "react";
 
 import { useMenuContent } from "~/features/menu/hooks/use-menu-content";
 
-import type { QmTemplateName } from "@qmenut/ui";
+import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
 
 interface UseMenuPageInput {

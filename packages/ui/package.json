@@ -4,10 +4,6 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts"
-    },
     "./theme/tokens": {
       "types": "./src/theme/tokens.ts",
       "import": "./src/theme/tokens.ts"
@@ -36,13 +32,13 @@
       "types": "./src/jsx-types.ts",
       "import": "./src/jsx-types.ts"
     },
-    "./react": {
-      "types": "./src/react.ts",
-      "import": "./src/react.ts"
-    },
     "./components/qm-allergen": {
       "types": "./src/components/atoms/qm-allergen/index.ts",
       "import": "./src/components/atoms/qm-allergen/index.ts"
+    },
+    "./components/qm-dish-extras": {
+      "types": "./src/components/atoms/qm-dish-extras/index.ts",
+      "import": "./src/components/atoms/qm-dish-extras/index.ts"
     },
     "./components/qm-wordmark": {
       "types": "./src/components/atoms/qm-wordmark/index.ts",
@@ -136,6 +132,26 @@
       "types": "./src/components/molecules/qm-location/index.ts",
       "import": "./src/components/molecules/qm-location/index.ts"
     },
+    "./components/qm-code-input": {
+      "types": "./src/components/molecules/qm-code-input/index.ts",
+      "import": "./src/components/molecules/qm-code-input/index.ts"
+    },
+    "./components/qm-code-input/react": {
+      "types": "./src/components/molecules/qm-code-input/react.ts",
+      "import": "./src/components/molecules/qm-code-input/react.ts"
+    },
+    "./components/qm-reward-row": {
+      "types": "./src/components/molecules/qm-reward-row/index.ts",
+      "import": "./src/components/molecules/qm-reward-row/index.ts"
+    },
+    "./components/qm-reward-row/react": {
+      "types": "./src/components/molecules/qm-reward-row/react.ts",
+      "import": "./src/components/molecules/qm-reward-row/react.ts"
+    },
+    "./components/qm-stamp-grid": {
+      "types": "./src/components/molecules/qm-stamp-grid/index.ts",
+      "import": "./src/components/molecules/qm-stamp-grid/index.ts"
+    },
     "./components/qm-field-group": {
       "types": "./src/components/molecules/qm-field-group/index.ts",
       "import": "./src/components/molecules/qm-field-group/index.ts"
@@ -151,6 +167,30 @@
     "./components/qm-hero-header/react": {
       "types": "./src/components/organisms/qm-hero-header/react.ts",
       "import": "./src/components/organisms/qm-hero-header/react.ts"
+    },
+    "./components/qm-loyalty-card": {
+      "types": "./src/components/organisms/qm-loyalty-card/index.ts",
+      "import": "./src/components/organisms/qm-loyalty-card/index.ts"
+    },
+    "./components/qm-loyalty-card/react": {
+      "types": "./src/components/organisms/qm-loyalty-card/react.ts",
+      "import": "./src/components/organisms/qm-loyalty-card/react.ts"
+    },
+    "./components/qm-loyalty-signup": {
+      "types": "./src/components/organisms/qm-loyalty-signup/index.ts",
+      "import": "./src/components/organisms/qm-loyalty-signup/index.ts"
+    },
+    "./components/qm-loyalty-signup/react": {
+      "types": "./src/components/organisms/qm-loyalty-signup/react.ts",
+      "import": "./src/components/organisms/qm-loyalty-signup/react.ts"
+    },
+    "./components/qm-redeem-wait": {
+      "types": "./src/components/organisms/qm-redeem-wait/index.ts",
+      "import": "./src/components/organisms/qm-redeem-wait/index.ts"
+    },
+    "./components/qm-redeem-wait/react": {
+      "types": "./src/components/organisms/qm-redeem-wait/react.ts",
+      "import": "./src/components/organisms/qm-redeem-wait/react.ts"
     },
     "./components/qm-page-header": {
       "types": "./src/components/organisms/qm-page-header/index.ts",

@@ -1,7 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { can } from "@qmenut/permissions";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { CategoryEditorView } from "@pages/menu/category-editor-view";
+import { CategoryEditorPage } from "~/features/menu/pages/menu-pages";
 
 export const Route = createFileRoute("/_auth/menu/categories/new")({
-  component: () => <CategoryEditorView />,
+  beforeLoad: ({ context }) => {
+    if (!can(context.roleCode, "menu.write")) redirect({ to: "/menu", throw: true });
+  },
+  component: () => <CategoryEditorPage />,
 });

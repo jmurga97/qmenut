@@ -8,6 +8,8 @@ export interface TenantContext {
   theme: QmTenantThemeConfig;
 }
 
+const clientTenantContextCache: { promise?: Promise<TenantContext> } = {};
+
 async function readTenantThemeFromKv(host: string): Promise<unknown> {
   if (!host) {
     return null;
@@ -31,3 +33,14 @@ export const getTenantContext = createServerFn({ method: "GET" }).handler(async 
 
   return { host, theme: resolveTenantThemeConfig(raw) };
 });
+
+/** Reuses immutable tenant configuration for client navigations, never across SSR requests. */
+export function getCachedTenantContext(): Promise<TenantContext> {
+  if (typeof window === "undefined") {
+    return getTenantContext();
+  }
+
+  clientTenantContextCache.promise ??= getTenantContext();
+
+  return clientTenantContextCache.promise;
+}

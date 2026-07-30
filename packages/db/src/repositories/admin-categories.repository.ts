@@ -3,6 +3,7 @@ import { and, asc, eq, isNull } from "drizzle-orm";
 import { categories } from "../schema/menu";
 
 import type { DrizzleDb } from "../client";
+import type { BatchItem } from "drizzle-orm/batch";
 
 export interface AdminCategory {
   id: string;
@@ -91,7 +92,7 @@ export async function getCategoryTranslatableFields({
   const row = await db
     .select({ name: categories.name, description: categories.description })
     .from(categories)
-    .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId)))
+    .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId), isNull(categories.deletedAt)))
     .get();
 
   return row ?? null;
@@ -104,8 +105,13 @@ interface UpdateCategoryInput {
   data: CategoryWriteData;
 }
 
-export async function updateCategory({ db, restaurantId, categoryId, data }: UpdateCategoryInput): Promise<void> {
-  await db
+export function updateCategoryStatement({
+  db,
+  restaurantId,
+  categoryId,
+  data,
+}: UpdateCategoryInput): BatchItem<"sqlite"> {
+  return db
     .update(categories)
     .set({
       name: data.name,
@@ -115,7 +121,7 @@ export async function updateCategory({ db, restaurantId, categoryId, data }: Upd
       isActive: data.isActive,
       updatedAt: Date.now(),
     })
-    .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId)));
+    .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId), isNull(categories.deletedAt)));
 }
 
 interface GetCategoryBranchIdInput {

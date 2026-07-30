@@ -1,13 +1,13 @@
 /**
- * Curated catalog of the font families QMenut self-hosts (via @fontsource in the consuming
- * app — see `apps/web/src/app/fonts.css`). A tenant may pick a `headingFont` and/or a
+ * Curated catalog of the font families QMenut self-hosts (see `apps/web/src/app/fonts/`). A
+ * tenant may pick a `headingFont` and/or a
  * `bodyFont` by catalog id; the theme engine resolves the id to its CSS `stack` and feeds it
  * into `--qm-heading` / `--qm-body` (see `theme/apply-theme.ts`). Anything not chosen falls
  * back to the template preset's own `heading` / `body` string.
  *
- * Keep this list in sync with the @fontsource imports in `apps/web/src/app/fonts.css`: every
+ * Keep this list in sync with the vendored family CSS files in `apps/web/src/app/fonts/`: every
  * catalog `stack` must have its faces loaded there, and each entry's `weights` must match the
- * weights imported (so callers never request a weight that renders as faux-bold).
+ * weights declared there (so callers never request a weight that renders as faux-bold).
  */
 export const QM_FONT_IDS = [
   "cormorant-garamond",
@@ -129,7 +129,7 @@ export const QM_FONT_CATALOG: Record<QmFontId, QmFontCatalogEntry> = {
 };
 
 function isFontId(value: unknown): value is QmFontId {
-  return typeof value === "string" && value in QM_FONT_CATALOG;
+  return typeof value === "string" && Object.hasOwn(QM_FONT_CATALOG, value);
 }
 
 /** Resolves a catalog id to its CSS `font-family` stack, or `undefined` if not a known id. */

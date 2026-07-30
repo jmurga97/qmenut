@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: 3:2 landing-page scene still and Seedance first frame
+Primary request: Create the opening qmenut restaurant-world diorama.
+Style/medium: Isometric glossy vinyl-toy 3D diorama floating as a small rounded island on a plain solid #EFEFEF background with a soft contact shadow beneath it. Smooth molded-resin forms, polished lacquer, subtle chrome highlights, rounded collectible-toy geometry, gentle cool studio lighting, soft long shadows, tilt-shift miniature look. Cohesive palette only: ink navy #02132E, royal blue #325A9F, lavender #A190BA, slate blue #556C97, porcelain #EFEFEF, sky blue #BAD5F6. Highly detailed, centered composition, absolutely no text, no letters, no numbers, no logos, no neon grid, no warm clay colors.
+Subject: A charismatic modern independent restaurant as a complete tiny world. Show a glossy navy facade, a cutaway dining room, a small terrace with guests, and an upright blank dark-glass digital menu portal integrated beside the entrance. A subtle polished orbit ring around the island suggests its own domain. A small square QR-like mosaic tile sits near the entrance without readable characters. A sky-blue route ribbon exits the back of the island, suggesting this world continues.
+Composition/framing: Wide 3:2 landscape, centered island, generous porcelain negative space around it, focal restaurant fully inside the middle 65% of the frame.
+Lighting/mood: Confident, premium, friendly, cool studio light with crisp chrome glints.
+Constraints: No readable interface, no brand marks, no typography, no labels, no watermark.

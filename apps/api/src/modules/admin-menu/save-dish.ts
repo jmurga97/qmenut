@@ -1,16 +1,17 @@
-import { TRPCError } from "@trpc/server";
 import {
   categoryBelongsToBranch,
   createDish,
   getDishTranslatableFields,
-  updateDish,
+  updateDishStatement,
 } from "@qmenut/db/repositories/admin-dishes.repository";
-import { markTranslationsPendingUpdate } from "@qmenut/db/repositories/translations.repository";
+import { markTranslationsPendingUpdateStatement } from "@qmenut/db/repositories/translations.repository";
+import { TRPCError } from "@trpc/server";
 
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 import type { DishWriteData } from "@qmenut/db/repositories/admin-dishes.repository";
+import type { BatchItem } from "drizzle-orm/batch";
 
 interface SaveDishInput {
   db: DrizzleDb;
@@ -31,13 +32,11 @@ export async function saveDish({ db, restaurantId, branchId, dishId, data }: Sav
   const categoryOk = await categoryBelongsToBranch({ db, branchId, categoryId: data.categoryId });
 
   if (!categoryOk) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "Category does not belong to this branch" });
+    throw new TRPCError({ code: "BAD_REQUEST", message: "La categoría no pertenece a esta sucursal" });
   }
 
   if (dishId) {
     const previous = await getDishTranslatableFields({ db, dishId, restaurantId });
-
-    await updateDish({ db, restaurantId, dishId, data });
 
     const changedFields = ["name", "description"].filter(
       (field) =>
@@ -45,15 +44,23 @@ export async function saveDish({ db, restaurantId, branchId, dishId, data }: Sav
         (field === "description" && previous?.description !== data.description),
     );
 
+    const statements: [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] = [
+      updateDishStatement({ db, restaurantId, dishId, data }),
+    ];
+
     if (changedFields.length > 0) {
-      await markTranslationsPendingUpdate({
-        db,
-        entityId: dishId,
-        entityType: "dish",
-        fields: changedFields,
-        restaurantId,
-      });
+      statements.push(
+        markTranslationsPendingUpdateStatement({
+          db,
+          entityId: dishId,
+          entityType: "dish",
+          fields: changedFields,
+          restaurantId,
+        }),
+      );
     }
+
+    await db.batch(statements);
 
     return { id: dishId };
   }

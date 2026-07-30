@@ -5,8 +5,21 @@ import { translations } from "../schema/translations";
 import type { DrizzleDb } from "../client";
 import type { ResolvedTenant } from "../domain/tenant";
 import type { PublicTranslation } from "../models/translation";
+import type { BatchItem } from "drizzle-orm/batch";
 
-export type TranslationEntityType = (typeof translations.entityType.enumValues)[number];
+export const TRANSLATION_ENTITY_TYPES = translations.entityType.enumValues;
+export type TranslationEntityType = (typeof TRANSLATION_ENTITY_TYPES)[number];
+export type TranslationField = "description" | "name";
+
+/** Which fields each entity actually has a column for. `translations.field` is free text —
+ * this is the only guard against writing a row no editor will ever show. */
+export const TRANSLATABLE_FIELDS = {
+  category: ["name", "description"],
+  dish: ["name", "description"],
+  ingredient: ["name"],
+  variant_group: ["name"],
+  variant_option: ["name"],
+} as const satisfies Record<TranslationEntityType, readonly TranslationField[]>;
 export type TranslationSource = (typeof translations.source.enumValues)[number];
 export type TranslationStatus = (typeof translations.status.enumValues)[number];
 
@@ -109,11 +122,17 @@ export async function upsertTranslations({ db, restaurantId, rows }: UpsertTrans
   }
 
   const now = Date.now();
+  const chunks = Array.from({ length: Math.ceil(rows.length / UPSERT_CHUNK_SIZE) }, (_, index) =>
+    rows.slice(index * UPSERT_CHUNK_SIZE, (index + 1) * UPSERT_CHUNK_SIZE),
+  );
+  const [firstChunk, ...remainingChunks] = chunks;
 
-  for (let index = 0; index < rows.length; index += UPSERT_CHUNK_SIZE) {
-    const chunk = rows.slice(index, index + UPSERT_CHUNK_SIZE);
+  if (!firstChunk) {
+    return;
+  }
 
-    await db
+  const statementFor = (chunk: TranslationUpsert[]) =>
+    db
       .insert(translations)
       .values(
         chunk.map((row) => ({
@@ -139,7 +158,8 @@ export async function upsertTranslations({ db, restaurantId, rows }: UpsertTrans
           updatedAt: sql`excluded.updated_at`,
         },
       });
-  }
+
+  await db.batch([statementFor(firstChunk), ...remainingChunks.map((chunk) => statementFor(chunk))]);
 }
 
 interface MarkTranslationsPendingUpdateInput {
@@ -150,18 +170,14 @@ interface MarkTranslationsPendingUpdateInput {
   restaurantId: string;
 }
 
-export async function markTranslationsPendingUpdate({
+export function markTranslationsPendingUpdateStatement({
   db,
   entityId,
   entityType,
   fields,
   restaurantId,
-}: MarkTranslationsPendingUpdateInput): Promise<void> {
-  if (fields.length === 0) {
-    return;
-  }
-
-  await db
+}: MarkTranslationsPendingUpdateInput): BatchItem<"sqlite"> {
+  return db
     .update(translations)
     .set({ status: "pending_update", updatedAt: Date.now() })
     .where(
@@ -180,12 +196,12 @@ interface DeleteTranslationsForLanguageInput {
   restaurantId: string;
 }
 
-export async function deleteTranslationsForLanguage({
+export function deleteTranslationsForLanguageStatement({
   db,
   languageCode,
   restaurantId,
-}: DeleteTranslationsForLanguageInput): Promise<void> {
-  await db
+}: DeleteTranslationsForLanguageInput): BatchItem<"sqlite"> {
+  return db
     .delete(translations)
     .where(and(eq(translations.restaurantId, restaurantId), eq(translations.languageCode, languageCode)));
 }

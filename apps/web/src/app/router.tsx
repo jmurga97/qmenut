@@ -7,7 +7,13 @@ import { createI18nInstance } from "~/lib/i18n/create-i18n";
 import { createTrpcOptionsProxy } from "~/lib/trpc-client";
 
 function createQueryClient() {
-  return new QueryClient();
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60_000,
+      },
+    },
+  });
 }
 
 export function getRouter() {

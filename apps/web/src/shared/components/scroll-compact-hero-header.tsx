@@ -1,4 +1,4 @@
-import { QmHeroHeader } from "@qmenut/ui/react";
+import { QmHeroHeader } from "@qmenut/ui/components/qm-hero-header/react";
 import { useEffect, useState } from "react";
 
 import type { ComponentProps, RefObject } from "react";
@@ -30,6 +30,11 @@ export function ScrollCompactHeroHeader({ scrollContainerRef, ...heroHeaderProps
     const sentinel = document.createElement("div");
     sentinel.setAttribute("aria-hidden", "true");
     sentinel.style.height = "1px";
+    // `@qmenut/db`'s `/// <reference types="@cloudflare/workers-types" />` globally merges its
+    // own `Element.prepend(content: string | Response | ReadableStream)` into this app's DOM
+    // lib, shadowing `Element.prepend(...nodes)` — so `container.prepend(sentinel)` fails to
+    // typecheck here even though it's the correct modern API.
+    // eslint-disable-next-line unicorn/prefer-modern-dom-apis
     container.insertAdjacentElement("afterbegin", sentinel);
 
     const observer = new IntersectionObserver(([entry]) => setCompact(!entry.isIntersecting), {

@@ -21,6 +21,12 @@
       "id": "0f5d31e6c4a94b0f8a2d7c1b3e9f6a01",
     },
   ],
+  "services": [
+    {
+      "binding": "API_WORKER",
+      "service": "qmenut-api",
+    },
+  ],
   "vars": {
     "TENANT_HOST": "",
     "SENTRY_DSN": "",

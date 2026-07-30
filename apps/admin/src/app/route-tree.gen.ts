@@ -16,14 +16,18 @@ import { Route as AuthThemeRouteImport } from './routes/_auth.theme'
 import { Route as AuthQrRouteImport } from './routes/_auth.qr'
 import { Route as AuthPromotionsRouteImport } from './routes/_auth.promotions'
 import { Route as AuthMenuRouteImport } from './routes/_auth.menu'
+import { Route as AuthLoyaltyRouteImport } from './routes/_auth.loyalty'
 import { Route as AuthLanguagesRouteImport } from './routes/_auth.languages'
 import { Route as AuthBranchRouteImport } from './routes/_auth.branch'
 import { Route as AuthBillingRouteImport } from './routes/_auth.billing'
 import { Route as AuthPromotionsIndexRouteImport } from './routes/_auth.promotions.index'
 import { Route as AuthMenuIndexRouteImport } from './routes/_auth.menu.index'
+import { Route as AuthLoyaltyIndexRouteImport } from './routes/_auth.loyalty.index'
 import { Route as AuthLanguagesIndexRouteImport } from './routes/_auth.languages.index'
 import { Route as AuthPromotionsNewRouteImport } from './routes/_auth.promotions.new'
 import { Route as AuthPromotionsPromotionIdRouteImport } from './routes/_auth.promotions.$promotionId'
+import { Route as AuthLoyaltyProgramRouteImport } from './routes/_auth.loyalty.program'
+import { Route as AuthLoyaltyInsightsRouteImport } from './routes/_auth.loyalty.insights'
 import { Route as AuthLanguagesLanguageCodeRouteImport } from './routes/_auth.languages.$languageCode'
 import { Route as AuthMenuDishesNewRouteImport } from './routes/_auth.menu.dishes.new'
 import { Route as AuthMenuDishesDishIdRouteImport } from './routes/_auth.menu.dishes.$dishId'
@@ -64,6 +68,11 @@ const AuthMenuRoute = AuthMenuRouteImport.update({
   path: '/menu',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthLoyaltyRoute = AuthLoyaltyRouteImport.update({
+  id: '/loyalty',
+  path: '/loyalty',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthLanguagesRoute = AuthLanguagesRouteImport.update({
   id: '/languages',
   path: '/languages',
@@ -89,6 +98,11 @@ const AuthMenuIndexRoute = AuthMenuIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthMenuRoute,
 } as any)
+const AuthLoyaltyIndexRoute = AuthLoyaltyIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthLoyaltyRoute,
+} as any)
 const AuthLanguagesIndexRoute = AuthLanguagesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -105,6 +119,16 @@ const AuthPromotionsPromotionIdRoute =
     path: '/$promotionId',
     getParentRoute: () => AuthPromotionsRoute,
   } as any)
+const AuthLoyaltyProgramRoute = AuthLoyaltyProgramRouteImport.update({
+  id: '/program',
+  path: '/program',
+  getParentRoute: () => AuthLoyaltyRoute,
+} as any)
+const AuthLoyaltyInsightsRoute = AuthLoyaltyInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => AuthLoyaltyRoute,
+} as any)
 const AuthLanguagesLanguageCodeRoute =
   AuthLanguagesLanguageCodeRouteImport.update({
     id: '/$languageCode',
@@ -139,14 +163,18 @@ export interface FileRoutesByFullPath {
   '/billing': typeof AuthBillingRoute
   '/branch': typeof AuthBranchRoute
   '/languages': typeof AuthLanguagesRouteWithChildren
+  '/loyalty': typeof AuthLoyaltyRouteWithChildren
   '/menu': typeof AuthMenuRouteWithChildren
   '/promotions': typeof AuthPromotionsRouteWithChildren
   '/qr': typeof AuthQrRoute
   '/theme': typeof AuthThemeRoute
   '/languages/$languageCode': typeof AuthLanguagesLanguageCodeRoute
+  '/loyalty/insights': typeof AuthLoyaltyInsightsRoute
+  '/loyalty/program': typeof AuthLoyaltyProgramRoute
   '/promotions/$promotionId': typeof AuthPromotionsPromotionIdRoute
   '/promotions/new': typeof AuthPromotionsNewRoute
   '/languages/': typeof AuthLanguagesIndexRoute
+  '/loyalty/': typeof AuthLoyaltyIndexRoute
   '/menu/': typeof AuthMenuIndexRoute
   '/promotions/': typeof AuthPromotionsIndexRoute
   '/menu/categories/$categoryId': typeof AuthMenuCategoriesCategoryIdRoute
@@ -162,9 +190,12 @@ export interface FileRoutesByTo {
   '/theme': typeof AuthThemeRoute
   '/': typeof AuthIndexRoute
   '/languages/$languageCode': typeof AuthLanguagesLanguageCodeRoute
+  '/loyalty/insights': typeof AuthLoyaltyInsightsRoute
+  '/loyalty/program': typeof AuthLoyaltyProgramRoute
   '/promotions/$promotionId': typeof AuthPromotionsPromotionIdRoute
   '/promotions/new': typeof AuthPromotionsNewRoute
   '/languages': typeof AuthLanguagesIndexRoute
+  '/loyalty': typeof AuthLoyaltyIndexRoute
   '/menu': typeof AuthMenuIndexRoute
   '/promotions': typeof AuthPromotionsIndexRoute
   '/menu/categories/$categoryId': typeof AuthMenuCategoriesCategoryIdRoute
@@ -179,15 +210,19 @@ export interface FileRoutesById {
   '/_auth/billing': typeof AuthBillingRoute
   '/_auth/branch': typeof AuthBranchRoute
   '/_auth/languages': typeof AuthLanguagesRouteWithChildren
+  '/_auth/loyalty': typeof AuthLoyaltyRouteWithChildren
   '/_auth/menu': typeof AuthMenuRouteWithChildren
   '/_auth/promotions': typeof AuthPromotionsRouteWithChildren
   '/_auth/qr': typeof AuthQrRoute
   '/_auth/theme': typeof AuthThemeRoute
   '/_auth/': typeof AuthIndexRoute
   '/_auth/languages/$languageCode': typeof AuthLanguagesLanguageCodeRoute
+  '/_auth/loyalty/insights': typeof AuthLoyaltyInsightsRoute
+  '/_auth/loyalty/program': typeof AuthLoyaltyProgramRoute
   '/_auth/promotions/$promotionId': typeof AuthPromotionsPromotionIdRoute
   '/_auth/promotions/new': typeof AuthPromotionsNewRoute
   '/_auth/languages/': typeof AuthLanguagesIndexRoute
+  '/_auth/loyalty/': typeof AuthLoyaltyIndexRoute
   '/_auth/menu/': typeof AuthMenuIndexRoute
   '/_auth/promotions/': typeof AuthPromotionsIndexRoute
   '/_auth/menu/categories/$categoryId': typeof AuthMenuCategoriesCategoryIdRoute
@@ -203,14 +238,18 @@ export interface FileRouteTypes {
     | '/billing'
     | '/branch'
     | '/languages'
+    | '/loyalty'
     | '/menu'
     | '/promotions'
     | '/qr'
     | '/theme'
     | '/languages/$languageCode'
+    | '/loyalty/insights'
+    | '/loyalty/program'
     | '/promotions/$promotionId'
     | '/promotions/new'
     | '/languages/'
+    | '/loyalty/'
     | '/menu/'
     | '/promotions/'
     | '/menu/categories/$categoryId'
@@ -226,9 +265,12 @@ export interface FileRouteTypes {
     | '/theme'
     | '/'
     | '/languages/$languageCode'
+    | '/loyalty/insights'
+    | '/loyalty/program'
     | '/promotions/$promotionId'
     | '/promotions/new'
     | '/languages'
+    | '/loyalty'
     | '/menu'
     | '/promotions'
     | '/menu/categories/$categoryId'
@@ -242,15 +284,19 @@ export interface FileRouteTypes {
     | '/_auth/billing'
     | '/_auth/branch'
     | '/_auth/languages'
+    | '/_auth/loyalty'
     | '/_auth/menu'
     | '/_auth/promotions'
     | '/_auth/qr'
     | '/_auth/theme'
     | '/_auth/'
     | '/_auth/languages/$languageCode'
+    | '/_auth/loyalty/insights'
+    | '/_auth/loyalty/program'
     | '/_auth/promotions/$promotionId'
     | '/_auth/promotions/new'
     | '/_auth/languages/'
+    | '/_auth/loyalty/'
     | '/_auth/menu/'
     | '/_auth/promotions/'
     | '/_auth/menu/categories/$categoryId'
@@ -315,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMenuRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/loyalty': {
+      id: '/_auth/loyalty'
+      path: '/loyalty'
+      fullPath: '/loyalty'
+      preLoaderRoute: typeof AuthLoyaltyRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/languages': {
       id: '/_auth/languages'
       path: '/languages'
@@ -350,6 +403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMenuIndexRouteImport
       parentRoute: typeof AuthMenuRoute
     }
+    '/_auth/loyalty/': {
+      id: '/_auth/loyalty/'
+      path: '/'
+      fullPath: '/loyalty/'
+      preLoaderRoute: typeof AuthLoyaltyIndexRouteImport
+      parentRoute: typeof AuthLoyaltyRoute
+    }
     '/_auth/languages/': {
       id: '/_auth/languages/'
       path: '/'
@@ -370,6 +430,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/promotions/$promotionId'
       preLoaderRoute: typeof AuthPromotionsPromotionIdRouteImport
       parentRoute: typeof AuthPromotionsRoute
+    }
+    '/_auth/loyalty/program': {
+      id: '/_auth/loyalty/program'
+      path: '/program'
+      fullPath: '/loyalty/program'
+      preLoaderRoute: typeof AuthLoyaltyProgramRouteImport
+      parentRoute: typeof AuthLoyaltyRoute
+    }
+    '/_auth/loyalty/insights': {
+      id: '/_auth/loyalty/insights'
+      path: '/insights'
+      fullPath: '/loyalty/insights'
+      preLoaderRoute: typeof AuthLoyaltyInsightsRouteImport
+      parentRoute: typeof AuthLoyaltyRoute
     }
     '/_auth/languages/$languageCode': {
       id: '/_auth/languages/$languageCode'
@@ -423,6 +497,22 @@ const AuthLanguagesRouteWithChildren = AuthLanguagesRoute._addFileChildren(
   AuthLanguagesRouteChildren,
 )
 
+interface AuthLoyaltyRouteChildren {
+  AuthLoyaltyInsightsRoute: typeof AuthLoyaltyInsightsRoute
+  AuthLoyaltyProgramRoute: typeof AuthLoyaltyProgramRoute
+  AuthLoyaltyIndexRoute: typeof AuthLoyaltyIndexRoute
+}
+
+const AuthLoyaltyRouteChildren: AuthLoyaltyRouteChildren = {
+  AuthLoyaltyInsightsRoute: AuthLoyaltyInsightsRoute,
+  AuthLoyaltyProgramRoute: AuthLoyaltyProgramRoute,
+  AuthLoyaltyIndexRoute: AuthLoyaltyIndexRoute,
+}
+
+const AuthLoyaltyRouteWithChildren = AuthLoyaltyRoute._addFileChildren(
+  AuthLoyaltyRouteChildren,
+)
+
 interface AuthMenuRouteChildren {
   AuthMenuIndexRoute: typeof AuthMenuIndexRoute
   AuthMenuCategoriesCategoryIdRoute: typeof AuthMenuCategoriesCategoryIdRoute
@@ -463,6 +553,7 @@ interface AuthRouteChildren {
   AuthBillingRoute: typeof AuthBillingRoute
   AuthBranchRoute: typeof AuthBranchRoute
   AuthLanguagesRoute: typeof AuthLanguagesRouteWithChildren
+  AuthLoyaltyRoute: typeof AuthLoyaltyRouteWithChildren
   AuthMenuRoute: typeof AuthMenuRouteWithChildren
   AuthPromotionsRoute: typeof AuthPromotionsRouteWithChildren
   AuthQrRoute: typeof AuthQrRoute
@@ -474,6 +565,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthBillingRoute: AuthBillingRoute,
   AuthBranchRoute: AuthBranchRoute,
   AuthLanguagesRoute: AuthLanguagesRouteWithChildren,
+  AuthLoyaltyRoute: AuthLoyaltyRouteWithChildren,
   AuthMenuRoute: AuthMenuRouteWithChildren,
   AuthPromotionsRoute: AuthPromotionsRouteWithChildren,
   AuthQrRoute: AuthQrRoute,

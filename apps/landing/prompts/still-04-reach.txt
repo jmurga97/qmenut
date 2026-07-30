@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: 3:2 landing-page scene still and Seedance first frame
+Primary request: Create the qmenut multilingual and multi-location reach diorama.
+Style/medium: Isometric glossy vinyl-toy 3D diorama floating as a small rounded island on a plain solid #EFEFEF background with a soft contact shadow beneath it. Smooth molded-resin forms, polished lacquer, subtle chrome highlights, rounded collectible-toy geometry, gentle cool studio lighting, soft long shadows, tilt-shift miniature look. Cohesive palette only: ink navy #02132E, royal blue #325A9F, lavender #A190BA, slate blue #556C97, porcelain #EFEFEF, sky blue #BAD5F6. Highly detailed, centered composition, absolutely no text, no letters, no numbers, no logos, no neon grid, no warm clay colors.
+Subject: A friendly miniature hospitality globe at the center of one rounded island, surrounded by three distinct branch restaurants connected to a single elegant control table. Diverse toy diners scan blank QR mosaic tiles and receive matching menu screens. Several blank speech bubbles in different shapes pass through a lavender translation carousel, then return to the menus with small review check lights. Polished map pins and orbit paths show multiple locations managed together.
+Composition/framing: Wide 3:2 landscape, globe and control table centered, branch restaurants arranged in a clear orbit with ample negative space and no edge-cropped essentials.
+Lighting/mood: Welcoming, international, effortless, bright cool studio light.
+Constraints: No flags, no readable interface, no brand marks, no typography, no labels, no watermark.

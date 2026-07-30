@@ -45,13 +45,11 @@ export class QmFeatured extends LitElement {
   photoUrl?: string;
 
   render() {
+    const photoImage = this.photoUrl ? html`<img src=${this.photoUrl} alt="" />` : nothing;
+
     return html`
       <div part="card" class="card">
-        ${this.photo
-          ? html`<span part="photo" class="photo"
-              >${this.photoUrl ? html`<img src=${this.photoUrl} alt="" />` : nothing}</span
-            >`
-          : nothing}
+        ${this.photo ? html` <span part="photo" class="photo">${photoImage}</span> ` : nothing}
         <div class="body">
           <div part="tag" class="tag">${this.tag}</div>
           <div part="name" class="name">${this.name}</div>

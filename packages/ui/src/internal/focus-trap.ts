@@ -30,7 +30,7 @@ export class FocusTrap {
   }
 
   private getFocusableElements(): HTMLElement[] {
-    return Array.from(this.root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+    return [...this.root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)];
   }
 
   private readonly handleKeydown = (event: KeyboardEvent): void => {
@@ -40,11 +40,9 @@ export class FocusTrap {
     if (focusable.length === 0) return;
 
     const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const active =
-      this.root.getRootNode() instanceof ShadowRoot
-        ? (this.root.getRootNode() as ShadowRoot).activeElement
-        : document.activeElement;
+    const last = focusable.at(-1)!;
+    const rootNode = this.root.getRootNode();
+    const active = (rootNode instanceof ShadowRoot ? rootNode : document).activeElement;
 
     if (event.shiftKey && active === first) {
       event.preventDefault();

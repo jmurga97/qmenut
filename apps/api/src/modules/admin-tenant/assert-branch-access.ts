@@ -1,7 +1,7 @@
-import { TRPCError } from "@trpc/server";
 import { getBranch } from "@qmenut/db/repositories/admin-branches.repository";
+import { TRPCError } from "@trpc/server";
 
-import type { DrizzleDb } from "@qmenut/db";
+import type { DrizzleDb } from "@qmenut/db/client";
 
 interface AssertBranchAccessInput {
   db: DrizzleDb;
@@ -18,7 +18,7 @@ export async function assertBranchAccess({ db, restaurantId, branchId }: AssertB
   const branch = await getBranch({ db, restaurantId, branchId });
 
   if (!branch) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Branch not found" });
+    throw new TRPCError({ code: "NOT_FOUND", message: "Sucursal no encontrada" });
   }
 
   return branch;

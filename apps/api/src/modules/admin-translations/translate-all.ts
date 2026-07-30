@@ -1,14 +1,14 @@
-import { TRPCError } from "@trpc/server";
 import { collectTranslatableTexts } from "@qmenut/db/repositories/admin-translations.repository";
 import { listTranslationsForLanguage, upsertTranslations } from "@qmenut/db/repositories/translations.repository";
+import { TRPCError } from "@trpc/server";
 
 import { deeplTranslate } from "./deepl.service";
 import { getLanguageCatalogEntry } from "./language-catalog";
 import { sanitizeDescription } from "../public-menu/sanitize-description";
 
+import type { DrizzleDb } from "@qmenut/db/client";
 import type { TranslatableText } from "@qmenut/db/repositories/admin-translations.repository";
-import type { TranslationRow, TranslationUpsert } from "@qmenut/db/repositories/translations.repository";
-import type { DrizzleDb } from "@qmenut/db";
+import type { TranslationRow } from "@qmenut/db/repositories/translations.repository";
 
 const DEEPL_BATCH_SIZE = 50;
 
@@ -60,7 +60,7 @@ export async function translateAll({
   restaurantId,
 }: TranslateAllInput): Promise<TranslateAllResult> {
   if (!deeplApiKey) {
-    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "DeepL API key is not configured" });
+    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "La clave de API de DeepL no está configurada" });
   }
 
   const catalogEntry = getLanguageCatalogEntry(languageCode);
@@ -68,7 +68,7 @@ export async function translateAll({
   if (!catalogEntry?.deeplTarget) {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: `DeepL does not support "${languageCode}" — translate this language manually`,
+      message: `DeepL no admite "${languageCode}"; traduce este idioma manualmente`,
     });
   }
 
@@ -90,8 +90,8 @@ export async function translateAll({
   );
   const nameItems = toTranslate.filter((item) => item.field === "name");
   const descriptionItems = toTranslate.filter((item) => item.field === "description");
-  const rows: TranslationUpsert[] = [];
   let batches = 0;
+  let translated = 0;
 
   async function translateBatches(items: TranslatableText[], tagHandling: "html" | undefined) {
     for (const batchItems of chunk(items, DEEPL_BATCH_SIZE)) {
@@ -104,34 +104,31 @@ export async function translateAll({
       });
 
       batches += 1;
-
-      batchItems.forEach((item, index) => {
-        const value = outputs[index];
-
-        if (value === undefined) {
-          return;
-        }
-
-        rows.push({
+      // Flush per batch: D1 has no interactive transactions, so a later batch failing must
+      // not discard translations we already paid DeepL for. Upserts are idempotent on
+      // ux_translations_lookup, so a retry is safe.
+      await upsertTranslations({
+        db,
+        restaurantId,
+        rows: batchItems.map((item, index) => ({
           entityId: item.entityId,
           entityType: item.entityType,
           field: item.field,
           languageCode,
-          source: "machine",
-          value: item.field === "description" ? sanitizeDescription(value) : value,
-        });
+          source: "machine" as const,
+          value: item.field === "description" ? sanitizeDescription(outputs[index]) : outputs[index],
+        })),
       });
+      translated += batchItems.length;
     }
   }
 
   await translateBatches(nameItems, undefined);
   await translateBatches(descriptionItems, "html");
 
-  await upsertTranslations({ db, restaurantId, rows });
-
   return {
     batches,
     skipped: texts.length - toTranslate.length,
-    translated: rows.length,
+    translated,
   };
 }

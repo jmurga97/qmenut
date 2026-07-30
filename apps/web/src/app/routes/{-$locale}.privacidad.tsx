@@ -1,11 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { PrivacyPage } from "~/features/legal/pages/privacy-page";
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
-import { ISR_CACHE_CONTROL } from "~/lib/isr";
+import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 
 export const Route = createFileRoute("/{-$locale}/privacidad")({
+  beforeLoad: ({ params }) => {
+    const locale = params.locale?.toLowerCase();
+
+    if (locale && locale !== "en" && locale !== "es") {
+      redirect({ to: ".", params: { locale: "es" }, throw: true });
+    }
+  },
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
       getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
@@ -17,8 +24,8 @@ export const Route = createFileRoute("/{-$locale}/privacidad")({
 
     const origin = `https://${match.context.tenant.host}`;
     const canonicalUrl = `${origin}${match.pathname}`;
-    const title = `Política de privacidad – ${loaderData.branch.name}`;
-    const description = `Política de privacidad y protección de datos de ${loaderData.branch.name}`;
+    const title = match.context.i18n.t("legal.privacy.seoTitle", { name: loaderData.branch.name });
+    const description = match.context.i18n.t("legal.privacy.seoDescription", { name: loaderData.branch.name });
 
     return {
       meta: [
@@ -31,14 +38,17 @@ export const Route = createFileRoute("/{-$locale}/privacidad")({
       ],
       links: [
         { rel: "canonical", href: canonicalUrl },
-        ...buildHreflangAlternates({ language: loaderData.language, origin, path: "/privacidad" }).map(
-          ({ hreflang, href }) => ({ rel: "alternate", hrefLang: hreflang, href }),
-        ),
+        ...buildHreflangAlternates({
+          allowedLocales: ["es", "en"],
+          language: loaderData.language,
+          origin,
+          path: "/privacidad",
+        }).map(({ hreflang, href }) => ({ rel: "alternate", hrefLang: hreflang, href })),
       ],
     };
   },
   headers: () => ({
-    "Cache-Control": ISR_CACHE_CONTROL,
+    "Cache-Control": BROWSER_CACHE_CONTROL,
   }),
   component: PrivacyPage,
 });

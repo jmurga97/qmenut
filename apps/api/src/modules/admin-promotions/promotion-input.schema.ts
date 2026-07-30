@@ -25,6 +25,8 @@ export const promotionWriteSchema = z
     description: nullableText,
     percentage: z.number().int().min(0).max(100).nullable().default(null),
     specialPrice: z.number().int().min(0).nullable().default(null),
+    buyQuantity: z.number().int().min(1).nullable().default(null),
+    paidQuantity: z.number().int().min(1).nullable().default(null),
     priority: z.number().int().min(0).default(0),
     startsAt: z.number().int().nullable().default(null),
     endsAt: z.number().int().nullable().default(null),
@@ -49,6 +51,24 @@ export const promotionWriteSchema = z
 
     if (data.type === "happy_hour" && data.percentage === null && data.specialPrice === null) {
       ctx.addIssue({ code: "custom", path: ["percentage"], message: "Indica un porcentaje o un precio" });
+    }
+
+    if (data.type === "two_for_one") {
+      if (data.buyQuantity === null) {
+        ctx.addIssue({ code: "custom", path: ["buyQuantity"], message: "Indica las unidades que lleva" });
+      }
+
+      if (data.paidQuantity === null) {
+        ctx.addIssue({ code: "custom", path: ["paidQuantity"], message: "Indica las unidades que paga" });
+      }
+
+      if (data.buyQuantity !== null && data.paidQuantity !== null && data.paidQuantity > data.buyQuantity) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["paidQuantity"],
+          message: "Las unidades pagadas no pueden superar las compradas",
+        });
+      }
     }
   });
 

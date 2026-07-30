@@ -1,20 +1,17 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { AdminShell } from "@components/shell/admin-shell";
-import { authClient } from "@lib/auth-client";
+import { authClient } from "~/lib/auth-client";
+import { getTenantQueryOptions } from "~/shared/api";
+import { AdminShell } from "~/shared/components/shell/admin-shell";
 
 export const Route = createFileRoute("/_auth")({
   component: AdminShell,
-  beforeLoad: async () => {
+  beforeLoad: async ({ context }) => {
     const { data: session } = await authClient.getSession();
-
     if (!session) {
       redirect({ to: "/login", throw: true });
     }
-
-    return { session };
-  },
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(context.trpc.admin.tenant.me.queryOptions());
+    const tenant = await context.queryClient.ensureQueryData(getTenantQueryOptions({ trpc: context.trpc }));
+    return { session, roleCode: tenant.roleCode };
   },
 });

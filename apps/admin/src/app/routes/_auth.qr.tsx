@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { QrCodeView } from "@pages/qr/qr-code-view";
+import { QrPage } from "~/features/qr/pages/qr-page";
 
 export const Route = createFileRoute("/_auth/qr")({
-  component: QrCodeView,
+  component: QrPage,
 });
