@@ -1,8 +1,24 @@
+import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
+import { useMemo } from "react";
+
+import { useTenantContext } from "~/shared/hooks/use-tenant-context";
+
 export function PublicPageSkeleton() {
   const rowCount = 5;
+  const { theme } = useTenantContext();
+  const themeVars = useMemo(
+    () =>
+      buildQmThemeVars({
+        ...theme,
+        template: theme.template,
+        primary: theme.primary,
+        secondary: theme.secondary,
+      }),
+    [theme],
+  );
 
   return (
-    <div className="home-shell">
+    <div className="home-shell" data-template={theme.template} style={themeVars}>
       <div className="home-column">
         <div className="hs-header">
           <div className="hs-bar hs-bar--topbar" />

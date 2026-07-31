@@ -2,12 +2,12 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: var(--qm-card, #fff);
-  border: var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8);
-  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-surface-bg, var(--qm-card, #fff));
+  border: var(--qm-surface-border, var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
   padding: 14px 16px;
   font-family: var(--qm-body, sans-serif);
-  box-shadow: var(--qm-card-shadow, none);
+  box-shadow: var(--qm-surface-shadow, var(--qm-card-shadow, none));
 }
 
 .pin {

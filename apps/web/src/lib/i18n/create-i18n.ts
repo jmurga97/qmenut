@@ -1,8 +1,8 @@
 import { createInstance } from "i18next";
 import { initReactI18next } from "react-i18next";
 
-import en from "./resources/en.json";
-import es from "./resources/es.json";
+import en from "./resources/en";
+import es from "./resources/es";
 
 import type { i18n as I18nInstance } from "i18next";
 

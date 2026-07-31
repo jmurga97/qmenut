@@ -4,7 +4,7 @@ import { TEMPLATES } from "./presets";
 
 import type { QmDerivedColors, QmThemeConfig } from "./derive";
 import type { QmFontId } from "./font-catalog";
-import type { QmBadgeShape, QmNavStyle, QmPhotoMode, QmTemplatePreset } from "./presets";
+import type { QmBadgeShape, QmLayoutRecipe, QmNavStyle, QmPhotoMode, QmTemplatePreset } from "./presets";
 
 /**
  * Tenant input: a template name + color overrides (`QmThemeConfig`), plus optional
@@ -97,6 +97,274 @@ const PHOTO_GROUPS: Record<QmPhotoMode, Record<string, string>> = {
     "--qm-modal-order-allergens": "3",
   },
 };
+
+interface BuildLayoutTokensArgs {
+  colors: QmDerivedColors;
+  recipe: QmLayoutRecipe;
+}
+
+function buildCourseLayoutTokens(colors: QmDerivedColors): Record<string, string> {
+  return {
+    "--qm-shell-pad-x": "24px",
+    "--qm-content-top": "20px",
+    "--qm-content-bottom": "32px",
+    "--qm-section-gap": "36px",
+    "--qm-list-gap": "20px",
+    "--qm-header-pad-x": "24px",
+    "--qm-header-pad-top": "24px",
+    "--qm-header-title-size": "34px",
+    "--qm-hero-scrim": "linear-gradient(180deg, rgba(15,11,8,.08), rgba(15,11,8,.62))",
+    "--qm-hero-name-size": "22px",
+    "--qm-hero-logo-radius": "0px",
+    "--qm-section-bg": "transparent",
+    "--qm-section-ink": colors.ink,
+    "--qm-section-muted": colors.muted,
+    "--qm-section-pad": "0 0 12px 14px",
+    "--qm-section-radius": "0px",
+    "--qm-section-border": "none",
+    "--qm-section-rail": `2px solid ${colors.accentInk}`,
+    "--qm-row-bg": "transparent",
+    "--qm-row-border": `1px solid ${colors.hairline}`,
+    "--qm-row-radius": "0px",
+    "--qm-row-pad-x": "0px",
+    "--qm-row-shadow": "none",
+    "--qm-row-stack-gap": "0px",
+    "--qm-row-name-size": "16px",
+    "--qm-row-price-size": "17px",
+    "--qm-row-photo-radius": "0px",
+    "--qm-featured-bg": "transparent",
+    "--qm-featured-border": `1px solid ${colors.ink}`,
+    "--qm-featured-cap": `1px solid ${colors.ink}`,
+    "--qm-featured-radius": "0px",
+    "--qm-featured-body-pad": "18px 0",
+    "--qm-featured-name-size": "21px",
+    "--qm-promo-discount-width": "54px",
+    "--qm-promo-body-pad": "16px 0 16px 18px",
+    "--qm-surface-radius": "0px",
+    "--qm-sheet-radius": "0px",
+    "--qm-sheet-photo-radius": "0px",
+    "--qm-category-radius": "0px",
+    "--qm-category-active-bg": "transparent",
+    "--qm-category-active-color": colors.ink,
+    "--qm-category-active-border": `1px solid ${colors.ink}`,
+  };
+}
+
+function buildArchiveLayoutTokens(colors: QmDerivedColors): Record<string, string> {
+  return {
+    "--qm-shell-pad-x": "18px",
+    "--qm-content-top": "16px",
+    "--qm-content-bottom": "28px",
+    "--qm-section-gap": "28px",
+    "--qm-list-gap": "16px",
+    "--qm-header-pad-x": "20px",
+    "--qm-header-pad-top": "22px",
+    "--qm-header-title-size": "32px",
+    "--qm-hero-scrim": "linear-gradient(180deg, rgba(25,16,10,.08), rgba(25,16,10,.66))",
+    "--qm-hero-name-size": "22px",
+    "--qm-hero-logo-radius": "3px",
+    "--qm-section-bg": colors.tint,
+    "--qm-section-ink": colors.ink,
+    "--qm-section-muted": colors.emphInk,
+    "--qm-section-pad": "12px 14px",
+    "--qm-section-radius": "3px",
+    "--qm-section-border": `1px solid ${colors.hairline}`,
+    "--qm-section-rail": `6px solid ${colors.secondary}`,
+    "--qm-row-bg": colors.card,
+    "--qm-row-border": `1px solid ${colors.hairline}`,
+    "--qm-row-radius": "3px",
+    "--qm-row-pad-x": "10px",
+    "--qm-row-shadow": "none",
+    "--qm-row-stack-gap": "8px",
+    "--qm-row-name-size": "15px",
+    "--qm-row-price-size": "17px",
+    "--qm-row-photo-radius": "1px",
+    "--qm-featured-bg": colors.card,
+    "--qm-featured-border": `1px solid ${colors.ink}`,
+    "--qm-featured-cap": `5px solid ${colors.secondary}`,
+    "--qm-featured-radius": "3px",
+    "--qm-featured-body-pad": "16px",
+    "--qm-featured-name-size": "19px",
+    "--qm-promo-discount-width": "72px",
+    "--qm-promo-body-pad": "14px 16px",
+    "--qm-surface-radius": "3px",
+    "--qm-sheet-radius": "18px",
+    "--qm-sheet-photo-radius": "0px",
+    "--qm-category-radius": "3px",
+    "--qm-category-active-bg": colors.secondary,
+    "--qm-category-active-color": colors.onSecondary,
+    "--qm-category-active-border": "1px solid transparent",
+  };
+}
+
+function buildCounterLayoutTokens(colors: QmDerivedColors): Record<string, string> {
+  return {
+    "--qm-shell-pad-x": "12px",
+    "--qm-content-top": "12px",
+    "--qm-content-bottom": "24px",
+    "--qm-section-gap": "20px",
+    "--qm-list-gap": "12px",
+    "--qm-header-pad-x": "16px",
+    "--qm-header-pad-top": "18px",
+    "--qm-header-title-size": "38px",
+    "--qm-hero-scrim": "linear-gradient(180deg, rgba(10,9,8,.04), rgba(10,9,8,.78))",
+    "--qm-hero-name-size": "26px",
+    "--qm-hero-logo-radius": "10px",
+    "--qm-section-bg": colors.primary,
+    "--qm-section-ink": colors.onPrimary,
+    "--qm-section-muted": mix(colors.onPrimary, 72, colors.primary),
+    "--qm-section-pad": "12px 14px",
+    "--qm-section-radius": "12px",
+    "--qm-section-border": "none",
+    "--qm-section-rail": `6px solid ${colors.secondary}`,
+    "--qm-row-bg": colors.card,
+    "--qm-row-border": "none",
+    "--qm-row-radius": "14px",
+    "--qm-row-pad-x": "12px",
+    "--qm-row-shadow": "0 8px 22px rgba(28,24,21,.09)",
+    "--qm-row-stack-gap": "10px",
+    "--qm-row-name-size": "17px",
+    "--qm-row-price-size": "20px",
+    "--qm-row-photo-radius": "10px",
+    "--qm-featured-bg": colors.card,
+    "--qm-featured-border": "none",
+    "--qm-featured-cap": `6px solid ${colors.secondary}`,
+    "--qm-featured-radius": "18px",
+    "--qm-featured-body-pad": "16px",
+    "--qm-featured-name-size": "24px",
+    "--qm-promo-discount-width": "86px",
+    "--qm-promo-body-pad": "16px",
+    "--qm-surface-radius": "16px",
+    "--qm-sheet-radius": "24px",
+    "--qm-sheet-photo-radius": "18px",
+    "--qm-category-radius": "999px",
+    "--qm-category-active-bg": colors.primary,
+    "--qm-category-active-color": colors.onPrimary,
+    "--qm-category-active-border": "1px solid transparent",
+    "--qm-surface-shadow": "0 12px 30px rgba(28,24,21,.10)",
+  };
+}
+
+function buildDailyLayoutTokens(colors: QmDerivedColors): Record<string, string> {
+  return {
+    "--qm-shell-pad-x": "18px",
+    "--qm-content-top": "18px",
+    "--qm-content-bottom": "30px",
+    "--qm-section-gap": "30px",
+    "--qm-list-gap": "16px",
+    "--qm-header-pad-x": "20px",
+    "--qm-header-pad-top": "20px",
+    "--qm-header-title-size": "31px",
+    "--qm-hero-scrim": "linear-gradient(180deg, rgba(30,22,16,.04), rgba(30,22,16,.56))",
+    "--qm-hero-name-size": "22px",
+    "--qm-hero-logo-radius": "50%",
+    "--qm-section-bg": "transparent",
+    "--qm-section-ink": colors.ink,
+    "--qm-section-muted": colors.muted,
+    "--qm-section-pad": "0 0 10px",
+    "--qm-section-radius": "0px",
+    "--qm-section-border": "none",
+    "--qm-section-rail": "none",
+    "--qm-row-bg": "transparent",
+    "--qm-row-border": "none",
+    "--qm-row-radius": "18px",
+    "--qm-row-pad-x": "0px",
+    "--qm-row-shadow": "none",
+    "--qm-row-stack-gap": "0px",
+    "--qm-row-name-size": "15px",
+    "--qm-row-price-size": "17px",
+    "--qm-row-photo-radius": "50%",
+    "--qm-featured-bg": colors.card,
+    "--qm-featured-border": `1px solid ${colors.hairline}`,
+    "--qm-featured-cap": "none",
+    "--qm-featured-radius": "22px",
+    "--qm-featured-body-pad": "18px",
+    "--qm-featured-name-size": "18px",
+    "--qm-promo-discount-width": "64px",
+    "--qm-promo-body-pad": "14px 16px",
+    "--qm-surface-radius": "20px",
+    "--qm-sheet-radius": "26px",
+    "--qm-sheet-photo-radius": "20px",
+    "--qm-category-radius": "999px",
+    "--qm-category-active-bg": colors.tint,
+    "--qm-category-active-color": colors.emphInk,
+    "--qm-category-active-border": "1px solid transparent",
+    "--qm-surface-shadow": "0 8px 24px rgba(54,43,34,.07)",
+  };
+}
+
+function buildBarLayoutTokens(colors: QmDerivedColors): Record<string, string> {
+  return {
+    "--qm-shell-pad-x": "18px",
+    "--qm-content-top": "14px",
+    "--qm-content-bottom": "24px",
+    "--qm-section-gap": "20px",
+    "--qm-list-gap": "12px",
+    "--qm-header-pad-x": "20px",
+    "--qm-header-pad-top": "20px",
+    "--qm-header-title-size": "32px",
+    "--qm-hero-scrim": "linear-gradient(180deg, rgba(20,12,8,.06), rgba(20,12,8,.70))",
+    "--qm-hero-name-size": "24px",
+    "--qm-hero-logo-radius": "2px",
+    "--qm-section-bg": "transparent",
+    "--qm-section-ink": colors.ink,
+    "--qm-section-muted": colors.muted,
+    "--qm-section-pad": "0 0 9px",
+    "--qm-section-radius": "0px",
+    "--qm-section-border": "none",
+    "--qm-section-rail": `4px solid ${colors.primary}`,
+    "--qm-row-bg": "transparent",
+    "--qm-row-border": `1px solid ${colors.hairline}`,
+    "--qm-row-radius": "0px",
+    "--qm-row-pad-x": "0px",
+    "--qm-row-shadow": "none",
+    "--qm-row-stack-gap": "0px",
+    "--qm-row-name-size": "16px",
+    "--qm-row-price-size": "19px",
+    "--qm-row-photo-radius": "2px",
+    "--qm-featured-bg": colors.card,
+    "--qm-featured-border": `1px solid ${colors.hairline}`,
+    "--qm-featured-cap": `3px solid ${colors.primary}`,
+    "--qm-featured-radius": "0px",
+    "--qm-featured-body-pad": "14px 16px",
+    "--qm-featured-name-size": "18px",
+    "--qm-promo-discount-width": "72px",
+    "--qm-promo-body-pad": "13px 15px",
+    "--qm-surface-radius": "2px",
+    "--qm-sheet-radius": "12px",
+    "--qm-sheet-photo-radius": "2px",
+    "--qm-category-radius": "2px",
+    "--qm-category-active-bg": colors.primary,
+    "--qm-category-active-color": colors.onPrimary,
+    "--qm-category-active-border": "1px solid transparent",
+  };
+}
+
+/**
+ * Structural recipes deliberately stay finite and governed. Components consume the expanded
+ * variables and never branch on a template name, which keeps the five identities distinct.
+ */
+function buildLayoutTokens({ colors, recipe }: BuildLayoutTokensArgs): Record<string, string> {
+  const shared = {
+    "--qm-shell-max": "430px",
+    "--qm-touch-min": "44px",
+    "--qm-nav-height": "64px",
+    "--qm-sheet-max": "720px",
+    "--qm-sheet-handle": colors.hairline,
+    "--qm-surface-bg": colors.card,
+    "--qm-surface-border": `1px solid ${colors.hairline}`,
+    "--qm-surface-shadow": "none",
+  };
+  const recipes: Record<QmLayoutRecipe, Record<string, string>> = {
+    archive: buildArchiveLayoutTokens(colors),
+    bar: buildBarLayoutTokens(colors),
+    counter: buildCounterLayoutTokens(colors),
+    course: buildCourseLayoutTokens(colors),
+    daily: buildDailyLayoutTokens(colors),
+  };
+
+  return { ...shared, ...recipes[recipe] };
+}
 
 interface BuildBadgeTokensArgs {
   shape: QmBadgeShape;
@@ -204,6 +472,7 @@ function resolveTemplate(input: QmThemeInput): QmTemplatePreset {
   const template = TEMPLATES[input.template];
   return {
     label: input.label ?? template.label,
+    layoutRecipe: input.layoutRecipe ?? template.layoutRecipe,
     headingFontId: template.headingFontId,
     bodyFontId: template.bodyFontId,
     // Catalog font pick wins, then any raw `heading`/`body` override, then the template preset.
@@ -298,6 +567,7 @@ export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
     "--qm-eyebrow-ls": `${resolved.eyebrowSpacing}px`,
     "--qm-dish-tt": resolved.dishCase ?? "none",
     ...buildTextScaleTokens(resolved.fontScale),
+    ...buildLayoutTokens({ colors, recipe: resolved.layoutRecipe }),
 
     "--qm-radius": `${resolved.radius}px`,
     "--qm-bw": `${resolved.borderWidth}px`,

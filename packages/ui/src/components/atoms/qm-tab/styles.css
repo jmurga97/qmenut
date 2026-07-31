@@ -5,19 +5,27 @@
 button {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  min-width: 0;
+  min-height: var(--qm-touch-min, 44px);
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
   border: none;
   cursor: pointer;
   background: transparent;
   font-family: var(--qm-body, sans-serif);
-  font-size: var(--qm-text-xs, 11px);
+  font-size: max(9px, var(--qm-text-2xs, 10px));
   font-weight: 800;
   letter-spacing: 0.4px;
   text-transform: uppercase;
-  padding: var(--qm-nav-active-pad, 6px 10px);
+  padding: 5px clamp(4px, 2.5vw, 12px);
   border-radius: var(--qm-nav-active-radius, 0px);
   color: var(--qm-nav-muted, #8c857b);
   border-bottom: 2px solid transparent;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    transform 100ms ease-out;
 }
 
 button[data-active="true"] {
@@ -30,4 +38,20 @@ button[data-active="true"] {
 .label {
   display: inline-flex;
   align-items: center;
+}
+
+.label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+button:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 1px;
 }

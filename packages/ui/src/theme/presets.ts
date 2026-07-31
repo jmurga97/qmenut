@@ -10,6 +10,7 @@ import type { QmFontId } from "./font-catalog";
  * defaults for the mobile-first client menu view.
  */
 export type QmTemplateName = "fine" | "her" | "fast" | "cafe" | "tapas";
+export type QmLayoutRecipe = "archive" | "bar" | "counter" | "course" | "daily";
 
 export type QmPhotoMode = "none" | "thumb" | "hero" | "heroxl";
 export type QmBadgeShape = "outline" | "block" | "pill";
@@ -26,6 +27,8 @@ export interface QmToneMix {
 
 export interface QmTemplatePreset {
   label: string;
+  /** Governed structural recipe expanded into layout tokens by `apply-theme.ts`. */
+  layoutRecipe: QmLayoutRecipe;
   heading: string;
   body: string;
   /** Catalog ids used to load the preset's heading and body faces. */
@@ -62,6 +65,7 @@ export interface QmTemplatePreset {
 export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
   fine: {
     label: "Alta cocina",
+    layoutRecipe: "course",
     heading: "'Cormorant Garamond',serif",
     body: "'Jost',sans-serif",
     headingFontId: "cormorant-garamond",
@@ -88,6 +92,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
   },
   her: {
     label: "Herencia",
+    layoutRecipe: "archive",
     heading: "'Yeseva One',serif",
     body: "'Spectral',serif",
     headingFontId: "yeseva-one",
@@ -114,6 +119,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
   },
   fast: {
     label: "Fast food",
+    layoutRecipe: "counter",
     heading: "'Anton',sans-serif",
     body: "'Barlow',sans-serif",
     headingFontId: "anton",
@@ -140,6 +146,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
   },
   cafe: {
     label: "Cafetería",
+    layoutRecipe: "daily",
     heading: "'Quicksand',sans-serif",
     body: "'Nunito Sans',sans-serif",
     headingFontId: "quicksand",
@@ -167,6 +174,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
   },
   tapas: {
     label: "Bar de tapas",
+    layoutRecipe: "bar",
     heading: "'Bebas Neue',sans-serif",
     body: "'Work Sans',sans-serif",
     headingFontId: "bebas-neue",

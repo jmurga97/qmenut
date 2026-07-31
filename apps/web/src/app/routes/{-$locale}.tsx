@@ -1,3 +1,4 @@
+import { TEMPLATES } from "@qmenut/ui/theme/presets";
 import { Outlet, createFileRoute, notFound, redirect } from "@tanstack/react-router";
 
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
@@ -5,6 +6,9 @@ import { DEFAULT_LOCALE, chromeLocale } from "~/lib/i18n/create-i18n";
 import { LOCALE_PATTERN } from "~/lib/i18n/locale-pattern";
 import { AnalyticsBootstrap } from "~/shared/components/analytics-bootstrap";
 import { LocaleDetector } from "~/shared/components/locale-detector";
+import { DevTemplateSwitcher } from "~/shared/dev/dev-template-switcher";
+
+import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 
 export interface LocaleLanguageOption {
   code: string;
@@ -14,12 +18,25 @@ export interface LocaleLanguageOption {
 export interface LocaleRouteContext {
   availableLanguages: LocaleLanguageOption[];
   defaultLanguage: string;
+  /** Dev-only `?template=` override, parsed and applied only when `import.meta.env.DEV`. */
+  devTemplate: QmTemplateName | undefined;
   effectiveLocale: string;
   locale: string | undefined;
 }
 
+interface LocaleSearch {
+  template?: QmTemplateName;
+}
+
+function isQmTemplateName(value: unknown): value is QmTemplateName {
+  return typeof value === "string" && Object.hasOwn(TEMPLATES, value);
+}
+
 export const Route = createFileRoute("/{-$locale}")({
-  beforeLoad: async ({ context, location, params }): Promise<LocaleRouteContext> => {
+  validateSearch: (search: Record<string, unknown>): LocaleSearch => ({
+    template: isQmTemplateName(search.template) ? search.template : undefined,
+  }),
+  beforeLoad: async ({ context, location, params, search }): Promise<LocaleRouteContext> => {
     const requested = params.locale?.toLowerCase();
 
     if (requested !== undefined && !LOCALE_PATTERN.test(requested)) {
@@ -48,6 +65,7 @@ export const Route = createFileRoute("/{-$locale}")({
     return {
       availableLanguages: language?.available ?? [],
       defaultLanguage: language?.default ?? DEFAULT_LOCALE,
+      devTemplate: import.meta.env.DEV ? search.template : undefined,
       effectiveLocale,
       locale: requested,
     };
@@ -61,6 +79,7 @@ function LocaleLayout() {
       <Outlet />
       <LocaleDetector />
       <AnalyticsBootstrap />
+      <DevTemplateSwitcher />
     </>
   );
 }

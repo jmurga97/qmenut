@@ -17,7 +17,8 @@ button {
   text-transform: uppercase;
   transition:
     opacity 150ms,
-    border-color 150ms;
+    border-color 150ms,
+    transform 100ms ease-out;
 }
 
 button[data-variant="primary"] {
@@ -47,6 +48,15 @@ button[data-size="sm"] {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--qm-accent-ink, var(--qm-ink, #1c1815));
+  outline-offset: 2px;
 }
 
 .icon,

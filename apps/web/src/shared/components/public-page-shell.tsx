@@ -62,7 +62,7 @@ export function PublicPageShell({ children, overlay, template, tenant }: PublicP
   }, [fontIds]);
 
   return (
-    <div className="home-shell" style={themeVars}>
+    <div className="home-shell" data-template={template} style={themeVars}>
       <div className="home-column">
         {children}
         <PublicBottomNav />

@@ -2,6 +2,7 @@ import { defineQmNavBar } from "@qmenut/ui/components/qm-nav-bar";
 import { QmTab } from "@qmenut/ui/components/qm-tab/react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Gift, Phone, Tag, UtensilsCrossed } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 defineQmNavBar();
 
@@ -10,19 +11,20 @@ const NAV_ICON_STROKE_WIDTH = 1.9;
 
 export function PublicBottomNav() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   // Matched by route id (not pathname) so the active tab is correct regardless of
   // whether a locale prefix (e.g. "/en") is present in the URL.
   const routeId = useRouterState({ select: (state) => state.matches.at(-1)?.routeId });
 
   return (
-    <qm-nav-bar aria-label="Navegación principal">
+    <qm-nav-bar aria-label={t("common.primaryNavigationLabel")}>
       <QmTab
         value="/"
         active={routeId === "/{-$locale}/"}
         onQmSelect={() => void navigate({ to: "/{-$locale}", params: (prev) => prev })}
       >
         <UtensilsCrossed slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
-        Inicio
+        {t("common.navigation.menu")}
       </QmTab>
       <QmTab
         value="/promos"
@@ -30,7 +32,7 @@ export function PublicBottomNav() {
         onQmSelect={() => void navigate({ to: "/{-$locale}/promos", params: (prev) => prev })}
       >
         <Tag slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
-        Promos
+        {t("common.navigation.promos")}
       </QmTab>
       <QmTab
         value="/contacto"
@@ -38,7 +40,7 @@ export function PublicBottomNav() {
         onQmSelect={() => void navigate({ to: "/{-$locale}/contacto", params: (prev) => prev })}
       >
         <Phone slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
-        Contacto
+        {t("common.navigation.contact")}
       </QmTab>
       <QmTab
         value="/puntos"
@@ -46,7 +48,7 @@ export function PublicBottomNav() {
         onQmSelect={() => void navigate({ to: "/{-$locale}/puntos", params: (prev) => prev })}
       >
         <Gift slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
-        Puntos
+        {t("common.navigation.loyalty")}
       </QmTab>
     </qm-nav-bar>
   );

@@ -45,7 +45,9 @@ export class QmFeatured extends LitElement {
   photoUrl?: string;
 
   render() {
-    const photoImage = this.photoUrl ? html`<img src=${this.photoUrl} alt="" />` : nothing;
+    const photoImage = this.photoUrl
+      ? html`<img src=${this.photoUrl} alt="" loading="eager" decoding="async" />`
+      : nothing;
 
     return html`
       <div part="card" class="card">

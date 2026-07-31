@@ -19,6 +19,11 @@ export default defineConfig({
     nitro({
       config: {
         preset: "cloudflare-module",
+        devProxy: {
+          "/trpc/**": {
+            target: "http://127.0.0.1:8787",
+          },
+        },
         cloudflare: {
           // Shared with apps/tenant-config so `vite dev` sees the KV entries seeded there
           // (wrangler CLIs point at ../../.wrangler-shared/state; wrangler appends /v3).

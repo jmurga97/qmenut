@@ -1,0 +1,56 @@
+:host {
+  display: inline-block;
+  flex: none;
+  scroll-snap-align: start;
+}
+
+button {
+  min-height: var(--qm-touch-min, 44px);
+  padding: 8px 13px;
+  border: 1px solid var(--qm-hairline, rgba(0, 0, 0, 0.12));
+  border-radius: var(--qm-category-radius, 0px);
+  background: var(--qm-card, #fff);
+  color: var(--qm-muted, #6d746f);
+  font-family: var(--qm-body, sans-serif);
+  font-size: var(--qm-text-xs, 11px);
+  font-weight: 800;
+  letter-spacing: var(--qm-eyebrow-ls, 0.5px);
+  text-transform: var(--qm-eyebrow-tt, uppercase);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 100ms ease-out,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+button[data-active="true"] {
+  border: var(--qm-category-active-border, 1px solid transparent);
+  background: var(--qm-category-active-bg, var(--qm-primary, #1c1815));
+  color: var(--qm-category-active-color, var(--qm-on-primary, #fff));
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+button:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+
+slot {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition-duration: 1ms;
+  }
+}
+
+@media (prefers-contrast: more) {
+  button {
+    border-color: var(--qm-ink, #1c1815);
+  }
+}

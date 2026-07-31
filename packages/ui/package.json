@@ -56,6 +56,14 @@
       "types": "./src/components/atoms/qm-button/index.ts",
       "import": "./src/components/atoms/qm-button/index.ts"
     },
+    "./components/qm-category-chip": {
+      "types": "./src/components/atoms/qm-category-chip/index.ts",
+      "import": "./src/components/atoms/qm-category-chip/index.ts"
+    },
+    "./components/qm-category-chip/react": {
+      "types": "./src/components/atoms/qm-category-chip/react.ts",
+      "import": "./src/components/atoms/qm-category-chip/react.ts"
+    },
     "./components/qm-eyebrow": {
       "types": "./src/components/atoms/qm-eyebrow/index.ts",
       "import": "./src/components/atoms/qm-eyebrow/index.ts"
@@ -111,6 +119,10 @@
     "./components/qm-lang/react": {
       "types": "./src/components/atoms/qm-lang/react.ts",
       "import": "./src/components/atoms/qm-lang/react.ts"
+    },
+    "./components/qm-category-nav": {
+      "types": "./src/components/molecules/qm-category-nav/index.ts",
+      "import": "./src/components/molecules/qm-category-nav/index.ts"
     },
     "./components/qm-section-header": {
       "types": "./src/components/molecules/qm-section-header/index.ts",
@@ -236,7 +248,8 @@
   "dependencies": {
     "@lit/react": "^1.0.8",
     "culori": "^4.0.2",
-    "lit": "^3.3.3"
+    "lit": "^3.3.3",
+    "motion": "^12.43.0"
   },
   "peerDependencies": {
     "react": "^19.2.3"

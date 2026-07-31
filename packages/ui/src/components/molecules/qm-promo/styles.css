@@ -1,10 +1,10 @@
 .card {
-  background: var(--qm-card, #fff);
-  border: var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8);
-  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-surface-bg, var(--qm-card, #fff));
+  border: var(--qm-surface-border, var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
   overflow: hidden;
   font-family: var(--qm-body, sans-serif);
-  box-shadow: var(--qm-card-shadow, none);
+  box-shadow: var(--qm-surface-shadow, var(--qm-card-shadow, none));
 }
 
 .inner {
@@ -14,7 +14,7 @@
 
 .discount {
   flex: none;
-  width: 64px;
+  width: var(--qm-promo-discount-width, 64px);
   background: var(--qm-primary, #1c1815);
   color: var(--qm-on-primary, #fff);
   display: flex;
@@ -35,7 +35,7 @@
 .body {
   flex: 1;
   min-width: 0;
-  padding: 13px 15px;
+  padding: var(--qm-promo-body-pad, 13px 15px);
 }
 
 .name {

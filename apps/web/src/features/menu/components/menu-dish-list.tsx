@@ -1,6 +1,7 @@
 import { defineQmMenuList } from "@qmenut/ui/components/qm-menu-list";
-import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
+
+import { menuSectionElementId } from "~/features/menu/components/menu-section-id";
 
 import type {
   MenuContentViewModel,
@@ -12,13 +13,13 @@ defineQmMenuList();
 
 interface MenuDishListProps {
   content: MenuContentViewModel;
-  onSelectDish: (dish: MenuDishViewModel) => void;
+  onSelectDish: (dish: MenuDishViewModel, trigger: HTMLButtonElement) => void;
   showDishPhotos: boolean;
 }
 
 interface MenuSectionProps {
   featured: MenuDishViewModel | null;
-  onSelectDish: (dish: MenuDishViewModel) => void;
+  onSelectDish: (dish: MenuDishViewModel, trigger: HTMLButtonElement) => void;
   section: MenuSectionViewModel;
   showDishPhotos: boolean;
 }
@@ -32,7 +33,12 @@ function MenuSection({ featured, onSelectDish, section, showDishPhotos }: MenuSe
   return (
     <qm-menu-list empty-label={t("menu.emptyLabel")}>
       {featured ? (
-        <button slot="featured" type="button" className="dish-trigger" onClick={() => onSelectDish(featured)}>
+        <button
+          slot="featured"
+          type="button"
+          className="dish-trigger"
+          onClick={(event) => onSelectDish(featured, event.currentTarget)}
+        >
           <qm-featured
             name={featured.name}
             desc={featured.desc}
@@ -52,7 +58,12 @@ function MenuSection({ featured, onSelectDish, section, showDishPhotos }: MenuSe
         section-count={section.count}
       />
       {section.dishes.map((dish) => (
-        <button key={dish.rowKey} type="button" className="dish-trigger" onClick={() => onSelectDish(dish)}>
+        <button
+          key={dish.rowKey}
+          type="button"
+          className="dish-trigger"
+          onClick={(event) => onSelectDish(dish, event.currentTarget)}
+        >
           <qm-dish-row
             name={dish.name}
             desc={dish.desc}
@@ -76,16 +87,23 @@ export function MenuDishList({ content, onSelectDish, showDishPhotos }: MenuDish
   }
 
   return (
-    <Fragment>
+    <>
       {content.sections.map((section, index) => (
-        <MenuSection
+        <section
           key={section.id}
-          featured={index === 0 ? content.featured : null}
-          section={section}
-          showDishPhotos={showDishPhotos}
-          onSelectDish={onSelectDish}
-        />
+          id={menuSectionElementId(index)}
+          aria-label={section.label}
+          className="menu-section-frame"
+          data-menu-section={section.id}
+        >
+          <MenuSection
+            featured={index === 0 ? content.featured : null}
+            section={section}
+            showDishPhotos={showDishPhotos}
+            onSelectDish={onSelectDish}
+          />
+        </section>
       ))}
-    </Fragment>
+    </>
   );
 }

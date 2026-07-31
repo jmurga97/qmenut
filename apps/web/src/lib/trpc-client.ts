@@ -17,6 +17,12 @@ export interface RouterAppContext {
 }
 
 function getApiBaseUrl(): string {
+  // Browsers use Vite's same-origin /trpc proxy in development. In particular, this prevents
+  // `localhost` from resolving to the phone itself when the dev server is opened over the LAN.
+  if (import.meta.env.DEV && typeof window !== "undefined") {
+    return window.location.origin;
+  }
+
   const configuredUrl = getEnvString("VITE_API_BASE_URL");
 
   if (configuredUrl) {

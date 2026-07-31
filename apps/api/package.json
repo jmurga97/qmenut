@@ -10,7 +10,7 @@
     }
   },
   "scripts": {
-    "dev": "wrangler dev --port 8787 --inspector-port 9230",
+    "dev": "wrangler dev --port 8787 --inspector-port 9230 --var NODE_ENV:development",
     "dev:e2e": "bash ../../e2e/scripts/start-api.sh",
     "build": "wrangler types && tsc --noEmit",
     "check": "tsc --noEmit",
@@ -39,6 +39,6 @@
     "@types/node": "^26.0.1",
     "drizzle-kit": "^0.31.5",
     "typescript": "^5.9.3",
-    "wrangler": "^4.60.0"
+    "wrangler": "4.116.0"
   }
 }

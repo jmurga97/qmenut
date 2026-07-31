@@ -50,15 +50,18 @@ export function buildDefaultTenantThemeConfig(template: QmTemplateName = DEFAULT
  * default config; a valid `template` with missing preset fields is overlaid on that template's
  * preset so partial entries stay renderable.
  */
-export function resolveTenantThemeConfig(raw: unknown): QmTenantThemeConfig {
+export function resolveTenantThemeConfig(
+  raw: unknown,
+  fallbackTemplate: QmTemplateName = DEFAULT_TEMPLATE,
+): QmTenantThemeConfig {
   if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
-    return buildDefaultTenantThemeConfig();
+    return buildDefaultTenantThemeConfig(fallbackTemplate);
   }
 
   const candidate = raw as Partial<QmTenantThemeConfig>;
 
   if (!isTemplateName(candidate.template)) {
-    return buildDefaultTenantThemeConfig();
+    return buildDefaultTenantThemeConfig(fallbackTemplate);
   }
 
   const base = TEMPLATES[candidate.template];

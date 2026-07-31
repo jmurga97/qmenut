@@ -1,12 +1,12 @@
 .card {
   display: flex;
   flex-direction: var(--qm-featured-dir, row);
-  background: var(--qm-card, #fff);
-  border: var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8);
+  background: var(--qm-featured-bg, var(--qm-card, #fff));
+  border: var(--qm-featured-border, var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8));
   /* Slim brand cap: marks this as the featured dish and gives the tenant's primary a
      visible role on the page's hero element across every template. */
-  border-top: 2px solid var(--qm-accent, #1c1815);
-  border-radius: var(--qm-radius, 0px);
+  border-top: var(--qm-featured-cap, 2px solid var(--qm-accent, #1c1815));
+  border-radius: var(--qm-featured-radius, var(--qm-radius, 0px));
   overflow: hidden;
   font-family: var(--qm-body, sans-serif);
   box-shadow: var(--qm-card-shadow, none);
@@ -33,7 +33,7 @@
 .body {
   flex: 1;
   min-width: 0;
-  padding: 14px 16px;
+  padding: var(--qm-featured-body-pad, 14px 16px);
 }
 
 .tag {
@@ -52,7 +52,7 @@
 
 .name {
   font-family: var(--qm-heading, serif);
-  font-size: var(--qm-text-xl, 17px);
+  font-size: var(--qm-featured-name-size, var(--qm-text-xl, 17px));
   font-weight: var(--qm-hw, 700);
   letter-spacing: -0.4px;
   text-transform: var(--qm-dish-tt, none);
@@ -66,4 +66,8 @@
   line-height: 1.45;
   color: var(--qm-muted, #8c857b);
   margin-bottom: 9px;
+}
+
+qm-price {
+  --qm-price-size: var(--qm-row-price-size, var(--qm-text-xl, 17px));
 }
