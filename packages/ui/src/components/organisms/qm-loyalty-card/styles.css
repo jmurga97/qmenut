@@ -3,10 +3,10 @@
 }
 .card {
   padding: 16px;
-  border: var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8);
-  border-radius: var(--qm-radius, 0px);
-  background: var(--qm-card, #fff);
-  box-shadow: var(--qm-card-shadow, none);
+  border: var(--qm-surface-border, var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
+  background: var(--qm-surface-bg, var(--qm-card, #fff));
+  box-shadow: var(--qm-surface-shadow, var(--qm-card-shadow, none));
   color: var(--qm-ink, #1c1815);
 }
 header {
@@ -77,6 +77,10 @@ header h2 {
   font-weight: 800;
   letter-spacing: 0.8px;
   text-transform: uppercase;
+  transition: transform 100ms ease-out;
+}
+.stamp-action:active {
+  transform: scale(0.98);
 }
 .stamp-action:focus-visible {
   outline: 2px solid var(--qm-ink, #1c1815);

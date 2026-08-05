@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --port 5174",
     "build": "vite build",
+    "deploy": "vite build && wrangler deploy",
     "preview": "wrangler dev",
     "check": "tsc --noEmit"
   },
@@ -40,6 +41,6 @@
     "@vitejs/plugin-react": "^5.0.4",
     "typescript": "^5.9.3",
     "vite": "^7.1.12",
-    "wrangler": "^4.60.0"
+    "wrangler": "4.118.0"
   }
 }

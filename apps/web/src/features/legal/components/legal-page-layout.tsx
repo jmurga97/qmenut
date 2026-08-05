@@ -42,8 +42,10 @@ export function LegalPageLayout({ children, subtitle, title }: LegalPageLayoutPr
       />
 
       <div className="home-scroll" ref={scrollRef}>
-        {children}
-        <LegalLinksNav />
+        <article className="legal-surface">
+          {children}
+          <LegalLinksNav />
+        </article>
       </div>
     </PublicPageShell>
   );

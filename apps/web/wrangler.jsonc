@@ -1,24 +1,24 @@
-// Worker config for the public menu web app. Nitro (preset cloudflare-module) merges this file
-// into the generated .output/server/wrangler.json and redirects wrangler to it via
-// .wrangler/deploy/config.json — so run wrangler from apps/web only AFTER `vite build`.
+// Source Worker config for the public menu web app. The Cloudflare Vite plugin resolves the
+// Wrangler environment at build time via CLOUDFLARE_ENV, builds `main`, generates the asset
+// binding, and writes a flat deploy config under dist/server. Do not pass --env to deploy.
 //
-// NOTE: redirected (generated) configs cannot contain `env` blocks, so per-tenant instances are
-// pinned via `--var TENANT_HOST:<host>` (see serve:* scripts in package.json). For real deploys,
-// create one worker per tenant with `wrangler deploy --name qmenut-web-<tenant>` and set
-// TENANT_HOST as a dashboard/API var, or drive it from the request Host header (custom domains
-// make TENANT_HOST unnecessary in production).
+// There is one deployed qmenut-web worker. Each tenant domain is attached to it as a Cloudflare
+// custom domain, and the request Host header resolves the tenant.
 //
-// The KV namespace id only needs to be a stable 32-hex value locally (local state is keyed by
-// id and must MATCH apps/tenant-config); replace with the real namespace id when deploying.
+// `preview_id` is the stable local namespace key and must MATCH apps/tenant-config. Replace the
+// placeholder production `id` in both configs after provisioning TENANT_THEME in Cloudflare.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "qmenut-web",
+  "main": "src/app/server.ts",
   "compatibility_date": "2026-06-16",
   "compatibility_flags": ["nodejs_compat"],
+  "upload_source_maps": true,
   "kv_namespaces": [
     {
       "binding": "TENANT_THEME",
       "id": "0f5d31e6c4a94b0f8a2d7c1b3e9f6a01",
+      "preview_id": "0f5d31e6c4a94b0f8a2d7c1b3e9f6a01",
     },
   ],
   "services": [
@@ -28,10 +28,34 @@
     },
   ],
   "vars": {
-    "TENANT_HOST": "",
     "SENTRY_DSN": "",
   },
   "observability": {
     "enabled": true,
+  },
+  // Wrangler named environments do not inherit KV, service bindings, vars, or observability.
+  // Keep name unchanged so custom domains and the API_WORKER binding keep their worker names.
+  "env": {
+    "production": {
+      "name": "qmenut-web",
+      "kv_namespaces": [
+        {
+          "binding": "TENANT_THEME",
+          "id": "48d5fae2045240cfae007bdd790c64f6"
+        }
+      ],
+      "services": [
+        {
+          "binding": "API_WORKER",
+          "service": "qmenut-api",
+        },
+      ],
+      "vars": {
+        "SENTRY_DSN": "",
+      },
+      "observability": {
+        "enabled": true,
+      },
+    },
   },
 }

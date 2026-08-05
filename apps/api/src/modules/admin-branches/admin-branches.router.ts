@@ -22,6 +22,7 @@ export const adminBranchesRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
       timezone: input.timezone,
+      legal: input.legal,
       info: input.info,
       schedules: input.schedules,
       photos: input.photos,

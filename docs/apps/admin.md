@@ -7,7 +7,7 @@
 ✅ Complete. The restaurant owner's dashboard: manage menu, branch, promotions,
 languages/translations, theme, QR, loyalty, and billing. React 19 + Vite **SPA**
 (TanStack Router file-based, TanStack Query, react-hook-form, Zustand, Tailwind v4).
-Deployed as a static-asset Worker with SPA fallback (`apps/admin/wrangler.toml`). Talks
+Deployed as a static-asset Worker with SPA fallback (`apps/admin/wrangler.jsonc`). Talks
 to the API over tRPC (`/trpc`) with session cookies (`credentials: "include"`); dev
 port 5174.
 
@@ -36,7 +36,7 @@ port 5174.
 | Feature folders | `apps/admin/src/features/*` |
 | Zustand stores | `apps/admin/src/app/store/*` |
 | Auth client | `apps/admin/src/lib/auth-client.ts` |
-| Worker config | `apps/admin/wrangler.toml` |
+| Worker config | `apps/admin/wrangler.jsonc` |
 
 ## Notes & gotchas
 

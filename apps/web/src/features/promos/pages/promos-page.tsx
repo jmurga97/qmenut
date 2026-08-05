@@ -3,7 +3,6 @@ import { useRef } from "react";
 import { PromosList } from "~/features/promos/components/promos-list";
 import { usePromosContent } from "~/features/promos/hooks/use-promos-content";
 import { useTrackPageView } from "~/lib/analytics/use-analytics";
-import { DevTemplateSwitcher } from "~/shared/components/dev-template-switcher";
 import { PublicPageShell } from "~/shared/components/public-page-shell";
 import { PublicPageSkeleton } from "~/shared/components/public-page-skeleton";
 import { ScrollHidePageHeader } from "~/shared/components/scroll-hide-page-header";
@@ -15,7 +14,7 @@ export function PromosPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const content = usePromosContent();
   const { tenant } = usePublicTenant();
-  const { setTemplate, template } = useTemplateSelection(tenant);
+  const { template } = useTemplateSelection(tenant);
   const { handleLanguageChange, lang, langLabel, langOptions } = useLocale();
 
   useTrackPageView("promo_view");
@@ -25,26 +24,23 @@ export function PromosPage() {
   }
 
   return (
-    <>
-      <PublicPageShell tenant={tenant} template={template}>
-        <ScrollHidePageHeader
-          scrollContainerRef={scrollRef}
-          topbarBrand="QMENUT"
-          topbarName={tenant.tenantName}
-          title={content.title}
-          subtitle={content.subtitle}
-          langValue={lang}
-          langOptions={langOptions}
-          langLabel={langLabel}
-          titleSize="lg"
-          onQmChange={handleLanguageChange}
-        />
+    <PublicPageShell tenant={tenant} template={template}>
+      <ScrollHidePageHeader
+        scrollContainerRef={scrollRef}
+        topbarBrand="QMENUT"
+        topbarName={tenant.tenantName}
+        title={content.title}
+        subtitle={content.subtitle}
+        langValue={lang}
+        langOptions={langOptions}
+        langLabel={langLabel}
+        titleSize="lg"
+        onQmChange={handleLanguageChange}
+      />
 
-        <div className="home-scroll" ref={scrollRef}>
-          <PromosList content={content} />
-        </div>
-      </PublicPageShell>
-      <DevTemplateSwitcher currentTemplate={template} onSelectTemplate={setTemplate} />
-    </>
+      <div className="home-scroll" ref={scrollRef}>
+        <PromosList content={content} />
+      </div>
+    </PublicPageShell>
   );
 }

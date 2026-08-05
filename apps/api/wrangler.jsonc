@@ -1,0 +1,107 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "qmenut-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-16",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "upload_source_maps": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "qmenut-db-v2",
+      "database_id": "2bb09db5-d6c8-477c-bf19-040a471ff879",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "services": [
+    {
+      "binding": "EMAIL_WORKER",
+      "service": "ming-email-worker",
+      "remote": true,
+    },
+    {
+      "binding": "THEME_WORKER",
+      "service": "qmenut-tenant-config",
+    },
+  ],
+  "ratelimits": [
+    {
+      "name": "LOYALTY_CODE_LIMITER",
+      "namespace_id": "1001",
+      "simple": {
+        "limit": 5,
+        "period": 60,
+      },
+    },
+  ],
+  "observability": {
+    "enabled": true,
+  },
+  "vars": {
+    "ALLOWED_ORIGINS": "http://localhost:5173,http://localhost:5174,http://tapas.localhost:5173,http://fine.localhost:5173,http://cafe.localhost:5173,http://her.localhost:5173,http://fast.localhost:5173,http://tapas.localhost:4011,http://fine.localhost:4011,http://cafe.localhost:4011,http://her.localhost:4011,http://fast.localhost:4011",
+    "BETTER_AUTH_URL": "http://localhost:8787",
+    "ADMIN_APP_URL": "http://localhost:5174",
+    "DEEPL_API_URL": "https://api-free.deepl.com",
+    "STRIPE_PRICE_BASIC": "price_1U120eEnGfbzQ006un87QMk4",
+    "LOG_LEVEL": "info",
+    "NODE_ENV": "production",
+    "SENTRY_DSN": "",
+  },
+  // Wrangler named environments do not inherit vars, D1, services, rate limits, or
+  // observability. Keep name unchanged so service bindings continue to resolve qmenut-api.
+  "env": {
+    "production": {
+      "name": "qmenut-api",
+      "workers_dev": false,
+      "routes": [
+        {
+          "pattern": "api.qmenut.app",
+          "custom_domain": true,
+        },
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "qmenut-db-v2",
+          "database_id": "2bb09db5-d6c8-477c-bf19-040a471ff879",
+          "migrations_dir": "migrations",
+        },
+      ],
+      "services": [
+        {
+          "binding": "EMAIL_WORKER",
+          "service": "ming-email-worker",
+          "remote": true,
+        },
+        {
+          "binding": "THEME_WORKER",
+          "service": "qmenut-tenant-config",
+        },
+      ],
+      "ratelimits": [
+        {
+          "name": "LOYALTY_CODE_LIMITER",
+          "namespace_id": "1001",
+          "simple": {
+            "limit": 5,
+            "period": 60,
+          },
+        },
+      ],
+      "observability": {
+        "enabled": true,
+      },
+      "vars": {
+        "ALLOWED_ORIGINS": "https://admin.qmenut.app",
+        "BETTER_AUTH_URL": "https://api.qmenut.app",
+        "ADMIN_APP_URL": "https://admin.qmenut.app",
+        "DEEPL_API_URL": "https://api-free.deepl.com",
+        "STRIPE_PRICE_BASIC": "price_1U120eEnGfbzQ006un87QMk4",
+        "LOG_LEVEL": "info",
+        "NODE_ENV": "production",
+        "SENTRY_DSN": "",
+      },
+    },
+  },
+}

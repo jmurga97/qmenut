@@ -1,28 +1,17 @@
-import { useEffect, useState } from "react";
+import { useRouteContext } from "@tanstack/react-router";
 
-import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 import type { PublicTenant } from "~/shared/types/public-tenant";
 
 interface TemplateSelectionState {
-  setTemplate: (template: QmTemplateName) => void;
-  template: QmTemplateName;
+  template: PublicTenant["template"];
 }
 
 export function useTemplateSelection(tenant: PublicTenant | null): TemplateSelectionState {
-  // Initialize from the tenant so SSR already renders the tenant's template (effects don't run
-  // on the server); the effect only covers later tenant changes.
-  const [template, setTemplate] = useState<QmTemplateName>(tenant?.template ?? "her");
-
-  useEffect(() => {
-    if (!tenant) {
-      return;
-    }
-
-    setTemplate(tenant.template);
-  }, [tenant]);
+  // The dev-only `?template=` override (see the `{-$locale}` layout route and
+  // `DevTemplateSwitcher`) takes priority over the tenant's own template when present.
+  const devTemplate = useRouteContext({ from: "/{-$locale}", select: (context) => context.devTemplate });
 
   return {
-    setTemplate,
-    template,
+    template: devTemplate ?? tenant?.template ?? "her",
   };
 }

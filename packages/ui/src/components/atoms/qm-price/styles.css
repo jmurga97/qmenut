@@ -16,7 +16,7 @@
 
 .value {
   font-family: var(--qm-body, sans-serif);
-  font-size: var(--qm-text-xl, 17px);
+  font-size: var(--qm-price-size, var(--qm-text-xl, 17px));
   font-weight: var(--qm-price-weight, 700);
   line-height: 1.05;
   letter-spacing: 0;

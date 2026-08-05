@@ -4,7 +4,7 @@ import { TEMPLATES } from "./presets";
 
 import type { QmDerivedColors, QmThemeConfig } from "./derive";
 import type { QmFontId } from "./font-catalog";
-import type { QmBadgeShape, QmNavStyle, QmPhotoMode, QmTemplatePreset } from "./presets";
+import type { QmBadgeShape, QmNavStyle, QmPhotoMode, QmTemplateLayoutDefaults, QmTemplatePreset } from "./presets";
 
 /**
  * Tenant input: a template name + color overrides (`QmThemeConfig`), plus optional
@@ -12,9 +12,10 @@ import type { QmBadgeShape, QmNavStyle, QmPhotoMode, QmTemplatePreset } from "./
  * mode) and optional font-catalog picks. Anything omitted falls back to the template preset.
  */
 export type QmThemeInput = QmThemeConfig &
-  Partial<Omit<QmTemplatePreset, "tone" | "saturationCap" | "paper">> & {
+  Partial<Omit<QmTemplatePreset, "layout" | "tone" | "saturationCap" | "paper">> & {
     headingFont?: QmFontId;
     bodyFont?: QmFontId;
+    layout?: Partial<QmTemplateLayoutDefaults>;
   };
 
 const PHOTO_GROUPS: Record<QmPhotoMode, Record<string, string>> = {
@@ -48,7 +49,6 @@ const PHOTO_GROUPS: Record<QmPhotoMode, Record<string, string>> = {
     "--qm-item-align": "center",
     "--qm-row-gap": "11px",
     "--qm-promo-img": "block",
-    "--qm-modal-photo-h": "140px",
     "--qm-modal-order-photo": "0",
     "--qm-modal-order-desc": "1",
     "--qm-modal-order-extras": "2",
@@ -69,7 +69,6 @@ const PHOTO_GROUPS: Record<QmPhotoMode, Record<string, string>> = {
     "--qm-row-gap": "11px",
     "--qm-hero-h": "148px",
     "--qm-promo-img": "block",
-    "--qm-modal-photo-h": "200px",
     "--qm-modal-order-photo": "0",
     "--qm-modal-order-desc": "1",
     "--qm-modal-order-extras": "2",
@@ -90,13 +89,34 @@ const PHOTO_GROUPS: Record<QmPhotoMode, Record<string, string>> = {
     "--qm-row-gap": "12px",
     "--qm-hero-h": "166px",
     "--qm-promo-img": "block",
-    "--qm-modal-photo-h": "280px",
     "--qm-modal-order-photo": "0",
     "--qm-modal-order-desc": "1",
     "--qm-modal-order-extras": "2",
     "--qm-modal-order-allergens": "3",
   },
 };
+
+interface BuildLayoutTokensArgs {
+  colors: QmDerivedColors;
+  layout: QmTemplateLayoutDefaults;
+}
+
+/** Shared shell constraints plus the selected template's concrete layout defaults. */
+function buildLayoutTokens({ colors, layout }: BuildLayoutTokensArgs): Record<string, string> {
+  const shared = {
+    "--qm-shell-max": "430px",
+    "--qm-touch-min": "44px",
+    "--qm-nav-height": "64px",
+    "--qm-sheet-max": "min(720px, 60dvh)",
+    "--qm-sheet-handle": colors.hairline,
+    "--qm-surface-bg": colors.card,
+    "--qm-surface-border": `1px solid ${colors.hairline}`,
+    "--qm-surface-shadow": "none",
+    "--qm-modal-photo-ratio": "4 / 3",
+  };
+
+  return { ...shared, ...layout };
+}
 
 interface BuildBadgeTokensArgs {
   shape: QmBadgeShape;
@@ -193,7 +213,7 @@ function buildNavTokens({ navStyle, colors, rule }: BuildNavTokensArgs): Record<
       "--qm-nav-active-bd": `2px solid ${colors.onPrimary}`,
       "--qm-nav-active-radius": "0px",
       "--qm-nav-active-pad": "6px 12px",
-      "--qm-nav-muted": mix(colors.onPrimary, 50, colors.primary),
+      "--qm-nav-muted": mix(colors.onPrimary, 72, colors.primary),
     },
   };
   return navByStyle[navStyle];
@@ -204,6 +224,7 @@ function resolveTemplate(input: QmThemeInput): QmTemplatePreset {
   const template = TEMPLATES[input.template];
   return {
     label: input.label ?? template.label,
+    layout: { ...template.layout, ...input.layout },
     headingFontId: template.headingFontId,
     bodyFontId: template.bodyFontId,
     // Catalog font pick wins, then any raw `heading`/`body` override, then the template preset.
@@ -298,6 +319,7 @@ export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
     "--qm-eyebrow-ls": `${resolved.eyebrowSpacing}px`,
     "--qm-dish-tt": resolved.dishCase ?? "none",
     ...buildTextScaleTokens(resolved.fontScale),
+    ...buildLayoutTokens({ colors, layout: resolved.layout }),
 
     "--qm-radius": `${resolved.radius}px`,
     "--qm-bw": `${resolved.borderWidth}px`,

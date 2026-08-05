@@ -1,7 +1,7 @@
 :host {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--qm-list-gap, 15px);
 }
 
 .section {
@@ -13,8 +13,8 @@
 .map {
   position: relative;
   height: 116px;
-  border: var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8);
-  border-radius: var(--qm-radius, 0px);
+  border: var(--qm-surface-border, var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
   overflow: hidden;
 }
 

@@ -43,7 +43,9 @@ export class QmDishRow extends LitElement {
   photoUrl?: string;
 
   render() {
-    const photoImage = this.photoUrl ? html`<img src=${this.photoUrl} alt="" />` : nothing;
+    const photoImage = this.photoUrl
+      ? html`<img src=${this.photoUrl} alt="" loading="lazy" decoding="async" />`
+      : nothing;
 
     return html`
       <div part="row" class="row">

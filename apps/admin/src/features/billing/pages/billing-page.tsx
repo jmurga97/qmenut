@@ -9,11 +9,8 @@ const STATUS_LABELS: Record<string, string> = {
   past_due: "Pago pendiente",
   canceled: "Cancelada",
 };
-const PLAN_LABELS: Record<string, string> = { basic: "Básico", business: "Business" };
-const PLANS = [
-  { code: "basic", label: "Suscribir Básico", variant: "secondary" },
-  { code: "business", label: "Suscribir Business", variant: "primary" },
-] as const;
+const PLAN_LABELS: Record<string, string> = { basic: "Básico" };
+const PLANS = [{ code: "basic", label: "Suscribir Básico", variant: "secondary" }] as const;
 export function BillingPage() {
   const controller = useBillingController();
   return (

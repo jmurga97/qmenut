@@ -6,9 +6,10 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  height: 60px;
+  min-height: var(--qm-nav-height, 64px);
   margin: var(--qm-nav-m, 0px);
-  padding: 0 6px;
+  padding: 4px max(6px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom))
+    max(6px, env(safe-area-inset-left));
   background: var(--qm-nav-bg, #fff);
   border-top: var(--qm-nav-bt, none);
   border-radius: var(--qm-nav-radius, 0px);

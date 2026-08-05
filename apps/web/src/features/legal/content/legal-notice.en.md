@@ -1,20 +1,18 @@
-<!-- Los marcadores [Razón social], [NIF], [Dirección fiscal] y los datos de QMenut se recogen en la ficha de alta (docs/onboarding-intake.md). No publicar un tenant sin haberlos sustituido. -->
-
 In compliance with Law 34/2002 of 11 July on Information Society Services and Electronic Commerce (LSSI-CE), the identifying details of the owner of this website are provided below.
 
 ## 1. Website owner
 
 This website contains the digital menu of **{{branchName}}**, whose owner is:
 
-- Company name: [Razón social]
-- Tax ID: [NIF]
-- Registered address: [Dirección fiscal]
+- Company name: {{ownerLegalName}}
+- Tax ID: {{ownerTaxId}}
+- Registered address: {{ownerLegalAddress}}
 - Establishment: {{branchAddress}}
 - Telephone: {{branchPhone}}
 
 ## 2. Platform
 
-The site is provided through the **QMenut** platform, operated by [QMenut owner], with tax ID [QMenut tax ID] and registered address at [QMenut address]. Contact: [QMenut contact email]. QMenut acts as the owner’s technology and hosting provider.
+The site is provided through the **QMenut** platform, operated by {{operatorLegalName}}, with tax ID {{operatorLegalTaxId}} and registered address at {{operatorLegalAddress}}. Contact: {{operatorEmail}}. QMenut acts as the owner’s technology and hosting provider.
 
 ## 3. Purpose
 

@@ -3,10 +3,10 @@
 }
 .card {
   padding: 24px 18px 18px;
-  border: var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8);
-  border-radius: var(--qm-radius, 0px);
-  background: var(--qm-card, #fff);
-  box-shadow: var(--qm-card-shadow, none);
+  border: var(--qm-surface-border, var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
+  background: var(--qm-surface-bg, var(--qm-card, #fff));
+  box-shadow: var(--qm-surface-shadow, var(--qm-card-shadow, none));
   color: var(--qm-ink, #1c1815);
 }
 .stamp {
@@ -51,7 +51,7 @@ input {
   min-height: 44px;
   padding: 8px 11px;
   border: 1px solid var(--qm-hairline, #d8d3c8);
-  border-radius: var(--qm-radius, 0px);
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
   background: var(--qm-bg, #fff);
   color: var(--qm-ink, #1c1815);
 }
@@ -79,6 +79,10 @@ button {
   font-weight: 800;
   letter-spacing: 1px;
   text-transform: uppercase;
+  transition: transform 100ms ease-out;
+}
+button:not(:disabled):active {
+  transform: scale(0.98);
 }
 button:disabled {
   cursor: default;

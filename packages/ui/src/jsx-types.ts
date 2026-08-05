@@ -1,6 +1,7 @@
 import type { QmAllergen, QmAllergenArgs } from "./components/atoms/qm-allergen";
 import type { QmBadge, QmBadgeArgs } from "./components/atoms/qm-badge";
 import type { QmButton, QmButtonArgs } from "./components/atoms/qm-button";
+import type { QmCategoryChip, QmCategoryChipArgs } from "./components/atoms/qm-category-chip";
 import type { QmChip, QmChipArgs } from "./components/atoms/qm-chip";
 import type { QmDishExtras, QmDishExtrasArgs } from "./components/atoms/qm-dish-extras";
 import type { QmDivider, QmDividerArgs } from "./components/atoms/qm-divider";
@@ -15,6 +16,7 @@ import type { QmSectionNum, QmSectionNumArgs } from "./components/atoms/qm-secti
 import type { QmSkeleton, QmSkeletonArgs } from "./components/atoms/qm-skeleton";
 import type { QmTab, QmTabArgs } from "./components/atoms/qm-tab";
 import type { QmWordmark, QmWordmarkArgs } from "./components/atoms/qm-wordmark";
+import type { QmCategoryNav, QmCategoryNavArgs } from "./components/molecules/qm-category-nav";
 import type { QmCodeInput, QmCodeInputArgs } from "./components/molecules/qm-code-input";
 import type { QmDishRow, QmDishRowArgs } from "./components/molecules/qm-dish-row";
 import type { QmFeatured, QmFeaturedArgs } from "./components/molecules/qm-featured";
@@ -63,6 +65,7 @@ declare module "react/jsx-runtime" {
       "qm-allergen": GenericWebComponent<QmAllergenArgs, QmAllergen>;
       "qm-badge": GenericWebComponent<QmBadgeArgs, QmBadge>;
       "qm-button": GenericWebComponent<QmButtonArgs, QmButton>;
+      "qm-category-chip": GenericWebComponent<QmCategoryChipArgs, QmCategoryChip>;
       "qm-chip": GenericWebComponent<QmChipArgs, QmChip>;
       "qm-dish-extras": GenericWebComponent<QmDishExtrasArgs, QmDishExtras>;
       "qm-divider": GenericWebComponent<QmDividerArgs, QmDivider>;
@@ -77,6 +80,7 @@ declare module "react/jsx-runtime" {
       "qm-skeleton": GenericWebComponent<QmSkeletonArgs, QmSkeleton>;
       "qm-tab": GenericWebComponent<QmTabArgs, QmTab>;
       "qm-wordmark": GenericWebComponent<QmWordmarkArgs, QmWordmark>;
+      "qm-category-nav": GenericWebComponent<QmCategoryNavArgs, QmCategoryNav>;
       "qm-dish-row": GenericWebComponent<QmDishRowArgs, QmDishRow>;
       "qm-featured": GenericWebComponent<QmFeaturedArgs, QmFeatured>;
       "qm-field-group": GenericWebComponent<QmFieldGroupArgs, QmFieldGroup>;

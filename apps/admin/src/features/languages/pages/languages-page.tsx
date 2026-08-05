@@ -17,6 +17,10 @@ function languageStatus(language: { isActive: boolean; isDefault: boolean }) {
   return language.isActive ? "activa" : "oculta";
 }
 
+function isAddLanguageOutcome(outcome: string | null): outcome is "failed" | "unavailable" | "unsupported" {
+  return ["failed", "unavailable", "unsupported"].includes(outcome ?? "");
+}
+
 function AddLanguageOutcome({ outcome }: { outcome: "failed" | "unavailable" | "unsupported" }) {
   if (outcome === "unsupported") {
     return (
@@ -88,11 +92,7 @@ export function LanguagesPage() {
         })}
       </EntityListCard>
       <FormFeedback error={controller.error} />
-      {controller.addOutcome === "failed" ||
-      controller.addOutcome === "unavailable" ||
-      controller.addOutcome === "unsupported" ? (
-        <AddLanguageOutcome outcome={controller.addOutcome} />
-      ) : null}
+      {isAddLanguageOutcome(controller.addOutcome) ? <AddLanguageOutcome outcome={controller.addOutcome} /> : null}
       {canWrite && controller.options.length > 0 ? (
         <section className="admin-card">
           <div className="admin-kicker">Añadir idioma</div>

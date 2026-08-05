@@ -3,7 +3,7 @@ import {
   replaceBranchSchedulesStatements,
   updateBranchSettingsStatements,
 } from "@qmenut/db/repositories/admin-branches.repository";
-import { updateRestaurantTimezoneStatement } from "@qmenut/db/repositories/restaurants.repository";
+import { updateRestaurantSettingsStatement } from "@qmenut/db/repositories/restaurants.repository";
 
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 
@@ -15,6 +15,12 @@ interface SaveBranchSettingsInput {
   restaurantId: string;
   branchId: string;
   timezone: string;
+  legal: {
+    dataProtectionEmail: string | null;
+    legalAddress: string | null;
+    legalName: string | null;
+    taxId: string | null;
+  };
   info: {
     name: string;
     address: string | null;
@@ -31,6 +37,7 @@ export async function saveBranchSettings({
   restaurantId,
   branchId,
   timezone,
+  legal,
   info,
   schedules,
   photos,
@@ -39,7 +46,7 @@ export async function saveBranchSettings({
 
   await db.batch([
     // Timezone is restaurant-wide even though it is edited from a branch settings page.
-    updateRestaurantTimezoneStatement({ db, restaurantId, timezone }),
+    updateRestaurantSettingsStatement({ db, legal, restaurantId, timezone }),
     ...updateBranchSettingsStatements({ db, restaurantId, branchId, data: info }),
     ...replaceBranchSchedulesStatements({ db, branchId, schedules }),
     ...replaceBranchPhotosStatements({ db, branchId, photos }),

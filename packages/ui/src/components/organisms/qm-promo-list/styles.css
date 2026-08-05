@@ -5,7 +5,7 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--qm-list-gap, 16px);
 }
 
 .empty {

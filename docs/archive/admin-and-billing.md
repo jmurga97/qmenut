@@ -70,15 +70,15 @@ tabla `verifications`).
 
 ## Stripe (facturación por sucursal)
 
-Planes: `basic` y `business`, pago mensual por sucursal. Checkout alojado +
+Plan: `basic`, pago mensual por sucursal. Checkout alojado +
 Customer Portal (sin PCI en nuestro lado). Stripe Connect / delivery es MVP2.
 
 ### Configuración de test
 
-1. En el dashboard de Stripe (modo test) crea dos productos con precio mensual
-   recurrente y copia sus `price_...`.
-2. En `apps/api/wrangler.toml` `[vars]` pon `STRIPE_PRICE_BASIC` y
-   `STRIPE_PRICE_BUSINESS`. En `.dev.vars` pon `STRIPE_SECRET_KEY` (`sk_test_...`).
+1. En el dashboard de Stripe (modo test) crea el producto Basic con precio mensual
+   recurrente y copia su `price_...`.
+2. En `apps/api/wrangler.jsonc` `vars` pon `STRIPE_PRICE_BASIC`. En `.dev.vars`
+   pon `STRIPE_SECRET_KEY` (`sk_test_...`).
 3. Reenvía webhooks al worker y copia el `whsec_...` a `.dev.vars`:
    ```bash
    stripe listen --forward-to http://localhost:8787/webhooks/stripe
@@ -122,7 +122,7 @@ Customer Portal (sin PCI en nuestro lado). Stripe Connect / delivery es MVP2.
 2. **Secret del worker de temas**: antes de desplegarlo, ejecutar
    `cd apps/tenant-config && bunx wrangler secret put THEME_WORKER_TOKEN` con el
    mismo valor configurado en la API.
-3. **Vars de producción** en `apps/api/wrangler.toml`: `ADMIN_APP_URL` (dominio
+3. **Vars de producción** en `apps/api/wrangler.jsonc`: `ADMIN_APP_URL` (dominio
    real del panel), `ALLOWED_ORIGINS` (añade el origen del panel),
    `STRIPE_PRICE_*` de producción.
 4. **Webhook de Stripe**: en el dashboard, endpoint

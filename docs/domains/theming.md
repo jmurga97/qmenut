@@ -7,7 +7,7 @@ wrong theme.
 ## Purpose & status
 
 ✅ Complete. A tenant picks a **template** (one of five looks) plus a **primary** and
-**secondary** brand colour (and optional tagline/fonts). The *color-engine* derives a
+**secondary** brand colour (and optional tagline/fonts). The _color-engine_ derives a
 full, legible colour system from that, which is applied to the public menu as CSS
 custom properties (`--qm-*`). The engine was recently refactored (commit "refactored
 color-engine") into a single singleton.
@@ -25,15 +25,15 @@ Writes to that KV go **only** through the `apps/tenant-config` worker (see
 
 ## The pieces (`packages/ui/src/theme/`)
 
-| File | Responsibility |
-|---|---|
-| `color-engine.ts` | `QmColorEngine` singleton (`qmColorEngine`): derives the full colour group from a template + 2 colours. |
-| `presets.ts` | The 5 templates (`TEMPLATES`): `fine`, `her`, `fast`, `cafe`, `tapas`. Everything the tenant does *not* choose. |
-| `apply-theme.ts` | `buildQmThemeVars(input)` → the full `--qm-*` variable map; `applyQmTheme(el, …)` writes them. |
-| `derive.ts` | Thin wrapper (`deriveQmTheme`, `mix`) over the engine used by `apply-theme`. |
-| `tenant-theme-config.ts` | `QmTenantThemeConfig` (the KV shape) + `resolveTenantThemeConfig` (narrows arbitrary KV JSON safely). |
-| `font-catalog.ts` | Font id catalog + `getFontStack` + heading/body validity guards. |
-| `tokens.ts` | Base token definitions. |
+| File                     | Responsibility                                                                                            |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `color-engine.ts`        | `QmColorEngine` singleton (`qmColorEngine`): derives the full colour group from a template + two colours. |
+| `presets.ts`             | The five templates (`fine`, `her`, `fast`, `cafe`, `tapas`) and their governed layout defaults.           |
+| `apply-theme.ts`         | `buildQmThemeVars(input)` builds the full `--qm-*` contract; `applyQmTheme` writes it.                    |
+| `derive.ts`              | Thin `deriveQmTheme`/`mix` wrapper over the engine.                                                       |
+| `tenant-theme-config.ts` | KV shape and defensive `resolveTenantThemeConfig` normalizer.                                             |
+| `font-catalog.ts`        | Font catalog, stacks, and heading/body validity guards.                                                   |
+| `tokens.ts`              | Typed CSS-variable contract consumed by components.                                                       |
 
 ## How the color-engine works
 
@@ -45,8 +45,8 @@ plus on-colours and the effective saturation cap.
 
 The primitives it is built from:
 
-- **`mix(a, pct, b)`** (`color-engine.ts:93`) emits a *live* `color-mix(in oklab, a
-  pct%, b)` CSS string — colours are **not** pre-resolved to hex. The browser does the
+- **`mix(a, pct, b)`** (`color-engine.ts:93`) emits a _live_ `color-mix(in oklab, a
+pct%, b)` CSS string — colours are **not** pre-resolved to hex. The browser does the
   final mixing, which keeps output faithful and lets one variable cascade into shadow
   DOM.
 - **`clampChroma(hex, cap)`** (`color-engine.ts:98`) parses to OKLCH and caps chroma to
@@ -60,7 +60,7 @@ The primitives it is built from:
 
 ## Templates (`presets.ts`)
 
-Five `QmTemplatePreset`s. Each defines everything the tenant does *not* pick: fonts &
+Five `QmTemplatePreset`s. Each defines everything the tenant does _not_ pick: fonts &
 weights, `fontScale`, radius/border/rule geometry, `photoMode` (none/thumb/hero/heroxl),
 `badgeShape`, `navStyle`, `saturationCap`, `paper`, and the `tone` mix percentages the
 engine feeds into `mix()`. `DEFAULT_TEMPLATE` is `"her"`
@@ -69,13 +69,27 @@ engine feeds into `mix()`. `DEFAULT_TEMPLATE` is `"her"`
 ## Applying it to the public menu (no flash)
 
 `buildQmThemeVars(input)` (`apply-theme.ts`) is a pure function that assembles the
-entire `--qm-*` map — colours (from the engine) plus typography, geometry, photo,
-badge and nav token groups. On the public menu this happens at SSR, so the correct
-theme is in the very first HTML byte:
+entire `--qm-*` map. The current contract includes:
+
+- derived brand, surface, text, accent, price, border, tint, and on-colour tokens;
+- font families and weights, tracking/casing, and the pre-scaled `2xs` through
+  `display` type scale;
+- shell, header/hero, section, row, featured card, promo, surface/sheet/modal, touch,
+  and category-navigation layout tokens;
+- core radius/border/rule, number, spacing, shadow, placeholder, and divider geometry;
+- expanded photo modes (`none`, `thumb`, `hero`, `heroxl`), badge/tag styles, and
+  navigation states (`bar`, `floating`, `solid`).
+
+The selected preset's `layout` map is merged with shared shell constraints before the
+photo, badge, and navigation expansions are added. Components consume concrete values;
+they do not need to understand the preset that produced them. `qm-category-chip` and
+`qm-category-nav` are new direct consumers of the category and navigation groups.
+
+On the public menu this happens during SSR, so the correct theme is in the first HTML:
 
 1. **Read** — `getTenantContext` (`apps/web/src/server/tenant-theme.ts:29`), a
    TanStack `createServerFn`, resolves the host and reads `TENANT_THEME.get(host,
-   "json")` straight from the KV binding, then narrows it with
+"json")` straight from the KV binding, then narrows it with
    `resolveTenantThemeConfig`. `getCachedTenantContext` (`tenant-theme.ts:38`) reuses
    it across client navigations but never across SSR requests.
 2. **Route context** — `apps/web/src/app/routes/__root.tsx` puts `tenant` into the
@@ -89,6 +103,22 @@ theme is in the very first HTML byte:
 `resolveTenantThemeConfig` (`tenant-theme-config.ts:53`) is the safety net: unknown or
 invalid KV JSON falls back to the default config, and a valid `template` with missing
 preset fields is overlaid on that template so partial entries still render.
+
+## Development template switcher
+
+The public menu has a DEV-only template override for comparing all five designs against
+the same tenant content. `apps/web/src/app/routes/{-$locale}.tsx` validates the
+`?template=fine|her|fast|cafe|tapas` search parameter and only exposes it when
+`import.meta.env.DEV` is true.
+
+`DevTemplateSwitcher` (`apps/web/src/shared/dev/dev-template-switcher.tsx`) shows the
+active override and maps `Cmd+1..5` or `Ctrl+1..5` to the templates in that order.
+`useTemplateSelection` gives the override priority over the tenant's KV template. The
+parameter has no effect in production.
+
+Each template has a seed under `apps/tenant-config/seed/*.localhost.json`. E2E exercises
+all five hosts, and `e2e/tests/web/templates.spec.ts` provides platform-scoped visual
+snapshots when the `visual` project is enabled. See [testing](../operations/testing.md).
 
 ## The admin theme editor
 
@@ -132,18 +162,18 @@ Save path (`apps/api/src/modules/theme/theme.router.ts`):
 
 ## Key files
 
-| Concern | Path |
-|---|---|
-| Color engine | `packages/ui/src/theme/color-engine.ts` |
-| Templates | `packages/ui/src/theme/presets.ts` |
-| CSS-var builder | `packages/ui/src/theme/apply-theme.ts` |
-| KV config shape + narrowing | `packages/ui/src/theme/tenant-theme-config.ts` |
-| Fonts | `packages/ui/src/theme/font-catalog.ts` |
-| Web: read theme at SSR | `apps/web/src/server/tenant-theme.ts` |
-| Web: apply theme | `apps/web/src/app/routes/__root.tsx`, `apps/web/src/shared/components/public-page-shell.tsx` |
-| Admin editor | `apps/admin/src/features/theme/`, `apps/admin/src/app/routes/_auth.theme.tsx` |
-| Theme API (save/get) | `apps/api/src/modules/theme/theme.router.ts` |
-| KV writer client | `apps/api/src/lib/theme/theme-worker-client.ts` |
+| Concern                     | Path                                                                                         |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| Color engine                | `packages/ui/src/theme/color-engine.ts`                                                      |
+| Templates                   | `packages/ui/src/theme/presets.ts`                                                           |
+| CSS-var builder             | `packages/ui/src/theme/apply-theme.ts`                                                       |
+| KV config shape + narrowing | `packages/ui/src/theme/tenant-theme-config.ts`                                               |
+| Fonts                       | `packages/ui/src/theme/font-catalog.ts`                                                      |
+| Web: read theme at SSR      | `apps/web/src/server/tenant-theme.ts`                                                        |
+| Web: apply theme            | `apps/web/src/app/routes/__root.tsx`, `apps/web/src/shared/components/public-page-shell.tsx` |
+| Admin editor                | `apps/admin/src/features/theme/`, `apps/admin/src/app/routes/_auth.theme.tsx`                |
+| Theme API (save/get)        | `apps/api/src/modules/theme/theme.router.ts`                                                 |
+| KV writer client            | `apps/api/src/lib/theme/theme-worker-client.ts`                                              |
 
 ## Notes & gotchas
 

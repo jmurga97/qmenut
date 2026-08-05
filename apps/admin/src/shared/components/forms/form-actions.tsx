@@ -20,11 +20,21 @@ export function FormActions({
     <div className="admin-topbar-actions">
       {children}
       {onCancel ? (
-        <mc-button disabled={busy} onClick={onCancel} variant="secondary">
+        <mc-button
+          key={busy ? "cancel-busy" : "cancel-idle"}
+          disabled={busy || undefined}
+          onClick={onCancel}
+          variant="secondary"
+        >
           Cancelar
         </mc-button>
       ) : null}
-      <mc-button disabled={busy} onClick={onSubmit} variant="primary">
+      <mc-button
+        key={busy ? "submit-busy" : "submit-idle"}
+        disabled={busy || undefined}
+        onClick={onSubmit}
+        variant="primary"
+      >
         {busy ? busyLabel : submitLabel}
       </mc-button>
     </div>

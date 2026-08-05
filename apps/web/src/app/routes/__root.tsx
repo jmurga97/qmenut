@@ -52,8 +52,16 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
     const preloadUrls = [...new Set([getFontPreloadUrl(heading, theme.headingWeight), getFontPreloadUrl(body, 400)])];
 
     return {
-      meta: [{ charSet: "utf8" }, { name: "viewport", content: "width=device-width, initial-scale=1" }],
+      meta: [
+        { charSet: "utf8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "robots", content: "index,follow,max-image-preview:large" },
+        { name: "theme-color", content: theme.primary },
+      ],
       links: [
+        { rel: "icon", href: "/favicon.ico", sizes: "any" },
+        { rel: "manifest", href: "/site.webmanifest" },
         ...familyIds.map((fontId) => ({ rel: "stylesheet", href: FONT_CSS_URLS[fontId] })),
         ...preloadUrls.map((href) => ({
           rel: "preload",

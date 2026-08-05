@@ -44,6 +44,66 @@ export interface QmThemeTokens {
   "--qm-text-2xl": string;
   "--qm-text-display": string;
 
+  // Governed mobile layout defaults supplied by the selected template
+  "--qm-shell-max": string;
+  "--qm-shell-pad-x": string;
+  "--qm-content-top": string;
+  "--qm-content-bottom": string;
+  "--qm-section-gap": string;
+  "--qm-list-gap": string;
+  "--qm-touch-min": string;
+  "--qm-header-pad-x": string;
+  "--qm-header-pad-top": string;
+  "--qm-header-title-size": string;
+  "--qm-hero-scrim": string;
+  "--qm-hero-name-size": string;
+  "--qm-hero-logo-radius": string;
+  "--qm-section-bg": string;
+  "--qm-section-ink": string;
+  "--qm-section-muted": string;
+  "--qm-section-pad": string;
+  "--qm-section-radius": string;
+  "--qm-section-border": string;
+  "--qm-section-divider": string;
+  "--qm-section-rail": string;
+  "--qm-row-bg": string;
+  "--qm-row-border": string;
+  "--qm-row-radius": string;
+  "--qm-row-pad-x": string;
+  "--qm-row-shadow": string;
+  "--qm-row-stack-gap": string;
+  "--qm-row-name-size": string;
+  "--qm-row-price-size": string;
+  "--qm-row-photo-radius": string;
+  "--qm-featured-bg": string;
+  "--qm-featured-border": string;
+  "--qm-featured-cap": string;
+  "--qm-featured-radius": string;
+  "--qm-featured-body-pad": string;
+  "--qm-featured-name-size": string;
+  "--qm-promo-discount-width": string;
+  "--qm-promo-body-pad": string;
+  "--qm-surface-bg": string;
+  "--qm-surface-border": string;
+  "--qm-surface-radius": string;
+  "--qm-surface-shadow": string;
+  "--qm-sheet-max": string;
+  "--qm-sheet-min": string;
+  "--qm-sheet-radius": string;
+  "--qm-sheet-photo-radius": string;
+  "--qm-sheet-handle": string;
+  "--qm-modal-photo-ratio": string;
+  "--qm-modal-pad-x": string;
+  "--qm-category-radius": string;
+  "--qm-category-bg": string;
+  "--qm-category-border": string;
+  "--qm-category-gap": string;
+  "--qm-category-separator": string;
+  "--qm-category-active-bg": string;
+  "--qm-category-active-color": string;
+  "--qm-category-active-border": string;
+  "--qm-nav-height": string;
+
   // Geometry
   "--qm-radius": string;
   "--qm-bw": string;
@@ -90,7 +150,6 @@ export interface QmThemeTokens {
   "--qm-item-align": "baseline" | "center";
   "--qm-promo-img": "block" | "none";
   "--qm-hero-h"?: string;
-  "--qm-modal-photo-h"?: string;
   "--qm-modal-order-photo": string;
   "--qm-modal-order-desc": string;
   "--qm-modal-order-extras": string;
@@ -123,4 +182,5 @@ export interface QmThemeTokens {
   "--qm-nav-active-radius": string;
   "--qm-nav-active-pad": string;
   "--qm-nav-muted": string;
+  "--qm-nav-icon-display": string;
 }

@@ -7,6 +7,11 @@ const nullableText = z
   .optional()
   .transform((value) => (value && value.length > 0 ? value : null));
 
+const nullableEmail = nullableText.refine(
+  (value) => value === null || z.email().safeParse(value).success,
+  "Email no válido",
+);
+
 const minuteSchema = z.number().int().min(0).max(1439);
 const supportedTimeZones = new Set([...Intl.supportedValuesOf("timeZone"), "UTC"]);
 
@@ -37,6 +42,12 @@ export const saveBranchSettingsSchema = z.object({
     phone: nullableText,
     whatsapp: nullableText,
     socialLinksJson: nullableText,
+  }),
+  legal: z.object({
+    dataProtectionEmail: nullableEmail,
+    legalAddress: nullableText,
+    legalName: nullableText,
+    taxId: nullableText,
   }),
   schedules: z.array(scheduleRowSchema).max(21).default([]),
   photos: z.array(photoRowSchema).max(20).default([]),

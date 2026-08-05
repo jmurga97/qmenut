@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { ContactPage } from "~/features/contact/pages/contact-page";
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
-import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
+import { buildPageHead } from "~/features/menu/seo/build-page-head";
+import { buildRestaurantJsonLd } from "~/features/menu/seo/build-restaurant-json-ld";
 import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 
 export const Route = createFileRoute("/{-$locale}/contacto")({
@@ -10,36 +11,21 @@ export const Route = createFileRoute("/{-$locale}/contacto")({
     context.queryClient.ensureQueryData(
       getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
     ),
-  head: ({ loaderData, match }) => {
-    if (!loaderData) {
-      return {};
-    }
-
-    const origin = `https://${match.context.tenant.host}`;
-    const canonicalUrl = `${origin}${match.pathname}`;
-    const title = match.context.i18n.t("contact.seoTitle", { name: loaderData.branch.name });
-    const description = match.context.i18n.t("contact.seoDescription", {
-      address: loaderData.branch.address ? `: ${loaderData.branch.address}` : "",
-      name: loaderData.branch.name,
-    });
-
-    return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:type", content: "website" },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:url", content: canonicalUrl },
-      ],
-      links: [
-        { rel: "canonical", href: canonicalUrl },
-        ...buildHreflangAlternates({ language: loaderData.language, origin, path: "/contacto" }).map(
-          ({ hreflang, href }) => ({ rel: "alternate", hrefLang: hreflang, href }),
-        ),
-      ],
-    };
-  },
+  head: ({ loaderData, match }) =>
+    buildPageHead({
+      descriptionKey: "contact.seoDescription",
+      jsonLd: loaderData
+        ? buildRestaurantJsonLd({
+            data: loaderData,
+            includeMenu: false,
+            origin: `https://${match.context.tenant.host}`,
+          })
+        : undefined,
+      loaderData,
+      match,
+      path: "/contacto",
+      titleKey: "contact.seoTitle",
+    }),
   headers: () => ({
     "Cache-Control": BROWSER_CACHE_CONTROL,
   }),

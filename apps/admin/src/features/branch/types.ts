@@ -36,6 +36,13 @@ export const branchFormSchema = z.object({
   address: z.string().trim(),
   phone: z.string().trim(),
   whatsapp: z.string().trim(),
+  legalName: z.string().trim(),
+  taxId: z.string().trim(),
+  legalAddress: z.string().trim(),
+  dataProtectionEmail: z
+    .string()
+    .trim()
+    .refine((value) => !value || z.email().safeParse(value).success, "Email no válido"),
   timezone: z.string().trim().min(1, "La zona horaria es obligatoria"),
   schedules: z.array(scheduleSchema).length(7),
 });

@@ -20,7 +20,7 @@ Apps involved:
   (PUT/DELETE need `Authorization: Bearer <THEME_WORKER_TOKEN>`, `dev-token` locally).
 
 Local KV state is shared across workers through `<repo>/.wrangler-shared/state` (the namespace
-**id** in `apps/web/wrangler.jsonc` and `apps/tenant-config/wrangler.toml` must match — local
+**id** in `apps/web/wrangler.jsonc` and `apps/tenant-config/wrangler.jsonc` must match — local
 storage is keyed by id). The api keeps its own default persist dir for D1.
 
 ## Run it
@@ -46,12 +46,13 @@ bun run dev
 #   http://cafe.localhost:5173     cafe data + DEFAULT theme (no KV entry)
 #   http://unknown.localhost:5173  "Carta no disponible"
 
-# 3b. Deploy-shaped path: N built workers, one per tenant, pinned via TENANT_HOST
+# 3b. Deploy-shaped path: one built worker; Host header picks the tenant
 cd apps/web
 bun run build
-bun run serve:tapas   # :4011   (parallel terminals; all share .wrangler-shared KV)
-bun run serve:fine    # :4012
-bun run serve:cafe    # :4013
+bun run serve          # :4011 (all share .wrangler-shared KV)
+#   http://tapas.localhost:4011  tapas data + tapas KV theme
+#   http://fine.localhost:4011   fine data + fine KV theme
+#   http://cafe.localhost:4011   cafe data + DEFAULT theme (no KV entry)
 ```
 
 ## Live theme edits
@@ -73,10 +74,9 @@ curl -X DELETE http://localhost:8788/tenants/cafe.localhost/theme \
 - Create the KV namespace once (`wrangler kv namespace create TENANT_THEME`) and put its id in
   both wrangler configs.
 - Nitro generates `.output/server/wrangler.json` + a `.wrangler/deploy/config.json` redirect —
-  and redirected configs **cannot contain `env` blocks**, so deploy one worker per tenant with
-  `wrangler deploy --name qmenut-web-<tenant>` (TENANT_HOST as a dashboard var), or skip
-  TENANT_HOST entirely: with real custom domains the request Host header already resolves the
-  tenant, so a single web worker on N domains also works.
+  and redirected configs **cannot contain `env` blocks**. That is fine because there is one
+  web worker: attach real custom domains to `qmenut-web` and let the request Host header
+  resolve the tenant.
 
 ## Notes / gotchas
 

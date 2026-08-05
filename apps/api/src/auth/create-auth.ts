@@ -17,6 +17,8 @@ export function createAuth({ db, env }: CreateAuthInput) {
       ? [
           { email: "e2e@test.local", otp: "000000" },
           { email: "staff.e2e@test.local", otp: "000000" },
+          { email: "admin.e2e@test.local", otp: "000000" },
+          { email: "owner.fine@test.local", otp: "000000" },
         ]
       : undefined;
 

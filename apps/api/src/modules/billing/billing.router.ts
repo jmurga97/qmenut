@@ -8,7 +8,7 @@ import { requirePermission } from "../admin-tenant/require-permission";
 
 const checkoutSchema = z.object({
   branchId: z.string().trim().min(1),
-  planCode: z.enum(["basic", "business"]),
+  planCode: z.enum(["basic"]),
 });
 
 export const billingRouter = router({

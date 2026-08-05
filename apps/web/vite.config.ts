@@ -1,14 +1,49 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { cloudflare } from "@cloudflare/vite-plugin";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
-import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 
+import type { Plugin } from "vite";
+
 const appDir = path.dirname(fileURLToPath(import.meta.url));
+const SSR_NODE_CONDITIONS = ["node", "module", "import", "default"];
+
+function ssrNodeConditions(): Plugin {
+  return {
+    name: "qmenut:ssr-node-conditions",
+    resolveId(source) {
+      if (source === "cloudflare:workers" && this.environment.name === "client") {
+        // Rollup resolves dynamic imports before eliminating import.meta.env.SSR branches.
+        return { id: source, external: true };
+      }
+    },
+    configEnvironment(name, options) {
+      if (name !== "ssr") {
+        return;
+      }
+
+      options.resolve ??= {};
+      // Mutate instead of returning a partial: Vite concatenates condition arrays when merging.
+      options.resolve.conditions = [...SSR_NODE_CONDITIONS];
+    },
+    configResolved(config) {
+      const conditions = config.environments.ssr?.resolve.conditions ?? [];
+
+      if (conditions.includes("browser")) {
+        throw new Error("The SSR environment must not resolve browser exports");
+      }
+    },
+  };
+}
 
 export default defineConfig({
   plugins: [
+    cloudflare({
+      viteEnvironment: { name: "ssr" },
+      persistState: { path: "../../.wrangler-shared/state" },
+    }),
     tanstackStart({
       srcDirectory: "src/app",
       router: {
@@ -16,19 +51,8 @@ export default defineConfig({
         routesDirectory: "routes",
       },
     }),
-    nitro({
-      config: {
-        preset: "cloudflare-module",
-        cloudflare: {
-          // Shared with apps/tenant-config so `vite dev` sees the KV entries seeded there
-          // (wrangler CLIs point at ../../.wrangler-shared/state; wrangler appends /v3).
-          dev: {
-            persistDir: "../../.wrangler-shared/state/v3",
-          },
-        },
-      },
-    }),
     react(),
+    ssrNodeConditions(),
   ],
   resolve: {
     alias: {
@@ -39,22 +63,16 @@ export default defineConfig({
   server: {
     host: true,
     port: Number(process.env.PORT) || 5173,
-  },
-  ssr: {
-    external: ["cloudflare:workers"],
-    resolve: {
-      // Prefer node builds during SSR so lit resolves its @lit-labs/ssr-dom-shim-backed
-      // entries instead of the browser build (which touches document/window at module scope).
-      conditions: ["node", "module", "import", "default"],
-      externalConditions: ["node", "module", "import", "default"],
+    proxy: {
+      "/trpc": {
+        target: "http://127.0.0.1:8787",
+        changeOrigin: false,
+      },
     },
   },
   build: {
-    outDir: "dist",
     sourcemap: true,
     rollupOptions: {
-      // Runtime module provided by the Workers runtime (nitro shims it in dev).
-      external: ["cloudflare:workers"],
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return;

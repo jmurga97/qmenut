@@ -1,7 +1,8 @@
 import { expect, test } from "../../fixtures/test";
 
 test("renders and edge-caches the seeded default-language tapas menu", async ({ page, request }) => {
-  const firstResponse = await request.get("/");
+  const cachePath = "/es/";
+  const firstResponse = await request.get(cachePath);
   const firstBody = await firstResponse.text();
 
   expect(firstResponse.ok(), firstBody).toBe(true);
@@ -12,7 +13,7 @@ test("renders and edge-caches the seeded default-language tapas menu", async ({ 
   await expect
     .poll(
       async () => {
-        const response = await request.get("/");
+        const response = await request.get(cachePath);
         expect(response.ok(), await response.text()).toBe(true);
         return response.headers()["x-qmenut-cache"];
       },

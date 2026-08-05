@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite dev",
     "build": "vite build",
     "check": "tsc --noEmit",
-    "serve:tapas": "wrangler dev --port 4011 --persist-to ../../.wrangler-shared/state --var TENANT_HOST:tapas.localhost",
-    "serve:fine": "wrangler dev --port 4012 --persist-to ../../.wrangler-shared/state --var TENANT_HOST:fine.localhost",
-    "serve:cafe": "wrangler dev --port 4013 --persist-to ../../.wrangler-shared/state --var TENANT_HOST:cafe.localhost"
+    "preview": "vite preview",
+    "deploy": "vite build && wrangler deploy",
+    "serve": "wrangler dev --port 4011 --persist-to ../../.wrangler-shared/state"
   },
   "dependencies": {
     "@lit-labs/ssr-dom-shim": "^1.6.0",
@@ -34,12 +34,13 @@
     "react-i18next": "^17.0.8"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.50.0",
+    "@cloudflare/workers-types": "^4.20260701.1",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.4",
-    "nitro": "^3.0.260610-beta",
     "typescript": "^5.9.3",
     "vite": "^7.1.12",
-    "wrangler": "^4.60.0"
+    "wrangler": "4.118.0"
   }
 }

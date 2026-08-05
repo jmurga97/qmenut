@@ -12,6 +12,10 @@ export function toBranchFormValues(settings: BranchSettings): BranchFormValues {
     address: settings.address ?? "",
     phone: settings.phone ?? "",
     whatsapp: settings.whatsapp ?? "",
+    legalName: settings.legalName ?? "",
+    taxId: settings.taxId ?? "",
+    legalAddress: settings.legalAddress ?? "",
+    dataProtectionEmail: settings.dataProtectionEmail ?? "",
     timezone: settings.timezone,
     schedules: DAYS.map((_, index) => {
       const dayOfWeek = index + 1;
@@ -40,6 +44,12 @@ export function toBranchInput({ branchId, settings, values }: BranchMapperInput)
       phone: values.phone,
       whatsapp: values.whatsapp,
       socialLinksJson: settings.socialLinksJson ?? undefined,
+    },
+    legal: {
+      legalName: values.legalName,
+      taxId: values.taxId,
+      legalAddress: values.legalAddress,
+      dataProtectionEmail: values.dataProtectionEmail,
     },
     schedules: values.schedules
       .filter((row) => row.enabled)

@@ -21,8 +21,9 @@ Two levels.
 - **`branches`** (`packages/db/src/schema/branches.ts:3`) belongs to a restaurant
   (`restaurantId`) and is **the unit that actually gets a public menu**. Its key
   field is **`customDomain`** (`branches.ts:13`) — the host that maps an incoming
-  request to this branch. A branch also has `planCode` (`basic` | `business`),
-  `currency`, `isActive`, and a soft-delete `deletedAt`. There is a unique constraint
+  request to this branch. A branch also has `planCode` (`basic` for new tenants;
+  the database retains the legacy `business` value), `currency`, `isActive`, and a
+  soft-delete `deletedAt`. There is a unique constraint
   `ux_branches_id_restaurant` on `(id, restaurantId)` so a branch id can always be
   safely qualified by its restaurant.
 

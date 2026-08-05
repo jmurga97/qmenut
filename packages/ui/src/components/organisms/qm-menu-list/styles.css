@@ -5,11 +5,16 @@
 .frame {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--qm-list-gap, 16px);
 }
 
 .rows {
   display: block;
+}
+
+.rows slot {
+  display: grid;
+  gap: var(--qm-row-stack-gap, 0px);
 }
 
 .empty {

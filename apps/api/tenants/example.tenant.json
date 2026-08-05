@@ -3,6 +3,12 @@
     "name": "Bar Ejemplo",
     "defaultLanguageCode": "es",
     "defaultCurrency": "EUR",
+    "legal": {
+      "legalName": "Bar Ejemplo Hostelería S.L.",
+      "taxId": "B12345678",
+      "legalAddress": "Calle Mayor 1, Logroño",
+      "dataProtectionEmail": "privacidad@barejemplo.es"
+    },
     "emailFromName": "Bar Ejemplo",
     "emailReplyTo": "hola@barejemplo.es",
     "languages": ["es", "en"]

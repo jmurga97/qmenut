@@ -169,7 +169,7 @@ const sharedTypeScriptRules = {
     "error",
     {
       caseSensitive: false,
-      ignore: ["^bun:test$", "\\.css$", "\\?.*$"],
+      ignore: ["^bun:test$", "^cloudflare:", "\\.css$", "\\?.*$"],
     },
   ],
 };

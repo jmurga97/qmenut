@@ -22,9 +22,9 @@
   /* Fixed 16px, not tokenized: iOS Safari auto-zooms on focus for inputs below 16px. */
   font-size: 16px;
   color: var(--qm-ink, #1c1815);
-  background: var(--qm-card, #ffffff);
-  border: var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8);
-  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-surface-bg, var(--qm-card, #ffffff));
+  border: var(--qm-surface-border, var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
 }
 
 .input:disabled {

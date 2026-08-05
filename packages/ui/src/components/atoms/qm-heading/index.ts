@@ -28,7 +28,7 @@ export class QmHeading extends LitElement {
   render() {
     return html`
       ${this.eyebrow ? html`<span part="eyebrow" class="eyebrow">${this.eyebrow}</span>` : nothing}
-      <span part="title" class="title">${this.text}</span>
+      <span part="title" class="title" role="heading" aria-level="2">${this.text}</span>
       ${this.divider ? html`<hr part="rule" class="rule" />` : nothing}
     `;
   }

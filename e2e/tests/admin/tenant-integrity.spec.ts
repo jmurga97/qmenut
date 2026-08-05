@@ -1,7 +1,7 @@
 import { expect, test } from "../../fixtures/test";
 import { callTrpcMutation, callTrpcQuery } from "../../helpers/trpc";
 
-test("keeps authenticated admin access inside the tapas tenant", async ({ page, request }) => {
+test("keeps authenticated admin access inside each owner tenant", async ({ page, fineOwner, request }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "Resumen" })).toBeVisible();
   await expect(page.getByText("Bar La Tasca", { exact: true }).first()).toBeVisible();
@@ -25,6 +25,16 @@ test("keeps authenticated admin access inside the tapas tenant", async ({ page, 
     },
   });
   expect(forbiddenWrite, forbiddenWrite.body).toMatchObject({ ok: false, status: 404 });
+
+  await fineOwner.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(fineOwner.getByText("Aurum", { exact: true }).first()).toBeVisible();
+  const fineMenu = await callTrpcQuery(fineOwner, "admin.menu.dishes.list", { branchId: "branch_fine" });
+  expect(fineMenu, fineMenu.body).toMatchObject({ ok: true, status: 200 });
+  expect(fineMenu.body).toContain("Ostra al aliño cítrico");
+  const forbiddenTapasRead = await callTrpcQuery(fineOwner, "admin.menu.dishes.list", {
+    branchId: "branch_tapas",
+  });
+  expect(forbiddenTapasRead, forbiddenTapasRead.body).toMatchObject({ ok: false, status: 404 });
 
   const tapasResponse = await request.get(
     `http://localhost:8787/trpc/menu.publicData?input=${encodeURIComponent(JSON.stringify({ host: "tapas.localhost" }))}`,

@@ -46,7 +46,7 @@
   right: 0;
   left: 0;
   height: var(--qm-hero-h, 180px);
-  background: linear-gradient(180deg, rgba(15, 11, 8, 0.1), rgba(15, 11, 8, 0.66));
+  background: var(--qm-hero-scrim, linear-gradient(180deg, rgba(15, 11, 8, 0.1), rgba(15, 11, 8, 0.66)));
   pointer-events: none;
   transform: translate3d(0, 0, 0);
   transition: transform 260ms ease;
@@ -134,7 +134,7 @@
   width: 48px;
   height: 48px;
   flex: none;
-  border-radius: calc(var(--qm-radius, 0px) + 4px);
+  border-radius: var(--qm-hero-logo-radius, calc(var(--qm-radius, 0px) + 4px));
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
   /* box-shadow is intentionally left out of the transition: animating a blurred shadow repaints
      every frame. It snaps between states instead, which reads as instant against the 260ms move. */
@@ -169,7 +169,7 @@
 }
 
 .name {
-  --qm-wordmark-size: var(--qm-text-2xl, 22px);
+  --qm-wordmark-size: var(--qm-hero-name-size, var(--qm-text-2xl, 22px));
   --qm-ink: #fff;
   display: block;
 }

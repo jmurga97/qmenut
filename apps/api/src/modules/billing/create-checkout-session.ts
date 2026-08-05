@@ -20,7 +20,7 @@ interface CreateCheckoutSessionInput {
   restaurantId: string;
   userEmail: string;
   branchId: string;
-  planCode: PlanCode;
+  planCode: Extract<PlanCode, "basic">;
 }
 
 export async function createCheckoutSession({
@@ -54,7 +54,7 @@ export async function createCheckoutSession({
   });
 
   const stripe = StripeProvider.getInstance().getClient(env);
-  const priceId = priceIdFor(env, planCode);
+  const priceId = priceIdFor(env);
 
   let session: Stripe.Checkout.Session;
 

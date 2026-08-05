@@ -5,10 +5,10 @@
   display: grid;
   justify-items: center;
   padding: 22px 16px 18px;
-  border: var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8);
-  border-radius: var(--qm-radius, 0px);
-  background: var(--qm-card, #fff);
-  box-shadow: var(--qm-card-shadow, none);
+  border: var(--qm-surface-border, var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
+  background: var(--qm-surface-bg, var(--qm-card, #fff));
+  box-shadow: var(--qm-surface-shadow, var(--qm-card-shadow, none));
   color: var(--qm-ink, #1c1815);
   text-align: center;
 }

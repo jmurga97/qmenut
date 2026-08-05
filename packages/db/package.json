@@ -128,6 +128,10 @@
       "types": "./src/schema/auth.ts",
       "import": "./src/schema/auth.ts"
     },
+    "./schema/analytics": {
+      "types": "./src/schema/analytics.ts",
+      "import": "./src/schema/analytics.ts"
+    },
     "./schema/billing": {
       "types": "./src/schema/billing.ts",
       "import": "./src/schema/billing.ts"
@@ -135,6 +139,10 @@
     "./schema/branches": {
       "types": "./src/schema/branches.ts",
       "import": "./src/schema/branches.ts"
+    },
+    "./schema/campaigns": {
+      "types": "./src/schema/campaigns.ts",
+      "import": "./src/schema/campaigns.ts"
     },
     "./schema/customers": {
       "types": "./src/schema/customers.ts",
@@ -147,6 +155,14 @@
     "./schema/menu": {
       "types": "./src/schema/menu.ts",
       "import": "./src/schema/menu.ts"
+    },
+    "./schema/operations": {
+      "types": "./src/schema/operations.ts",
+      "import": "./src/schema/operations.ts"
+    },
+    "./schema/ordering": {
+      "types": "./src/schema/ordering.ts",
+      "import": "./src/schema/ordering.ts"
     },
     "./schema/promotions": {
       "types": "./src/schema/promotions.ts",
@@ -167,7 +183,7 @@
   },
   "dependencies": {
     "@qmenut/permissions": "workspace:*",
-    "drizzle-orm": "^0.44.6"
+    "drizzle-orm": "0.44.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260502.0",
