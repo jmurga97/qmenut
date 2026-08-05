@@ -19,6 +19,10 @@ export default {
     photoLabel: "Foto del plato",
     recommended: "Recomendado",
   },
+  promos: {
+    seoTitle: "Promociones – {{name}}",
+    seoDescription: "Ofertas y promociones actuales de {{name}}",
+  },
   contact: {
     submittedLabel: "Enviado",
     seoTitle: "Contacto – {{name}}",
@@ -42,6 +46,8 @@ export default {
     },
   },
   loyalty: {
+    seoTitle: "Fidelización – {{name}}",
+    seoDescription: "Tarjeta de fidelización y premios de {{name}}",
     page: {
       title: "Fidelización",
       subtitle: "Tus visitas se convierten en premios",

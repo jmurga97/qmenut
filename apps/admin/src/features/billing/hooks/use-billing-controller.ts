@@ -13,6 +13,6 @@ export function useBillingController() {
     busy: checkout.isPending || portal.isPending,
     error: checkout.error ?? portal.error,
     openPortal: () => portal.mutate(),
-    subscribe: (branchId: string, planCode: "basic" | "business") => checkout.mutate({ branchId, planCode }),
+    subscribe: (branchId: string, planCode: "basic") => checkout.mutate({ branchId, planCode }),
   };
 }

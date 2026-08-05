@@ -13,19 +13,18 @@ Una vez rellenada: crear el JSON y ejecutar
 - [ ] **Idioma principal de la carta** (es, en, …) → `restaurant.defaultLanguageCode`
 - [ ] **Otros idiomas de la carta** → `restaurant.languages`
 - [ ] **Moneda** (EUR salvo excepción) → `restaurant.defaultCurrency`
+- [ ] **Zona horaria IANA** (opcional; por defecto `Europe/Madrid`) → `restaurant.timezone`
+- [ ] **Razón social** → `restaurant.legal.legalName`
+- [ ] **NIF/CIF** → `restaurant.legal.taxId`
+- [ ] **Domicilio fiscal completo** → `restaurant.legal.legalAddress`
+- [ ] **Email de contacto para protección de datos** → `restaurant.legal.dataProtectionEmail`
 - [ ] **Nombre remitente de emails** (opcional, ej. "Bar La Tasca") → `restaurant.emailFromName`
+- [ ] **Dirección remitente de emails** (opcional) → `restaurant.emailFromAddress`
 - [ ] **Email de respuesta** (opcional, donde quieren recibir respuestas) → `restaurant.emailReplyTo`
 
 ## 2. Datos legales (para las páginas de aviso legal y privacidad)
 
-- [ ] **Razón social** (ej. "La Tasca Hostelería S.L.")
-- [ ] **NIF/CIF**
-- [ ] **Dirección fiscal completa**
-- [ ] **Email de contacto para asuntos de protección de datos**
-
-> Estos datos sustituyen los marcadores `[Razón social]`, `[NIF]` y
-> `[Dirección fiscal]` de las páginas legales del menú público. No publicar
-> el tenant sin revisarlos.
+Los cuatro campos se guardan en `restaurants` y también pueden revisarse o editarse desde la sección **Datos legales del titular** de la página Sucursal. No publicar el tenant sin completarlos y revisarlos.
 
 ## 3. Sucursal (local)
 
@@ -35,8 +34,8 @@ Una vez rellenada: crear el JSON y ejecutar
 - [ ] **WhatsApp** (opcional) → `branch.whatsapp`
 - [ ] **Redes sociales** (Instagram, Facebook, TikTok… URLs) → `branch.socialLinks`
 - [ ] **Horario por día de la semana** (apertura/cierre; 1 = lunes … 7 = domingo) → `branch.schedules`
-- [ ] **Dominio deseado** (ej. `carta.barlatasca.es` o subdominio de qmenut) → `branch.customDomain`
-- [ ] **Plan contratado** (basic / business) → `branch.planCode`
+- [ ] **Dominio deseado** (ej. `carta.barlatasca.es` o un subdominio exacto de qmenut; siempre un `customDomain` del mismo worker, no un esquema wildcard) → `branch.customDomain`
+- [ ] **Plan contratado** (basic) → `branch.planCode`
 
 ## 4. Propietario (acceso al panel)
 
@@ -63,8 +62,13 @@ en PDF/foto como referencia:
 
 ## 7. Post-alta (checklist interno)
 
-- [ ] Configurar el dominio en Cloudflare (custom domain del worker `qmenut-web`)
-- [ ] Cargar el menú en el panel y verificar la carta pública
-- [ ] Revisar páginas legales sin marcadores pendientes
+- [ ] Adjuntar el dominio como custom domain del worker `qmenut-web` en Cloudflare
+- [ ] Revisar los datos legales en **Sucursal → Datos legales del titular** antes de publicar y
+      comprobar `/aviso-legal` y `/privacidad` en el dominio del tenant.
+- [ ] Cargar el menú en el panel y verificar la carta pública en el dominio
 - [ ] Descargar el QR desde el panel (sección "Código QR") y enviarlo al restaurante
 - [ ] Verificar login OTP del propietario
+
+El script publica automáticamente el tema normalizado y `menuVersion:{host}` en KV; no
+hay un paso manual de seed. Si D1 falla después de publicar, elimina ambas claves antes
+de salir.

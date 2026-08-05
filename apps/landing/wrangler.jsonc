@@ -5,8 +5,21 @@
   "assets": {
     "directory": "./dist",
   },
-  "compatibility_date": "2026-07-29",
+  "compatibility_date": "2026-06-16",
   "observability": {
     "enabled": true,
+  },
+  // Wrangler named environments do not inherit assets or observability. Keep the name
+  // unchanged so the apex/www custom domains remain attached to qmenut-landing.
+  "env": {
+    "production": {
+      "name": "qmenut-landing",
+      "assets": {
+        "directory": "./dist",
+      },
+      "observability": {
+        "enabled": true,
+      },
+    },
   },
 }

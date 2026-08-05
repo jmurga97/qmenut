@@ -1,9 +1,9 @@
 import { expect, test } from "../../fixtures/test";
+import { getContentVersion } from "../../helpers/tenant-config";
 
 import type { APIRequestContext } from "@playwright/test";
 
-const PUBLIC_MENU_URL = "http://localhost:4011/es/";
-const CONTENT_VERSION_URL = "http://localhost:8788/tenants/tapas.localhost/menu-version";
+const PUBLIC_MENU_URL = "http://tapas.localhost:4011/es/";
 
 interface PublicMenuResponse {
   body: string;
@@ -19,14 +19,6 @@ async function getPublicMenu(request: APIRequestContext): Promise<PublicMenuResp
     cacheStatus: response.headers()["x-qmenut-cache"],
     status: response.status(),
   };
-}
-
-async function getContentVersion(request: APIRequestContext): Promise<string | null> {
-  const response = await request.get(CONTENT_VERSION_URL, { timeout: 5_000 });
-  const body = (await response.json()) as { version?: string | null };
-
-  expect(response.ok(), JSON.stringify(body)).toBe(true);
-  return body.version ?? null;
 }
 
 async function expectCachedMenu(request: APIRequestContext, expectedName: string): Promise<void> {
@@ -48,7 +40,7 @@ test("publishes an admin dish rename through versioned SSR cache invalidation", 
   const updatedName = `Croquetas sincronizadas ${Date.now()}`;
 
   await expectCachedMenu(request, originalName);
-  const versionBeforeUpdate = await getContentVersion(request);
+  const versionBeforeUpdate = await getContentVersion(request, "tapas.localhost");
 
   await page.goto("/menu", { waitUntil: "domcontentloaded" });
   await page.getByRole("link", { name: originalName }).click();
@@ -58,7 +50,7 @@ test("publishes an admin dish rename through versioned SSR cache invalidation", 
 
   try {
     await expect
-      .poll(() => getContentVersion(request), {
+      .poll(() => getContentVersion(request, "tapas.localhost"), {
         message: "the admin mutation should bump the tenant public-content version",
         timeout: 10_000,
       })
@@ -72,7 +64,7 @@ test("publishes an admin dish rename through versioned SSR cache invalidation", 
 
     await expectCachedMenu(request, updatedName);
   } finally {
-    const versionBeforeRestore = await getContentVersion(request);
+    const versionBeforeRestore = await getContentVersion(request, "tapas.localhost");
     await page.goto("/menu", { waitUntil: "domcontentloaded" });
     const updatedLink = page.getByRole("link", { name: updatedName });
 
@@ -83,7 +75,7 @@ test("publishes an admin dish rename through versioned SSR cache invalidation", 
       await expect(page.getByRole("link", { name: originalName })).toBeVisible();
 
       await expect
-        .poll(() => getContentVersion(request), {
+        .poll(() => getContentVersion(request, "tapas.localhost"), {
           message: "restoring seeded data should bump the public-content version",
           timeout: 10_000,
         })

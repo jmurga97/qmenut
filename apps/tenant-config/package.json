@@ -7,7 +7,8 @@
     "dev": "wrangler dev --port 8788 --persist-to ../../.wrangler-shared/state",
     "build": "tsc --noEmit",
     "check": "tsc --noEmit",
-    "seed:local": "wrangler kv key put tapas.localhost --path seed/tapas.localhost.json --binding TENANT_THEME --local --persist-to ../../.wrangler-shared/state && wrangler kv key put fine.localhost --path seed/fine.localhost.json --binding TENANT_THEME --local --persist-to ../../.wrangler-shared/state && wrangler kv key put cafe.localhost --path seed/cafe.localhost.json --binding TENANT_THEME --local --persist-to ../../.wrangler-shared/state"
+    "deploy": "wrangler deploy",
+    "seed:local": "wrangler kv key put tapas.localhost --path seed/tapas.localhost.json --binding TENANT_THEME --preview --local --persist-to ../../.wrangler-shared/state && wrangler kv key put fine.localhost --path seed/fine.localhost.json --binding TENANT_THEME --preview --local --persist-to ../../.wrangler-shared/state && wrangler kv key put cafe.localhost --path seed/cafe.localhost.json --binding TENANT_THEME --preview --local --persist-to ../../.wrangler-shared/state && wrangler kv key put her.localhost --path seed/her.localhost.json --binding TENANT_THEME --preview --local --persist-to ../../.wrangler-shared/state && wrangler kv key put fast.localhost --path seed/fast.localhost.json --binding TENANT_THEME --preview --local --persist-to ../../.wrangler-shared/state"
   },
   "dependencies": {
     "@qmenut/db": "workspace:*",
@@ -16,6 +17,6 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260502.0",
     "typescript": "^5.9.3",
-    "wrangler": "4.116.0"
+    "wrangler": "4.118.0"
   }
 }

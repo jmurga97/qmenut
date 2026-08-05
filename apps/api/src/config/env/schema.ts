@@ -52,7 +52,6 @@ export const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
   STRIPE_PRICE_BASIC: z.string().min(1),
-  STRIPE_PRICE_BUSINESS: z.string().min(1),
   ADMIN_APP_URL: z.url(),
   SENTRY_DSN: z.string().trim().optional(),
   LOG_LEVEL: logLevelSchema.default("info"),

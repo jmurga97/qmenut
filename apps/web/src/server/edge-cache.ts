@@ -1,13 +1,18 @@
+import { env } from "cloudflare:workers";
+
 import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 import { LOCALE_PATTERN } from "~/lib/i18n/locale-pattern";
+import { resolveRequestTenantHost } from "~/server/tenant-host";
 
 const PROMOTION_EDGE_TTL_SECONDS = 15 * 60;
 const DEFAULT_EDGE_TTL_SECONDS = 24 * 60 * 60;
+const STALE_WINDOW_SECONDS = 24 * 60 * 60;
 // Legacy KV key prefix retained to avoid migrating existing tenant version entries.
 const LEGACY_CONTENT_VERSION_KEY_PREFIX = "menuVersion:";
 // Legacy query parameter retained so previously generated edge-cache keys remain compatible.
 const LEGACY_CONTENT_VERSION_QUERY_PARAM = "menuVersion";
 const CACHE_STATUS_HEADER = "X-QMenut-Cache";
+const FRESH_UNTIL_HEADER = "x-qmenut-fresh-until";
 const CACHEABLE_ROUTES = new Set([
   "",
   "contacto",
@@ -18,18 +23,12 @@ const CACHEABLE_ROUTES = new Set([
   "robots.txt",
   "sitemap.xml",
 ]);
-type CacheStatus = "BYPASS" | "HIT" | "MISS";
+const revalidations = new Map<string, Promise<void>>();
+
+type CacheStatus = "BYPASS" | "HIT" | "MISS" | "STALE";
 
 async function readPublicContentVersion(host: string): Promise<string | null> {
-  try {
-    // eslint-disable-next-line import/no-unresolved -- runtime module provided by workerd
-    const { env } = await import("cloudflare:workers");
-    const kv = (env as { TENANT_THEME?: { get(key: string): Promise<string | null> } }).TENANT_THEME;
-
-    return (await kv?.get(`${LEGACY_CONTENT_VERSION_KEY_PREFIX}${host}`)) ?? null;
-  } catch {
-    return null;
-  }
+  return (await env.TENANT_THEME?.get(`${LEGACY_CONTENT_VERSION_KEY_PREFIX}${host}`)) ?? null;
 }
 
 interface BuildCacheKeyInput {
@@ -70,38 +69,32 @@ interface EdgeCacheContext {
 
 /** Resolves the per-tenant cache key and policy for public HTML and crawler routes. */
 async function resolveEdgeCacheContext(request: Request): Promise<EdgeCacheContext | null> {
-  try {
-    if (request.method !== "GET") {
-      return null;
-    }
-
-    const url = new URL(request.url);
-    const edgeTtlSeconds = getEdgeTtlSeconds(url.pathname);
-
-    if (edgeTtlSeconds === null) {
-      return null;
-    }
-
-    const { resolveSsrTenantHost } = await import("./tenant-host");
-    const host = await resolveSsrTenantHost();
-
-    if (!host) {
-      return null;
-    }
-
-    const version = await readPublicContentVersion(host);
-    // `.default` is a Cloudflare-specific CacheStorage extension not in the standard lib types.
-    const cache = (caches as unknown as { default: Cache }).default;
-
-    return {
-      cache,
-      cacheKey: buildCacheKey({ host, pathname: url.pathname, version }),
-      edgeTtlSeconds,
-    };
-  } catch {
-    // No `cloudflare:workers` / `caches` under plain Vite dev: render uncached.
+  if (request.method !== "GET") {
     return null;
   }
+
+  const url = new URL(request.url);
+  const edgeTtlSeconds = getEdgeTtlSeconds(url.pathname);
+
+  if (edgeTtlSeconds === null) {
+    return null;
+  }
+
+  const host = resolveRequestTenantHost(request);
+
+  if (!host) {
+    return null;
+  }
+
+  const version = await readPublicContentVersion(host);
+  // `.default` is a Cloudflare-specific CacheStorage extension not in the standard lib types.
+  const cache = (caches as unknown as { default: Cache }).default;
+
+  return {
+    cache,
+    cacheKey: buildCacheKey({ host, pathname: url.pathname, version }),
+    edgeTtlSeconds,
+  };
 }
 
 interface CacheStatusResponseInput {
@@ -117,6 +110,7 @@ function withCacheStatus({ browserCacheControl, cacheStatus, response }: CacheSt
     browserResponse.headers.set("Cache-Control", BROWSER_CACHE_CONTROL);
   }
 
+  browserResponse.headers.delete(FRESH_UNTIL_HEADER);
   browserResponse.headers.set(CACHE_STATUS_HEADER, cacheStatus);
 
   return browserResponse;
@@ -125,7 +119,11 @@ function withCacheStatus({ browserCacheControl, cacheStatus, response }: CacheSt
 function withEdgeCacheControl(response: Response, edgeTtlSeconds: number): Response {
   const edgeResponse = new Response(response.body, response);
 
-  edgeResponse.headers.set("Cache-Control", `public, max-age=60, s-maxage=${edgeTtlSeconds}, must-revalidate`);
+  edgeResponse.headers.set(
+    "Cache-Control",
+    `public, max-age=60, s-maxage=${edgeTtlSeconds + STALE_WINDOW_SECONDS}, must-revalidate`,
+  );
+  edgeResponse.headers.set(FRESH_UNTIL_HEADER, String(Date.now() + edgeTtlSeconds * 1000));
 
   return edgeResponse;
 }
@@ -138,35 +136,83 @@ async function observeCachePut(putPromise: Promise<void>): Promise<void> {
   }
 }
 
-async function populateEdgeCache({
-  context,
-  response,
-}: {
+interface PopulateEdgeCacheInput {
   context: EdgeCacheContext;
+  ctx: ExecutionContext;
   response: Response;
-}): Promise<void> {
-  try {
-    // eslint-disable-next-line import/no-unresolved -- runtime module provided by workerd
-    const { waitUntil } = await import("cloudflare:workers");
-    const edgeResponse = withEdgeCacheControl(response.clone(), context.edgeTtlSeconds);
-    const putPromise = context.cache.put(context.cacheKey, edgeResponse);
+}
 
-    waitUntil(observeCachePut(putPromise));
-  } catch {
-    // Cache API is unavailable in plain Vite dev; the rendered response remains valid.
+function populateEdgeCache({ context, ctx, response }: PopulateEdgeCacheInput): void {
+  const edgeResponse = withEdgeCacheControl(response.clone(), context.edgeTtlSeconds);
+  const putPromise = context.cache.put(context.cacheKey, edgeResponse);
+
+  ctx.waitUntil(observeCachePut(putPromise));
+}
+
+interface RevalidateInput {
+  context: EdgeCacheContext;
+  render: () => Response | Promise<Response>;
+}
+
+async function revalidate({ context, render }: RevalidateInput): Promise<void> {
+  try {
+    const response = await render();
+
+    if (!response.ok || response.headers.has("Set-Cookie")) {
+      return;
+    }
+
+    // Only the cache consumes this background-rendered stream, so no clone/tee is needed.
+    await context.cache.put(context.cacheKey, withEdgeCacheControl(response, context.edgeTtlSeconds));
+  } catch (error) {
+    console.error("Failed to revalidate public edge cache", error);
   }
+}
+
+interface ScheduleRevalidationInput extends RevalidateInput {
+  ctx: ExecutionContext;
+}
+
+function scheduleRevalidation({ context, ctx, render }: ScheduleRevalidationInput): void {
+  const key = context.cacheKey.url;
+
+  if (revalidations.has(key)) {
+    return;
+  }
+
+  const promise = (async () => {
+    try {
+      await revalidate({ context, render });
+    } finally {
+      revalidations.delete(key);
+    }
+  })();
+
+  revalidations.set(key, promise);
+  ctx.waitUntil(promise);
+}
+
+async function matchEdgeCache(context: EdgeCacheContext): Promise<Response | null> {
+  try {
+    return (await context.cache.match(context.cacheKey)) ?? null;
+  } catch {
+    // A cache read failure should not prevent rendering the public route.
+    return null;
+  }
+}
+
+interface ServeWithEdgeCacheInput {
+  ctx: ExecutionContext;
+  render: () => Response | Promise<Response>;
+  request: Request;
 }
 
 /**
  * Public edge cache keyed by tenant, path, and the tenant's opaque public-content version.
- * The stored copy gets a route-specific shared-cache TTL; callers always receive the short
- * browser-cache contract. Streaming responses are deliberately not deduplicated: sharing them
- * requires teeing the body, and an unread tee branch prevents Workers SSR streams from closing.
+ * Fresh entries are served directly; stale entries are served immediately and revalidated in
+ * the background. Callers always receive the short browser-cache contract.
  */
-export async function serveWithEdgeCache(
-  request: Request,
-  render: () => Response | Promise<Response>,
-): Promise<Response> {
+export async function serveWithEdgeCache({ ctx, render, request }: ServeWithEdgeCacheInput): Promise<Response> {
   const context = await resolveEdgeCacheContext(request);
 
   if (!context) {
@@ -175,20 +221,25 @@ export async function serveWithEdgeCache(
     return withCacheStatus({ browserCacheControl: false, cacheStatus: "BYPASS", response });
   }
 
-  try {
-    const cached = await context.cache.match(context.cacheKey);
+  const cached = await matchEdgeCache(context);
 
-    if (cached) {
+  if (cached) {
+    const freshUntil = Number(cached.headers.get(FRESH_UNTIL_HEADER));
+
+    if (Number.isFinite(freshUntil) && Date.now() < freshUntil) {
       return withCacheStatus({ browserCacheControl: true, cacheStatus: "HIT", response: cached });
     }
-  } catch {
-    // A cache read failure should not prevent rendering the public route.
+
+    scheduleRevalidation({ context, ctx, render });
+
+    // Cloning a cached response is safe because its body is already buffered.
+    return withCacheStatus({ browserCacheControl: true, cacheStatus: "STALE", response: cached });
   }
 
   const response = await render();
 
   if (response.ok && !response.headers.has("Set-Cookie")) {
-    await populateEdgeCache({ context, response });
+    populateEdgeCache({ context, ctx, response });
   }
 
   // `populateEdgeCache` consumes one clone while the caller consumes this original stream.

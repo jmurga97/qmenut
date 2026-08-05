@@ -1,19 +1,17 @@
-<!-- Los marcadores [Razón social], [NIF], [Dirección fiscal] y los datos de QMenut se recogen en la ficha de alta (docs/onboarding-intake.md). No publicar un tenant sin haberlos sustituido. -->
-
 Esta política describe cómo se tratan los datos personales de quienes visitan la carta digital de **{{branchName}}**, conforme al Reglamento (UE) 2016/679 (RGPD) y a la Ley Orgánica 3/2018 (LOPDGDD).
 
 ## 1. Responsable del tratamiento
 
 El responsable del tratamiento de los datos recogidos en este sitio es el titular del establecimiento:
 
-- Razón social: [Razón social]
-- NIF: [NIF]
-- Domicilio: [Dirección fiscal]
-- Contacto en materia de protección de datos: [email de contacto]
+- Razón social: {{ownerLegalName}}
+- NIF: {{ownerTaxId}}
+- Domicilio: {{ownerLegalAddress}}
+- Contacto en materia de protección de datos: {{ownerDataProtectionEmail}}
 
 ## 2. Encargado del tratamiento
 
-La plataforma **QMenut** ([Titular de QMenut], NIF [NIF de QMenut]) presta el servicio tecnológico de la carta digital y actúa como encargado del tratamiento por cuenta del establecimiento, conforme al artículo 28 del RGPD.
+La plataforma **QMenut** ({{operatorLegalName}}, NIF {{operatorLegalTaxId}}) presta el servicio tecnológico de la carta digital y actúa como encargado del tratamiento por cuenta del establecimiento, conforme al artículo 28 del RGPD.
 
 ## 3. Datos que se tratan y finalidades
 
@@ -48,7 +46,9 @@ Los mensajes de contacto se conservan el tiempo necesario para atender la consul
 
 ## 8. Derechos
 
-Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad escribiendo al responsable ([email de contacto]), acreditando tu identidad. Si consideras que el tratamiento no es conforme, puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es).
+Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad escribiendo al responsable y acreditando tu identidad. Si consideras que el tratamiento no es conforme, puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es).
+
+- Contacto para ejercer tus derechos: {{ownerDataProtectionEmail}}
 
 ## 9. Cookies y tecnologías de almacenamiento
 

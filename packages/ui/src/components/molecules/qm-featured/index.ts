@@ -53,7 +53,7 @@ export class QmFeatured extends LitElement {
       <div part="card" class="card">
         ${this.photo ? html` <span part="photo" class="photo">${photoImage}</span> ` : nothing}
         <div class="body">
-          <div part="tag" class="tag">${this.tag}</div>
+          ${this.tag ? html`<div part="tag" class="tag">${this.tag}</div>` : nothing}
           <div part="name" class="name">${this.name}</div>
           <div part="desc" class="desc">${this.desc}</div>
           <qm-price part="price" .value=${this.price} .oldValue=${this.oldPrice}></qm-price>

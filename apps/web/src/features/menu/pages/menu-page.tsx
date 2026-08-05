@@ -81,8 +81,12 @@ export function MenuPage() {
       )}
 
       <div className="home-scroll" ref={scrollRef}>
-        <MenuCategoryNav scrollContainerRef={scrollRef} sections={content.sections} />
-        <MenuDishList content={content} showDishPhotos={showDishPhotos} onSelectDish={handleSelectDish} />
+        <MenuDishList
+          categoryNav={<MenuCategoryNav scrollContainerRef={scrollRef} sections={content.sections} />}
+          content={content}
+          showDishPhotos={showDishPhotos}
+          onSelectDish={handleSelectDish}
+        />
       </div>
     </PublicPageShell>
   );

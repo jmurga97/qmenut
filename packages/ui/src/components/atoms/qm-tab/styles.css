@@ -34,7 +34,11 @@ button[data-active="true"] {
   border-bottom: var(--qm-nav-active-bd, 2px solid currentColor);
 }
 
-.icon,
+.icon {
+  display: var(--qm-nav-icon-display, inline-flex);
+  align-items: center;
+}
+
 .label {
   display: inline-flex;
   align-items: center;

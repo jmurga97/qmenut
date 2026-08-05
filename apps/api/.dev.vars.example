@@ -1,5 +1,5 @@
 # apps/api local secrets — copy to `.dev.vars` (gitignored) and fill in.
-# Vars that are NOT secret (STRIPE_PRICE_*, ADMIN_APP_URL, etc.) live in wrangler.toml [vars].
+# Vars that are NOT secret (STRIPE_PRICE_*, ADMIN_APP_URL, etc.) live in wrangler.jsonc [vars].
 
 # Better Auth signing secret (any long random string in dev).
 BETTER_AUTH_SECRET=dev-secret-change-me

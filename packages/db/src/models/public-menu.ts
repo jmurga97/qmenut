@@ -85,8 +85,16 @@ export interface PublicMenuLanguage {
   requested: string | null;
 }
 
+export interface PublicLegalEntity {
+  address: string | null;
+  dataProtectionEmail: string | null;
+  name: string | null;
+  taxId: string | null;
+}
+
 export interface PublicMenuData {
   branch: PublicBranch;
   categories: PublicCategory[];
+  legal: PublicLegalEntity;
   promotions: PublicPromotion[];
 }

@@ -2,7 +2,7 @@ import Stripe from "stripe";
 
 import type { RuntimeEnv } from "../../config/env/schema";
 
-const STRIPE_API_VERSION = "2025-10-29.clover";
+const STRIPE_API_VERSION = "2026-07-29.dahlia";
 
 /**
  * Suministrador del cliente Stripe (patrón singleton para infraestructura).

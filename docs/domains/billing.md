@@ -6,7 +6,7 @@
 ## Purpose & status
 
 ✅ Complete for MVP1. SaaS billing with **Stripe**, one subscription **per branch**.
-Two plans (`basic`, `business`) configured via env price ids. State is kept in sync by
+One plan (`basic`) configured via an env price id. State is kept in sync by
 Stripe webhooks. MVP1 uses env-configured plans; the code notes an intent to migrate to
 a plans table later.
 
@@ -30,7 +30,7 @@ a plans table later.
   `handleStripeWebhook`. All subscription events converge in `syncSubscriptionState`.
 - Infra singletons: `apps/api/src/lib/stripe/stripe-provider.ts`,
   `apps/api/src/lib/billing/plan-catalog.ts` (maps `basic`→`STRIPE_PRICE_BASIC`,
-  `business`→`STRIPE_PRICE_BUSINESS`), `apps/api/src/lib/billing/entitlement.ts`.
+  `apps/api/src/lib/billing/entitlement.ts`.
 
 ## Frontend
 

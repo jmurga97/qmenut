@@ -1,20 +1,18 @@
-<!-- Los marcadores [Razón social], [NIF], [Dirección fiscal] y los datos de QMenut se recogen en la ficha de alta (docs/onboarding-intake.md). No publicar un tenant sin haberlos sustituido. -->
-
 En cumplimiento de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa de los datos identificativos del titular de este sitio web.
 
 ## 1. Titular del sitio
 
 Este sitio web contiene la carta digital del establecimiento **{{branchName}}**, cuyo titular es:
 
-- Razón social: [Razón social]
-- NIF: [NIF]
-- Domicilio: [Dirección fiscal]
+- Razón social: {{ownerLegalName}}
+- NIF: {{ownerTaxId}}
+- Domicilio: {{ownerLegalAddress}}
 - Establecimiento: {{branchAddress}}
 - Teléfono: {{branchPhone}}
 
 ## 2. Plataforma
 
-El sitio se presta a través de la plataforma **QMenut**, operada por [Titular de QMenut], con NIF [NIF de QMenut] y domicilio en [Domicilio de QMenut]. Contacto: [email de contacto de QMenut]. QMenut actúa como proveedor tecnológico y de alojamiento del titular.
+El sitio se presta a través de la plataforma **QMenut**, operada por {{operatorLegalName}}, con NIF {{operatorLegalTaxId}} y domicilio en {{operatorLegalAddress}}. Contacto: {{operatorEmail}}. QMenut actúa como proveedor tecnológico y de alojamiento del titular.
 
 ## 3. Objeto
 

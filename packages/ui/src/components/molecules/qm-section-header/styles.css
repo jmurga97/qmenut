@@ -5,7 +5,7 @@
   gap: 10px;
   padding: var(--qm-section-pad, 0 0 10px);
   border: var(--qm-section-border, none);
-  border-bottom: var(--qm-rule, 1.5px) solid var(--qm-section-ink, var(--qm-ink, #1c1815));
+  border-bottom: var(--qm-section-divider, var(--qm-rule, 1.5px) solid var(--qm-section-ink, var(--qm-ink, #1c1815)));
   border-left: var(--qm-section-rail, none);
   border-radius: var(--qm-section-radius, 0px);
   background: var(--qm-section-bg, transparent);

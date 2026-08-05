@@ -1,8 +1,10 @@
 :host {
   position: sticky;
   z-index: 2;
-  top: 0;
-  margin: calc(var(--qm-content-top, 16px) * -1) calc(var(--qm-shell-pad-x, 18px) * -1) var(--qm-section-gap, 24px);
+  top: calc(
+    var(--scroll-sticky-header-offset, 0px) - var(--scroll-hide-header-height, 0px) - var(--qm-content-top, 16px)
+  );
+  margin: 0 calc(var(--qm-shell-pad-x, 18px) * -1) var(--qm-section-gap, 24px);
   padding: 10px var(--qm-shell-pad-x, 18px);
   background: color-mix(in oklab, var(--qm-bg, #fff) 92%, transparent);
   backdrop-filter: blur(16px) saturate(150%);
@@ -11,11 +13,15 @@
 
 .track {
   display: flex;
-  gap: 8px;
+  gap: var(--qm-category-gap, 8px);
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
   scroll-snap-type: x proximity;
+}
+
+slot::slotted(qm-category-chip:not(:first-child)) {
+  border-inline-start: var(--qm-category-separator, none);
 }
 
 .track::-webkit-scrollbar {

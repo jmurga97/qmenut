@@ -59,7 +59,7 @@ const DEFAULT_CONFIG: QmColorEngineConfig = {
   darkInk: "#16110D",
   white: "#FFFFFF",
   onColorLightnessThreshold: 0.62,
-  emphInkMix: 82,
+  emphInkMix: 65,
 };
 
 /**
@@ -130,7 +130,8 @@ class QmColorEngine {
     const bg = this.mix(primary, tone.bgMix, paper);
     const card = this.config.white;
     const ink = this.mix(primary, tone.inkMix, this.config.darkInk);
-    const muted = this.mix(ink, tone.mutedMix, bg);
+    // Muted copy is frequently small; preserve a WCAG-AA contrast floor against the page tone.
+    const muted = this.mix(ink, Math.max(tone.mutedMix, 65), bg);
     const hairline = this.mix(ink, tone.hairMix, bg);
     const tint = this.mix(secondary, tone.tintMix, this.config.white);
     const emph = secondary;

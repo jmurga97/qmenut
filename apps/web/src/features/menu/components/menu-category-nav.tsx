@@ -38,9 +38,10 @@ export function MenuCategoryNav({ scrollContainerRef, sections }: MenuCategoryNa
     if (!container || sections.length < 2) return;
 
     const targets = [...container.querySelectorAll<HTMLElement>("[data-menu-section]")];
+    const navigation = container.querySelector<HTMLElement>("qm-category-nav");
     const observer = new IntersectionObserver(
       () => {
-        const anchorY = container.getBoundingClientRect().top + 68;
+        const anchorY = navigation?.getBoundingClientRect().bottom ?? container.getBoundingClientRect().top + 68;
         const isAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 2;
         const activeTarget = isAtBottom
           ? targets.at(-1)

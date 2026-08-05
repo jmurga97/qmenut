@@ -6,10 +6,14 @@ import type { DrizzleDb } from "../client";
 import type { BatchItem } from "drizzle-orm/batch";
 
 export interface RestaurantSummary {
-  id: string;
-  name: string;
-  defaultLanguageCode: string;
+  dataProtectionEmail: string | null;
   defaultCurrency: string;
+  defaultLanguageCode: string;
+  id: string;
+  legalAddress: string | null;
+  legalName: string | null;
+  name: string;
+  taxId: string | null;
   timezone: string;
 }
 
@@ -28,6 +32,10 @@ export async function getRestaurantById({
       name: restaurants.name,
       defaultLanguageCode: restaurants.defaultLanguageCode,
       defaultCurrency: restaurants.defaultCurrency,
+      dataProtectionEmail: restaurants.dataProtectionEmail,
+      legalAddress: restaurants.legalAddress,
+      legalName: restaurants.legalName,
+      taxId: restaurants.taxId,
       timezone: restaurants.timezone,
     })
     .from(restaurants)
@@ -37,19 +45,26 @@ export async function getRestaurantById({
   return row ?? null;
 }
 
-interface UpdateRestaurantTimezoneInput {
+interface UpdateRestaurantSettingsInput {
   db: DrizzleDb;
+  legal: {
+    dataProtectionEmail: string | null;
+    legalAddress: string | null;
+    legalName: string | null;
+    taxId: string | null;
+  };
   restaurantId: string;
   timezone: string;
 }
 
-export function updateRestaurantTimezoneStatement({
+export function updateRestaurantSettingsStatement({
   db,
+  legal,
   restaurantId,
   timezone,
-}: UpdateRestaurantTimezoneInput): BatchItem<"sqlite"> {
+}: UpdateRestaurantSettingsInput): BatchItem<"sqlite"> {
   return db
     .update(restaurants)
-    .set({ timezone, updatedAt: Date.now() })
+    .set({ ...legal, timezone, updatedAt: Date.now() })
     .where(and(eq(restaurants.id, restaurantId), isNull(restaurants.deletedAt)));
 }

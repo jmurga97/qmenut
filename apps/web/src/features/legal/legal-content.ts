@@ -8,6 +8,13 @@ import type { BUNDLED_LOCALES } from "~/lib/i18n/create-i18n";
 type LegalLocale = Extract<(typeof BUNDLED_LOCALES)[number], "en" | "es">;
 export type LegalPage = "legalNotice" | "privacy";
 
+export const LEGAL_OPERATOR = {
+  operatorEmail: "proyectos@murga.ing",
+  operatorLegalAddress: "Valencia, Valencia",
+  operatorLegalName: "murga.ing",
+  operatorLegalTaxId: "Z1225135E",
+} as const;
+
 const legalContent: Record<LegalPage, Record<LegalLocale, string>> = {
   legalNotice: { en: legalNoticeEn, es: legalNoticeEs },
   privacy: { en: privacyEn, es: privacyEs },

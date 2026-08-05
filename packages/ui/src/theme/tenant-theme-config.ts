@@ -58,13 +58,23 @@ export function resolveTenantThemeConfig(
     return buildDefaultTenantThemeConfig(fallbackTemplate);
   }
 
-  const candidate = raw as Partial<QmTenantThemeConfig>;
+  const candidate = {
+    ...(raw as Partial<QmTenantThemeConfig> & { layoutRecipe?: unknown }),
+  };
+
+  // Older KV entries stored the former recipe name. Layout now comes directly from the
+  // selected template, so drop the legacy field instead of returning it to consumers.
+  delete candidate.layoutRecipe;
 
   if (!isTemplateName(candidate.template)) {
     return buildDefaultTenantThemeConfig(fallbackTemplate);
   }
 
   const base = TEMPLATES[candidate.template];
+  const layout =
+    candidate.layout && typeof candidate.layout === "object" && !Array.isArray(candidate.layout)
+      ? { ...base.layout, ...candidate.layout }
+      : base.layout;
 
   let primary: string = DEFAULT_TENANT_COLORS.primary;
 
@@ -81,6 +91,7 @@ export function resolveTenantThemeConfig(
   return {
     ...base,
     ...candidate,
+    layout,
     template: candidate.template,
     primary,
     secondary,

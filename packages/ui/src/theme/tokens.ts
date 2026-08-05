@@ -44,7 +44,7 @@ export interface QmThemeTokens {
   "--qm-text-2xl": string;
   "--qm-text-display": string;
 
-  // Governed mobile layout recipe
+  // Governed mobile layout defaults supplied by the selected template
   "--qm-shell-max": string;
   "--qm-shell-pad-x": string;
   "--qm-content-top": string;
@@ -64,6 +64,7 @@ export interface QmThemeTokens {
   "--qm-section-pad": string;
   "--qm-section-radius": string;
   "--qm-section-border": string;
+  "--qm-section-divider": string;
   "--qm-section-rail": string;
   "--qm-row-bg": string;
   "--qm-row-border": string;
@@ -87,10 +88,17 @@ export interface QmThemeTokens {
   "--qm-surface-radius": string;
   "--qm-surface-shadow": string;
   "--qm-sheet-max": string;
+  "--qm-sheet-min": string;
   "--qm-sheet-radius": string;
   "--qm-sheet-photo-radius": string;
   "--qm-sheet-handle": string;
+  "--qm-modal-photo-ratio": string;
+  "--qm-modal-pad-x": string;
   "--qm-category-radius": string;
+  "--qm-category-bg": string;
+  "--qm-category-border": string;
+  "--qm-category-gap": string;
+  "--qm-category-separator": string;
   "--qm-category-active-bg": string;
   "--qm-category-active-color": string;
   "--qm-category-active-border": string;
@@ -142,7 +150,6 @@ export interface QmThemeTokens {
   "--qm-item-align": "baseline" | "center";
   "--qm-promo-img": "block" | "none";
   "--qm-hero-h"?: string;
-  "--qm-modal-photo-h"?: string;
   "--qm-modal-order-photo": string;
   "--qm-modal-order-desc": string;
   "--qm-modal-order-extras": string;
@@ -175,4 +182,5 @@ export interface QmThemeTokens {
   "--qm-nav-active-radius": string;
   "--qm-nav-active-pad": string;
   "--qm-nav-muted": string;
+  "--qm-nav-icon-display": string;
 }

@@ -5,19 +5,37 @@ import { createServerTrpcCaller } from "~/lib/trpc-client";
 import { resolveSsrTenantHost } from "~/server/tenant-host";
 
 const ROUTE_PATHS = ["/", "/contacto", "/promos", "/puntos", "/aviso-legal", "/privacidad"];
+const CONTENT_VERSION_KEY_PREFIX = "menuVersion:";
 
 function escapeXml(value: string): string {
-  return value.replaceAll('&', "&amp;").replaceAll('<', "&lt;").replaceAll('>', "&gt;").replaceAll('"', "&quot;");
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
+
+async function readLastModified(host: string): Promise<string | null> {
+  if (!import.meta.env.SSR) {
+    return null;
+  }
+
+  const { env } = await import("cloudflare:workers");
+  const version = await env.TENANT_THEME?.get(`${CONTENT_VERSION_KEY_PREFIX}${host}`);
+  const timestamp = Number(version);
+
+  return Number.isFinite(timestamp) && timestamp > 0 ? new Date(timestamp).toISOString() : null;
 }
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const host = await resolveSsrTenantHost();
+        const host = resolveSsrTenantHost();
+
+        if (!host) {
+          return new Response("Not found", { status: 404 });
+        }
+
         const origin = `https://${host}`;
         const trpc = createServerTrpcCaller();
-        const data = await trpc.menu.publicData.query({ host });
+        const [data, lastModified] = await Promise.all([trpc.menu.publicData.query({ host }), readLastModified(host)]);
 
         if (!data) {
           return new Response("Not found", { status: 404 });
@@ -35,7 +53,7 @@ export const Route = createFileRoute("/sitemap.xml")({
 
           return `  <url>
     <loc>${escapeXml(defaultHref)}</loc>
-${alternateLinks}
+${lastModified ? `    <lastmod>${lastModified}</lastmod>\n` : ""}${alternateLinks}
   </url>`;
         });
 

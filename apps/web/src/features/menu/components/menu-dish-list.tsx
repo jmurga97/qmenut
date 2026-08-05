@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { menuSectionElementId } from "~/features/menu/components/menu-section-id";
 
+import type { ReactNode } from "react";
 import type {
   MenuContentViewModel,
   MenuDishViewModel,
@@ -12,13 +13,13 @@ import type {
 defineQmMenuList();
 
 interface MenuDishListProps {
+  categoryNav: ReactNode;
   content: MenuContentViewModel;
   onSelectDish: (dish: MenuDishViewModel, trigger: HTMLButtonElement) => void;
   showDishPhotos: boolean;
 }
 
 interface MenuSectionProps {
-  featured: MenuDishViewModel | null;
   onSelectDish: (dish: MenuDishViewModel, trigger: HTMLButtonElement) => void;
   section: MenuSectionViewModel;
   showDishPhotos: boolean;
@@ -27,29 +28,11 @@ interface MenuSectionProps {
 // Multi-word Lit props are written as their kebab attributes (old-price, photo-url,
 // section-label...) so SSR-rendered values survive hydration; see KebabAttributes in
 // @qmenut/ui jsx-types.
-function MenuSection({ featured, onSelectDish, section, showDishPhotos }: MenuSectionProps) {
+function MenuSection({ onSelectDish, section, showDishPhotos }: MenuSectionProps) {
   const { t } = useTranslation();
 
   return (
     <qm-menu-list empty-label={t("menu.emptyLabel")}>
-      {featured ? (
-        <button
-          slot="featured"
-          type="button"
-          className="dish-trigger"
-          onClick={(event) => onSelectDish(featured, event.currentTarget)}
-        >
-          <qm-featured
-            name={featured.name}
-            desc={featured.desc}
-            price={featured.price}
-            old-price={featured.oldPrice}
-            tag={featured.tag}
-            photo={showDishPhotos}
-            photo-url={featured.photoUrl}
-          />
-        </button>
-      ) : null}
       <qm-section-header
         slot="section-header"
         num={section.num}
@@ -79,15 +62,35 @@ function MenuSection({ featured, onSelectDish, section, showDishPhotos }: MenuSe
   );
 }
 
-export function MenuDishList({ content, onSelectDish, showDishPhotos }: MenuDishListProps) {
+export function MenuDishList({ categoryNav, content, onSelectDish, showDishPhotos }: MenuDishListProps) {
   const { t } = useTranslation();
 
   if (content.sections.length === 0) {
     return <qm-menu-list empty-label={t("menu.emptyLabel")} />;
   }
 
+  const featured = content.featured;
+
   return (
     <>
+      {featured ? (
+        <button
+          type="button"
+          className="dish-trigger menu-featured-frame"
+          onClick={(event) => onSelectDish(featured, event.currentTarget)}
+        >
+          <qm-featured
+            name={featured.name}
+            desc={featured.desc}
+            price={featured.price}
+            old-price={featured.oldPrice}
+            tag={featured.tag}
+            photo={showDishPhotos}
+            photo-url={featured.photoUrl}
+          />
+        </button>
+      ) : null}
+      {categoryNav}
       {content.sections.map((section, index) => (
         <section
           key={section.id}
@@ -96,12 +99,7 @@ export function MenuDishList({ content, onSelectDish, showDishPhotos }: MenuDish
           className="menu-section-frame"
           data-menu-section={section.id}
         >
-          <MenuSection
-            featured={index === 0 ? content.featured : null}
-            section={section}
-            showDishPhotos={showDishPhotos}
-            onSelectDish={onSelectDish}
-          />
+          <MenuSection section={section} showDishPhotos={showDishPhotos} onSelectDish={onSelectDish} />
         </section>
       ))}
     </>

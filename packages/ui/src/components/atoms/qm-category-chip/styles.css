@@ -7,9 +7,9 @@
 button {
   min-height: var(--qm-touch-min, 44px);
   padding: 8px 13px;
-  border: 1px solid var(--qm-hairline, rgba(0, 0, 0, 0.12));
+  border: var(--qm-category-border, 1px solid var(--qm-hairline, rgba(0, 0, 0, 0.12)));
   border-radius: var(--qm-category-radius, 0px);
-  background: var(--qm-card, #fff);
+  background: var(--qm-category-bg, var(--qm-card, #fff));
   color: var(--qm-muted, #6d746f);
   font-family: var(--qm-body, sans-serif);
   font-size: var(--qm-text-xs, 11px);

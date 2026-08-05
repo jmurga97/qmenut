@@ -22,6 +22,7 @@ export function FormColorInput<TValues extends FieldValues>({ label, name }: For
           value={value}
         />
         <input
+          aria-label={label}
           id={inputId}
           onBlur={field.onBlur}
           onChange={(event) => field.onChange(event.currentTarget.value)}

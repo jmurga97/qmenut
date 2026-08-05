@@ -8,7 +8,8 @@ the same conversation in which the customer asks to redeem. No cameras, no
 scanner screen, no push infrastructure.
 
 Scope: v1 / beta. The existing schema
-(`apps/api/migrations/0001_initial_schema.sql`, sections 6–7) models everything
+(`packages/db/src/schema/loyalty.ts`, and the loyalty tables in
+`apps/api/migrations/0000_baseline.sql`) models everything
 below — **no migrations needed**. The venue code is stateless (TOTP-style,
 derived from the signing secret), so it needs no storage at all.
 

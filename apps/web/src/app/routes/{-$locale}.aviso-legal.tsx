@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { LegalNoticePage } from "~/features/legal/pages/legal-notice-page";
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
-import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
+import { buildPageHead } from "~/features/menu/seo/build-page-head";
 import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 
 export const Route = createFileRoute("/{-$locale}/aviso-legal")({
@@ -17,36 +17,15 @@ export const Route = createFileRoute("/{-$locale}/aviso-legal")({
     context.queryClient.ensureQueryData(
       getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
     ),
-  head: ({ loaderData, match }) => {
-    if (!loaderData) {
-      return {};
-    }
-
-    const origin = `https://${match.context.tenant.host}`;
-    const canonicalUrl = `${origin}${match.pathname}`;
-    const title = match.context.i18n.t("legal.legalNotice.seoTitle", { name: loaderData.branch.name });
-    const description = match.context.i18n.t("legal.legalNotice.seoDescription", { name: loaderData.branch.name });
-
-    return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:type", content: "website" },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:url", content: canonicalUrl },
-      ],
-      links: [
-        { rel: "canonical", href: canonicalUrl },
-        ...buildHreflangAlternates({
-          allowedLocales: ["es", "en"],
-          language: loaderData.language,
-          origin,
-          path: "/aviso-legal",
-        }).map(({ hreflang, href }) => ({ rel: "alternate", hrefLang: hreflang, href })),
-      ],
-    };
-  },
+  head: ({ loaderData, match }) =>
+    buildPageHead({
+      allowedLocales: ["es", "en"],
+      descriptionKey: "legal.legalNotice.seoDescription",
+      loaderData,
+      match,
+      path: "/aviso-legal",
+      titleKey: "legal.legalNotice.seoTitle",
+    }),
   headers: () => ({
     "Cache-Control": BROWSER_CACHE_CONTROL,
   }),

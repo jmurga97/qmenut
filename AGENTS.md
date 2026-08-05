@@ -5,7 +5,10 @@
 This is a Bun monorepo orchestrated with Turbo. Application code lives under `apps/*`:
 
 - `apps/web`: React 19 + Vite + TanStack Router frontend. Routes and app entry points are in `apps/web/src/app`; generated route files such as `route-tree.gen.ts` should not be edited manually.
-- `apps/api`: Cloudflare Worker backend with native fetch dispatch, tRPC at `/trpc`, Better Auth at `/api/auth/*`, and Drizzle over D1. Source is in `apps/api/src`, Wrangler config in `apps/api/wrangler.toml`, and database migrations live in `apps/api/migrations`.
+- `apps/api`: Cloudflare Worker backend with native fetch dispatch, tRPC at `/trpc`, Better Auth at `/api/auth/*`, and Drizzle over D1. Source is in `apps/api/src`, Wrangler config in `apps/api/wrangler.jsonc`, and database migrations live in `apps/api/migrations`.
+- `apps/admin`: React 19 + Vite owner dashboard SPA, deployed as a static-asset Worker.
+- `apps/tenant-config`: Cloudflare Worker that owns writes to the shared tenant-theme KV namespace.
+- `apps/landing`: Astro 5 SSR marketing site with its own deploy script.
 - `packages`: shared workspace packages used by multiple apps, including `auth`, `db`, `permissions`, and `ui`. The API dispatches requests natively from `apps/api/src/index.ts`.
 
 Generated output such as `apps/web/dist`, `.wrangler`, `.turbo`, and `node_modules` should stay out of source changes.
@@ -22,6 +25,21 @@ Use Bun `1.3.6` as declared in `package.json`.
 - `bun run lint:fix` or `bun run format`: apply formatting and safe lint fixes.
 
 For app-specific work, run commands in the package, for example `bun run --cwd apps/web dev` or `bun run --cwd apps/api dev`.
+
+## Database Migration Workflow
+
+The TypeScript schema in `packages/db/src/schema/` is the source of truth for D1. After
+changing it, run `bun run --cwd apps/api db:generate -- --name <change_name>` and commit
+the generated SQL plus `apps/api/migrations/meta/` together. Use
+`db:generate:custom` only for data migrations or DDL that Drizzle Kit cannot generate.
+
+Wrangler remains the migration executor (`db:migrate:local` / `db:migrate`). Do not use
+`drizzle-kit push`, `wrangler d1 migrations create`, hand-author normal DDL migrations,
+or edit a migration after it has been applied. `bun run check` verifies that the schema
+matches the latest committed Drizzle snapshot. Drizzle Kit reads only the barrel
+`packages/db/src/schema/index.ts`; a table that is not reachable from it is not managed.
+The full workflow, the SQLite gotchas, and the production preflight are in
+[docs/operations/database-migrations.md](docs/operations/database-migrations.md).
 
 ## Coding Style & Naming Conventions
 
@@ -40,11 +58,21 @@ Avoid barrel imports for everything. Just one barrel for a whole module or packa
 DO NOT IMPLEMENT EARLY TESTS IF IM NOT ASKING FOR IT.
 
 Playwright E2E tests live in `e2e/`. Install Chromium once with
-`bunx playwright install chromium`, then run `bun run test:e2e`. The test reset
+`bunx playwright install chromium`. Before running them locally, map every seeded
+tenant host to loopback in `/etc/hosts`:
+
+```bash
+echo "127.0.0.1 tapas.localhost fine.localhost cafe.localhost her.localhost fast.localhost" | sudo tee -a /etc/hosts
+```
+
+Then run `bun run test:e2e`. The test reset
 recreates local D1 data and shared tenant-theme KV data before starting the API,
-admin, and public-menu workers. E2E auth uses `e2e@test.local` with OTP `000000`.
+tenant-config, admin, and public-menu workers. The public menu runs as one worker
+with the tenant selected by the Host header. E2E auth uses `e2e@test.local` with OTP `000000`.
 The `E2E_FIXED_OTP` flag is local-test-only and must never be configured on a
-deployed worker.
+deployed worker. Use `E2E_REUSE_SERVERS=1` while iterating against already-running
+E2E workers. Set `E2E_VISUAL=1` to register the OS-sensitive template snapshot
+project locally; generate Linux baselines by running the visual project in a Linux container.
 
 ## Commit & Pull Request Guidelines
 

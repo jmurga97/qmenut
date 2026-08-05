@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
-import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
+import { buildPageHead } from "~/features/menu/seo/build-page-head";
+import { buildPromotionsJsonLd } from "~/features/menu/seo/build-promotions-json-ld";
 import { PromosPage } from "~/features/promos/pages/promos-page";
 import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 
@@ -10,33 +11,15 @@ export const Route = createFileRoute("/{-$locale}/promos")({
     context.queryClient.ensureQueryData(
       getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
     ),
-  head: ({ loaderData, match }) => {
-    if (!loaderData) {
-      return {};
-    }
-
-    const origin = `https://${match.context.tenant.host}`;
-    const canonicalUrl = `${origin}${match.pathname}`;
-    const title = `Promociones – ${loaderData.branch.name}`;
-    const description = `Ofertas y promociones actuales de ${loaderData.branch.name}`;
-
-    return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:type", content: "website" },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:url", content: canonicalUrl },
-      ],
-      links: [
-        { rel: "canonical", href: canonicalUrl },
-        ...buildHreflangAlternates({ language: loaderData.language, origin, path: "/promos" }).map(
-          ({ hreflang, href }) => ({ rel: "alternate", hrefLang: hreflang, href }),
-        ),
-      ],
-    };
-  },
+  head: ({ loaderData, match }) =>
+    buildPageHead({
+      descriptionKey: "promos.seoDescription",
+      jsonLd: loaderData ? buildPromotionsJsonLd(loaderData) : undefined,
+      loaderData,
+      match,
+      path: "/promos",
+      titleKey: "promos.seoTitle",
+    }),
   headers: () => ({
     "Cache-Control": BROWSER_CACHE_CONTROL,
   }),

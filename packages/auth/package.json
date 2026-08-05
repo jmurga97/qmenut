@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "better-auth": "1.6.23",
-    "drizzle-orm": "^0.44.6"
+    "drizzle-orm": "0.44.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260502.0",

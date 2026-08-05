@@ -19,6 +19,10 @@ export default {
     photoLabel: "Dish photo",
     recommended: "Recommended",
   },
+  promos: {
+    seoTitle: "Offers – {{name}}",
+    seoDescription: "Current offers and promotions from {{name}}",
+  },
   contact: {
     submittedLabel: "Sent",
     seoTitle: "Contact – {{name}}",
@@ -42,6 +46,8 @@ export default {
     },
   },
   loyalty: {
+    seoTitle: "Loyalty rewards – {{name}}",
+    seoDescription: "Loyalty card and rewards from {{name}}",
     page: {
       title: "Loyalty",
       subtitle: "Turn every visit into a reward",

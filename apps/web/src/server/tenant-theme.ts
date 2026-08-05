@@ -11,26 +11,19 @@ export interface TenantContext {
 const clientTenantContextCache: { promise?: Promise<TenantContext> } = {};
 
 async function readTenantThemeFromKv(host: string): Promise<unknown> {
-  if (!host) {
+  if (!host || !import.meta.env.SSR) {
     return null;
   }
 
-  try {
-    // eslint-disable-next-line import/no-unresolved -- runtime module provided by workerd
-    const { env } = await import("cloudflare:workers");
-    const kv = (env as { TENANT_THEME?: { get(key: string, type: "json"): Promise<unknown> } }).TENANT_THEME;
+  // Client-reachable modules must guard this dynamic runtime import with import.meta.env.SSR.
+  const { env } = await import("cloudflare:workers");
 
-    return (await kv?.get(host, "json")) ?? null;
-  } catch {
-    return null;
-  }
+  return (await env.TENANT_THEME?.get(host, "json")) ?? null;
 }
 
 export const getTenantContext = createServerFn({ method: "GET" }).handler(async (): Promise<TenantContext> => {
-  const { DEV_DEFAULT_TENANT_HOST, DEV_DEFAULT_TENANT_TEMPLATE, resolveSsrTenantHost } = await import(
-    "./tenant-host"
-  );
-  const host = await resolveSsrTenantHost();
+  const { DEV_DEFAULT_TENANT_HOST, DEV_DEFAULT_TENANT_TEMPLATE, resolveSsrTenantHost } = await import("./tenant-host");
+  const host = resolveSsrTenantHost();
   const raw = await readTenantThemeFromKv(host);
   const fallbackTemplate =
     import.meta.env.DEV && host === DEV_DEFAULT_TENANT_HOST ? DEV_DEFAULT_TENANT_TEMPLATE : undefined;

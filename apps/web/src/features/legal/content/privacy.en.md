@@ -1,19 +1,17 @@
-<!-- Los marcadores [Razón social], [NIF], [Dirección fiscal] y los datos de QMenut se recogen en la ficha de alta (docs/onboarding-intake.md). No publicar un tenant sin haberlos sustituido. -->
-
 This policy describes how the personal data of people who visit the digital menu of **{{branchName}}** is processed, in accordance with Regulation (EU) 2016/679 (GDPR) and Organic Law 3/2018 (LOPDGDD).
 
 ## 1. Data controller
 
 The controller of the data collected on this website is the owner of the establishment:
 
-- Company name: [Razón social]
-- Tax ID: [NIF]
-- Registered address: [Dirección fiscal]
-- Data protection contact: [email de contacto]
+- Company name: {{ownerLegalName}}
+- Tax ID: {{ownerTaxId}}
+- Registered address: {{ownerLegalAddress}}
+- Data protection contact: {{ownerDataProtectionEmail}}
 
 ## 2. Data processor
 
-The **QMenut** platform ([QMenut owner], tax ID [QMenut tax ID]) provides the digital-menu technology service and acts as a processor on behalf of the establishment, in accordance with Article 28 of the GDPR.
+The **QMenut** platform ({{operatorLegalName}}, tax ID {{operatorLegalTaxId}}) provides the digital-menu technology service and acts as a processor on behalf of the establishment, in accordance with Article 28 of the GDPR.
 
 ## 3. Data processed and purposes
 
@@ -48,7 +46,9 @@ Contact messages are kept for as long as necessary to handle the enquiry. Loyalt
 
 ## 8. Your rights
 
-You may exercise your rights of access, rectification, erasure, objection, restriction of processing, and data portability by writing to the controller ([data protection contact]), and proving your identity. If you believe the processing is not compliant, you may lodge a complaint with the Spanish Data Protection Agency (www.aepd.es).
+You may exercise your rights of access, rectification, erasure, objection, restriction of processing, and data portability by writing to the controller and proving your identity. If you believe the processing is not compliant, you may lodge a complaint with the Spanish Data Protection Agency (www.aepd.es).
+
+- Contact for exercising your rights: {{ownerDataProtectionEmail}}
 
 ## 9. Cookies and storage technologies
 

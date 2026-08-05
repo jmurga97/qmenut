@@ -2,21 +2,17 @@ import type { RuntimeEnv } from "../../config/env/schema";
 import type { PlanCode } from "@qmenut/db/repositories/billing.repository";
 
 /**
- * Catálogo de planes: mapea plan <-> price id de Stripe. Hoy sobre variables de
- * entorno (dos planes, MVP1); estas funciones son la costura para migrar a una
- * tabla de planes en el futuro sin tocar el resto del dominio.
+ * Catálogo de planes: mapea el plan básico al price id de Stripe. Hoy sobre una
+ * variable de entorno; estas funciones son la costura para migrar a una tabla de
+ * planes en el futuro sin tocar el resto del dominio.
  */
-export function priceIdFor(env: RuntimeEnv, planCode: PlanCode): string {
-  return planCode === "basic" ? env.STRIPE_PRICE_BASIC : env.STRIPE_PRICE_BUSINESS;
+export function priceIdFor(env: RuntimeEnv): string {
+  return env.STRIPE_PRICE_BASIC;
 }
 
 export function planCodeFor(env: RuntimeEnv, priceId: string): PlanCode | null {
   if (priceId === env.STRIPE_PRICE_BASIC) {
     return "basic";
-  }
-
-  if (priceId === env.STRIPE_PRICE_BUSINESS) {
-    return "business";
   }
 
   return null;

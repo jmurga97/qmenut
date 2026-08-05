@@ -17,9 +17,10 @@ export interface RouterAppContext {
 }
 
 function getApiBaseUrl(): string {
-  // Browsers use Vite's same-origin /trpc proxy in development. In particular, this prevents
-  // `localhost` from resolving to the phone itself when the dev server is opened over the LAN.
-  if (import.meta.env.DEV && typeof window !== "undefined") {
+  // Browsers always use same-origin /trpc: Vite proxies it in development and the public-menu
+  // Worker proxies it through API_WORKER in production. This also prevents `localhost` from
+  // resolving to the diner's device when a local build is opened over the LAN.
+  if (typeof window !== "undefined") {
     return window.location.origin;
   }
 
@@ -30,35 +31,19 @@ function getApiBaseUrl(): string {
     return configuredUrl.replace(/\/+$/, "");
   }
 
-  if (import.meta.env.DEV) {
-    return "http://localhost:8787";
-  }
-
-  if (typeof window === "undefined") {
-    return "http://localhost:8787";
-  }
-
-  return window.location.origin;
+  return "http://localhost:8787";
 }
 
-interface ApiWorkerBinding {
-  fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-}
-
-async function getApiWorkerBinding(): Promise<ApiWorkerBinding | undefined> {
-  if (typeof window !== "undefined") {
-    return undefined;
+async function getApiWorkerBinding() {
+  if (!import.meta.env.SSR) {
+    return;
   }
 
-  try {
-    // eslint-disable-next-line import/no-unresolved -- runtime module provided by workerd
-    const { env } = await import("cloudflare:workers");
-    const binding = (env as { API_WORKER?: ApiWorkerBinding }).API_WORKER;
+  // Client-reachable modules must guard this dynamic runtime import with import.meta.env.SSR.
+  const { env } = await import("cloudflare:workers");
+  const binding = env.API_WORKER;
 
-    return binding && typeof binding.fetch === "function" ? binding : undefined;
-  } catch {
-    return undefined;
-  }
+  return binding && typeof binding.fetch === "function" ? binding : undefined;
 }
 
 function getRequestUrl(url: RequestInfo | URL): string {
@@ -90,30 +75,13 @@ async function fetchApi(url: RequestInfo | URL, options?: RequestInit): Promise<
   return fetch(url, options);
 }
 
-export function getPublicMenuHost(): string | undefined {
-  const configuredHost = getEnvString("VITE_PUBLIC_MENU_HOST");
-
-  if (configuredHost) {
-    return configuredHost;
-  }
-
-  if (typeof window === "undefined") {
-    return undefined;
-  }
-
-  return window.location.hostname;
-}
-
 function createRawTrpcClient() {
   return createTRPCClient<AppRouter>({
     links: [
       httpBatchLink({
         url: `${getApiBaseUrl()}/trpc`,
         fetch(url, options) {
-          return fetchApi(url, {
-            ...options,
-            credentials: "include",
-          });
+          return fetchApi(url, options);
         },
       }),
     ],

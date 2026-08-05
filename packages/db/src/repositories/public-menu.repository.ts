@@ -26,7 +26,7 @@ import { restaurants } from "../schema/restaurants";
 import type { IdsInput, TenantIdsInput, TenantInput } from "../domain/tenant";
 import type { PublicBranch, PublicBranchPhoto, PublicBranchSchedule } from "../models/branch";
 import type { PublicPromotion } from "../models/promotion";
-import type { PublicMenuData } from "../models/public-menu";
+import type { PublicLegalEntity, PublicMenuData } from "../models/public-menu";
 
 export type { ResolvedTenant } from "../domain/tenant";
 export { normalizeTenantHost } from "../domain/tenant";
@@ -39,6 +39,7 @@ export type {
   PublicDishExtra,
   PublicDishVariantGroup,
   PublicDishVariantOption,
+  PublicLegalEntity,
   PublicMenuData,
   PublicTag,
 } from "../models/public-menu";
@@ -85,6 +86,10 @@ async function getBranchRow({ db, tenant }: TenantInput) {
   return db
     .select({
       ...getTableColumns(branches),
+      legalAddress: restaurants.legalAddress,
+      dataProtectionEmail: restaurants.dataProtectionEmail,
+      legalName: restaurants.legalName,
+      taxId: restaurants.taxId,
       timeZone: restaurants.timezone,
     })
     .from(branches)
@@ -131,7 +136,7 @@ async function getBranchSchedules({ db, tenant }: TenantInput): Promise<PublicBr
 async function getPublicBranchContext({
   db,
   tenant,
-}: TenantInput): Promise<{ branch: PublicBranch; timeZone: string } | null> {
+}: TenantInput): Promise<{ branch: PublicBranch; legal: PublicLegalEntity; timeZone: string } | null> {
   const row = await getBranchRow({ db, tenant });
 
   if (!row) {
@@ -142,6 +147,12 @@ async function getPublicBranchContext({
 
   return {
     branch: mapBranch({ row, photos, schedules }),
+    legal: {
+      address: row.legalAddress,
+      dataProtectionEmail: row.dataProtectionEmail,
+      name: row.legalName,
+      taxId: row.taxId,
+    },
     timeZone: row.timeZone,
   };
 }
@@ -305,7 +316,7 @@ export async function getPublicMenu({
     return null;
   }
 
-  const { branch, timeZone } = branchContext;
+  const { branch, legal, timeZone } = branchContext;
   const [categoryRows, dishRows, promotionRows] = await Promise.all([
     getCategoryRows({ db, tenant }),
     getDishRows({ db, tenant }),
@@ -364,6 +375,7 @@ export async function getPublicMenu({
   return {
     branch,
     categories: mapPublicCategories({ categoryRows, dishesByCategory, translationsByEntity }),
+    legal,
     promotions: activePromotions.map((row): PublicPromotion => mapPromotion(row)),
   };
 }

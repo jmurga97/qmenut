@@ -5,7 +5,7 @@ menu, branding, promotions and loyalty program from an admin dashboard; diners
 browse a fast, per-tenant public menu at the restaurant's own domain.
 
 This documentation is both a **reference** and a **guided tour of the code**: every
-doc explains a strategic division of the system *and* points at the real files, so
+doc explains a strategic division of the system _and_ points at the real files, so
 you can read the doc with the source open beside it.
 
 ## How to read this
@@ -13,7 +13,7 @@ you can read the doc with the source open beside it.
 Start here, in order:
 
 1. [architecture.md](architecture.md) — the shape of the whole system: the Bun
-   monorepo, the three Cloudflare Workers, the data layer, and how a request flows.
+   monorepo, the Cloudflare Workers, the data layer, and how a request flows.
 2. [domains/multi-tenancy.md](domains/multi-tenancy.md) — the tenant model
    (restaurant → branch) and how tenant isolation is enforced. **Read this before
    any feature doc** — every feature is scoped by it.
@@ -25,9 +25,11 @@ Start here, in order:
 ## Map
 
 ### Foundation
+
 - [architecture.md](architecture.md) — monorepo, workers, data layer, request flow, conventions ✅
 
 ### Domains
+
 - [domains/multi-tenancy.md](domains/multi-tenancy.md) — restaurant/branch model, tenant isolation ✅
 - [domains/theming.md](domains/theming.md) — the color-engine, presets, per-tenant theme ✅
 - [domains/custom-domains.md](domains/custom-domains.md) — host resolution, the tenant-config worker ✅
@@ -40,15 +42,23 @@ Start here, in order:
 - [domains/qr.md](domains/qr.md) — QR code generation 🧩
 
 ### Apps
-- [apps/web-public-menu.md](apps/web-public-menu.md) — the public menu SSR worker 🧩
+
+- [apps/web-public-menu.md](apps/web-public-menu.md) — the public menu SSR worker ✅
 - [apps/admin.md](apps/admin.md) — the owner dashboard SPA 🧩
+- The deployable marketing site `apps/landing` is covered in [architecture.md](architecture.md).
 
 ### Design & operations
+
 - [design/loyalty-ux.md](design/loyalty-ux.md) — loyalty UX decisions & rationale
 - [operations/onboarding-intake.md](operations/onboarding-intake.md) — data to collect before onboarding a restaurant
-- [operations/deployment.md](operations/deployment.md) — deploying the workers 🧩
+- [operations/database-migrations.md](operations/database-migrations.md) — class: Drizzle schema → generated SQL → D1 ✅
+- [operations/deployment.md](operations/deployment.md) — zero-to-live Cloudflare runbook ✅
+- [operations/performance-and-caching.md](operations/performance-and-caching.md) — edge/browser caching and invalidation ✅
+- [operations/testing.md](operations/testing.md) — local E2E topology, reset, and visual snapshots ✅
+- [operations/production-checklist.md](operations/production-checklist.md) — ranked production blockers and follow-ups ✅
 
 ### Archive
+
 - [archive/](archive/) — superseded design notes kept for history. **Do not treat as
   current** — see each file's banner. `intial-design.md` in particular describes an
   abandoned GraphQL/gateway design.

@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const isCi = Boolean(process.env.CI);
 const reuseExistingServer = process.env.E2E_REUSE_SERVERS === "1";
+const runVisual = isCi || process.env.E2E_VISUAL === "1";
 
 export default defineConfig({
   testDir: ".",
@@ -39,8 +40,8 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: "bun run --cwd ../apps/web build && bun run --cwd ../apps/web serve:tapas",
-      url: "http://localhost:4011/robots.txt",
+      command: "bun run --cwd ../apps/web build && bun run --cwd ../apps/web serve",
+      url: "http://tapas.localhost:4011/robots.txt",
       reuseExistingServer,
       timeout: 180_000,
     },
@@ -64,9 +65,27 @@ export default defineConfig({
     {
       name: "web",
       testMatch: /tests\/web\/.*\.spec\.ts/,
+      testIgnore: [/tests\/web\/desktop-.*\.spec\.ts/, /tests\/web\/templates\.spec\.ts/],
       dependencies: ["setup"],
-      use: { ...devices["Desktop Chrome"], baseURL: "http://localhost:4011", locale: "es-ES" },
+      use: { ...devices["Pixel 7"], baseURL: "http://tapas.localhost:4011", locale: "es-ES" },
     },
+    {
+      name: "web-desktop",
+      testMatch: /tests\/web\/desktop-.*\.spec\.ts/,
+      dependencies: ["setup"],
+      use: { ...devices["Desktop Chrome"], baseURL: "http://tapas.localhost:4011", locale: "es-ES" },
+    },
+    ...(runVisual
+      ? [
+          {
+            name: "visual",
+            testMatch: /tests\/web\/templates\.spec\.ts/,
+            snapshotPathTemplate: "{testDir}/snapshots/{testFilePath}/{platform}/{arg}{ext}",
+            dependencies: ["setup"],
+            use: { ...devices["Pixel 7"], baseURL: "http://tapas.localhost:4011", locale: "es-ES" },
+          },
+        ]
+      : []),
     {
       name: "cross",
       testMatch: /tests\/cross\/.*\.spec\.ts/,

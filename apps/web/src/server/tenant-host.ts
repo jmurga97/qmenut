@@ -5,23 +5,7 @@ import { getEnvString } from "../lib/env";
 
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 
-async function readWorkerVar(key: string): Promise<string | undefined> {
-  try {
-    // eslint-disable-next-line import/no-unresolved -- runtime module provided by workerd
-    const { env } = await import("cloudflare:workers");
-    const value = (env as Record<string, unknown>)[key];
-
-    if (typeof value !== "string") {
-      return undefined;
-    }
-
-    return value.trim() || undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-/** Bare `localhost` has no seeded tenant; `bun run dev` (plain vite, no `TENANT_HOST` pin) falls
+/** Bare `localhost` has no seeded tenant; `bun run dev` falls
  *  back to this seeded subdomain so the app has something to render out of the box. Exported so
  *  `tenant-theme.ts` can match its own (KV-backed, separately seeded) font/theme fallback to the
  *  same tenant — otherwise the preloaded fonts don't match what the menu actually renders. */
@@ -36,38 +20,35 @@ function isLocalDevelopmentHost(host: string): boolean {
   return unwrappedHost === "localhost" || IPV4_HOST_PATTERN.test(unwrappedHost) || unwrappedHost.includes(":");
 }
 
-/**
- * Resolves the tenant host during SSR. A `TENANT_HOST` worker var pins an instance to one tenant
- * (the N-workers-per-domain setup); otherwise the incoming request's Host header decides, with
- * `VITE_PUBLIC_MENU_HOST` as the local fallback.
- */
-export async function resolveSsrTenantHost(): Promise<string> {
-  const pinnedHost = await readWorkerVar("TENANT_HOST");
-
-  if (pinnedHost) {
-    return normalizeTenantHost(pinnedHost);
+function normalizeWithDevFallback(rawHost: string | null | undefined): string {
+  if (!rawHost) {
+    return "";
   }
 
-  let requestHost: string | undefined;
+  const normalizedRequestHost = normalizeTenantHost(rawHost);
 
+  // Bare `localhost` and LAN IPs (phone hitting the dev server) have no seeded tenant.
+  if (import.meta.env.DEV && isLocalDevelopmentHost(normalizedRequestHost)) {
+    const configuredHost = getEnvString("VITE_PUBLIC_MENU_HOST");
+
+    return configuredHost ? normalizeTenantHost(configuredHost) : DEV_DEFAULT_TENANT_HOST;
+  }
+
+  return normalizedRequestHost;
+}
+
+/** Resolves the tenant host inside the TanStack Start request context. */
+export function resolveSsrTenantHost(): string {
   try {
-    requestHost = getRequestHost({ xForwardedHost: true }) ?? undefined;
+    return normalizeWithDevFallback(getRequestHost());
   } catch {
-    requestHost = undefined;
+    return "";
   }
+}
 
-  const configuredHost = getEnvString("VITE_PUBLIC_MENU_HOST");
+/** Resolves the tenant host before TanStack Start establishes its request context. */
+export function resolveRequestTenantHost(request: Request): string {
+  const urlHost = new URL(request.url).host;
 
-  if (requestHost) {
-    const normalizedRequestHost = normalizeTenantHost(requestHost);
-
-    // Bare `localhost` and LAN IPs (phone hitting the dev server) have no seeded tenant.
-    if (import.meta.env.DEV && isLocalDevelopmentHost(normalizedRequestHost)) {
-      return configuredHost ? normalizeTenantHost(configuredHost) : DEV_DEFAULT_TENANT_HOST;
-    }
-
-    return normalizedRequestHost;
-  }
-
-  return configuredHost ? normalizeTenantHost(configuredHost) : "";
+  return normalizeWithDevFallback(urlHost || request.headers.get("host"));
 }
