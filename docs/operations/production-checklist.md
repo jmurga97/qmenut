@@ -34,7 +34,7 @@ Cloudflare, vendor-account, product, or legal work.
 
 ## P1 — ship-blocking for a paying customer
 
-- [ ] **Replace mock-backed `/promos` and `/contacto`.** `use-promos-content.ts` and
+- [x] **Replace mock-backed `/promos` and `/contacto`.** `use-promos-content.ts` and
       `use-contact-content.ts` still return `MOCK_*`; use the existing promotions API and
       effective-price data, and source real branch contact details.
 - [ ] **Make plan gating real or simplify pricing.** `getBranchEntitlement` and
@@ -46,7 +46,7 @@ Cloudflare, vendor-account, product, or legal work.
 - [x] **Deploy `ming-email-worker` in the same Cloudflare account** and configure the
       sending domain's DKIM, SPF, and DMARC. The remote service binding and OTP login fail
       otherwise.
-- [ ] **Create observability projects.** Create Sentry projects for API/web/admin, fill
+- [x] **Create observability projects.** Create Sentry projects for API/web/admin, fill
       runtime and build-time DSNs, and create the PostHog EU project/key.
 - [x] **Choose visual snapshot support after CI removal.** The supported baseline is
       macOS-local for now; Linux must run the complete visual project in a pinned container
@@ -54,10 +54,10 @@ Cloudflare, vendor-account, product, or legal work.
 
 ## P2 — should be done before public traffic
 
-- [ ] **Add response security headers.** `apps/web/public/_headers` currently sets only
+- [??] **Add response security headers.** `apps/web/public/_headers` currently sets only
       immutable asset caching. Define and validate CSP, `X-Content-Type-Options`,
       `Referrer-Policy`, and HSTS for the actual Sentry/PostHog/font/image origins.
-- [ ] **Remove generic tenant manifest branding.** `site.webmanifest` still identifies
+- [x] **Remove generic tenant manifest branding.** `site.webmanifest` still identifies
       every tenant as QMenut with a shared theme colour; generate tenant-specific metadata
       or use a deliberately minimal manifest.
 - [ ] **Replace the universal OG fallback.** Tenants without a branch photo all use
