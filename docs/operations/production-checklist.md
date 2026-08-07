@@ -37,7 +37,7 @@ Cloudflare, vendor-account, product, or legal work.
 - [x] **Replace mock-backed `/promos` and `/contacto`.** `use-promos-content.ts` and
       `use-contact-content.ts` still return `MOCK_*`; use the existing promotions API and
       effective-price data, and source real branch contact details.
-- [ ] **Make plan gating real or simplify pricing.** `getBranchEntitlement` and
+- [??] **Make plan gating real or simplify pricing.** `getBranchEntitlement` and
       `requirePlan` are exported but unused, so the business plan unlocks nothing. Wire
       them into business-only procedures or launch with one plan.
 - [x] **Create onboarding subscription state.** `create-tenant.ts` now inserts a
@@ -60,10 +60,10 @@ Cloudflare, vendor-account, product, or legal work.
 - [x] **Remove generic tenant manifest branding.** `site.webmanifest` still identifies
       every tenant as QMenut with a shared theme colour; generate tenant-specific metadata
       or use a deliberately minimal manifest.
-- [ ] **Replace the universal OG fallback.** Tenants without a branch photo all use
+- [??] **Replace the universal OG fallback.** Tenants without a branch photo all use
       `og-default.png`; provide tenant branding or an intentional neutral fallback.
-- [ ] **Define backups and restore drills.** Record the D1 time-travel/export policy and
+- [??] **Define backups and restore drills.** Record the D1 time-travel/export policy and
       schedule an export of `TENANT_THEME` KV, including a tested restore procedure.
-- [ ] **Collect timezone during intake.** The script now accepts `restaurant.timezone`
+- [??] **Collect timezone during intake.** The script now accepts `restaurant.timezone`
       and documents the `Europe/Madrid` default, but existing product intake/admin flows
       still need to require the correct zone outside Spain.

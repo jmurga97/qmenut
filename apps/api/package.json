@@ -33,6 +33,7 @@
     "@qmenut/ui": "workspace:*",
     "@sentry/cloudflare": "^10.63.0",
     "@trpc/server": "11.18.0",
+    "drizzle-orm": "0.44.7",
     "stripe": "22.4.0",
     "xss": "^1.0.15",
     "zod": "^4.4.3"
