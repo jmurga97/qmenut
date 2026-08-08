@@ -8,8 +8,10 @@ interface PromosListProps {
 }
 
 export function PromosList({ content }: PromosListProps) {
+  const emptyLabel = content.promos.length === 0 ? content.emptyLabel : undefined;
+
   return (
-    <QmPromoList value={{ emptyLabel: content.emptyLabel }}>
+    <QmPromoList value={{ emptyLabel }}>
       {content.promos.map((promo) => (
         <QmPromo key={promo.name} value={promo} />
       ))}

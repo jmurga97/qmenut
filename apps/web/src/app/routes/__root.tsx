@@ -62,6 +62,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
       links: [
         { rel: "icon", href: "/favicon.ico", sizes: "any" },
         { rel: "manifest", href: "/site.webmanifest" },
+        { rel: "preconnect", href: "https://images.unsplash.com", crossOrigin: "anonymous" },
         ...familyIds.map((fontId) => ({ rel: "stylesheet", href: FONT_CSS_URLS[fontId] })),
         ...preloadUrls.map((href) => ({
           rel: "preload",

@@ -1,14 +1,14 @@
-import { defineQmAllergen } from "@qmenut/ui/components/qm-allergen";
-import { defineQmDishExtras } from "@qmenut/ui/components/qm-dish-extras";
+import { QmAllergen } from "@qmenut/ui/components/qm-allergen/react";
+import { QmDishExtras } from "@qmenut/ui/components/qm-dish-extras/react";
 import { QmDishModal } from "@qmenut/ui/components/qm-dish-modal/react";
 import { useTranslation } from "react-i18next";
 
 import { ALLERGEN_META } from "~/features/menu/constants/allergens";
+import { photoUrl } from "~/shared/lib/photo-url";
 
 import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
 
-defineQmDishExtras();
-defineQmAllergen();
+const MODAL_IMAGE_WIDTH_PX = 430;
 
 interface MenuDishModalProps {
   dish: MenuDishViewModel | null;
@@ -18,25 +18,29 @@ interface MenuDishModalProps {
 export function MenuDishModal({ dish, onClose }: MenuDishModalProps) {
   const { t } = useTranslation();
 
+  if (!dish) {
+    return null;
+  }
+
   return (
     <QmDishModal
-      open={dish !== null}
-      name={dish?.name ?? ""}
-      photoUrl={dish?.photoUrl}
+      open
+      name={dish.name}
+      photoUrl={photoUrl(dish.photoUrl, MODAL_IMAGE_WIDTH_PX)}
       photoLabel={t("menu.photoLabel")}
       closeLabel={t("menu.closeLabel")}
       onQmClose={onClose}
     >
       {/* Descriptions may contain sanitized rich-text HTML (bold/italic/lists) from the CRM. */}
-      <div dangerouslySetInnerHTML={{ __html: dish?.descHtml ?? "" }} />
-      {dish?.extras && dish.extras.length > 0 ? <qm-dish-extras slot="extras" items={dish.extras} /> : null}
-      {dish?.allergens?.map((code) => {
+      <div dangerouslySetInnerHTML={{ __html: dish.descHtml }} />
+      {dish.extras && dish.extras.length > 0 ? <QmDishExtras slot="extras" items={dish.extras} /> : null}
+      {dish.allergens?.map((code) => {
         const { label, Icon } = ALLERGEN_META[code];
 
         return (
-          <qm-allergen key={code} slot="allergens" label={label}>
+          <QmAllergen key={code} slot="allergens" label={label}>
             <Icon slot="icon" size={13} strokeWidth={2} />
-          </qm-allergen>
+          </QmAllergen>
         );
       })}
     </QmDishModal>

@@ -13,8 +13,11 @@ import { TenantNotFound } from "~/shared/components/tenant-not-found";
 import { useLocale } from "~/shared/hooks/use-locale";
 import { usePublicTenant } from "~/shared/hooks/use-public-tenant";
 import { useTemplateSelection } from "~/shared/hooks/use-template-selection";
+import { photoUrl } from "~/shared/lib/photo-url";
 
 import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
+
+const HERO_IMAGE_WIDTH_PX = 430;
 
 export function MenuPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -64,7 +67,13 @@ export function MenuPage() {
           logoLabel={content.logoLabel}
           onQmChange={handleLanguageChange}
         >
-          <img slot="photo" src={tenant.heroPhotoUrl} alt="" fetchPriority="high" />
+          <img
+            slot="photo"
+            src={photoUrl(tenant.heroPhotoUrl, HERO_IMAGE_WIDTH_PX)}
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+          />
         </ScrollCompactHeroHeader>
       ) : (
         <ScrollHidePageHeader
