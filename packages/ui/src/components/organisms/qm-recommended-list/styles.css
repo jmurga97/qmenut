@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+.rows {
+  display: block;
+}
+
+.rows slot {
+  display: grid;
+  gap: var(--qm-row-stack-gap, 0px);
+}
+
+.empty {
+  margin: 0;
+  font-family: var(--qm-body, sans-serif);
+  font-size: var(--qm-text-sm, 12px);
+  color: var(--qm-muted, #8c857b);
+  text-align: center;
+  padding: 24px 0;
+}

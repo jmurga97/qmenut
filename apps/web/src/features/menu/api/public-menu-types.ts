@@ -9,3 +9,4 @@ export type PublicMenuData = NonNullable<inferRouterOutputs<AppRouter>["menu"]["
 export type PublicMenuCategory = PublicMenuData["categories"][number];
 export type PublicMenuDish = PublicMenuCategory["dishes"][number];
 export type PublicMenuLanguage = PublicMenuData["language"];
+export type PublicMenuPromotion = PublicMenuData["promotions"][number];

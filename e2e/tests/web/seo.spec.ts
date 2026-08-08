@@ -1,6 +1,6 @@
 import { expect, test } from "../../fixtures/test";
 
-const ROUTE_PATHS = ["/", "/contacto", "/promos", "/puntos", "/aviso-legal", "/privacidad"];
+const ROUTE_PATHS = ["/", "/contacto", "/destacados", "/puntos", "/aviso-legal", "/privacidad"];
 
 test("serves host-specific robots and a complete localized sitemap through the edge cache", async ({ request }) => {
   const cacheKey = Date.now();

@@ -4,7 +4,7 @@ export default {
     primaryNavigationLabel: "Navegación principal",
     navigation: {
       menu: "Inicio",
-      promos: "Promos",
+      destacados: "Destacados",
       contact: "Contacto",
       loyalty: "Puntos",
     },
@@ -19,13 +19,19 @@ export default {
     photoLabel: "Foto del plato",
     recommended: "Recomendado",
   },
+  destacados: {
+    seoTitle: "Destacados – {{name}}",
+    seoDescription: "Platos recomendados y ofertas actuales de {{name}}",
+    page: {
+      title: "Destacados",
+      subtitle: "Nuestras recomendaciones y ofertas actuales",
+      recommendedTitle: "Recomendados",
+      recommendedEmptyLabel: "Todavía no hay platos recomendados",
+    },
+  },
   promos: {
-    seoTitle: "Promociones – {{name}}",
-    seoDescription: "Ofertas y promociones actuales de {{name}}",
     page: {
       title: "Promociones",
-      subtitle_one: "{{count}} oferta activa · hoy",
-      subtitle_other: "{{count}} ofertas activas · hoy",
       emptyLabel: "No hay promociones disponibles",
       availableToday: "Disponible hoy",
     },

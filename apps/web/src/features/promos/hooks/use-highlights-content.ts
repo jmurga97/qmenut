@@ -3,11 +3,11 @@ import { useRouteContext } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
-import { mapPublicPromosContent } from "~/features/promos/mappers/map-public-promos-content";
+import { mapPublicHighlightsContent } from "~/features/promos/mappers/map-public-highlights-content";
 import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
 
-export function usePromosContent() {
+export function useHighlightsContent() {
   const trpc = useAppTrpc();
   const { host } = useTenantContext();
   const { locale } = useRouteContext({ from: "/{-$locale}" });
@@ -15,8 +15,8 @@ export function usePromosContent() {
   const { data } = useSuspenseQuery(getPublicMenuQueryOptions({ host, locale, trpc }));
 
   if (!data) {
-    return mapPublicPromosContent({ data: null, locale: i18n.language, t });
+    return mapPublicHighlightsContent({ data: null, locale: i18n.language, t });
   }
 
-  return mapPublicPromosContent({ data, locale: i18n.language, t });
+  return mapPublicHighlightsContent({ data, locale: i18n.language, t });
 }

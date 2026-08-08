@@ -20,43 +20,35 @@ const componentStyles = createComponentStyles(componentStylesText);
  * this molecule renders slightly larger than the design's literal spec; accepted since
  * overriding a child atom's internals is out of bounds (see CONTRIBUTING.md RULE 12).
  */
+export interface QmFeaturedValue {
+  name: string;
+  desc: string;
+  price: string;
+  oldPrice?: string;
+  tag?: string;
+  photo: boolean;
+  photoUrl?: string;
+}
+
 export class QmFeatured extends LitElement {
   static styles = [qmHostResetStyles, componentStyles];
 
-  @property({ type: String })
-  name = "";
-
-  @property({ type: String })
-  desc = "";
-
-  @property({ type: String })
-  price = "";
-
-  @property({ type: String, attribute: "old-price" })
-  oldPrice?: string;
-
-  @property({ type: String })
-  tag = "";
-
-  @property({ type: Boolean })
-  photo = false;
-
-  @property({ type: String, attribute: "photo-url" })
-  photoUrl?: string;
+  @property({ attribute: false })
+  value?: QmFeaturedValue;
 
   render() {
-    const photoImage = this.photoUrl
-      ? html`<img src=${this.photoUrl} alt="" loading="eager" decoding="async" />`
+    const photoImage = this.value?.photoUrl
+      ? html`<img src=${this.value.photoUrl} alt="" loading="eager" decoding="async" />`
       : nothing;
 
     return html`
       <div part="card" class="card">
-        ${this.photo ? html` <span part="photo" class="photo">${photoImage}</span> ` : nothing}
+        ${this.value?.photo ? html` <span part="photo" class="photo">${photoImage}</span> ` : nothing}
         <div class="body">
-          ${this.tag ? html`<div part="tag" class="tag">${this.tag}</div>` : nothing}
-          <div part="name" class="name">${this.name}</div>
-          <div part="desc" class="desc">${this.desc}</div>
-          <qm-price part="price" .value=${this.price} .oldValue=${this.oldPrice}></qm-price>
+          ${this.value?.tag ? html`<div part="tag" class="tag">${this.value.tag}</div>` : nothing}
+          <div part="name" class="name">${this.value?.name ?? ""}</div>
+          <div part="desc" class="desc">${this.value?.desc ?? ""}</div>
+          <qm-price part="price" .value=${this.value?.price ?? ""} .oldValue=${this.value?.oldPrice}></qm-price>
         </div>
       </div>
     `;
@@ -71,9 +63,7 @@ export function defineQmFeatured() {
   }
 }
 
-export type QmFeaturedArgs = Partial<
-  Pick<QmFeatured, "name" | "desc" | "price" | "oldPrice" | "tag" | "photo" | "photoUrl">
->;
+export type QmFeaturedArgs = Partial<Pick<QmFeatured, "value">>;
 
 declare global {
   interface HTMLElementTagNameMap {

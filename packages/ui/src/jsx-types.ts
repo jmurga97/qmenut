@@ -35,6 +35,7 @@ import type { QmMenuList, QmMenuListArgs } from "./components/organisms/qm-menu-
 import type { QmNavBar, QmNavBarArgs } from "./components/organisms/qm-nav-bar";
 import type { QmPageHeader, QmPageHeaderArgs } from "./components/organisms/qm-page-header";
 import type { QmPromoList, QmPromoListArgs } from "./components/organisms/qm-promo-list";
+import type { QmRecommendedList, QmRecommendedListArgs } from "./components/organisms/qm-recommended-list";
 import type { QmRedeemWait, QmRedeemWaitArgs } from "./components/organisms/qm-redeem-wait";
 import type { DetailedHTMLProps, HTMLAttributes } from "react";
 // Forces TS to fully resolve "react/jsx-runtime" via normal import resolution first —
@@ -99,6 +100,7 @@ declare module "react/jsx-runtime" {
       "qm-nav-bar": GenericWebComponent<QmNavBarArgs, QmNavBar>;
       "qm-page-header": GenericWebComponent<QmPageHeaderArgs, QmPageHeader>;
       "qm-promo-list": GenericWebComponent<QmPromoListArgs, QmPromoList>;
+      "qm-recommended-list": GenericWebComponent<QmRecommendedListArgs, QmRecommendedList>;
       "qm-redeem-wait": GenericWebComponent<QmRedeemWaitArgs, QmRedeemWait>;
     }
   }

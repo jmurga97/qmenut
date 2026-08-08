@@ -3,7 +3,7 @@ import { expectNoSeriousA11yViolations } from "../../helpers/a11y";
 
 const ROUTES = [
   "http://tapas.localhost:4011/",
-  "http://tapas.localhost:4011/promos",
+  "http://tapas.localhost:4011/destacados",
   "http://fine.localhost:4011/puntos",
   "http://fine.localhost:4011/contacto",
 ];

@@ -40,9 +40,14 @@ test("renders explicit Spanish and English locale routes", async ({ page }) => {
   await expect(page.getByText("Sharing plates", { exact: true }).first()).toBeVisible();
 });
 
-test("loads the promotions page", async ({ page }) => {
-  await page.goto("/es/promos", { waitUntil: "domcontentloaded" });
+test("loads the highlights page and leaves the old promotions route unavailable", async ({ page }) => {
+  await page.goto("/es/destacados", { waitUntil: "domcontentloaded" });
 
-  await expect(page).toHaveURL(/\/es\/promos$/);
+  await expect(page).toHaveURL(/\/es\/destacados$/);
+  await expect(page.locator("qm-recommended-list")).toBeVisible();
   await expect(page.locator("qm-promo").first()).toBeVisible();
+
+  const oldRouteResponse = await page.goto("/es/promos", { waitUntil: "domcontentloaded" });
+  expect(oldRouteResponse?.status()).toBe(404);
+  await expect(page.getByText("Not Found", { exact: true })).toBeVisible();
 });

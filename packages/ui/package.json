@@ -56,6 +56,10 @@
       "types": "./src/components/atoms/qm-heading/index.ts",
       "import": "./src/components/atoms/qm-heading/index.ts"
     },
+    "./components/qm-heading/react": {
+      "types": "./src/components/atoms/qm-heading/react.ts",
+      "import": "./src/components/atoms/qm-heading/react.ts"
+    },
     "./components/qm-section-num": {
       "types": "./src/components/atoms/qm-section-num/index.ts",
       "import": "./src/components/atoms/qm-section-num/index.ts"
@@ -259,6 +263,14 @@
     "./components/qm-promo-list/react": {
       "types": "./src/components/organisms/qm-promo-list/react.ts",
       "import": "./src/components/organisms/qm-promo-list/react.ts"
+    },
+    "./components/qm-recommended-list": {
+      "types": "./src/components/organisms/qm-recommended-list/index.ts",
+      "import": "./src/components/organisms/qm-recommended-list/index.ts"
+    },
+    "./components/qm-recommended-list/react": {
+      "types": "./src/components/organisms/qm-recommended-list/react.ts",
+      "import": "./src/components/organisms/qm-recommended-list/react.ts"
     },
     "./components/qm-contact-panel": {
       "types": "./src/components/organisms/qm-contact-panel/index.ts",

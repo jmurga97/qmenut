@@ -4,7 +4,7 @@ import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alte
 import { createServerTrpcCaller } from "~/lib/trpc-client";
 import { resolveSsrTenantHost } from "~/server/tenant-host";
 
-const ROUTE_PATHS = ["/", "/contacto", "/promos", "/puntos", "/aviso-legal", "/privacidad"];
+const ROUTE_PATHS = ["/", "/contacto", "/destacados", "/puntos", "/aviso-legal", "/privacidad"];
 const CONTENT_VERSION_KEY_PREFIX = "menuVersion:";
 
 function escapeXml(value: string): string {

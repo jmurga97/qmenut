@@ -16,7 +16,7 @@ const FRESH_UNTIL_HEADER = "x-qmenut-fresh-until";
 const CACHEABLE_ROUTES = new Set([
   "",
   "contacto",
-  "promos",
+  "destacados",
   "puntos",
   "aviso-legal",
   "privacidad",
@@ -58,7 +58,7 @@ function getEdgeTtlSeconds(pathname: string): number | null {
     return null;
   }
 
-  return route === "" || route === "promos" ? PROMOTION_EDGE_TTL_SECONDS : DEFAULT_EDGE_TTL_SECONDS;
+  return route === "" || route === "destacados" ? PROMOTION_EDGE_TTL_SECONDS : DEFAULT_EDGE_TTL_SECONDS;
 }
 
 interface EdgeCacheContext {

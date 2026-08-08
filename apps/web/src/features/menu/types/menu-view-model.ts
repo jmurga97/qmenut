@@ -1,3 +1,4 @@
+import type { QmFeaturedValue } from "@qmenut/ui/components/qm-featured/react";
 import type { AllergenCode } from "~/features/menu/constants/allergens";
 
 export interface MenuDishExtraViewModel {
@@ -29,6 +30,7 @@ export interface MenuSectionViewModel {
 
 export interface MenuContentViewModel {
   featured: MenuDishViewModel | null;
+  featuredPromo: QmFeaturedValue | null;
   heroLabel: string;
   logoLabel: string;
   sections: MenuSectionViewModel[];

@@ -99,7 +99,7 @@ test("invalidates versioned public caches for theme, promotion, branch, and tran
   await expectInvalidation({
     host: "tapas.localhost",
     request,
-    url: `http://tapas.localhost:4011/promos?invalidate-promotion=${stamp}`,
+    url: `http://tapas.localhost:4011/destacados?invalidate-promotion=${stamp}`,
     mutate: async () => {
       const promotion = await callTrpcMutation(page, "admin.promotions.create", {
         branchId: "branch_tapas",

@@ -23,6 +23,7 @@ export function mapPromotion(row: PromotionRow): PublicPromotion {
     recurringDays: parseRecurringDays(row.recurringDays),
     recurringStartMinute: row.recurringStartMinute,
     recurringEndMinute: row.recurringEndMinute,
+    updatedAt: row.updatedAt,
   };
 }
 
