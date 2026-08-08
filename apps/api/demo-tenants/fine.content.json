@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "host": "fine.qmenut.app",
+  "contact": {
+    "name": "Luce di Modena",
+    "address": "Carrer de Mallorca 214, Barcelona · local de demostración",
+    "phone": "+34900000103",
+    "whatsapp": "+34600000103",
+    "socialLinks": { "Instagram": "https://www.instagram.com/qmenut_demo_luce/" }
+  },
+  "photos": [
+    {
+      "url": "https://images.unsplash.com/photo-1667388969250-1c7220bf3f37?auto=format&fit=crop&w=1200&q=82",
+      "sourceUrl": "https://unsplash.com/photos/a-room-with-tables-and-chairs-e4B5AvA7Jqo",
+      "photographer": "Glenov Brankovic"
+    }
+  ],
+  "ingredients": [
+    { "key": "bread_service", "name": "Pan de masa madre y aceite", "price": 350 },
+    { "key": "black_truffle", "name": "Trufa negra laminada", "price": 900 }
+  ],
+  "categories": [
+    {
+      "key": "antipasti",
+      "name": "Antipasti",
+      "description": "Primeros gestos de la cocina italiana.",
+      "position": 0,
+      "dishes": [
+        {
+          "key": "burrata",
+          "name": "Burrata y melocotón",
+          "description": "Burrata pugliese, melocotón asado, albahaca y almendra fresca.",
+          "price": 1800,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1606850246029-dd00bd5eff97?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/sliced-fruits-on-white-ceramic-plate-I90KYtZDi54",
+            "photographer": "Max Griss"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["seasonal", "gluten_free"],
+          "allergens": ["milk", "nuts"],
+          "extraKeys": ["bread_service"]
+        },
+        {
+          "key": "vitello",
+          "name": "Vitello tonnato",
+          "description": "Ternera rosa, salsa de atún, alcaparras fritas y limón.",
+          "price": 2000,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1513262599279-d287e25f4d84?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/cooked-pork-chop-on-round-white-ceramic-plate-ZQuFgfyCifI",
+            "photographer": "Raphael Nogueira"
+          },
+          "position": 1,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["eggs", "fish"],
+          "extraKeys": ["bread_service"]
+        },
+        {
+          "key": "parmigiano",
+          "name": "Parmigiano en tres texturas",
+          "description": "Crema, crujiente y aire de Parmigiano Reggiano de 36 meses.",
+          "price": 1900,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1779265423742-563230c4a941?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/hand-lifting-gourmet-dish-with-cheese-and-prosciutto-5S2FAyHocyI",
+            "photographer": "Wesley Shen"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["milk"],
+          "extraKeys": []
+        }
+      ]
+    },
+    {
+      "key": "primi",
+      "name": "Primi",
+      "description": "Pasta fresca y arroz trabajados al minuto.",
+      "position": 1,
+      "dishes": [
+        {
+          "key": "tortellini",
+          "name": "Tortellini de Parmigiano",
+          "description": "Pasta fresca rellena y crema ligera de Parmigiano de 36 meses.",
+          "price": 2600,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1646470288584-c36e748fac65?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-close-up-of-some-food-on-a-table-DJoaulLVdEE",
+            "photographer": "Elisa Corvaro"
+          },
+          "position": 0,
+          "isRecommended": true,
+          "isFeatured": true,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": ["black_truffle"]
+        },
+        {
+          "key": "tagliatelle",
+          "name": "Tagliatelle al ragù",
+          "description": "Pasta al huevo y ragù de ternera cocinado durante doce horas.",
+          "price": 2400,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1734356959885-54fe2e99c1cd?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-plate-of-pasta-being-lifted-with-a-fork-qfpVo7fMyII",
+            "photographer": "Hailey Tong"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk", "celery"],
+          "extraKeys": ["black_truffle"]
+        },
+        {
+          "key": "risotto",
+          "name": "Risotto de porcini",
+          "description": "Arroz carnaroli, boletus, mantequilla avellanada y tomillo.",
+          "price": 2700,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1609770424775-39ec362f2d94?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/cooked-rice-with-green-vegetable-on-white-round-plate-D9fAmtjC284",
+            "photographer": "Max Griss"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["seasonal", "gluten_free"],
+          "allergens": ["milk"],
+          "extraKeys": ["black_truffle"]
+        }
+      ]
+    },
+    {
+      "key": "secondi",
+      "name": "Secondi",
+      "description": "Producto mediterráneo y fondos de cocción lenta.",
+      "position": 2,
+      "dishes": [
+        {
+          "key": "branzino",
+          "name": "Branzino al limone",
+          "description": "Lubina, limón confitado, hinojo y salsa de sus espinas.",
+          "price": 3300,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1562656407-7f78d2507827?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/fish-dish-with-sliced-lemon-zOYuGvDlZ7g",
+            "photographer": "Hristo Sahatchiev"
+          },
+          "position": 0,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["fish", "milk"],
+          "extraKeys": []
+        },
+        {
+          "key": "guancia",
+          "name": "Guancia brasata",
+          "description": "Carrillera de ternera, Barolo, polenta cremosa y chalota.",
+          "price": 3400,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1664339030060-191ccb53b5d2?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-bowl-of-food-sxdkUGB7cdc",
+            "photographer": "Holly Spangler"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["gluten_free", "contains_alcohol"],
+          "allergens": ["milk", "celery", "sulphites"],
+          "extraKeys": []
+        },
+        {
+          "key": "eggplant",
+          "name": "Melanzana affumicata",
+          "description": "Berenjena ahumada, tomate San Marzano, ricotta y albahaca.",
+          "price": 2600,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1700481947515-7a162cbe4df7?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-white-plate-topped-with-an-eggplant-and-radishes-ZjNWGiHT8Jo",
+            "photographer": "Amy Vann"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["milk"],
+          "extraKeys": []
+        }
+      ]
+    },
+    {
+      "key": "dolci",
+      "name": "Dolci",
+      "description": "Clásicos italianos con un final ligero.",
+      "position": 3,
+      "dishes": [
+        {
+          "key": "tiramisu",
+          "name": "Tiramisù",
+          "description": "Mascarpone, café espresso, cacao y savoiardi.",
+          "price": 1100,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/white-and-brown-ceramic-cake-4El3DUkQs2g",
+            "photographer": "Marianna OLE"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["contains_alcohol"],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": []
+        },
+        {
+          "key": "panna_cotta",
+          "name": "Panna cotta",
+          "description": "Nata infusionada con vainilla, fresa y aceite de albahaca.",
+          "price": 1000,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/sliced-strawberries-in-clear-glass-jar-with-cream-lK1Q5RyD6tc",
+            "photographer": "Karly Gomez"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["milk"],
+          "extraKeys": []
+        },
+        {
+          "key": "lemon_tart",
+          "name": "Crostata al limone",
+          "description": "Crema de limón, merengue italiano y masa sablé.",
+          "price": 1200,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/round-sliced-pie-with-cream-aX_ljOOyWJY",
+            "photographer": "Alex Lvrs"
+          },
+          "position": 2,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": []
+        }
+      ]
+    }
+  ],
+  "promotions": []
+}

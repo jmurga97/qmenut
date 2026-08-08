@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "host": "qmenut-demo.murga.ing",
+  "contact": {
+    "name": "QMenut Demo Bar",
+    "address": "Rúa do Príncipe 21, Vigo · local de demostración",
+    "phone": "+34900000106",
+    "whatsapp": "+34600000106",
+    "socialLinks": { "Instagram": "https://www.instagram.com/qmenut_demo_bar/" }
+  },
+  "photos": [
+    {
+      "url": "https://images.unsplash.com/photo-1669295987842-53270c972055?auto=format&fit=crop&w=1200&q=82",
+      "sourceUrl": "https://unsplash.com/photos/a-restaurant-with-tables-and-chairs-buBWIBoYVuY",
+      "photographer": "Thanos Pal"
+    }
+  ],
+  "ingredients": [
+    { "key": "bread", "name": "Pan", "price": 100 },
+    { "key": "alioli", "name": "Alioli", "price": 80 }
+  ],
+  "categories": [
+    {
+      "key": "drinks",
+      "name": "Bebidas",
+      "description": "Dos básicos para probar una carta pequeña.",
+      "position": 0,
+      "dishes": [
+        {
+          "key": "coffee",
+          "name": "Café solo",
+          "description": "Espresso corto de tueste natural.",
+          "price": 220,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1610889556528-9a770e32642f?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/clear-glass-cup-on-saucer-xKS-1DP4g7A",
+            "photographer": "Adi Goldstein"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["lactose_free", "gluten_free"],
+          "allergens": [],
+          "extraKeys": []
+        },
+        {
+          "key": "orange_juice",
+          "name": "Zumo de naranja",
+          "description": "Naranja recién exprimida, sin azúcar añadido.",
+          "price": 320,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/orange-juice-in-clear-drinking-glass-kkrXVKK-jhg",
+            "photographer": "ABHISHEK HAJARE"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["vegan", "gluten_free"],
+          "allergens": [],
+          "extraKeys": []
+        }
+      ]
+    },
+    {
+      "key": "food",
+      "name": "Algo de comer",
+      "description": "Una muestra compacta para comprobar el aislamiento del dominio.",
+      "position": 1,
+      "dishes": [
+        {
+          "key": "tortilla",
+          "name": "Tortilla",
+          "description": "Patata, cebolla y huevo de corral.",
+          "price": 450,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1646579933415-92109f9805df?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-slice-of-quiche-on-a-white-plate-on-a-wooden-table-ivFdoHieX08",
+            "photographer": "Samuel Agyeman-Duah"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["eggs"],
+          "extraKeys": ["bread"]
+        },
+        {
+          "key": "bravas",
+          "name": "Bravas",
+          "description": "Patata dorada, salsa brava y alioli.",
+          "price": 650,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1633959639799-6d3f66e05710?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-white-plate-topped-with-potatoes-and-parsley-9DEggBoY8CY",
+            "photographer": "Markus Winkler"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": true,
+          "tags": ["spicy", "gluten_free"],
+          "allergens": ["eggs"],
+          "extraKeys": ["alioli"]
+        },
+        {
+          "key": "croquette",
+          "name": "Croqueta",
+          "description": "Croqueta cremosa de jamón, servida por unidad.",
+          "price": 220,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1703077710733-72c46d2fcff3?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-person-holding-a-bowl-of-fried-food-fJc41-CtN_0",
+            "photographer": "Crunch"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": []
+        },
+        {
+          "key": "cheesecake",
+          "name": "Tarta de queso",
+          "description": "Queso crema, vainilla y frutos rojos.",
+          "price": 550,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1702925614886-50ad13c88d3f?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-slice-of-cheesecake-with-blueberries-on-a-plate-lKF0Urvp4RY",
+            "photographer": "A Studios"
+          },
+          "position": 3,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": []
+        }
+      ]
+    }
+  ],
+  "promotions": [
+    {
+      "key": "demo_bravas",
+      "type": "special_price",
+      "scope": "dish",
+      "name": "Bravas demo",
+      "description": "Una promoción permanente para verificar el segundo dominio.",
+      "specialPrice": 550,
+      "priority": 10,
+      "recurringDays": [],
+      "targetKeys": ["bravas"]
+    }
+  ]
+}

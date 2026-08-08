@@ -24,7 +24,8 @@
     "db:seed:local": "wrangler d1 execute DB --local --file seed/seed-public-menu.sql",
     "db:seed:e2e": "wrangler d1 execute DB --local --file seed/seed-e2e.sql",
     "db:cleanup:e2e": "wrangler d1 execute DB --local --file ../../e2e/seed/cleanup-e2e.sql",
-    "tenant:create": "bun scripts/create-tenant.ts"
+    "tenant:create": "bun scripts/create-tenant.ts",
+    "tenant:content": "bun scripts/load-tenant-content.ts"
   },
   "dependencies": {
     "@qmenut/auth": "workspace:*",

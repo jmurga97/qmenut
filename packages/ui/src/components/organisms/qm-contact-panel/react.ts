@@ -6,6 +6,8 @@ import { defineQmContactPanel, QM_CONTACT_PANEL_TAG_NAME, QmContactPanel as QmCo
 import type { QmFieldEventDetail } from "../../atoms/qm-field";
 import type { EventName } from "@lit/react";
 
+export type { QmContactPanelValue } from "./index";
+
 defineQmContactPanel();
 
 /** All three events bubble up (composed) from the nested `qm-field-group`; this organism dispatches none itself. */

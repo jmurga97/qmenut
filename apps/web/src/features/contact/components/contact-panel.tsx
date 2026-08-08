@@ -1,4 +1,5 @@
 import { QmContactPanel } from "@qmenut/ui/components/qm-contact-panel/react";
+import { QmLocation } from "@qmenut/ui/components/qm-location/react";
 
 import type { RefObject } from "react";
 import type { ContactContentViewModel } from "~/features/contact/types/contact-view-model";
@@ -15,23 +16,19 @@ export function ContactPanel({ content, hostRef, messageValue, nameValue, submit
   return (
     <div ref={hostRef}>
       <QmContactPanel
-        mapLabel={content.mapLabel}
-        nameLabel={content.form.nameLabel}
+        value={{
+          mapLabel: content.mapLabel,
+          nameLabel: content.form.nameLabel,
+          namePlaceholder: content.form.namePlaceholder,
+          messageLabel: content.form.messageLabel,
+          messagePlaceholder: content.form.messagePlaceholder,
+        }}
         nameValue={nameValue}
-        namePlaceholder={content.form.namePlaceholder}
-        messageLabel={content.form.messageLabel}
         messageValue={messageValue}
-        messagePlaceholder={content.form.messagePlaceholder}
         submitLabel={submitLabel}
       >
         {content.locations.map((location) => (
-          <qm-location
-            key={location.name}
-            slot="sedes"
-            name={location.name}
-            addr={location.addr}
-            status={location.status}
-          />
+          <QmLocation key={location.name} slot="sedes" value={location} />
         ))}
       </QmContactPanel>
     </div>

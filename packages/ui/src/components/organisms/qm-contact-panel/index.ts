@@ -33,47 +33,31 @@ const componentStyles = createComponentStyles(componentStylesText);
  * so the `sedes` list uses card-stack spacing (flex `gap`), the same mechanism as
  * `qm-promo-list`, rather than the mockup's flat hairline-divided list.
  */
+export interface QmContactPanelValue {
+  ubicacionNum?: string;
+  ubicacionLabel?: string;
+  sedesNum?: string;
+  sedesLabel?: string;
+  mensajeNum?: string;
+  mensajeLabel?: string;
+  mapLabel?: string;
+  nameLabel?: string;
+  namePlaceholder?: string;
+  messageLabel?: string;
+  messagePlaceholder?: string;
+}
+
 export class QmContactPanel extends LitElement {
   static styles = [qmHostResetStyles, componentStyles];
 
-  @property({ type: String, attribute: "ubicacion-num" })
-  ubicacionNum = "01";
-
-  @property({ type: String, attribute: "ubicacion-label" })
-  ubicacionLabel = "Ubicación";
-
-  @property({ type: String, attribute: "sedes-num" })
-  sedesNum = "02";
-
-  @property({ type: String, attribute: "sedes-label" })
-  sedesLabel = "Sedes";
-
-  @property({ type: String, attribute: "mensaje-num" })
-  mensajeNum = "03";
-
-  @property({ type: String, attribute: "mensaje-label" })
-  mensajeLabel = "Mensaje";
-
-  @property({ type: String, attribute: "map-label" })
-  mapLabel = "";
-
-  @property({ type: String, attribute: "name-label" })
-  nameLabel = "Nombre";
+  @property({ attribute: false })
+  value?: QmContactPanelValue;
 
   @property({ type: String, attribute: "name-value" })
   nameValue = "";
 
-  @property({ type: String, attribute: "name-placeholder" })
-  namePlaceholder = "";
-
-  @property({ type: String, attribute: "message-label" })
-  messageLabel = "Mensaje";
-
   @property({ type: String, attribute: "message-value" })
   messageValue = "";
-
-  @property({ type: String, attribute: "message-placeholder" })
-  messagePlaceholder = "";
 
   @property({ type: String, attribute: "submit-label" })
   submitLabel = "Enviar";
@@ -84,10 +68,14 @@ export class QmContactPanel extends LitElement {
   private renderUbicacion(): TemplateResult {
     return html`
       <section part="ubicacion" class="section">
-        <qm-section-num part="ubicacion-header" .num=${this.ubicacionNum} .label=${this.ubicacionLabel}>
+        <qm-section-num
+          part="ubicacion-header"
+          .num=${this.value?.ubicacionNum ?? "01"}
+          .label=${this.value?.ubicacionLabel ?? "Ubicación"}
+        >
         </qm-section-num>
         <div part="map" class="map">
-          <qm-image part="map-image" class="map-image" label=${this.mapLabel}></qm-image>
+          <qm-image part="map-image" class="map-image" label=${this.value?.mapLabel ?? ""}></qm-image>
           <qm-pin part="map-pin" class="map-pin" size="32px"></qm-pin>
         </div>
       </section>
@@ -97,7 +85,11 @@ export class QmContactPanel extends LitElement {
   private renderSedes(): TemplateResult {
     return html`
       <section part="sedes" class="section">
-        <qm-section-num part="sedes-header" .num=${this.sedesNum} .label=${this.sedesLabel}></qm-section-num>
+        <qm-section-num
+          part="sedes-header"
+          .num=${this.value?.sedesNum ?? "02"}
+          .label=${this.value?.sedesLabel ?? "Sedes"}
+        ></qm-section-num>
         <div part="sedes-list" class="sedes-list">
           <slot name="sedes"></slot>
         </div>
@@ -108,15 +100,19 @@ export class QmContactPanel extends LitElement {
   private renderMensaje(): TemplateResult {
     return html`
       <section part="mensaje" class="section">
-        <qm-section-num part="mensaje-header" .num=${this.mensajeNum} .label=${this.mensajeLabel}></qm-section-num>
+        <qm-section-num
+          part="mensaje-header"
+          .num=${this.value?.mensajeNum ?? "03"}
+          .label=${this.value?.mensajeLabel ?? "Mensaje"}
+        ></qm-section-num>
         <qm-field-group
           part="form"
-          .nameLabel=${this.nameLabel}
+          .nameLabel=${this.value?.nameLabel ?? "Nombre"}
           .nameValue=${this.nameValue}
-          .namePlaceholder=${this.namePlaceholder}
-          .messageLabel=${this.messageLabel}
+          .namePlaceholder=${this.value?.namePlaceholder ?? ""}
+          .messageLabel=${this.value?.messageLabel ?? "Mensaje"}
           .messageValue=${this.messageValue}
-          .messagePlaceholder=${this.messagePlaceholder}
+          .messagePlaceholder=${this.value?.messagePlaceholder ?? ""}
           .submitLabel=${this.submitLabel}
           ?disabled=${this.disabled}
         ></qm-field-group>
@@ -142,24 +138,7 @@ export function defineQmContactPanel() {
 }
 
 export type QmContactPanelArgs = Partial<
-  Pick<
-    QmContactPanel,
-    | "ubicacionNum"
-    | "ubicacionLabel"
-    | "sedesNum"
-    | "sedesLabel"
-    | "mensajeNum"
-    | "mensajeLabel"
-    | "mapLabel"
-    | "nameLabel"
-    | "nameValue"
-    | "namePlaceholder"
-    | "messageLabel"
-    | "messageValue"
-    | "messagePlaceholder"
-    | "submitLabel"
-    | "disabled"
-  >
+  Pick<QmContactPanel, "value" | "nameValue" | "messageValue" | "submitLabel" | "disabled">
 >;
 
 declare global {

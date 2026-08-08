@@ -1,8 +1,7 @@
-import { defineQmPromoList } from "@qmenut/ui/components/qm-promo-list";
+import { QmPromo } from "@qmenut/ui/components/qm-promo/react";
+import { QmPromoList } from "@qmenut/ui/components/qm-promo-list/react";
 
 import type { PromosContentViewModel } from "~/features/promos/types/promos-view-model";
-
-defineQmPromoList();
 
 interface PromosListProps {
   content: PromosContentViewModel;
@@ -10,18 +9,10 @@ interface PromosListProps {
 
 export function PromosList({ content }: PromosListProps) {
   return (
-    <qm-promo-list emptyLabel={content.emptyLabel}>
+    <QmPromoList value={{ emptyLabel: content.emptyLabel }}>
       {content.promos.map((promo) => (
-        <qm-promo
-          key={promo.name}
-          discount={promo.discount}
-          name={promo.name}
-          desc={promo.desc}
-          price={promo.price}
-          oldPrice={promo.oldPrice}
-          vigencia={promo.vigencia}
-        />
+        <QmPromo key={promo.name} value={promo} />
       ))}
-    </qm-promo-list>
+    </QmPromoList>
   );
 }

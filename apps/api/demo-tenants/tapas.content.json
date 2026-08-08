@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 1,
+  "host": "tapas.qmenut.app",
+  "contact": {
+    "name": "La Vuelta",
+    "address": "Calle del Laurel 18, Logroño · local de demostración",
+    "phone": "+34900000102",
+    "whatsapp": "+34600000102",
+    "socialLinks": { "Instagram": "https://www.instagram.com/qmenut_demo_lavuelta/" }
+  },
+  "photos": [
+    {
+      "url": "https://images.unsplash.com/photo-1656423521731-9665583f100c?auto=format&fit=crop&w=1200&q=82",
+      "sourceUrl": "https://unsplash.com/photos/a-table-with-food-and-drinks-on-it-KTqMU3j-Vcw",
+      "photographer": "CHUTTERSNAP"
+    }
+  ],
+  "ingredients": [
+    { "key": "bread", "name": "Pan de pueblo", "price": 150 },
+    { "key": "alioli", "name": "Alioli casero", "price": 100 },
+    { "key": "brava", "name": "Salsa brava extra", "price": 100 }
+  ],
+  "categories": [
+    {
+      "key": "bar",
+      "name": "Barra",
+      "description": "Bocados de un par de tragos, hechos al momento.",
+      "position": 0,
+      "dishes": [
+        {
+          "key": "gilda",
+          "name": "Gilda",
+          "description": "Anchoa del Cantábrico, piparra riojana y aceituna manzanilla.",
+          "price": 320,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1596099477998-880bc06e09f9?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/black-round-fruits-on-white-and-blue-ceramic-bowl-u_8uu3yWPrg",
+            "photographer": "Simone Impei"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["fish"],
+          "extraKeys": []
+        },
+        {
+          "key": "ham_croquette",
+          "name": "Croqueta de jamón",
+          "description": "Bechamel cremosa, jamón ibérico y rebozado muy fino.",
+          "price": 280,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1713517915303-ae3b3429f939?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-close-up-of-a-plate-of-food-on-a-table-kEYieb7pzAM",
+            "photographer": "Poul Hoang"
+          },
+          "position": 1,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": ["bread"]
+        },
+        {
+          "key": "tortilla",
+          "name": "Tortilla jugosa",
+          "description": "Patata agria, cebolla pochada y huevo de corral.",
+          "price": 450,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1639669794539-952631b44515?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-close-up-of-a-piece-of-food-on-a-plate-z4CQtd07u5k",
+            "photographer": "blackieshoot"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["eggs"],
+          "extraKeys": ["bread"]
+        }
+      ]
+    },
+    {
+      "key": "sharing",
+      "name": "Para compartir",
+      "description": "Raciones de siempre para poner en el centro.",
+      "position": 1,
+      "dishes": [
+        {
+          "key": "bravas",
+          "name": "Patatas bravas",
+          "description": "Patata crujiente, salsa brava de pimentón y alioli suave.",
+          "price": 750,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1565599837634-134bc3aadce8?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/fried-food-with-sauce-vzIgmhbEN9w",
+            "photographer": "Nacho Carretero Molero"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": true,
+          "tags": ["spicy", "gluten_free"],
+          "allergens": ["eggs"],
+          "extraKeys": ["alioli", "brava"]
+        },
+        {
+          "key": "ensaladilla",
+          "name": "Ensaladilla rusa",
+          "description": "Patata, ventresca, zanahoria, encurtidos y mayonesa casera.",
+          "price": 780,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1550936831-46af2497cf61?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/cooked-dish-hYD4_U0XBXo",
+            "photographer": "Victoria Shes"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["eggs", "fish"],
+          "extraKeys": ["bread"]
+        },
+        {
+          "key": "broken_eggs",
+          "name": "Huevos rotos con jamón",
+          "description": "Patata confitada, huevos de corral y jamón ibérico.",
+          "price": 1350,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1730308346772-a43851aa65b7?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-white-plate-topped-with-eggs-ham-and-potatoes-GanBIwRAMmE",
+            "photographer": "Gennady Zakharin"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["eggs"],
+          "extraKeys": ["bread"]
+        }
+      ]
+    },
+    {
+      "key": "sea",
+      "name": "Del mar",
+      "description": "Producto atlántico y aceite de oliva.",
+      "position": 2,
+      "dishes": [
+        {
+          "key": "octopus",
+          "name": "Pulpo a feira",
+          "description": "Pulpo, cachelos, pimentón de la Vera y aceite virgen extra.",
+          "price": 1850,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1774451606775-68df417107b3?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-cooked-octopus-dish-with-potatoes-and-greens-0ezL9Nd679Q",
+            "photographer": "Benjamin Chambon"
+          },
+          "position": 0,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["molluscs"],
+          "extraKeys": ["bread"]
+        },
+        {
+          "key": "calamari",
+          "name": "Calamares",
+          "description": "Calamar fresco, rebozado ligero y limón.",
+          "price": 1350,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1682264895449-f75b342cbab6?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-white-plate-topped-with-fried-food-and-a-dipping-sauce-COtv-D5osKA",
+            "photographer": "Joanie Simon"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "molluscs"],
+          "extraKeys": ["alioli"]
+        },
+        {
+          "key": "garlic_prawns",
+          "name": "Gambas al ajillo",
+          "description": "Gamba blanca, ajo laminado, guindilla y aceite de oliva.",
+          "price": 1650,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1750680229961-1b0e607eb2c7?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/garlic-shrimp-plated-with-chilies-ready-to-eat-ILKZqcRVlFk",
+            "photographer": "Raphael Dalagnol"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["spicy", "gluten_free"],
+          "allergens": ["crustaceans"],
+          "extraKeys": ["bread"]
+        }
+      ]
+    },
+    {
+      "key": "sweet_cellar",
+      "name": "Dulce y bodega",
+      "description": "Finales caseros y el aperitivo de la casa.",
+      "position": 3,
+      "dishes": [
+        {
+          "key": "torrija",
+          "name": "Torrija",
+          "description": "Brioche empapado, canela y crema helada.",
+          "price": 650,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/toast-bread-with-blueberry-on-black-plate-zcUgjyqEwe8",
+            "photographer": "Joseph Gonzalez"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": []
+        },
+        {
+          "key": "cheesecake",
+          "name": "Tarta de queso",
+          "description": "Centro fundente, queso curado y galleta tostada.",
+          "price": 680,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1524351199678-941a58a3df50?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/sliced-of-cake-on-black-plate-s8_7AqkzCWY",
+            "photographer": "Tina Guina"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": []
+        },
+        {
+          "key": "vermouth",
+          "name": "Vermut de la casa",
+          "description": "Rojo, especiado, servido con hielo, naranja y aceituna.",
+          "price": 380,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1668431456021-dc83abe07992?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-glass-with-a-liquid-in-it-8J-nwlRI-XY",
+            "photographer": "Timothé Durand"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["contains_alcohol", "gluten_free"],
+          "allergens": ["sulphites"],
+          "extraKeys": []
+        }
+      ]
+    }
+  ],
+  "promotions": [
+    {
+      "key": "vermouth_hour",
+      "type": "happy_hour",
+      "scope": "dish",
+      "name": "La hora del vermut −20%",
+      "description": "El aperitivo de la casa, de lunes a jueves por la tarde.",
+      "percentage": 20,
+      "priority": 10,
+      "recurringDays": [1, 2, 3, 4],
+      "recurringStartMinute": 1080,
+      "recurringEndMinute": 1200,
+      "targetKeys": ["vermouth"]
+    },
+    {
+      "key": "bravas_tuesday",
+      "type": "special_price",
+      "scope": "dish",
+      "name": "Martes de bravas",
+      "description": "Nuestra ración de bravas a precio especial durante todo el servicio.",
+      "specialPrice": 550,
+      "priority": 20,
+      "recurringDays": [2],
+      "recurringStartMinute": 720,
+      "recurringEndMinute": 1380,
+      "targetKeys": ["bravas"]
+    },
+    {
+      "key": "croquette_wednesday",
+      "type": "two_for_one",
+      "scope": "dish",
+      "name": "Miércoles de croquetas 2x1",
+      "description": "Dos croquetas de jamón y solo pagas una.",
+      "buyQuantity": 2,
+      "paidQuantity": 1,
+      "priority": 15,
+      "recurringDays": [3],
+      "recurringStartMinute": 1140,
+      "recurringEndMinute": 1380,
+      "targetKeys": ["ham_croquette"]
+    }
+  ]
+}
