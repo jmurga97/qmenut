@@ -24,13 +24,14 @@ export class QmCategoryNav extends LitElement {
   @property({ type: String, attribute: "aria-label" })
   ariaLabel: string | null = null;
 
-  private readonly activeObserver = new MutationObserver(() => {
-    this.scrollActiveChipIntoView();
-  });
+  private activeObserver?: MutationObserver;
 
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener("keydown", this.handleKeydown);
+    this.activeObserver = new MutationObserver(() => {
+      this.scrollActiveChipIntoView();
+    });
     this.activeObserver.observe(this, {
       subtree: true,
       attributes: true,
@@ -41,7 +42,8 @@ export class QmCategoryNav extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this.removeEventListener("keydown", this.handleKeydown);
-    this.activeObserver.disconnect();
+    this.activeObserver?.disconnect();
+    this.activeObserver = undefined;
   }
 
   private getChips(): QmCategoryChip[] {

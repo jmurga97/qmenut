@@ -25,10 +25,7 @@ interface BuildRestaurantJsonLdInput {
   origin: string;
 }
 
-/**
- * Carries the menu content that dom-shim SSR only renders into Lit shadow DOM (invisible to
- * non-JS crawlers) as schema.org structured data instead of attempting full Lit SSR.
- */
+/** Adds machine-readable restaurant and menu semantics alongside the visible Lit SSR markup. */
 export function buildRestaurantJsonLd({
   data,
   includeMenu = true,

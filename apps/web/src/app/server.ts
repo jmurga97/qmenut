@@ -1,5 +1,5 @@
-// Must run before anything that imports @qmenut/ui components.
-import "~/server/lit-dom-shim";
+// Must run before React, its JSX runtime, or anything that imports @qmenut/ui components.
+import "@lit-labs/ssr-react/enable-lit-ssr.js";
 
 import * as Sentry from "@sentry/cloudflare";
 import handler from "@tanstack/react-start/server-entry";

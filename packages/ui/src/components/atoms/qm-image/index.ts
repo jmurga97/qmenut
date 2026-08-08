@@ -1,5 +1,5 @@
 import { html, LitElement, nothing } from "lit";
-import { property, state } from "lit/decorators.js";
+import { property } from "lit/decorators.js";
 
 import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
@@ -11,9 +11,8 @@ const componentStyles = createComponentStyles(componentStylesText);
 
 /**
  * Image placeholder that also accepts a real slotted `<img>`. The `--qm-ph` hatch pattern
- * always renders behind the slot; once a consumer slots real content in, the fallback
- * caption is suppressed via a `slotchange` check (internal-only derived state, not a
- * public prop, so it doesn't compete with any controlled API).
+ * always renders behind the slot. The caption is native slot fallback content, so SSR and
+ * the browser both suppress it immediately when a real image is assigned.
  */
 export class QmImage extends LitElement {
   static styles = [qmHostResetStyles, componentStyles];
@@ -21,19 +20,10 @@ export class QmImage extends LitElement {
   @property({ type: String })
   label = "";
 
-  @state()
-  private hasContent = false;
-
-  private readonly handleSlotChange = (event: Event) => {
-    const assigned = (event.target as HTMLSlotElement).assignedNodes({ flatten: true });
-    this.hasContent = assigned.some((node) => node.nodeType === Node.ELEMENT_NODE);
-  };
-
   render() {
     return html`
-      <div part="frame" class="frame" data-has-content=${this.hasContent}>
-        <slot @slotchange=${this.handleSlotChange}></slot>
-        ${!this.hasContent && this.label ? html`<span part="label" class="label">${this.label}</span>` : nothing}
+      <div part="frame" class="frame">
+        <slot>${this.label ? html`<span part="label" class="label">${this.label}</span>` : nothing}</slot>
       </div>
     `;
   }

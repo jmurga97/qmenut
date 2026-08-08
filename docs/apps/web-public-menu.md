@@ -31,8 +31,11 @@ There is no `apps/web/src/server/sentry.ts`. Its per-request `wrapRequestHandler
 workaround was needed when Nitro owned the top-level export; the Cloudflare Vite plugin
 allows the Worker itself to be wrapped with `Sentry.withSentry`.
 
-`lit-dom-shim.ts` must remain the first import: shared `@qmenut/ui` Lit components need
-its DOM globals during workerd SSR.
+`@lit-labs/ssr-react/enable-lit-ssr.js` must remain the first import in both the server
+and client entries. The SSR build uses its Node export to patch React element creation and
+deep-render registered Lit components as Declarative Shadow DOM. The browser export installs
+LitElement hydration support before any `@qmenut/ui` component loads, so custom elements adopt
+their server-rendered shadow roots instead of replacing them.
 
 ## Host resolution
 
@@ -83,6 +86,11 @@ Related helpers are:
 the SSR environment to use Node/server export conditions and fails the build if a
 `browser` condition leaks into it. Do not remove that guard to make an incompatible
 package resolve; fix the offending import or export conditions.
+
+React render sites use the `/react` wrappers exported by `@qmenut/ui`. The wrappers preserve
+non-string Lit properties during SSR and defer component hydration until those properties have
+been restored on the client. Lit elements instantiated inside another Lit template do not need
+React wrappers; their parent component's `defineQm*` chain registers them for deep SSR.
 
 ## Key files
 
