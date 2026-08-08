@@ -14,6 +14,7 @@ export interface PublicPromotion {
   specialPrice: number | null;
   startsAt: number | null;
   type: "daily_menu" | "happy_hour" | "percentage_discount" | "special_price" | "two_for_one";
+  updatedAt: number;
 }
 
 export interface PublicDishPromotion extends PublicPromotion {

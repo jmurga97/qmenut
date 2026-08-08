@@ -5,6 +5,5 @@ export type PromoViewModel = QmPromoValue;
 export interface PromosContentViewModel {
   emptyLabel: string;
   promos: PromoViewModel[];
-  subtitle: string;
   title: string;
 }

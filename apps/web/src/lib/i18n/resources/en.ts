@@ -4,7 +4,7 @@ export default {
     primaryNavigationLabel: "Primary navigation",
     navigation: {
       menu: "Menu",
-      promos: "Offers",
+      destacados: "Highlights",
       contact: "Contact",
       loyalty: "Rewards",
     },
@@ -19,13 +19,19 @@ export default {
     photoLabel: "Dish photo",
     recommended: "Recommended",
   },
+  destacados: {
+    seoTitle: "Highlights – {{name}}",
+    seoDescription: "Recommended dishes and current offers from {{name}}",
+    page: {
+      title: "Highlights",
+      subtitle: "Our recommendations and current offers",
+      recommendedTitle: "Recommended",
+      recommendedEmptyLabel: "There are no recommended dishes yet",
+    },
+  },
   promos: {
-    seoTitle: "Offers – {{name}}",
-    seoDescription: "Current offers and promotions from {{name}}",
     page: {
       title: "Offers",
-      subtitle_one: "{{count}} active offer · today",
-      subtitle_other: "{{count}} active offers · today",
       emptyLabel: "There are no offers available",
       availableToday: "Available today",
     },

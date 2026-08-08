@@ -16,48 +16,43 @@ const componentStyles = createComponentStyles(componentStylesText);
  * be repeated inside a list; the surrounding card/list container belongs to the (organism)
  * menu section, out of scope here. The tag pill uses the `--qm-tag-*` token group, which is
  * distinct from `qm-badge`'s `--qm-badge-*` contract, so it's bespoke markup rather than a
- * wrapped atom.
+ * wrapped atom. `featured` swaps in the `--qm-tag-featured-*` group instead of `--qm-tag-*`
+ * so it reads as a stronger emphasis even where a template themes both tag groups the same.
  */
+export interface QmDishRowValue {
+  name: string;
+  desc: string;
+  price: string;
+  oldPrice?: string;
+  tag?: string;
+  featured?: boolean;
+  photo: boolean;
+  photoUrl?: string;
+}
+
 export class QmDishRow extends LitElement {
   static styles = [qmHostResetStyles, componentStyles];
 
-  @property({ type: String })
-  name = "";
-
-  @property({ type: String })
-  desc = "";
-
-  @property({ type: String })
-  price = "";
-
-  @property({ type: String, attribute: "old-price" })
-  oldPrice?: string;
-
-  @property({ type: String })
-  tag?: string;
-
-  @property({ type: Boolean })
-  photo = false;
-
-  @property({ type: String, attribute: "photo-url" })
-  photoUrl?: string;
+  @property({ attribute: false })
+  value?: QmDishRowValue;
 
   render() {
-    const photoImage = this.photoUrl
-      ? html`<img src=${this.photoUrl} alt="" loading="lazy" decoding="async" />`
+    const photoImage = this.value?.photoUrl
+      ? html`<img src=${this.value.photoUrl} alt="" loading="lazy" decoding="async" />`
       : nothing;
+    const tagClass = this.value?.featured ? "tag tag--featured" : "tag";
 
     return html`
       <div part="row" class="row">
-        ${this.photo ? html` <span part="photo" class="photo">${photoImage}</span> ` : nothing}
+        ${this.value?.photo ? html` <span part="photo" class="photo">${photoImage}</span> ` : nothing}
         <div class="body">
           <div class="name-line">
-            <span part="name" class="name">${this.name}</span>
-            ${this.tag ? html`<span part="tag" class="tag">${this.tag}</span>` : nothing}
+            <span part="name" class="name">${this.value?.name ?? ""}</span>
+            ${this.value?.tag ? html`<span part="tag" class=${tagClass}>${this.value.tag}</span>` : nothing}
           </div>
-          <div part="desc" class="desc">${this.desc}</div>
+          <div part="desc" class="desc">${this.value?.desc ?? ""}</div>
         </div>
-        <qm-price part="price" .value=${this.price} .oldValue=${this.oldPrice}></qm-price>
+        <qm-price part="price" .value=${this.value?.price ?? ""} .oldValue=${this.value?.oldPrice}></qm-price>
       </div>
     `;
   }
@@ -71,9 +66,7 @@ export function defineQmDishRow() {
   }
 }
 
-export type QmDishRowArgs = Partial<
-  Pick<QmDishRow, "name" | "desc" | "price" | "oldPrice" | "tag" | "photo" | "photoUrl">
->;
+export type QmDishRowArgs = Partial<Pick<QmDishRow, "value">>;
 
 declare global {
   interface HTMLElementTagNameMap {

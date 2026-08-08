@@ -27,12 +27,12 @@ export function PublicBottomNav() {
         {t("common.navigation.menu")}
       </QmTab>
       <QmTab
-        value="/promos"
-        active={routeId === "/{-$locale}/promos"}
-        onQmSelect={() => void navigate({ to: "/{-$locale}/promos", params: (prev) => prev })}
+        value="/destacados"
+        active={routeId === "/{-$locale}/destacados"}
+        onQmSelect={() => void navigate({ to: "/{-$locale}/destacados", params: (prev) => prev })}
       >
         <Tag slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
-        {t("common.navigation.promos")}
+        {t("common.navigation.destacados")}
       </QmTab>
       <QmTab
         value="/contacto"

@@ -14,8 +14,8 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}.index'
 import { Route as Char123LocaleChar125PuntosRouteImport } from './routes/{-$locale}.puntos'
-import { Route as Char123LocaleChar125PromosRouteImport } from './routes/{-$locale}.promos'
 import { Route as Char123LocaleChar125PrivacidadRouteImport } from './routes/{-$locale}.privacidad'
+import { Route as Char123LocaleChar125DestacadosRouteImport } from './routes/{-$locale}.destacados'
 import { Route as Char123LocaleChar125ContactoRouteImport } from './routes/{-$locale}.contacto'
 import { Route as Char123LocaleChar125AvisoLegalRouteImport } from './routes/{-$locale}.aviso-legal'
 
@@ -46,16 +46,16 @@ const Char123LocaleChar125PuntosRoute =
     path: '/puntos',
     getParentRoute: () => Char123LocaleChar125Route,
   } as any)
-const Char123LocaleChar125PromosRoute =
-  Char123LocaleChar125PromosRouteImport.update({
-    id: '/promos',
-    path: '/promos',
-    getParentRoute: () => Char123LocaleChar125Route,
-  } as any)
 const Char123LocaleChar125PrivacidadRoute =
   Char123LocaleChar125PrivacidadRouteImport.update({
     id: '/privacidad',
     path: '/privacidad',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
+const Char123LocaleChar125DestacadosRoute =
+  Char123LocaleChar125DestacadosRouteImport.update({
+    id: '/destacados',
+    path: '/destacados',
     getParentRoute: () => Char123LocaleChar125Route,
   } as any)
 const Char123LocaleChar125ContactoRoute =
@@ -77,8 +77,8 @@ export interface FileRoutesByFullPath {
   '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
   '/{-$locale}/aviso-legal': typeof Char123LocaleChar125AvisoLegalRoute
   '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
+  '/{-$locale}/destacados': typeof Char123LocaleChar125DestacadosRoute
   '/{-$locale}/privacidad': typeof Char123LocaleChar125PrivacidadRoute
-  '/{-$locale}/promos': typeof Char123LocaleChar125PromosRoute
   '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
 }
@@ -87,8 +87,8 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/{-$locale}/aviso-legal': typeof Char123LocaleChar125AvisoLegalRoute
   '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
+  '/{-$locale}/destacados': typeof Char123LocaleChar125DestacadosRoute
   '/{-$locale}/privacidad': typeof Char123LocaleChar125PrivacidadRoute
-  '/{-$locale}/promos': typeof Char123LocaleChar125PromosRoute
   '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
 }
@@ -99,8 +99,8 @@ export interface FileRoutesById {
   '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
   '/{-$locale}/aviso-legal': typeof Char123LocaleChar125AvisoLegalRoute
   '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
+  '/{-$locale}/destacados': typeof Char123LocaleChar125DestacadosRoute
   '/{-$locale}/privacidad': typeof Char123LocaleChar125PrivacidadRoute
-  '/{-$locale}/promos': typeof Char123LocaleChar125PromosRoute
   '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
 }
@@ -112,8 +112,8 @@ export interface FileRouteTypes {
     | '/{-$locale}'
     | '/{-$locale}/aviso-legal'
     | '/{-$locale}/contacto'
+    | '/{-$locale}/destacados'
     | '/{-$locale}/privacidad'
-    | '/{-$locale}/promos'
     | '/{-$locale}/puntos'
     | '/{-$locale}/'
   fileRoutesByTo: FileRoutesByTo
@@ -122,8 +122,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/{-$locale}/aviso-legal'
     | '/{-$locale}/contacto'
+    | '/{-$locale}/destacados'
     | '/{-$locale}/privacidad'
-    | '/{-$locale}/promos'
     | '/{-$locale}/puntos'
     | '/{-$locale}'
   id:
@@ -133,8 +133,8 @@ export interface FileRouteTypes {
     | '/{-$locale}'
     | '/{-$locale}/aviso-legal'
     | '/{-$locale}/contacto'
+    | '/{-$locale}/destacados'
     | '/{-$locale}/privacidad'
-    | '/{-$locale}/promos'
     | '/{-$locale}/puntos'
     | '/{-$locale}/'
   fileRoutesById: FileRoutesById
@@ -182,18 +182,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125PuntosRouteImport
       parentRoute: typeof Char123LocaleChar125Route
     }
-    '/{-$locale}/promos': {
-      id: '/{-$locale}/promos'
-      path: '/promos'
-      fullPath: '/{-$locale}/promos'
-      preLoaderRoute: typeof Char123LocaleChar125PromosRouteImport
-      parentRoute: typeof Char123LocaleChar125Route
-    }
     '/{-$locale}/privacidad': {
       id: '/{-$locale}/privacidad'
       path: '/privacidad'
       fullPath: '/{-$locale}/privacidad'
       preLoaderRoute: typeof Char123LocaleChar125PrivacidadRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/destacados': {
+      id: '/{-$locale}/destacados'
+      path: '/destacados'
+      fullPath: '/{-$locale}/destacados'
+      preLoaderRoute: typeof Char123LocaleChar125DestacadosRouteImport
       parentRoute: typeof Char123LocaleChar125Route
     }
     '/{-$locale}/contacto': {
@@ -216,8 +216,8 @@ declare module '@tanstack/react-router' {
 interface Char123LocaleChar125RouteChildren {
   Char123LocaleChar125AvisoLegalRoute: typeof Char123LocaleChar125AvisoLegalRoute
   Char123LocaleChar125ContactoRoute: typeof Char123LocaleChar125ContactoRoute
+  Char123LocaleChar125DestacadosRoute: typeof Char123LocaleChar125DestacadosRoute
   Char123LocaleChar125PrivacidadRoute: typeof Char123LocaleChar125PrivacidadRoute
-  Char123LocaleChar125PromosRoute: typeof Char123LocaleChar125PromosRoute
   Char123LocaleChar125PuntosRoute: typeof Char123LocaleChar125PuntosRoute
   Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
 }
@@ -225,8 +225,8 @@ interface Char123LocaleChar125RouteChildren {
 const Char123LocaleChar125RouteChildren: Char123LocaleChar125RouteChildren = {
   Char123LocaleChar125AvisoLegalRoute: Char123LocaleChar125AvisoLegalRoute,
   Char123LocaleChar125ContactoRoute: Char123LocaleChar125ContactoRoute,
+  Char123LocaleChar125DestacadosRoute: Char123LocaleChar125DestacadosRoute,
   Char123LocaleChar125PrivacidadRoute: Char123LocaleChar125PrivacidadRoute,
-  Char123LocaleChar125PromosRoute: Char123LocaleChar125PromosRoute,
   Char123LocaleChar125PuntosRoute: Char123LocaleChar125PuntosRoute,
   Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
 }

@@ -1,4 +1,6 @@
 import { ALLERGEN_META } from "~/features/menu/constants/allergens";
+import { mapPromotionToFeatured } from "~/features/promos/mappers/map-promotion-to-featured";
+import { pickFeaturedPromo } from "~/features/promos/mappers/pick-featured-promo";
 
 import type { TFunction } from "i18next";
 import type { PublicMenuData, PublicMenuDish } from "~/features/menu/api/public-menu-types";
@@ -45,7 +47,7 @@ function createPriceFormatter(locale: string, currency: string) {
   return (cents: number) => formatter.format(cents / 100);
 }
 
-function mapDish({
+export function mapDish({
   dish,
   formatPrice,
   t,
@@ -98,9 +100,13 @@ export function mapPublicMenuContent({ data, locale, t }: MapPublicMenuContentIn
       tagline: stripHtml(category.description ?? ""),
     }));
   const featuredDish = pickFeaturedDish(data);
+  const featuredPromoEntity = pickFeaturedPromo(data.promotions);
 
   return {
     featured: featuredDish ? mapDish({ dish: featuredDish, formatPrice, t }) : null,
+    featuredPromo: featuredPromoEntity
+      ? mapPromotionToFeatured({ data, formatPrice, promotion: featuredPromoEntity, t })
+      : null,
     heroLabel: t("menu.heroLabel"),
     logoLabel: buildLogoLabel(data.branch.name),
     sections,

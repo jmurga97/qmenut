@@ -67,6 +67,12 @@
   padding: 2px 6px;
 }
 
+.tag--featured {
+  color: var(--qm-tag-featured-color, #fff);
+  background: var(--qm-tag-featured-bg, var(--qm-emph, #1c1815));
+  border: var(--qm-tag-featured-bd, none);
+}
+
 .desc {
   font-family: var(--qm-body, sans-serif);
   font-size: var(--qm-text-sm, 12px);

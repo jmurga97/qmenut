@@ -1,3 +1,5 @@
+import { QmDishRow } from "@qmenut/ui/components/qm-dish-row/react";
+import { QmFeatured } from "@qmenut/ui/components/qm-featured/react";
 import { defineQmMenuList } from "@qmenut/ui/components/qm-menu-list";
 import { useTranslation } from "react-i18next";
 
@@ -25,9 +27,6 @@ interface MenuSectionProps {
   showDishPhotos: boolean;
 }
 
-// Multi-word Lit props are written as their kebab attributes (old-price, photo-url,
-// section-label...) so SSR-rendered values survive hydration; see KebabAttributes in
-// @qmenut/ui jsx-types.
 function MenuSection({ onSelectDish, section, showDishPhotos }: MenuSectionProps) {
   const { t } = useTranslation();
 
@@ -47,14 +46,16 @@ function MenuSection({ onSelectDish, section, showDishPhotos }: MenuSectionProps
           className="dish-trigger"
           onClick={(event) => onSelectDish(dish, event.currentTarget)}
         >
-          <qm-dish-row
-            name={dish.name}
-            desc={dish.desc}
-            price={dish.price}
-            old-price={dish.oldPrice}
-            tag={dish.tag}
-            photo={showDishPhotos}
-            photo-url={dish.photoUrl}
+          <QmDishRow
+            value={{
+              desc: dish.desc,
+              name: dish.name,
+              oldPrice: dish.oldPrice,
+              photo: showDishPhotos,
+              photoUrl: dish.photoUrl,
+              price: dish.price,
+              tag: dish.tag,
+            }}
           />
         </button>
       ))}
@@ -79,16 +80,23 @@ export function MenuDishList({ categoryNav, content, onSelectDish, showDishPhoto
           className="dish-trigger menu-featured-frame"
           onClick={(event) => onSelectDish(featured, event.currentTarget)}
         >
-          <qm-featured
-            name={featured.name}
-            desc={featured.desc}
-            price={featured.price}
-            old-price={featured.oldPrice}
-            tag={featured.tag}
-            photo={showDishPhotos}
-            photo-url={featured.photoUrl}
+          <QmFeatured
+            value={{
+              desc: featured.desc,
+              name: featured.name,
+              oldPrice: featured.oldPrice,
+              photo: showDishPhotos,
+              photoUrl: featured.photoUrl,
+              price: featured.price,
+              tag: featured.tag,
+            }}
           />
         </button>
+      ) : null}
+      {content.featuredPromo ? (
+        <div className="menu-featured-frame">
+          <QmFeatured value={content.featuredPromo} />
+        </div>
       ) : null}
       {categoryNav}
       {content.sections.map((section, index) => (
