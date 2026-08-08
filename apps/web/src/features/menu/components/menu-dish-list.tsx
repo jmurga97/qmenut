@@ -1,9 +1,11 @@
 import { QmDishRow } from "@qmenut/ui/components/qm-dish-row/react";
 import { QmFeatured } from "@qmenut/ui/components/qm-featured/react";
-import { defineQmMenuList } from "@qmenut/ui/components/qm-menu-list";
+import { QmMenuList } from "@qmenut/ui/components/qm-menu-list/react";
+import { QmSectionHeader } from "@qmenut/ui/components/qm-section-header/react";
 import { useTranslation } from "react-i18next";
 
 import { menuSectionElementId } from "~/features/menu/components/menu-section-id";
+import { photoUrl } from "~/shared/lib/photo-url";
 
 import type { ReactNode } from "react";
 import type {
@@ -12,7 +14,8 @@ import type {
   MenuSectionViewModel,
 } from "~/features/menu/types/menu-view-model";
 
-defineQmMenuList();
+const FEATURED_IMAGE_WIDTH_PX = 430;
+const DISH_THUMB_WIDTH_PX = 60;
 
 interface MenuDishListProps {
   categoryNav: ReactNode;
@@ -28,16 +31,14 @@ interface MenuSectionProps {
 }
 
 function MenuSection({ onSelectDish, section, showDishPhotos }: MenuSectionProps) {
-  const { t } = useTranslation();
-
   return (
-    <qm-menu-list empty-label={t("menu.emptyLabel")}>
-      <qm-section-header
+    <QmMenuList>
+      <QmSectionHeader
         slot="section-header"
         num={section.num}
         tagline={section.tagline}
-        section-label={section.label}
-        section-count={section.count}
+        sectionLabel={section.label}
+        sectionCount={section.count}
       />
       {section.dishes.map((dish) => (
         <button
@@ -47,19 +48,17 @@ function MenuSection({ onSelectDish, section, showDishPhotos }: MenuSectionProps
           onClick={(event) => onSelectDish(dish, event.currentTarget)}
         >
           <QmDishRow
-            value={{
-              desc: dish.desc,
-              name: dish.name,
-              oldPrice: dish.oldPrice,
-              photo: showDishPhotos,
-              photoUrl: dish.photoUrl,
-              price: dish.price,
-              tag: dish.tag,
-            }}
+            name={dish.name}
+            desc={dish.desc}
+            price={dish.price}
+            oldPrice={dish.oldPrice}
+            tag={dish.tag}
+            photo={showDishPhotos}
+            photoUrl={photoUrl(dish.photoUrl, DISH_THUMB_WIDTH_PX)}
           />
         </button>
       ))}
-    </qm-menu-list>
+    </QmMenuList>
   );
 }
 
@@ -67,7 +66,7 @@ export function MenuDishList({ categoryNav, content, onSelectDish, showDishPhoto
   const { t } = useTranslation();
 
   if (content.sections.length === 0) {
-    return <qm-menu-list empty-label={t("menu.emptyLabel")} />;
+    return <QmMenuList emptyLabel={t("menu.emptyLabel")} />;
   }
 
   const featured = content.featured;
@@ -81,15 +80,13 @@ export function MenuDishList({ categoryNav, content, onSelectDish, showDishPhoto
           onClick={(event) => onSelectDish(featured, event.currentTarget)}
         >
           <QmFeatured
-            value={{
-              desc: featured.desc,
-              name: featured.name,
-              oldPrice: featured.oldPrice,
-              photo: showDishPhotos,
-              photoUrl: featured.photoUrl,
-              price: featured.price,
-              tag: featured.tag,
-            }}
+            name={featured.name}
+            desc={featured.desc}
+            price={featured.price}
+            oldPrice={featured.oldPrice}
+            tag={featured.tag}
+            photo={showDishPhotos}
+            photoUrl={photoUrl(featured.photoUrl, FEATURED_IMAGE_WIDTH_PX)}
           />
         </button>
       ) : null}
