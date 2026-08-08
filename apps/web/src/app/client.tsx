@@ -1,3 +1,6 @@
+// Installs LitElement hydration support before any route can import @qmenut/ui components.
+import "@lit-labs/ssr-react/enable-lit-ssr.js";
+
 import * as Sentry from "@sentry/react";
 import { StartClient } from "@tanstack/react-start/client";
 import { StrictMode, startTransition } from "react";

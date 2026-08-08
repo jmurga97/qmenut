@@ -1,5 +1,5 @@
 import { QmCategoryChip } from "@qmenut/ui/components/qm-category-chip/react";
-import { defineQmCategoryNav } from "@qmenut/ui/components/qm-category-nav";
+import { QmCategoryNav } from "@qmenut/ui/components/qm-category-nav/react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,7 +8,7 @@ import { menuSectionElementId } from "~/features/menu/components/menu-section-id
 import type { RefObject } from "react";
 import type { MenuSectionViewModel } from "~/features/menu/types/menu-view-model";
 
-defineQmCategoryNav();
+const BOTTOM_SCROLL_TOLERANCE_PX = 2;
 
 interface MenuCategoryNavProps {
   scrollContainerRef: RefObject<HTMLElement | null>;
@@ -39,50 +39,65 @@ export function MenuCategoryNav({ scrollContainerRef, sections }: MenuCategoryNa
 
     const targets = [...container.querySelectorAll<HTMLElement>("[data-menu-section]")];
     const navigation = container.querySelector<HTMLElement>("qm-category-nav");
-    const observer = new IntersectionObserver(
-      () => {
-        const anchorY = navigation?.getBoundingClientRect().bottom ?? container.getBoundingClientRect().top + 68;
-        const isAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 2;
-        const activeTarget = isAtBottom
-          ? targets.at(-1)
-          : (targets.findLast((target) => target.getBoundingClientRect().top <= anchorY) ?? targets[0]);
-        const nextId = activeTarget?.dataset.menuSection;
+    let frame = 0;
 
-        if (nextId) {
-          setActiveId(nextId);
-        }
-      },
-      {
-        root: container,
-        rootMargin: "-8% 0px -72% 0px",
-        threshold: [0, 0.01],
-      },
-    );
+    const updateActiveCategory = () => {
+      frame = 0;
 
+      const maxScrollTop = Math.max(container.scrollHeight - container.clientHeight, 0);
+      const isAtBottom =
+        maxScrollTop > BOTTOM_SCROLL_TOLERANCE_PX && container.scrollTop >= maxScrollTop - BOTTOM_SCROLL_TOLERANCE_PX;
+      const anchorY = navigation?.getBoundingClientRect().bottom ?? container.getBoundingClientRect().top + 68;
+      const activeTarget = isAtBottom
+        ? targets.at(-1)
+        : (targets.findLast((target) => target.getBoundingClientRect().top <= anchorY) ?? targets[0]);
+      const nextId = activeTarget?.dataset.menuSection;
+
+      if (nextId) {
+        setActiveId((currentId) => (currentId === nextId ? currentId : nextId));
+      }
+    };
+
+    const scheduleActiveCategoryUpdate = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(updateActiveCategory);
+    };
+
+    const resizeObserver = new ResizeObserver(scheduleActiveCategoryUpdate);
+    resizeObserver.observe(container);
+    if (navigation) {
+      resizeObserver.observe(navigation);
+    }
     for (const target of targets) {
-      observer.observe(target);
+      resizeObserver.observe(target);
     }
 
-    return () => observer.disconnect();
+    container.addEventListener("scroll", scheduleActiveCategoryUpdate, { passive: true });
+    updateActiveCategory();
+
+    return () => {
+      container.removeEventListener("scroll", scheduleActiveCategoryUpdate);
+      resizeObserver.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [scrollContainerRef, sections]);
 
   if (sections.length < 2) return null;
 
   return (
-    <qm-category-nav aria-label={t("menu.categoryNavigationLabel")}>
+    <QmCategoryNav aria-label={t("menu.categoryNavigationLabel")}>
       {sections.map((section, index) => (
         <QmCategoryChip
           key={section.id}
           value={section.id}
           active={section.id === activeId}
           onQmSelect={() => {
-            setActiveId(section.id);
             scrollToMenuSection(index);
           }}
         >
           {section.label}
         </QmCategoryChip>
       ))}
-    </qm-category-nav>
+    </QmCategoryNav>
   );
 }

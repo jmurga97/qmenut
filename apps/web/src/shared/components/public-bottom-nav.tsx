@@ -1,10 +1,8 @@
-import { defineQmNavBar } from "@qmenut/ui/components/qm-nav-bar";
+import { QmNavBar } from "@qmenut/ui/components/qm-nav-bar/react";
 import { QmTab } from "@qmenut/ui/components/qm-tab/react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Gift, Phone, Tag, UtensilsCrossed } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
-defineQmNavBar();
 
 const NAV_ICON_SIZE = 19;
 const NAV_ICON_STROKE_WIDTH = 1.9;
@@ -17,7 +15,7 @@ export function PublicBottomNav() {
   const routeId = useRouterState({ select: (state) => state.matches.at(-1)?.routeId });
 
   return (
-    <qm-nav-bar aria-label={t("common.primaryNavigationLabel")}>
+    <QmNavBar aria-label={t("common.primaryNavigationLabel")}>
       <QmTab
         value="/"
         active={routeId === "/{-$locale}/"}
@@ -50,6 +48,6 @@ export function PublicBottomNav() {
         <Gift slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
         {t("common.navigation.loyalty")}
       </QmTab>
-    </qm-nav-bar>
+    </QmNavBar>
   );
 }
