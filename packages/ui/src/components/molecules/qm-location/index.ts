@@ -1,4 +1,4 @@
-import { html, LitElement } from "lit";
+import { html, LitElement, nothing } from "lit";
 import { property } from "lit/decorators.js";
 
 import componentStylesText from "./styles.css?inline";
@@ -19,26 +19,60 @@ const componentStyles = createComponentStyles(componentStylesText);
  * references a `--qm-line` token for the chip border that doesn't exist in the theme
  * contract — moot here since `qm-chip` already supplies that border itself via `--qm-ink`.
  */
+export interface QmLocationValue {
+  name: string;
+  addr: string;
+  status: string;
+  actionsLabel?: string;
+  phone?: string;
+  phoneHref?: string;
+  phoneLabel?: string;
+  whatsappHref?: string;
+  whatsappLabel?: string;
+  mapHref?: string;
+  mapLabel?: string;
+  socialHref?: string;
+  socialLabel?: string;
+}
+
 export class QmLocation extends LitElement {
   static styles = [qmHostResetStyles, componentStyles];
 
-  @property({ type: String })
-  name = "";
+  @property({ attribute: false })
+  value?: QmLocationValue;
 
-  @property({ type: String })
-  addr = "";
+  private renderAction(href: string | undefined, label: string | undefined) {
+    if (!href || !label) return html``;
 
-  @property({ type: String })
-  status = "";
+    const external = href.startsWith("http");
+    return html`
+      <a
+        part="action"
+        class="action"
+        href=${href}
+        target=${external ? "_blank" : nothing}
+        rel=${external ? "noreferrer" : nothing}
+      >
+        ${label}
+      </a>
+    `;
+  }
 
   render() {
     return html`
       <div part="card" class="card">
         <qm-pin part="pin" class="pin" size="18px" aria-hidden="true"></qm-pin>
         <div class="body">
-          <div part="name" class="name">${this.name}</div>
-          <div part="addr" class="addr">${this.addr}</div>
-          <qm-chip part="status" .text=${this.status} variant="default"></qm-chip>
+          <div part="name" class="name">${this.value?.name ?? ""}</div>
+          <div part="addr" class="addr">${this.value?.addr ?? ""}</div>
+          <qm-chip part="status" .text=${this.value?.status ?? ""} variant="default"></qm-chip>
+          ${this.value?.phone ? html`<div part="phone" class="phone">${this.value.phone}</div>` : nothing}
+          <nav part="actions" class="actions" aria-label=${this.value?.actionsLabel ?? "Contact"}>
+            ${this.renderAction(this.value?.phoneHref, this.value?.phoneLabel)}
+            ${this.renderAction(this.value?.whatsappHref, this.value?.whatsappLabel)}
+            ${this.renderAction(this.value?.mapHref, this.value?.mapLabel)}
+            ${this.renderAction(this.value?.socialHref, this.value?.socialLabel)}
+          </nav>
         </div>
       </div>
     `;
@@ -54,7 +88,7 @@ export function defineQmLocation() {
   }
 }
 
-export type QmLocationArgs = Partial<Pick<QmLocation, "name" | "addr" | "status">>;
+export type QmLocationArgs = Partial<Pick<QmLocation, "value">>;
 
 declare global {
   interface HTMLElementTagNameMap {

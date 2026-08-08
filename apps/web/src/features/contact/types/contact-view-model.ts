@@ -1,8 +1,6 @@
-export interface ContactLocationViewModel {
-  addr: string;
-  name: string;
-  status: string;
-}
+import type { QmLocationValue } from "@qmenut/ui/components/qm-location/react";
+
+export type ContactLocationViewModel = QmLocationValue;
 
 export interface ContactFormViewModel {
   messageLabel: string;

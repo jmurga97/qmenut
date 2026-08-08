@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "host": "cafe.qmenut.app",
+  "contact": {
+    "name": "Bruma Coffee Roasters",
+    "address": "Calle del Barquillo 48, Madrid · local de demostración",
+    "phone": "+34900000101",
+    "whatsapp": "+34600000101",
+    "socialLinks": { "Instagram": "https://www.instagram.com/qmenut_demo_bruma/" }
+  },
+  "photos": [
+    {
+      "url": "https://images.unsplash.com/photo-1511081692775-05d0f180a065?auto=format&fit=crop&w=1200&q=82",
+      "sourceUrl": "https://unsplash.com/photos/cafe-interior-with-hanging-bulbs-and-table-VobvKmG-StA",
+      "photographer": "Clifford"
+    }
+  ],
+  "ingredients": [
+    { "key": "extra_shot", "name": "Shot extra de espresso", "price": 80 },
+    { "key": "oat_milk", "name": "Bebida de avena", "price": 50 },
+    { "key": "vanilla", "name": "Sirope de vainilla", "price": 50 },
+    { "key": "poached_egg", "name": "Huevo poché extra", "price": 150 }
+  ],
+  "categories": [
+    {
+      "key": "coffee",
+      "name": "Café",
+      "description": "Especialidad de origen, molida al momento.",
+      "position": 0,
+      "dishes": [
+        {
+          "key": "espresso",
+          "name": "Espresso doble",
+          "description": "Doble extracción de nuestro blend de temporada, cacao y avellana.",
+          "price": 240,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1579992357154-faf4bde95b3d?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/white-ceramic-cup-with-brown-liquid-dAYJfrtVjh0",
+            "photographer": "Nathan Dumlao"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["lactose_free"],
+          "allergens": [],
+          "extraKeys": ["extra_shot"]
+        },
+        {
+          "key": "flat_white",
+          "name": "Flat white",
+          "description": "Doble ristretto y leche microespumada de textura sedosa.",
+          "price": 380,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/shallow-focus-photography-of-coffee-late-in-mug-on-table-zUNs99PGDg0",
+            "photographer": "Nathan Dumlao"
+          },
+          "position": 1,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["milk"],
+          "extraKeys": ["extra_shot", "oat_milk"],
+          "variantGroups": [
+            {
+              "key": "size",
+              "name": "Tamaño",
+              "selectionType": "single",
+              "isRequired": true,
+              "minSelect": 1,
+              "maxSelect": 1,
+              "position": 0,
+              "options": [
+                { "key": "regular", "name": "Regular", "priceDelta": 0, "position": 0 },
+                { "key": "large", "name": "Grande", "priceDelta": 70, "position": 1 }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "vanilla_latte",
+          "name": "Latte de vainilla",
+          "description": "Espresso, leche cremosa y vainilla de Madagascar.",
+          "price": 440,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/clear-drinking-glass-with-espresso-vfiA7rRtjWo",
+            "photographer": "Billy Kwok"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["milk"],
+          "extraKeys": ["extra_shot", "oat_milk", "vanilla"],
+          "variantGroups": [
+            {
+              "key": "size",
+              "name": "Tamaño",
+              "selectionType": "single",
+              "isRequired": true,
+              "minSelect": 1,
+              "maxSelect": 1,
+              "position": 0,
+              "options": [
+                { "key": "regular", "name": "Regular", "priceDelta": 0, "position": 0 },
+                { "key": "large", "name": "Grande", "priceDelta": 80, "position": 1 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "cold",
+      "name": "Fríos",
+      "description": "Café y té servidos sobre hielo.",
+      "position": 1,
+      "dishes": [
+        {
+          "key": "orange_cold_brew",
+          "name": "Cold brew con naranja",
+          "description": "Café infusionado 18 horas, naranja fresca y soda.",
+          "price": 480,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1561641377-f7456d23aa9b?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/glass-cup-of-beverage-yN7prWLW7xg",
+            "photographer": "Wade Austin Ellis"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["new", "lactose_free"],
+          "allergens": [],
+          "extraKeys": ["extra_shot"]
+        },
+        {
+          "key": "iced_matcha",
+          "name": "Matcha latte helado",
+          "description": "Matcha ceremonial batido, leche y un toque de agave.",
+          "price": 460,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1717398804885-a6c22b3e5c2f?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-green-liquid-in-a-glass-with-a-wooden-coaster-_zwATV2KGTg",
+            "photographer": "Daniel Stiel"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["milk"],
+          "extraKeys": ["oat_milk"]
+        },
+        {
+          "key": "caramel_frappe",
+          "name": "Frappé de caramelo salado",
+          "description": "Café, hielo, caramelo salado y crema ligera.",
+          "price": 520,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1637178035222-a08f2d4dd1a3?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-close-up-of-a-cup-of-food-on-a-table-OSYt_g-EoPE",
+            "photographer": "Victor Rutka"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["milk"],
+          "extraKeys": ["extra_shot"]
+        }
+      ]
+    },
+    {
+      "key": "brunch",
+      "name": "Brunch",
+      "description": "Cocina todo el día con pan de masa madre.",
+      "position": 2,
+      "dishes": [
+        {
+          "key": "avocado_toast",
+          "name": "Tostada de aguacate y huevo",
+          "description": "Masa madre, aguacate, huevo poché, feta y semillas.",
+          "price": 950,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1687276287139-88f7333c8ca4?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-sandwich-with-an-egg-and-asparagus-on-it-w1NiWDrp68M",
+            "photographer": "Imad 786"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": true,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk", "sesame"],
+          "extraKeys": ["poached_egg"],
+          "availability": [
+            { "dayOfWeek": 1, "startMinute": 450, "endMinute": 900 },
+            { "dayOfWeek": 2, "startMinute": 450, "endMinute": 900 },
+            { "dayOfWeek": 3, "startMinute": 450, "endMinute": 900 },
+            { "dayOfWeek": 4, "startMinute": 450, "endMinute": 900 },
+            { "dayOfWeek": 5, "startMinute": 450, "endMinute": 900 },
+            { "dayOfWeek": 6, "startMinute": 480, "endMinute": 900 },
+            { "dayOfWeek": 7, "startMinute": 480, "endMinute": 900 }
+          ]
+        },
+        {
+          "key": "salmon_bagel",
+          "name": "Bagel de salmón",
+          "description": "Salmón ahumado, queso crema, pepino, alcaparras y eneldo.",
+          "price": 1050,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1601585099780-6b176dc702af?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/bread-with-sliced-tomato-and-green-vegetable-on-black-textile-eV5PkVkDWDs",
+            "photographer": "David Foodphototasty"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "fish", "milk", "sesame"],
+          "extraKeys": []
+        },
+        {
+          "key": "granola_bowl",
+          "name": "Yogur con granola",
+          "description": "Yogur griego, granola casera, frutos rojos y miel.",
+          "price": 720,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1612182062572-e29c5dfb5eb4?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/stainless-steel-spoon-on-white-ceramic-plate-neUW-U0NwCU",
+            "photographer": "Jaqueline Pelzer"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "milk", "nuts"],
+          "extraKeys": []
+        }
+      ]
+    },
+    {
+      "key": "bakery",
+      "name": "Horno",
+      "description": "Dulces horneados cada mañana.",
+      "position": 3,
+      "dishes": [
+        {
+          "key": "cinnamon_roll",
+          "name": "Cinnamon roll",
+          "description": "Masa brioche, canela de Ceilán y glaseado de queso.",
+          "price": 420,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1645995575875-ea6511c9d127?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-plate-of-food-on-a-table-toUmtRwoWCA",
+            "photographer": "Eve Maier"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": []
+        },
+        {
+          "key": "carrot_cake",
+          "name": "Carrot cake",
+          "description": "Zanahoria, nueces, especias y frosting de queso crema.",
+          "price": 540,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1676300186098-9b5ae9916e3c?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-piece-of-carrot-cake-on-a-plate-with-a-fork-EvfXG4aK9d8",
+            "photographer": "Orkun Orcan"
+          },
+          "position": 1,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk", "nuts"],
+          "extraKeys": []
+        },
+        {
+          "key": "pistachio_croissant",
+          "name": "Croissant de pistacho",
+          "description": "Hojaldre de mantequilla, crema de pistacho y pistacho tostado.",
+          "price": 480,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1703168080814-3cd5ba68343d?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-white-plate-topped-with-a-pastry-covered-in-toppings-yGMlOsO4rM0",
+            "photographer": "Habib Eskandari"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk", "nuts"],
+          "extraKeys": []
+        }
+      ]
+    }
+  ],
+  "promotions": []
+}

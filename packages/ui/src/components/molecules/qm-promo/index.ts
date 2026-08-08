@@ -17,40 +17,34 @@ const componentStyles = createComponentStyles(componentStylesText);
  * bespoke markup rather than a wrapped atom. Reuses `qm-price` for price; see `qm-featured`
  * for the accepted font-size trade-off from that atom having no size override.
  */
+export interface QmPromoValue {
+  discount: string;
+  name: string;
+  desc: string;
+  price?: string;
+  oldPrice?: string;
+  vigencia: string;
+}
+
 export class QmPromo extends LitElement {
   static styles = [qmHostResetStyles, componentStyles];
 
-  @property({ type: String })
-  discount = "";
-
-  @property({ type: String })
-  name = "";
-
-  @property({ type: String })
-  desc = "";
-
-  @property({ type: String })
-  price = "";
-
-  @property({ type: String, attribute: "old-price" })
-  oldPrice?: string;
-
-  @property({ type: String })
-  vigencia = "";
+  @property({ attribute: false })
+  value?: QmPromoValue;
 
   render() {
     return html`
       <div part="card" class="card">
         <div class="inner">
           <div part="discount" class="discount">
-            <span class="discount-value">${this.discount}</span>
+            <span class="discount-value">${this.value?.discount ?? ""}</span>
           </div>
           <div class="body">
-            <div part="name" class="name">${this.name}</div>
-            <div part="desc" class="desc">${this.desc}</div>
+            <div part="name" class="name">${this.value?.name ?? ""}</div>
+            <div part="desc" class="desc">${this.value?.desc ?? ""}</div>
             <div class="footer">
-              <span part="vigencia" class="vigencia">${this.vigencia}</span>
-              <qm-price part="price" .value=${this.price} .oldValue=${this.oldPrice}></qm-price>
+              <span part="vigencia" class="vigencia">${this.value?.vigencia ?? ""}</span>
+              <qm-price part="price" .value=${this.value?.price ?? ""} .oldValue=${this.value?.oldPrice}></qm-price>
             </div>
           </div>
         </div>
@@ -67,7 +61,7 @@ export function defineQmPromo() {
   }
 }
 
-export type QmPromoArgs = Partial<Pick<QmPromo, "discount" | "name" | "desc" | "price" | "oldPrice" | "vigencia">>;
+export type QmPromoArgs = Partial<Pick<QmPromo, "value">>;
 
 declare global {
   interface HTMLElementTagNameMap {

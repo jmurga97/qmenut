@@ -18,11 +18,15 @@ const componentStyles = createComponentStyles(componentStylesText);
  * no backing `--qm-*` token yet (`tokens.ts` has no `--qm-promo-gap`) — flagged as hardcoded
  * geometry pending a future token addition; out of scope for this organism-only pass.
  */
+export interface QmPromoListValue {
+  emptyLabel?: string;
+}
+
 export class QmPromoList extends LitElement {
   static styles = [qmHostResetStyles, componentStyles];
 
-  @property({ type: String, attribute: "empty-label" })
-  emptyLabel = "";
+  @property({ attribute: false })
+  value?: QmPromoListValue;
 
   @state()
   private hasPromos = false;
@@ -36,7 +40,9 @@ export class QmPromoList extends LitElement {
     return html`
       <div part="list" class="list">
         <slot @slotchange=${this.handleSlotChange}></slot>
-        ${!this.hasPromos && this.emptyLabel ? html`<p part="empty" class="empty">${this.emptyLabel}</p>` : nothing}
+        ${!this.hasPromos && this.value?.emptyLabel
+          ? html`<p part="empty" class="empty">${this.value.emptyLabel}</p>`
+          : nothing}
       </div>
     `;
   }
@@ -50,7 +56,7 @@ export function defineQmPromoList() {
   }
 }
 
-export type QmPromoListArgs = Partial<Pick<QmPromoList, "emptyLabel">>;
+export type QmPromoListArgs = Partial<Pick<QmPromoList, "value">>;
 
 declare global {
   interface HTMLElementTagNameMap {

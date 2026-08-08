@@ -1,0 +1,377 @@
+{
+  "schemaVersion": 1,
+  "host": "fast.qmenut.app",
+  "contact": {
+    "name": "Tonda Pizza",
+    "address": "Avenida de América 72, Madrid · local de demostración",
+    "phone": "+34900000105",
+    "whatsapp": "+34600000105",
+    "socialLinks": { "Instagram": "https://www.instagram.com/qmenut_demo_tonda/" }
+  },
+  "photos": [
+    {
+      "url": "https://images.unsplash.com/photo-1542018508502-daaee0fb76c2?auto=format&fit=crop&w=1200&q=82",
+      "sourceUrl": "https://unsplash.com/photos/black-fabric-stool-ZSIb-lseiqA",
+      "photographer": "Nassim Qo"
+    }
+  ],
+  "ingredients": [
+    { "key": "extra_cheese", "name": "Extra de mozzarella", "price": 180 },
+    { "key": "pepperoni", "name": "Pepperoni extra", "price": 200 },
+    { "key": "jalapeno", "name": "Jalapeño", "price": 120 },
+    { "key": "bbq_dip", "name": "Salsa BBQ", "price": 90 }
+  ],
+  "categories": [
+    {
+      "key": "classics",
+      "name": "Clásicas",
+      "description": "Las pizzas que siempre funcionan.",
+      "position": 0,
+      "dishes": [
+        {
+          "key": "margherita",
+          "name": "Margherita",
+          "description": "Tomate, mozzarella 100%, albahaca y aceite de oliva.",
+          "price": 1099,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/pizza-with-berries-MQUqbmszGGM",
+            "photographer": "Ivan Torres"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "milk"],
+          "extraKeys": ["extra_cheese", "jalapeno"],
+          "variantGroups": [
+            {
+              "key": "size",
+              "name": "Tamaño",
+              "selectionType": "single",
+              "isRequired": true,
+              "minSelect": 1,
+              "maxSelect": 1,
+              "position": 0,
+              "options": [
+                { "key": "medium", "name": "Mediana", "priceDelta": 0, "position": 0 },
+                { "key": "family", "name": "Familiar", "priceDelta": 450, "position": 1 }
+              ]
+            },
+            {
+              "key": "dough",
+              "name": "Masa",
+              "selectionType": "single",
+              "isRequired": true,
+              "minSelect": 1,
+              "maxSelect": 1,
+              "position": 1,
+              "options": [
+                { "key": "original", "name": "Original", "priceDelta": 0, "position": 0 },
+                { "key": "thin", "name": "Fina y crujiente", "priceDelta": 0, "position": 1 }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "pepperoni",
+          "name": "Pepperoni",
+          "description": "Tomate, mozzarella y doble pepperoni crujiente.",
+          "price": 1399,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/pizza-with-cheese-and-green-leaf-a66sGfOnnqQ",
+            "photographer": "Shourav Sheikh"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": true,
+          "tags": [],
+          "allergens": ["gluten", "milk"],
+          "extraKeys": ["extra_cheese", "pepperoni", "jalapeno"],
+          "variantGroups": [
+            {
+              "key": "size",
+              "name": "Tamaño",
+              "selectionType": "single",
+              "isRequired": true,
+              "minSelect": 1,
+              "maxSelect": 1,
+              "position": 0,
+              "options": [
+                { "key": "medium", "name": "Mediana", "priceDelta": 0, "position": 0 },
+                { "key": "family", "name": "Familiar", "priceDelta": 450, "position": 1 }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "bbq_chicken",
+          "name": "Pollo BBQ",
+          "description": "Salsa barbacoa, pollo asado, bacon, cebolla roja y mozzarella.",
+          "price": 1599,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/pizza-on-chopping-board-MqT0asuoIcU",
+            "photographer": "Chad Montano"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "milk"],
+          "extraKeys": ["extra_cheese", "bbq_dip"],
+          "variantGroups": [
+            {
+              "key": "size",
+              "name": "Tamaño",
+              "selectionType": "single",
+              "isRequired": true,
+              "minSelect": 1,
+              "maxSelect": 1,
+              "position": 0,
+              "options": [
+                { "key": "medium", "name": "Mediana", "priceDelta": 0, "position": 0 },
+                { "key": "family", "name": "Familiar", "priceDelta": 450, "position": 1 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "signature",
+      "name": "Signature",
+      "description": "Combinaciones grandes, bordes dorados y mucho queso.",
+      "position": 1,
+      "dishes": [
+        {
+          "key": "truffle_bacon",
+          "name": "Trufa y panceta",
+          "description": "Crema de trufa, mozzarella, panceta ahumada y parmesano.",
+          "price": 1799,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1717883235373-ef10b2a745a3?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-pizza-sitting-on-top-of-a-wooden-cutting-board-H5Z8wovS9ic",
+            "photographer": "Amadeus Moga"
+          },
+          "position": 0,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "milk"],
+          "extraKeys": ["extra_cheese"],
+          "variantGroups": [
+            {
+              "key": "size",
+              "name": "Tamaño",
+              "selectionType": "single",
+              "isRequired": true,
+              "minSelect": 1,
+              "maxSelect": 1,
+              "position": 0,
+              "options": [
+                { "key": "medium", "name": "Mediana", "priceDelta": 0, "position": 0 },
+                { "key": "family", "name": "Familiar", "priceDelta": 450, "position": 1 }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "goat_onion",
+          "name": "Cabra y cebolla caramelizada",
+          "description": "Queso de cabra, cebolla caramelizada, nueces y miel.",
+          "price": 1699,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1634629377376-6c6bae2d8bcf?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-pizza-sitting-on-top-of-a-wooden-cutting-board-aSdgU3Lmx48",
+            "photographer": "Rajasekhar R"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "milk", "nuts"],
+          "extraKeys": ["extra_cheese"],
+          "variantGroups": []
+        },
+        {
+          "key": "nduja",
+          "name": "’Nduja picante",
+          "description": "Tomate, mozzarella, ’nduja, salami picante y miel de chile.",
+          "price": 1649,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/pizza-with-cheese-and-tomato-_P76trHTWDE",
+            "photographer": "Fernando Andrade"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["spicy"],
+          "allergens": ["gluten", "milk"],
+          "extraKeys": ["extra_cheese", "jalapeno"],
+          "variantGroups": []
+        }
+      ]
+    },
+    {
+      "key": "sides",
+      "name": "Entrantes",
+      "description": "Para abrir la caja y compartir.",
+      "position": 2,
+      "dishes": [
+        {
+          "key": "cajun_fries",
+          "name": "Patatas cajún",
+          "description": "Patatas crujientes, especias cajún y salsa de queso.",
+          "price": 499,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1518013431117-eb1465fa5752?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/fries-and-ketchup-8YBHgP0WrEo",
+            "photographer": "Pixzolo Photography"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["spicy", "gluten_free"],
+          "allergens": ["milk"],
+          "extraKeys": ["bbq_dip"]
+        },
+        {
+          "key": "bbq_wings",
+          "name": "Alitas BBQ",
+          "description": "Ocho alitas asadas, glaseado barbacoa y cebollino.",
+          "price": 799,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/fried-chicken-gE28aTnlqJA",
+            "photographer": "Chad Montano"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["soybeans", "mustard"],
+          "extraKeys": ["bbq_dip"]
+        },
+        {
+          "key": "cheese_bread",
+          "name": "Pan de queso",
+          "description": "Bocados horneados con mozzarella, ajo y orégano.",
+          "price": 599,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1559141680-d0bd7bc5af84?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/pastry-balls-on-plate-mOedSrS6qS0",
+            "photographer": "rodolfo allen_"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "milk"],
+          "extraKeys": ["bbq_dip"]
+        }
+      ]
+    },
+    {
+      "key": "desserts",
+      "name": "Dulces",
+      "description": "El último trozo siempre se comparte.",
+      "position": 3,
+      "dishes": [
+        {
+          "key": "brownie_cookie",
+          "name": "Brownie-cookie",
+          "description": "Brownie de chocolate y cookie con centro fundente.",
+          "price": 549,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1654796605330-8a1248a2cb07?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-piece-of-chocolate-cake-with-ice-cream-on-top-iw3bza94-r0",
+            "photographer": "ABHISHEK HAJARE"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk", "nuts"],
+          "extraKeys": []
+        },
+        {
+          "key": "chocolate_pizza",
+          "name": "Pizza de chocolate",
+          "description": "Masa dulce, crema de cacao, avellanas y nubes tostadas.",
+          "price": 649,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1767114916329-9b5649724379?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/dessert-pizza-with-chocolate-and-wine-4mPliNoWEKc",
+            "photographer": "Chetanya Sharma"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "milk", "nuts"],
+          "extraKeys": []
+        },
+        {
+          "key": "cheesecake",
+          "name": "Cheesecake",
+          "description": "Tarta de queso cremosa y salsa de frutos rojos.",
+          "price": 599,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1578775887804-699de7086ff9?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/cheesecake-with-pink-toppings-FDYbS43jUrU",
+            "photographer": "Yulia Khlebnikova"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": []
+        }
+      ]
+    }
+  ],
+  "promotions": [
+    {
+      "key": "tuesday_two_for_one",
+      "type": "two_for_one",
+      "scope": "category",
+      "name": "Martes 2x1 en clásicas",
+      "description": "Pide dos pizzas clásicas medianas y paga una.",
+      "buyQuantity": 2,
+      "paidQuantity": 1,
+      "priority": 30,
+      "recurringDays": [2],
+      "recurringStartMinute": 720,
+      "recurringEndMinute": 1439,
+      "targetKeys": ["classics"]
+    },
+    {
+      "key": "happy_sides",
+      "type": "happy_hour",
+      "scope": "category",
+      "name": "Happy entrantes −20%",
+      "description": "Todos los entrantes con descuento de lunes a viernes hasta las 19:00.",
+      "percentage": 20,
+      "priority": 20,
+      "recurringDays": [1, 2, 3, 4, 5],
+      "recurringStartMinute": 720,
+      "recurringEndMinute": 1140,
+      "targetKeys": ["sides"]
+    },
+    {
+      "key": "family_pack",
+      "type": "special_price",
+      "scope": "info",
+      "name": "Pack familiar",
+      "description": "Una pizza familiar, un entrante y dos bebidas.",
+      "specialPrice": 2999,
+      "priority": 10,
+      "recurringDays": [],
+      "targetKeys": []
+    }
+  ]
+}

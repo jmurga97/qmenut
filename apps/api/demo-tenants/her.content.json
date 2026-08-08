@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "host": "her.qmenut.app",
+  "contact": {
+    "name": "Casa Encina",
+    "address": "Calle Regina 12, Sevilla · local de demostración",
+    "phone": "+34900000104",
+    "whatsapp": "+34600000104",
+    "socialLinks": { "Instagram": "https://www.instagram.com/qmenut_demo_encina/" }
+  },
+  "photos": [
+    {
+      "url": "https://images.unsplash.com/photo-1625418277638-6db2d521a78c?auto=format&fit=crop&w=1200&q=82",
+      "sourceUrl": "https://unsplash.com/photos/brown-wooden-framed-chalk-board-tngQhdQ6KAA",
+      "photographer": "Veronika Hradilová"
+    }
+  ],
+  "ingredients": [
+    { "key": "bread", "name": "Pan de masa madre", "price": 180 },
+    { "key": "fried_egg", "name": "Huevo frito de corral", "price": 180 }
+  ],
+  "categories": [
+    {
+      "key": "bar",
+      "name": "Barra",
+      "description": "El aperitivo y los bocados de la casa.",
+      "position": 0,
+      "dishes": [
+        {
+          "key": "iberian_ham",
+          "name": "Jamón ibérico",
+          "description": "Jamón ibérico de bellota cortado a cuchillo y regañás.",
+          "price": 2200,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1640703935633-ca20bef6c38f?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-white-plate-topped-with-meat-and-veggies-kouNxFstszs",
+            "photographer": "Allan Francis"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten"],
+          "extraKeys": ["bread"]
+        },
+        {
+          "key": "stew_croquettes",
+          "name": "Croquetas de puchero",
+          "description": "Pollo de corral, jamón, bechamel suave y rebozado crujiente.",
+          "price": 1050,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1683694062041-cc62c5390b13?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-white-plate-topped-with-fried-food-on-top-of-a-table-nRhHYzybDCE",
+            "photographer": "Ronald Vargas"
+          },
+          "position": 1,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": []
+        },
+        {
+          "key": "vermouth",
+          "name": "Vermut de grifo",
+          "description": "Vermut rojo, piel de naranja y aceituna gordal.",
+          "price": 360,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1603048004555-d0f5ec48f106?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/orange-juice-on-black-glass-bottle-frVLSys60ZE",
+            "photographer": "Gaby Yerden"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["contains_alcohol", "gluten_free"],
+          "allergens": ["sulphites"],
+          "extraKeys": []
+        }
+      ]
+    },
+    {
+      "key": "spoon",
+      "name": "Cuchara y huerta",
+      "description": "Recetas lentas, verduras y fondos de toda la vida.",
+      "position": 1,
+      "dishes": [
+        {
+          "key": "salmorejo",
+          "name": "Salmorejo",
+          "description": "Tomate maduro, pan, aceite de oliva, huevo y jamón.",
+          "price": 850,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1654844828827-e93aa9298cdd?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-table-with-bowls-of-food-ySJVH49STmg",
+            "photographer": "SartenPorElMango"
+          },
+          "position": 0,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["seasonal"],
+          "allergens": ["gluten", "eggs"],
+          "extraKeys": []
+        },
+        {
+          "key": "fabada",
+          "name": "Fabada asturiana",
+          "description": "Faba, compango ahumado y cocción muy lenta.",
+          "price": 1650,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1606791496080-69a6e309f42c?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/soup-in-black-ceramic-bowl-qjh-BCHbHis",
+            "photographer": "Christina Rumpf"
+          },
+          "position": 1,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": [],
+          "extraKeys": ["bread"]
+        },
+        {
+          "key": "tripe",
+          "name": "Callos a la madrileña",
+          "description": "Callos de ternera, morro, chorizo y pimentón.",
+          "price": 1550,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1763048443535-1243379234e2?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/hands-holding-a-bowl-of-egusi-soup-with-assorted-meats-0A03YQqU4CU",
+            "photographer": "Tosan Dudun"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["spicy", "gluten_free"],
+          "allergens": [],
+          "extraKeys": ["bread"]
+        }
+      ]
+    },
+    {
+      "key": "roasts",
+      "name": "Pescados y asados",
+      "description": "Piezas al horno, guisos y salsas clásicas.",
+      "position": 2,
+      "dishes": [
+        {
+          "key": "suckling_pig",
+          "name": "Cochinillo asado",
+          "description": "Piel crujiente, carne melosa y patata panadera.",
+          "price": 2600,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1523986490752-c28064f26be3?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/grilled-meat-on-brown-chopping-board-8X3oqzxQQa4",
+            "photographer": "Jez Timms"
+          },
+          "position": 0,
+          "isRecommended": true,
+          "isFeatured": true,
+          "tags": ["gluten_free"],
+          "allergens": [],
+          "extraKeys": []
+        },
+        {
+          "key": "oxtail",
+          "name": "Rabo de toro",
+          "description": "Estofado al vino tinto, puré de patata y cebollitas.",
+          "price": 2200,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1608500218861-01091cdc501e?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/cooked-food-in-white-ceramic-bowl-1lAIRAsv3C4",
+            "photographer": "Nathan Dumlao"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["contains_alcohol", "gluten_free"],
+          "allergens": ["celery", "sulphites"],
+          "extraKeys": []
+        },
+        {
+          "key": "hake",
+          "name": "Merluza en salsa verde",
+          "description": "Merluza, perejil, ajo, guisantes y almejas.",
+          "price": 2100,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1700481932999-4bba65731015?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-white-bowl-filled-with-food-on-top-of-a-wooden-table-CVQcjon9ULs",
+            "photographer": "Amy Vann"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["fish", "molluscs"],
+          "extraKeys": []
+        }
+      ]
+    },
+    {
+      "key": "desserts",
+      "name": "Postres",
+      "description": "Recetario doméstico servido sin prisa.",
+      "position": 3,
+      "dishes": [
+        {
+          "key": "torrija",
+          "name": "Torrija",
+          "description": "Pan brioche, leche especiada, caramelo y helado de canela.",
+          "price": 700,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1586628741499-470e8ad221bc?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/bread-on-white-ceramic-plate-0MXi2Ui8j38",
+            "photographer": "Vanesa conunaese"
+          },
+          "position": 0,
+          "isRecommended": true,
+          "isFeatured": false,
+          "tags": [],
+          "allergens": ["gluten", "eggs", "milk"],
+          "extraKeys": []
+        },
+        {
+          "key": "crema_catalana",
+          "name": "Crema catalana",
+          "description": "Crema de cítricos y canela con azúcar quemado.",
+          "price": 650,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1676300184943-09b2a08319a3?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-bowl-of-pudding-with-a-raspberry-on-top-xQFLBRdch_k",
+            "photographer": "Orkun Orcan"
+          },
+          "position": 1,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["eggs", "milk"],
+          "extraKeys": []
+        },
+        {
+          "key": "rice_pudding",
+          "name": "Arroz con leche",
+          "description": "Arroz cremoso, piel de limón y canela tostada.",
+          "price": 600,
+          "image": {
+            "url": "https://images.unsplash.com/photo-1665529555367-8a4672d97641?auto=format&fit=crop&w=1200&q=82",
+            "sourceUrl": "https://unsplash.com/photos/a-plate-of-food-VeRTm8WMTNM",
+            "photographer": "Wil Carranza"
+          },
+          "position": 2,
+          "isRecommended": false,
+          "isFeatured": false,
+          "tags": ["gluten_free"],
+          "allergens": ["milk"],
+          "extraKeys": []
+        }
+      ]
+    }
+  ],
+  "promotions": [
+    {
+      "key": "weekday_menu",
+      "type": "daily_menu",
+      "scope": "info",
+      "name": "Menú de la casa",
+      "description": "Primero, segundo, postre y bebida de martes a viernes al mediodía.",
+      "specialPrice": 2450,
+      "priority": 10,
+      "recurringDays": [2, 3, 4, 5],
+      "recurringStartMinute": 780,
+      "recurringEndMinute": 960,
+      "targetKeys": []
+    },
+    {
+      "key": "vermouth_afternoon",
+      "type": "happy_hour",
+      "scope": "dish",
+      "name": "Tardes de vermut −20%",
+      "description": "Vermut de grifo a precio especial de martes a jueves.",
+      "percentage": 20,
+      "priority": 15,
+      "recurringDays": [2, 3, 4],
+      "recurringStartMinute": 1020,
+      "recurringEndMinute": 1140,
+      "targetKeys": ["vermouth"]
+    },
+    {
+      "key": "torrija_special",
+      "type": "special_price",
+      "scope": "dish",
+      "name": "Torrija de entresemana",
+      "description": "Nuestra torrija a precio especial de martes a jueves.",
+      "specialPrice": 550,
+      "priority": 20,
+      "recurringDays": [2, 3, 4],
+      "recurringStartMinute": 750,
+      "recurringEndMinute": 1380,
+      "targetKeys": ["torrija"]
+    }
+  ]
+}

@@ -140,9 +140,17 @@
       "types": "./src/components/molecules/qm-promo/index.ts",
       "import": "./src/components/molecules/qm-promo/index.ts"
     },
+    "./components/qm-promo/react": {
+      "types": "./src/components/molecules/qm-promo/react.ts",
+      "import": "./src/components/molecules/qm-promo/react.ts"
+    },
     "./components/qm-location": {
       "types": "./src/components/molecules/qm-location/index.ts",
       "import": "./src/components/molecules/qm-location/index.ts"
+    },
+    "./components/qm-location/react": {
+      "types": "./src/components/molecules/qm-location/react.ts",
+      "import": "./src/components/molecules/qm-location/react.ts"
     },
     "./components/qm-code-input": {
       "types": "./src/components/molecules/qm-code-input/index.ts",
@@ -219,6 +227,10 @@
     "./components/qm-promo-list": {
       "types": "./src/components/organisms/qm-promo-list/index.ts",
       "import": "./src/components/organisms/qm-promo-list/index.ts"
+    },
+    "./components/qm-promo-list/react": {
+      "types": "./src/components/organisms/qm-promo-list/react.ts",
+      "import": "./src/components/organisms/qm-promo-list/react.ts"
     },
     "./components/qm-contact-panel": {
       "types": "./src/components/organisms/qm-contact-panel/index.ts",
