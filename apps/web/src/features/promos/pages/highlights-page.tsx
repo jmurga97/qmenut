@@ -1,5 +1,5 @@
 import { QmFeatured } from "@qmenut/ui/components/qm-featured/react";
-import { defineQmHeading } from "@qmenut/ui/components/qm-heading";
+import { QmHeading } from "@qmenut/ui/components/qm-heading/react";
 import { TEMPLATES } from "@qmenut/ui/theme/presets";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,8 +14,6 @@ import { ScrollHidePageHeader } from "~/shared/components/scroll-hide-page-heade
 import { useLocale } from "~/shared/hooks/use-locale";
 import { usePublicTenant } from "~/shared/hooks/use-public-tenant";
 import { useTemplateSelection } from "~/shared/hooks/use-template-selection";
-
-defineQmHeading();
 
 export function HighlightsPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -49,9 +47,9 @@ export function HighlightsPage() {
 
       <div className="home-scroll" ref={scrollRef}>
         {content.featuredPromo ? <QmFeatured value={content.featuredPromo} /> : null}
-        <qm-heading text={t("destacados.page.recommendedTitle")} />
+        <QmHeading text={t("destacados.page.recommendedTitle")} />
         <RecommendedList content={content.recommended} showDishPhotos={showDishPhotos} />
-        <qm-heading text={content.promos.title} />
+        <QmHeading text={content.promos.title} />
         <PromosList content={content.promos} />
       </div>
     </PublicPageShell>

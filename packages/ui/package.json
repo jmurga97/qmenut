@@ -56,6 +56,10 @@
       "types": "./src/components/atoms/qm-heading/index.ts",
       "import": "./src/components/atoms/qm-heading/index.ts"
     },
+    "./components/qm-heading/react": {
+      "types": "./src/components/atoms/qm-heading/react.ts",
+      "import": "./src/components/atoms/qm-heading/react.ts"
+    },
     "./components/qm-section-num": {
       "types": "./src/components/atoms/qm-section-num/index.ts",
       "import": "./src/components/atoms/qm-section-num/index.ts"

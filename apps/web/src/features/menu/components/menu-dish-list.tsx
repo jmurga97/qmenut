@@ -48,13 +48,15 @@ function MenuSection({ onSelectDish, section, showDishPhotos }: MenuSectionProps
           onClick={(event) => onSelectDish(dish, event.currentTarget)}
         >
           <QmDishRow
-            name={dish.name}
-            desc={dish.desc}
-            price={dish.price}
-            oldPrice={dish.oldPrice}
-            tag={dish.tag}
-            photo={showDishPhotos}
-            photoUrl={photoUrl(dish.photoUrl, DISH_THUMB_WIDTH_PX)}
+            value={{
+              desc: dish.desc,
+              name: dish.name,
+              oldPrice: dish.oldPrice,
+              photo: showDishPhotos,
+              photoUrl: photoUrl(dish.photoUrl, DISH_THUMB_WIDTH_PX),
+              price: dish.price,
+              tag: dish.tag,
+            }}
           />
         </button>
       ))}
@@ -80,13 +82,15 @@ export function MenuDishList({ categoryNav, content, onSelectDish, showDishPhoto
           onClick={(event) => onSelectDish(featured, event.currentTarget)}
         >
           <QmFeatured
-            name={featured.name}
-            desc={featured.desc}
-            price={featured.price}
-            oldPrice={featured.oldPrice}
-            tag={featured.tag}
-            photo={showDishPhotos}
-            photoUrl={photoUrl(featured.photoUrl, FEATURED_IMAGE_WIDTH_PX)}
+            value={{
+              desc: featured.desc,
+              name: featured.name,
+              oldPrice: featured.oldPrice,
+              photo: showDishPhotos,
+              photoUrl: photoUrl(featured.photoUrl, FEATURED_IMAGE_WIDTH_PX),
+              price: featured.price,
+              tag: featured.tag,
+            }}
           />
         </button>
       ) : null}

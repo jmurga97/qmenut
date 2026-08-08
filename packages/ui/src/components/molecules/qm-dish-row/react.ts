@@ -3,6 +3,8 @@ import * as React from "react";
 
 import { defineQmDishRow, QM_DISH_ROW_TAG_NAME, QmDishRow as QmDishRowElement } from "./index";
 
+export type { QmDishRowValue } from "./index";
+
 defineQmDishRow();
 
 export const QmDishRow = createComponent({
