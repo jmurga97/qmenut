@@ -53,5 +53,4 @@ export function HighlightsPage() {
         </section>
       ) : null}
     </div>
-  );
 }
