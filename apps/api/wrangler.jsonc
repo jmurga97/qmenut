@@ -27,6 +27,14 @@
   ],
   "ratelimits": [
     {
+      "name": "GEOCODING_LIMITER",
+      "namespace_id": "1002",
+      "simple": {
+        "limit": 30,
+        "period": 60,
+      },
+    },
+    {
       "name": "LOYALTY_CODE_LIMITER",
       "namespace_id": "1001",
       "simple": {
@@ -80,6 +88,14 @@
         },
       ],
       "ratelimits": [
+        {
+          "name": "GEOCODING_LIMITER",
+          "namespace_id": "1002",
+          "simple": {
+            "limit": 30,
+            "period": 60,
+          },
+        },
         {
           "name": "LOYALTY_CODE_LIMITER",
           "namespace_id": "1001",

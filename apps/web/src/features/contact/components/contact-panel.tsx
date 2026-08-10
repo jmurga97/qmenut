@@ -17,7 +17,10 @@ export function ContactPanel({ content, hostRef, messageValue, nameValue, submit
     <div ref={hostRef}>
       <QmContactPanel
         value={{
-          mapLabel: content.mapLabel,
+          map: content.map,
+          ubicacionLabel: content.mapSectionLabel,
+          sedesLabel: content.sitesSectionLabel,
+          mensajeLabel: content.messageSectionLabel,
           nameLabel: content.form.nameLabel,
           namePlaceholder: content.form.namePlaceholder,
           messageLabel: content.form.messageLabel,
@@ -28,7 +31,7 @@ export function ContactPanel({ content, hostRef, messageValue, nameValue, submit
         submitLabel={submitLabel}
       >
         {content.locations.map((location) => (
-          <QmLocation key={location.name} slot="sedes" value={location} />
+          <QmLocation key={location.id ?? location.name} slot="sedes" value={location} />
         ))}
       </QmContactPanel>
     </div>

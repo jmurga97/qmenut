@@ -5,7 +5,9 @@ export function mapMockContactContent(content: MockContactContent): ContactConte
   return {
     form: content.form,
     locations: content.locations,
-    mapLabel: content.mapLabel,
+    mapSectionLabel: "Ubicaciones",
+    messageSectionLabel: "Mensaje",
+    sitesSectionLabel: "Sedes",
     subtitle: content.subtitle,
     title: content.title,
   };

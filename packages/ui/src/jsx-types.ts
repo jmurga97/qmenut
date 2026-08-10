@@ -22,6 +22,7 @@ import type { QmDishRow, QmDishRowArgs } from "./components/molecules/qm-dish-ro
 import type { QmFeatured, QmFeaturedArgs } from "./components/molecules/qm-featured";
 import type { QmFieldGroup, QmFieldGroupArgs } from "./components/molecules/qm-field-group";
 import type { QmLocation, QmLocationArgs } from "./components/molecules/qm-location";
+import type { QmMap, QmMapArgs } from "./components/molecules/qm-map";
 import type { QmPromo, QmPromoArgs } from "./components/molecules/qm-promo";
 import type { QmRewardRow, QmRewardRowArgs } from "./components/molecules/qm-reward-row";
 import type { QmSectionHeader, QmSectionHeaderArgs } from "./components/molecules/qm-section-header";
@@ -86,6 +87,7 @@ declare module "react/jsx-runtime" {
       "qm-featured": GenericWebComponent<QmFeaturedArgs, QmFeatured>;
       "qm-field-group": GenericWebComponent<QmFieldGroupArgs, QmFieldGroup>;
       "qm-location": GenericWebComponent<QmLocationArgs, QmLocation>;
+      "qm-map": GenericWebComponent<QmMapArgs, QmMap>;
       "qm-code-input": GenericWebComponent<QmCodeInputArgs, QmCodeInput>;
       "qm-promo": GenericWebComponent<QmPromoArgs, QmPromo>;
       "qm-reward-row": GenericWebComponent<QmRewardRowArgs, QmRewardRow>;

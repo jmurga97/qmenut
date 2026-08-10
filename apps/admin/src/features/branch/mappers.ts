@@ -10,6 +10,8 @@ export function toBranchFormValues(settings: BranchSettings): BranchFormValues {
   return {
     name: settings.name,
     address: settings.address ?? "",
+    latitude: settings.latitude === null ? "" : String(settings.latitude),
+    longitude: settings.longitude === null ? "" : String(settings.longitude),
     phone: settings.phone ?? "",
     whatsapp: settings.whatsapp ?? "",
     legalName: settings.legalName ?? "",
@@ -35,12 +37,17 @@ type BranchMapperInput = {
   values: BranchFormValues;
 };
 export function toBranchInput({ branchId, settings, values }: BranchMapperInput) {
+  const latitude = values.latitude.trim() ? Number(values.latitude) : null;
+  const longitude = values.longitude.trim() ? Number(values.longitude) : null;
+
   return {
     branchId,
     timezone: values.timezone,
     info: {
       name: values.name,
       address: values.address,
+      latitude,
+      longitude,
       phone: values.phone,
       whatsapp: values.whatsapp,
       socialLinksJson: settings.socialLinksJson ?? undefined,

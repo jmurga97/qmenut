@@ -20,11 +20,13 @@ Cloudflare, vendor-account, product, or legal work.
 - [x] **Set all production secrets.** Configure `BETTER_AUTH_SECRET`, byte-identical
       `THEME_WORKER_TOKEN` on API and tenant-config, `LOYALTY_TOKEN_SECRET`,
       `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and (if translations are enabled)
-      `DEEPL_API_KEY`. Never set `E2E_FIXED_OTP`.
+      `DEEPL_API_KEY`. Configure `MAPTILER_API_KEY` on the API before enabling branch
+      address autocomplete. Never set `E2E_FIXED_OTP`.
 - [x] **Replace Stripe price placeholders.** `STRIPE_PRICE_BASIC` and in production vars.
 - [x] **Confirm and migrate remote D1.** Verify database
       `f3138d43-a32e-46f2-a9d9-b4e777b02d8a` exists in the deployment account, then apply
-      migrations `0001`–`0006` remotely with the production environment.
+      every committed migration through `0002_branch_coordinates.sql` remotely with the
+      production environment before deploying API, admin, and web.
 - [x] **Remove per-tenant public-menu CORS scaling.** Browser `/trpc` is now same-origin
       and proxied by `qmenut-web` through `API_WORKER`; only the fixed admin origin remains
       in production `ALLOWED_ORIGINS`.

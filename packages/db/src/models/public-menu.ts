@@ -1,4 +1,4 @@
-import type { PublicBranch } from "./branch";
+import type { PublicBranch, PublicContactBranch } from "./branch";
 import type { PublicDishPromotion, PublicPromotion } from "./promotion";
 
 export interface PublicDishAvailabilityWindow {
@@ -95,6 +95,7 @@ export interface PublicLegalEntity {
 export interface PublicMenuData {
   branch: PublicBranch;
   categories: PublicCategory[];
+  contactBranches: PublicContactBranch[];
   legal: PublicLegalEntity;
   promotions: PublicPromotion[];
 }

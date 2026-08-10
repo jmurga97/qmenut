@@ -67,6 +67,8 @@ export interface BranchPhotoRow {
 export interface BranchSettingsWriteData {
   name: string;
   address: string | null;
+  latitude: number | null;
+  longitude: number | null;
   phone: string | null;
   whatsapp: string | null;
   socialLinksJson: string | null;
@@ -91,6 +93,8 @@ export function updateBranchSettingsStatements({
       .set({
         name: data.name,
         address: data.address,
+        latitude: data.latitude,
+        longitude: data.longitude,
         phone: data.phone,
         whatsapp: data.whatsapp,
         socialLinksJson: data.socialLinksJson,

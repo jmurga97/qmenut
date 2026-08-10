@@ -94,15 +94,69 @@ INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALU
     ('rest_fine', 'es', 1),
     ('rest_fine', 'en', 0);
 
-INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain, currency)
-VALUES ('branch_fine', 'rest_fine', 'Aurum', 'Paseo de Gracia 88, Barcelona', '+34932111444', 'fine.localhost', 'EUR');
+INSERT INTO branches (
+    id,
+    restaurant_id,
+    name,
+    address,
+    latitude,
+    longitude,
+    phone,
+    whatsapp,
+    social_links_json,
+    custom_domain,
+    currency
+) VALUES
+    (
+        'branch_fine',
+        'rest_fine',
+        'Aurum Passeig de Gràcia',
+        'Passeig de Gràcia 88, Barcelona',
+        41.3954,
+        2.1619,
+        '+34932111444',
+        '+34600111222',
+        '{"instagram":"https://www.instagram.com/aurum"}',
+        'fine.localhost',
+        'EUR'
+    ),
+    (
+        'branch_fine_born',
+        'rest_fine',
+        'Aurum El Born',
+        'Carrer de Montcada 15, Barcelona',
+        41.3852,
+        2.1809,
+        '+34932111555',
+        '+34600111333',
+        '{"instagram":"https://www.instagram.com/aurum"}',
+        NULL,
+        'EUR'
+    ),
+    (
+        'branch_fine_sarria',
+        'rest_fine',
+        'Aurum Sarrià',
+        'Carrer Major de Sarrià 93, Barcelona',
+        NULL,
+        NULL,
+        '+34932111666',
+        NULL,
+        NULL,
+        NULL,
+        'EUR'
+    );
 
 INSERT INTO branch_photos (id, branch_id, url, position) VALUES
     ('bp_fine_1', 'branch_fine', 'https://picsum.photos/seed/qmenut-aurum/800/600', 0);
 
 INSERT INTO branch_schedules (id, branch_id, day_of_week, open_minute, close_minute) VALUES
     ('bs_fine_5', 'branch_fine', 5, 780, 1380),
-    ('bs_fine_6', 'branch_fine', 6, 780, 1380);
+    ('bs_fine_6', 'branch_fine', 6, 780, 1380),
+    ('bs_fine_born_5', 'branch_fine_born', 5, 720, 1439),
+    ('bs_fine_born_6', 'branch_fine_born', 6, 720, 1439),
+    ('bs_fine_sarria_5', 'branch_fine_sarria', 5, 780, 1380),
+    ('bs_fine_sarria_6', 'branch_fine_sarria', 6, 780, 1380);
 
 INSERT INTO categories (id, restaurant_id, branch_id, name, description, position) VALUES
     ('cat_fine_entrantes',   'rest_fine', 'branch_fine', 'Entrantes',   'Primeros pasos del menú',  0),
