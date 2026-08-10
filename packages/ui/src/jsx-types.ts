@@ -26,6 +26,7 @@ import type { QmMap, QmMapArgs } from "./components/molecules/qm-map";
 import type { QmPromo, QmPromoArgs } from "./components/molecules/qm-promo";
 import type { QmRewardRow, QmRewardRowArgs } from "./components/molecules/qm-reward-row";
 import type { QmSectionHeader, QmSectionHeaderArgs } from "./components/molecules/qm-section-header";
+import type { QmSocialLinks, QmSocialLinksArgs } from "./components/molecules/qm-social-links";
 import type { QmStampGrid, QmStampGridArgs } from "./components/molecules/qm-stamp-grid";
 import type { QmContactPanel, QmContactPanelArgs } from "./components/organisms/qm-contact-panel";
 import type { QmDishModal, QmDishModalArgs } from "./components/organisms/qm-dish-modal";
@@ -93,6 +94,7 @@ declare module "react/jsx-runtime" {
       "qm-reward-row": GenericWebComponent<QmRewardRowArgs, QmRewardRow>;
       "qm-stamp-grid": GenericWebComponent<QmStampGridArgs, QmStampGrid>;
       "qm-section-header": GenericWebComponent<QmSectionHeaderArgs, QmSectionHeader>;
+      "qm-social-links": GenericWebComponent<QmSocialLinksArgs, QmSocialLinks>;
       "qm-contact-panel": GenericWebComponent<QmContactPanelArgs, QmContactPanel>;
       "qm-dish-modal": GenericWebComponent<QmDishModalArgs, QmDishModal>;
       "qm-hero-header": GenericWebComponent<QmHeroHeaderArgs, QmHeroHeader>;

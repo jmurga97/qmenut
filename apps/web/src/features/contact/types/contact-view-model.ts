@@ -1,5 +1,6 @@
 import type { QmLocationValue } from "@qmenut/ui/components/qm-location/react";
 import type { QmMapValue } from "@qmenut/ui/components/qm-map";
+import type { QmSocialLink } from "@qmenut/ui/components/qm-social-links";
 
 export type ContactLocationViewModel = QmLocationValue;
 
@@ -18,6 +19,8 @@ export interface ContactContentViewModel {
   mapSectionLabel: string;
   messageSectionLabel: string;
   sitesSectionLabel: string;
+  socialLinks: QmSocialLink[];
+  socialLinksLabel: string;
   subtitle: string;
   title: string;
 }

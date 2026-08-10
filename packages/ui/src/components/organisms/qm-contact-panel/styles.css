@@ -17,15 +17,6 @@
   overflow: hidden;
 }
 
-.map-section::after {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  background: color-mix(in oklab, var(--qm-primary, transparent) 6%, transparent);
-  content: "";
-  pointer-events: none;
-}
-
 .map {
   position: absolute;
   z-index: 0;
@@ -35,11 +26,10 @@
 .map-fade {
   position: absolute;
   z-index: 2;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 92px;
-  background: linear-gradient(to bottom, transparent, var(--qm-bg, #fff));
+  inset: 0;
+  background:
+    linear-gradient(to bottom, var(--qm-bg, #fff), transparent) top / 100% 92px no-repeat,
+    linear-gradient(to bottom, transparent, var(--qm-bg, #fff)) bottom / 100% 92px no-repeat;
   pointer-events: none;
 }
 

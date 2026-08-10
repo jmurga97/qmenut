@@ -6,13 +6,13 @@ import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
 
-import type { Map as LeafletMap } from "leaflet";
+import type { Map as LeafletMap, Marker as LeafletMarker } from "leaflet";
 import type { PropertyValues } from "lit";
 
 export const QM_MAP_TAG_NAME = "qm-map";
 
 const componentStyles = createComponentStyles(`${leafletStylesText}\n${componentStylesText}`);
-const SINGLE_MARKER_ZOOM = 16;
+const CENTER_MARKER_ZOOM = 16;
 const MULTI_MARKER_PADDING = 40;
 
 export interface QmMapMarkerValue {
@@ -85,10 +85,6 @@ export class QmMap extends LitElement {
     const content = document.createElement("div");
     content.className = "marker-popup";
 
-    const name = document.createElement("strong");
-    name.textContent = marker.name;
-    appendElement(content, name);
-
     if (marker.address) {
       const address = document.createElement("p");
       address.textContent = marker.address;
@@ -96,10 +92,33 @@ export class QmMap extends LitElement {
     }
 
     const link = document.createElement("a");
+    link.className = "maps-link";
     link.href = marker.directionsHref;
     link.rel = "noreferrer";
     link.target = "_blank";
-    link.textContent = this.value?.openMapsLabel ?? "Open in Google Maps";
+
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.classList.add("maps-link-icon");
+    icon.setAttribute("aria-hidden", "true");
+    icon.setAttribute("viewBox", "0 0 24 24");
+    icon.setAttribute("fill", "none");
+    icon.setAttribute("stroke", "currentColor");
+    icon.setAttribute("stroke-width", "1.8");
+    icon.setAttribute("stroke-linecap", "round");
+    icon.setAttribute("stroke-linejoin", "round");
+
+    const pin = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    pin.setAttribute("d", "M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z");
+    appendElement(icon, pin);
+
+    const center = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    center.setAttribute("cx", "12");
+    center.setAttribute("cy", "10");
+    center.setAttribute("r", "2.5");
+    appendElement(icon, center);
+
+    appendElement(link, icon);
+    appendElement(link, document.createTextNode(this.value?.openMapsLabel ?? "Open in Google Maps"));
     appendElement(content, link);
 
     return content;
@@ -110,6 +129,7 @@ export class QmMap extends LitElement {
     this.destroyMap();
     const markers = (this.value?.markers ?? []).filter((marker) => validMarker(marker));
     if (markers.length === 0 || !this.isConnected) return;
+    const initialMarker = markers.find((marker) => marker.current) ?? markers[0];
 
     const leaflet = await import("leaflet");
     if (generation !== this.generation || !this.isConnected) return;
@@ -140,45 +160,52 @@ export class QmMap extends LitElement {
       .addTo(map);
 
     const coordinates: [number, number][] = [];
+    let initialMapMarker: LeafletMarker | undefined;
     for (const marker of markers) {
-      const size = marker.current ? 42 : 34;
+      const size = marker.current ? 20 : 16;
       const shape = document.createElement("span");
-      shape.className = marker.current ? "marker-shape marker-shape--current" : "marker-shape";
+      shape.className = marker.current ? "marker-dot marker-dot--current" : "marker-dot";
       const icon = leaflet.divIcon({
         className: "qm-map-marker",
         html: shape,
-        iconAnchor: [size / 2, size],
+        iconAnchor: [size / 2, size / 2],
         iconSize: [size, size],
-        popupAnchor: [0, size + 28],
+        popupAnchor: [0, -(size / 2 + 8)],
       });
       const coordinate: [number, number] = [marker.latitude, marker.longitude];
+      const markerLabel = marker.address ? `${marker.name}: ${marker.address}` : marker.name;
       coordinates.push(coordinate);
-      leaflet
-        .marker(coordinate, {
-          alt: `${marker.name}: ${marker.address}`,
-          icon,
-          keyboard: true,
-          riseOnHover: true,
-          title: marker.name,
-        })
-        .addTo(map)
-        .bindPopup(this.createPopupContent(marker), {
-          autoPan: false,
-          closeButton: true,
-          maxWidth: 240,
-          minWidth: 190,
-        });
+      const mapMarker = leaflet.marker(coordinate, {
+        alt: markerLabel,
+        icon,
+        keyboard: true,
+        riseOnHover: true,
+        title: marker.name,
+      });
+      mapMarker.once("add", () => mapMarker.getElement()?.setAttribute("aria-label", markerLabel));
+      mapMarker.addTo(map).bindPopup(this.createPopupContent(marker), {
+        autoPan: false,
+        closeButton: false,
+        maxWidth: 240,
+        minWidth: 0,
+      });
+      if (marker.id === initialMarker.id) initialMapMarker = mapMarker;
     }
 
-    if (coordinates.length === 1) {
-      map.setView(coordinates[0], SINGLE_MARKER_ZOOM, { animate: false });
+    const currentMarker = markers.find((marker) => marker.current);
+    if (currentMarker) {
+      map.setView([currentMarker.latitude, currentMarker.longitude], CENTER_MARKER_ZOOM, { animate: false });
+    } else if (coordinates.length === 1) {
+      map.setView(coordinates[0], CENTER_MARKER_ZOOM, { animate: false });
     } else {
       map.fitBounds(leaflet.latLngBounds(coordinates), {
         animate: false,
-        maxZoom: SINGLE_MARKER_ZOOM,
+        maxZoom: CENTER_MARKER_ZOOM,
         padding: [MULTI_MARKER_PADDING, MULTI_MARKER_PADDING],
       });
     }
+
+    map.whenReady(() => initialMapMarker?.openPopup());
 
     this.resizeObserver = new ResizeObserver(() => map.invalidateSize({ animate: false }));
     this.resizeObserver.observe(container);

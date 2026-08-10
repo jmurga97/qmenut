@@ -63,6 +63,7 @@ export default {
       locationSectionLabel_one: "Ubicación",
       locationSectionLabel_other: "Ubicaciones",
       sitesSectionLabel: "Sedes",
+      socialLinksLabel: "Redes sociales",
       messageSectionLabel: "Mensaje",
       mapAriaLabel_one: "Mapa con una sucursal",
       mapAriaLabel_other: "Mapa con {{count}} sucursales",

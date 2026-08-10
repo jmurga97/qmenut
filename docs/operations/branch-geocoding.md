@@ -5,6 +5,11 @@ when at least one active branch has a valid latitude/longitude pair. MapTiler is
 the authenticated admin address autocomplete; its key must never be exposed to the web or
 admin bundles.
 
+The raster map is styled as monochrome cartography blended with the tenant's `--qm-bg`; markers
+and popups consume the same theme tokens as the rest of the Lit UI. The current domain's branch
+is centered at zoom 16 when it has coordinates. If it does not, one remaining marker is centered
+or multiple markers are fitted into view.
+
 ## Local setup
 
 1. Copy `apps/api/.dev.vars.example` to `apps/api/.dev.vars` if needed.

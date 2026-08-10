@@ -47,6 +47,11 @@ function socialLinks(value: unknown): { href: string; label: string }[] {
   });
 }
 
+function uniqueSocialLinks(branches: ContactBranch[]): { href: string; label: string }[] {
+  const links = branches.flatMap((branch) => socialLinks(branch.socialLinks));
+  return new Map(links.map((link) => [link.href, link])).values().toArray();
+}
+
 function hasCoordinates(branch: ContactBranch): branch is ContactBranch & {
   latitude: number;
   longitude: number;
@@ -124,7 +129,6 @@ export function mapPublicContactContent({ data, locale, t }: MapPublicContactCon
         phone,
         phoneHref: phone ? `tel:${phone}` : undefined,
         phoneLabel: t("contact.page.callLabel"),
-        socialLinks: socialLinks(branch.socialLinks),
         status: formatSchedule({ branch, locale, t }),
         whatsappHref: whatsapp ? `https://wa.me/${whatsapp.replace("+", "")}` : undefined,
         whatsappLabel: t("contact.page.whatsappLabel"),
@@ -141,6 +145,8 @@ export function mapPublicContactContent({ data, locale, t }: MapPublicContactCon
     mapSectionLabel: t("contact.page.locationSectionLabel", { count: markers.length }),
     messageSectionLabel: t("contact.page.messageSectionLabel"),
     sitesSectionLabel: t("contact.page.sitesSectionLabel"),
+    socialLinks: uniqueSocialLinks(branches),
+    socialLinksLabel: t("contact.page.socialLinksLabel"),
     subtitle: t("contact.page.subtitle"),
     title: t("contact.page.title"),
   };

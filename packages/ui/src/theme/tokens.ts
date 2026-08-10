@@ -51,6 +51,7 @@ export interface QmThemeTokens {
   "--qm-content-bottom": string;
   "--qm-section-gap": string;
   "--qm-list-gap": string;
+  "--qm-map-link-icon-display": string;
   "--qm-touch-min": string;
   "--qm-header-pad-x": string;
   "--qm-header-pad-top": string;

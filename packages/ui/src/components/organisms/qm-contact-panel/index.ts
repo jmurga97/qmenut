@@ -8,8 +8,10 @@ import { defineQmSectionNum } from "../../atoms/qm-section-num";
 import { defineQmFieldGroup } from "../../molecules/qm-field-group";
 import { defineQmLocation } from "../../molecules/qm-location";
 import { defineQmMap } from "../../molecules/qm-map";
+import { defineQmSocialLinks } from "../../molecules/qm-social-links";
 
 import type { QmMapValue } from "../../molecules/qm-map";
+import type { QmSocialLink } from "../../molecules/qm-social-links";
 import type { TemplateResult } from "lit";
 
 export const QM_CONTACT_PANEL_TAG_NAME = "qm-contact-panel";
@@ -25,6 +27,8 @@ export interface QmContactPanelValue {
   mensajeNum?: string;
   mensajeLabel?: string;
   map?: QmMapValue;
+  socialLinks?: QmSocialLink[];
+  socialLinksLabel?: string;
   nameLabel?: string;
   namePlaceholder?: string;
   messageLabel?: string;
@@ -56,14 +60,14 @@ export class QmContactPanel extends LitElement {
       <section part="ubicacion" class="section map-section">
         <qm-map part="map" class="map" .value=${this.value.map}></qm-map>
         <div class="map-fade" aria-hidden="true"></div>
-        <div class="map-header">
+        <!--<div class="map-header">
           <qm-section-num
             part="ubicacion-header"
             .num=${this.value?.ubicacionNum ?? "01"}
             .label=${this.value?.ubicacionLabel ?? "Ubicación"}
           >
           </qm-section-num>
-        </div>
+        </div>-->
       </section>
     `;
   }
@@ -80,6 +84,18 @@ export class QmContactPanel extends LitElement {
           <slot name="sedes"></slot>
         </div>
       </section>
+    `;
+  }
+
+  private renderSocialLinks(): TemplateResult {
+    if (!this.value?.socialLinks?.length) return html``;
+
+    return html`
+      <qm-social-links
+        part="social-links"
+        .links=${this.value.socialLinks}
+        .ariaLabel=${this.value.socialLinksLabel ?? "Social networks"}
+      ></qm-social-links>
     `;
   }
 
@@ -108,7 +124,7 @@ export class QmContactPanel extends LitElement {
 
   render() {
     const hasMap = Boolean(this.value?.map?.markers.length);
-    return html`${this.renderUbicacion()}${this.renderSedes(hasMap ? "02" : "01")}${this.renderMensaje(
+    return html`${this.renderUbicacion()}${this.renderSocialLinks()}${this.renderSedes(hasMap ? "02" : "01")}${this.renderMensaje(
       hasMap ? "03" : "02",
     )}`;
   }
@@ -118,6 +134,7 @@ export function defineQmContactPanel() {
   defineQmSectionNum();
   defineQmLocation();
   defineQmMap();
+  defineQmSocialLinks();
   defineQmFieldGroup();
 
   if (!customElements.get(QM_CONTACT_PANEL_TAG_NAME)) {

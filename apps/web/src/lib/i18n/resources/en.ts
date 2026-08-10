@@ -63,6 +63,7 @@ export default {
       locationSectionLabel_one: "Location",
       locationSectionLabel_other: "Locations",
       sitesSectionLabel: "Branches",
+      socialLinksLabel: "Social networks",
       messageSectionLabel: "Message",
       mapAriaLabel_one: "Map with one branch",
       mapAriaLabel_other: "Map with {{count}} branches",

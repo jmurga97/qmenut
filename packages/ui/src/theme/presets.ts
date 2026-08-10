@@ -50,6 +50,7 @@ export type QmTemplateLayoutDefaults = Pick<
   | "--qm-hero-name-size"
   | "--qm-hero-scrim"
   | "--qm-list-gap"
+  | "--qm-map-link-icon-display"
   | "--qm-modal-pad-x"
   | "--qm-nav-icon-display"
   | "--qm-promo-body-pad"
@@ -171,6 +172,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-category-active-bg": "transparent",
       "--qm-category-active-color": "var(--qm-ink)",
       "--qm-category-active-border": "none",
+      "--qm-map-link-icon-display": "none",
       "--qm-nav-icon-display": "none",
     },
     heading: "'Cormorant Garamond',serif",
@@ -250,6 +252,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-category-active-bg": "var(--qm-secondary)",
       "--qm-category-active-color": "var(--qm-on-secondary)",
       "--qm-category-active-border": "1px solid transparent",
+      "--qm-map-link-icon-display": "none",
       "--qm-nav-icon-display": "inline-flex",
     },
     heading: "'Yeseva One',serif",
@@ -329,6 +332,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-category-active-bg": "var(--qm-primary)",
       "--qm-category-active-color": "var(--qm-on-primary)",
       "--qm-category-active-border": "1px solid transparent",
+      "--qm-map-link-icon-display": "inline-flex",
       "--qm-nav-icon-display": "inline-flex",
     },
     heading: "'Anton',sans-serif",
@@ -408,6 +412,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-category-active-bg": "var(--qm-tint)",
       "--qm-category-active-color": "var(--qm-emph-ink)",
       "--qm-category-active-border": "1px solid transparent",
+      "--qm-map-link-icon-display": "inline-flex",
       "--qm-nav-icon-display": "inline-flex",
     },
     heading: "'Quicksand',sans-serif",
@@ -488,6 +493,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-category-active-bg": "var(--qm-primary)",
       "--qm-category-active-color": "var(--qm-on-primary)",
       "--qm-category-active-border": "1px solid transparent",
+      "--qm-map-link-icon-display": "inline-flex",
       "--qm-nav-icon-display": "inline-flex",
     },
     heading: "'Bebas Neue',sans-serif",

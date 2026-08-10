@@ -29,6 +29,7 @@ export function StandardRouteHeader({ locale, routeId, scrollContainerRef, tenan
       langOptions={locale.langOptions}
       langLabel={locale.langLabel}
       titleSize="lg"
+      hideSeparator={routeId === "/{-$locale}/contacto"}
       onQmChange={locale.handleLanguageChange}
     />
   );

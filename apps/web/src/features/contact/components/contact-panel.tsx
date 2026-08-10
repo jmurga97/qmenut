@@ -25,6 +25,8 @@ export function ContactPanel({ content, hostRef, messageValue, nameValue, submit
           namePlaceholder: content.form.namePlaceholder,
           messageLabel: content.form.messageLabel,
           messagePlaceholder: content.form.messagePlaceholder,
+          socialLinks: content.socialLinks,
+          socialLinksLabel: content.socialLinksLabel,
         }}
         nameValue={nameValue}
         messageValue={messageValue}

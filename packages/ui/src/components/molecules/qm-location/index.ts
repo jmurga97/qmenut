@@ -34,9 +34,6 @@ export interface QmLocationValue {
   mapLabel?: string;
   menuHref?: string;
   menuLabel?: string;
-  socialHref?: string;
-  socialLabel?: string;
-  socialLinks?: { href: string; label: string }[];
 }
 
 export class QmLocation extends LitElement {
@@ -76,8 +73,6 @@ export class QmLocation extends LitElement {
             ${this.renderAction(this.value?.whatsappHref, this.value?.whatsappLabel)}
             ${this.renderAction(this.value?.mapHref, this.value?.mapLabel)}
             ${this.renderAction(this.value?.menuHref, this.value?.menuLabel)}
-            ${this.renderAction(this.value?.socialHref, this.value?.socialLabel)}
-            ${(this.value?.socialLinks ?? []).map((link) => this.renderAction(link.href, link.label))}
           </nav>
         </div>
       </div>

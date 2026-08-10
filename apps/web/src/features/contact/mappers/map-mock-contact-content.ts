@@ -8,6 +8,8 @@ export function mapMockContactContent(content: MockContactContent): ContactConte
     mapSectionLabel: "Ubicaciones",
     messageSectionLabel: "Mensaje",
     sitesSectionLabel: "Sedes",
+    socialLinks: [],
+    socialLinksLabel: "Redes sociales",
     subtitle: content.subtitle,
     title: content.title,
   };
