@@ -1,5 +1,4 @@
 import { marked } from "marked";
-import { useTranslation } from "react-i18next";
 
 import { LegalPageLayout } from "~/features/legal/components/legal-page-layout";
 import { useLegalContent } from "~/features/legal/hooks/use-legal-content";
@@ -10,7 +9,6 @@ import { useLocale } from "~/shared/hooks/use-locale";
 export function LegalNoticePage() {
   const content = useLegalContent();
   const { lang } = useLocale();
-  const { t } = useTranslation();
 
   if (!content) {
     return null;
@@ -28,7 +26,7 @@ export function LegalNoticePage() {
   });
 
   return (
-    <LegalPageLayout title={t("legal.legalNotice.title")} subtitle={t("legal.legalNotice.subtitle")}>
+    <LegalPageLayout>
       <article className="legal-prose" dangerouslySetInnerHTML={{ __html: marked.parse(markdown) }} />
     </LegalPageLayout>
   );

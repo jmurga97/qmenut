@@ -1,11 +1,12 @@
 import { TEMPLATES } from "@qmenut/ui/theme/presets";
-import { Outlet, createFileRoute, notFound, redirect } from "@tanstack/react-router";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { DEFAULT_LOCALE, chromeLocale } from "~/lib/i18n/create-i18n";
 import { LOCALE_PATTERN } from "~/lib/i18n/locale-pattern";
 import { AnalyticsBootstrap } from "~/shared/components/analytics-bootstrap";
 import { LocaleDetector } from "~/shared/components/locale-detector";
+import { PublicRouteLayout } from "~/shared/components/public-route-layout";
 import { DevTemplateSwitcher } from "~/shared/dev/dev-template-switcher";
 
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";
@@ -76,7 +77,7 @@ export const Route = createFileRoute("/{-$locale}")({
 function LocaleLayout() {
   return (
     <>
-      <Outlet />
+      <PublicRouteLayout />
       <LocaleDetector />
       <AnalyticsBootstrap />
       <DevTemplateSwitcher />
