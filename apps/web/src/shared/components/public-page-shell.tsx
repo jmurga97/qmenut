@@ -12,12 +12,11 @@ import type { PublicTenant } from "~/shared/types/public-tenant";
 
 interface PublicPageShellProps {
   children: ReactNode;
-  overlay?: ReactNode;
   template: QmTemplateName;
   tenant: PublicTenant;
 }
 
-export function PublicPageShell({ children, overlay, template, tenant }: PublicPageShellProps) {
+export function PublicPageShell({ children, template, tenant }: PublicPageShellProps) {
   const { theme } = useTenantContext();
 
   const themeVars = useMemo(() => {
@@ -67,7 +66,6 @@ export function PublicPageShell({ children, overlay, template, tenant }: PublicP
         {children}
         <PublicBottomNav />
       </div>
-      {overlay}
     </div>
   );
 }
