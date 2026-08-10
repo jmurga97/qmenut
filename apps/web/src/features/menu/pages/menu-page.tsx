@@ -6,7 +6,7 @@ import { MenuDishModal } from "~/features/menu/components/menu-dish-modal";
 import { useMenuPage } from "~/features/menu/hooks/use-menu-page";
 import { track } from "~/lib/analytics/posthog";
 import { useTrackPageView } from "~/lib/analytics/use-analytics";
-import { usePublicRouteLayout } from "~/shared/components/public-route-layout-context";
+import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
 
 import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
 

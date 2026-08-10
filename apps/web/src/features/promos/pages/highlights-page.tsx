@@ -7,7 +7,7 @@ import { PromosList } from "~/features/promos/components/promos-list";
 import { RecommendedList } from "~/features/promos/components/recommended-list";
 import { useHighlightsContent } from "~/features/promos/hooks/use-highlights-content";
 import { useTrackPageView } from "~/lib/analytics/use-analytics";
-import { usePublicRouteLayout } from "~/shared/components/public-route-layout-context";
+import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
 
 export function HighlightsPage() {
   const content = useHighlightsContent();
