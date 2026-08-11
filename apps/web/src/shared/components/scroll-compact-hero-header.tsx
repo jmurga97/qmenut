@@ -49,5 +49,5 @@ export function ScrollCompactHeroHeader({ scrollContainerRef, ...heroHeaderProps
     };
   }, [scrollContainerRef]);
 
-  return <QmHeroHeader {...heroHeaderProps} compact={compact} />;
+  return <QmHeroHeader {...heroHeaderProps} className="public-route-header-stage" compact={compact} />;
 }

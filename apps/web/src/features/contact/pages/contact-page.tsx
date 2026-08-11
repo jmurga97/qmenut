@@ -18,7 +18,7 @@ export function ContactPage() {
   const submitLabel = submitted ? t("contact.submittedLabel") : content.form.submitLabel;
 
   return (
-    <>
+    <div className="public-route-content-stage">
       <ContactPanel
         content={content}
         hostRef={contactPanelHostRef}
@@ -28,6 +28,6 @@ export function ContactPage() {
       />
 
       <LegalLinksNav />
-    </>
+    </div>
   );
 }
