@@ -3,6 +3,10 @@
   padding: var(--qm-header-pad-top, 20px) var(--qm-header-pad-x, 20px) 0;
 }
 
+:host([hide-separator]) {
+  padding-bottom: var(--qm-header-pad-top, 20px);
+}
+
 .topbar {
   display: flex;
   align-items: center;

@@ -31,3 +31,38 @@
   border: none;
   border-top: var(--qm-rule, 1.5px) solid var(--qm-ink, #1c1815);
 }
+
+.secondary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: var(--qm-secondary-heading-padding, 2px 0 2px 10px);
+  border: var(--qm-secondary-heading-border, none);
+  border-left: var(--qm-secondary-heading-rail, 2px solid var(--qm-primary, currentColor));
+  border-radius: var(--qm-secondary-heading-radius, 0px);
+  background: var(--qm-secondary-heading-bg, transparent);
+  color: var(--qm-secondary-heading-color, var(--qm-ink, #1c1815));
+}
+
+.secondary .title {
+  font-size: var(--qm-text-xl, 17px);
+  line-height: 1.1;
+  color: inherit;
+}
+
+.secondary-icon {
+  display: var(--qm-secondary-heading-icon-display, none);
+  width: 30px;
+  height: 30px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--qm-secondary-heading-icon-radius, 0px);
+  background: var(--qm-secondary-heading-icon-bg, transparent);
+  color: var(--qm-secondary-heading-icon-color, currentColor);
+}
+
+.secondary-icon slot::slotted(*) {
+  width: 17px;
+  height: 17px;
+}

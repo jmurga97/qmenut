@@ -1,0 +1,21 @@
+/* Overview */
+
+.admin-overview-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.admin-overview-secondary {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 960px) {
+  .admin-overview-grid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
+  }
+
+  .admin-overview-secondary {
+    align-content: start;
+  }
+}

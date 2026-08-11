@@ -50,6 +50,7 @@ export type QmTemplateLayoutDefaults = Pick<
   | "--qm-hero-name-size"
   | "--qm-hero-scrim"
   | "--qm-list-gap"
+  | "--qm-map-link-icon-display"
   | "--qm-modal-pad-x"
   | "--qm-nav-icon-display"
   | "--qm-promo-body-pad"
@@ -72,6 +73,16 @@ export type QmTemplateLayoutDefaults = Pick<
   | "--qm-section-pad"
   | "--qm-section-radius"
   | "--qm-section-rail"
+  | "--qm-secondary-heading-bg"
+  | "--qm-secondary-heading-border"
+  | "--qm-secondary-heading-color"
+  | "--qm-secondary-heading-icon-bg"
+  | "--qm-secondary-heading-icon-color"
+  | "--qm-secondary-heading-icon-display"
+  | "--qm-secondary-heading-icon-radius"
+  | "--qm-secondary-heading-padding"
+  | "--qm-secondary-heading-radius"
+  | "--qm-secondary-heading-rail"
   | "--qm-sheet-min"
   | "--qm-sheet-photo-radius"
   | "--qm-sheet-radius"
@@ -140,6 +151,16 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-section-border": "none",
       "--qm-section-divider": "none",
       "--qm-section-rail": "none",
+      "--qm-secondary-heading-bg": "transparent",
+      "--qm-secondary-heading-border": "none",
+      "--qm-secondary-heading-color": "var(--qm-ink)",
+      "--qm-secondary-heading-icon-bg": "transparent",
+      "--qm-secondary-heading-icon-color": "var(--qm-ink)",
+      "--qm-secondary-heading-icon-display": "none",
+      "--qm-secondary-heading-icon-radius": "0px",
+      "--qm-secondary-heading-padding": "2px 0 2px 12px",
+      "--qm-secondary-heading-radius": "0px",
+      "--qm-secondary-heading-rail": "2px solid var(--qm-primary)",
       "--qm-row-bg": "transparent",
       "--qm-row-border": "1px solid var(--qm-hairline)",
       "--qm-row-radius": "0px",
@@ -171,6 +192,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-category-active-bg": "transparent",
       "--qm-category-active-color": "var(--qm-ink)",
       "--qm-category-active-border": "none",
+      "--qm-map-link-icon-display": "none",
       "--qm-nav-icon-display": "none",
     },
     heading: "'Cormorant Garamond',serif",
@@ -219,6 +241,16 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-section-border": "1px solid var(--qm-hairline)",
       "--qm-section-divider": "var(--qm-rule) solid var(--qm-section-ink)",
       "--qm-section-rail": "6px solid var(--qm-secondary)",
+      "--qm-secondary-heading-bg": "var(--qm-card)",
+      "--qm-secondary-heading-border": "1px solid var(--qm-hairline)",
+      "--qm-secondary-heading-color": "var(--qm-ink)",
+      "--qm-secondary-heading-icon-bg": "transparent",
+      "--qm-secondary-heading-icon-color": "var(--qm-ink)",
+      "--qm-secondary-heading-icon-display": "none",
+      "--qm-secondary-heading-icon-radius": "0px",
+      "--qm-secondary-heading-padding": "9px 12px",
+      "--qm-secondary-heading-radius": "3px",
+      "--qm-secondary-heading-rail": "5px solid var(--qm-secondary)",
       "--qm-row-bg": "var(--qm-card)",
       "--qm-row-border": "1px solid var(--qm-hairline)",
       "--qm-row-radius": "3px",
@@ -250,6 +282,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-category-active-bg": "var(--qm-secondary)",
       "--qm-category-active-color": "var(--qm-on-secondary)",
       "--qm-category-active-border": "1px solid transparent",
+      "--qm-map-link-icon-display": "none",
       "--qm-nav-icon-display": "inline-flex",
     },
     heading: "'Yeseva One',serif",
@@ -298,6 +331,16 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-section-border": "none",
       "--qm-section-divider": "var(--qm-rule) solid var(--qm-section-ink)",
       "--qm-section-rail": "6px solid var(--qm-secondary)",
+      "--qm-secondary-heading-bg": "var(--qm-primary)",
+      "--qm-secondary-heading-border": "none",
+      "--qm-secondary-heading-color": "var(--qm-on-primary)",
+      "--qm-secondary-heading-icon-bg": "var(--qm-secondary)",
+      "--qm-secondary-heading-icon-color": "var(--qm-on-secondary)",
+      "--qm-secondary-heading-icon-display": "inline-flex",
+      "--qm-secondary-heading-icon-radius": "8px",
+      "--qm-secondary-heading-padding": "8px 10px",
+      "--qm-secondary-heading-radius": "12px",
+      "--qm-secondary-heading-rail": "none",
       "--qm-row-bg": "var(--qm-card)",
       "--qm-row-border": "none",
       "--qm-row-radius": "14px",
@@ -329,6 +372,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-category-active-bg": "var(--qm-primary)",
       "--qm-category-active-color": "var(--qm-on-primary)",
       "--qm-category-active-border": "1px solid transparent",
+      "--qm-map-link-icon-display": "inline-flex",
       "--qm-nav-icon-display": "inline-flex",
     },
     heading: "'Anton',sans-serif",
@@ -377,6 +421,16 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-section-border": "none",
       "--qm-section-divider": "var(--qm-rule) solid var(--qm-section-ink)",
       "--qm-section-rail": "none",
+      "--qm-secondary-heading-bg": "var(--qm-tint)",
+      "--qm-secondary-heading-border": "1px solid var(--qm-hairline)",
+      "--qm-secondary-heading-color": "var(--qm-emph-ink)",
+      "--qm-secondary-heading-icon-bg": "transparent",
+      "--qm-secondary-heading-icon-color": "var(--qm-emph-ink)",
+      "--qm-secondary-heading-icon-display": "none",
+      "--qm-secondary-heading-icon-radius": "50%",
+      "--qm-secondary-heading-padding": "8px 14px",
+      "--qm-secondary-heading-radius": "999px",
+      "--qm-secondary-heading-rail": "none",
       "--qm-row-bg": "transparent",
       "--qm-row-border": "none",
       "--qm-row-radius": "18px",
@@ -408,6 +462,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-category-active-bg": "var(--qm-tint)",
       "--qm-category-active-color": "var(--qm-emph-ink)",
       "--qm-category-active-border": "1px solid transparent",
+      "--qm-map-link-icon-display": "inline-flex",
       "--qm-nav-icon-display": "inline-flex",
     },
     heading: "'Quicksand',sans-serif",
@@ -457,6 +512,16 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-section-border": "none",
       "--qm-section-divider": "var(--qm-rule) solid var(--qm-section-ink)",
       "--qm-section-rail": "4px solid var(--qm-primary)",
+      "--qm-secondary-heading-bg": "transparent",
+      "--qm-secondary-heading-border": "1px solid var(--qm-ink)",
+      "--qm-secondary-heading-color": "var(--qm-ink)",
+      "--qm-secondary-heading-icon-bg": "var(--qm-primary)",
+      "--qm-secondary-heading-icon-color": "var(--qm-on-primary)",
+      "--qm-secondary-heading-icon-display": "inline-flex",
+      "--qm-secondary-heading-icon-radius": "1px",
+      "--qm-secondary-heading-padding": "7px 9px",
+      "--qm-secondary-heading-radius": "2px",
+      "--qm-secondary-heading-rail": "4px solid var(--qm-primary)",
       "--qm-row-bg": "transparent",
       "--qm-row-border": "1px solid var(--qm-hairline)",
       "--qm-row-radius": "0px",
@@ -488,6 +553,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-category-active-bg": "var(--qm-primary)",
       "--qm-category-active-color": "var(--qm-on-primary)",
       "--qm-category-active-border": "1px solid transparent",
+      "--qm-map-link-icon-display": "inline-flex",
       "--qm-nav-icon-display": "inline-flex",
     },
     heading: "'Bebas Neue',sans-serif",

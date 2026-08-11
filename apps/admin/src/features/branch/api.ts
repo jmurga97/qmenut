@@ -7,6 +7,9 @@ type BranchOptionsInput = { branchId: string; trpc: TrpcOptionsProxy };
 export function getBranchQueryOptions({ branchId, trpc }: BranchOptionsInput) {
   return trpc.admin.branches.get.queryOptions({ branchId });
 }
+export function getAddressSuggestionsQueryOptions({ branchId, query, trpc }: BranchOptionsInput & { query: string }) {
+  return trpc.admin.branches.searchAddresses.queryOptions({ branchId, query });
+}
 export function getSaveBranchMutationOptions(input: BranchOptionsInput & { queryClient: QueryClient }) {
   const { branchId, queryClient, trpc } = input;
   return trpc.admin.branches.save.mutationOptions({

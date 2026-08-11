@@ -1,0 +1,58 @@
+:host {
+  display: block;
+  padding: 2px var(--qm-shell-pad-x, 18px) 8px;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--qm-nav-active-color, var(--qm-accent-ink, #1c1815));
+}
+
+.link {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: max(var(--qm-nav-active-radius, 0px), 50%);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.link:hover {
+  background: color-mix(in oklab, currentColor 9%, transparent);
+  transform: translateY(-1px);
+}
+
+.link:focus-visible {
+  background: color-mix(in oklab, currentColor 9%, transparent);
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
+}

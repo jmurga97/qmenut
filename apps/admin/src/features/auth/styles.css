@@ -1,0 +1,29 @@
+/* Authentication */
+
+.admin-login-shell {
+  display: grid;
+  min-height: 100dvh;
+  padding: 1.25rem;
+  background: var(--color-mc-background);
+  place-items: center;
+}
+
+.admin-login-panel {
+  display: grid;
+  gap: 1.5rem;
+  width: min(100%, 32rem);
+}
+
+.admin-login-header {
+  padding-block-end: 1.5rem;
+}
+
+.admin-login-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-login-header h2 {
+  font-family: "Geist Pixel Line", "Space Mono", monospace;
+  font-size: var(--text-mc-display);
+}

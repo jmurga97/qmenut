@@ -13,6 +13,14 @@ import { RouteErrorState } from "~/shared/components/state/error-state";
 import { LoadingState } from "~/shared/components/state/loading-state";
 import { NotFoundState } from "~/shared/components/state/not-found-state";
 import "./styles/global.css";
+import "../shared/components/forms/styles.css";
+import "../features/auth/styles.css";
+import "../features/branch/styles.css";
+import "../features/languages/styles.css";
+import "../features/loyalty/styles.css";
+import "../features/overview/styles.css";
+import "../features/qr/styles.css";
+import "../features/theme/styles.css";
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({

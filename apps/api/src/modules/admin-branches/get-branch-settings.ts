@@ -11,6 +11,8 @@ export interface BranchSettings {
   id: string;
   name: string;
   address: string | null;
+  latitude: number | null;
+  longitude: number | null;
   phone: string | null;
   whatsapp: string | null;
   socialLinksJson: string | null;
@@ -51,6 +53,8 @@ export async function getBranchSettings({
     id: branch.id,
     name: branch.name,
     address: branch.address,
+    latitude: branch.latitude,
+    longitude: branch.longitude,
     phone: branch.phone,
     whatsapp: branch.whatsapp,
     socialLinksJson: branch.socialLinksJson,

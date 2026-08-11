@@ -29,6 +29,11 @@ export const envSchema = z.object({
   DEEPL_API_KEY: z.string().trim().min(1).optional(),
   DEEPL_API_URL: z.url().default("https://api-free.deepl.com"),
   E2E_FIXED_OTP: z.string().trim().optional(),
+  GEOCODING_LIMITER: z.custom<RateLimit>(
+    (value) =>
+      typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",
+    "El binding GEOCODING_LIMITER debe implementar limit",
+  ),
   DB: z.custom<D1Database>((value) => typeof value === "object" && value !== null, {
     error: "El binding DB es obligatorio",
   }),
@@ -55,6 +60,7 @@ export const envSchema = z.object({
   ADMIN_APP_URL: z.url(),
   SENTRY_DSN: z.string().trim().optional(),
   LOG_LEVEL: logLevelSchema.default("info"),
+  MAPTILER_API_KEY: z.string().trim().min(1).optional(),
   NODE_ENV: nodeEnvSchema.default("development"),
 });
 

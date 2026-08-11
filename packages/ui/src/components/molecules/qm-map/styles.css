@@ -1,0 +1,130 @@
+:host {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+  background: var(--qm-bg, #faf8f3);
+  font-family: var(--qm-body, sans-serif);
+  isolation: isolate;
+  touch-action: pan-y !important;
+}
+
+.leaflet-tile-pane {
+  opacity: 0.72;
+  filter: grayscale(1) contrast(0.72) brightness(1.12);
+  mix-blend-mode: multiply;
+}
+
+.leaflet-tile {
+  background: transparent;
+}
+
+.leaflet-control-attribution {
+  max-width: 100%;
+  border-radius: 3px 0 0;
+  background: color-mix(in oklab, var(--qm-card, #fff) 88%, transparent) !important;
+  color: var(--qm-muted, #6f6a62);
+  font-size: 8px;
+  line-height: 1.25;
+  text-align: right;
+  white-space: normal;
+}
+
+.leaflet-control-attribution a {
+  color: var(--qm-ink, #1c1815);
+}
+
+.qm-map-marker {
+  display: grid !important;
+  place-items: center;
+  border: 0;
+  background: transparent;
+}
+
+.marker-dot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--qm-card, #fff);
+  border-radius: 50%;
+  background: var(--qm-emph, var(--qm-secondary, #555));
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--qm-ink, #1c1815) 18%, transparent),
+    0 4px 12px color-mix(in oklab, var(--qm-ink, #1c1815) 24%, transparent);
+}
+
+.marker-dot--current {
+  background: var(--qm-primary, #333);
+  box-shadow:
+    0 0 0 5px color-mix(in oklab, var(--qm-primary, #333) 22%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--qm-ink, #1c1815) 20%, transparent),
+    0 5px 14px color-mix(in oklab, var(--qm-ink, #1c1815) 28%, transparent);
+}
+
+.leaflet-marker-icon:focus-visible {
+  border-radius: 50%;
+  outline: 3px solid var(--qm-accent-ink, var(--qm-ink, #1c1815));
+  outline-offset: 4px;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: color-mix(in oklab, var(--qm-card, #fff) 94%, var(--qm-bg, #faf8f3));
+  color: var(--qm-ink, #1c1815);
+}
+
+.leaflet-popup-content-wrapper {
+  border: var(--qm-surface-border, 1px solid var(--qm-hairline, #ddd));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 4px));
+  box-shadow: 0 16px 34px color-mix(in oklab, var(--qm-ink, #1c1815) 22%, transparent);
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px 13px;
+}
+
+.leaflet-popup-tip-container {
+  display: none;
+}
+
+.marker-popup {
+  display: grid;
+  gap: 6px;
+}
+
+.marker-popup p {
+  margin: 0;
+  color: var(--qm-muted, #777);
+  font-size: var(--qm-text-sm, 12px);
+  line-height: 1.4;
+}
+
+.marker-popup .maps-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-self: start;
+  margin-top: 3px;
+  color: var(--qm-accent-ink, var(--qm-ink, #1c1815));
+  font-size: var(--qm-text-xs, 11px);
+  font-weight: 700;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.maps-link-icon {
+  display: var(--qm-map-link-icon-display, none);
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leaflet-fade-anim .leaflet-popup {
+    transition: none;
+  }
+}

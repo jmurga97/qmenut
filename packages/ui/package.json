@@ -180,6 +180,18 @@
       "types": "./src/components/molecules/qm-location/react.ts",
       "import": "./src/components/molecules/qm-location/react.ts"
     },
+    "./components/qm-map": {
+      "types": "./src/components/molecules/qm-map/index.ts",
+      "import": "./src/components/molecules/qm-map/index.ts"
+    },
+    "./components/qm-social-links": {
+      "types": "./src/components/molecules/qm-social-links/index.ts",
+      "import": "./src/components/molecules/qm-social-links/index.ts"
+    },
+    "./components/qm-social-links/react": {
+      "types": "./src/components/molecules/qm-social-links/react.ts",
+      "import": "./src/components/molecules/qm-social-links/react.ts"
+    },
     "./components/qm-code-input": {
       "types": "./src/components/molecules/qm-code-input/index.ts",
       "import": "./src/components/molecules/qm-code-input/index.ts"
@@ -304,6 +316,7 @@
   "dependencies": {
     "@lit/react": "^1.0.8",
     "culori": "^4.0.2",
+    "leaflet": "1.9.4",
     "lit": "^3.3.3",
     "motion": "^12.43.0"
   },
@@ -312,6 +325,7 @@
   },
   "devDependencies": {
     "@types/culori": "^4.0.1",
+    "@types/leaflet": "^1.9.21",
     "@types/react": "^19.2.9",
     "react": "^19.2.3",
     "typescript": "^5.9.3"

@@ -1,0 +1,109 @@
+/* Branch settings and address lookup */
+
+.admin-address-autocomplete {
+  position: relative;
+  min-width: 0;
+}
+
+.admin-address-results {
+  position: absolute;
+  z-index: 20;
+  top: 4rem;
+  right: 0;
+  left: 0;
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--color-mc-border-visible);
+  border-radius: 0.5rem;
+  background: var(--color-mc-surface-raised);
+  box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--color-mc-background) 68%, transparent);
+}
+
+.admin-address-option {
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 0;
+  border-bottom: 1px solid var(--color-mc-border);
+  background: transparent;
+  color: var(--color-mc-text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-address-option:hover,
+.admin-address-option[aria-selected="true"] {
+  background: var(--color-mc-surface);
+  color: var(--color-mc-text-display);
+}
+
+.admin-address-option:focus-visible {
+  outline: 2px solid var(--color-mc-interactive);
+  outline-offset: -2px;
+}
+
+.admin-address-state,
+.admin-address-attribution {
+  padding: 0.7rem 0.75rem;
+  color: var(--color-mc-text-secondary);
+  font-size: var(--text-mc-body-sm);
+}
+
+.admin-address-attribution {
+  color: var(--color-mc-text-disabled);
+  font-family: "Space Mono", monospace;
+  font-size: var(--text-mc-caption);
+}
+
+.admin-address-linked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  color: var(--color-mc-success);
+  font-size: var(--text-mc-body-sm);
+}
+
+.admin-address-linked button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-mc-text-secondary);
+  font-size: var(--text-mc-caption);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.admin-field-hint {
+  margin: 0.5rem 0 0;
+  color: var(--color-mc-text-disabled);
+  font-size: var(--text-mc-caption);
+  line-height: 1.4;
+}
+
+.admin-schedule-grid {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.admin-schedule-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) auto auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.admin-schedule-row input[type="time"] {
+  min-height: 2.5rem;
+  border: 1px solid var(--color-mc-border-visible);
+  border-radius: 0.5rem;
+  background: var(--color-mc-surface);
+  color: var(--color-mc-text-display);
+  padding: 0.375rem 0.625rem;
+}
+
+.admin-schedule-row input[type="time"]:disabled {
+  opacity: 0.4;
+}

@@ -20,6 +20,7 @@ const componentStyles = createComponentStyles(componentStylesText);
  * contract — moot here since `qm-chip` already supplies that border itself via `--qm-ink`.
  */
 export interface QmLocationValue {
+  id?: string;
   name: string;
   addr: string;
   status: string;
@@ -31,8 +32,8 @@ export interface QmLocationValue {
   whatsappLabel?: string;
   mapHref?: string;
   mapLabel?: string;
-  socialHref?: string;
-  socialLabel?: string;
+  menuHref?: string;
+  menuLabel?: string;
 }
 
 export class QmLocation extends LitElement {
@@ -71,7 +72,7 @@ export class QmLocation extends LitElement {
             ${this.renderAction(this.value?.phoneHref, this.value?.phoneLabel)}
             ${this.renderAction(this.value?.whatsappHref, this.value?.whatsappLabel)}
             ${this.renderAction(this.value?.mapHref, this.value?.mapLabel)}
-            ${this.renderAction(this.value?.socialHref, this.value?.socialLabel)}
+            ${this.renderAction(this.value?.menuHref, this.value?.menuLabel)}
           </nav>
         </div>
       </div>

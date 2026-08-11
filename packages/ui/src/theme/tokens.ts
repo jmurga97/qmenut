@@ -51,6 +51,7 @@ export interface QmThemeTokens {
   "--qm-content-bottom": string;
   "--qm-section-gap": string;
   "--qm-list-gap": string;
+  "--qm-map-link-icon-display": string;
   "--qm-touch-min": string;
   "--qm-header-pad-x": string;
   "--qm-header-pad-top": string;
@@ -66,6 +67,16 @@ export interface QmThemeTokens {
   "--qm-section-border": string;
   "--qm-section-divider": string;
   "--qm-section-rail": string;
+  "--qm-secondary-heading-bg": string;
+  "--qm-secondary-heading-border": string;
+  "--qm-secondary-heading-color": string;
+  "--qm-secondary-heading-icon-bg": string;
+  "--qm-secondary-heading-icon-color": string;
+  "--qm-secondary-heading-icon-display": string;
+  "--qm-secondary-heading-icon-radius": string;
+  "--qm-secondary-heading-padding": string;
+  "--qm-secondary-heading-radius": string;
+  "--qm-secondary-heading-rail": string;
   "--qm-row-bg": string;
   "--qm-row-border": string;
   "--qm-row-radius": string;

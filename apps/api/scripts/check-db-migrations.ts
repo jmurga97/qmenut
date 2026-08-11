@@ -1,6 +1,5 @@
 import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 
 interface DrizzleJournal {
   entries: unknown[];
@@ -8,8 +7,9 @@ interface DrizzleJournal {
 
 const apiDirectory = resolve(import.meta.dir, "..");
 const migrationMetaDirectory = join(apiDirectory, "migrations", "meta");
-const temporaryDirectory = await mkdtemp(join(tmpdir(), "qmenut-drizzle-check-"));
+const temporaryDirectory = await mkdtemp(join(apiDirectory, ".drizzle-check-"));
 const temporaryMetaDirectory = join(temporaryDirectory, "meta");
+const temporaryOutputDirectory = relative(apiDirectory, temporaryDirectory);
 
 try {
   await cp(migrationMetaDirectory, temporaryMetaDirectory, { recursive: true });
@@ -26,7 +26,7 @@ try {
       "--schema",
       "../../packages/db/src/schema/index.ts",
       "--out",
-      temporaryDirectory,
+      temporaryOutputDirectory,
       "--name",
       "schema_check",
       "--prefix",

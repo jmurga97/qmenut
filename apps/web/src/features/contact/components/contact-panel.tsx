@@ -17,18 +17,23 @@ export function ContactPanel({ content, hostRef, messageValue, nameValue, submit
     <div ref={hostRef}>
       <QmContactPanel
         value={{
-          mapLabel: content.mapLabel,
+          map: content.map,
+          ubicacionLabel: content.mapSectionLabel,
+          sedesLabel: content.sitesSectionLabel,
+          mensajeLabel: content.messageSectionLabel,
           nameLabel: content.form.nameLabel,
           namePlaceholder: content.form.namePlaceholder,
           messageLabel: content.form.messageLabel,
           messagePlaceholder: content.form.messagePlaceholder,
+          socialLinks: content.socialLinks,
+          socialLinksLabel: content.socialLinksLabel,
         }}
         nameValue={nameValue}
         messageValue={messageValue}
         submitLabel={submitLabel}
       >
         {content.locations.map((location) => (
-          <QmLocation key={location.name} slot="sedes" value={location} />
+          <QmLocation key={location.id ?? location.name} slot="sedes" value={location} />
         ))}
       </QmContactPanel>
     </div>

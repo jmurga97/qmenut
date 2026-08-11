@@ -1,0 +1,21 @@
+/* ===== DEV ONLY — dev-template-switcher ===== */
+
+.dev-template-switcher {
+  position: fixed;
+  right: 16px;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  z-index: 9999;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 15, 12, 0.86);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  color: #eceae4;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+body:has(qm-dish-modal[open]) .dev-template-switcher {
+  pointer-events: none;
+  opacity: 0;
+}
