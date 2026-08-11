@@ -7,6 +7,8 @@ import { createComponentStyles } from "../../../internal/component-styles";
 
 export const QM_HEADING_TAG_NAME = "qm-heading";
 
+export type QmHeadingVariant = "primary" | "secondary";
+
 const componentStyles = createComponentStyles(componentStylesText);
 
 /**
@@ -25,7 +27,20 @@ export class QmHeading extends LitElement {
   @property({ type: Boolean })
   divider = true;
 
+  @property({ type: String, reflect: true })
+  variant: QmHeadingVariant = "primary";
+
   render() {
+    if (this.variant === "secondary") {
+      return html`
+        ${this.eyebrow ? html`<span part="eyebrow" class="eyebrow">${this.eyebrow}</span>` : nothing}
+        <span part="secondary" class="secondary">
+          <span part="icon" class="secondary-icon" aria-hidden="true"><slot name="icon"></slot></span>
+          <span part="title" class="title" role="heading" aria-level="2">${this.text}</span>
+        </span>
+      `;
+    }
+
     return html`
       ${this.eyebrow ? html`<span part="eyebrow" class="eyebrow">${this.eyebrow}</span>` : nothing}
       <span part="title" class="title" role="heading" aria-level="2">${this.text}</span>
@@ -40,7 +55,7 @@ export function defineQmHeading() {
   }
 }
 
-export type QmHeadingArgs = Partial<Pick<QmHeading, "text" | "eyebrow" | "divider">>;
+export type QmHeadingArgs = Partial<Pick<QmHeading, "text" | "eyebrow" | "divider" | "variant">>;
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -1,7 +1,7 @@
 import { QmFeatured } from "@qmenut/ui/components/qm-featured/react";
 import { QmHeading } from "@qmenut/ui/components/qm-heading/react";
 import { TEMPLATES } from "@qmenut/ui/theme/presets";
-import { ChefHat } from "lucide-react";
+import { ChefHat, Sparkles, Tag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { PromosList } from "~/features/promos/components/promos-list";
@@ -21,7 +21,7 @@ export function HighlightsPage() {
   const hasRecommended = content.recommended.dishes.length > 0;
   const hasPromos = content.promos.promos.length > 0;
 
-  if(!hasRecommended && !hasPromos) {
+  if (!hasRecommended && !hasPromos) {
     return (
       <div className="highlights-empty">
         <span className="highlights-empty__icon" aria-hidden="true">
@@ -42,16 +42,20 @@ export function HighlightsPage() {
       ) : null}
       {hasRecommended ? (
         <section className="highlights-section">
-          <QmHeading text={t("destacados.page.recommendedTitle")} />
+          <QmHeading text={t("destacados.page.recommendedTitle")} variant="secondary">
+            <Sparkles slot="icon" aria-hidden="true" strokeWidth={2} />
+          </QmHeading>
           <RecommendedList content={content.recommended} showDishPhotos={showDishPhotos} />
         </section>
       ) : null}
       {hasPromos ? (
         <section className="highlights-section">
-          <QmHeading text={content.promos.title} />
+          <QmHeading text={content.promos.title} variant="secondary">
+            <Tag slot="icon" aria-hidden="true" strokeWidth={2} />
+          </QmHeading>
           <PromosList content={content.promos} />
         </section>
       ) : null}
     </div>
-  )
+  );
 }

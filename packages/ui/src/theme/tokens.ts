@@ -67,6 +67,16 @@ export interface QmThemeTokens {
   "--qm-section-border": string;
   "--qm-section-divider": string;
   "--qm-section-rail": string;
+  "--qm-secondary-heading-bg": string;
+  "--qm-secondary-heading-border": string;
+  "--qm-secondary-heading-color": string;
+  "--qm-secondary-heading-icon-bg": string;
+  "--qm-secondary-heading-icon-color": string;
+  "--qm-secondary-heading-icon-display": string;
+  "--qm-secondary-heading-icon-radius": string;
+  "--qm-secondary-heading-padding": string;
+  "--qm-secondary-heading-radius": string;
+  "--qm-secondary-heading-rail": string;
   "--qm-row-bg": string;
   "--qm-row-border": string;
   "--qm-row-radius": string;
