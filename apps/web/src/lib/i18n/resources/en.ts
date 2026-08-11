@@ -15,6 +15,8 @@ export default {
     dishCount_one: "{{count}} dish",
     dishCount_other: "{{count}} dishes",
     emptyLabel: "No dishes available",
+    extrasLabel: "Extras",
+    allergensLabel: "Allergens",
     heroLabel: "Today's menu",
     photoLabel: "Dish photo",
     recommended: "Recommended",
