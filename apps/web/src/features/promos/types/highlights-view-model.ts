@@ -1,7 +1,9 @@
 import type { QmFeaturedValue } from "@qmenut/ui/components/qm-featured/react";
+import type { MenuDishBadgeViewModel } from "~/features/menu/types/menu-view-model";
 import type { PromosContentViewModel } from "~/features/promos/types/promos-view-model";
 
 export interface RecommendedDishViewModel {
+  badge?: MenuDishBadgeViewModel;
   desc: string;
   featured: boolean;
   name: string;
@@ -9,7 +11,6 @@ export interface RecommendedDishViewModel {
   photoUrl?: string;
   price: string;
   rowKey: string;
-  tag?: string;
 }
 
 export interface RecommendedContentViewModel {

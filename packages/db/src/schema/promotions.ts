@@ -5,7 +5,15 @@ import { branches } from "./branches";
 
 const epochMilliseconds = sql`(unixepoch() * 1000)`;
 
-const promotionTypes = ["percentage_discount", "special_price", "daily_menu", "happy_hour", "two_for_one"] as const;
+export const promotionTypes = [
+  "percentage_discount",
+  "special_price",
+  "daily_menu",
+  "happy_hour",
+  "two_for_one",
+] as const;
+
+export type PromotionType = (typeof promotionTypes)[number];
 
 export const promotions = sqliteTable(
   "promotions",

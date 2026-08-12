@@ -1,14 +1,21 @@
 :host {
   display: inline-block;
+  max-width: 100%;
 }
 
 .text {
   display: inline-block;
-  padding: 3px 8px;
+  box-sizing: border-box;
+  max-width: var(--qm-badge-max-width, 100%);
+  padding: var(--qm-badge-padding, 3px 8px);
   font-family: var(--qm-body, sans-serif);
-  font-size: var(--qm-text-xs, 11px);
+  font-size: var(--qm-badge-font-size, var(--qm-text-xs, 11px));
   font-weight: var(--qm-badge-weight, 700);
-  letter-spacing: -0.5px;
+  line-height: var(--qm-badge-line-height, 1.2);
+  letter-spacing: var(--qm-badge-letter-spacing, -0.5px);
+  text-transform: var(--qm-badge-text-transform, none);
+  overflow-wrap: var(--qm-badge-overflow-wrap, anywhere);
+  white-space: var(--qm-badge-white-space, normal);
   background: var(--qm-badge-bg, transparent);
   color: var(--qm-badge-color, #1c1815);
   border: var(--qm-badge-bd, 1px solid #1c1815);

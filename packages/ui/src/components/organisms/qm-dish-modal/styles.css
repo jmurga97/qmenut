@@ -188,18 +188,15 @@
 }
 
 .tag {
-  display: inline-flex;
-  padding: 4px 9px;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
   margin-bottom: 10px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--qm-tag-color, var(--qm-on-secondary, #fff));
-  background: var(--qm-tag-bg, var(--qm-emph, #1c1815));
-  border: var(--qm-tag-bd, none);
-  border-radius: var(--qm-badge-radius, 0px);
+  --qm-badge-font-size: 0.75rem;
+  --qm-badge-letter-spacing: 0.08em;
+  --qm-badge-line-height: 1.2;
+  --qm-badge-padding: 4px 9px;
+  --qm-badge-text-transform: uppercase;
 }
 
 .identity {

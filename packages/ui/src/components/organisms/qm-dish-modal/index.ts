@@ -7,6 +7,7 @@ import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
 import { FocusTrap } from "../../../internal/focus-trap";
 import { QmElement } from "../../../internal/qm-element";
+import { defineQmBadge } from "../../atoms/qm-badge";
 import { defineQmImage } from "../../atoms/qm-image";
 import { defineQmPrice } from "../../atoms/qm-price";
 
@@ -310,7 +311,7 @@ export class QmDishModal extends QmElement {
   private renderLead(): unknown {
     return html`
       <div part="lead" class="lead">
-        ${this.tag ? html`<div part="tag" class="tag">${this.tag}</div>` : nothing}
+        ${this.tag ? html`<qm-badge part="tag" class="tag" .text=${this.tag}></qm-badge>` : nothing}
         <div class="identity">
           <h2 part="title" id=${this.resolvedTitleId} class="title">${this.name}</h2>
           ${
@@ -396,6 +397,7 @@ export class QmDishModal extends QmElement {
 }
 
 export function defineQmDishModal() {
+  defineQmBadge();
   defineQmImage();
   defineQmPrice();
 

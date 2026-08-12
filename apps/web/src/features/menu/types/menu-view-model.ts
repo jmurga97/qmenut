@@ -6,8 +6,14 @@ export interface MenuDishExtraViewModel {
   price: string;
 }
 
+export interface MenuDishBadgeViewModel {
+  compactText: string;
+  fullText: string;
+}
+
 export interface MenuDishViewModel {
   allergens?: AllergenCode[];
+  badge?: MenuDishBadgeViewModel;
   desc: string;
   descHtml: string;
   extras?: MenuDishExtraViewModel[];
@@ -16,7 +22,6 @@ export interface MenuDishViewModel {
   photoUrl?: string;
   price: string;
   rowKey: string;
-  tag?: string;
 }
 
 export interface MenuSectionViewModel {

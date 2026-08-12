@@ -47,7 +47,7 @@ export function MenuSection({ index, onSelectDish, section, showDishPhotos }: Me
                 photo: showDishPhotos,
                 photoUrl: photoUrl(dish.photoUrl, DISH_THUMB_WIDTH_PX),
                 price: dish.price,
-                tag: dish.tag,
+                tag: dish.badge?.compactText,
               }}
             />
           </button>

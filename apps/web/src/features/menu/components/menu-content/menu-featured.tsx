@@ -31,7 +31,7 @@ export function MenuFeatured({ featured, featuredPromo, onSelectDish, showDishPh
               photo: showDishPhotos,
               photoUrl: photoUrl(featured.photoUrl, FEATURED_IMAGE_WIDTH_PX),
               price: featured.price,
-              tag: featured.tag,
+              tag: featured.badge?.fullText,
             }}
           />
         </button>

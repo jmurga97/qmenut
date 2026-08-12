@@ -3,9 +3,10 @@ import { and, asc, eq, isNull } from "drizzle-orm";
 import { promotionTargets, promotions } from "../schema/promotions";
 
 import type { DrizzleDb } from "../client";
+import type { PromotionType } from "../schema/promotions";
 import type { BatchItem } from "drizzle-orm/batch";
 
-export type PromotionType = "percentage_discount" | "special_price" | "daily_menu" | "happy_hour" | "two_for_one";
+export type { PromotionType } from "../schema/promotions";
 export type PromotionScope = "info" | "branch" | "category" | "dish";
 export type PromotionStatus = "active" | "inactive" | "expired";
 export type PromotionTargetType = "dish" | "category";

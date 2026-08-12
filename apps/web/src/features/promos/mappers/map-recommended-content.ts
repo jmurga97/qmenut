@@ -20,6 +20,7 @@ export function mapRecommendedDish({
   const base = mapDish({ dish, formatPrice, t });
 
   return {
+    badge: base.badge,
     desc: base.desc,
     featured: dish.isFeatured,
     name: base.name,
@@ -27,6 +28,5 @@ export function mapRecommendedDish({
     photoUrl: base.photoUrl,
     price: base.price,
     rowKey: base.rowKey,
-    tag: base.tag,
   };
 }

@@ -1,3 +1,4 @@
+import { promotionTypes } from "@qmenut/db/schema/promotions";
 import { z } from "zod";
 
 const nullableText = z
@@ -19,7 +20,7 @@ export const promotionTargetSchema = z.object({
  */
 export const promotionWriteSchema = z
   .object({
-    type: z.enum(["percentage_discount", "special_price", "daily_menu", "happy_hour", "two_for_one"]),
+    type: z.enum(promotionTypes),
     scope: z.enum(["info", "branch", "category", "dish"]),
     name: z.string().trim().min(1).max(200),
     description: nullableText,

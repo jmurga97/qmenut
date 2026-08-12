@@ -32,7 +32,7 @@ export function MenuDishModal({ dish, onClose }: MenuDishModalProps) {
       closeLabel={t("menu.closeLabel")}
       price={dish.price}
       oldPrice={dish.oldPrice}
-      tag={dish.tag}
+      tag={dish.badge?.fullText}
       allergensLabel={t("menu.allergensLabel")}
       onQmClose={onClose}
     >
