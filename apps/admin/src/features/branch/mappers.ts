@@ -14,6 +14,7 @@ export function toBranchFormValues(settings: BranchSettings): BranchFormValues {
     longitude: settings.longitude === null ? "" : String(settings.longitude),
     phone: settings.phone ?? "",
     whatsapp: settings.whatsapp ?? "",
+    logoUrl: settings.logoUrl ?? "",
     legalName: settings.legalName ?? "",
     taxId: settings.taxId ?? "",
     legalAddress: settings.legalAddress ?? "",
@@ -50,6 +51,7 @@ export function toBranchInput({ branchId, settings, values }: BranchMapperInput)
       longitude,
       phone: values.phone,
       whatsapp: values.whatsapp,
+      logoUrl: values.logoUrl,
       socialLinksJson: settings.socialLinksJson ?? undefined,
     },
     legal: {

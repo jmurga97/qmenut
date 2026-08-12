@@ -33,14 +33,25 @@ all public-content changes, not only menu rows.
 Only GET requests to `CACHEABLE_ROUTES` are eligible. A leading locale segment is removed
 before matching, so `/en/promos` follows `/promos` policy.
 
-| Route after locale removal                            | Fresh edge TTL | Stale window |
-| ----------------------------------------------------- | -------------: | -----------: |
-| `/`, `/promos`                                        |     15 minutes |     24 hours |
-| `/contacto`, `/puntos`, `/aviso-legal`, `/privacidad` |       24 hours |     24 hours |
-| `/robots.txt`, `/sitemap.xml`                         |       24 hours |     24 hours |
+| Route after locale removal                                                      | Fresh edge TTL | Stale window |
+| ------------------------------------------------------------------------------- | -------------: | -----------: |
+| `/`, `/promos`                                                                  |     15 minutes |     24 hours |
+| `/contacto`, `/puntos`, `/aviso-legal`, `/privacidad`                           |       24 hours |     24 hours |
+| `/robots.txt`, `/sitemap.xml`                                                   |       24 hours |     24 hours |
+| `/offline`                                                                      |       24 hours |     24 hours |
+| `/site.webmanifest`, `/icon.svg`, `/icon-maskable.svg`, `/apple-touch-icon.png` |       24 hours |     24 hours |
 
 The shorter menu/promotions TTL limits drift around time-bounded promotion windows.
 Unlisted paths and non-GET methods return `X-QMenut-Cache: BYPASS`.
+
+The PWA routes are generated per tenant from `menu.publicData` plus the KV theme, so they
+share the same invalidation path as the HTML: saving a branch or a theme bumps
+`menuVersion:{host}`, which rotates the cache key for the manifest and icons too. See
+[../apps/web-pwa.md](../apps/web-pwa.md).
+
+Note that the browser's service worker adds a **third** cache layer in front of these two.
+It is per-origin and per-device, and it is deliberately not invalidated by `menuVersion`:
+HTML is fetched network-first, so a reachable network always wins.
 
 ## Stale-while-revalidate mechanics
 

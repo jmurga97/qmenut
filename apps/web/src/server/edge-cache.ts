@@ -20,8 +20,13 @@ const CACHEABLE_ROUTES = new Set([
   "puntos",
   "aviso-legal",
   "privacidad",
+  "offline",
   "robots.txt",
   "sitemap.xml",
+  "site.webmanifest",
+  "icon.svg",
+  "icon-maskable.svg",
+  "apple-touch-icon.png",
 ]);
 const revalidations = new Map<string, Promise<void>>();
 

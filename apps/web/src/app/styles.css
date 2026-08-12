@@ -6,3 +6,5 @@
 @import "../shared/styles/skeleton.css";
 @import "../shared/styles/dev.css";
 @import "../features/legal/styles.css";
+@import "../features/install/styles.css";
+@import "../features/offline/styles.css";

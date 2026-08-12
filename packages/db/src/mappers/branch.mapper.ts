@@ -30,6 +30,7 @@ export function mapBranch({
     phone: row.phone,
     whatsapp: row.whatsapp,
     socialLinks: parseSocialLinks(row.socialLinksJson),
+    logoUrl: row.logoUrl,
     customDomain: row.customDomain,
     currency: row.currency,
     latitude: row.latitude,

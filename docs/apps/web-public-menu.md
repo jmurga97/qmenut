@@ -79,6 +79,10 @@ Related helpers are:
 - `sitemap[.]xml.ts`: localized alternates for every public route. Its `lastmod` reads
   `menuVersion:{host}`, the same KV version used in the edge-cache key.
 
+The same server-handler pattern also serves the per-tenant web app manifest and icons
+(`site[.]webmanifest.ts`, `icon[.]svg.ts`, `icon-maskable[.]svg.ts`,
+`apple-touch-icon[.]png.ts`) — see [web-pwa.md](web-pwa.md).
+
 ## Client and SSR bundle shape
 
 `apps/web/vite.config.ts` manually splits the client output into React, data

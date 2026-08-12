@@ -14,7 +14,7 @@ export const Route = createFileRoute("/robots.txt")({
           });
         }
 
-        const body = `User-agent: *\nAllow: /\nDisallow: /_server/\nSitemap: https://${host}/sitemap.xml\n`;
+        const body = `User-agent: *\nAllow: /\nDisallow: /_server/\nDisallow: /offline\nSitemap: https://${host}/sitemap.xml\n`;
 
         return new Response(body, { headers: { "content-type": "text/plain; charset=utf-8" } });
       },

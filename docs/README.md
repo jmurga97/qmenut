@@ -44,6 +44,7 @@ Start here, in order:
 ### Apps
 
 - [apps/web-public-menu.md](apps/web-public-menu.md) — the public menu SSR worker ✅
+- [apps/web-pwa.md](apps/web-pwa.md) — installable menu: manifest, icons, service worker, offline ✅
 - [apps/admin.md](apps/admin.md) — the owner dashboard SPA 🧩
 - The deployable marketing site `apps/landing` is covered in [architecture.md](architecture.md).
 
@@ -51,6 +52,7 @@ Start here, in order:
 
 - [design/loyalty-ux.md](design/loyalty-ux.md) — loyalty UX decisions & rationale
 - [operations/onboarding-intake.md](operations/onboarding-intake.md) — data to collect before onboarding a restaurant
+- [operations/branch-geocoding.md](operations/branch-geocoding.md) — Leaflet maps, MapTiler autocomplete, key handling ✅
 - [operations/database-migrations.md](operations/database-migrations.md) — class: Drizzle schema → generated SQL → D1 ✅
 - [operations/deployment.md](operations/deployment.md) — zero-to-live Cloudflare runbook ✅
 - [operations/performance-and-caching.md](operations/performance-and-caching.md) — edge/browser caching and invalidation ✅
