@@ -48,11 +48,10 @@ header h2 {
 }
 .eyebrow {
   margin: 0;
-  color: var(--qm-muted, #777);
-  font-size: var(--qm-text-2xs, 10px);
-  font-weight: 800;
-  letter-spacing: var(--qm-eyebrow-ls, 1px);
-  text-transform: var(--qm-eyebrow-tt, uppercase);
+  --qm-eyebrow-color: var(--qm-muted, #777);
+  --qm-eyebrow-font-size: var(--qm-text-2xs, 10px);
+  --qm-eyebrow-font-weight: 800;
+  --qm-eyebrow-ls: 1px;
 }
 .progress strong {
   color: var(--qm-emph-ink, var(--qm-secondary, #555));
@@ -60,31 +59,13 @@ header h2 {
   font-weight: 900;
 }
 .stamp-action {
-  display: flex;
   width: 100%;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
   margin-top: 15px;
-  padding: 8px 12px;
-  border: 0;
-  border-radius: var(--qm-radius, 0px);
-  background: var(--qm-primary, #333);
-  color: var(--qm-on-primary, #fff);
-  cursor: pointer;
-  font-size: var(--qm-text-xs, 11px);
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  transition: transform 100ms ease-out;
-}
-.stamp-action:active {
-  transform: scale(0.98);
-}
-.stamp-action:focus-visible {
-  outline: 2px solid var(--qm-ink, #1c1815);
-  outline-offset: 2px;
+  --qm-button-active-scale: 0.98;
+  --qm-button-font-size: var(--qm-text-xs, 11px);
+  --qm-button-letter-spacing: 0.8px;
+  --qm-button-min-height: 44px;
+  --qm-button-padding: 8px 12px;
 }
 .stamp-glyph {
   position: relative;
@@ -123,6 +104,9 @@ header h2 {
 .card--redeemed .eyebrow,
 .card--redeemed .redeemed-footer {
   color: currentcolor;
+}
+.card--redeemed .eyebrow {
+  --qm-eyebrow-color: currentcolor;
 }
 .check {
   display: grid;

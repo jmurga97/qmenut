@@ -5,6 +5,7 @@ import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
 import { QmElement } from "../../../internal/qm-element";
+import { defineQmBadge } from "../../atoms/qm-badge";
 
 export const QM_REDEEM_WAIT_TAG_NAME = "qm-redeem-wait";
 export type QmRedeemWaitStatus = "expired" | "pending" | "rejected";
@@ -31,7 +32,7 @@ export class QmRedeemWait extends QmElement {
     const indicator = this.renderIndicator();
     return html`
       <section class="card" aria-live="polite" aria-busy=${pending ? "true" : "false"}>
-        <div class="badge">${this.badge}</div>
+        <qm-badge part="badge" class="badge" .text=${this.badge}></qm-badge>
         <div class=${pending ? "spinner" : "terminal"} aria-hidden="true">${indicator}</div>
         <h2>${this.title}</h2>
         <p class="hint">${this.hint}</p>
@@ -53,6 +54,7 @@ export class QmRedeemWait extends QmElement {
 }
 
 export function defineQmRedeemWait() {
+  defineQmBadge();
   if (!customElements.get(QM_REDEEM_WAIT_TAG_NAME)) {
     customElements.define(QM_REDEEM_WAIT_TAG_NAME, QmRedeemWait);
   }

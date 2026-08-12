@@ -2,18 +2,18 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--qm-button-gap, 8px);
   width: 100%;
-  min-height: 44px;
-  padding: 12px 20px;
+  min-height: var(--qm-button-min-height, 44px);
+  padding: var(--qm-button-padding, 12px 20px);
   border: var(--qm-bw, 1px) solid transparent;
   border-radius: var(--qm-radius, 0px);
   background: transparent;
   cursor: pointer;
   font-family: var(--qm-body, sans-serif);
-  font-size: var(--qm-text-sm, 12px);
+  font-size: var(--qm-button-font-size, var(--qm-text-sm, 12px));
   font-weight: 800;
-  letter-spacing: 1.5px;
+  letter-spacing: var(--qm-button-letter-spacing, 1.5px);
   text-transform: uppercase;
   transition:
     opacity 150ms,
@@ -40,9 +40,9 @@ button[data-variant="ghost"] {
 }
 
 button[data-size="sm"] {
-  min-height: 36px;
-  padding: 8px 14px;
-  font-size: var(--qm-text-xs, 11px);
+  min-height: var(--qm-button-min-height, 36px);
+  padding: var(--qm-button-padding, 8px 14px);
+  font-size: var(--qm-button-font-size, var(--qm-text-xs, 11px));
 }
 
 button:disabled {
@@ -51,7 +51,7 @@ button:disabled {
 }
 
 button:not(:disabled):active {
-  transform: scale(0.97);
+  transform: scale(var(--qm-button-active-scale, 0.97));
 }
 
 button:focus-visible {

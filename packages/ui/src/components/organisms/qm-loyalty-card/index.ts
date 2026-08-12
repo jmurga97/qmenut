@@ -5,6 +5,8 @@ import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
 import { QmElement } from "../../../internal/qm-element";
+import { defineQmButton } from "../../atoms/qm-button";
+import { defineQmEyebrow } from "../../atoms/qm-eyebrow";
 import { defineQmStampGrid } from "../../molecules/qm-stamp-grid";
 
 export const QM_LOYALTY_CARD_TAG_NAME = "qm-loyalty-card";
@@ -38,7 +40,7 @@ export class QmLoyaltyCard extends QmElement {
       return html`
         <article class="card card--redeemed" aria-live="polite">
           <div class="check" aria-hidden="true">✓</div>
-          <p class="eyebrow">${this.redeemedLabel}</p>
+          <qm-eyebrow class="eyebrow" .text=${this.redeemedLabel}></qm-eyebrow>
           <h2 class="reward-name">${this.redeemedReward}</h2>
           <qm-stamp-grid total=${target} filled="0" aria-label=${this.gridLabel}></qm-stamp-grid>
           <p class="redeemed-footer">${this.redeemedFooter}</p>
@@ -54,7 +56,7 @@ export class QmLoyaltyCard extends QmElement {
           <span class="email">${this.email}</span>
         </header>
         <div class="progress">
-          <span class="eyebrow">${this.progressLabel}</span>
+          <qm-eyebrow class="eyebrow" .text=${this.progressLabel}></qm-eyebrow>
           <strong>${filled}/${target}</strong>
         </div>
         <qm-stamp-grid
@@ -73,14 +75,17 @@ export class QmLoyaltyCard extends QmElement {
   private renderStampAction() {
     if (this.stampOpen) return html``;
     return html`
-      <button class="stamp-action" type="button" @click=${this.handleStamp}>
-        <span class="stamp-glyph" aria-hidden="true"></span>${this.stampLabel}
-      </button>
+      <qm-button class="stamp-action" type="button" @click=${this.handleStamp}>
+        <span slot="icon-start" class="stamp-glyph" aria-hidden="true"></span>
+        ${this.stampLabel}
+      </qm-button>
     `;
   }
 }
 
 export function defineQmLoyaltyCard() {
+  defineQmButton();
+  defineQmEyebrow();
   defineQmStampGrid();
   if (!customElements.get(QM_LOYALTY_CARD_TAG_NAME)) {
     customElements.define(QM_LOYALTY_CARD_TAG_NAME, QmLoyaltyCard);

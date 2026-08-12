@@ -4,6 +4,7 @@ import { property } from "lit/decorators.js";
 import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
+import { defineQmBadge } from "../../atoms/qm-badge";
 import { defineQmPrice } from "../../atoms/qm-price";
 
 export const QM_FEATURED_TAG_NAME = "qm-featured";
@@ -14,9 +15,9 @@ const componentStyles = createComponentStyles(componentStylesText);
  * Featured-dish card: optional hero/thumb photo, a tag, name, description, and price. Photo
  * layout (direction, size, order) is fully theme-driven via `--qm-featured-*` tokens, so a
  * template can render it as a hero (image on top/full-width) or thumb (image beside text)
- * without any prop changes here. The tag uses `--qm-emph`/`--qm-on-secondary`, a different
- * token pair than `qm-badge`'s own contract, so it's bespoke markup rather than a wrapped
- * atom. Reuses `qm-price` for price — that atom's font-size is fixed (not configurable), so
+ * without any prop changes here. The tag composes `qm-badge` and maps its local tag tokens
+ * into the atom's customization variables. Reuses `qm-price` for price — that atom's
+ * font-size is fixed (not configurable), so
  * this molecule renders slightly larger than the design's literal spec; accepted since
  * overriding a child atom's internals is out of bounds (see CONTRIBUTING.md RULE 12).
  */
@@ -45,7 +46,7 @@ export class QmFeatured extends LitElement {
       <div part="card" class="card">
         ${this.value?.photo ? html` <span part="photo" class="photo">${photoImage}</span> ` : nothing}
         <div class="body">
-          ${this.value?.tag ? html`<div part="tag" class="tag">${this.value.tag}</div>` : nothing}
+          ${this.value?.tag ? html`<qm-badge part="tag" class="tag" .text=${this.value.tag}></qm-badge>` : nothing}
           <div part="name" class="name">${this.value?.name ?? ""}</div>
           <div part="desc" class="desc">${this.value?.desc ?? ""}</div>
           <qm-price part="price" .value=${this.value?.price ?? ""} .oldValue=${this.value?.oldPrice}></qm-price>
@@ -56,6 +57,7 @@ export class QmFeatured extends LitElement {
 }
 
 export function defineQmFeatured() {
+  defineQmBadge();
   defineQmPrice();
 
   if (!customElements.get(QM_FEATURED_TAG_NAME)) {

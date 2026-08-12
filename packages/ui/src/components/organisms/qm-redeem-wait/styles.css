@@ -13,12 +13,13 @@
   text-align: center;
 }
 .badge {
-  padding: 5px 10px;
-  border-radius: var(--qm-badge-radius, var(--qm-radius, 0px));
-  background: var(--qm-emph, #657763);
-  color: var(--qm-on-secondary, #fff);
-  font-size: var(--qm-text-2xs, 10px);
-  font-weight: 800;
+  --qm-badge-bg: var(--qm-emph, #657763);
+  --qm-badge-bd: none;
+  --qm-badge-color: var(--qm-on-secondary, #fff);
+  --qm-badge-font-size: var(--qm-text-2xs, 10px);
+  --qm-badge-line-height: normal;
+  --qm-badge-padding: 5px 10px;
+  --qm-badge-weight: 800;
 }
 .spinner,
 .terminal {

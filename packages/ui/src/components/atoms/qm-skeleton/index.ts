@@ -9,16 +9,18 @@ export const QM_SKELETON_TAG_NAME = "qm-skeleton";
 
 const componentStyles = createComponentStyles(componentStylesText);
 
+export type QmSkeletonVariant = "text" | "block" | "circle";
+
 /**
- * Loading placeholder: one wider "heading" bar plus `lines` narrower "body" bars. Always
- * decorative — self-applies `aria-hidden` since the whole component is loading UI, never
- * real content.
+ * Single decorative loading shape. Consumers compose multiple instances to build their
+ * own content-specific skeletons and control geometry through the `--qm-skeleton-*`
+ * custom properties.
  */
 export class QmSkeleton extends LitElement {
   static styles = [qmHostResetStyles, componentStyles];
 
-  @property({ type: Number })
-  lines = 2;
+  @property({ type: String })
+  variant: QmSkeletonVariant = "text";
 
   connectedCallback() {
     super.connectedCallback();
@@ -26,13 +28,7 @@ export class QmSkeleton extends LitElement {
   }
 
   render() {
-    const bars = Array.from({ length: this.lines }, (_, index) => index);
-    return html`
-      <span part="heading-bar" class="bar bar--heading"></span>
-      ${bars.map(
-        (index) => html`<span part="body-bar" class="bar bar--body" data-last=${index === bars.length - 1}></span>`,
-      )}
-    `;
+    return html`<span part="shape" class="shape" data-variant=${this.variant}></span>`;
   }
 }
 
@@ -42,7 +38,7 @@ export function defineQmSkeleton() {
   }
 }
 
-export type QmSkeletonArgs = Partial<Pick<QmSkeleton, "lines">>;
+export type QmSkeletonArgs = Partial<Pick<QmSkeleton, "variant">>;
 
 declare global {
   interface HTMLElementTagNameMap {

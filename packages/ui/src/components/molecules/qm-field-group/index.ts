@@ -5,6 +5,7 @@ import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
 import { QmElement } from "../../../internal/qm-element";
+import { defineQmButton } from "../../atoms/qm-button";
 import { defineQmField } from "../../atoms/qm-field";
 
 import type { PropertyValues } from "lit";
@@ -124,16 +125,17 @@ export class QmFieldGroup extends QmElement {
           placeholder=${this.messagePlaceholder}
           ?disabled=${this.disabled}
         ></qm-field>
-        <button part="submit" class="submit" type="button" ?disabled=${this.disabled} @click=${this.handleSubmit}>
+        <qm-button part="submit" class="submit" type="button" ?disabled=${this.disabled} @click=${this.handleSubmit}>
           <span class="sr-only">${this.submitLabel}</span>
           <span class="submit-label" aria-hidden="true">${this.renderSubmitLabel()}</span>
-        </button>
+        </qm-button>
       </div>
     `;
   }
 }
 
 export function defineQmFieldGroup() {
+  defineQmButton();
   defineQmField();
 
   if (!customElements.get(QM_FIELD_GROUP_TAG_NAME)) {
