@@ -1,7 +1,7 @@
-> 📦 **Archived — content folded into the current docs.** This POC writeup is still
-> broadly accurate but superseded by [../domains/theming.md](../domains/theming.md) and
-> [../domains/custom-domains.md](../domains/custom-domains.md). Kept for the "Run it"
-> local-setup notes.
+> Archived. The content of this proof-of-concept writeup has been folded into the current
+> documentation. It is still broadly accurate, but it is superseded by
+> [Theming](../domains/theming.md) and [Custom domains](../domains/custom-domains.md). It
+> is kept for its local-setup notes.
 
 # Multi-tenant public menu POC
 

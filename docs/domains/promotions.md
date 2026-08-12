@@ -1,53 +1,61 @@
-# Promotions 🧩
+# Promotions
 
-> **Stub** — Purpose + key files below; expand when needed.
-> Follows the [doc template](../README.md#the-doc-template).
+This page describes how owners define promotions and how effective prices are computed
+for the public menu.
 
-## Purpose & status
+This page is partial. It states the purpose, the structure, and the key files, but does
+not yet contain a full walkthrough.
 
-🟡 Admin/API complete; **public web page still uses mock data**. Owners define
-promotions (percentage discount, special price, daily menu, happy hour, two-for-one)
-scoped to info/branch/category/dish, with recurring windows and priority. Effective
-prices are computed by a SQL view. The customer-facing promos page is **not yet wired
-to the live API** — this is the main gap.
+## Status
+
+The admin dashboard and the API are complete. The public promotions page still uses mock
+data, which is the main gap.
+
+Owners define promotions of five types, percentage discount, special price, daily menu,
+happy hour, and two-for-one, scoped to the restaurant information, a branch, a category,
+or a dish, with recurring windows and a priority. Effective prices are computed by a SQL
+view.
 
 ## Data model
 
-`packages/db/src/schema/promotions.ts` — `promotions` (type, scope, recurring window,
-priority, start/end), `promotion_targets`, and the SQL view `v_dish_promotion_prices`
-that computes effective per-dish prices.
+The schema is `packages/db/src/schema/promotions.ts`. It defines `promotions`, which holds
+the type, the scope, the recurring window, the priority, and the start and end dates;
+`promotion_targets`; and the SQL view `v_dish_promotion_prices`, which computes the
+effective price for each dish.
 
 ## Backend
 
-- Admin: `apps/api/src/modules/admin-promotions/` — `admin-promotions.router.ts`,
-  `save-promotion.ts`, `promotion-input.schema.ts`. Procedures: `list`, `get`,
-  `create`, `update`, `remove`. `tenantProcedure`.
-- Repositories: `packages/db/src/repositories/admin-promotions.repository.ts`,
-  `promotions.repository.ts`; model `packages/db/src/models/promotion.ts`; domain
-  `packages/db/src/domain/promotions.ts`.
+- Admin. `apps/api/src/modules/admin-promotions/` contains
+  `admin-promotions.router.ts`, `save-promotion.ts`, and `promotion-input.schema.ts`. The
+  procedures are `list`, `get`, `create`, `update`, and `remove`, all built on
+  `tenantProcedure`.
+- Repositories, model, and domain logic.
+  `packages/db/src/repositories/admin-promotions.repository.ts` and
+  `promotions.repository.ts`, the model `packages/db/src/models/promotion.ts`, and the
+  domain logic in `packages/db/src/domain/promotions.ts`.
 
 ## Frontend
 
-- Admin routes: `apps/admin/src/app/routes/_auth.promotions.tsx`,
-  `_auth.promotions.index.tsx`, `_auth.promotions.new.tsx`,
+- Admin routes. `apps/admin/src/app/routes/_auth.promotions.tsx`,
+  `_auth.promotions.index.tsx`, `_auth.promotions.new.tsx`, and
   `_auth.promotions.$promotionId.tsx`.
-- Public — **MOCK**: `apps/web/src/app/routes/{-$locale}.promos.tsx` renders
-  `apps/web/src/features/promos/`, backed by
+- Public. `apps/web/src/app/routes/{-$locale}.promos.tsx` renders
+  `apps/web/src/features/promos/`, which is currently backed by
   `apps/web/src/features/promos/mock/mock-promos-content.ts`.
 
 ## Key files
 
-| Concern | Path |
-|---|---|
-| Promotions schema + price view | `packages/db/src/schema/promotions.ts` |
-| Admin router + handlers | `apps/api/src/modules/admin-promotions/` |
-| Repositories / model / domain | `packages/db/src/repositories/{admin-promotions,promotions}.repository.ts`, `.../models/promotion.ts`, `.../domain/promotions.ts` |
-| Admin UI | `apps/admin/src/app/routes/_auth.promotions.*` |
-| Public UI (mock) | `apps/web/src/features/promos/` |
+| Concern                                    | Path                                                                                                                              |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| Promotions schema and effective-price view | `packages/db/src/schema/promotions.ts`                                                                                            |
+| Admin router and handlers                  | `apps/api/src/modules/admin-promotions/`                                                                                          |
+| Repositories, model, and domain logic      | `packages/db/src/repositories/{admin-promotions,promotions}.repository.ts`, `.../models/promotion.ts`, `.../domain/promotions.ts` |
+| Admin UI                                   | `apps/admin/src/app/routes/_auth.promotions.*`                                                                                    |
+| Public UI, currently mock-backed           | `apps/web/src/features/promos/`                                                                                                   |
 
-## Notes & gotchas
+## Limitations
 
-- **Wire the public promos page to the real API** (replace `mock/mock-promos-content.ts`)
-  to close MVP1 — this is the tracked gap.
-- Effective public prices should come from `v_dish_promotion_prices`, not recomputed
+- The public promotions page must be wired to the live API, replacing
+  `mock/mock-promos-content.ts`. This is the tracked gap that closes MVP1.
+- Effective public prices must come from `v_dish_promotion_prices`. Do not recompute them
   in the client.

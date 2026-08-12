@@ -7,6 +7,8 @@ interface BranchSettings {
   dataProtectionEmail: string | null;
   legalAddress: string | null;
   legalName: string | null;
+  latitude: number | null;
+  longitude: number | null;
   name: string;
   phone: string | null;
   photos: Array<{ position: number; url: string }>;
@@ -24,6 +26,8 @@ function saveInput(settings: BranchSettings) {
     info: {
       name: settings.name,
       address: settings.address ?? undefined,
+      latitude: settings.latitude,
+      longitude: settings.longitude,
       phone: settings.phone ?? undefined,
       whatsapp: settings.whatsapp ?? undefined,
       socialLinksJson: settings.socialLinksJson ?? undefined,

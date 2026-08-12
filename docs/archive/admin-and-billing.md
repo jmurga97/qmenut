@@ -1,6 +1,6 @@
-> 📦 **Archivado — contenido integrado en la documentación actual.** Sigue siendo en
-> su mayoría correcto, pero está sustituido por [../architecture.md](../architecture.md)
-> y [../domains/billing.md](../domains/billing.md). Se conserva por referencia.
+> Archivado. El contenido se ha integrado en la documentación actual. Sigue siendo en su
+> mayoría correcto, pero está sustituido por [Arquitectura](../architecture.md) y
+> [Facturación](../domains/billing.md). Se conserva por referencia.
 
 # Panel de administración y facturación (MVP1)
 

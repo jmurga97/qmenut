@@ -1,141 +1,155 @@
 # Loyalty
 
-The rewards program: how diners earn points or stamps, how they redeem rewards, and
-how staff validate a redemption in-store. This is the most built-out feature in
-qmenut.
+This page describes the rewards program: how diners earn points or stamps, how they
+redeem rewards, and how staff validate a redemption in the restaurant.
 
-## Purpose & status
+## Status
 
-✅ Complete and wired end to end (schema + public API + admin API + both UIs). A
-restaurant runs **one** loyalty program (points *or* stamps), defines **rewards**, and
-customers redeem them; staff validate redemptions in person using a rotating **venue
-code** — no scanner, no camera. The UX rationale is in
-[../design/loyalty-ux.md](../design/loyalty-ux.md) (decisions locked 2026-07-08,
-revised 2026-07-10 to drop QR scanning).
+Complete and wired end to end, covering the schema, the public API, the admin API, and
+both user interfaces. A restaurant runs one loyalty program, based either on points or on
+stamps, defines rewards, and lets customers redeem them. Staff validate redemptions in
+person using a rotating venue code, so no scanner or camera is required.
+
+The design reasoning is in [Loyalty UX](../design/loyalty-ux.md). Those decisions were
+locked on 2026-07-08 and revised on 2026-07-10 to remove QR scanning.
 
 ## Data model
 
-Program and rewards (`packages/db/src/schema/loyalty.ts`):
+The program and its rewards are defined in `packages/db/src/schema/loyalty.ts`:
 
-- **`loyalty_programs`** (`loyalty.ts:3`) — one row per restaurant (`restaurantId` is
-  the PK). `type` is `points | stamps`; `pointsPerCurrencyUnit`, `pointsPerVisit`,
-  `stampsPerVisit`, optional `rulesJson`.
-- **`loyalty_rewards`** (`loyalty.ts:15`) — `cost` (points/stamps) and `type`:
-  `percentage_discount` (`percentage`), `free_dish` (`freeDishId`), or `special_price`
-  (`specialPrice`).
-- **`loyalty_transactions`** (`loyalty.ts:35`) — the ledger. `type` is
-  `earn | redeem | adjust | expire`; signed `points`; optional `redemptionId`/`orderId`.
-- **`loyalty_redemptions`** (`loyalty.ts:52`) — the redemption state machine:
-  `pending → validated | rejected | expired`, plus `validatedBy`/`validatedAt`.
+- `loyalty_programs` (`loyalty.ts:3`) holds one row per restaurant, with `restaurantId`
+  as the primary key. `type` is either `points` or `stamps`. The row also holds
+  `pointsPerCurrencyUnit`, `pointsPerVisit`, `stampsPerVisit`, and an optional
+  `rulesJson`.
+- `loyalty_rewards` (`loyalty.ts:15`) holds `cost`, in points or stamps, and `type`. The
+  type is `percentage_discount` with a `percentage`, `free_dish` with a `freeDishId`, or
+  `special_price` with a `specialPrice`.
+- `loyalty_transactions` (`loyalty.ts:35`) is the ledger. `type` is `earn`, `redeem`,
+  `adjust`, or `expire`. `points` is signed, and `redemptionId` and `orderId` are
+  optional.
+- `loyalty_redemptions` (`loyalty.ts:52`) is the redemption state machine: `pending` moves
+  to `validated`, `rejected`, or `expired`. It also records `validatedBy` and
+  `validatedAt`.
 
-Customer & balances (`packages/db/src/schema/customers.ts`):
+Customers and balances are defined in `packages/db/src/schema/customers.ts`:
 
-- **`customers`** (`customers.ts:3`) — identity is **email** (`unique`). No password.
-- **`customer_restaurants`** (`customers.ts:12`) — per-restaurant balances
-  (`pointsBalance`, `stampsBalance`) and first/last visit. PK `(customerId,
-  restaurantId)`.
-- **`customer_visits`** (`customers.ts:30`) — visit log with a `source`
-  (`qr | direct | domain | order`), used for insights.
+- `customers` (`customers.ts:3`) identifies a customer by email, which is unique. There is
+  no password.
+- `customer_restaurants` (`customers.ts:12`) holds per-restaurant balances,
+  `pointsBalance` and `stampsBalance`, and the first and last visit timestamps. Its
+  primary key is `(customerId, restaurantId)`.
+- `customer_visits` (`customers.ts:30`) is the visit log. Its `source` is `qr`, `direct`,
+  `domain`, or `order`, and it is used for insights.
 
 ## Backend
 
-Two routers — public (the customer) and admin (the operator).
+There are two routers: a public one for the customer and an admin one for the operator.
 
-### Public: `loyalty.*` (`apps/api/src/modules/loyalty/`)
+### Public router
 
-All `publicProcedure` (`loyalty.router.ts:18`). The customer is identified by a
-**card token** (opaque, in `localStorage`), and every call carries the tenant `host`:
+The public router is `loyalty.*` in `apps/api/src/modules/loyalty/`. Every procedure is a
+`publicProcedure` (`loyalty.router.ts:18`). The customer is identified by an opaque card
+token held in `localStorage`, and every call carries the tenant `host`.
 
-- `program` — the active program + rewards for this tenant.
-- `createCard` — creates/links a card for an email (`create-card.ts`).
-- `getCard` — the card + balance + history (`get-card.ts`).
-- `earnStamp` — earns a stamp/points, **gated by the venue code** (`earn-stamp.ts`).
-- `requestRedemption` — opens a `pending` redemption (`request-redemption.ts`).
-- `cancelRedemption` / `redemptionStatus` — manage/poll a redemption.
+| Procedure                              | Description                                                         |
+| -------------------------------------- | ------------------------------------------------------------------- |
+| `program`                              | Returns the active program and its rewards for the tenant.          |
+| `createCard`                           | Creates or links a card for an email (`create-card.ts`).            |
+| `getCard`                              | Returns the card, its balance, and its history (`get-card.ts`).     |
+| `earnStamp`                            | Earns a stamp or points, gated by the venue code (`earn-stamp.ts`). |
+| `requestRedemption`                    | Opens a `pending` redemption (`request-redemption.ts`).             |
+| `cancelRedemption`, `redemptionStatus` | Cancel or poll a redemption.                                        |
 
-### Admin: `admin.loyalty.*` (`apps/api/src/modules/admin-loyalty/`)
+### Admin router
 
-`tenantProcedure`. Program config (`getProgram`, `saveProgram`), rewards CRUD
-(`createReward`/`updateReward`/`deleteReward`), operations (`venueCode`,
-`pendingRedemptions`, `validateRedemption`, `rejectRedemption`, `undo`), and insights
-(`summary`, `customers`, `visitsChart`, `loyaltyReturn`).
+The admin router is `admin.loyalty.*` in `apps/api/src/modules/admin-loyalty/`, built on
+`tenantProcedure`. It covers program configuration (`getProgram` and `saveProgram`),
+reward CRUD (`createReward`, `updateReward`, and `deleteReward`), daily operations
+(`venueCode`, `pendingRedemptions`, `validateRedemption`, `rejectRedemption`, and `undo`),
+and insights (`summary`, `customers`, `visitsChart`, and `loyaltyReturn`).
 
-### The venue code (`apps/api/src/lib/loyalty/venue-code.ts`)
+### The venue code
 
-This is how "the customer is physically here right now" is proven without a scanner.
-It's a **TOTP-style rotating 4-digit code**, stateless (nothing stored):
+The venue code proves that the customer is physically in the restaurant without using a
+scanner. It is a rotating four-digit code in the style of TOTP, and it is stateless:
+nothing is stored. The implementation is `apps/api/src/lib/loyalty/venue-code.ts`.
 
-- `getVenueCode` (`venue-code.ts:36`) — HMACs `restaurantId:branchId:windowIndex` with
-  a signing secret and takes 4 digits. The window is 3 minutes
-  (`VENUE_CODE_WINDOW_MS`, `venue-code.ts:3`). Staff read the current code off the
-  admin app.
-- `verifyVenueCode` (`venue-code.ts:83`) — when a customer types a code to earn,
-  accepts the **current or previous** window (clock skew / slow readers) and returns
-  the matching branch id. Because it's derived from the secret, it needs no storage.
+- `getVenueCode` (`venue-code.ts:36`) computes an HMAC of
+  `restaurantId:branchId:windowIndex` with a signing secret and takes four digits from it.
+  The window is three minutes (`VENUE_CODE_WINDOW_MS`, `venue-code.ts:3`). Staff read the
+  current code from the admin application.
+- `verifyVenueCode` (`venue-code.ts:83`) runs when a customer types a code to earn. It
+  accepts the current window and the previous one, which absorbs clock skew and slow
+  typing, and returns the matching branch ID. Because the code is derived from the secret,
+  verification needs no storage.
 
-Ledger writes go through `packages/db/src/repositories/loyalty-ledger.repository.ts`;
-admin/insight reads through `loyalty-admin.repository.ts` and
-`loyalty-insights.repository.ts`; `customers.repository.ts` owns the customer/balance
+Ledger writes go through `packages/db/src/repositories/loyalty-ledger.repository.ts`.
+Admin and insight reads go through `loyalty-admin.repository.ts` and
+`loyalty-insights.repository.ts`. `customers.repository.ts` owns the customer and balance
 rows.
 
 ## Frontend
 
-- **Public** (`apps/web`): route `apps/web/src/app/routes/{-$locale}.puntos.tsx` →
-  `apps/web/src/features/loyalty/` (`loyalty-page`, `loyalty-experience`,
-  `use-loyalty-controller`, `loyalty-query-options`) — wired to the real tRPC API. Card
-  UI components live in `packages/ui` (`qm-loyalty-card`, `qm-loyalty-signup`,
-  `qm-redeem-wait`, `qm-stamp-grid`, `qm-reward-row`).
-- **Admin** (`apps/admin`): routes `_auth.loyalty.tsx` (layout),
-  `_auth.loyalty.index.tsx` (operations), `_auth.loyalty.program.tsx`,
-  `_auth.loyalty.insights.tsx`; feature `apps/admin/src/features/loyalty/`.
+The public interface is in `apps/web`. The route is
+`apps/web/src/app/routes/{-$locale}.puntos.tsx`, and the feature directory is
+`apps/web/src/features/loyalty/`, which contains `loyalty-page`, `loyalty-experience`,
+`use-loyalty-controller`, and `loyalty-query-options`. It is wired to the live tRPC API.
+The card components live in `packages/ui`: `qm-loyalty-card`, `qm-loyalty-signup`,
+`qm-redeem-wait`, `qm-stamp-grid`, and `qm-reward-row`.
 
-## Walkthrough: earn a stamp in the restaurant
+The admin interface is in `apps/admin`. The routes are `_auth.loyalty.tsx` for the layout,
+`_auth.loyalty.index.tsx` for operations, `_auth.loyalty.program.tsx`, and
+`_auth.loyalty.insights.tsx`. The feature directory is `apps/admin/src/features/loyalty/`.
 
-1. Diner opens the menu, taps into the loyalty card (`/puntos`), signs up with email
-   → `loyalty.createCard` stores a card token in `localStorage`.
-2. Diner asks to collect a stamp; staff read the current 4-digit code off the admin
-   operations screen (`admin.loyalty.venueCode` → `getVenueCode`).
-3. Diner types the code; the client calls `loyalty.earnStamp({ host, cardToken,
-   venueCode })`.
-4. `earn-stamp.ts` calls `verifyVenueCode(...)` (`venue-code.ts:83`) — valid for the
-   current/previous 3-min window → returns the branch id.
-5. A `earn` row is written to `loyalty_transactions` and `customer_restaurants`
-   balance is bumped. No approval queue.
+## Example: earning a stamp in the restaurant
 
-## Walkthrough: redeem a reward
+1. The diner opens the menu, taps the loyalty card at `/puntos`, and signs up with an
+   email address. `loyalty.createCard` stores a card token in `localStorage`.
+2. The diner asks for a stamp, and staff read the current four-digit code from the admin
+   operations screen (`admin.loyalty.venueCode`, backed by `getVenueCode`).
+3. The diner types the code, and the client calls
+   `loyalty.earnStamp({ host, cardToken, venueCode })`.
+4. `earn-stamp.ts` calls `verifyVenueCode(...)` (`venue-code.ts:83`). A code from the
+   current or previous three-minute window is valid and returns the branch ID.
+5. An `earn` row is written to `loyalty_transactions`, and the balance in
+   `customer_restaurants` is incremented. There is no approval queue.
 
-1. Diner picks a reward → `loyalty.requestRedemption` creates a `pending`
-   `loyalty_redemptions` row.
-2. It appears on the staff operations screen via `admin.loyalty.pendingRedemptions`.
-3. During the same conversation, staff tap the row →
-   `admin.loyalty.validateRedemption` moves it to `validated`, records
-   `validatedBy`/`validatedAt`, and writes a `redeem` ledger row (or `rejectRedemption`
-   to decline). `undo` reverses a recent action.
+## Example: redeeming a reward
+
+1. The diner picks a reward, and `loyalty.requestRedemption` creates a `pending` row in
+   `loyalty_redemptions`.
+2. The row appears on the staff operations screen through
+   `admin.loyalty.pendingRedemptions`.
+3. During the same conversation, staff tap the row. `admin.loyalty.validateRedemption`
+   moves it to `validated`, records `validatedBy` and `validatedAt`, and writes a `redeem`
+   ledger row. `rejectRedemption` declines it instead, and `undo` reverses a recent
+   action.
 
 ## Key files
 
-| Concern | Path |
-|---|---|
-| Program/reward/ledger/redemption schema | `packages/db/src/schema/loyalty.ts` |
-| Customer & balances schema | `packages/db/src/schema/customers.ts` |
-| Public loyalty router | `apps/api/src/modules/loyalty/loyalty.router.ts` |
-| Public handlers | `apps/api/src/modules/loyalty/*.ts` |
-| Admin loyalty router + handlers | `apps/api/src/modules/admin-loyalty/` |
-| Venue code (rotating) | `apps/api/src/lib/loyalty/venue-code.ts`, `token.ts` |
-| Ledger / admin / insights repos | `packages/db/src/repositories/loyalty-*.repository.ts`, `customers.repository.ts` |
-| Public UI | `apps/web/src/features/loyalty/`, `apps/web/src/app/routes/{-$locale}.puntos.tsx` |
-| Admin UI | `apps/admin/src/features/loyalty/`, `apps/admin/src/app/routes/_auth.loyalty.*.tsx` |
-| Loyalty card components | `packages/ui/src/components/organisms/qm-loyalty-*`, `.../molecules/qm-stamp-grid`, `qm-reward-row` |
-| UX rationale | `docs/design/loyalty-ux.md` |
+| Concern                                        | Path                                                                                                |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Program, reward, ledger, and redemption schema | `packages/db/src/schema/loyalty.ts`                                                                 |
+| Customer and balance schema                    | `packages/db/src/schema/customers.ts`                                                               |
+| Public loyalty router                          | `apps/api/src/modules/loyalty/loyalty.router.ts`                                                    |
+| Public handlers                                | `apps/api/src/modules/loyalty/*.ts`                                                                 |
+| Admin loyalty router and handlers              | `apps/api/src/modules/admin-loyalty/`                                                               |
+| Venue code                                     | `apps/api/src/lib/loyalty/venue-code.ts`, `token.ts`                                                |
+| Ledger, admin, and insight repositories        | `packages/db/src/repositories/loyalty-*.repository.ts`, `customers.repository.ts`                   |
+| Public UI                                      | `apps/web/src/features/loyalty/`, `apps/web/src/app/routes/{-$locale}.puntos.tsx`                   |
+| Admin UI                                       | `apps/admin/src/features/loyalty/`, `apps/admin/src/app/routes/_auth.loyalty.*.tsx`                 |
+| Loyalty card components                        | `packages/ui/src/components/organisms/qm-loyalty-*`, `.../molecules/qm-stamp-grid`, `qm-reward-row` |
+| Design reasoning                               | `docs/design/loyalty-ux.md`                                                                         |
 
-## Notes & gotchas
+## Limitations
 
-- **Email is the only identity** — no password, unverified. `customers.email` is the
-  key across restaurants; balances are per `(customer, restaurant)`.
-- **Presence proof = the venue code, not a scanner.** It's stateless and derived from
-  the signing secret; nothing to store, but the secret must be configured and kept out
-  of the client.
-- **Earning is auto-granted; redemption is staff-validated.** There's no approval queue
-  for earning — the code *is* the gate.
-- A near-empty `apps/web/src/features/fidelity/` directory also exists; the live
-  feature is `features/loyalty/`.
+- Email is the only identity. There is no password and no verification.
+  `customers.email` is the key across restaurants, and balances are per customer and
+  restaurant.
+- Presence is proven by the venue code, not by a scanner. The code is stateless and
+  derived from the signing secret, so there is nothing to store, but the secret must be
+  configured and must stay out of the client bundle.
+- Earning is granted automatically and redemption is validated by staff. There is no
+  approval queue for earning, because the code is the gate.
+- A nearly empty `apps/web/src/features/fidelity/` directory also exists. The live feature
+  is `features/loyalty/`.

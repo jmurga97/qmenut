@@ -11,9 +11,9 @@ test("keeps authenticated admin access inside each owner tenant", async ({ page,
 
   const forbiddenWrite = await callTrpcMutation(page, "admin.menu.dishes.update", {
     branchId: "branch_fine",
-    dishId: "dish_fine_ostra",
+    dishId: "dish_fine_margherita",
     data: {
-      categoryId: "cat_fine_entrantes",
+      categoryId: "cat_fine_classics",
       name: "Tenant leak",
       description: "",
       price: 1,
@@ -30,7 +30,7 @@ test("keeps authenticated admin access inside each owner tenant", async ({ page,
   await expect(fineOwner.getByText("Aurum", { exact: true }).first()).toBeVisible();
   const fineMenu = await callTrpcQuery(fineOwner, "admin.menu.dishes.list", { branchId: "branch_fine" });
   expect(fineMenu, fineMenu.body).toMatchObject({ ok: true, status: 200 });
-  expect(fineMenu.body).toContain("Ostra al aliño cítrico");
+  expect(fineMenu.body).toContain("Margherita");
   const forbiddenTapasRead = await callTrpcQuery(fineOwner, "admin.menu.dishes.list", {
     branchId: "branch_tapas",
   });
@@ -50,7 +50,7 @@ test("keeps authenticated admin access inside each owner tenant", async ({ page,
   expect(tapasBody).toContain("Bar La Tasca");
   expect(tapasBody).not.toContain("Aurum");
   expect(fineBody).toContain("Aurum");
-  expect(fineBody).toContain("Ostra al aliño cítrico");
+  expect(fineBody).toContain("Margherita");
   expect(fineBody).not.toContain("Tenant leak");
   expect(fineBody).not.toContain("Bar La Tasca");
 });

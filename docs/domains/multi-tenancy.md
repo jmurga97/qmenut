@@ -1,44 +1,43 @@
 # Multi-tenancy
 
-How restaurants are modelled and, crucially, **how one tenant's data is kept
-separate from another's**. Every feature in qmenut is scoped by the rules in this
-doc — read it before any feature doc.
+This page describes how restaurants are modeled and how one tenant's data is kept
+separate from another's. Every feature in qmenut is scoped by these rules, so read this
+page before any feature page.
 
-## Purpose & status
+## Status
 
-✅ Complete. qmenut runs all tenants in **one D1 database**; isolation is enforced in
-application code, not by separate databases. There are two independent isolation
-paths — one for the public menu (keyed by host) and one for the admin dashboard
-(keyed by the logged-in user's membership).
+Complete. qmenut runs all tenants in one D1 database. Isolation is enforced in
+application code, not by separate databases. There are two independent isolation paths:
+one for the public menu, keyed by request host, and one for the admin dashboard, keyed by
+the signed-in user's membership.
 
-## The model: restaurant → branch
+## Data model
 
-Two levels.
+The tenant model has two levels: restaurant and branch.
 
-- **`restaurants`** (`packages/db/src/schema/restaurants.ts:4`) is the top tenant
-  entity: `name`, `defaultLanguageCode`, `defaultCurrency`, `timezone`, email-sender
-  settings, and a soft-delete `deletedAt`.
-- **`branches`** (`packages/db/src/schema/branches.ts:3`) belongs to a restaurant
-  (`restaurantId`) and is **the unit that actually gets a public menu**. Its key
-  field is **`customDomain`** (`branches.ts:13`) — the host that maps an incoming
-  request to this branch. A branch also has `planCode` (`basic` for new tenants;
-  the database retains the legacy `business` value), `currency`, `isActive`, and a
-  soft-delete `deletedAt`. There is a unique constraint
-  `ux_branches_id_restaurant` on `(id, restaurantId)` so a branch id can always be
-  safely qualified by its restaurant.
+- `restaurants` (`packages/db/src/schema/restaurants.ts:4`) is the top-level tenant
+  entity. It holds `name`, `defaultLanguageCode`, `defaultCurrency`, `timezone`, the
+  email-sender settings, and a `deletedAt` soft-delete column.
+- `branches` (`packages/db/src/schema/branches.ts:3`) belongs to a restaurant through
+  `restaurantId` and is the entity that gets a public menu. Its key column is
+  `customDomain` (`branches.ts:13`), the host that maps an incoming request to the
+  branch. A branch also has `planCode`, `currency`, `isActive`, and `deletedAt`. New
+  tenants get the `basic` plan; the database still contains the legacy `business` value.
+  The unique constraint `ux_branches_id_restaurant` on `(id, restaurantId)` lets any
+  branch ID be qualified by its restaurant.
 
-Menu content hangs off the branch, **denormalized with both ids**:
+Menu content hangs off the branch and is denormalized with both IDs:
 
-- `categories` and `dishes` (`packages/db/src/schema/menu.ts`) each carry **both
-  `restaurantId` and `branchId`**. Menu content is therefore per-branch — two
-  branches of the same restaurant do not share categories or dishes.
-- `dishes.categoryId` links a dish to its category; `dishes.price` is an integer
-  (cents).
-- Restaurant-scoped catalogs: `ingredients` (`restaurantId`) and `tags`
-  (`restaurantId` nullable — a null restaurant + `isSystem` marks a global/system
-  tag). `allergens` are fully global.
+- `categories` and `dishes` (`packages/db/src/schema/menu.ts`) each carry both
+  `restaurantId` and `branchId`. Menu content is therefore per branch: two branches of
+  the same restaurant do not share categories or dishes.
+- `dishes.categoryId` links a dish to its category. `dishes.price` is an integer in
+  cents.
+- Two catalogs are restaurant-scoped: `ingredients`, keyed by `restaurantId`, and `tags`,
+  whose `restaurantId` is nullable. A null `restaurantId` combined with `isSystem` marks
+  a global system tag. The `allergens` table is fully global.
 
-```
+```text
 restaurants (tenant root)
  ├─ restaurant_users        (membership: user ↔ restaurant + role)
  ├─ restaurant_languages    (enabled menu languages)
@@ -54,102 +53,103 @@ restaurants (tenant root)
      ├─ branch_photos, branch_schedules
 ```
 
-## Users & staff
+### Users and staff
 
-Staff belong to a **restaurant**, not to a branch. The join table is
-`restaurantUsers` (`restaurants.ts:18`): `restaurantId`, `userId`, `roleCode` (from
-`packages/permissions`), `isActive`, unique on `(restaurantId, userId)`. Login itself
-is Better Auth (see [auth.md](auth.md)); this table is the authorization layer on top.
+Staff belong to a restaurant, not to a branch. The join table is `restaurantUsers`
+(`restaurants.ts:18`), which holds `restaurantId`, `userId`, `roleCode` (from
+`packages/permissions`), and `isActive`, with a unique constraint on
+`(restaurantId, userId)`. Sign-in itself is handled by Better Auth, described in
+[Auth](auth.md). This table is the authorization layer on top of it.
 
-## Tenant isolation — the two paths
+## Tenant isolation
 
-This is the heart of the system. There are two entry points into tenant data, and
-each resolves "which tenant" a different way.
+There are two entry points into tenant data, and each one determines the tenant
+differently.
 
-### 1. Public path — resolved by host
+### Public path, resolved by host
 
-Diners are anonymous; the tenant is derived from the **request host**.
+Diners are anonymous, so the tenant is derived from the request host.
 
 - `resolveTenantByHost` (`packages/db/src/repositories/tenant.repository.ts:14`)
-  normalizes the host and looks up a branch where
-  `customDomain = host AND deletedAt IS NULL AND isActive = true`, returning
+  normalizes the host and looks up a branch where `customDomain = host`,
+  `deletedAt IS NULL`, and `isActive = true`. It returns
   `ResolvedTenant { branchId, restaurantId }` (`packages/db/src/domain/tenant.ts:3`).
-- `normalizeTenantHost` (`packages/db/src/domain/tenant.ts:22`) lowercases, trims, and
-  strips protocol/port/path via `URL`, leaving a bare hostname. It is used everywhere
-  a host is handled, on both the read and write sides.
-- Every public query then filters on **both** `branchId` and `restaurantId` (plus
-  `isActive`), so even a bug in host resolution cannot leak another tenant's rows. See
-  `packages/db/src/repositories/public-menu.repository.ts` (categories/dishes filtered
-  by branch + restaurant; tags scoped by `or(isNull(restaurantId), eq(restaurantId, …))`).
+- `normalizeTenantHost` (`packages/db/src/domain/tenant.ts:22`) lowercases and trims the
+  value, then strips the protocol, port, and path with `URL`, leaving a bare hostname. It
+  is used wherever a host is handled, on both the read and the write side.
+- Every public query then filters on both `branchId` and `restaurantId`, plus `isActive`,
+  so an error in host resolution cannot leak another tenant's rows. See
+  `packages/db/src/repositories/public-menu.repository.ts`, where categories and dishes
+  are filtered by branch and restaurant, and tags are scoped by
+  `or(isNull(restaurantId), eq(restaurantId, …))`.
 
-Host resolution mechanics (headers, worker vars, dev fallbacks) are their own topic —
-see [custom-domains.md](custom-domains.md).
+For the details of host resolution, including headers, Worker variables, and development
+fallbacks, see [Custom domains](custom-domains.md).
 
-### 2. Admin path — resolved by session
+### Admin path, resolved by session
 
-Owners are authenticated; the tenant is derived from **their membership**, never from
-a request parameter.
+Owners are authenticated, so the tenant is derived from their membership and never from a
+request parameter.
 
 - `tenantProcedure` (`apps/api/src/trpc/trpc.ts:34`) runs after `protectedProcedure`,
-  calls `findMembershipByUserId`, and puts
-  `ctx.tenant = { membershipId, restaurantId, roleCode }` on the context. If there is
-  no active membership it throws `FORBIDDEN`.
-- Every `admin.*` procedure reads `ctx.tenant.restaurantId` — clients never send a
-  restaurant id, so they cannot ask for another tenant's data.
-- Any mutation that receives a `branchId` must pass through **`assertBranchAccess`**
-  (`apps/api/src/modules/admin-tenant/assert-branch-access.ts:17`) first. It loads the
-  branch scoped to `restaurantId` and throws **`NOT_FOUND`** (deliberately not
-  `FORBIDDEN`) when the branch isn't the tenant's — so the API never reveals that
-  another tenant's branch exists.
+  calls `findMembershipByUserId`, and sets
+  `ctx.tenant = { membershipId, restaurantId, roleCode }` on the context. If there is no
+  active membership, it throws `FORBIDDEN`.
+- Every `admin.*` procedure reads `ctx.tenant.restaurantId`. Clients never send a
+  restaurant ID, so they cannot request another tenant's data.
+- Any mutation that receives a `branchId` must first call `assertBranchAccess`
+  (`apps/api/src/modules/admin-tenant/assert-branch-access.ts:17`). It loads the branch
+  scoped to `restaurantId` and throws `NOT_FOUND`, not `FORBIDDEN`, when the branch does
+  not belong to the tenant, so the API does not reveal that another tenant's branch
+  exists.
 - Write permissions are checked with `requirePermission(ctx.tenant, "<perm>")`
-  (`apps/api/src/modules/admin-tenant/require-permission.ts`), backed by
+  (`apps/api/src/modules/admin-tenant/require-permission.ts`), which is backed by
   `packages/permissions`.
 
-## Walkthrough: an admin edits a dish
+## Example: an admin edits a dish
 
-1. Admin SPA calls `admin.menu.saveDish` over tRPC with session cookies.
-2. `apps/api/src/index.ts:40` routes `/trpc` → `tenantProcedure`.
-3. `apps/api/src/trpc/trpc.ts:19` `protectedProcedure` verifies the session;
-   `trpc.ts:34` `tenantProcedure` loads the membership → `ctx.tenant.restaurantId`.
+1. The admin SPA calls `admin.menu.saveDish` over tRPC with session cookies.
+2. `apps/api/src/index.ts:40` routes `/trpc` to the tRPC handler.
+3. `protectedProcedure` (`apps/api/src/trpc/trpc.ts:19`) verifies the session, and
+   `tenantProcedure` (`trpc.ts:34`) loads the membership into `ctx.tenant.restaurantId`.
 4. The handler in `apps/api/src/modules/admin-menu/` calls
    `assertBranchAccess({ db, restaurantId: ctx.tenant.restaurantId, branchId })`
-   (`assert-branch-access.ts:17`) — cross-tenant `branchId` ⇒ `NOT_FOUND`.
-5. `requirePermission(ctx.tenant, "menu.write")` gates the write by role.
-6. The repository writes, always filtered by `restaurantId` + `branchId`.
+   (`assert-branch-access.ts:17`). A `branchId` from another tenant produces `NOT_FOUND`.
+5. `requirePermission(ctx.tenant, "menu.write")` checks the role.
+6. The repository writes the row, filtered by `restaurantId` and `branchId`.
 
-## Walkthrough: a diner opens the menu
+## Example: a diner opens the menu
 
-1. Request hits `apps/web` at the restaurant's domain.
-2. The web worker resolves the host (`apps/web/src/server/tenant-host.ts`) and calls
-   the API via the `API_WORKER` binding.
-3. The public-menu handler calls `resolveTenantByHost`
-   (`tenant.repository.ts:14`) → `{ branchId, restaurantId }`.
-4. `public-menu.repository.ts` reads the menu filtered by both ids + `isActive`.
-5. Nothing on this path trusts a client-supplied id.
+1. The request reaches `apps/web` at the restaurant's domain.
+2. The web Worker resolves the host (`apps/web/src/server/tenant-host.ts`) and calls the
+   API through the `API_WORKER` binding.
+3. The public-menu handler calls `resolveTenantByHost` (`tenant.repository.ts:14`), which
+   returns `{ branchId, restaurantId }`.
+4. `public-menu.repository.ts` reads the menu, filtered by both IDs and `isActive`.
+5. Nothing on this path trusts a client-supplied ID.
 
 ## Key files
 
-| Concern | Path |
-|---|---|
-| Restaurant / membership / subscriptions schema | `packages/db/src/schema/restaurants.ts` |
-| Branch schema (`customDomain`) | `packages/db/src/schema/branches.ts` |
-| Menu schema (branch-scoped) | `packages/db/src/schema/menu.ts` |
-| `ResolvedTenant` type + host normalize | `packages/db/src/domain/tenant.ts` |
-| Host → branch/restaurant | `packages/db/src/repositories/tenant.repository.ts` |
-| Public query isolation | `packages/db/src/repositories/public-menu.repository.ts` |
-| Admin session → tenant | `apps/api/src/trpc/trpc.ts` (`tenantProcedure`) |
-| Branch access guard | `apps/api/src/modules/admin-tenant/assert-branch-access.ts` |
-| Permission checks | `apps/api/src/modules/admin-tenant/require-permission.ts`, `packages/permissions` |
+| Concern                                         | Path                                                                              |
+| ----------------------------------------------- | --------------------------------------------------------------------------------- |
+| Restaurant, membership, and subscription schema | `packages/db/src/schema/restaurants.ts`                                           |
+| Branch schema, including `customDomain`         | `packages/db/src/schema/branches.ts`                                              |
+| Menu schema, scoped by branch                   | `packages/db/src/schema/menu.ts`                                                  |
+| `ResolvedTenant` type and host normalization    | `packages/db/src/domain/tenant.ts`                                                |
+| Host to branch and restaurant lookup            | `packages/db/src/repositories/tenant.repository.ts`                               |
+| Public query isolation                          | `packages/db/src/repositories/public-menu.repository.ts`                          |
+| Admin session to tenant                         | `apps/api/src/trpc/trpc.ts` (`tenantProcedure`)                                   |
+| Branch access guard                             | `apps/api/src/modules/admin-tenant/assert-branch-access.ts`                       |
+| Permission checks                               | `apps/api/src/modules/admin-tenant/require-permission.ts`, `packages/permissions` |
 
-## Notes & gotchas
+## Limitations
 
-- **Single membership per user (verify).** `tenantProcedure` resolves *one*
-  membership via `findMembershipByUserId`. There is no active-restaurant switching in
-  the code as of MVP1 — a user who belongs to multiple restaurants is not clearly
-  handled. If multi-restaurant staff become a requirement, this is the place to add an
-  active-restaurant selector.
-- **`NOT_FOUND`, not `FORBIDDEN`.** The choice in `assertBranchAccess` is intentional
-  (avoids leaking cross-tenant existence). Keep new branch-scoped mutations consistent
-  with it.
-- **Denormalized `restaurantId` on menu rows** is a deliberate defense-in-depth /
-  query-simplicity choice, not an accident — keep writing both ids.
+- One membership per user. `tenantProcedure` resolves a single membership through
+  `findMembershipByUserId`. As of MVP1 there is no active-restaurant switching, so a user
+  who belongs to more than one restaurant is not handled clearly. If multi-restaurant
+  staff become a requirement, add an active-restaurant selector here.
+- `assertBranchAccess` returns `NOT_FOUND` rather than `FORBIDDEN` so that the API does
+  not disclose the existence of another tenant's branch. Keep new branch-scoped mutations
+  consistent with this behavior.
+- The denormalized `restaurantId` on menu rows is intentional. It provides
+  defense in depth and simplifies queries, so keep writing both IDs.

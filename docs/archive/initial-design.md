@@ -1,8 +1,8 @@
-> ⚠️ **Superseded — do not treat as current.** This describes an **abandoned**
-> GraphQL/gateway design (private GraphQL runtime behind a public BFF/Gateway Worker,
-> Clerk auth). The real backend is a tRPC API worker + Better Auth + a web SSR worker
-> + the tenant-config KV worker. See [../architecture.md](../architecture.md). Kept for
-> historical context only.
+> Superseded. Do not treat this page as current. It describes an abandoned GraphQL and
+> gateway design, with a private GraphQL runtime behind a public BFF or gateway Worker
+> and Clerk authentication. The implemented backend is a tRPC API Worker, Better Auth, a
+> web SSR Worker, and the tenant-config KV Worker. See
+> [Architecture](../architecture.md). This page is kept for historical context only.
 
 # QMenut Backend Architecture
 

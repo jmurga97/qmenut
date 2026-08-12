@@ -42,6 +42,8 @@ async function branchWrite(page: Page) {
   const branch = getTrpcData<{
     name: string;
     address: string | null;
+    latitude: number | null;
+    longitude: number | null;
     dataProtectionEmail: string | null;
     legalAddress: string | null;
     legalName: string | null;
@@ -59,6 +61,8 @@ async function branchWrite(page: Page) {
     info: {
       name: branch.name,
       address: branch.address ?? undefined,
+      latitude: branch.latitude,
+      longitude: branch.longitude,
       phone: branch.phone ?? undefined,
       whatsapp: branch.whatsapp ?? undefined,
       socialLinksJson: branch.socialLinksJson ?? undefined,
