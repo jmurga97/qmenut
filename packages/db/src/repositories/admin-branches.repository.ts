@@ -72,6 +72,7 @@ export interface BranchSettingsWriteData {
   phone: string | null;
   whatsapp: string | null;
   socialLinksJson: string | null;
+  logoUrl: string | null;
 }
 
 interface UpdateBranchSettingsInput {
@@ -98,6 +99,7 @@ export function updateBranchSettingsStatements({
         phone: data.phone,
         whatsapp: data.whatsapp,
         socialLinksJson: data.socialLinksJson,
+        logoUrl: data.logoUrl,
         updatedAt: Date.now(),
       })
       .where(and(eq(branches.id, branchId), eq(branches.restaurantId, restaurantId), isNull(branches.deletedAt))),

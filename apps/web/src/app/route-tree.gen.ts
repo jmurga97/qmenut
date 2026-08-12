@@ -11,10 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char123LocaleChar125RouteImport } from './routes/{-$locale}'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SiteDotwebmanifestRouteImport } from './routes/site[.]webmanifest'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as IconDotsvgRouteImport } from './routes/icon[.]svg'
+import { Route as IconMaskableDotsvgRouteImport } from './routes/icon-maskable[.]svg'
+import { Route as AppleTouchIconDotpngRouteImport } from './routes/apple-touch-icon[.]png'
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}.index'
 import { Route as Char123LocaleChar125PuntosRouteImport } from './routes/{-$locale}.puntos'
 import { Route as Char123LocaleChar125PrivacidadRouteImport } from './routes/{-$locale}.privacidad'
+import { Route as Char123LocaleChar125OfflineRouteImport } from './routes/{-$locale}.offline'
 import { Route as Char123LocaleChar125DestacadosRouteImport } from './routes/{-$locale}.destacados'
 import { Route as Char123LocaleChar125ContactoRouteImport } from './routes/{-$locale}.contacto'
 import { Route as Char123LocaleChar125AvisoLegalRouteImport } from './routes/{-$locale}.aviso-legal'
@@ -29,9 +34,29 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SiteDotwebmanifestRoute = SiteDotwebmanifestRouteImport.update({
+  id: '/site.webmanifest',
+  path: '/site.webmanifest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IconDotsvgRoute = IconDotsvgRouteImport.update({
+  id: '/icon.svg',
+  path: '/icon.svg',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IconMaskableDotsvgRoute = IconMaskableDotsvgRouteImport.update({
+  id: '/icon-maskable.svg',
+  path: '/icon-maskable.svg',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppleTouchIconDotpngRoute = AppleTouchIconDotpngRouteImport.update({
+  id: '/apple-touch-icon.png',
+  path: '/apple-touch-icon.png',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char123LocaleChar125IndexRoute =
@@ -50,6 +75,12 @@ const Char123LocaleChar125PrivacidadRoute =
   Char123LocaleChar125PrivacidadRouteImport.update({
     id: '/privacidad',
     path: '/privacidad',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
+const Char123LocaleChar125OfflineRoute =
+  Char123LocaleChar125OfflineRouteImport.update({
+    id: '/offline',
+    path: '/offline',
     getParentRoute: () => Char123LocaleChar125Route,
   } as any)
 const Char123LocaleChar125DestacadosRoute =
@@ -72,34 +103,49 @@ const Char123LocaleChar125AvisoLegalRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/apple-touch-icon.png': typeof AppleTouchIconDotpngRoute
+  '/icon-maskable.svg': typeof IconMaskableDotsvgRoute
+  '/icon.svg': typeof IconDotsvgRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/site.webmanifest': typeof SiteDotwebmanifestRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
   '/{-$locale}/aviso-legal': typeof Char123LocaleChar125AvisoLegalRoute
   '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
   '/{-$locale}/destacados': typeof Char123LocaleChar125DestacadosRoute
+  '/{-$locale}/offline': typeof Char123LocaleChar125OfflineRoute
   '/{-$locale}/privacidad': typeof Char123LocaleChar125PrivacidadRoute
   '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
 }
 export interface FileRoutesByTo {
+  '/apple-touch-icon.png': typeof AppleTouchIconDotpngRoute
+  '/icon-maskable.svg': typeof IconMaskableDotsvgRoute
+  '/icon.svg': typeof IconDotsvgRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/site.webmanifest': typeof SiteDotwebmanifestRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/{-$locale}/aviso-legal': typeof Char123LocaleChar125AvisoLegalRoute
   '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
   '/{-$locale}/destacados': typeof Char123LocaleChar125DestacadosRoute
+  '/{-$locale}/offline': typeof Char123LocaleChar125OfflineRoute
   '/{-$locale}/privacidad': typeof Char123LocaleChar125PrivacidadRoute
   '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/apple-touch-icon.png': typeof AppleTouchIconDotpngRoute
+  '/icon-maskable.svg': typeof IconMaskableDotsvgRoute
+  '/icon.svg': typeof IconDotsvgRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/site.webmanifest': typeof SiteDotwebmanifestRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
   '/{-$locale}/aviso-legal': typeof Char123LocaleChar125AvisoLegalRoute
   '/{-$locale}/contacto': typeof Char123LocaleChar125ContactoRoute
   '/{-$locale}/destacados': typeof Char123LocaleChar125DestacadosRoute
+  '/{-$locale}/offline': typeof Char123LocaleChar125OfflineRoute
   '/{-$locale}/privacidad': typeof Char123LocaleChar125PrivacidadRoute
   '/{-$locale}/puntos': typeof Char123LocaleChar125PuntosRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
@@ -107,40 +153,59 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/apple-touch-icon.png'
+    | '/icon-maskable.svg'
+    | '/icon.svg'
     | '/robots.txt'
+    | '/site.webmanifest'
     | '/sitemap.xml'
     | '/{-$locale}'
     | '/{-$locale}/aviso-legal'
     | '/{-$locale}/contacto'
     | '/{-$locale}/destacados'
+    | '/{-$locale}/offline'
     | '/{-$locale}/privacidad'
     | '/{-$locale}/puntos'
     | '/{-$locale}/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/apple-touch-icon.png'
+    | '/icon-maskable.svg'
+    | '/icon.svg'
     | '/robots.txt'
+    | '/site.webmanifest'
     | '/sitemap.xml'
     | '/{-$locale}/aviso-legal'
     | '/{-$locale}/contacto'
     | '/{-$locale}/destacados'
+    | '/{-$locale}/offline'
     | '/{-$locale}/privacidad'
     | '/{-$locale}/puntos'
     | '/{-$locale}'
   id:
     | '__root__'
+    | '/apple-touch-icon.png'
+    | '/icon-maskable.svg'
+    | '/icon.svg'
     | '/robots.txt'
+    | '/site.webmanifest'
     | '/sitemap.xml'
     | '/{-$locale}'
     | '/{-$locale}/aviso-legal'
     | '/{-$locale}/contacto'
     | '/{-$locale}/destacados'
+    | '/{-$locale}/offline'
     | '/{-$locale}/privacidad'
     | '/{-$locale}/puntos'
     | '/{-$locale}/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AppleTouchIconDotpngRoute: typeof AppleTouchIconDotpngRoute
+  IconMaskableDotsvgRoute: typeof IconMaskableDotsvgRoute
+  IconDotsvgRoute: typeof IconDotsvgRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SiteDotwebmanifestRoute: typeof SiteDotwebmanifestRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char123LocaleChar125Route: typeof Char123LocaleChar125RouteWithChildren
 }
@@ -161,11 +226,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/site.webmanifest': {
+      id: '/site.webmanifest'
+      path: '/site.webmanifest'
+      fullPath: '/site.webmanifest'
+      preLoaderRoute: typeof SiteDotwebmanifestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/robots.txt': {
       id: '/robots.txt'
       path: '/robots.txt'
       fullPath: '/robots.txt'
       preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/icon.svg': {
+      id: '/icon.svg'
+      path: '/icon.svg'
+      fullPath: '/icon.svg'
+      preLoaderRoute: typeof IconDotsvgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/icon-maskable.svg': {
+      id: '/icon-maskable.svg'
+      path: '/icon-maskable.svg'
+      fullPath: '/icon-maskable.svg'
+      preLoaderRoute: typeof IconMaskableDotsvgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apple-touch-icon.png': {
+      id: '/apple-touch-icon.png'
+      path: '/apple-touch-icon.png'
+      fullPath: '/apple-touch-icon.png'
+      preLoaderRoute: typeof AppleTouchIconDotpngRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/{-$locale}/': {
@@ -187,6 +280,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidad'
       fullPath: '/{-$locale}/privacidad'
       preLoaderRoute: typeof Char123LocaleChar125PrivacidadRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/offline': {
+      id: '/{-$locale}/offline'
+      path: '/offline'
+      fullPath: '/{-$locale}/offline'
+      preLoaderRoute: typeof Char123LocaleChar125OfflineRouteImport
       parentRoute: typeof Char123LocaleChar125Route
     }
     '/{-$locale}/destacados': {
@@ -217,6 +317,7 @@ interface Char123LocaleChar125RouteChildren {
   Char123LocaleChar125AvisoLegalRoute: typeof Char123LocaleChar125AvisoLegalRoute
   Char123LocaleChar125ContactoRoute: typeof Char123LocaleChar125ContactoRoute
   Char123LocaleChar125DestacadosRoute: typeof Char123LocaleChar125DestacadosRoute
+  Char123LocaleChar125OfflineRoute: typeof Char123LocaleChar125OfflineRoute
   Char123LocaleChar125PrivacidadRoute: typeof Char123LocaleChar125PrivacidadRoute
   Char123LocaleChar125PuntosRoute: typeof Char123LocaleChar125PuntosRoute
   Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
@@ -226,6 +327,7 @@ const Char123LocaleChar125RouteChildren: Char123LocaleChar125RouteChildren = {
   Char123LocaleChar125AvisoLegalRoute: Char123LocaleChar125AvisoLegalRoute,
   Char123LocaleChar125ContactoRoute: Char123LocaleChar125ContactoRoute,
   Char123LocaleChar125DestacadosRoute: Char123LocaleChar125DestacadosRoute,
+  Char123LocaleChar125OfflineRoute: Char123LocaleChar125OfflineRoute,
   Char123LocaleChar125PrivacidadRoute: Char123LocaleChar125PrivacidadRoute,
   Char123LocaleChar125PuntosRoute: Char123LocaleChar125PuntosRoute,
   Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
@@ -235,7 +337,11 @@ const Char123LocaleChar125RouteWithChildren =
   Char123LocaleChar125Route._addFileChildren(Char123LocaleChar125RouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  AppleTouchIconDotpngRoute: AppleTouchIconDotpngRoute,
+  IconMaskableDotsvgRoute: IconMaskableDotsvgRoute,
+  IconDotsvgRoute: IconDotsvgRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
+  SiteDotwebmanifestRoute: SiteDotwebmanifestRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   Char123LocaleChar125Route: Char123LocaleChar125RouteWithChildren,
 }

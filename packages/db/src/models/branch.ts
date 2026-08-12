@@ -17,6 +17,7 @@ export interface PublicBranch {
   customDomain: string | null;
   id: string;
   latitude: number | null;
+  logoUrl: string | null;
   longitude: number | null;
   name: string;
   phone: string | null;

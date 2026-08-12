@@ -1,0 +1,102 @@
+/* "Add to home screen" block at the end of the contact page. */
+
+.install-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 28px;
+  padding: clamp(18px, 5vw, 24px);
+  border: var(--qm-surface-border, 1px solid var(--qm-hairline, rgba(0, 0, 0, 0.12)));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
+  background: var(--qm-surface-bg, var(--qm-card, #fff));
+  box-shadow: var(--qm-surface-shadow, none);
+}
+
+.install-card__dismiss {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--qm-muted, #6b7280);
+  cursor: pointer;
+}
+
+.install-card__icon {
+  margin-bottom: 10px;
+  color: var(--qm-primary, #1c1815);
+}
+
+.install-card__title {
+  margin: 0 0 6px;
+  padding-right: 32px;
+  color: var(--qm-ink, #17211d);
+  font-family: var(--qm-heading, inherit);
+  font-size: var(--qm-text-md, 16px);
+  font-weight: var(--qm-hw, 600);
+  line-height: 1.3;
+}
+
+.install-card__body {
+  margin: 0 0 16px;
+  color: var(--qm-muted, #6b7280);
+  font-family: var(--qm-body, inherit);
+  font-size: var(--qm-text-sm, 14px);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.install-card__steps {
+  margin: 6px 0 0;
+  padding-left: 20px;
+  color: var(--qm-muted, #6b7280);
+  font-family: var(--qm-body, inherit);
+  font-size: var(--qm-text-sm, 14px);
+  line-height: 1.7;
+}
+
+.install-card__steps li + li {
+  margin-top: 4px;
+}
+
+.install-card__steps svg {
+  display: inline-block;
+  vertical-align: -2px;
+}
+
+.install-card__action {
+  min-height: 44px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-primary, #1c1815);
+  color: var(--qm-on-primary, #fff);
+  font-family: var(--qm-heading, inherit);
+  font-size: var(--qm-text-xs, 12px);
+  font-weight: var(--qm-hw, 600);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.install-card__action:focus-visible,
+.install-card__dismiss:focus-visible {
+  outline: 2px solid var(--qm-accent-ink, currentColor);
+  outline-offset: 2px;
+}
+
+/* Belt-and-braces: the hook already hides the card, but this guarantees it never flashes
+   during hydration inside the installed app. */
+@media (display-mode: standalone) {
+  .install-card {
+    display: none;
+  }
+}

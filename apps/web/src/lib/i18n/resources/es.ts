@@ -15,6 +15,8 @@ export default {
     dishCount_one: "{{count}} plato",
     dishCount_other: "{{count}} platos",
     emptyLabel: "No hay platos disponibles",
+    extrasLabel: "Extras",
+    allergensLabel: "Alérgenos",
     heroLabel: "Menú del día",
     photoLabel: "Foto del plato",
     recommended: "Recomendado",
@@ -97,6 +99,24 @@ export default {
       seoTitle: "Aviso legal – {{name}}",
       seoDescription: "Aviso legal e información del titular de {{name}}",
     },
+  },
+  install: {
+    title: "Lleva la carta en tu móvil",
+    body: "Añádela a tu pantalla de inicio y ábrela de un toque, incluso sin conexión.",
+    action: "Instalar",
+    dismissLabel: "Cerrar",
+    ios: {
+      title: "Cómo añadirla en iPhone",
+      step1: "Abre el botón Compartir o el menú de tu navegador",
+      step2: "Elige «Añadir a pantalla de inicio»",
+      step3: "Si no aparece la opción, abre esta página en Safari",
+    },
+  },
+  offline: {
+    title: "Sin conexión",
+    body: "No hemos podido cargar esta página. Las páginas que ya has visitado siguen disponibles.",
+    retry: "Reintentar",
+    seoTitle: "Sin conexión – {{name}}",
   },
   loyalty: {
     seoTitle: "Fidelización – {{name}}",

@@ -6,21 +6,6 @@
   padding-bottom: 12px;
 }
 
-.loyalty-stage {
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    opacity 240ms ease,
-    transform 240ms ease;
-}
-
-@starting-style {
-  .loyalty-stage {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
-
 .loyalty-status {
   display: grid;
   justify-items: start;
@@ -87,19 +72,6 @@
 @media (prefers-reduced-motion: reduce) {
   .dish-trigger:active {
     transform: none;
-  }
-
-  .loyalty-stage {
-    transition:
-      opacity 150ms ease,
-      transform 150ms ease;
-  }
-
-  @starting-style {
-    .loyalty-stage {
-      opacity: 0.7;
-      transform: none;
-    }
   }
 
   .loyalty-loading {

@@ -15,6 +15,8 @@ export default {
     dishCount_one: "{{count}} dish",
     dishCount_other: "{{count}} dishes",
     emptyLabel: "No dishes available",
+    extrasLabel: "Extras",
+    allergensLabel: "Allergens",
     heroLabel: "Today's menu",
     photoLabel: "Dish photo",
     recommended: "Recommended",
@@ -97,6 +99,24 @@ export default {
       seoTitle: "Legal notice – {{name}}",
       seoDescription: "Legal notice and owner information for {{name}}",
     },
+  },
+  install: {
+    title: "Keep the menu on your phone",
+    body: "Add it to your home screen and open it with one tap, even without a connection.",
+    action: "Install",
+    dismissLabel: "Dismiss",
+    ios: {
+      title: "How to add it on iPhone",
+      step1: "Open your browser's Share or menu button",
+      step2: "Choose “Add to Home Screen”",
+      step3: "If the option is missing, open this page in Safari",
+    },
+  },
+  offline: {
+    title: "You're offline",
+    body: "We couldn't load this page. Pages you've already visited are still available.",
+    retry: "Retry",
+    seoTitle: "Offline – {{name}}",
   },
   loyalty: {
     seoTitle: "Loyalty rewards – {{name}}",

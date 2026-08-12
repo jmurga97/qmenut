@@ -12,6 +12,11 @@ const nullableEmail = nullableText.refine(
   "Email no válido",
 );
 
+const nullableHttpsUrl = nullableText.refine(
+  (value) => value === null || (z.url().safeParse(value).success && value.startsWith("https://")),
+  "La URL debe empezar por https://",
+);
+
 const minuteSchema = z.number().int().min(0).max(1439);
 const latitudeSchema = z.number().min(-90).max(90).nullable();
 const longitudeSchema = z.number().min(-180).max(180).nullable();
@@ -26,6 +31,7 @@ const branchInfoSchema = z
     phone: nullableText,
     whatsapp: nullableText,
     socialLinksJson: nullableText,
+    logoUrl: nullableHttpsUrl,
   })
   .superRefine((value, context) => {
     if ((value.latitude === null) === (value.longitude === null)) return;

@@ -29,6 +29,7 @@ interface SaveBranchSettingsInput {
     phone: string | null;
     whatsapp: string | null;
     socialLinksJson: string | null;
+    logoUrl: string | null;
   };
   schedules: BranchScheduleRow[];
   photos: BranchPhotoRow[];

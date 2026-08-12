@@ -48,6 +48,7 @@ img {
 /* ===== Home route shell (mocked-token flow) ===== */
 
 .home-shell {
+  --qm-motion-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   display: flex;
   justify-content: center;
   min-height: 100dvh;
@@ -105,6 +106,36 @@ img {
   min-height: 0;
 }
 
+.public-route-header-stage {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 300ms var(--qm-motion-ease-out),
+    transform 300ms var(--qm-motion-ease-out);
+}
+
+.public-route-content-stage {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 300ms var(--qm-motion-ease-out) 50ms,
+    transform 300ms var(--qm-motion-ease-out) 50ms;
+}
+
+@starting-style {
+  .public-route-header-stage {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@starting-style {
+  .public-route-content-stage {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
 .home-scroll {
   flex: 1 1 auto;
   min-height: 0;
@@ -128,9 +159,32 @@ img {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .public-route-header-stage,
+  .public-route-content-stage {
+    transform: none;
+    transition: opacity 150ms ease;
+    transition-delay: 0ms;
+  }
+
+  @starting-style {
+    .public-route-header-stage,
+    .public-route-content-stage {
+      opacity: 0.7;
+      transform: none;
+    }
+  }
+}
+
 @media (prefers-contrast: more) {
   .scroll-hide-header {
     background: var(--qm-bg, #fff);
+  }
+}
+
+@media (display-mode: standalone) {
+  html {
+    overscroll-behavior: none;
   }
 }
 

@@ -8,6 +8,7 @@ import { createComponentStyles } from "../../../internal/component-styles";
 import { FocusTrap } from "../../../internal/focus-trap";
 import { QmElement } from "../../../internal/qm-element";
 import { defineQmImage } from "../../atoms/qm-image";
+import { defineQmPrice } from "../../atoms/qm-price";
 
 import type { PropertyValues } from "lit";
 import type { AnimationPlaybackControls } from "motion";
@@ -28,10 +29,10 @@ interface AnimateSheetArgs {
 let instanceCount = 0;
 
 /**
- * Dish detail overlay: an optional photo followed by one scrollable details region containing
- * the rich-text description (default slot), extras (`extras` slot), and repeated allergens
- * (`allergens` slot). Photo visibility and section order remain theme-token-driven, with no
- * template prop or template-name branching in the component.
+ * Mobile dish-detail sheet with fixed drag/close chrome and one scrollable content region.
+ * The region contains an optional photo, the dish identity and price, rich-text description
+ * (default slot), extras (`extras` slot), and repeated allergens (`allergens` slot). Template
+ * signatures remain theme-token-driven, with no template-name branching in the component.
  */
 export class QmDishModal extends QmElement {
   static styles = [qmHostResetStyles, componentStyles];
@@ -53,6 +54,18 @@ export class QmDishModal extends QmElement {
 
   @property({ type: String, attribute: "close-label" })
   closeLabel = "";
+
+  @property({ type: String })
+  price = "";
+
+  @property({ type: String, attribute: "old-price" })
+  oldPrice?: string;
+
+  @property({ type: String })
+  tag?: string;
+
+  @property({ type: String, attribute: "allergens-label" })
+  allergensLabel = "";
 
   private readonly generatedTitleId = `qm-dish-modal-${++instanceCount}`;
 
@@ -76,6 +89,9 @@ export class QmDishModal extends QmElement {
   private hasExtras = false;
 
   @state()
+  private hasDescription = false;
+
+  @state()
   private rendered = false;
 
   private readonly handleAllergensSlotChange = (event: Event) => {
@@ -84,6 +100,10 @@ export class QmDishModal extends QmElement {
 
   private readonly handleExtrasSlotChange = (event: Event) => {
     this.hasExtras = (event.target as HTMLSlotElement).assignedElements({ flatten: true }).length > 0;
+  };
+
+  private readonly handleDescriptionSlotChange = (event: Event) => {
+    this.hasDescription = (event.target as HTMLSlotElement).assignedElements({ flatten: true }).length > 0;
   };
 
   private readonly handleBackdropClick = () => {
@@ -287,6 +307,53 @@ export class QmDishModal extends QmElement {
     `;
   }
 
+  private renderLead(): unknown {
+    return html`
+      <div part="lead" class="lead">
+        ${this.tag ? html`<div part="tag" class="tag">${this.tag}</div>` : nothing}
+        <div class="identity">
+          <h2 part="title" id=${this.resolvedTitleId} class="title">${this.name}</h2>
+          ${
+            this.price
+              ? html` <qm-price part="price" class="price" .value=${this.price} .oldValue=${this.oldPrice}></qm-price> `
+              : nothing
+          }
+        </div>
+      </div>
+    `;
+  }
+
+  private renderDescription(): unknown {
+    return html`
+      <div part="description" class="description" ?hidden=${!this.hasDescription}>
+        <slot @slotchange=${this.handleDescriptionSlotChange}></slot>
+      </div>
+    `;
+  }
+
+  private renderExtras(): unknown {
+    return html`
+      <div part="extras" class="extras" ?hidden=${!this.hasExtras}>
+        <slot name="extras" @slotchange=${this.handleExtrasSlotChange}></slot>
+      </div>
+    `;
+  }
+
+  private renderAllergens(): unknown {
+    return html`
+      <div part="allergens" class="allergens" ?hidden=${!this.hasAllergens}>
+        ${
+          this.allergensLabel
+            ? html`<h3 part="allergens-label" class="section-label">${this.allergensLabel}</h3>`
+            : nothing
+        }
+        <div class="allergen-list">
+          <slot name="allergens" @slotchange=${this.handleAllergensSlotChange}></slot>
+        </div>
+      </div>
+    `;
+  }
+
   render(): unknown {
     if (!this.rendered) return nothing;
 
@@ -305,28 +372,21 @@ export class QmDishModal extends QmElement {
           >
             <span></span>
           </div>
-          <div part="header" class="header">
-            <h2 part="title" id=${this.resolvedTitleId} class="title">${this.name}</h2>
-            <button
-              part="close"
-              class="close"
-              type="button"
-              aria-label=${this.closeLabel}
-              @click=${this.handleCloseClick}
-            >
-              <slot name="close-icon" aria-hidden="true">×</slot>
-            </button>
-          </div>
-          ${this.renderPhoto()}
-          <div part="details" class="details">
-            <div part="description" class="description">
-              <slot></slot>
+          <div part="sheet" class="sheet">
+            <div part="header" class="chrome">
+              <button
+                part="close"
+                class="close"
+                type="button"
+                aria-label=${this.closeLabel}
+                @click=${this.handleCloseClick}
+              >
+                <slot name="close-icon" aria-hidden="true">×</slot>
+              </button>
             </div>
-            <div part="extras" class="extras" ?hidden=${!this.hasExtras}>
-              <slot name="extras" @slotchange=${this.handleExtrasSlotChange}></slot>
-            </div>
-            <div part="allergens" class="allergens" ?hidden=${!this.hasAllergens}>
-              <slot name="allergens" @slotchange=${this.handleAllergensSlotChange}></slot>
+            <div part="content" class="content">
+              ${this.renderPhoto()} ${this.renderLead()} ${this.renderDescription()} ${this.renderExtras()}
+              ${this.renderAllergens()}
             </div>
           </div>
         </div>
@@ -337,6 +397,7 @@ export class QmDishModal extends QmElement {
 
 export function defineQmDishModal() {
   defineQmImage();
+  defineQmPrice();
 
   if (!customElements.get(QM_DISH_MODAL_TAG_NAME)) {
     customElements.define(QM_DISH_MODAL_TAG_NAME, QmDishModal);
@@ -344,7 +405,19 @@ export function defineQmDishModal() {
 }
 
 export type QmDishModalArgs = Partial<
-  Pick<QmDishModal, "open" | "name" | "titleId" | "photoUrl" | "photoLabel" | "closeLabel">
+  Pick<
+    QmDishModal,
+    | "open"
+    | "name"
+    | "titleId"
+    | "photoUrl"
+    | "photoLabel"
+    | "closeLabel"
+    | "price"
+    | "oldPrice"
+    | "tag"
+    | "allergensLabel"
+  >
 >;
 
 declare global {

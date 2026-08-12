@@ -16,6 +16,7 @@ export interface BranchSettings {
   phone: string | null;
   whatsapp: string | null;
   socialLinksJson: string | null;
+  logoUrl: string | null;
   customDomain: string | null;
   dataProtectionEmail: string | null;
   legalAddress: string | null;
@@ -58,6 +59,7 @@ export async function getBranchSettings({
     phone: branch.phone,
     whatsapp: branch.whatsapp,
     socialLinksJson: branch.socialLinksJson,
+    logoUrl: branch.logoUrl,
     customDomain: branch.customDomain,
     dataProtectionEmail: restaurant.dataProtectionEmail,
     legalAddress: restaurant.legalAddress,

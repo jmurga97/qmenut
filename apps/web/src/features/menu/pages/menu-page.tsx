@@ -1,7 +1,10 @@
+import { QmMenuList } from "@qmenut/ui/components/qm-menu-list/react";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 
-import { MenuCategoryNav } from "~/features/menu/components/menu-category-nav";
-import { MenuDishList } from "~/features/menu/components/menu-dish-list";
+import { MenuCategoryNav } from "~/features/menu/components/menu-content/menu-category-nav";
+import { MenuFeatured } from "~/features/menu/components/menu-content/menu-featured";
+import { MenuSection } from "~/features/menu/components/menu-content/menu-section";
 import { MenuDishModal } from "~/features/menu/components/menu-dish-modal";
 import { useMenuPage } from "~/features/menu/hooks/use-menu-page";
 import { track } from "~/lib/analytics/posthog";
@@ -11,6 +14,7 @@ import { usePublicRouteLayout } from "~/shared/components/public-route-layout/pu
 import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
 
 export function MenuPage() {
+  const { t } = useTranslation();
   const dishTriggerRef = useRef<HTMLElement | null>(null);
   const { scrollContainerRef, template, tenant } = usePublicRouteLayout();
   const { content, selectedDish, setSelectedDish, showDishPhotos } = useMenuPage({
@@ -39,12 +43,28 @@ export function MenuPage() {
 
   return (
     <>
-      <MenuDishList
-        categoryNav={<MenuCategoryNav scrollContainerRef={scrollContainerRef} sections={content.sections} />}
-        content={content}
-        showDishPhotos={showDishPhotos}
-        onSelectDish={handleSelectDish}
-      />
+      {content.sections.length === 0 ? (
+        <QmMenuList cascade emptyLabel={t("menu.emptyLabel")} />
+      ) : (
+        <>
+          <MenuFeatured
+            featured={content.featured}
+            featuredPromo={content.featuredPromo}
+            showDishPhotos={showDishPhotos}
+            onSelectDish={handleSelectDish}
+          />
+          <MenuCategoryNav scrollContainerRef={scrollContainerRef} sections={content.sections} />
+          {content.sections.map((section, index) => (
+            <MenuSection
+              key={section.id}
+              index={index}
+              section={section}
+              showDishPhotos={showDishPhotos}
+              onSelectDish={handleSelectDish}
+            />
+          ))}
+        </>
+      )}
       <MenuDishModal dish={selectedDish} onClose={handleCloseDish} />
     </>
   );

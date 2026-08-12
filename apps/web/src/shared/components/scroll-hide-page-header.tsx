@@ -102,7 +102,7 @@ export function ScrollHidePageHeader({ scrollContainerRef, ...pageHeaderProps }:
 
   return (
     <div ref={headerRef} aria-hidden={hidden} className="scroll-hide-header" data-hidden={hidden} inert={hidden}>
-      <div className="scroll-hide-header__inner">
+      <div className="scroll-hide-header__inner public-route-header-stage">
         <QmPageHeader {...pageHeaderProps} />
       </div>
     </div>

@@ -23,7 +23,7 @@ export function HighlightsPage() {
 
   if (!hasRecommended && !hasPromos) {
     return (
-      <div className="highlights-empty">
+      <div className="highlights-empty public-route-content-stage">
         <span className="highlights-empty__icon" aria-hidden="true">
           <ChefHat size={26} strokeWidth={1.6} />
         </span>
@@ -34,7 +34,7 @@ export function HighlightsPage() {
   }
 
   return (
-    <div className="highlights-page">
+    <div className="highlights-page public-route-content-stage">
       {content.featuredPromo ? (
         <div className="highlights-featured-frame">
           <QmFeatured value={content.featuredPromo} />

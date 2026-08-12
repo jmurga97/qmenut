@@ -45,6 +45,13 @@ export const branchFormSchema = z
     longitude: coordinateText({ min: -180, max: 180, label: "Longitud" }),
     phone: z.string().trim(),
     whatsapp: z.string().trim(),
+    logoUrl: z
+      .string()
+      .trim()
+      .refine(
+        (value) => !value || (z.url().safeParse(value).success && value.startsWith("https://")),
+        "La URL debe empezar por https://",
+      ),
     legalName: z.string().trim(),
     taxId: z.string().trim(),
     legalAddress: z.string().trim(),

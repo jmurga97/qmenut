@@ -21,14 +21,22 @@ async function readTenantThemeFromKv(host: string): Promise<unknown> {
   return (await env.TENANT_THEME?.get(host, "json")) ?? null;
 }
 
+export async function readTenantTheme(
+  host: string,
+  fallbackTemplate?: QmTenantThemeConfig["template"],
+): Promise<QmTenantThemeConfig> {
+  const raw = await readTenantThemeFromKv(host);
+
+  return resolveTenantThemeConfig(raw, fallbackTemplate);
+}
+
 export const getTenantContext = createServerFn({ method: "GET" }).handler(async (): Promise<TenantContext> => {
   const { DEV_DEFAULT_TENANT_HOST, DEV_DEFAULT_TENANT_TEMPLATE, resolveSsrTenantHost } = await import("./tenant-host");
   const host = resolveSsrTenantHost();
-  const raw = await readTenantThemeFromKv(host);
   const fallbackTemplate =
     import.meta.env.DEV && host === DEV_DEFAULT_TENANT_HOST ? DEV_DEFAULT_TENANT_TEMPLATE : undefined;
 
-  return { host, theme: resolveTenantThemeConfig(raw, fallbackTemplate) };
+  return { host, theme: await readTenantTheme(host, fallbackTemplate) };
 });
 
 /** Reuses immutable tenant configuration for client navigations, never across SSR requests. */

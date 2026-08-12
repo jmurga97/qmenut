@@ -6,6 +6,9 @@ import { StartClient } from "@tanstack/react-start/client";
 import { StrictMode, startTransition } from "react";
 import { hydrateRoot } from "react-dom/client";
 
+import { registerServiceWorker } from "~/app/register-sw";
+import { initInstallPromptCapture } from "~/features/install/use-install-prompt";
+
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN as string | undefined;
 
 if (sentryDsn) {
@@ -17,6 +20,9 @@ if (sentryDsn) {
   });
 }
 
+// Must run before hydration: `beforeinstallprompt` fires once, and often before React mounts.
+initInstallPromptCapture();
+
 startTransition(() => {
   hydrateRoot(
     document,
@@ -25,3 +31,5 @@ startTransition(() => {
     </StrictMode>,
   );
 });
+
+registerServiceWorker();

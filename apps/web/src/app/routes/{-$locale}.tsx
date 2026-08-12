@@ -2,6 +2,7 @@ import { TEMPLATES } from "@qmenut/ui/theme/presets";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
+import { SHORT_NAME_MAX_LENGTH, truncateLabel } from "~/lib/app-label";
 import { DEFAULT_LOCALE, chromeLocale } from "~/lib/i18n/create-i18n";
 import { LOCALE_PATTERN } from "~/lib/i18n/locale-pattern";
 import { AnalyticsBootstrap } from "~/shared/components/analytics-bootstrap";
@@ -18,6 +19,8 @@ export interface LocaleLanguageOption {
 
 export interface LocaleRouteContext {
   availableLanguages: LocaleLanguageOption[];
+  /** Home-screen label for the installed app; the root route cannot reach `menu.publicData`. */
+  branchName: string | undefined;
   defaultLanguage: string;
   /** Dev-only `?template=` override, parsed and applied only when `import.meta.env.DEV`. */
   devTemplate: QmTemplateName | undefined;
@@ -65,12 +68,23 @@ export const Route = createFileRoute("/{-$locale}")({
 
     return {
       availableLanguages: language?.available ?? [],
+      branchName: data?.branch.name,
       defaultLanguage: language?.default ?? DEFAULT_LOCALE,
       devTemplate: import.meta.env.DEV ? search.template : undefined,
       effectiveLocale,
       locale: requested,
     };
   },
+  head: ({ match }) => ({
+    meta: match.context.branchName
+      ? [
+          {
+            name: "apple-mobile-web-app-title",
+            content: truncateLabel(match.context.branchName, SHORT_NAME_MAX_LENGTH),
+          },
+        ]
+      : [],
+  }),
   component: LocaleLayout,
 });
 

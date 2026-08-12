@@ -39,6 +39,7 @@ function BranchForm({ branchId }: { branchId: string }) {
             <BranchAddressAutocomplete branchId={branchId} />
             <FormTextInput<BranchFormValues> label="Teléfono" name="phone" />
             <FormTextInput<BranchFormValues> label="WhatsApp" name="whatsapp" />
+            <FormTextInput<BranchFormValues> label="URL del logo (icono de la app)" name="logoUrl" />
             <FormSelect<BranchFormValues>
               label="Zona horaria del restaurante"
               name="timezone"

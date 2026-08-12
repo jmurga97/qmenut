@@ -23,6 +23,9 @@ export function AnalyticsBootstrap() {
 
     registerTenantProperties({
       tenant_host: host,
+      // Splits installed-app sessions from browser sessions on every event, which is the
+      // number that shows a restaurant what the PWA is actually worth.
+      display_mode: window.matchMedia("(display-mode: standalone)").matches ? "standalone" : "browser",
       ...(data && { restaurant_id: data.branch.restaurantId, branch_id: data.branch.id }),
     });
     scheduleAnalyticsLoad();
