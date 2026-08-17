@@ -135,8 +135,8 @@
         "lucide-react": "^1.23.0",
         "marked": "^18.0.6",
         "posthog-js": "^1.398.0",
-        "react": "19.2.3",
-        "react-dom": "19.2.3",
+        "react": "canary",
+        "react-dom": "canary",
         "react-i18next": "^17.0.8",
       },
       "devDependencies": {
@@ -2213,6 +2213,10 @@
 
     "@parse5/tools/parse5": ["parse5@7.3.0", "", { "dependencies": { "entities": "^6.0.0" } }, "sha512-IInvU7fabl34qmi9gY8XOVxhYyMyuH2xUNpb2q8/Y+7552KlejkRvqvD19nMoUW/uQGGbqNpA6Tufu5FL5BZgw=="],
 
+    "@qmenut/web/react": ["react@19.3.0-canary-eb8feb71-20260814", "", {}, "sha512-4CF6VVbInQ54749LzFJ6POm1SREXQmNZ6yFjTq67yCL3NrYlK+aO6nzO3i1Fe7szu/fXUr3NRzitdHj+l/O5EQ=="],
+
+    "@qmenut/web/react-dom": ["react-dom@19.3.0-canary-eb8feb71-20260814", "", { "dependencies": { "scheduler": "0.28.0-canary-eb8feb71-20260814" }, "peerDependencies": { "react": "19.3.0-canary-eb8feb71-20260814" } }, "sha512-sURKF6v4XliFLgl9+lT3S9zM9EEqJFDzYwE7+BtHdUesovByKQbM9dm4WqGr/b3kiTq6jw7ASIYG10j/t2pbbQ=="],
+
     "@rollup/pluginutils/estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
 
     "@tailwindcss/oxide-wasm32-wasi/@emnapi/core": ["@emnapi/core@1.11.1", "", { "dependencies": { "@emnapi/wasi-threads": "1.2.2", "tslib": "^2.4.0" }, "bundled": true }, "sha512-RSvbQmHzdKzNsLYa/wHrbc3KN4sYLKAdPZxqiM2HATqv/SBk2/ENSHpvXGaLOMcsAyz0poEGqkmmKYG3OWiJEQ=="],
@@ -2458,6 +2462,8 @@
     "@lit-labs/ssr/parse5/entities": ["entities@6.0.1", "", {}, "sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g=="],
 
     "@parse5/tools/parse5/entities": ["entities@6.0.1", "", {}, "sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g=="],
+
+    "@qmenut/web/react-dom/scheduler": ["scheduler@0.28.0-canary-eb8feb71-20260814", "", {}, "sha512-TjXQVWDPcNnqesHvbi5WB587WPFr8to90JVhOIO0szb0GFgg0fF0PPJCWoxi0poyxJ98OThXb22akDHfZyXG6A=="],
 
     "@tanstack/eslint-plugin-router/@typescript-eslint/utils/@typescript-eslint/scope-manager": ["@typescript-eslint/scope-manager@8.61.1", "", { "dependencies": { "@typescript-eslint/types": "8.61.1", "@typescript-eslint/visitor-keys": "8.61.1" } }, "sha512-L2bdIeoQS8FlKAvONAr20w6OcLXeB+qiDKbAooS9A0Ben+iSIkBef0FxqwKWYqt5sa0i4KJtxVyVmhMylKzF5w=="],
 

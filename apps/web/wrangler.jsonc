@@ -36,13 +36,41 @@
   // Wrangler named environments do not inherit KV, service bindings, vars, or observability.
   // Keep name unchanged so custom domains and the API_WORKER binding keep their worker names.
   "env": {
+    "development": {
+      "name": "qmenut-web-dev",
+      "workers_dev": false,
+      "routes": [
+        {
+          "pattern": "dev.qmenut.app",
+          "custom_domain": true,
+        },
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "TENANT_THEME",
+          "id": "d85019d6ce874b2abdedeb95a91736a3",
+        },
+      ],
+      "services": [
+        {
+          "binding": "API_WORKER",
+          "service": "qmenut-api-dev",
+        },
+      ],
+      "vars": {
+        "SENTRY_DSN": "",
+      },
+      "observability": {
+        "enabled": true,
+      },
+    },
     "production": {
       "name": "qmenut-web",
       "kv_namespaces": [
         {
           "binding": "TENANT_THEME",
-          "id": "48d5fae2045240cfae007bdd790c64f6"
-        }
+          "id": "48d5fae2045240cfae007bdd790c64f6",
+        },
       ],
       "services": [
         {

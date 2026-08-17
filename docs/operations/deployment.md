@@ -1,15 +1,111 @@
 # Cloudflare deployment runbook
 
 This page describes how to take qmenut from an empty Cloudflare account to a live
-deployment. Deployments are manual and target the named `production` environment.
-Top-level Wrangler configuration is for development only. Never deploy it to production
-without the environment selection described here.
+deployment. Deployments are manual and target a named Wrangler environment. The top-level
+configuration remains for local development; remote deployments must select either the
+named `development` or `production` environment.
 
 The production topology uses the `qmenut.app` zone: the API at `api.qmenut.app`, the admin
 dashboard at `admin.qmenut.app`, the marketing site at `qmenut.app` and `www.qmenut.app`,
 and one `qmenut-web` Worker attached to each tenant's own custom domain.
 
 Run commands from the repository root unless the command includes `--cwd`.
+
+## Remote development environment
+
+The repository includes an isolated `development` environment for the product Workers:
+
+| Worker                     | Development hostname   | Isolated resources                 |
+| -------------------------- | ---------------------- | ---------------------------------- |
+| `qmenut-api-dev`           | `api.dev.qmenut.app`   | D1, rate-limit namespaces, secrets |
+| `qmenut-tenant-config-dev` | service binding only   | Development `TENANT_THEME` KV      |
+| `qmenut-web-dev`           | `dev.qmenut.app`       | Development `TENANT_THEME` KV      |
+| `qmenut-admin-dev`         | `admin.dev.qmenut.app` | Build-time development API URL     |
+
+The landing Worker is intentionally not deployed to development. The development API keeps
+the private `EMAIL_WORKER` service binding to the existing `ming-email-worker`; no public
+email endpoint or second email Worker is created.
+
+### Provision development resources
+
+The development D1 and KV resources are already represented in source with these IDs:
+
+- D1 `qmenut-db-v2-dev`: `f83a9c25-39a3-4003-80f5-633a6b9de41b`
+- KV `TENANT_THEME_DEV`: `d85019d6ce874b2abdedeb95a91736a3`
+
+If provisioning a new account, create them with:
+
+```bash
+bunx wrangler d1 create qmenut-db-v2-dev
+```
+
+```bash
+bunx wrangler kv namespace create TENANT_THEME_DEV
+```
+
+The development KV ID must be identical in `apps/web/wrangler.jsonc` and
+`apps/tenant-config/wrangler.jsonc`. The rate-limit bindings use account-unique namespace
+IDs `2001` and `2002`, separate from production's `1001` and `1002`; rate-limit namespace
+IDs are identifiers chosen within the account rather than KV-style resources to provision.
+
+### Configure development secrets
+
+Use separate values from production. Set `STRIPE_SECRET_KEY` and
+`STRIPE_WEBHOOK_SECRET` from Stripe test mode, and replace
+`price_dev_basic_replace_me` in `apps/api/wrangler.jsonc` with the development Stripe test
+price before testing billing.
+
+```bash
+bunx wrangler secret put BETTER_AUTH_SECRET --env development --cwd apps/api
+bunx wrangler secret put THEME_WORKER_TOKEN --env development --cwd apps/api
+bunx wrangler secret put THEME_WORKER_TOKEN --env development --cwd apps/tenant-config
+bunx wrangler secret put LOYALTY_TOKEN_SECRET --env development --cwd apps/api
+bunx wrangler secret put STRIPE_SECRET_KEY --env development --cwd apps/api
+bunx wrangler secret put STRIPE_WEBHOOK_SECRET --env development --cwd apps/api
+```
+
+Use the same development `THEME_WORKER_TOKEN` value for both Workers. Do not set
+`E2E_FIXED_OTP` on the deployed development Worker. DeepL, MapTiler, and Sentry are optional
+and are intentionally unset by default.
+
+### Deploy and seed development
+
+Run the following in order:
+
+```bash
+bun run --cwd apps/tenant-config deploy:development
+bun run --cwd apps/api db:migrate:development
+bun run --cwd apps/api deploy:development
+bun run --cwd apps/web deploy:development
+bun run --cwd apps/admin deploy:development
+```
+
+Before seeding, replace the placeholder owner email in
+`apps/api/tenants/development.tenant.json` with a real development inbox. Then create the
+tenant and reuse the existing tapas content fixture under the development hostname:
+
+```bash
+bun run --cwd apps/api tenant:create -- --file tenants/development.tenant.json --remote --env development
+```
+
+```bash
+bun run --cwd apps/api tenant:content -- --file demo-tenants/tapas.content.json --remote --env development --host dev.qmenut.app
+```
+
+The web, API, and admin custom-domain routes are declared in their development Wrangler
+environments. Cloudflare must still be authoritative for the `qmenut.app` zone so DNS and
+managed TLS can become active.
+
+Verify the deployment with:
+
+```bash
+curl --fail --show-error --silent https://api.dev.qmenut.app/health
+```
+
+Then open `https://admin.dev.qmenut.app` to complete OTP login and
+`https://dev.qmenut.app` to verify the seeded public menu and theme. Confirm that the
+development D1 and KV IDs are used by the deployed Workers and that production IDs and
+secrets remain unchanged.
 
 ## Before you begin
 

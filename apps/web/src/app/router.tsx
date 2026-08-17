@@ -4,7 +4,18 @@ import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query
 
 import { routeTree } from "~/app/route-tree.gen";
 import { createI18nInstance } from "~/lib/i18n/create-i18n";
+import { LOCALE_PATTERN } from "~/lib/i18n/locale-pattern";
 import { createTrpcOptionsProxy } from "~/lib/trpc-client";
+
+const PUBLIC_VIEW_TRANSITION_PATHS = ["/", "/destacados", "/contacto", "/puntos"] as const;
+
+function getPublicViewTransitionIndex(pathname: string) {
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const pathWithoutLocale = LOCALE_PATTERN.test(pathSegments[0] ?? "") ? pathSegments.slice(1) : pathSegments;
+  const publicPath = `/${pathWithoutLocale.join("/")}`;
+
+  return PUBLIC_VIEW_TRANSITION_PATHS.findIndex((path) => path === publicPath);
+}
 
 function createQueryClient() {
   return new QueryClient({
@@ -33,6 +44,24 @@ export function getRouter() {
     routeTree,
     scrollRestoration: true,
     defaultPreload: "intent",
+    // TanStack Router owns the route store update, so its native wrapper is needed
+    // for React's public-route ViewTransition boundary to capture the page swap.
+    // Keep the temporary experiment limited to the four public content routes.
+    defaultViewTransition: {
+      types: ({ fromLocation, toLocation }) => {
+        if (!fromLocation) return false;
+
+        const fromIndex = getPublicViewTransitionIndex(fromLocation.pathname);
+        const toIndex = getPublicViewTransitionIndex(toLocation.pathname);
+
+        if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return false;
+
+        return [
+          "qm-public-route-slide",
+          fromIndex < toIndex ? "qm-public-route-slide-forward" : "qm-public-route-slide-backward",
+        ];
+      },
+    },
     context: {
       queryClient,
       trpc,

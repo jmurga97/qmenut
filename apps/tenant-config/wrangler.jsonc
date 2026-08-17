@@ -18,13 +18,25 @@
   // Wrangler named environments do not inherit KV bindings or observability. Keep name
   // unchanged so the API's THEME_WORKER service binding resolves this worker.
   "env": {
+    "development": {
+      "name": "qmenut-tenant-config-dev",
+      "kv_namespaces": [
+        {
+          "binding": "TENANT_THEME",
+          "id": "d85019d6ce874b2abdedeb95a91736a3",
+        },
+      ],
+      "observability": {
+        "enabled": true,
+      },
+    },
     "production": {
       "name": "qmenut-tenant-config",
       "kv_namespaces": [
         {
           "binding": "TENANT_THEME",
-          "id": "48d5fae2045240cfae007bdd790c64f6"
-        }
+          "id": "48d5fae2045240cfae007bdd790c64f6",
+        },
       ],
       "observability": {
         "enabled": true,

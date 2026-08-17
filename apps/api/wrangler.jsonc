@@ -59,6 +59,66 @@
   // Wrangler named environments do not inherit vars, D1, services, rate limits, or
   // observability. Keep name unchanged so service bindings continue to resolve qmenut-api.
   "env": {
+    "development": {
+      "name": "qmenut-api-dev",
+      "workers_dev": false,
+      "routes": [
+        {
+          "pattern": "api.dev.qmenut.app",
+          "custom_domain": true,
+        },
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "qmenut-db-v2-dev",
+          "database_id": "f83a9c25-39a3-4003-80f5-633a6b9de41b",
+          "migrations_dir": "migrations",
+        },
+      ],
+      "services": [
+        {
+          "binding": "EMAIL_WORKER",
+          "service": "ming-email-worker",
+          "remote": true,
+        },
+        {
+          "binding": "THEME_WORKER",
+          "service": "qmenut-tenant-config-dev",
+        },
+      ],
+      "ratelimits": [
+        {
+          "name": "GEOCODING_LIMITER",
+          "namespace_id": "2002",
+          "simple": {
+            "limit": 30,
+            "period": 60,
+          },
+        },
+        {
+          "name": "LOYALTY_CODE_LIMITER",
+          "namespace_id": "2001",
+          "simple": {
+            "limit": 5,
+            "period": 60,
+          },
+        },
+      ],
+      "observability": {
+        "enabled": true,
+      },
+      "vars": {
+        "ALLOWED_ORIGINS": "https://admin.dev.qmenut.app",
+        "BETTER_AUTH_URL": "https://api.dev.qmenut.app",
+        "ADMIN_APP_URL": "https://admin.dev.qmenut.app",
+        "DEEPL_API_URL": "https://api-free.deepl.com",
+        "STRIPE_PRICE_BASIC": "price_dev_basic_replace_me",
+        "LOG_LEVEL": "info",
+        "NODE_ENV": "development",
+        "SENTRY_DSN": "",
+      },
+    },
     "production": {
       "name": "qmenut-api",
       "workers_dev": false,

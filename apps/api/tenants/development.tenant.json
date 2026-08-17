@@ -1,0 +1,43 @@
+{
+  "restaurant": {
+    "name": "QMenut Development",
+    "defaultLanguageCode": "es",
+    "defaultCurrency": "EUR",
+    "timezone": "Europe/Madrid",
+    "legal": {
+      "legalName": "QMenut Development",
+      "taxId": "DEV00000000",
+      "legalAddress": "Development environment",
+      "dataProtectionEmail": "dev-owner@example.com"
+    },
+    "emailFromName": "QMenut Development",
+    "emailReplyTo": "dev-owner@example.com",
+    "languages": ["es", "en"]
+  },
+  "branch": {
+    "name": "Development",
+    "customDomain": "dev.qmenut.app",
+    "address": "Development environment",
+    "phone": "+34900000000",
+    "currency": "EUR",
+    "planCode": "basic",
+    "schedules": [
+      { "dayOfWeek": 1, "openMinute": 540, "closeMinute": 1320 },
+      { "dayOfWeek": 2, "openMinute": 540, "closeMinute": 1320 },
+      { "dayOfWeek": 3, "openMinute": 540, "closeMinute": 1320 },
+      { "dayOfWeek": 4, "openMinute": 540, "closeMinute": 1320 },
+      { "dayOfWeek": 5, "openMinute": 540, "closeMinute": 1380 },
+      { "dayOfWeek": 6, "openMinute": 600, "closeMinute": 1380 }
+    ]
+  },
+  "owner": {
+    "name": "QMenut Development Owner",
+    "email": "dev-owner@example.com"
+  },
+  "theme": {
+    "template": "tapas",
+    "primary": "#9C2B1F",
+    "secondary": "#C99B3F",
+    "tagline": "QMenut development environment"
+  }
+}

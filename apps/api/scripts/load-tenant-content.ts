@@ -1,6 +1,7 @@
 // QMenut · Carga reproducible de contenido público para un tenant existente.
 //
-//   bun scripts/load-tenant-content.ts --file demo-tenants/cafe.content.json [--remote] [--force] [--dry-run]
+//   bun scripts/load-tenant-content.ts --file demo-tenants/cafe.content.json [--remote]
+//     [--env production|development] [--host host] [--force] [--dry-run]
 
 // Resuelve el tenant por host, valida las imágenes antes de escribir, actualiza los
 // datos públicos de contacto e inserta fotos, carta, relaciones y promociones. Al
@@ -217,7 +218,9 @@ type ContentFile = z.infer<typeof contentFileSchema>;
 type PromotionInput = z.infer<typeof promotionSchema>;
 
 interface CliOptions {
+  environment: "production" | "development";
   file: string;
+  host?: string;
   remote: boolean;
   force: boolean;
   dryRun: boolean;
@@ -323,6 +326,8 @@ function errorMessage(error: unknown): string {
 
 function parseArgs(argv: string[]): CliOptions {
   let file: string | undefined;
+  let environment: CliOptions["environment"] = "production";
+  let host: string | undefined;
   let remote = false;
   let force = false;
   let dryRun = false;
@@ -332,6 +337,20 @@ function parseArgs(argv: string[]): CliOptions {
 
     if (arg === "--file") {
       file = argv[++index];
+    } else if (arg === "--env") {
+      const value = argv[++index];
+
+      if (value !== "production" && value !== "development") {
+        fail("--env debe ser production o development");
+      }
+
+      environment = value;
+    } else if (arg === "--host") {
+      host = argv[++index];
+
+      if (!host || !HOST_PATTERN.test(host)) {
+        fail("--host debe ser un hostname en minúsculas, sin esquema ni puerto");
+      }
     } else if (arg === "--remote") {
       remote = true;
     } else if (arg === "--force") {
@@ -347,7 +366,7 @@ function parseArgs(argv: string[]): CliOptions {
     fail("Falta --file <content.json>");
   }
 
-  return { file: path.resolve(process.cwd(), file), remote, force, dryRun };
+  return { environment, file: path.resolve(process.cwd(), file), host, remote, force, dryRun };
 }
 
 function esc(value: string): string {
@@ -373,12 +392,12 @@ function runWrangler(args: string[], cwd: string): string {
 }
 
 function getD1TargetArgs(options: CliOptions): string[] {
-  return options.remote ? ["--remote", "--env", "production", "-y"] : ["--local"];
+  return options.remote ? ["--remote", "--env", options.environment, "-y"] : ["--local"];
 }
 
 function getKvTargetArgs(options: CliOptions): string[] {
   return options.remote
-    ? ["--remote", "--env", "production"]
+    ? ["--remote", "--env", options.environment]
     : ["--preview", "--local", "--persist-to", LOCAL_KV_PERSIST];
 }
 
@@ -678,7 +697,7 @@ if (!parsed.success) {
   fail(`JSON de contenido inválido:\n${z.prettifyError(parsed.error)}`);
 }
 
-const content = parsed.data;
+const content = options.host ? { ...parsed.data, host: options.host } : parsed.data;
 const resolvedIds = resolveTenant(content.host, options);
 
 if (!resolvedIds && !options.dryRun) {

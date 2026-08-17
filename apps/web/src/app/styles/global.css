@@ -136,6 +136,121 @@ img {
   }
 }
 
+/* Temporary: keep the page header static while the route sheet transition is tuned. */
+.public-route-header-stage {
+  transition: none;
+}
+
+@starting-style {
+  .public-route-header-stage {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Temporary public route ViewTransition experiment. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* The named selectors keep this working in browsers that support View Transitions
+   but have not implemented React's view-transition-class selector yet. */
+::view-transition-group(qm-public-route) {
+  animation: none;
+  overflow: hidden;
+}
+
+::view-transition-old(qm-public-route) {
+  animation: qm-public-route-slide-out-left 300ms var(--qm-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
+}
+
+::view-transition-new(qm-public-route) {
+  animation: qm-public-route-slide-in-right 300ms var(--qm-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
+  z-index: 1;
+}
+
+::view-transition-group(.qm-public-route-slide) {
+  animation: none;
+  overflow: hidden;
+}
+
+::view-transition-old(.qm-public-route-slide) {
+  animation: qm-public-route-slide-out-left 300ms var(--qm-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
+}
+
+::view-transition-new(.qm-public-route-slide) {
+  animation: qm-public-route-slide-in-right 300ms var(--qm-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
+  z-index: 1;
+}
+
+:root:active-view-transition-type(qm-public-route-slide-forward)::view-transition-old(qm-public-route),
+:root:active-view-transition-type(qm-public-route-slide-forward)::view-transition-old(.qm-public-route-slide) {
+  animation-name: qm-public-route-slide-out-left;
+}
+
+:root:active-view-transition-type(qm-public-route-slide-forward)::view-transition-new(qm-public-route),
+:root:active-view-transition-type(qm-public-route-slide-forward)::view-transition-new(.qm-public-route-slide) {
+  animation-name: qm-public-route-slide-in-right;
+}
+
+:root:active-view-transition-type(qm-public-route-slide-backward)::view-transition-old(qm-public-route),
+:root:active-view-transition-type(qm-public-route-slide-backward)::view-transition-old(.qm-public-route-slide) {
+  animation-name: qm-public-route-slide-out-right;
+}
+
+:root:active-view-transition-type(qm-public-route-slide-backward)::view-transition-new(qm-public-route),
+:root:active-view-transition-type(qm-public-route-slide-backward)::view-transition-new(.qm-public-route-slide) {
+  animation-name: qm-public-route-slide-in-left;
+}
+
+@keyframes qm-public-route-slide-out-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes qm-public-route-slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes qm-public-route-slide-out-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes qm-public-route-slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-old(qm-public-route),
+  ::view-transition-new(qm-public-route),
+  ::view-transition-old(.qm-public-route-slide),
+  ::view-transition-new(.qm-public-route-slide) {
+    animation: none;
+  }
+}
+
 .home-scroll {
   flex: 1 1 auto;
   min-height: 0;
@@ -145,6 +260,10 @@ img {
   overscroll-behavior-y: contain;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+}
+
+.home-scroll:has(.public-route-transition-surface--animated) {
+  view-transition-name: qm-public-route;
 }
 
 .home-scroll::-webkit-scrollbar {

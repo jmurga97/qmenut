@@ -1,7 +1,7 @@
-import { Outlet } from "@tanstack/react-router";
 import { useMemo, useRef } from "react";
 
 import { PublicPageShell } from "~/shared/components/public-page-shell";
+import { PublicRouteContentTransition } from "~/shared/components/public-route-layout/public-route-content-transition";
 import { PublicRouteHeader } from "~/shared/components/public-route-layout/public-route-header";
 import { PublicRouteLayoutContext } from "~/shared/components/public-route-layout/public-route-layout-context";
 import { TenantNotFound } from "~/shared/components/tenant-not-found";
@@ -26,7 +26,7 @@ export function PublicRouteLayout() {
       <PublicPageShell tenant={tenant} template={template}>
         <PublicRouteHeader scrollContainerRef={scrollContainerRef} template={template} tenant={tenant} />
         <div className="home-scroll" ref={scrollContainerRef}>
-          <Outlet />
+          <PublicRouteContentTransition />
         </div>
       </PublicPageShell>
     </PublicRouteLayoutContext.Provider>

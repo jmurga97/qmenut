@@ -1,6 +1,7 @@
 // QMenut · Alta de tenant desde un JSON de intake (ver tenants/example.tenant.json).
 //
-//   bun scripts/create-tenant.ts --file tenants/la-tasca.json [--remote] [--force] [--dry-run]
+//   bun scripts/create-tenant.ts --file tenants/la-tasca.json [--remote] [--env production|development]
+//     [--force] [--dry-run]
 //
 // Publica primero el tema + menuVersion en TENANT_THEME, inserta restaurante, sucursal,
 // suscripción trial, propietario (Better Auth: basta la fila en `users`), idiomas y horarios
@@ -85,6 +86,7 @@ function escOrNull(value: string | undefined): string {
 }
 
 interface CliOptions {
+  environment: "production" | "development";
   file: string;
   remote: boolean;
   force: boolean;
@@ -93,6 +95,7 @@ interface CliOptions {
 
 function parseArgs(argv: string[]): CliOptions {
   let file: string | undefined;
+  let environment: CliOptions["environment"] = "production";
   let remote = false;
   let force = false;
   let dryRun = false;
@@ -101,6 +104,14 @@ function parseArgs(argv: string[]): CliOptions {
     const arg = argv[i];
     if (arg === "--file") {
       file = argv[++i];
+    } else if (arg === "--env") {
+      const value = argv[++i];
+
+      if (value !== "production" && value !== "development") {
+        fail("--env debe ser production o development");
+      }
+
+      environment = value;
     } else if (arg === "--remote") {
       remote = true;
     } else if (arg === "--force") {
@@ -116,7 +127,7 @@ function parseArgs(argv: string[]): CliOptions {
     fail("Falta --file <tenant.json>. Ejemplo: bun scripts/create-tenant.ts --file tenants/example.tenant.json");
   }
 
-  return { file: path.resolve(process.cwd(), file), remote, force, dryRun };
+  return { environment, file: path.resolve(process.cwd(), file), remote, force, dryRun };
 }
 
 function fail(message: string): never {
@@ -139,12 +150,12 @@ function errorMessage(error: unknown): string {
 }
 
 function getD1TargetArgs(options: CliOptions): string[] {
-  return options.remote ? ["--remote", "--env", "production", "-y"] : ["--local"];
+  return options.remote ? ["--remote", "--env", options.environment, "-y"] : ["--local"];
 }
 
 function getKvTargetArgs(options: CliOptions): string[] {
   return options.remote
-    ? ["--remote", "--env", "production"]
+    ? ["--remote", "--env", options.environment]
     : ["--preview", "--local", "--persist-to", LOCAL_KV_PERSIST];
 }
 
