@@ -1,7 +1,10 @@
-import { mapPromotionToFeatured } from "~/features/promos/mappers/map-promotion-to-featured";
+import { mapDish } from "~/features/menu/mappers/map-public-menu-content";
 import { mapPublicPromosContent } from "~/features/promos/mappers/map-public-promos-content";
-import { mapRecommendedDish, pickRecommendedDishes } from "~/features/promos/mappers/map-recommended-content";
-import { pickFeaturedPromo } from "~/features/promos/mappers/pick-featured-promo";
+import {
+  mapRecommendedDish,
+  pickFeaturedDish,
+  pickRecommendedDishes,
+} from "~/features/promos/mappers/map-recommended-content";
 import { createPriceFormatter } from "~/features/promos/mappers/promotion-formatting";
 
 import type { TFunction } from "i18next";
@@ -20,13 +23,10 @@ export function mapPublicHighlightsContent({
   t,
 }: MapPublicHighlightsContentInput): HighlightsContentViewModel {
   const formatPrice = createPriceFormatter(locale, data?.branch.currency ?? "EUR");
-  const featuredPromoEntity = data ? pickFeaturedPromo(data.promotions) : null;
+  const featuredDish = data ? pickFeaturedDish(data) : null;
 
   return {
-    featuredPromo:
-      data && featuredPromoEntity
-        ? mapPromotionToFeatured({ data, formatPrice, promotion: featuredPromoEntity, t })
-        : null,
+    featured: featuredDish ? mapDish({ dish: featuredDish, formatPrice, t }) : null,
     promos: mapPublicPromosContent({ data, locale, t }),
     recommended: {
       dishes: data ? pickRecommendedDishes(data).map((dish) => mapRecommendedDish({ dish, formatPrice, t })) : [],

@@ -201,7 +201,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-featured-body-pad": "0px",
       "--qm-featured-name-size": "21px",
       "--qm-promo-discount-width": "54px",
-      "--qm-promo-body-pad": "16px 0 16px 18px",
+      "--qm-promo-body-pad": "16px 18px",
       "--qm-surface-radius": "0px",
       "--qm-surface-shadow": "none",
       "--qm-sheet-radius": "0px",

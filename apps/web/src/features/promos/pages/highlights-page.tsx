@@ -9,6 +9,9 @@ import { RecommendedList } from "~/features/promos/components/recommended-list";
 import { useHighlightsContent } from "~/features/promos/hooks/use-highlights-content";
 import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
+import { photoUrl } from "~/shared/lib/photo-url";
+
+const FEATURED_IMAGE_WIDTH_PX = 430;
 
 export function HighlightsPage() {
   const content = useHighlightsContent();
@@ -21,7 +24,7 @@ export function HighlightsPage() {
   const hasRecommended = content.recommended.dishes.length > 0;
   const hasPromos = content.promos.promos.length > 0;
 
-  if (!hasRecommended && !hasPromos) {
+  if (!content.featured && !hasRecommended && !hasPromos) {
     return (
       <div className="highlights-empty public-route-content-stage">
         <span className="highlights-empty__icon" aria-hidden="true">
@@ -35,9 +38,20 @@ export function HighlightsPage() {
 
   return (
     <div className="highlights-page public-route-content-stage">
-      {content.featuredPromo ? (
+      {content.featured ? (
         <div className="highlights-featured-frame">
-          <QmFeatured value={content.featuredPromo} />
+          <QmFeatured
+            value={{
+              desc: content.featured.desc,
+              name: content.featured.name,
+              oldPrice: content.featured.oldPrice,
+              photo: showDishPhotos,
+              photoUrl: photoUrl(content.featured.photoUrl, FEATURED_IMAGE_WIDTH_PX),
+              price: content.featured.price,
+              secondaryTag: t(`menu.featuredBadges.${template}`),
+              tag: content.featured.badge?.compactText,
+            }}
+          />
         </div>
       ) : null}
       {hasRecommended ? (

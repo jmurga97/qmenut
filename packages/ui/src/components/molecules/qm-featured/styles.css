@@ -36,11 +36,18 @@
   padding: var(--qm-featured-body-pad, 14px 16px);
 }
 
-.tag {
-  display: block;
-  width: fit-content;
+.tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
   max-width: 100%;
   margin-bottom: 8px;
+}
+
+.tag {
+  flex: none;
+  max-width: 100%;
   --qm-badge-bg: var(--qm-tag-bg, var(--qm-emph, #1c1815));
   --qm-badge-bd: var(--qm-tag-bd, none);
   --qm-badge-color: var(--qm-tag-color, #fff);
@@ -50,6 +57,12 @@
   --qm-badge-padding: 3px 8px;
   --qm-badge-text-transform: uppercase;
   --qm-badge-weight: 800;
+}
+
+.tag--secondary {
+  --qm-badge-bg: var(--qm-featured-badge-bg, var(--qm-primary, #1c1815));
+  --qm-badge-bd: var(--qm-featured-badge-bd, none);
+  --qm-badge-color: var(--qm-featured-badge-color, var(--qm-on-primary, #fff));
 }
 
 .name {

@@ -17,6 +17,7 @@ export interface MenuDishViewModel {
   desc: string;
   descHtml: string;
   extras?: MenuDishExtraViewModel[];
+  featured: boolean;
   name: string;
   oldPrice?: string;
   photoUrl?: string;

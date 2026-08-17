@@ -49,6 +49,7 @@ export function MenuPage() {
         <>
           <MenuFeatured
             featured={content.featured}
+            featuredLabel={t(`menu.featuredBadges.${template}`)}
             featuredPromo={content.featuredPromo}
             showDishPhotos={showDishPhotos}
             onSelectDish={handleSelectDish}

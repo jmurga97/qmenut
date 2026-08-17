@@ -1,4 +1,4 @@
-import { formatDiscount, resolvePromotionPrice } from "~/features/promos/mappers/promotion-formatting";
+import { resolvePromotionPrice } from "~/features/promos/mappers/promotion-formatting";
 
 import type { QmFeaturedValue } from "@qmenut/ui/components/qm-featured/react";
 import type { TFunction } from "i18next";
@@ -24,6 +24,6 @@ export function mapPromotionToFeatured({
     photo: false,
     photoUrl: undefined,
     price: price ?? "",
-    tag: formatDiscount(promotion, t),
+    tag: promotion.name,
   };
 }

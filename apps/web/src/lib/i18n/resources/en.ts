@@ -20,6 +20,13 @@ export default {
     heroLabel: "Today's menu",
     photoLabel: "Dish photo",
     recommended: "Recommended",
+    featuredBadges: {
+      fine: "Chef's recommendation",
+      her: "House special",
+      cafe: "Our favorite",
+      fast: "Our favorite",
+      tapas: "Star dish",
+    },
   },
   destacados: {
     seoTitle: "Highlights – {{name}}",

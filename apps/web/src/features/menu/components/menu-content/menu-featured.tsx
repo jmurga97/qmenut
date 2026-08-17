@@ -9,12 +9,19 @@ const FEATURED_IMAGE_WIDTH_PX = 430;
 
 interface MenuFeaturedProps {
   featured: MenuDishViewModel | null;
+  featuredLabel: string;
   featuredPromo: QmFeaturedValue | null;
   onSelectDish: (dish: MenuDishViewModel, trigger: HTMLButtonElement) => void;
   showDishPhotos: boolean;
 }
 
-export function MenuFeatured({ featured, featuredPromo, onSelectDish, showDishPhotos }: MenuFeaturedProps) {
+export function MenuFeatured({
+  featured,
+  featuredLabel,
+  featuredPromo,
+  onSelectDish,
+  showDishPhotos,
+}: MenuFeaturedProps) {
   return (
     <>
       {featured ? (
@@ -31,7 +38,8 @@ export function MenuFeatured({ featured, featuredPromo, onSelectDish, showDishPh
               photo: showDishPhotos,
               photoUrl: photoUrl(featured.photoUrl, FEATURED_IMAGE_WIDTH_PX),
               price: featured.price,
-              tag: featured.badge?.fullText,
+              secondaryTag: featured.featured ? featuredLabel : undefined,
+              tag: featured.badge?.compactText,
             }}
           />
         </button>

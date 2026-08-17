@@ -83,6 +83,7 @@ export function mapDish({
     desc: stripHtml(descHtml),
     descHtml,
     extras: extras.length > 0 ? extras : undefined,
+    featured: dish.isFeatured,
     name: dish.name,
     oldPrice: hasDiscount ? formatPrice(promotion.basePrice) : undefined,
     photoUrl: dish.imageUrl ?? undefined,
