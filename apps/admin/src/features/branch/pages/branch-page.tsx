@@ -6,6 +6,7 @@ import { FormTextInput } from "~/shared/components/forms/adapters/form-text-inpu
 import { FormShell } from "~/shared/components/forms/form-shell";
 import { PageHeader } from "~/shared/components/page-header";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
+import { AdminThemePreference } from "~/shared/components/theme_preference/theme_preference";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 
@@ -88,6 +89,7 @@ function BranchForm({ branchId }: { branchId: string }) {
           </section>
         </FormShell>
       </FormProvider>
+      <AdminThemePreference />
     </div>
   );
 }
