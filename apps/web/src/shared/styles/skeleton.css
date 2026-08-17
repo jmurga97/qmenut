@@ -1,0 +1,86 @@
+/* ===== Home skeleton ===== */
+
+.hs-header {
+  flex: 0 0 auto;
+  padding: 20px 20px 0;
+}
+
+.hs-featured {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hs-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid #ece8df;
+}
+
+.hs-bar,
+.hs-block {
+  border-radius: var(--qm-surface-radius, 4px);
+  background: var(--qm-fill, #e8e6e2);
+  animation: skeleton-breathe 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-breathe {
+  0%,
+  100% {
+    opacity: 0.52;
+  }
+
+  50% {
+    opacity: 0.92;
+  }
+}
+
+.hs-bar--topbar {
+  width: 55%;
+  height: 10px;
+  margin-bottom: 14px;
+}
+
+.hs-bar--title {
+  width: 70%;
+  height: 22px;
+  margin-bottom: 10px;
+}
+
+.hs-bar--subtitle {
+  width: 45%;
+  height: 10px;
+}
+
+.hs-block--photo {
+  width: 100%;
+  height: 96px;
+}
+
+.hs-bar--name {
+  width: 60%;
+  height: 14px;
+}
+
+.hs-bar--desc {
+  width: 85%;
+  height: 10px;
+}
+
+.hs-bar--row-name {
+  width: 50%;
+  height: 12px;
+}
+
+.hs-bar--row-desc {
+  width: 80%;
+  height: 9px;
+}
+
+.hs-nav {
+  flex: 0 0 auto;
+  height: 60px;
+  border-top: 1px solid #ece8df;
+}

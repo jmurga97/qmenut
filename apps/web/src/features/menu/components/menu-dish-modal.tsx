@@ -1,6 +1,7 @@
 import { QmAllergen } from "@qmenut/ui/components/qm-allergen/react";
 import { QmDishExtras } from "@qmenut/ui/components/qm-dish-extras/react";
 import { QmDishModal } from "@qmenut/ui/components/qm-dish-modal/react";
+import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { ALLERGEN_META } from "~/features/menu/constants/allergens";
@@ -29,11 +30,18 @@ export function MenuDishModal({ dish, onClose }: MenuDishModalProps) {
       photoUrl={photoUrl(dish.photoUrl, MODAL_IMAGE_WIDTH_PX)}
       photoLabel={t("menu.photoLabel")}
       closeLabel={t("menu.closeLabel")}
+      price={dish.price}
+      oldPrice={dish.oldPrice}
+      tag={dish.badge?.fullText}
+      allergensLabel={t("menu.allergensLabel")}
       onQmClose={onClose}
     >
+      <X slot="close-icon" size={20} strokeWidth={1.8} />
       {/* Descriptions may contain sanitized rich-text HTML (bold/italic/lists) from the CRM. */}
-      <div dangerouslySetInnerHTML={{ __html: dish.descHtml }} />
-      {dish.extras && dish.extras.length > 0 ? <QmDishExtras slot="extras" items={dish.extras} /> : null}
+      {dish.descHtml ? <div dangerouslySetInnerHTML={{ __html: dish.descHtml }} /> : null}
+      {dish.extras && dish.extras.length > 0 ? (
+        <QmDishExtras slot="extras" label={t("menu.extrasLabel")} items={dish.extras} />
+      ) : null}
       {dish.allergens?.map((code) => {
         const { label, Icon } = ALLERGEN_META[code];
 

@@ -12,6 +12,8 @@ export function getStandardHeaderCopy(routeId: string | undefined, t: TFunction)
       return { subtitle: t("legal.legalNotice.subtitle"), title: t("legal.legalNotice.title") };
     case "/{-$locale}/privacidad":
       return { subtitle: t("legal.privacy.subtitle"), title: t("legal.privacy.title") };
+    case "/{-$locale}/offline":
+      return { subtitle: "", title: t("offline.title") };
     case undefined:
     default:
       return { subtitle: "", title: t("common.navigation.menu") };

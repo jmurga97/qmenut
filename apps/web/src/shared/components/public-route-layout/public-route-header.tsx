@@ -20,11 +20,23 @@ export function PublicRouteHeader({ scrollContainerRef, template, tenant }: Publ
 
   if (routeId === "/{-$locale}/") {
     return (
-      <MenuRouteHeader locale={locale} scrollContainerRef={scrollContainerRef} template={template} tenant={tenant} />
+      <MenuRouteHeader
+        key={routeId}
+        locale={locale}
+        scrollContainerRef={scrollContainerRef}
+        template={template}
+        tenant={tenant}
+      />
     );
   }
 
   return (
-    <StandardRouteHeader locale={locale} routeId={routeId} scrollContainerRef={scrollContainerRef} tenant={tenant} />
+    <StandardRouteHeader
+      key={routeId}
+      locale={locale}
+      routeId={routeId}
+      scrollContainerRef={scrollContainerRef}
+      tenant={tenant}
+    />
   );
 }

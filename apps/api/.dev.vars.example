@@ -10,6 +10,10 @@ THEME_WORKER_TOKEN=dev-token
 # Signs loyalty card/redemption QR tokens (any long random string in dev).
 LOYALTY_TOKEN_SECRET=dev-loyalty-secret
 
+# Server-side token for the MapTiler Geocoding API used by the admin address combobox.
+# It is never sent to the browser.
+MAPTILER_API_KEY=maptiler-key
+
 # Local Playwright only. Never set this on a deployed worker.
 E2E_FIXED_OTP=false
 

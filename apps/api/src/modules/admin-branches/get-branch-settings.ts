@@ -11,9 +11,12 @@ export interface BranchSettings {
   id: string;
   name: string;
   address: string | null;
+  latitude: number | null;
+  longitude: number | null;
   phone: string | null;
   whatsapp: string | null;
   socialLinksJson: string | null;
+  logoUrl: string | null;
   customDomain: string | null;
   dataProtectionEmail: string | null;
   legalAddress: string | null;
@@ -51,9 +54,12 @@ export async function getBranchSettings({
     id: branch.id,
     name: branch.name,
     address: branch.address,
+    latitude: branch.latitude,
+    longitude: branch.longitude,
     phone: branch.phone,
     whatsapp: branch.whatsapp,
     socialLinksJson: branch.socialLinksJson,
+    logoUrl: branch.logoUrl,
     customDomain: branch.customDomain,
     dataProtectionEmail: restaurant.dataProtectionEmail,
     legalAddress: restaurant.legalAddress,

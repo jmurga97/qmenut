@@ -5,9 +5,9 @@
 .text {
   display: block;
   font-family: var(--qm-body, sans-serif);
-  font-size: var(--qm-text-xs, 11px);
-  font-weight: 700;
+  font-size: var(--qm-eyebrow-font-size, var(--qm-text-xs, 11px));
+  font-weight: var(--qm-eyebrow-font-weight, 700);
   letter-spacing: var(--qm-eyebrow-ls, 1.5px);
   text-transform: var(--qm-eyebrow-tt, uppercase);
-  color: var(--qm-muted, #8c857b);
+  color: var(--qm-eyebrow-color, var(--qm-muted, #8c857b));
 }

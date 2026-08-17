@@ -6,6 +6,7 @@ import {
   index,
   integer,
   primaryKey,
+  real,
   sqliteTable,
   text,
   unique,
@@ -47,9 +48,12 @@ export const branches = sqliteTable(
       .references(() => restaurants.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     address: text("address"),
+    latitude: real("latitude"),
+    longitude: real("longitude"),
     phone: text("phone"),
     whatsapp: text("whatsapp"),
     socialLinksJson: text("social_links_json"),
+    logoUrl: text("logo_url"),
     customDomain: text("custom_domain"),
     currency: text("currency").notNull().default("EUR"),
     planCode: text("plan_code", { enum: ["basic", "business"] })
@@ -70,6 +74,12 @@ export const branches = sqliteTable(
       .where(sql`${table.customDomain} IS NOT NULL`),
     check("branches_currency_length", sql`length(${table.currency}) = 3`),
     check("branches_plan_code", sql`${table.planCode} IN ('basic', 'business')`),
+    check(
+      "branches_coordinates_pair",
+      sql`(${table.latitude} IS NULL AND ${table.longitude} IS NULL) OR (${table.latitude} IS NOT NULL AND ${table.longitude} IS NOT NULL)`,
+    ),
+    check("branches_latitude_range", sql`${table.latitude} IS NULL OR ${table.latitude} BETWEEN -90 AND 90`),
+    check("branches_longitude_range", sql`${table.longitude} IS NULL OR ${table.longitude} BETWEEN -180 AND 180`),
   ],
 );
 

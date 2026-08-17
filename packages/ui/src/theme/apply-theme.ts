@@ -107,7 +107,7 @@ function buildLayoutTokens({ colors, layout }: BuildLayoutTokensArgs): Record<st
     "--qm-shell-max": "430px",
     "--qm-touch-min": "44px",
     "--qm-nav-height": "64px",
-    "--qm-sheet-max": "min(720px, 60dvh)",
+    "--qm-sheet-max": "min(760px, 90dvh)",
     "--qm-sheet-handle": colors.hairline,
     "--qm-surface-bg": colors.card,
     "--qm-surface-border": `1px solid ${colors.hairline}`,

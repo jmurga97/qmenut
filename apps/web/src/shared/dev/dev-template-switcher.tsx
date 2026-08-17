@@ -7,7 +7,7 @@ const TEMPLATE_ORDER: QmTemplateName[] = ["fine", "her", "fast", "cafe", "tapas"
 
 export function DevTemplateSwitcher() {
   const devTemplate = useRouteContext({ from: "/{-$locale}", select: (context) => context.devTemplate });
-  const navigate = useNavigate({ from: "/{-$locale}" });
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!import.meta.env.DEV) {
@@ -26,7 +26,11 @@ export function DevTemplateSwitcher() {
       }
 
       event.preventDefault();
-      void navigate({ search: (prev) => ({ ...prev, template: TEMPLATE_ORDER[index] }), replace: true });
+      void navigate({
+        to: ".",
+        search: (prev) => ({ ...prev, template: TEMPLATE_ORDER[index] }),
+        replace: true,
+      });
     }
 
     window.addEventListener("keydown", handleKeyDown);

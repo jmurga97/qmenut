@@ -4,7 +4,7 @@ import { getPromotionCandidateRows, getPromotionRows } from "./promotions.reposi
 import { resolveTenantByHost } from "./tenant.repository";
 import { getTranslationRows } from "./translations.repository";
 import { createBestPromotionMap, isPromotionLikeActiveNow } from "../domain/promotions";
-import { mapBranch } from "../mappers/branch.mapper";
+import { mapBranch, mapContactBranch } from "../mappers/branch.mapper";
 import { mapPromotion } from "../mappers/promotion.mapper";
 import { createTranslationFieldMap, mapPublicCategories, mapPublicDishes } from "../mappers/public-menu.mapper";
 import { branchPhotos, branches, branchSchedules } from "../schema/branches";
@@ -24,13 +24,13 @@ import {
 import { restaurants } from "../schema/restaurants";
 
 import type { IdsInput, TenantIdsInput, TenantInput } from "../domain/tenant";
-import type { PublicBranch, PublicBranchPhoto, PublicBranchSchedule } from "../models/branch";
+import type { PublicBranch, PublicBranchPhoto, PublicBranchSchedule, PublicContactBranch } from "../models/branch";
 import type { PublicPromotion } from "../models/promotion";
 import type { PublicLegalEntity, PublicMenuData } from "../models/public-menu";
 
 export type { ResolvedTenant } from "../domain/tenant";
 export { normalizeTenantHost } from "../domain/tenant";
-export type { PublicBranch, PublicBranchPhoto, PublicBranchSchedule } from "../models/branch";
+export type { PublicBranch, PublicBranchPhoto, PublicBranchSchedule, PublicContactBranch } from "../models/branch";
 export type {
   PublicAllergen,
   PublicCategory,
@@ -131,6 +131,47 @@ async function getBranchSchedules({ db, tenant }: TenantInput): Promise<PublicBr
     .where(eq(branchSchedules.branchId, tenant.branchId))
     .orderBy(asc(branchSchedules.dayOfWeek), asc(branchSchedules.openMinute))
     .all();
+}
+
+async function getPublicContactBranches({ db, tenant }: TenantInput): Promise<PublicContactBranch[]> {
+  const rows = await db
+    .select()
+    .from(branches)
+    .where(and(eq(branches.restaurantId, tenant.restaurantId), isNull(branches.deletedAt), eq(branches.isActive, true)))
+    .orderBy(asc(branches.createdAt), asc(branches.id))
+    .all();
+
+  if (rows.length === 0) {
+    return [];
+  }
+
+  const schedules = await db
+    .select({
+      branchId: branchSchedules.branchId,
+      closeMinute: branchSchedules.closeMinute,
+      dayOfWeek: branchSchedules.dayOfWeek,
+      id: branchSchedules.id,
+      openMinute: branchSchedules.openMinute,
+    })
+    .from(branchSchedules)
+    .where(
+      inArray(
+        branchSchedules.branchId,
+        rows.map((row) => row.id),
+      ),
+    )
+    .orderBy(asc(branchSchedules.branchId), asc(branchSchedules.dayOfWeek), asc(branchSchedules.openMinute))
+    .all();
+  const schedulesByBranch = Map.groupBy(schedules, (schedule) => schedule.branchId);
+  const current = rows.find((row) => row.id === tenant.branchId);
+  const orderedRows = current ? [current, ...rows.filter((row) => row.id !== tenant.branchId)] : rows;
+
+  return orderedRows.map((row) =>
+    mapContactBranch({
+      row,
+      schedules: (schedulesByBranch.get(row.id) ?? []).map(({ branchId: _branchId, ...schedule }) => schedule),
+    }),
+  );
 }
 
 async function getPublicBranchContext({
@@ -317,8 +358,9 @@ export async function getPublicMenu({
   }
 
   const { branch, legal, timeZone } = branchContext;
-  const [categoryRows, dishRows, promotionRows] = await Promise.all([
+  const [categoryRows, contactBranches, dishRows, promotionRows] = await Promise.all([
     getCategoryRows({ db, tenant }),
+    getPublicContactBranches({ db, tenant }),
     getDishRows({ db, tenant }),
     getPromotionRows({ db, tenant }),
   ]);
@@ -375,6 +417,7 @@ export async function getPublicMenu({
   return {
     branch,
     categories: mapPublicCategories({ categoryRows, dishesByCategory, translationsByEntity }),
+    contactBranches,
     legal,
     promotions: activePromotions.map((row): PublicPromotion => mapPromotion(row)),
   };

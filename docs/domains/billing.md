@@ -1,55 +1,59 @@
-# Billing & subscriptions 🧩
+# Billing and subscriptions
 
-> **Stub** — Purpose + key files below; expand when needed.
-> Follows the [doc template](../README.md#the-doc-template).
+This page describes SaaS billing with Stripe: one subscription per branch, kept in sync by
+webhooks.
 
-## Purpose & status
+This page is partial. It states the purpose, the structure, and the key files, but does
+not yet contain a full walkthrough.
 
-✅ Complete for MVP1. SaaS billing with **Stripe**, one subscription **per branch**.
-One plan (`basic`) configured via an env price id. State is kept in sync by
-Stripe webhooks. MVP1 uses env-configured plans; the code notes an intent to migrate to
-a plans table later.
+## Status
+
+Complete for MVP1. There is one plan, `basic`, configured through an environment price ID.
+Subscription state is kept in sync by Stripe webhooks. The code notes an intention to move
+plans into a database table later.
 
 ## Data model
 
-- `packages/db/src/schema/billing.ts` — `stripe_customers`.
-- Subscription/account state in `packages/db/src/schema/restaurants.ts` —
-  `branch_subscriptions` (Stripe subscription per branch; `status`
-  `trialing|active|past_due|canceled`) and `restaurant_stripe_accounts` (Stripe
-  Connect per restaurant).
-- Repo: `packages/db/src/repositories/billing.repository.ts` (defines `PlanCode`).
+- `packages/db/src/schema/billing.ts` defines `stripe_customers`.
+- `packages/db/src/schema/restaurants.ts` defines `branch_subscriptions`, which holds one
+  Stripe subscription per branch with a `status` of `trialing`, `active`, `past_due`, or
+  `canceled`, and `restaurant_stripe_accounts`, which holds the Stripe Connect account per
+  restaurant.
+- `packages/db/src/repositories/billing.repository.ts` defines `PlanCode`.
 
 ## Backend
 
-- Router: `apps/api/src/modules/billing/billing.router.ts` — `overview`, `checkout`,
-  `portal`. `tenantProcedure` (billing writes are owner-only).
-- Handlers: `create-checkout-session.ts`, `create-portal-session.ts`,
+- Router. `apps/api/src/modules/billing/billing.router.ts` provides `overview`,
+  `checkout`, and `portal`, built on `tenantProcedure`. Billing writes are restricted to
+  owners.
+- Handlers. `create-checkout-session.ts`, `create-portal-session.ts`,
   `get-billing-overview.ts`, `get-or-create-customer.ts`, `handle-stripe-webhook.ts`,
-  `sync-subscription-state.ts`, `map-stripe-status.ts`.
-- Webhook entry: `apps/api/src/index.ts` routes `POST /webhooks/stripe` →
+  `sync-subscription-state.ts`, and `map-stripe-status.ts`.
+- Webhook entry point. `apps/api/src/index.ts` routes `POST /webhooks/stripe` to
   `handleStripeWebhook`. All subscription events converge in `syncSubscriptionState`.
-- Infra singletons: `apps/api/src/lib/stripe/stripe-provider.ts`,
-  `apps/api/src/lib/billing/plan-catalog.ts` (maps `basic`→`STRIPE_PRICE_BASIC`,
-  `apps/api/src/lib/billing/entitlement.ts`.
+- Infrastructure singletons. `apps/api/src/lib/stripe/stripe-provider.ts`,
+  `apps/api/src/lib/billing/plan-catalog.ts`, which maps `basic` to `STRIPE_PRICE_BASIC`,
+  and `apps/api/src/lib/billing/entitlement.ts`.
 
 ## Frontend
 
-- Admin: `apps/admin/src/app/routes/_auth.billing.tsx` (Checkout + Customer Portal).
+The admin route `apps/admin/src/app/routes/_auth.billing.tsx` links to Stripe Checkout and
+the Stripe Customer Portal.
 
 ## Key files
 
-| Concern | Path |
-|---|---|
-| Billing schema | `packages/db/src/schema/billing.ts`, `.../restaurants.ts` (`branch_subscriptions`, `restaurant_stripe_accounts`) |
-| Billing router + handlers | `apps/api/src/modules/billing/` |
-| Stripe webhook entry | `apps/api/src/index.ts` (`/webhooks/stripe`) |
-| Stripe provider / plans / entitlement | `apps/api/src/lib/stripe/`, `apps/api/src/lib/billing/` |
-| Repo | `packages/db/src/repositories/billing.repository.ts` |
-| Admin UI | `apps/admin/src/app/routes/_auth.billing.tsx` |
+| Concern                                 | Path                                                                                                             |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Billing schema                          | `packages/db/src/schema/billing.ts`, `.../restaurants.ts` (`branch_subscriptions`, `restaurant_stripe_accounts`) |
+| Billing router and handlers             | `apps/api/src/modules/billing/`                                                                                  |
+| Stripe webhook entry point              | `apps/api/src/index.ts` (`/webhooks/stripe`)                                                                     |
+| Stripe provider, plans, and entitlement | `apps/api/src/lib/stripe/`, `apps/api/src/lib/billing/`                                                          |
+| Repository                              | `packages/db/src/repositories/billing.repository.ts`                                                             |
+| Admin UI                                | `apps/admin/src/app/routes/_auth.billing.tsx`                                                                    |
 
-## Notes & gotchas
+## Limitations
 
-- **Webhook-driven state.** Never infer subscription state from the checkout response;
-  it converges in `syncSubscriptionState` from webhook events.
-- Plans are env-configured for MVP1 (`STRIPE_PRICE_*`); migrating to a DB plans table is
-  a known future step.
+- Subscription state is webhook-driven. Never infer it from the Checkout response; it
+  converges in `syncSubscriptionState` from webhook events.
+- Plans are configured through environment variables named `STRIPE_PRICE_*` for MVP1.
+  Moving them into a database table is a known future step.

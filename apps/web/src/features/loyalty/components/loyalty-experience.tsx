@@ -25,7 +25,7 @@ export function LoyaltyExperience({ restaurantName }: { restaurantName: string }
 
   if (!loyalty.program || loyalty.program.rewards.length === 0) {
     return (
-      <div className="loyalty-stage" key="unavailable">
+      <div className="public-route-content-stage" key="unavailable">
         <UnavailableState />
       </div>
     );
@@ -37,7 +37,7 @@ export function LoyaltyExperience({ restaurantName }: { restaurantName: string }
 
   if (!loyalty.card) {
     return (
-      <div className="loyalty-stage" key="signup">
+      <div className="public-route-content-stage" key="signup">
         <SignupState loyalty={loyalty} />
       </div>
     );
@@ -45,14 +45,14 @@ export function LoyaltyExperience({ restaurantName }: { restaurantName: string }
 
   if (loyalty.redemption) {
     return (
-      <div className="loyalty-stage" key="redemption">
+      <div className="public-route-content-stage" key="redemption">
         <RedemptionState loyalty={loyalty} />
       </div>
     );
   }
 
   return (
-    <div className="loyalty-stage" key="card">
+    <div className="public-route-content-stage" key="card">
       <CardState loyalty={loyalty} restaurantName={restaurantName} />
     </div>
   );

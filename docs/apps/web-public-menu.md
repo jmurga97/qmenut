@@ -1,114 +1,126 @@
-# apps/web — public menu (SSR worker)
+# Public menu Worker
 
-## Purpose and status
+`apps/web` is the server-rendered application that diners see. One `qmenut-web` Cloudflare
+Worker serves every tenant domain. React 19, TanStack Start, TanStack Router, and
+`@cloudflare/vite-plugin` render each page in workerd.
 
-✅ Complete for the menu and loyalty surfaces. Promotions and contact are still
+The normalized request host is the tenant identity. KV supplies the tenant's theme, and
+tRPC over D1 supplies its content. See [Custom domains](../domains/custom-domains.md),
+[Theming](../domains/theming.md), and
+[Performance and caching](../operations/performance-and-caching.md).
+
+## Status
+
+Complete for the menu and loyalty pages. The promotions and contact pages are still
 mock-backed: `use-promos-content.ts` and `use-contact-content.ts` map `MOCK_*` constants,
-even though the promotions API and effective-price view exist.
+even though the promotions API and the effective-price view exist.
 
-One `qmenut-web` Cloudflare Worker serves every tenant domain. React 19, TanStack Start,
-TanStack Router, and `@cloudflare/vite-plugin` render the page in workerd. The normalized
-request host is the tenant identity; KV supplies its theme and D1-backed tRPC supplies its
-content. See [custom domains](../domains/custom-domains.md),
-[theming](../domains/theming.md), and [performance and caching](../operations/performance-and-caching.md).
+## Worker entry point and rendering errors
 
-## Worker entry and SSR errors
-
-The production entry is `apps/web/src/app/server.ts`, using the real Cloudflare
-`fetch(request, env, ctx)` contract:
+The production entry point is `apps/web/src/app/server.ts`, which implements the
+Cloudflare `fetch(request, env, ctx)` contract in this order:
 
 1. `Sentry.withSentry` creates request-scoped Sentry instrumentation.
-2. `/trpc` is proxied to the `API_WORKER` service binding, with the local HTTP API as the
-   fallback when the binding is absent.
+2. `/trpc` is proxied to the `API_WORKER` service binding. When the binding is absent, the
+   local HTTP API is used instead.
 3. `serveWithEdgeCache` handles eligible public routes.
 4. TanStack Start's `handler.fetch` renders the response.
 
-Keep this ordering. The comment in `server.ts` is deliberate: TanStack converts many SSR
-exceptions into 5xx responses before the outer Worker wrapper can observe the exception,
-so the entry explicitly captures returned 5xx responses too.
+Keep this order. The comment in `server.ts` is deliberate: TanStack converts many
+rendering exceptions into 5xx responses before the outer Worker wrapper can observe the
+exception, so the entry point also captures returned 5xx responses.
 
 There is no `apps/web/src/server/sentry.ts`. Its per-request `wrapRequestHandler`
-workaround was needed when Nitro owned the top-level export; the Cloudflare Vite plugin
+workaround was needed when Nitro owned the top-level export. The Cloudflare Vite plugin
 allows the Worker itself to be wrapped with `Sentry.withSentry`.
 
 `@lit-labs/ssr-react/enable-lit-ssr.js` must remain the first import in both the server
-and client entries. The SSR build uses its Node export to patch React element creation and
-deep-render registered Lit components as Declarative Shadow DOM. The browser export installs
-LitElement hydration support before any `@qmenut/ui` component loads, so custom elements adopt
-their server-rendered shadow roots instead of replacing them.
+and the client entry points. The server build uses its Node export to patch React element
+creation and deep-render registered Lit components as declarative shadow DOM. The browser
+export installs LitElement hydration support before any `@qmenut/ui` component loads, so
+custom elements adopt their server-rendered shadow roots instead of replacing them.
 
 ## Host resolution
 
-There are two host resolvers because the edge cache runs before TanStack creates request
-context:
+There are two host resolvers, because the edge cache runs before TanStack creates the
+request context:
 
 - `resolveRequestTenantHost(request)` reads the request URL for the outer cache wrapper.
 - `resolveSsrTenantHost()` reads `getRequestHost()` from inside TanStack Start.
 
-Both normalize the host and neither trusts `X-Forwarded-Host`, avoiding tenant confusion
-and cache poisoning. In development only, bare `localhost` and LAN IP hosts fall back to
-`VITE_PUBLIC_MENU_HOST`, then `fine.localhost`. Tenant-shaped hosts such as
-`tapas.localhost` are unchanged. `tenant-theme.ts` mirrors the same `fine` fallback so
-font preload links and the theme that renders agree on the first paint.
+Both normalize the host, and neither trusts `X-Forwarded-Host`, which prevents tenant
+confusion and cache poisoning. In development only, bare `localhost` and LAN IP hosts fall
+back to `VITE_PUBLIC_MENU_HOST` and then to `fine.localhost`. Tenant-shaped hosts such as
+`tapas.localhost` are unchanged. `tenant-theme.ts` mirrors the same `fine` fallback, so
+the font preload links and the rendered theme agree on the first paint.
 
 ## Data access and same-origin tRPC
 
-`apps/web/src/lib/trpc-client.ts` uses `API_WORKER` during SSR when available. In the
-browser, production requests go to same-origin `/trpc`; `server.ts` forwards them through
-the binding. This means a new tenant domain does not need an API CORS entry and public
-loyalty does not use auth cookies: its `cardToken` lives in local storage. Vite's dev proxy
-provides the same `/trpc` shape locally.
+`apps/web/src/lib/trpc-client.ts` uses `API_WORKER` during server-side rendering when the
+binding is available. In the browser, production requests go to same-origin `/trpc`, and
+`server.ts` forwards them through the binding.
+
+Two consequences follow. A new tenant domain does not need an API CORS entry, and public
+loyalty does not use authentication cookies, because its `cardToken` lives in local
+storage. The Vite development proxy provides the same `/trpc` shape locally.
 
 Client-reachable modules guard `cloudflare:workers` dynamic imports with
-`import.meta.env.SSR` so the browser bundle cannot import Worker-only runtime code.
+`import.meta.env.SSR`, so the browser bundle cannot import Worker-only runtime code.
 
-## SEO surface
+## SEO
 
 `apps/web/src/features/menu/seo/build-page-head.ts` builds each page's title,
-description, canonical URL, Open Graph metadata and image, `og:locale:alternate`,
-hreflang links, and optional JSON-LD. A route with no tenant loader data emits `noindex`
-instead of advertising an empty tenant.
+description, canonical URL, Open Graph metadata and image, `og:locale:alternate`, hreflang
+links, and optional JSON-LD. A route with no tenant loader data emits `noindex` instead of
+advertising an empty tenant.
 
-Related helpers are:
+The related helpers are:
 
-- `build-hreflang-alternates.ts`: only the tenant's active languages plus `x-default`.
-- `build-restaurant-json-ld.ts`: restaurant, address, hours, images, menu sections,
-  dishes, and prices.
-- `build-promotions-json-ld.ts`: promotions as schema.org offers.
-- `robots[.]txt.ts`: crawler policy and a host-specific sitemap URL.
-- `sitemap[.]xml.ts`: localized alternates for every public route. Its `lastmod` reads
-  `menuVersion:{host}`, the same KV version used in the edge-cache key.
+- `build-hreflang-alternates.ts` emits only the tenant's active languages plus
+  `x-default`.
+- `build-restaurant-json-ld.ts` emits the restaurant, its address, hours, images, menu
+  sections, dishes, and prices.
+- `build-promotions-json-ld.ts` emits promotions as schema.org offers.
+- `robots[.]txt.ts` emits the crawler policy and a host-specific sitemap URL.
+- `sitemap[.]xml.ts` emits localized alternates for every public route. Its `lastmod`
+  value reads `menuVersion:{host}`, the same KV version used in the edge-cache key.
 
-## Client and SSR bundle shape
+The same server-handler pattern serves the per-tenant web app manifest and icons through
+`site[.]webmanifest.ts`, `icon[.]svg.ts`, `icon-maskable[.]svg.ts`, and
+`apple-touch-icon[.]png.ts`. See [Public menu PWA](web-pwa.md).
 
-`apps/web/vite.config.ts` manually splits the client output into React, data
-(TanStack/tRPC), i18n, and UI (Culori/Lit) vendor chunks. `ssrNodeConditions()` forces
-the SSR environment to use Node/server export conditions and fails the build if a
+## Bundle shape
+
+`apps/web/vite.config.ts` splits the client output into React, data (TanStack and tRPC),
+internationalization, and UI (Culori and Lit) vendor chunks. `ssrNodeConditions()` forces
+the server environment to use Node and server export conditions, and fails the build if a
 `browser` condition leaks into it. Do not remove that guard to make an incompatible
-package resolve; fix the offending import or export conditions.
+package resolve; fix the offending import or export conditions instead.
 
-React render sites use the `/react` wrappers exported by `@qmenut/ui`. The wrappers preserve
-non-string Lit properties during SSR and defer component hydration until those properties have
-been restored on the client. Lit elements instantiated inside another Lit template do not need
-React wrappers; their parent component's `defineQm*` chain registers them for deep SSR.
+React render sites use the `/react` wrappers exported by `@qmenut/ui`. The wrappers
+preserve non-string Lit properties during rendering and defer component hydration until
+those properties have been restored on the client. Lit elements instantiated inside
+another Lit template do not need React wrappers, because their parent component's
+`defineQm*` chain registers them for deep server rendering.
 
 ## Key files
 
-| Concern                    | Path                                                   |
-| -------------------------- | ------------------------------------------------------ |
-| Worker config and bindings | `apps/web/wrangler.jsonc`                              |
-| Worker entry               | `apps/web/src/app/server.ts`                           |
-| Edge cache                 | `apps/web/src/server/edge-cache.ts`                    |
-| Host resolvers             | `apps/web/src/server/tenant-host.ts`                   |
-| KV theme read              | `apps/web/src/server/tenant-theme.ts`                  |
-| SEO helpers                | `apps/web/src/features/menu/seo/`                      |
-| tRPC client/proxy fallback | `apps/web/src/lib/trpc-client.ts`                      |
-| Vite bundle guards         | `apps/web/vite.config.ts`                              |
-| Theme application          | `apps/web/src/shared/components/public-page-shell.tsx` |
+| Concern                           | Path                                                   |
+| --------------------------------- | ------------------------------------------------------ |
+| Worker configuration and bindings | `apps/web/wrangler.jsonc`                              |
+| Worker entry point                | `apps/web/src/app/server.ts`                           |
+| Edge cache                        | `apps/web/src/server/edge-cache.ts`                    |
+| Host resolvers                    | `apps/web/src/server/tenant-host.ts`                   |
+| KV theme read                     | `apps/web/src/server/tenant-theme.ts`                  |
+| SEO helpers                       | `apps/web/src/features/menu/seo/`                      |
+| tRPC client and proxy fallback    | `apps/web/src/lib/trpc-client.ts`                      |
+| Vite bundle guards                | `apps/web/vite.config.ts`                              |
+| Theme application                 | `apps/web/src/shared/components/public-page-shell.tsx` |
 
-## Gotchas
+## Limitations
 
 - Do not reintroduce `X-Forwarded-Host` as a tenant source.
-- Preserve the response-stream rule in `serveWithEdgeCache`: an unread clone branch can
-  keep a Workers SSR stream alive.
-- Promos and contacto remain mock-backed and must not be described as live tenant data.
+- Preserve the response-stream rule in `serveWithEdgeCache`. An unread clone branch can
+  keep a Workers rendering stream alive.
+- The promotions and contact pages remain mock-backed and must not be described as live
+  tenant data.

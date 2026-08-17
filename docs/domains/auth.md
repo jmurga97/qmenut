@@ -1,51 +1,59 @@
-# Auth 🧩
+# Auth
 
-> **Stub** — Purpose + key files below; expand when needed.
-> Follows the [doc template](../README.md#the-doc-template).
+This page describes how staff sign in. Authentication uses Better Auth with passwordless
+email OTP. Sign-up is disabled: accounts are provisioned, and the user then signs in with
+an emailed one-time code.
 
-## Purpose & status
+This page is partial. It states the purpose, the structure, and the key files, but does
+not yet contain a full walkthrough.
 
-✅ Complete. Staff sign in with **Better Auth email OTP** (passwordless). Sign-up is
-**disabled** — accounts are provisioned, then the user logs in with an emailed
-one-time code. Authentication (who you are) is separate from authorization (which
-tenant/role), which lives in [multi-tenancy.md](multi-tenancy.md).
+Authentication determines who the user is. Authorization determines which tenant and role
+they have, and is described in [Multi-tenancy](multi-tenancy.md).
+
+## Status
+
+Complete.
 
 ## How it works
 
-- Server setup: `packages/auth/src/index.ts` — Better Auth with the `emailOTP` plugin,
-  Drizzle adapter (SQLite, `usePlural`), basePath `/api/auth`, `disableSignUp: true`.
-- OTP delivery: via the Cloudflare `EMAIL_WORKER` service binding
-  (`createEmailWorkerOtpSender`). E2E uses fixed OTP `000000` for test accounts
-  (`apps/api/src/auth/create-auth.ts`, `E2E_FIXED_OTP`, local-only).
-- Config/tuning: `packages/auth/src/store.ts` (OTP length, expiry, attempts, session
-  expiry). Session schema: `packages/db/src/schema/auth.ts`.
-- Client: `packages/auth/src/client.ts` (`createEmailOtpAuthClient`, `credentials:
-  include`) wrapped by `apps/admin/src/lib/auth-client.ts` (base URL + `signOut`).
-- API mounting: `apps/api/src/index.ts` routes `/api/auth/*` to the Better Auth
-  handler; `apps/api/src/auth/create-auth.ts` builds it per request.
-- In tRPC: `protectedProcedure` (`apps/api/src/trpc/trpc.ts`) reads the session via
-  `ctx.getSession()`.
+- Server setup. `packages/auth/src/index.ts` configures Better Auth with the `emailOTP`
+  plugin and the Drizzle adapter for SQLite with `usePlural`, a base path of `/api/auth`,
+  and `disableSignUp: true`.
+- OTP delivery. Codes are sent through the Cloudflare `EMAIL_WORKER` service binding by
+  `createEmailWorkerOtpSender`. End-to-end tests use the fixed OTP `000000` for test
+  accounts, controlled by `E2E_FIXED_OTP` in `apps/api/src/auth/create-auth.ts`. That
+  variable is for local use only.
+- Configuration. `packages/auth/src/store.ts` sets the OTP length, expiry, attempt limit,
+  and session expiry. The session schema is `packages/db/src/schema/auth.ts`.
+- Client. `packages/auth/src/client.ts` exports `createEmailOtpAuthClient`, which sets
+  `credentials: include`. `apps/admin/src/lib/auth-client.ts` wraps it with the base URL
+  and `signOut`.
+- API mounting. `apps/api/src/index.ts` routes `/api/auth/*` to the Better Auth handler,
+  and `apps/api/src/auth/create-auth.ts` builds that handler per request.
+- tRPC integration. `protectedProcedure` in `apps/api/src/trpc/trpc.ts` reads the session
+  through `ctx.getSession()`.
 
 ## Frontend
 
-- Login UI: `apps/admin/src/features/auth/pages/login-page.tsx` (two-step email → OTP);
-  route `apps/admin/src/app/routes/login.tsx`. Protected routes gated by
-  `apps/admin/src/app/routes/_auth.tsx`.
+The sign-in page is `apps/admin/src/features/auth/pages/login-page.tsx`, a two-step flow
+that collects the email address and then the OTP. Its route is
+`apps/admin/src/app/routes/login.tsx`. Protected routes are gated by
+`apps/admin/src/app/routes/_auth.tsx`.
 
 ## Key files
 
-| Concern | Path |
-|---|---|
-| Better Auth server | `packages/auth/src/index.ts`, `apps/api/src/auth/create-auth.ts` |
-| Auth store/tuning | `packages/auth/src/store.ts` |
-| Session schema | `packages/db/src/schema/auth.ts` |
-| Auth client | `packages/auth/src/client.ts`, `apps/admin/src/lib/auth-client.ts` |
-| API mount | `apps/api/src/index.ts` (`/api/auth/*`) |
-| Session in tRPC | `apps/api/src/trpc/trpc.ts` (`protectedProcedure`) |
-| Login UI + guard | `apps/admin/src/features/auth/`, `apps/admin/src/app/routes/{login,_auth}.tsx` |
+| Concern                    | Path                                                                           |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| Better Auth server         | `packages/auth/src/index.ts`, `apps/api/src/auth/create-auth.ts`               |
+| Auth store and tuning      | `packages/auth/src/store.ts`                                                   |
+| Session schema             | `packages/db/src/schema/auth.ts`                                               |
+| Auth client                | `packages/auth/src/client.ts`, `apps/admin/src/lib/auth-client.ts`             |
+| API mount point            | `apps/api/src/index.ts` (`/api/auth/*`)                                        |
+| Session in tRPC            | `apps/api/src/trpc/trpc.ts` (`protectedProcedure`)                             |
+| Sign-in UI and route guard | `apps/admin/src/features/auth/`, `apps/admin/src/app/routes/{login,_auth}.tsx` |
 
-## Notes & gotchas
+## Limitations
 
-- **Sign-up is off by design** — provision accounts (and their `restaurant_users`
-  membership) out of band.
-- `E2E_FIXED_OTP` must never be set on a deployed worker.
+- Sign-up is disabled by design. Provision accounts, and their `restaurant_users`
+  membership rows, out of band.
+- Never set `E2E_FIXED_OTP` on a deployed Worker.

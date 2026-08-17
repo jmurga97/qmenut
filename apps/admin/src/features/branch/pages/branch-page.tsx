@@ -6,9 +6,11 @@ import { FormTextInput } from "~/shared/components/forms/adapters/form-text-inpu
 import { FormShell } from "~/shared/components/forms/form-shell";
 import { PageHeader } from "~/shared/components/page-header";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
+import { AdminThemePreference } from "~/shared/components/theme_preference/theme_preference";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 
+import { BranchAddressAutocomplete } from "../components/branch-address-autocomplete";
 import { useBranchController } from "../hooks/use-branch-controller";
 import { DAYS, TIMEZONE_OPTIONS } from "../types";
 
@@ -35,9 +37,10 @@ function BranchForm({ branchId }: { branchId: string }) {
         >
           <div className="admin-form-grid">
             <FormTextInput<BranchFormValues> label="Nombre" name="name" />
-            <FormTextInput<BranchFormValues> label="Dirección" name="address" />
+            <BranchAddressAutocomplete branchId={branchId} />
             <FormTextInput<BranchFormValues> label="Teléfono" name="phone" />
             <FormTextInput<BranchFormValues> label="WhatsApp" name="whatsapp" />
+            <FormTextInput<BranchFormValues> label="URL del logo (icono de la app)" name="logoUrl" />
             <FormSelect<BranchFormValues>
               label="Zona horaria del restaurante"
               name="timezone"
@@ -86,6 +89,7 @@ function BranchForm({ branchId }: { branchId: string }) {
           </section>
         </FormShell>
       </FormProvider>
+      <AdminThemePreference />
     </div>
   );
 }

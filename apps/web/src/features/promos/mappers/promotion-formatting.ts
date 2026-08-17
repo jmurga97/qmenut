@@ -1,5 +1,13 @@
+import type { PromotionType } from "@qmenut/db/schema/promotions";
 import type { TFunction } from "i18next";
 import type { PublicMenuData, PublicMenuPromotion } from "~/features/menu/api/public-menu-types";
+
+interface PromotionBadgeSource {
+  buyQuantity: number | null;
+  paidQuantity: number | null;
+  percentage: number | null;
+  type: PromotionType;
+}
 
 export function createPriceFormatter(locale: string, currency: string) {
   let formatter: Intl.NumberFormat;
@@ -63,17 +71,19 @@ export function formatValidity({
   return t("promos.page.availableToday");
 }
 
-export function formatDiscount(promotion: PublicMenuPromotion, t: TFunction): string {
-  if (promotion.type === "percentage_discount" || promotion.type === "happy_hour") {
-    return promotion.percentage === null ? t("promos.badges.happyHour") : `−${promotion.percentage}%`;
+export function formatDiscount(promotion: PromotionBadgeSource, t: TFunction): string {
+  switch (promotion.type) {
+    case "percentage_discount":
+      return `−${promotion.percentage ?? 0}%`;
+    case "special_price":
+      return t("promos.badges.offer");
+    case "daily_menu":
+      return t("promos.badges.menu");
+    case "happy_hour":
+      return promotion.percentage === null ? t("promos.badges.happyHour") : `−${promotion.percentage}%`;
+    case "two_for_one":
+      return `${promotion.buyQuantity ?? 2}x${promotion.paidQuantity ?? 1}`;
   }
-
-  if (promotion.type === "two_for_one") {
-    return `${promotion.buyQuantity ?? 2}x${promotion.paidQuantity ?? 1}`;
-  }
-
-  if (promotion.type === "daily_menu") return t("promos.badges.menu");
-  return t("promos.badges.offer");
 }
 
 export function resolvePromotionPrice({

@@ -94,42 +94,172 @@ INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALU
     ('rest_fine', 'es', 1),
     ('rest_fine', 'en', 0);
 
-INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain, currency)
-VALUES ('branch_fine', 'rest_fine', 'Aurum', 'Paseo de Gracia 88, Barcelona', '+34932111444', 'fine.localhost', 'EUR');
+INSERT INTO branches (
+    id,
+    restaurant_id,
+    name,
+    address,
+    latitude,
+    longitude,
+    phone,
+    whatsapp,
+    social_links_json,
+    custom_domain,
+    currency
+) VALUES
+    (
+        'branch_fine',
+        'rest_fine',
+        'Aurum Passeig de Gràcia',
+        'Passeig de Gràcia 88, Barcelona',
+        41.3954,
+        2.1619,
+        '+34932111444',
+        '+34600111222',
+        '{"instagram":"https://www.instagram.com/aurum"}',
+        'fine.localhost',
+        'EUR'
+    ),
+    (
+        'branch_fine_born',
+        'rest_fine',
+        'Aurum El Born',
+        'Carrer de Montcada 15, Barcelona',
+        41.3852,
+        2.1809,
+        '+34932111555',
+        '+34600111333',
+        '{"instagram":"https://www.instagram.com/aurum"}',
+        NULL,
+        'EUR'
+    ),
+    (
+        'branch_fine_sarria',
+        'rest_fine',
+        'Aurum Sarrià',
+        'Carrer Major de Sarrià 93, Barcelona',
+        41.4012,
+        2.1285,
+        '+34932111666',
+        '+34600111444',
+        '{"instagram":"https://www.instagram.com/aurum"}',
+        NULL,
+        'EUR'
+    );
 
 INSERT INTO branch_photos (id, branch_id, url, position) VALUES
-    ('bp_fine_1', 'branch_fine', 'https://picsum.photos/seed/qmenut-aurum/800/600', 0);
+    ('bp_fine_1', 'branch_fine', 'https://images.unsplash.com/photo-1542018508502-daaee0fb76c2?auto=format&fit=crop&w=1200&q=82', 0),
+    ('bp_fine_2', 'branch_fine', 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200&q=82', 1),
+    ('bp_fine_3', 'branch_fine', 'https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=1200&q=82', 2),
+    ('bp_fine_4', 'branch_fine', 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1200&q=82', 3);
 
 INSERT INTO branch_schedules (id, branch_id, day_of_week, open_minute, close_minute) VALUES
     ('bs_fine_5', 'branch_fine', 5, 780, 1380),
-    ('bs_fine_6', 'branch_fine', 6, 780, 1380);
+    ('bs_fine_6', 'branch_fine', 6, 780, 1380),
+    ('bs_fine_born_5', 'branch_fine_born', 5, 720, 1439),
+    ('bs_fine_born_6', 'branch_fine_born', 6, 720, 1439),
+    ('bs_fine_sarria_5', 'branch_fine_sarria', 5, 780, 1380),
+    ('bs_fine_sarria_6', 'branch_fine_sarria', 6, 780, 1380);
 
 INSERT INTO categories (id, restaurant_id, branch_id, name, description, position) VALUES
-    ('cat_fine_entrantes',   'rest_fine', 'branch_fine', 'Entrantes',   'Primeros pasos del menú',  0),
-    ('cat_fine_principales', 'rest_fine', 'branch_fine', 'Principales', 'Producto de temporada',    1),
-    ('cat_fine_postres',     'rest_fine', 'branch_fine', 'Postres',     'El cierre dulce',          2);
+    ('cat_fine_classics', 'rest_fine', 'branch_fine', 'Clásicas', 'Las pizzas que siempre funcionan.', 0),
+    ('cat_fine_signature', 'rest_fine', 'branch_fine', 'Signature', 'Combinaciones grandes, bordes dorados y mucho queso.', 1),
+    ('cat_fine_sides', 'rest_fine', 'branch_fine', 'Entrantes', 'Para abrir la caja y compartir.', 2),
+    ('cat_fine_desserts', 'rest_fine', 'branch_fine', 'Dulces', 'El último trozo siempre se comparte.', 3);
 
-INSERT INTO dishes (id, restaurant_id, branch_id, category_id, name, description, price, position, is_recommended, is_featured) VALUES
-    ('dish_fine_ostra',   'rest_fine', 'branch_fine', 'cat_fine_entrantes',   'Ostra al aliño cítrico',  'Emulsión de yuzu y manzana verde',     980,  0, 0, 1),
-    ('dish_fine_tartar',  'rest_fine', 'branch_fine', 'cat_fine_entrantes',   'Tartar de atún rojo',     'Almadraba, huevas de trucha',          2400, 1, 1, 0),
-    ('dish_fine_lubina',  'rest_fine', 'branch_fine', 'cat_fine_principales', 'Lubina salvaje',          'Pil-pil de sus espinas, hinojo',       3200, 0, 0, 0),
-    ('dish_fine_pichon',  'rest_fine', 'branch_fine', 'cat_fine_principales', 'Pichón asado',            'Remolacha, mole de frutos rojos',      3600, 1, 0, 0),
-    ('dish_fine_esfera',  'rest_fine', 'branch_fine', 'cat_fine_postres',     'Esfera de chocolate',     'Caramelo salado, helado de vainilla',  1400, 0, 0, 0);
+INSERT INTO dishes (
+    id, restaurant_id, branch_id, category_id, name, description, price, image_url, position, is_recommended, is_featured
+) VALUES
+    ('dish_fine_margherita', 'rest_fine', 'branch_fine', 'cat_fine_classics', 'Margherita', 'Tomate, mozzarella 100%, albahaca y aceite de oliva.', 1099, 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200&q=82', 0, 0, 0),
+    ('dish_fine_pepperoni', 'rest_fine', 'branch_fine', 'cat_fine_classics', 'Pepperoni', 'Tomate, mozzarella y doble pepperoni crujiente.', 1399, 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=1200&q=82', 1, 0, 1),
+    ('dish_fine_bbq_chicken', 'rest_fine', 'branch_fine', 'cat_fine_classics', 'Pollo BBQ', 'Salsa barbacoa, pollo asado, bacon, cebolla roja y mozzarella.', 1599, 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1200&q=82', 2, 0, 0),
+    ('dish_fine_truffle_bacon', 'rest_fine', 'branch_fine', 'cat_fine_signature', 'Trufa y panceta', 'Crema de trufa, mozzarella, panceta ahumada y parmesano.', 1799, 'https://images.unsplash.com/photo-1717883235373-ef10b2a745a3?auto=format&fit=crop&w=1200&q=82', 0, 1, 0),
+    ('dish_fine_goat_onion', 'rest_fine', 'branch_fine', 'cat_fine_signature', 'Cabra y cebolla caramelizada', 'Queso de cabra, cebolla caramelizada, nueces y miel.', 1699, 'https://images.unsplash.com/photo-1634629377376-6c6bae2d8bcf?auto=format&fit=crop&w=1200&q=82', 1, 0, 0),
+    ('dish_fine_nduja', 'rest_fine', 'branch_fine', 'cat_fine_signature', '’Nduja picante', 'Tomate, mozzarella, ’nduja, salami picante y miel de chile.', 1649, 'https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=1200&q=82', 2, 0, 0),
+    ('dish_fine_cajun_fries', 'rest_fine', 'branch_fine', 'cat_fine_sides', 'Patatas cajún', 'Patatas crujientes, especias cajún y salsa de queso.', 499, 'https://images.unsplash.com/photo-1518013431117-eb1465fa5752?auto=format&fit=crop&w=1200&q=82', 0, 0, 0),
+    ('dish_fine_bbq_wings', 'rest_fine', 'branch_fine', 'cat_fine_sides', 'Alitas BBQ', 'Ocho alitas asadas, glaseado barbacoa y cebollino.', 799, 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&w=1200&q=82', 1, 0, 0),
+    ('dish_fine_cheese_bread', 'rest_fine', 'branch_fine', 'cat_fine_sides', 'Pan de queso', 'Bocados horneados con mozzarella, ajo y orégano.', 599, 'https://images.unsplash.com/photo-1559141680-d0bd7bc5af84?auto=format&fit=crop&w=1200&q=82', 2, 0, 0),
+    ('dish_fine_brownie_cookie', 'rest_fine', 'branch_fine', 'cat_fine_desserts', 'Brownie-cookie', 'Brownie de chocolate y cookie con centro fundente.', 549, 'https://images.unsplash.com/photo-1654796605330-8a1248a2cb07?auto=format&fit=crop&w=1200&q=82', 0, 0, 0),
+    ('dish_fine_chocolate_pizza', 'rest_fine', 'branch_fine', 'cat_fine_desserts', 'Pizza de chocolate', 'Masa dulce, crema de cacao, avellanas y nubes tostadas.', 649, 'https://images.unsplash.com/photo-1767114916329-9b5649724379?auto=format&fit=crop&w=1200&q=82', 1, 0, 0),
+    ('dish_fine_cheesecake', 'rest_fine', 'branch_fine', 'cat_fine_desserts', 'Cheesecake', 'Tarta de queso cremosa y salsa de frutos rojos.', 599, 'https://images.unsplash.com/photo-1578775887804-699de7086ff9?auto=format&fit=crop&w=1200&q=82', 2, 1, 0);
+
+INSERT INTO ingredients (id, restaurant_id, name, price) VALUES
+    ('ing_fine_extra_cheese', 'rest_fine', 'Extra de mozzarella', 180),
+    ('ing_fine_pepperoni', 'rest_fine', 'Pepperoni extra', 200),
+    ('ing_fine_jalapeno', 'rest_fine', 'Jalapeño', 120),
+    ('ing_fine_bbq_dip', 'rest_fine', 'Salsa BBQ', 90);
+
+INSERT INTO dish_extras (dish_id, ingredient_id, position) VALUES
+    ('dish_fine_margherita', 'ing_fine_extra_cheese', 0),
+    ('dish_fine_margherita', 'ing_fine_jalapeno', 1),
+    ('dish_fine_pepperoni', 'ing_fine_extra_cheese', 0),
+    ('dish_fine_pepperoni', 'ing_fine_pepperoni', 1),
+    ('dish_fine_pepperoni', 'ing_fine_jalapeno', 2),
+    ('dish_fine_bbq_chicken', 'ing_fine_extra_cheese', 0),
+    ('dish_fine_bbq_chicken', 'ing_fine_bbq_dip', 1),
+    ('dish_fine_truffle_bacon', 'ing_fine_extra_cheese', 0),
+    ('dish_fine_cajun_fries', 'ing_fine_bbq_dip', 0),
+    ('dish_fine_bbq_wings', 'ing_fine_bbq_dip', 0),
+    ('dish_fine_cheese_bread', 'ing_fine_bbq_dip', 0);
 
 INSERT INTO dish_allergens (dish_id, allergen_id) VALUES
-    ('dish_fine_ostra',  14),
-    ('dish_fine_tartar', 4),
-    ('dish_fine_lubina', 4),
-    ('dish_fine_esfera', 7),
-    ('dish_fine_esfera', 3);
+    ('dish_fine_margherita', 1), ('dish_fine_margherita', 7),
+    ('dish_fine_pepperoni', 1), ('dish_fine_pepperoni', 7),
+    ('dish_fine_bbq_chicken', 1), ('dish_fine_bbq_chicken', 7),
+    ('dish_fine_truffle_bacon', 1), ('dish_fine_truffle_bacon', 7),
+    ('dish_fine_goat_onion', 1), ('dish_fine_goat_onion', 7), ('dish_fine_goat_onion', 8),
+    ('dish_fine_nduja', 1), ('dish_fine_nduja', 7),
+    ('dish_fine_cajun_fries', 7),
+    ('dish_fine_bbq_wings', 6), ('dish_fine_bbq_wings', 10),
+    ('dish_fine_cheese_bread', 1), ('dish_fine_cheese_bread', 7),
+    ('dish_fine_brownie_cookie', 1), ('dish_fine_brownie_cookie', 3), ('dish_fine_brownie_cookie', 7), ('dish_fine_brownie_cookie', 8),
+    ('dish_fine_chocolate_pizza', 1), ('dish_fine_chocolate_pizza', 7), ('dish_fine_chocolate_pizza', 8),
+    ('dish_fine_cheesecake', 1), ('dish_fine_cheesecake', 3), ('dish_fine_cheesecake', 7);
+
+INSERT INTO dish_tags (dish_id, tag_id) VALUES
+    ('dish_fine_nduja', '00000000-0000-0000-0000-000000000004'),
+    ('dish_fine_cajun_fries', '00000000-0000-0000-0000-000000000004'),
+    ('dish_fine_cajun_fries', '00000000-0000-0000-0000-000000000002');
+
+INSERT INTO dish_variant_groups (id, dish_id, name, selection_type, is_required, min_select, max_select, position) VALUES
+    ('vgroup_fine_margherita_size', 'dish_fine_margherita', 'Tamaño', 'single', 1, 1, 1, 0),
+    ('vgroup_fine_margherita_dough', 'dish_fine_margherita', 'Masa', 'single', 1, 1, 1, 1),
+    ('vgroup_fine_pepperoni_size', 'dish_fine_pepperoni', 'Tamaño', 'single', 1, 1, 1, 0),
+    ('vgroup_fine_bbq_size', 'dish_fine_bbq_chicken', 'Tamaño', 'single', 1, 1, 1, 0),
+    ('vgroup_fine_truffle_size', 'dish_fine_truffle_bacon', 'Tamaño', 'single', 1, 1, 1, 0);
+
+INSERT INTO dish_variant_options (id, group_id, name, price_delta, position) VALUES
+    ('voption_fine_margherita_medium', 'vgroup_fine_margherita_size', 'Mediana', 0, 0),
+    ('voption_fine_margherita_family', 'vgroup_fine_margherita_size', 'Familiar', 450, 1),
+    ('voption_fine_margherita_original', 'vgroup_fine_margherita_dough', 'Original', 0, 0),
+    ('voption_fine_margherita_thin', 'vgroup_fine_margherita_dough', 'Fina y crujiente', 0, 1),
+    ('voption_fine_pepperoni_medium', 'vgroup_fine_pepperoni_size', 'Mediana', 0, 0),
+    ('voption_fine_pepperoni_family', 'vgroup_fine_pepperoni_size', 'Familiar', 450, 1),
+    ('voption_fine_bbq_medium', 'vgroup_fine_bbq_size', 'Mediana', 0, 0),
+    ('voption_fine_bbq_family', 'vgroup_fine_bbq_size', 'Familiar', 450, 1),
+    ('voption_fine_truffle_medium', 'vgroup_fine_truffle_size', 'Mediana', 0, 0),
+    ('voption_fine_truffle_family', 'vgroup_fine_truffle_size', 'Familiar', 450, 1);
+
+INSERT INTO promotions (id, restaurant_id, branch_id, type, scope, name, description, percentage, special_price, buy_quantity, paid_quantity, priority, is_recurring, status) VALUES
+    ('promo_fine_classics', 'rest_fine', 'branch_fine', 'two_for_one', 'category', 'Martes 2x1 en clásicas', 'Pide dos pizzas clásicas medianas y paga una.', NULL, NULL, 2, 1, 30, 0, 'active'),
+    ('promo_fine_sides', 'rest_fine', 'branch_fine', 'happy_hour', 'category', 'Happy entrantes −20%', 'Todos los entrantes con descuento.', 20, NULL, NULL, NULL, 20, 0, 'active'),
+    ('promo_fine_pack', 'rest_fine', 'branch_fine', 'special_price', 'info', 'Pack familiar', 'Una pizza familiar, un entrante y dos bebidas.', NULL, 2999, NULL, NULL, 10, 0, 'active');
+
+INSERT INTO promotion_targets (promotion_id, target_type, target_id) VALUES
+    ('promo_fine_classics', 'category', 'cat_fine_classics'),
+    ('promo_fine_sides', 'category', 'cat_fine_sides');
 
 INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_code, field, value) VALUES
-    ('tr_fine_cat1_name',   'rest_fine', 'category', 'cat_fine_entrantes',   'en', 'name',        'Starters'),
-    ('tr_fine_cat2_name',   'rest_fine', 'category', 'cat_fine_principales', 'en', 'name',        'Mains'),
-    ('tr_fine_cat3_name',   'rest_fine', 'category', 'cat_fine_postres',     'en', 'name',        'Desserts'),
-    ('tr_fine_ostra_name',  'rest_fine', 'dish',     'dish_fine_ostra',      'en', 'name',        'Oyster, citrus dressing'),
-    ('tr_fine_tartar_name', 'rest_fine', 'dish',     'dish_fine_tartar',     'en', 'name',        'Bluefin tuna tartare'),
-    ('tr_fine_lubina_name', 'rest_fine', 'dish',     'dish_fine_lubina',     'en', 'name',        'Wild sea bass');
+    ('tr_fine_cat1_name', 'rest_fine', 'category', 'cat_fine_classics', 'en', 'name', 'Classics'),
+    ('tr_fine_cat2_name', 'rest_fine', 'category', 'cat_fine_signature', 'en', 'name', 'Signature'),
+    ('tr_fine_cat3_name', 'rest_fine', 'category', 'cat_fine_sides', 'en', 'name', 'Starters'),
+    ('tr_fine_cat4_name', 'rest_fine', 'category', 'cat_fine_desserts', 'en', 'name', 'Desserts'),
+    ('tr_fine_margherita_name', 'rest_fine', 'dish', 'dish_fine_margherita', 'en', 'name', 'Margherita'),
+    ('tr_fine_pepperoni_name', 'rest_fine', 'dish', 'dish_fine_pepperoni', 'en', 'name', 'Pepperoni'),
+    ('tr_fine_bbq_name', 'rest_fine', 'dish', 'dish_fine_bbq_chicken', 'en', 'name', 'BBQ chicken'),
+    ('tr_fine_truffle_name', 'rest_fine', 'dish', 'dish_fine_truffle_bacon', 'en', 'name', 'Truffle and bacon'),
+    ('tr_fine_cajun_name', 'rest_fine', 'dish', 'dish_fine_cajun_fries', 'en', 'name', 'Cajun fries'),
+    ('tr_fine_cheesecake_name', 'rest_fine', 'dish', 'dish_fine_cheesecake', 'en', 'name', 'Cheesecake');
 
 -- =============================================================================
 -- TENANT 3 · Café Brote · cafe.localhost · template default (sin entrada KV)

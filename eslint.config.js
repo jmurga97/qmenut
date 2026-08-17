@@ -30,6 +30,9 @@ const typeScriptFiles = [...appFiles, ...packageFiles];
 
 const reactFiles = ["apps/admin/src/**/*.{ts,tsx}", "apps/web/src/**/*.{ts,tsx}"];
 const workerFiles = ["apps/api/src/**/*.ts"];
+// Hand-written, unbundled, and served as a classic worker straight from the assets binding,
+// so it sits outside every `src/**` glob above.
+const serviceWorkerFiles = ["apps/web/public/sw.js"];
 const litFiles = ["packages/ui/src/components/**/*.ts"];
 
 const tsconfigPaths = [
@@ -278,6 +281,18 @@ export default defineConfig(
       parserOptions: sharedParserOptions,
     },
     settings: importSettings,
+  },
+  {
+    files: serviceWorkerFiles,
+    // Only the base recommended rules: the type-checked stacks would need a tsconfig entry
+    // for a file that is deliberately plain, unbundled JavaScript.
+    ...js.configs.recommended,
+    languageOptions: {
+      ecmaVersion: "latest",
+      // A classic service worker, not an ES module, despite the package being "type": "module".
+      sourceType: "script",
+      globals: { ...globals.serviceworker },
+    },
   },
   {
     files: ["apps/*/tests/**/*.{ts,tsx}", "packages/*/tests/**/*.{ts,tsx}"],

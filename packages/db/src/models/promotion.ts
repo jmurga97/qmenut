@@ -1,3 +1,5 @@
+import type { PromotionType } from "../schema/promotions";
+
 export interface PublicPromotion {
   buyQuantity: number | null;
   description: string | null;
@@ -13,7 +15,7 @@ export interface PublicPromotion {
   scope: "branch" | "category" | "dish" | "info";
   specialPrice: number | null;
   startsAt: number | null;
-  type: "daily_menu" | "happy_hour" | "percentage_discount" | "special_price" | "two_for_one";
+  type: PromotionType;
   updatedAt: number;
 }
 

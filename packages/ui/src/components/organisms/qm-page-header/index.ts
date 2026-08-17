@@ -62,6 +62,10 @@ export class QmPageHeader extends LitElement {
   @property({ type: Number, attribute: "heading-level" })
   headingLevel = 1;
 
+  /** Omits the bottom rule when the following content provides its own visual transition. */
+  @property({ type: Boolean, attribute: "hide-separator", reflect: true })
+  hideSeparator = false;
+
   private renderTopbarText() {
     if (this.topbarBrand && this.topbarName) return `${this.topbarBrand} / ${this.topbarName}`;
     return this.topbarBrand || this.topbarName;
@@ -77,7 +81,7 @@ export class QmPageHeader extends LitElement {
         <qm-wordmark part="title" class="title" data-size=${this.titleSize} .text=${this.title}></qm-wordmark>
       </div>
       ${this.subtitle ? html`<p part="subtitle" class="subtitle">${this.subtitle}</p>` : nothing}
-      <qm-divider part="rule" class="rule" variant="rule"></qm-divider>
+      ${this.hideSeparator ? nothing : html`<qm-divider part="rule" class="rule" variant="rule"></qm-divider>`}
     `;
   }
 }
@@ -104,6 +108,7 @@ export type QmPageHeaderArgs = Partial<
     | "langLabel"
     | "titleSize"
     | "headingLevel"
+    | "hideSeparator"
   >
 >;
 

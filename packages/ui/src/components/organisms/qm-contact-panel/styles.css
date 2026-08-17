@@ -10,28 +10,46 @@
   gap: 9px;
 }
 
-.map {
+.map-section {
   position: relative;
-  height: 116px;
-  border: var(--qm-surface-border, var(--qm-bw, 1px) solid var(--qm-hairline, #e5e0d8));
-  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
+  height: clamp(300px, 45dvh, 380px);
+  margin-inline: calc(var(--qm-shell-pad-x, 18px) * -1);
   overflow: hidden;
 }
 
-.map-image {
+.map {
   position: absolute;
+  z-index: 0;
   inset: 0;
 }
 
-.map-image::part(frame) {
-  height: 100%;
+.map-fade {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, var(--qm-bg, #fff), transparent) top / 100% 92px no-repeat,
+    linear-gradient(to bottom, transparent, var(--qm-bg, #fff)) bottom / 100% 92px no-repeat;
+  pointer-events: none;
 }
 
-.map-pin {
+.map-header {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  z-index: 3;
+  top: 14px;
+  right: var(--qm-shell-pad-x, 18px);
+  left: var(--qm-shell-pad-x, 18px);
+  padding: 10px 12px;
+  border: var(--qm-surface-border, 1px solid var(--qm-hairline, #e5e0d8));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
+  background: color-mix(in oklab, var(--qm-card, #fff) 88%, transparent);
+  box-shadow: 0 10px 30px color-mix(in oklab, var(--qm-ink, #1c1815) 10%, transparent);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+}
+
+.map-header qm-section-num {
+  --qm-rule: 0px;
 }
 
 .sedes-list {

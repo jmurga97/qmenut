@@ -67,9 +67,12 @@ export interface BranchPhotoRow {
 export interface BranchSettingsWriteData {
   name: string;
   address: string | null;
+  latitude: number | null;
+  longitude: number | null;
   phone: string | null;
   whatsapp: string | null;
   socialLinksJson: string | null;
+  logoUrl: string | null;
 }
 
 interface UpdateBranchSettingsInput {
@@ -91,9 +94,12 @@ export function updateBranchSettingsStatements({
       .set({
         name: data.name,
         address: data.address,
+        latitude: data.latitude,
+        longitude: data.longitude,
         phone: data.phone,
         whatsapp: data.whatsapp,
         socialLinksJson: data.socialLinksJson,
+        logoUrl: data.logoUrl,
         updatedAt: Date.now(),
       })
       .where(and(eq(branches.id, branchId), eq(branches.restaurantId, restaurantId), isNull(branches.deletedAt))),

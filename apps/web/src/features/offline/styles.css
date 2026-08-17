@@ -1,0 +1,47 @@
+/* Offline fallback page, precached by the service worker at install. */
+
+.offline-surface {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(24px, 7vw, 36px) clamp(18px, 5vw, 26px);
+  border: var(--qm-surface-border, 1px solid var(--qm-hairline, rgba(0, 0, 0, 0.12)));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
+  background: var(--qm-surface-bg, var(--qm-card, #fff));
+  box-shadow: var(--qm-surface-shadow, none);
+  text-align: center;
+}
+
+.offline-surface__icon {
+  margin-bottom: 14px;
+  color: var(--qm-muted, #6b7280);
+}
+
+.offline-surface__body {
+  margin: 0 0 20px;
+  color: var(--qm-muted, #6b7280);
+  font-family: var(--qm-body, inherit);
+  font-size: var(--qm-text-sm, 14px);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.offline-surface__action {
+  min-height: 44px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-primary, #1c1815);
+  color: var(--qm-on-primary, #fff);
+  font-family: var(--qm-heading, inherit);
+  font-size: var(--qm-text-xs, 12px);
+  font-weight: var(--qm-hw, 600);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.offline-surface__action:focus-visible {
+  outline: 2px solid var(--qm-accent-ink, currentColor);
+  outline-offset: 2px;
+}

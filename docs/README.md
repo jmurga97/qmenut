@@ -1,88 +1,104 @@
-# qmenut — Codebase Documentation
+# qmenut documentation
 
-qmenut is a multi-tenant restaurant-menu SaaS. A restaurant owner manages their
-menu, branding, promotions and loyalty program from an admin dashboard; diners
-browse a fast, per-tenant public menu at the restaurant's own domain.
+qmenut is a multi-tenant restaurant menu SaaS. A restaurant owner manages the menu,
+branding, promotions, and loyalty program from an admin dashboard. Diners browse a
+per-tenant public menu on the restaurant's own domain.
 
-This documentation is both a **reference** and a **guided tour of the code**: every
-doc explains a strategic division of the system _and_ points at the real files, so
-you can read the doc with the source open beside it.
+These pages describe the system as it is implemented. Each page names the source files
+that implement the behavior it describes, so you can read a page with the code open.
 
-## How to read this
+## Before you start
 
-Start here, in order:
+Read the following pages in this order:
 
-1. [architecture.md](architecture.md) — the shape of the whole system: the Bun
-   monorepo, the Cloudflare Workers, the data layer, and how a request flows.
-2. [domains/multi-tenancy.md](domains/multi-tenancy.md) — the tenant model
-   (restaurant → branch) and how tenant isolation is enforced. **Read this before
-   any feature doc** — every feature is scoped by it.
-3. [domains/theming.md](domains/theming.md) and
-   [domains/custom-domains.md](domains/custom-domains.md) — how a branch gets its
-   look and its own domain.
-4. Any feature doc under [domains/](domains/) as needed.
+1. [Architecture](architecture.md). Describes the monorepo, the Cloudflare Workers, the
+   data layer, and how a request flows through the system.
+2. [Multi-tenancy](domains/multi-tenancy.md). Describes the tenant model and how tenant
+   isolation is enforced. Every feature is scoped by these rules, so read this page
+   before any feature page.
+3. [Theming](domains/theming.md) and [Custom domains](domains/custom-domains.md).
+   Describe how a branch gets its appearance and its own domain.
 
-## Map
+After that, read feature pages as you need them.
+
+## Documentation map
 
 ### Foundation
 
-- [architecture.md](architecture.md) — monorepo, workers, data layer, request flow, conventions ✅
+| Page                            | Description                                                         | Status   |
+| ------------------------------- | ------------------------------------------------------------------- | -------- |
+| [Architecture](architecture.md) | Monorepo, Workers, data layer, request flow, and build conventions. | Complete |
 
 ### Domains
 
-- [domains/multi-tenancy.md](domains/multi-tenancy.md) — restaurant/branch model, tenant isolation ✅
-- [domains/theming.md](domains/theming.md) — the color-engine, presets, per-tenant theme ✅
-- [domains/custom-domains.md](domains/custom-domains.md) — host resolution, the tenant-config worker ✅
-- [domains/loyalty.md](domains/loyalty.md) — points/stamps, rewards, redemptions, venue code ✅
-- [domains/menu.md](domains/menu.md) — categories, dishes, variants, availability 🧩
-- [domains/promotions.md](domains/promotions.md) — promotions & effective pricing 🧩
-- [domains/i18n.md](domains/i18n.md) — languages & DeepL translations 🧩
-- [domains/billing.md](domains/billing.md) — Stripe subscriptions per branch 🧩
-- [domains/auth.md](domains/auth.md) — Better Auth email-OTP login 🧩
-- [domains/qr.md](domains/qr.md) — QR code generation 🧩
+| Page                                        | Description                                                  | Status   |
+| ------------------------------------------- | ------------------------------------------------------------ | -------- |
+| [Multi-tenancy](domains/multi-tenancy.md)   | Restaurant and branch model, and tenant isolation.           | Complete |
+| [Theming](domains/theming.md)               | Color engine, templates, and per-tenant theme.               | Complete |
+| [Custom domains](domains/custom-domains.md) | Host resolution and the tenant-config Worker.                | Complete |
+| [Loyalty](domains/loyalty.md)               | Points and stamps, rewards, redemptions, and the venue code. | Complete |
+| [Menu management](domains/menu.md)          | Categories, dishes, variants, and availability.              | Partial  |
+| [Promotions](domains/promotions.md)         | Promotions and effective pricing.                            | Partial  |
+| [Internationalization](domains/i18n.md)     | Languages and DeepL translations.                            | Partial  |
+| [Billing](domains/billing.md)               | Stripe subscriptions, one per branch.                        | Partial  |
+| [Auth](domains/auth.md)                     | Better Auth email-OTP sign-in.                               | Partial  |
+| [QR codes](domains/qr.md)                   | QR code generation in the admin dashboard.                   | Partial  |
 
-### Apps
+### Applications
 
-- [apps/web-public-menu.md](apps/web-public-menu.md) — the public menu SSR worker ✅
-- [apps/admin.md](apps/admin.md) — the owner dashboard SPA 🧩
-- The deployable marketing site `apps/landing` is covered in [architecture.md](architecture.md).
+| Page                                          | Description                                            | Status   |
+| --------------------------------------------- | ------------------------------------------------------ | -------- |
+| [Public menu Worker](apps/web-public-menu.md) | The SSR Worker that serves every tenant domain.        | Complete |
+| [Public menu PWA](apps/web-pwa.md)            | Manifest, icons, service worker, and offline behavior. | Complete |
+| [Admin dashboard](apps/admin.md)              | The owner dashboard SPA.                               | Partial  |
 
-### Design & operations
+The marketing site, `apps/landing`, is covered in [Architecture](architecture.md).
 
-- [design/loyalty-ux.md](design/loyalty-ux.md) — loyalty UX decisions & rationale
-- [operations/onboarding-intake.md](operations/onboarding-intake.md) — data to collect before onboarding a restaurant
-- [operations/database-migrations.md](operations/database-migrations.md) — class: Drizzle schema → generated SQL → D1 ✅
-- [operations/deployment.md](operations/deployment.md) — zero-to-live Cloudflare runbook ✅
-- [operations/performance-and-caching.md](operations/performance-and-caching.md) — edge/browser caching and invalidation ✅
-- [operations/testing.md](operations/testing.md) — local E2E topology, reset, and visual snapshots ✅
-- [operations/production-checklist.md](operations/production-checklist.md) — ranked production blockers and follow-ups ✅
+### Design and operations
+
+| Page                                                             | Description                                               | Status   |
+| ---------------------------------------------------------------- | --------------------------------------------------------- | -------- |
+| [Loyalty UX](design/loyalty-ux.md)                               | Loyalty UX decisions and the reasoning behind them.       | Complete |
+| [Restaurant intake](operations/onboarding-intake.md)             | Data to collect before onboarding a restaurant (Spanish). | Complete |
+| [Branch geocoding](operations/branch-geocoding.md)               | Leaflet maps, MapTiler autocomplete, and key handling.    | Complete |
+| [Database migrations](operations/database-migrations.md)         | Drizzle schema to generated SQL to D1.                    | Complete |
+| [Deployment](operations/deployment.md)                           | Cloudflare deployment runbook.                            | Complete |
+| [Performance and caching](operations/performance-and-caching.md) | Edge and browser caching, and cache invalidation.         | Complete |
+| [Testing](operations/testing.md)                                 | Local end-to-end topology, reset, and visual snapshots.   | Complete |
+| [Production checklist](operations/production-checklist.md)       | Ranked production blockers and follow-up work.            | Complete |
 
 ### Archive
 
-- [archive/](archive/) — superseded design notes kept for history. **Do not treat as
-  current** — see each file's banner. `intial-design.md` in particular describes an
-  abandoned GraphQL/gateway design.
+The [archive](archive/) directory holds superseded design notes. Do not treat them as
+current documentation; each file starts with a banner that names its replacement.
+`initial-design.md` describes an abandoned GraphQL and gateway design.
 
-## Status legend
+## Status values
 
-- ✅ **complete** — written and traced against the code.
-- 🧩 **stub** — headings + a Purpose paragraph + a key-file table, ready to expand.
+| Value    | Meaning                                                                                 |
+| -------- | --------------------------------------------------------------------------------------- |
+| Complete | The page is written and has been checked against the code.                              |
+| Partial  | The page has the purpose, the structure, and a key-file table, but no full walkthrough. |
 
-## The doc template
+The status describes the documentation page, not the feature. Each page states the
+implementation status of its feature in its own `Status` section.
 
-Every domain doc follows the same skeleton, so the set reads consistently and each
-one works as a walkthrough:
+## Page structure
 
-1. **Purpose & status** — what it does; complete / partial / WIP + known gaps.
-2. **Data model** — tables, relationships, key fields (with `packages/db/src/schema/*` paths).
-3. **Backend** — tRPC router + module handlers + repositories; procedure type; how isolation is enforced.
-4. **Frontend** — admin and/or public routes and feature folders.
-5. **Walkthrough** — an end-to-end trace with `file:line` references to read along.
-6. **Key files** — a path → responsibility table.
-7. **Notes & gotchas** — caveats, WIP gaps, things to verify.
+Domain pages use the same sections in the same order:
 
-## A note on accuracy
+1. `Status`. What the feature does, what is implemented, and what is missing.
+2. `Data model`. Tables, relationships, and key fields, with paths under
+   `packages/db/src/schema/`.
+3. `Backend`. The tRPC router, the module handlers, the repositories, the procedure
+   type, and how tenant isolation is enforced.
+4. `Frontend`. Admin routes, public routes, and feature directories.
+5. `Example`. One end-to-end trace with `file:line` references.
+6. `Key files`. A table that maps a path to its responsibility.
+7. `Limitations`. Caveats, known gaps, and things to verify.
 
-Line numbers drift as the code changes. Treat `file:line` references as "roughly
-here" and trust the file path plus the symbol name. When in doubt, the code wins;
-if you find a doc that contradicts the code, fix the doc.
+## Accuracy of file references
+
+Line numbers drift as the code changes. Treat a `file:line` reference as approximate and
+rely on the file path and the symbol name. The code is authoritative. If a page
+contradicts the code, update the page.

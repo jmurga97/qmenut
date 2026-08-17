@@ -54,13 +54,20 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
     return {
       meta: [
         { charSet: "utf8" },
-        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        // Required for the bottom navigation's safe-area insets in standalone mode.
+        { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "robots", content: "index,follow,max-image-preview:large" },
         { name: "theme-color", content: theme.primary },
+        { name: "mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-capable", content: "yes" },
       ],
       links: [
         { rel: "icon", href: "/favicon.ico", sizes: "any" },
+        { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
+        // iOS ignores manifest icons for Add to Home Screen; this route redirects to the
+        // tenant logo, or to the committed raster when the branch has none.
+        { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
         { rel: "manifest", href: "/site.webmanifest" },
         { rel: "preconnect", href: "https://images.unsplash.com", crossOrigin: "anonymous" },
         ...familyIds.map((fontId) => ({ rel: "stylesheet", href: FONT_CSS_URLS[fontId] })),

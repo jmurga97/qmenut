@@ -1,6 +1,6 @@
 import { QmNavBar } from "@qmenut/ui/components/qm-nav-bar/react";
 import { QmTab } from "@qmenut/ui/components/qm-tab/react";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
 import { Gift, Phone, Tag, UtensilsCrossed } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -9,6 +9,7 @@ const NAV_ICON_STROKE_WIDTH = 1.9;
 
 export function PublicBottomNav() {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/{-$locale}" });
   const { t } = useTranslation();
   // Matched by route id (not pathname) so the active tab is correct regardless of
   // whether a locale prefix (e.g. "/en") is present in the URL.
@@ -19,7 +20,7 @@ export function PublicBottomNav() {
       <QmTab
         value="/"
         active={routeId === "/{-$locale}/"}
-        onQmSelect={() => void navigate({ to: "/{-$locale}", params: (prev) => prev })}
+        onQmSelect={() => void navigate({ to: "/{-$locale}", params: (prev) => prev, search })}
       >
         <UtensilsCrossed slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
         {t("common.navigation.menu")}
@@ -27,7 +28,7 @@ export function PublicBottomNav() {
       <QmTab
         value="/destacados"
         active={routeId === "/{-$locale}/destacados"}
-        onQmSelect={() => void navigate({ to: "/{-$locale}/destacados", params: (prev) => prev })}
+        onQmSelect={() => void navigate({ to: "/{-$locale}/destacados", params: (prev) => prev, search })}
       >
         <Tag slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
         {t("common.navigation.destacados")}
@@ -35,7 +36,7 @@ export function PublicBottomNav() {
       <QmTab
         value="/contacto"
         active={routeId === "/{-$locale}/contacto"}
-        onQmSelect={() => void navigate({ to: "/{-$locale}/contacto", params: (prev) => prev })}
+        onQmSelect={() => void navigate({ to: "/{-$locale}/contacto", params: (prev) => prev, search })}
       >
         <Phone slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
         {t("common.navigation.contact")}
@@ -43,7 +44,7 @@ export function PublicBottomNav() {
       <QmTab
         value="/puntos"
         active={routeId === "/{-$locale}/puntos"}
-        onQmSelect={() => void navigate({ to: "/{-$locale}/puntos", params: (prev) => prev })}
+        onQmSelect={() => void navigate({ to: "/{-$locale}/puntos", params: (prev) => prev, search })}
       >
         <Gift slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
         {t("common.navigation.loyalty")}

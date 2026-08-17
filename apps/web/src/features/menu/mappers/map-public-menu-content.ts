@@ -1,12 +1,14 @@
 import { ALLERGEN_META } from "~/features/menu/constants/allergens";
 import { mapPromotionToFeatured } from "~/features/promos/mappers/map-promotion-to-featured";
 import { pickFeaturedPromo } from "~/features/promos/mappers/pick-featured-promo";
+import { formatDiscount } from "~/features/promos/mappers/promotion-formatting";
 
 import type { TFunction } from "i18next";
 import type { PublicMenuData, PublicMenuDish } from "~/features/menu/api/public-menu-types";
 import type { AllergenCode } from "~/features/menu/constants/allergens";
 import type {
   MenuContentViewModel,
+  MenuDishBadgeViewModel,
   MenuDishViewModel,
   MenuSectionViewModel,
 } from "~/features/menu/types/menu-view-model";
@@ -66,18 +68,27 @@ export function mapDish({
       name: extra.name,
       price: `+${formatPrice(extra.price)}`,
     }));
+  let badge: MenuDishBadgeViewModel | undefined;
+
+  if (promotion) {
+    badge = { compactText: formatDiscount(promotion, t), fullText: promotion.name };
+  } else if (dish.isRecommended) {
+    const recommendedText = t("menu.recommended");
+    badge = { compactText: recommendedText, fullText: recommendedText };
+  }
 
   return {
     allergens: allergens.length > 0 ? allergens : undefined,
+    badge,
     desc: stripHtml(descHtml),
     descHtml,
     extras: extras.length > 0 ? extras : undefined,
+    featured: dish.isFeatured,
     name: dish.name,
     oldPrice: hasDiscount ? formatPrice(promotion.basePrice) : undefined,
     photoUrl: dish.imageUrl ?? undefined,
     price: formatPrice(promotion?.effectiveUnitPrice ?? dish.price),
     rowKey: dish.id,
-    tag: promotion?.name ?? (dish.isRecommended ? t("menu.recommended") : undefined),
   };
 }
 

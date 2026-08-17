@@ -1,0 +1,46 @@
+/* Languages and translations */
+
+.admin-translation-row {
+  display: grid;
+  gap: 0.5rem;
+  padding-block: 0.75rem;
+  border-bottom: 1px solid var(--color-mc-border);
+}
+
+.admin-translation-row:last-child {
+  border-bottom: 0;
+}
+
+.admin-translation-base p {
+  margin: 0;
+}
+
+.admin-translation-input {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.admin-translation-input input,
+.admin-translation-input textarea {
+  flex: 1;
+  min-height: 2.75rem;
+  border: 1px solid var(--color-mc-border-visible);
+  border-radius: 0.5rem;
+  background: var(--color-mc-surface);
+  color: var(--color-mc-text-display);
+  padding: 0.5rem 0.75rem;
+  outline: none;
+  font-family: inherit;
+}
+
+.admin-translation-input input:focus,
+.admin-translation-input textarea:focus {
+  border-color: var(--color-mc-text-display);
+}
+
+.admin-translation-nested {
+  margin-inline-start: 1.25rem;
+  padding-inline-start: 1rem;
+  border-inline-start: 1px solid var(--color-mc-border);
+}

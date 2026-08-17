@@ -25,25 +25,50 @@ export const TIMEZONE_OPTIONS = [
   { id: "UTC", label: "UTC" },
 ];
 const time = z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Hora no válida");
+const coordinateText = ({ min, max, label }: { min: number; max: number; label: string }) =>
+  z
+    .string()
+    .trim()
+    .refine((value) => !value || Number.isFinite(Number(value)), `${label} no válida`)
+    .refine((value) => !value || (Number(value) >= min && Number(value) <= max), `${label} fuera de rango`);
 const scheduleSchema = z
   .object({ dayOfWeek: z.number().int().min(1).max(7), enabled: z.boolean(), open: time, close: time })
   .refine((row) => !row.enabled || hhmmToMinutes(row.close) >= hhmmToMinutes(row.open), {
     path: ["close"],
     message: "El cierre debe ser posterior a la apertura",
   });
-export const branchFormSchema = z.object({
-  name: z.string().trim().min(1, "El nombre es obligatorio"),
-  address: z.string().trim(),
-  phone: z.string().trim(),
-  whatsapp: z.string().trim(),
-  legalName: z.string().trim(),
-  taxId: z.string().trim(),
-  legalAddress: z.string().trim(),
-  dataProtectionEmail: z
-    .string()
-    .trim()
-    .refine((value) => !value || z.email().safeParse(value).success, "Email no válido"),
-  timezone: z.string().trim().min(1, "La zona horaria es obligatoria"),
-  schedules: z.array(scheduleSchema).length(7),
-});
+export const branchFormSchema = z
+  .object({
+    name: z.string().trim().min(1, "El nombre es obligatorio"),
+    address: z.string().trim(),
+    latitude: coordinateText({ min: -90, max: 90, label: "Latitud" }),
+    longitude: coordinateText({ min: -180, max: 180, label: "Longitud" }),
+    phone: z.string().trim(),
+    whatsapp: z.string().trim(),
+    logoUrl: z
+      .string()
+      .trim()
+      .refine(
+        (value) => !value || (z.url().safeParse(value).success && value.startsWith("https://")),
+        "La URL debe empezar por https://",
+      ),
+    legalName: z.string().trim(),
+    taxId: z.string().trim(),
+    legalAddress: z.string().trim(),
+    dataProtectionEmail: z
+      .string()
+      .trim()
+      .refine((value) => !value || z.email().safeParse(value).success, "Email no válido"),
+    timezone: z.string().trim().min(1, "La zona horaria es obligatoria"),
+    schedules: z.array(scheduleSchema).length(7),
+  })
+  .superRefine((value, context) => {
+    if (Boolean(value.latitude) === Boolean(value.longitude)) return;
+
+    context.addIssue({
+      code: "custom",
+      message: "Selecciona una dirección para completar la ubicación del mapa",
+      path: [value.latitude ? "longitude" : "latitude"],
+    });
+  });
 export type BranchFormValues = z.infer<typeof branchFormSchema>;
