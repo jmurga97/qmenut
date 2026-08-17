@@ -265,7 +265,11 @@ Perform these ten steps around every production migration:
 
 4. Query the affected production tables and confirm that your assumptions about the
    existing rows hold. Never assume that a table is empty.
-5. Keep a recovery path available.
+5. Create and record a D1 Time Travel bookmark immediately before applying the migration.
+   For a parent table referenced by foreign keys, do not rely on
+   `PRAGMA foreign_keys=OFF`: remote D1 migration execution can retain cascade behavior.
+   Prefer additive `ALTER TABLE` statements. `db:check` rejects a migration that drops a
+   referenced table.
 6. Apply the migration with Wrangler and the production environment:
 
    ```bash
