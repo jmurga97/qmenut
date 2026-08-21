@@ -7,7 +7,6 @@ type RouterOutputs = inferRouterOutputs<AppRouter>;
 export type DishDetail = RouterOutputs["admin"]["menu"]["dishes"]["detail"];
 export const categoryFormSchema = z.object({
   description: z.string().trim(),
-  imageUrl: z.string().trim(),
   isActive: z.boolean(),
   name: z.string().trim().min(1, { message: "El nombre es obligatorio" }),
 });
@@ -16,7 +15,6 @@ export const dishFormSchema = z.object({
   categoryId: z.string().trim().min(1, { message: "Elige una categoría" }),
   description: z.string().trim(),
   extraIngredientIds: z.array(z.string()),
-  imageUrl: z.string().trim(),
   isActive: z.boolean(),
   isFeatured: z.boolean(),
   isRecommended: z.boolean(),

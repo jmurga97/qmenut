@@ -2,16 +2,20 @@
 
 import { z } from "zod";
 
-export interface EmailWorkerServiceBinding {
-  fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-}
-
-export interface ThemeWorkerServiceBinding {
+export interface ServiceWorkerBinding {
   fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 }
 
 const logLevelSchema = z.enum(["trace", "debug", "info", "warn", "error", "fatal"]);
 const nodeEnvSchema = z.enum(["development", "test", "production"]);
+
+function serviceWorkerBindingSchema(binding: string) {
+  return z.custom<ServiceWorkerBinding>(
+    (value) =>
+      typeof value === "object" && value !== null && typeof (value as { fetch?: unknown }).fetch === "function",
+    `El binding de servicio ${binding} debe implementar fetch`,
+  );
+}
 
 export const envSchema = z.object({
   ALLOWED_ORIGINS: z
@@ -37,16 +41,9 @@ export const envSchema = z.object({
   DB: z.custom<D1Database>((value) => typeof value === "object" && value !== null, {
     error: "El binding DB es obligatorio",
   }),
-  EMAIL_WORKER: z.custom<EmailWorkerServiceBinding>(
-    (value) =>
-      typeof value === "object" && value !== null && typeof (value as { fetch?: unknown }).fetch === "function",
-    "El binding de servicio EMAIL_WORKER debe implementar fetch",
-  ),
-  THEME_WORKER: z.custom<ThemeWorkerServiceBinding>(
-    (value) =>
-      typeof value === "object" && value !== null && typeof (value as { fetch?: unknown }).fetch === "function",
-    "El binding de servicio THEME_WORKER debe implementar fetch",
-  ),
+  EMAIL_WORKER: serviceWorkerBindingSchema("EMAIL_WORKER"),
+  IMAGE_WORKER: serviceWorkerBindingSchema("IMAGE_WORKER"),
+  THEME_WORKER: serviceWorkerBindingSchema("THEME_WORKER"),
   THEME_WORKER_TOKEN: z.string().min(1),
   LOYALTY_TOKEN_SECRET: z.string().min(1),
   LOYALTY_CODE_LIMITER: z.custom<RateLimit>(

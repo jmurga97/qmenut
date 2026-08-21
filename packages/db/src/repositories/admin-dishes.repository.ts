@@ -145,6 +145,25 @@ export interface DishTranslatableFields {
   name: string;
 }
 
+export interface DishContext {
+  branchId: string;
+  imageUrl: string | null;
+}
+
+export async function getDishContext({
+  db,
+  dishId,
+  restaurantId,
+}: GetDishTranslatableFieldsInput): Promise<DishContext | null> {
+  const row = await db
+    .select({ branchId: dishes.branchId, imageUrl: dishes.imageUrl })
+    .from(dishes)
+    .where(and(eq(dishes.id, dishId), eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt)))
+    .get();
+
+  return row ?? null;
+}
+
 interface GetDishTranslatableFieldsInput {
   db: DrizzleDb;
   dishId: string;
@@ -290,40 +309,6 @@ export function setDishExtrasStatements({
           .values(ingredientIds.map((ingredientId, position) => ({ dishId, ingredientId, position }))),
       ]
     : [remove];
-}
-
-interface GetDishBranchIdInput {
-  db: DrizzleDb;
-  restaurantId: string;
-  dishId: string;
-}
-
-/** Used to resolve which tenant host's menu cache to invalidate for mutations that only carry a dishId. */
-export async function getDishBranchId({ db, restaurantId, dishId }: GetDishBranchIdInput): Promise<string | null> {
-  const row = await db
-    .select({ branchId: dishes.branchId })
-    .from(dishes)
-    .where(and(eq(dishes.id, dishId), eq(dishes.restaurantId, restaurantId)))
-    .get();
-
-  return row?.branchId ?? null;
-}
-
-interface DishBelongsToTenantInput {
-  db: DrizzleDb;
-  restaurantId: string;
-  dishId: string;
-}
-
-/** Guard para relaciones: confirma que el plato es del tenant antes de tocar sus tablas hijas. */
-export async function dishBelongsToTenant({ db, restaurantId, dishId }: DishBelongsToTenantInput): Promise<boolean> {
-  const row = await db
-    .select({ id: dishes.id })
-    .from(dishes)
-    .where(and(eq(dishes.id, dishId), eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt)))
-    .get();
-
-  return Boolean(row);
 }
 
 interface CategoryBelongsToBranchInput {

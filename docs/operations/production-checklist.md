@@ -49,6 +49,10 @@ items need Cloudflare, vendor-account, product, or legal work.
 - [x] Deploy `ming-email-worker` in the same Cloudflare account, and configure the sending
       domain's DKIM, SPF, and DMARC records. The remote service binding and OTP sign-in
       fail otherwise.
+- [ ] Deploy the qmenut policy in `ming-image-worker` and provision `qmenut-image-staging`,
+      `qmenut-media`, the prefix-filtered Queue notification, upload CORS, one-day staging
+      lifecycle, signing credentials, and the `media.qmenut.app` R2 custom domain. The API's
+      `IMAGE_WORKER` binding and every new image save fail until this is complete.
 - [x] Create the observability projects. Create Sentry projects for the API, web, and
       admin, fill in the runtime and build-time DSNs, and create the PostHog EU project and
       key.

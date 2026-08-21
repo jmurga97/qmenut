@@ -8,7 +8,6 @@ export function toDishFormValues(dish: DishDetail | null): DishFormValues {
     categoryId: dish?.categoryId ?? "",
     description: dish?.description ?? "",
     extraIngredientIds: dish?.extraIngredientIds ?? [],
-    imageUrl: dish?.imageUrl ?? "",
     isActive: dish?.isActive ?? true,
     isFeatured: dish?.isFeatured ?? false,
     isRecommended: dish?.isRecommended ?? false,
@@ -17,11 +16,22 @@ export function toDishFormValues(dish: DishDetail | null): DishFormValues {
     tagIds: dish?.tagIds ?? [],
   };
 }
-export function toDishInput({ position, values }: { position: number; values: DishFormValues }) {
+export function toDishInput({
+  imageUploadId,
+  imageUrl,
+  position,
+  values,
+}: {
+  imageUploadId?: string;
+  imageUrl: string | null;
+  position: number;
+  values: DishFormValues;
+}) {
   return {
     categoryId: values.categoryId,
     description: values.description || undefined,
-    imageUrl: values.imageUrl || undefined,
+    imageUrl: imageUrl ?? undefined,
+    imageUploadId,
     isActive: values.isActive,
     isFeatured: values.isFeatured,
     isRecommended: values.isRecommended,

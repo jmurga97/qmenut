@@ -5,8 +5,6 @@ import {
 } from "@qmenut/db/repositories/admin-categories.repository";
 import { markTranslationsPendingUpdateStatement } from "@qmenut/db/repositories/translations.repository";
 
-import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
-
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { CategoryWriteData } from "@qmenut/db/repositories/admin-categories.repository";
 import type { BatchItem } from "drizzle-orm/batch";
@@ -24,7 +22,7 @@ export async function createMenuCategory({
   branchId,
   data,
 }: CreateCategoryInput): Promise<{ id: string }> {
-  await assertBranchAccess({ db, restaurantId, branchId });
+  // The menu router authorizes the branch before calling this writer.
   const id = await createCategory({ db, restaurantId, branchId, data });
   return { id };
 }

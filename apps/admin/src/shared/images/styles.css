@@ -1,0 +1,204 @@
+/* Preview-first image inputs and the branch photography strip */
+
+.admin-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.admin-image-control,
+.admin-image-gallery {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-image-control__header,
+.admin-image-gallery__header {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.admin-image-control__label {
+  color: var(--color-mc-text-secondary);
+  font-family: "Space Mono", monospace;
+  font-size: var(--text-mc-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-image-status,
+.admin-image-gallery__header > span,
+.admin-photo-strip__number {
+  color: var(--color-mc-text-tertiary);
+  font-family: "Space Mono", monospace;
+  font-size: var(--text-mc-caption);
+}
+
+.admin-image-status--uploading,
+.admin-image-status--optimizing {
+  color: var(--color-mc-warning);
+}
+
+.admin-image-status--succeeded {
+  color: var(--color-mc-success);
+}
+
+.admin-image-status--failed,
+.admin-image-error {
+  color: var(--color-mc-error);
+}
+
+.admin-image-preview {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  min-height: 12rem;
+  padding: 0;
+  border: 1px solid var(--color-mc-border-visible);
+  border-radius: 0.75rem;
+  background:
+    linear-gradient(135deg, transparent 48%, var(--color-mc-border) 49%, var(--color-mc-border) 51%, transparent 52%),
+    var(--color-mc-surface);
+  color: var(--color-mc-text-secondary);
+  cursor: pointer;
+}
+
+.admin-image-preview img {
+  width: 100%;
+  height: 100%;
+  max-height: 22rem;
+  object-fit: cover;
+}
+
+.admin-image-preview > span {
+  display: grid;
+  gap: 0.35rem;
+  padding: 2rem;
+  font-size: var(--text-mc-body-sm);
+}
+
+.admin-image-preview b {
+  color: var(--color-mc-text-display);
+  font-family: "Space Mono", monospace;
+  font-weight: 400;
+}
+
+.admin-image-preview:focus-visible,
+.admin-image-actions button:focus-visible,
+.admin-image-gallery__add:focus-visible,
+.admin-photo-strip__order button:focus-visible {
+  outline: 2px solid var(--color-mc-interactive);
+  outline-offset: 3px;
+}
+
+.admin-image-actions,
+.admin-photo-strip__order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-image-actions button,
+.admin-image-gallery__add,
+.admin-photo-strip__order button {
+  min-height: 2.25rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--color-mc-border-visible);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-mc-text-primary);
+  font-family: "Space Mono", monospace;
+  font-size: var(--text-mc-caption);
+  cursor: pointer;
+}
+
+.admin-image-actions button:disabled,
+.admin-image-gallery__add:disabled,
+.admin-photo-strip__order button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.admin-image-gallery {
+  padding-block: 1.5rem;
+  border-block: 1px solid var(--color-mc-border);
+}
+
+.admin-image-gallery__header p,
+.admin-image-gallery__empty {
+  margin: 0.4rem 0 0;
+  color: var(--color-mc-text-secondary);
+  font-size: var(--text-mc-body-sm);
+}
+
+.admin-photo-strip {
+  display: grid;
+  grid-auto-columns: minmax(13rem, 18rem);
+  grid-auto-flow: column;
+  gap: 0.75rem;
+  overflow-x: auto;
+  margin: 0;
+  padding: 0 0 0.75rem;
+  list-style: none;
+  scroll-snap-type: inline mandatory;
+}
+
+.admin-photo-strip > li {
+  position: relative;
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  border: 1px solid var(--color-mc-border);
+  border-radius: 0.75rem;
+  background: var(--color-mc-surface);
+  scroll-snap-align: start;
+}
+
+.admin-photo-strip .admin-image-preview {
+  min-height: 9rem;
+}
+
+.admin-photo-strip .admin-image-control__header {
+  min-height: 1rem;
+  justify-content: flex-end;
+}
+
+.admin-photo-strip .admin-image-control__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.admin-photo-strip__number {
+  position: absolute;
+  z-index: 1;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-mc-background) 84%, transparent);
+  color: var(--color-mc-text-display);
+  backdrop-filter: blur(8px);
+}
+
+.admin-image-gallery__add {
+  width: fit-content;
+  border-style: dashed;
+}
+
+@media (max-width: 640px) {
+  .admin-photo-strip {
+    grid-auto-columns: minmax(11rem, 78vw);
+  }
+}
