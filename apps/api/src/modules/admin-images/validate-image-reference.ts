@@ -3,10 +3,10 @@ import { TRPCError } from "@trpc/server";
 import { assertCompletedImageUpload, isQmenutMediaUrl } from "./image-worker.client";
 
 import type { ImagePurpose } from "./image-input.schema";
-import type { ServiceWorkerBinding } from "../../config/env/schema";
+import type { ImageWorkerBinding } from "../../config/env/schema";
 
 interface ValidateImageReferenceInput {
-  worker: ServiceWorkerBinding;
+  worker: ImageWorkerBinding;
   restaurantId: string;
   branchId: string;
   purpose: ImagePurpose;
@@ -41,7 +41,7 @@ interface ImageReferenceRow {
 }
 
 interface ValidateImageReferencesInput {
-  worker: ServiceWorkerBinding;
+  worker: ImageWorkerBinding;
   restaurantId: string;
   branchId: string;
   purpose: ImagePurpose;

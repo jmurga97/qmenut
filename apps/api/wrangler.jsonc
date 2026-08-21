@@ -23,6 +23,7 @@
     {
       "binding": "IMAGE_WORKER",
       "service": "ming-image-worker",
+      "entrypoint": "ImageRpc",
       "remote": true,
     },
     {
@@ -90,6 +91,7 @@
         {
           "binding": "IMAGE_WORKER",
           "service": "ming-image-worker",
+          "entrypoint": "ImageRpc",
           "remote": true,
         },
         {
@@ -155,6 +157,7 @@
         {
           "binding": "IMAGE_WORKER",
           "service": "ming-image-worker",
+          "entrypoint": "ImageRpc",
           "remote": true,
         },
         {

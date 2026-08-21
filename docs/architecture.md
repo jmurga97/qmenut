@@ -86,11 +86,11 @@ The relationships between Workers are as follows:
   `THEME_WORKER` service binding to `apps/tenant-config`, which is the only writer and
   normalizer of `TENANT_THEME`. See [Custom domains](domains/custom-domains.md) and
   [Theming](domains/theming.md).
-- API to image Worker. Authenticated image negotiation and polling go through the private
-  `IMAGE_WORKER` service binding. Browser bytes go directly to a signed private R2 staging
-  object; the Queue-driven image Worker writes the public WebP result to `qmenut-media`.
-  qmenut saves a URL only after revalidating the upload's tenant/branch ownership and exact
-  manifest URL. See [Image uploads](operations/image-uploads.md).
+- API to image Worker. Authenticated image negotiation and polling call `createUpload` and
+  `getUpload` through the private `IMAGE_WORKER` RPC service binding. Browser bytes go directly
+  to a signed private R2 staging object; the Queue-driven image Worker writes the public WebP
+  result to `qmenut-media`. qmenut saves a URL only after revalidating the upload's tenant/branch
+  ownership and exact manifest URL. See [Image uploads](operations/image-uploads.md).
 - Shared KV ID. `apps/web/wrangler.jsonc` and `apps/tenant-config/wrangler.jsonc` bind
   the same KV namespace ID. Local storage under
   `--persist-to ../../.wrangler-shared/state` is keyed by ID, so both Workers must

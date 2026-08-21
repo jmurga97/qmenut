@@ -32,8 +32,8 @@ qmenut owns:
 - immutable cache metadata on optimized output objects.
 
 The browser never calls the image Worker. qmenut's API reaches it through the private
-`IMAGE_WORKER` service binding. The only browser-facing infrastructure URL is the scoped,
-short-lived R2 `PUT` URL.
+`IMAGE_WORKER` service binding and its named `ImageRpc` entrypoint. The only browser-facing
+infrastructure URL is the scoped, short-lived R2 `PUT` URL.
 
 ## End-to-end sequence
 
@@ -49,7 +49,7 @@ sequenceDiagram
 
     A->>API: admin.images.createUpload(purpose, file metadata, idempotency key)
     API->>API: authenticate, authorize tenant and branch
-    API->>IW: POST /v1/uploads?productId=qmenut
+    API->>IW: RPC createUpload(productId, metadata, idempotency key)
     IW-->>API: uploadId and signed PUT
     API-->>A: uploadId and signed PUT
     A->>S: PUT bytes with the signed Content-Type
@@ -59,11 +59,11 @@ sequenceDiagram
     IW->>M: write main.webp with immutable caching
     IW->>S: delete successful staged original
     A->>API: admin.images.getUpload(uploadId, branchId, purpose)
-    API->>IW: GET /v1/uploads/{uploadId}?productId=qmenut
+    API->>IW: RPC getUpload(productId, uploadId)
     API->>API: verify ownership fingerprint, preset, and public URL
     API-->>A: succeeded + main WebP URL
     A->>API: existing domain save mutation with URL + uploadId
-    API->>IW: re-fetch and revalidate completed upload
+    API->>IW: RPC getUpload and revalidate completed upload
     API->>DB: write only after all changed images pass
 ```
 

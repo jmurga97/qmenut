@@ -2,9 +2,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { ImagePurpose } from "./image-input.schema";
-import type { ServiceWorkerBinding } from "../../config/env/schema";
+import type { ImageWorkerBinding } from "../../config/env/schema";
 
-const IMAGE_WORKER_BASE_URL = "https://image-worker.internal";
 const QMENUT_PRODUCT_ID = "qmenut";
 const QMENUT_MEDIA_ORIGIN = "https://media.qmenut.app";
 
@@ -73,7 +72,7 @@ interface OwnershipInput {
 }
 
 interface CreateUploadInput extends OwnershipInput {
-  worker: ServiceWorkerBinding;
+  worker: ImageWorkerBinding;
   filename: string;
   contentType: "image/jpeg" | "image/png" | "image/webp";
   sizeBytes: number;
@@ -81,7 +80,7 @@ interface CreateUploadInput extends OwnershipInput {
 }
 
 interface GetUploadInput extends OwnershipInput {
-  worker: ServiceWorkerBinding;
+  worker: ImageWorkerBinding;
   uploadId: string;
 }
 
@@ -115,17 +114,6 @@ function mapWorkerError(error: z.infer<typeof workerErrorSchema>["error"]): TRPC
   return new TRPCError({ code, message: error.message });
 }
 
-async function readWorkerResponse(response: Response): Promise<unknown> {
-  try {
-    return await response.json();
-  } catch {
-    throw new TRPCError({
-      code: "BAD_GATEWAY",
-      message: "El servicio de imágenes devolvió una respuesta no válida",
-    });
-  }
-}
-
 async function createOwnershipExternalId(input: OwnershipInput): Promise<string> {
   const value = `${input.restaurantId}\u{0}${input.branchId}\u{0}${input.purpose}`;
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
@@ -155,22 +143,18 @@ function readMainImageUrl(data: z.infer<typeof uploadResultSchema>["data"]): str
 
 export async function createImageUpload(input: CreateUploadInput) {
   const externalId = await createOwnershipExternalId(input);
-  const response = await input.worker.fetch(`${IMAGE_WORKER_BASE_URL}/v1/uploads?productId=${QMENUT_PRODUCT_ID}`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "idempotency-key": input.idempotencyKey,
-    },
-    body: JSON.stringify({
+  const body = await input.worker.createUpload({
+    productId: QMENUT_PRODUCT_ID,
+    idempotencyKey: input.idempotencyKey,
+    upload: {
       presetId: presetByPurpose[input.purpose],
       externalId,
       filename: input.filename,
       contentType: input.contentType,
       sizeBytes: input.sizeBytes,
       metadata: { source: "qmenut-admin" },
-    }),
+    },
   });
-  const body = await readWorkerResponse(response);
   const error = workerErrorSchema.safeParse(body);
   if (error.success) throw mapWorkerError(error.data.error);
 
@@ -186,10 +170,10 @@ export async function createImageUpload(input: CreateUploadInput) {
 }
 
 export async function getImageUpload(input: GetUploadInput) {
-  const response = await input.worker.fetch(
-    `${IMAGE_WORKER_BASE_URL}/v1/uploads/${input.uploadId}?productId=${QMENUT_PRODUCT_ID}`,
-  );
-  const body = await readWorkerResponse(response);
+  const body = await input.worker.getUpload({
+    productId: QMENUT_PRODUCT_ID,
+    uploadId: input.uploadId,
+  });
   const error = workerErrorSchema.safeParse(body);
   if (error.success) throw mapWorkerError(error.data.error);
 

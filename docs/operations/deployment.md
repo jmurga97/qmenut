@@ -27,10 +27,11 @@ private `EMAIL_WORKER` and `IMAGE_WORKER` service bindings to the existing share
 public endpoint or second development instance of either infrastructure Worker is created.
 The canonical staging CORS origin list is maintained in [Image uploads](image-uploads.md#storage-and-delivery).
 
-`IMAGE_WORKER` is also configured with `remote: true` for unqualified local `wrangler dev` and the
-Playwright E2E API. A local upload therefore calls the deployed shared image worker and creates
-real staging objects, queue messages, and optimized objects in the shared qmenut buckets. Do not
-add upload E2E coverage until the suite has an isolated local worker or fake service binding.
+`IMAGE_WORKER` selects the shared worker's named `ImageRpc` entrypoint and is also configured with
+`remote: true` for unqualified local `wrangler dev` and the Playwright E2E API. A local upload
+therefore calls the deployed shared image worker and creates real staging objects, queue messages,
+and optimized objects in the shared qmenut buckets. Do not add upload E2E coverage until the suite
+has an isolated local worker or fake service binding.
 
 ### Provision development resources
 
