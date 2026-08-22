@@ -14,6 +14,7 @@ import { LoadingState } from "~/shared/components/state/loading-state";
 import { NotFoundState } from "~/shared/components/state/not-found-state";
 import "./styles/global.css";
 import "../shared/components/forms/styles.css";
+import "../shared/images/styles.css";
 import "../features/auth/styles.css";
 import "../features/branch/styles.css";
 import "../features/languages/styles.css";

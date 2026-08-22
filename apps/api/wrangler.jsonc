@@ -21,6 +21,12 @@
       "remote": true,
     },
     {
+      "binding": "IMAGE_WORKER",
+      "service": "ming-image-worker",
+      "entrypoint": "ImageRpc",
+      "remote": true,
+    },
+    {
       "binding": "THEME_WORKER",
       "service": "qmenut-tenant-config",
     },
@@ -83,6 +89,12 @@
           "remote": true,
         },
         {
+          "binding": "IMAGE_WORKER",
+          "service": "ming-image-worker",
+          "entrypoint": "ImageRpc",
+          "remote": true,
+        },
+        {
           "binding": "THEME_WORKER",
           "service": "qmenut-tenant-config-dev",
         },
@@ -140,6 +152,12 @@
         {
           "binding": "EMAIL_WORKER",
           "service": "ming-email-worker",
+          "remote": true,
+        },
+        {
+          "binding": "IMAGE_WORKER",
+          "service": "ming-image-worker",
+          "entrypoint": "ImageRpc",
           "remote": true,
         },
         {

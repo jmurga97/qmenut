@@ -2,6 +2,7 @@ import { authRouter } from "./routers/auth";
 import { healthRouter } from "./routers/health";
 import { router } from "./trpc";
 import { adminBranchesRouter } from "../modules/admin-branches/admin-branches.router";
+import { adminImagesRouter } from "../modules/admin-images/admin-images.router";
 import { adminLoyaltyRouter } from "../modules/admin-loyalty/admin-loyalty.router";
 import { adminMenuRouter } from "../modules/admin-menu/admin-menu.router";
 import { adminPromotionsRouter } from "../modules/admin-promotions/admin-promotions.router";
@@ -21,6 +22,7 @@ export const appRouter = router({
     tenant: adminTenantRouter,
     menu: adminMenuRouter,
     branches: adminBranchesRouter,
+    images: adminImagesRouter,
     promotions: adminPromotionsRouter,
     theme: themeRouter,
     billing: billingRouter,

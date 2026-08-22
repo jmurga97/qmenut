@@ -17,6 +17,7 @@ import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { NotFoundState } from "~/shared/components/state/not-found-state";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
+import { ImageUploadControl } from "~/shared/images/image-upload-control";
 import { eurosToCents, formatMoney } from "~/shared/services/money";
 
 import { getDishDetailQueryOptions } from "../api";
@@ -133,7 +134,14 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
           <div className="admin-form-grid">
             <FormTextInput<CategoryFormValues> label="Nombre" name="name" />
             <FormTextarea<CategoryFormValues> label="Descripción" name="description" rows={3} />
-            <FormTextInput<CategoryFormValues> label="URL de imagen" name="imageUrl" />
+            <ImageUploadControl
+              disabled={controller.busy}
+              draft={controller.image.draft}
+              label="Imagen de categoría"
+              onRemove={controller.image.remove}
+              onRetry={controller.image.retry}
+              onSelect={controller.image.selectFile}
+            />
             <FormCheckbox<CategoryFormValues> label="Categoría activa" name="isActive" />
           </div>
         </FormShell>
@@ -172,7 +180,14 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
             <FormTextInput<DishFormValues> label="Nombre" name="name" />
             <FormSelect<DishFormValues> label="Categoría" name="categoryId" options={controller.categoryOptions} />
             <FormTextInput<DishFormValues> inputMode="decimal" label="Precio" name="priceEuros" />
-            <FormTextInput<DishFormValues> label="URL de imagen" name="imageUrl" />
+            <ImageUploadControl
+              disabled={controller.busy}
+              draft={controller.image.draft}
+              label="Imagen del plato"
+              onRemove={controller.image.remove}
+              onRetry={controller.image.retry}
+              onSelect={controller.image.selectFile}
+            />
             <FormTextarea<DishFormValues> label="Descripción" name="description" rows={3} />
             <div className="admin-form-grid--two">
               <FormCheckbox<DishFormValues> label="Activo" name="isActive" />

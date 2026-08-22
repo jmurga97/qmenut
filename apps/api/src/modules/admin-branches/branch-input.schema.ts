@@ -32,6 +32,7 @@ const branchInfoSchema = z
     whatsapp: nullableText,
     socialLinksJson: nullableText,
     logoUrl: nullableHttpsUrl,
+    logoUploadId: z.uuid().optional(),
   })
   .superRefine((value, context) => {
     if ((value.latitude === null) === (value.longitude === null)) return;
@@ -56,6 +57,7 @@ export const scheduleRowSchema = z
 export const photoRowSchema = z.object({
   url: z.url().trim(),
   position: z.number().int().min(0),
+  uploadId: z.uuid().optional(),
 });
 
 export const saveBranchSettingsSchema = z.object({
