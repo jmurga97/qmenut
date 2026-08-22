@@ -91,7 +91,7 @@ export const envSchema = z.object({
   ADMIN_APP_URL: z.url(),
   SENTRY_DSN: z.string().trim().optional(),
   LOG_LEVEL: logLevelSchema.default("info"),
-  MAPTILER_API_KEY: z.string().trim().min(1).optional(),
+  GOOGLE_MAPS_API_KEY: z.string().trim().min(1).optional(),
   NODE_ENV: nodeEnvSchema.default("development"),
 });
 

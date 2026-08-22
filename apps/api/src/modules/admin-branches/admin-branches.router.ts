@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { saveBranchSettingsSchema } from "./branch-input.schema";
 import { getBranchSettings } from "./get-branch-settings";
-import { searchMaptilerAddresses } from "./maptiler-geocoding.service";
+import { searchGoogleAddresses } from "./google-geocoding.service";
 import { saveBranchSettings } from "./save-branch-settings";
 import { bumpPublicContentVersionForRestaurant } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
@@ -34,7 +34,7 @@ export const adminBranchesRouter = router({
       throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Demasiadas búsquedas, espera un momento" });
     }
 
-    if (!ctx.env.MAPTILER_API_KEY) {
+    if (!ctx.env.GOOGLE_MAPS_API_KEY) {
       throw new TRPCError({
         code: "PRECONDITION_FAILED",
         message: "El autocompletado de direcciones no está configurado",
@@ -42,9 +42,9 @@ export const adminBranchesRouter = router({
     }
 
     try {
-      return await searchMaptilerAddresses({ apiKey: ctx.env.MAPTILER_API_KEY, query: input.query });
+      return await searchGoogleAddresses({ apiKey: ctx.env.GOOGLE_MAPS_API_KEY, query: input.query });
     } catch (error) {
-      console.error("No se pudieron obtener sugerencias de MapTiler", error);
+      console.error("No se pudieron obtener sugerencias de Google Maps", error);
       throw new TRPCError({
         cause: error,
         code: "BAD_GATEWAY",

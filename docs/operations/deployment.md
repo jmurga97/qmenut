@@ -72,7 +72,7 @@ bunx wrangler secret put STRIPE_WEBHOOK_SECRET --env development --cwd apps/api
 ```
 
 Use the same development `THEME_WORKER_TOKEN` value for both Workers. Do not set
-`E2E_FIXED_OTP` on the deployed development Worker. DeepL, MapTiler, and Sentry are optional
+`E2E_FIXED_OTP` on the deployed development Worker. DeepL, Google Maps Geocoding, and Sentry are optional
 and are intentionally unset by default.
 
 ### Deploy and seed development

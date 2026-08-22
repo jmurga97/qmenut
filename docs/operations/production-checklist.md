@@ -20,7 +20,7 @@ items need Cloudflare, vendor-account, product, or legal work.
 - [x] Set all production secrets. Configure `BETTER_AUTH_SECRET`, a byte-identical
       `THEME_WORKER_TOKEN` on the API and tenant-config, `LOYALTY_TOKEN_SECRET`,
       `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and, if translations are enabled,
-      `DEEPL_API_KEY`. Configure `MAPTILER_API_KEY` on the API before enabling branch
+      `DEEPL_API_KEY`. Configure `GOOGLE_MAPS_API_KEY` on the API before enabling branch
       address autocomplete. Never set `E2E_FIXED_OTP`.
 - [x] Replace the Stripe price placeholders, including `STRIPE_PRICE_BASIC` in the
       production variables.
