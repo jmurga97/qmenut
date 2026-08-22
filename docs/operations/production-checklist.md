@@ -20,8 +20,8 @@ items need Cloudflare, vendor-account, product, or legal work.
 - [x] Set all production secrets. Configure `BETTER_AUTH_SECRET`, a byte-identical
       `THEME_WORKER_TOKEN` on the API and tenant-config, `LOYALTY_TOKEN_SECRET`,
       `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and, if translations are enabled,
-      `DEEPL_API_KEY`. Configure `MAPTILER_API_KEY` on the API before enabling branch
-      address autocomplete. Never set `E2E_FIXED_OTP`.
+      `DEEPL_API_KEY`. Configure `GOOGLE_MAPS_API_KEY` on the API before enabling branch
+      address autocomplete. Never set `DEV_FIXED_OTP` in production.
 - [x] Replace the Stripe price placeholders, including `STRIPE_PRICE_BASIC` in the
       production variables.
 - [x] Confirm and migrate the remote D1 database. Verify that database
@@ -49,6 +49,10 @@ items need Cloudflare, vendor-account, product, or legal work.
 - [x] Deploy `ming-email-worker` in the same Cloudflare account, and configure the sending
       domain's DKIM, SPF, and DMARC records. The remote service binding and OTP sign-in
       fail otherwise.
+- [ ] Deploy the qmenut policy in `ming-image-worker` and provision `qmenut-image-staging`,
+      `qmenut-media`, the prefix-filtered Queue notification, upload CORS, one-day staging
+      lifecycle, signing credentials, and the `media.qmenut.app` R2 custom domain. The API's
+      `IMAGE_WORKER` binding and every new image save fail until this is complete.
 - [x] Create the observability projects. Create Sentry projects for the API, web, and
       admin, fill in the runtime and build-time DSNs, and create the PostHog EU project and
       key.

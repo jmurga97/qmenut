@@ -21,8 +21,8 @@ async function useAuthenticatedPage({ browser, email, use }: AuthenticatedPageIn
   await blockPlaceholderImages(page);
   await page.goto("/login");
   await page.getByLabel("Email").fill(email);
-  await page.getByRole("button", { name: "Solicitar código" }).click();
-  await page.getByLabel("Código OTP").fill("000000");
+  await page.getByRole("button", { name: "Continuar" }).click();
+  await expect(page.getByLabel("Código OTP")).toHaveValue("000000");
   await page.getByRole("button", { name: "Entrar" }).click();
   await expect(page).toHaveURL(/\/$/);
 

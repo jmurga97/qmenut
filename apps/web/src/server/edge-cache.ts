@@ -105,13 +105,16 @@ async function resolveEdgeCacheContext(request: Request): Promise<EdgeCacheConte
 interface CacheStatusResponseInput {
   browserCacheControl: boolean;
   cacheStatus: CacheStatus;
+  noStore?: boolean;
   response: Response;
 }
 
-function withCacheStatus({ browserCacheControl, cacheStatus, response }: CacheStatusResponseInput): Response {
+function withCacheStatus({ browserCacheControl, cacheStatus, noStore, response }: CacheStatusResponseInput): Response {
   const browserResponse = new Response(response.body, response);
 
-  if (browserCacheControl && response.ok) {
+  if (noStore) {
+    browserResponse.headers.set("Cache-Control", "no-store");
+  } else if (browserCacheControl && response.ok) {
     browserResponse.headers.set("Cache-Control", BROWSER_CACHE_CONTROL);
   }
 
@@ -218,6 +221,17 @@ interface ServeWithEdgeCacheInput {
  * the background. Callers always receive the short browser-cache contract.
  */
 export async function serveWithEdgeCache({ ctx, render, request }: ServeWithEdgeCacheInput): Promise<Response> {
+  if (env.DISABLE_EDGE_CACHE === "true") {
+    const response = await render();
+
+    return withCacheStatus({
+      browserCacheControl: false,
+      cacheStatus: "BYPASS",
+      noStore: true,
+      response,
+    });
+  }
+
   const context = await resolveEdgeCacheContext(request);
 
   if (!context) {

@@ -4,6 +4,7 @@ import { DAYS } from "./types";
 import type { BranchFormValues } from "./types";
 import type { AppRouter } from "@qmenut/api/router";
 import type { inferRouterOutputs } from "@trpc/server";
+import type { PreparedImage } from "~/shared/images/image-draft";
 
 type BranchSettings = inferRouterOutputs<AppRouter>["admin"]["branches"]["get"];
 export function toBranchFormValues(settings: BranchSettings): BranchFormValues {
@@ -36,8 +37,10 @@ type BranchMapperInput = {
   branchId: string;
   settings: BranchSettings;
   values: BranchFormValues;
+  logo: PreparedImage;
+  photos: PreparedImage[];
 };
-export function toBranchInput({ branchId, settings, values }: BranchMapperInput) {
+export function toBranchInput({ branchId, settings, values, logo, photos }: BranchMapperInput) {
   const latitude = values.latitude.trim() ? Number(values.latitude) : null;
   const longitude = values.longitude.trim() ? Number(values.longitude) : null;
 
@@ -51,7 +54,8 @@ export function toBranchInput({ branchId, settings, values }: BranchMapperInput)
       longitude,
       phone: values.phone,
       whatsapp: values.whatsapp,
-      logoUrl: values.logoUrl,
+      logoUrl: logo.imageUrl ?? undefined,
+      logoUploadId: logo.uploadId,
       socialLinksJson: settings.socialLinksJson ?? undefined,
     },
     legal: {
@@ -67,6 +71,8 @@ export function toBranchInput({ branchId, settings, values }: BranchMapperInput)
         openMinute: hhmmToMinutes(row.open),
         closeMinute: hhmmToMinutes(row.close),
       })),
-    photos: settings.photos,
+    photos: photos.flatMap((photo, position) =>
+      photo.imageUrl ? [{ url: photo.imageUrl, uploadId: photo.uploadId, position }] : [],
+    ),
   };
 }

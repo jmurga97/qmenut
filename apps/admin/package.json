@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --port 5174",
+    "dev": "VITE_DEV_FIXED_OTP=000000 vite --port 5174",
     "build": "vite build",
-    "deploy": "vite build && wrangler deploy",
+    "deploy": "bun run deploy:production",
+    "deploy:production": "VITE_API_BASE_URL=https://api.qmenut.app VITE_DEV_FIXED_OTP='' vite build && wrangler deploy --env production",
+    "deploy:development": "VITE_API_BASE_URL=https://api.dev.qmenut.app VITE_DEV_FIXED_OTP=000000 vite build && wrangler deploy --env development",
     "preview": "wrangler dev",
     "check": "tsc --noEmit"
   },

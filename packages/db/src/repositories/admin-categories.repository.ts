@@ -78,6 +78,25 @@ export interface CategoryTranslatableFields {
   name: string;
 }
 
+export interface CategoryContext {
+  branchId: string;
+  imageUrl: string | null;
+}
+
+export async function getCategoryContext({
+  categoryId,
+  db,
+  restaurantId,
+}: GetCategoryTranslatableFieldsInput): Promise<CategoryContext | null> {
+  const row = await db
+    .select({ branchId: categories.branchId, imageUrl: categories.imageUrl })
+    .from(categories)
+    .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId), isNull(categories.deletedAt)))
+    .get();
+
+  return row ?? null;
+}
+
 interface GetCategoryTranslatableFieldsInput {
   categoryId: string;
   db: DrizzleDb;
@@ -122,27 +141,6 @@ export function updateCategoryStatement({
       updatedAt: Date.now(),
     })
     .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId), isNull(categories.deletedAt)));
-}
-
-interface GetCategoryBranchIdInput {
-  db: DrizzleDb;
-  restaurantId: string;
-  categoryId: string;
-}
-
-/** Used to resolve which tenant host's menu cache to invalidate for mutations that only carry a categoryId. */
-export async function getCategoryBranchId({
-  db,
-  restaurantId,
-  categoryId,
-}: GetCategoryBranchIdInput): Promise<string | null> {
-  const row = await db
-    .select({ branchId: categories.branchId })
-    .from(categories)
-    .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId)))
-    .get();
-
-  return row?.branchId ?? null;
 }
 
 interface SoftDeleteCategoryInput {

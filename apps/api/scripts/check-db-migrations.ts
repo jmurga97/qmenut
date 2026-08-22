@@ -11,6 +11,10 @@ const temporaryDirectory = await mkdtemp(join(apiDirectory, ".drizzle-check-"));
 const temporaryMetaDirectory = join(temporaryDirectory, "meta");
 const temporaryOutputDirectory = relative(apiDirectory, temporaryDirectory);
 
+// This migration was applied remotely before the parent-table rebuild guard existed.
+// It is immutable migration history, so keep the exception explicit instead of editing it.
+const LEGACY_PARENT_TABLE_REBUILDS = new Set(["0002_branch_coordinates.sql"]);
+
 async function checkForUnsafeParentTableRebuilds(): Promise<void> {
   const migrationsDirectory = join(apiDirectory, "migrations");
   const migrationFiles = (await readdir(migrationsDirectory)).filter((file) => file.endsWith(".sql"));
@@ -22,11 +26,13 @@ async function checkForUnsafeParentTableRebuilds(): Promise<void> {
   );
   const allSql = migrations.map(({ sql }) => sql).join("\n");
   const referencedTables = new Set(
-    [...allSql.matchAll(/REFERENCES\s+[`\"]?([A-Za-z0-9_]+)[`\"]?/gi)].map((match) => match[1]),
+    [...allSql.matchAll(/REFERENCES\s+[`"]?([A-Za-z0-9_]+)[`"]?/gi)].map((match) => match[1]),
   );
 
   for (const { file, sql } of migrations) {
-    const droppedTables = [...sql.matchAll(/DROP\s+TABLE(?:\s+IF\s+EXISTS)?\s+[`\"]?([A-Za-z0-9_]+)[`\"]?/gi)].map(
+    if (LEGACY_PARENT_TABLE_REBUILDS.has(file)) continue;
+
+    const droppedTables = [...sql.matchAll(/DROP\s+TABLE(?:\s+IF\s+EXISTS)?\s+[`"]?([A-Za-z0-9_]+)[`"]?/gi)].map(
       (match) => match[1],
     );
     const unsafeTables = droppedTables.filter((table) => referencedTables.has(table));

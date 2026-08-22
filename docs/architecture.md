@@ -48,7 +48,7 @@ connected by service bindings and one shared KV namespace.
    TENANT_THEME   │                                   ▼
      KV directly  │      ┌───────────────────────────────────────────┐
                   └─────►│                 apps/api  (qmenut-api)     │◄── EMAIL_WORKER
-                         │  /trpc · /api/auth/* · /webhooks/stripe   │    (remote service binding)
+                         │  /trpc · /api/auth/* · /webhooks/stripe   │◄── IMAGE_WORKER
                          └───────┬───────────────────────────┬───────┘
                                  │ D1 (DB binding)            │ THEME_WORKER
                                  ▼                            ▼
@@ -65,11 +65,12 @@ connected by service bindings and one shared KV namespace.
         marketing visitors
                 │
                 ▼
-        ┌───────────────────┐       External service
-        │  apps/landing     │       ┌───────────────────┐
-        │  qmenut-landing   │       │ ming-email-worker │
-        │  standalone SSR   │       │ (EMAIL_WORKER)    │
-        └───────────────────┘       └───────────────────┘
+        ┌───────────────────┐       External services
+        │  apps/landing     │       ┌───────────────────┐  ┌───────────────────┐
+        │  qmenut-landing   │       │ ming-email-worker │  │ ming-image-worker │
+        │  standalone SSR   │       │ (EMAIL_WORKER)    │  │ (IMAGE_WORKER)    │
+        └───────────────────┘       └───────────────────┘  └─────────┬─────────┘
+                                                                  R2 + Queue + Images
 ```
 
 The relationships between Workers are as follows:
@@ -85,6 +86,11 @@ The relationships between Workers are as follows:
   `THEME_WORKER` service binding to `apps/tenant-config`, which is the only writer and
   normalizer of `TENANT_THEME`. See [Custom domains](domains/custom-domains.md) and
   [Theming](domains/theming.md).
+- API to image Worker. Authenticated image negotiation and polling call `createUpload` and
+  `getUpload` through the private `IMAGE_WORKER` RPC service binding. Browser bytes go directly
+  to a signed private R2 staging object; the Queue-driven image Worker writes the public WebP
+  result to `qmenut-media`. qmenut saves a URL only after revalidating the upload's tenant/branch
+  ownership and exact manifest URL. See [Image uploads](operations/image-uploads.md).
 - Shared KV ID. `apps/web/wrangler.jsonc` and `apps/tenant-config/wrangler.jsonc` bind
   the same KV namespace ID. Local storage under
   `--persist-to ../../.wrangler-shared/state` is keyed by ID, so both Workers must
@@ -118,7 +124,7 @@ appRouter = {
   health,
   menu, // public menu (public-menu module)
   loyalty, // public customer loyalty
-  admin: { tenant, menu, branches, promotions, theme, billing, loyalty, languages, translations },
+  admin: { tenant, menu, branches, images, promotions, theme, billing, loyalty, languages, translations },
 };
 ```
 
@@ -203,9 +209,9 @@ Playwright end-to-end tests live in `e2e/` and run locally with `bun run test:e2
 is no CI workflow. The reset script recreates the local D1 database and the shared KV
 namespace before starting the api, tenant-config, admin, and public-menu Workers. Tests
 select a tenant with the `Host` header. End-to-end authentication uses `e2e@test.local`
-with the fixed OTP `000000`, supplied through `E2E_FIXED_OTP`. That variable is for local
-use only and must never be set on a deployed Worker. As stated in `AGENTS.md`, do not add
-tests unless you are asked to.
+with the fixed OTP `000000`, supplied through `DEV_FIXED_OTP`. Local, test, and the deployed
+development environment enable it; production ignores it and must never configure it.
+As stated in `AGENTS.md`, do not add tests unless you are asked to.
 
 Local end-to-end runs require `tapas.localhost`, `fine.localhost`, `cafe.localhost`,
 `her.localhost`, and `fast.localhost` to resolve to `127.0.0.1` in `/etc/hosts`. This is

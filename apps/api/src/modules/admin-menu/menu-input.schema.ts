@@ -15,6 +15,7 @@ export const categoryWriteSchema = z.object({
   name: z.string().trim().min(1).max(200),
   description: nullableText,
   imageUrl: nullableText,
+  imageUploadId: z.uuid().optional(),
   position: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
 });
@@ -34,6 +35,7 @@ export const dishWriteSchema = z.object({
   description: nullableText,
   price: z.number().int().min(0),
   imageUrl: nullableText,
+  imageUploadId: z.uuid().optional(),
   position: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
   isRecommended: z.boolean().default(false),

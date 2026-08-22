@@ -4,11 +4,17 @@ Lista de datos que hay que pedir a un restaurante antes de darlo de alta. Cada s
 corresponde con un bloque del JSON de `apps/api/tenants/`; véase `example.tenant.json`.
 La lista puede convertirse tal cual en un formulario.
 
-Cuando la ficha esté completa, cree el JSON y ejecute este comando desde `apps/api`:
+Cuando la ficha esté completa, cree el JSON y seleccione explícitamente el ambiente. Las
+operaciones remotas no tienen un ambiente por defecto:
 
 ```bash
-bun tenant:create --file tenants/<nombre>.json --remote
+bun tenant:create --file tenants/<nombre>.json --remote --env production
 ```
+
+Para development use `--env development` y un hostname exclusivo de ese ambiente, por
+ejemplo `cliente.dev.qmenut.app`. Puede reutilizar la misma ficha sin editarla mediante
+`--host cliente.dev.qmenut.app`. Ejecute `bun tenant:environments` para consultar los
+recursos y Workers seleccionados por cada ambiente.
 
 ## 1. Datos del restaurante
 
@@ -73,7 +79,8 @@ PDF o foto como referencia:
 
 ## 7. Tareas posteriores al alta
 
-- [ ] Adjuntar el dominio como custom domain del worker `qmenut-web` en Cloudflare.
+- [ ] Adjuntar el dominio exacto al Worker indicado por el script: `qmenut-web` en
+      producción o `qmenut-web-dev` en development.
 - [ ] Revisar los datos legales en Sucursal > Datos legales del titular antes de publicar,
       y comprobar `/aviso-legal` y `/privacidad` en el dominio del tenant.
 - [ ] Cargar el menú en el panel y verificar la carta pública en el dominio.
@@ -84,3 +91,6 @@ PDF o foto como referencia:
 El script publica automáticamente el tema normalizado y `menuVersion:{host}` en KV; no hay
 un paso manual de seed. Si D1 falla después de publicar, el script elimina ambas claves
 antes de salir.
+
+No reutilice el mismo hostname entre ambientes. El hostname guardado en D1, la clave de KV
+y el custom domain de Cloudflare deben coincidir exactamente.

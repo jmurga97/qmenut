@@ -60,8 +60,9 @@ The marketing site, `apps/landing`, is covered in [Architecture](architecture.md
 | ---------------------------------------------------------------- | --------------------------------------------------------- | -------- |
 | [Loyalty UX](design/loyalty-ux.md)                               | Loyalty UX decisions and the reasoning behind them.       | Complete |
 | [Restaurant intake](operations/onboarding-intake.md)             | Data to collect before onboarding a restaurant (Spanish). | Complete |
-| [Branch geocoding](operations/branch-geocoding.md)               | Leaflet maps, MapTiler autocomplete, and key handling.    | Complete |
+| [Branch geocoding](operations/branch-geocoding.md)               | Leaflet maps, Google autocomplete, and key handling.      | Complete |
 | [Database migrations](operations/database-migrations.md)         | Drizzle schema to generated SQL to D1.                    | Complete |
+| [Image uploads](operations/image-uploads.md)                     | Private R2 uploads, optimization, and verified URLs.      | Complete |
 | [Deployment](operations/deployment.md)                           | Cloudflare deployment runbook.                            | Complete |
 | [Performance and caching](operations/performance-and-caching.md) | Edge and browser caching, and cache invalidation.         | Complete |
 | [Testing](operations/testing.md)                                 | Local end-to-end topology, reset, and visual snapshots.   | Complete |

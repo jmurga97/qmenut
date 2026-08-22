@@ -240,7 +240,7 @@ bun run --cwd apps/api db:seed:e2e
 bun run test:e2e
 ```
 
-Never set the end-to-end fixed OTP on a deployed Worker.
+Never set `DEV_FIXED_OTP` on the production Worker.
 
 ## Production migrations
 
@@ -268,8 +268,9 @@ Perform these ten steps around every production migration:
 5. Create and record a D1 Time Travel bookmark immediately before applying the migration.
    For a parent table referenced by foreign keys, do not rely on
    `PRAGMA foreign_keys=OFF`: remote D1 migration execution can retain cascade behavior.
-   Prefer additive `ALTER TABLE` statements. `db:check` rejects a migration that drops a
-   referenced table.
+   Prefer additive `ALTER TABLE` statements. `db:check` rejects new migrations that drop a
+   referenced table. `0002_branch_coordinates.sql` is an explicit historical exception because
+   it was already applied before this guard existed; do not copy that pattern.
 6. Apply the migration with Wrangler and the production environment:
 
    ```bash

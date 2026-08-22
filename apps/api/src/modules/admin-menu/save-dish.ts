@@ -7,8 +7,6 @@ import {
 import { markTranslationsPendingUpdateStatement } from "@qmenut/db/repositories/translations.repository";
 import { TRPCError } from "@trpc/server";
 
-import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
-
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { DishWriteData } from "@qmenut/db/repositories/admin-dishes.repository";
 import type { BatchItem } from "drizzle-orm/batch";
@@ -27,8 +25,7 @@ interface SaveDishInput {
  * exige; validamos antes para devolver un error claro).
  */
 export async function saveDish({ db, restaurantId, branchId, dishId, data }: SaveDishInput): Promise<{ id: string }> {
-  await assertBranchAccess({ db, restaurantId, branchId });
-
+  // The menu router authorizes the branch or existing dish context before calling this writer.
   const categoryOk = await categoryBelongsToBranch({ db, branchId, categoryId: data.categoryId });
 
   if (!categoryOk) {

@@ -1,15 +1,132 @@
 # Cloudflare deployment runbook
 
 This page describes how to take qmenut from an empty Cloudflare account to a live
-deployment. Deployments are manual and target the named `production` environment.
-Top-level Wrangler configuration is for development only. Never deploy it to production
-without the environment selection described here.
+deployment. Deployments are manual and target a named Wrangler environment. The top-level
+configuration remains for local development; remote deployments must select either the
+named `development` or `production` environment.
 
 The production topology uses the `qmenut.app` zone: the API at `api.qmenut.app`, the admin
 dashboard at `admin.qmenut.app`, the marketing site at `qmenut.app` and `www.qmenut.app`,
 and one `qmenut-web` Worker attached to each tenant's own custom domain.
 
 Run commands from the repository root unless the command includes `--cwd`.
+
+## Remote development environment
+
+The repository includes an isolated `development` environment for the product Workers:
+
+| Worker                     | Development hostname   | Isolated resources                 |
+| -------------------------- | ---------------------- | ---------------------------------- |
+| `qmenut-api-dev`           | `api.dev.qmenut.app`   | D1, rate-limit namespaces, secrets |
+| `qmenut-tenant-config-dev` | service binding only   | Development `TENANT_THEME` KV      |
+| `qmenut-web-dev`           | `dev.qmenut.app`       | Development `TENANT_THEME` KV      |
+| `qmenut-admin-dev`         | `admin.dev.qmenut.app` | Build-time development API URL     |
+
+The landing Worker is intentionally not deployed to development. The development API keeps
+private `EMAIL_WORKER` and `IMAGE_WORKER` service bindings to the existing shared workers; no
+public endpoint or second development instance of either infrastructure Worker is created.
+The canonical staging CORS origin list is maintained in [Image uploads](image-uploads.md#storage-and-delivery).
+
+`IMAGE_WORKER` selects the shared worker's named `ImageRpc` entrypoint and is also configured with
+`remote: true` for unqualified local `wrangler dev` and the Playwright E2E API. A local upload
+therefore calls the deployed shared image worker and creates real staging objects, queue messages,
+and optimized objects in the shared qmenut buckets. Do not add upload E2E coverage until the suite
+has an isolated local worker or fake service binding.
+
+### Provision development resources
+
+The development D1 and KV resources are already represented in source with these IDs:
+
+- D1 `qmenut-db-v2-dev`: `f83a9c25-39a3-4003-80f5-633a6b9de41b`
+- KV `TENANT_THEME_DEV`: `d85019d6ce874b2abdedeb95a91736a3`
+
+If provisioning a new account, create them with:
+
+```bash
+bunx wrangler d1 create qmenut-db-v2-dev
+```
+
+```bash
+bunx wrangler kv namespace create TENANT_THEME_DEV
+```
+
+The development KV ID must be identical in `apps/web/wrangler.jsonc` and
+`apps/tenant-config/wrangler.jsonc`. The rate-limit bindings use account-unique namespace
+IDs `2001` and `2002`, separate from production's `1001` and `1002`; rate-limit namespace
+IDs are identifiers chosen within the account rather than KV-style resources to provision.
+
+### Configure development secrets
+
+Use separate values from production. Set `STRIPE_SECRET_KEY` and
+`STRIPE_WEBHOOK_SECRET` from Stripe test mode, and replace
+`price_dev_basic_replace_me` in `apps/api/wrangler.jsonc` with the development Stripe test
+price before testing billing.
+
+```bash
+bunx wrangler secret put BETTER_AUTH_SECRET --env development --cwd apps/api
+bunx wrangler secret put THEME_WORKER_TOKEN --env development --cwd apps/api
+bunx wrangler secret put THEME_WORKER_TOKEN --env development --cwd apps/tenant-config
+bunx wrangler secret put LOYALTY_TOKEN_SECRET --env development --cwd apps/api
+bunx wrangler secret put STRIPE_SECRET_KEY --env development --cwd apps/api
+bunx wrangler secret put STRIPE_WEBHOOK_SECRET --env development --cwd apps/api
+```
+
+Use the same development `THEME_WORKER_TOKEN` value for both Workers. The checked-in
+development Worker variables enable `DEV_FIXED_OTP=true`, so every provisioned account
+uses `000000` without sending email. DeepL, Google Maps Geocoding, and Sentry are optional
+and are intentionally unset by default.
+
+### Deploy and seed development
+
+First run the repository preflight. It intentionally fails while the development Stripe
+price remains a placeholder:
+
+```bash
+bun run --cwd apps/api preflight:development
+```
+
+After configuring the missing external values, run the following in order:
+
+```bash
+bun run --cwd apps/tenant-config deploy:development
+bun run --cwd apps/api db:migrate:development
+bun run --cwd apps/api deploy:development
+bun run --cwd apps/web deploy:development
+bun run --cwd apps/admin deploy:development
+```
+
+Before seeding, replace the placeholder owner email in
+`apps/api/tenants/development.tenant.json` with a real development inbox. Then create the
+tenant and reuse the existing tapas content fixture under the development hostname:
+
+```bash
+bun run --cwd apps/api tenant:create:development -- --file tenants/development.tenant.json
+```
+
+```bash
+bun run --cwd apps/api tenant:content:development -- --file demo-tenants/tapas.content.json --host dev.qmenut.app
+```
+
+The web, API, and admin custom-domain routes are declared in their development Wrangler
+environments. Cloudflare must still be authoritative for the `qmenut.app` zone so DNS and
+managed TLS can become active.
+
+For more than one development tenant, use a distinct exact hostname for each tenant, such
+as `cafe.dev.qmenut.app`. Add every hostname as a custom domain of `qmenut-web-dev`; do not
+reuse a production hostname. The creation script accepts `--host` so the same intake can be
+reused without changing its production domain.
+
+Verify the deployment with:
+
+```bash
+curl --fail --show-error --silent https://api.dev.qmenut.app/health
+```
+
+Then open `https://admin.dev.qmenut.app` and sign in with a provisioned email; the admin
+prefills the development OTP `000000`. Open
+`https://dev.qmenut.app` to verify the seeded public menu and theme. Confirm that the
+development D1 and KV IDs are used by the deployed Workers and that production IDs and
+secrets remain unchanged.
 
 ## Before you begin
 
@@ -24,6 +141,10 @@ You need all of the following:
 - A PostHog EU project.
 - `ming-email-worker` deployed in the same Cloudflare account. The API's `EMAIL_WORKER`
   binding is remote and does not resolve across accounts.
+- `ming-image-worker` deployed in the same Cloudflare account with its D1, Images binding,
+  processing Queue/DLQ, qmenut R2 buckets, S3 signing credentials, event notification, CORS,
+  lifecycle rule, and `media.qmenut.app` custom domain. The API's `IMAGE_WORKER` binding is
+  also account-local.
 
 ## Step 1: Provision resources
 
@@ -51,6 +172,39 @@ Copy the returned `id` into both production bindings:
 The two values must be byte-identical. Leave `preview_id` unchanged: local development and
 end-to-end tests deliberately share that stable preview namespace in
 `.wrangler-shared/state`.
+
+Provision the qmenut image resources from the sibling `ming-image-worker` repository. Do not
+add R2 credentials to qmenut:
+
+```bash
+bunx wrangler r2 bucket create qmenut-image-staging
+bunx wrangler r2 bucket create qmenut-media
+```
+
+```bash
+bunx wrangler r2 bucket notification create qmenut-image-staging \
+  --event-type object-create \
+  --queue ming-image-processing-production \
+  --prefix "products/qmenut/uploads/" \
+  --description "qmenut image uploads"
+```
+
+```bash
+bunx wrangler r2 bucket cors set qmenut-image-staging \
+  --file examples/qmenut-staging-cors.json \
+  --cwd ../ming-image-worker
+```
+
+```bash
+bunx wrangler r2 bucket lifecycle add qmenut-image-staging \
+  qmenut-staging-fallback "products/qmenut/uploads/" --expire-days 1
+```
+
+The image Worker's `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` secrets must sign writes to both
+configured staging/original buckets and must not grant broader access than required. Connect
+`qmenut-media` to `media.qmenut.app` as a public R2 custom domain; keep
+`qmenut-image-staging` private. Full policy and smoke checks are in
+[Image uploads](image-uploads.md).
 
 ## Step 2: Fill in production configuration
 
@@ -109,8 +263,8 @@ bunx wrangler secret put STRIPE_WEBHOOK_SECRET --env production --cwd apps/api
 bunx wrangler secret put DEEPL_API_KEY --env production --cwd apps/api
 ```
 
-Never set `E2E_FIXED_OTP` on a deployed Worker. The local guard in `create-auth.ts` is
-defense in depth, not permission to configure the variable remotely.
+Never set `DEV_FIXED_OTP` on the production Worker. `create-auth.ts` ignores it when
+`NODE_ENV === "production"`, and the production preflight rejects a checked-in enabled flag.
 
 ## Step 4: Apply D1 migrations
 
@@ -140,10 +294,10 @@ post-apply verification.
 Vite variables are compiled into the SPA and client bundles and cannot be changed through
 Worker runtime variables. Any change requires a rebuild and a redeploy.
 
-| Application | Build-time variables                                       |
-| ----------- | ---------------------------------------------------------- |
-| Web         | `VITE_SENTRY_DSN`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` |
-| Admin       | `VITE_API_BASE_URL`, `VITE_SENTRY_DSN`                     |
+| Application | Build-time variables                                                            |
+| ----------- | ------------------------------------------------------------------------------- |
+| Web         | `VITE_SENTRY_DSN`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`                      |
+| Admin       | `VITE_API_BASE_URL`, `VITE_DEV_FIXED_OTP` (development only), `VITE_SENTRY_DSN` |
 
 Do not set `VITE_API_BASE_URL` for the web production build. Its browser client must use
 the tenant origin's `/trpc`, which `qmenut-web` proxies through `API_WORKER`. The admin
@@ -152,9 +306,16 @@ cross-origin with session cookies.
 
 ## Step 6: Deploy in dependency order
 
-Deploy tenant-config, then the API, then web, then admin, then landing. Service bindings
-must reference Workers that already exist: the API needs `qmenut-tenant-config` and
-`ming-email-worker`, and web needs `qmenut-api`.
+Deploy the compatible `ming-image-worker` policy and bindings first, then tenant-config, the API,
+web, admin, and landing. Service bindings must reference Workers that already exist: the API needs
+`qmenut-tenant-config`, `ming-email-worker`, and `ming-image-worker`; web needs `qmenut-api`.
+
+From `../ming-image-worker`, apply its D1 migration and deploy before qmenut starts calling the new
+product policy:
+
+```bash
+bun run deploy
+```
 
 ```bash
 bunx wrangler deploy --env production --cwd apps/tenant-config
@@ -205,6 +366,7 @@ ID, the `API_WORKER` binding to `qmenut-api`, and the production runtime variabl
 
 ```bash
 VITE_API_BASE_URL='https://api.qmenut.app' \
+VITE_DEV_FIXED_OTP='' \
 VITE_SENTRY_DSN='ADMIN_CLIENT_DSN' \
 bun run --cwd apps/admin build
 ```
@@ -231,8 +393,12 @@ Configure or verify these mappings:
 - `admin.qmenut.app` to `qmenut-admin`. Add it under the Worker's Domains & Routes
   settings.
 - `qmenut.app` and `www.qmenut.app` to `qmenut-landing`.
+- `media.qmenut.app` to the public custom domain of the `qmenut-media` R2 bucket. Do not route
+  this hostname to a Worker.
 - `qmenut-tenant-config` gets no public route. It is reachable only through the API's
   `THEME_WORKER` service binding. Do not expose it in order to give it a hostname.
+- `ming-image-worker` gets no public route. It is reachable only through the API's
+  `IMAGE_WORKER` service binding; presigned R2 URLs are the only browser-facing upload surface.
 
 The admin dashboard and the API must share the `qmenut.app` registrable domain for the
 current Better Auth same-site cookie configuration. If they move to unrelated domains,
@@ -254,12 +420,17 @@ mapping: the `Host` header is the only selector, so the attached hostname and
 Create the D1 and KV tenant data after the domain is known:
 
 ```bash
-bun run --cwd apps/api tenant:create --file tenants/CUSTOMER.tenant.json --remote
+bun run --cwd apps/api tenant:create -- --file tenants/CUSTOMER.tenant.json --remote --env production
 ```
 
 The script publishes to KV first, inserts the D1 rows, verifies both, and prints the
-custom-domain attachment as its first manual follow-up. Its `--remote` mode selects the
-production Wrangler environment for both D1 and KV.
+environment-specific custom-domain attachment as its first manual follow-up. Remote mode
+requires an explicit named environment for both D1 and KV.
+
+Do not clone the complete production D1 database into development. A full clone includes
+sessions, OTP verifications, live Stripe references, customer data, orders, loyalty data,
+campaign state, and analytics. Recreate test tenants from their intake and content fixtures,
+or use a purpose-built allowlisted export that remaps IDs and excludes those tables.
 
 ## Step 8: Configure Stripe
 
@@ -311,6 +482,14 @@ Expect `{"status":"ok"}`. Then open `https://admin.qmenut.app`, request an OTP f
 onboarded owner, confirm that the email arrives, and sign in. Check that the branch and
 theme load.
 
+Upload a JPEG logo, PNG category image, WebP dish image, and at least two branch photos. Keep the
+browser network panel open and verify that bytes go directly to a presigned R2 URL, polling goes
+through authenticated qmenut tRPC, and the final save contains only
+`https://media.qmenut.app/.../main.webp` URLs. In R2, confirm that successful staging objects are
+deleted, outputs have immutable cache metadata, and an intentionally abandoned staging object has
+the one-day lifecycle expiration. Also exercise a rejected oversized file and a partial gallery
+failure; neither may change domain data.
+
 Replace `TENANT_DOMAIN` with an attached live tenant hostname and run:
 
 ```bash
@@ -346,7 +525,8 @@ bunx wrangler rollback --name qmenut-api
 ```
 
 The same two commands work for `qmenut-tenant-config`, `qmenut-web`, `qmenut-admin`, and
-`qmenut-landing`.
+`qmenut-landing`. `ming-image-worker` is deployed and rolled back from its own repository. Keep
+its qmenut policy backward-compatible while any qmenut API deployment references it.
 
 Choose the previous healthy version when prompted, and record why it was restored.
 

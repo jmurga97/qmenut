@@ -21,6 +21,12 @@
       "remote": true,
     },
     {
+      "binding": "IMAGE_WORKER",
+      "service": "ming-image-worker",
+      "entrypoint": "ImageRpc",
+      "remote": true,
+    },
+    {
       "binding": "THEME_WORKER",
       "service": "qmenut-tenant-config",
     },
@@ -59,6 +65,73 @@
   // Wrangler named environments do not inherit vars, D1, services, rate limits, or
   // observability. Keep name unchanged so service bindings continue to resolve qmenut-api.
   "env": {
+    "development": {
+      "name": "qmenut-api-dev",
+      "workers_dev": false,
+      "routes": [
+        {
+          "pattern": "api.dev.qmenut.app",
+          "custom_domain": true,
+        },
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "qmenut-db-v2-dev",
+          "database_id": "f83a9c25-39a3-4003-80f5-633a6b9de41b",
+          "migrations_dir": "migrations",
+        },
+      ],
+      "services": [
+        {
+          "binding": "EMAIL_WORKER",
+          "service": "ming-email-worker",
+          "remote": true,
+        },
+        {
+          "binding": "IMAGE_WORKER",
+          "service": "ming-image-worker",
+          "entrypoint": "ImageRpc",
+          "remote": true,
+        },
+        {
+          "binding": "THEME_WORKER",
+          "service": "qmenut-tenant-config-dev",
+        },
+      ],
+      "ratelimits": [
+        {
+          "name": "GEOCODING_LIMITER",
+          "namespace_id": "2002",
+          "simple": {
+            "limit": 30,
+            "period": 60,
+          },
+        },
+        {
+          "name": "LOYALTY_CODE_LIMITER",
+          "namespace_id": "2001",
+          "simple": {
+            "limit": 5,
+            "period": 60,
+          },
+        },
+      ],
+      "observability": {
+        "enabled": true,
+      },
+      "vars": {
+        "ALLOWED_ORIGINS": "https://admin.dev.qmenut.app",
+        "BETTER_AUTH_URL": "https://api.dev.qmenut.app",
+        "ADMIN_APP_URL": "https://admin.dev.qmenut.app",
+        "DEEPL_API_URL": "https://api-free.deepl.com",
+        "STRIPE_PRICE_BASIC": "price_1U120eEnGfbzQ006un87QMk4",
+        "LOG_LEVEL": "debug",
+        "NODE_ENV": "development",
+        "DEV_FIXED_OTP": "true",
+        "SENTRY_DSN": "https://b201dd7421ecf64b6b7c2f073bae0cf0@o4511851717394432.ingest.de.sentry.io/4511956009943120",
+      },
+    },
     "production": {
       "name": "qmenut-api",
       "workers_dev": false,
@@ -80,6 +153,12 @@
         {
           "binding": "EMAIL_WORKER",
           "service": "ming-email-worker",
+          "remote": true,
+        },
+        {
+          "binding": "IMAGE_WORKER",
+          "service": "ming-image-worker",
+          "entrypoint": "ImageRpc",
           "remote": true,
         },
         {
@@ -116,7 +195,8 @@
         "STRIPE_PRICE_BASIC": "price_1U120eEnGfbzQ006un87QMk4",
         "LOG_LEVEL": "info",
         "NODE_ENV": "production",
-        "SENTRY_DSN": "",
+        "SENTRY_DSN": "https://b201dd7421ecf64b6b7c2f073bae0cf0@o4511851717394432.ingest.de.sentry.io/4511956009943120",
+        "DEV_FIXED_OTP": "false"
       },
     },
   },

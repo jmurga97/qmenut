@@ -9,6 +9,7 @@
     "check": "tsc --noEmit",
     "preview": "vite preview",
     "deploy": "CLOUDFLARE_ENV=production vite build && wrangler deploy",
+    "deploy:development": "CLOUDFLARE_ENV=development vite build && wrangler deploy",
     "serve": "wrangler dev --port 4011 --persist-to ../../.wrangler-shared/state"
   },
   "dependencies": {
@@ -29,8 +30,8 @@
     "lucide-react": "^1.23.0",
     "marked": "^18.0.6",
     "posthog-js": "^1.398.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "canary",
+    "react-dom": "canary",
     "react-i18next": "^17.0.8"
   },
   "devDependencies": {

@@ -12,6 +12,8 @@ import {
 
 const EMAIL_WORKER_SEND_PATH = "https://email-worker.internal/send?productId=qmenut";
 
+export const FIXED_OTP_WILDCARD = "*";
+
 type DrizzleAdapterDatabase = Parameters<typeof drizzleAdapter>[0];
 
 export type AuthSchema = Record<string, unknown>;
@@ -150,6 +152,10 @@ export function createEmailWorkerOtpSender(options: CreateEmailWorkerOtpSenderOp
   };
 }
 
+function getFixedOtp(fixedOtpByEmail: Map<string, string>, email: string): string | undefined {
+  return fixedOtpByEmail.get(email.toLowerCase()) ?? fixedOtpByEmail.get(FIXED_OTP_WILDCARD);
+}
+
 function getAdvancedCookieOptions(cookieMode: AuthCookieMode) {
   if (cookieMode !== "cross-site") {
     return;
@@ -200,9 +206,9 @@ export function createAuth({
         expiresIn: OTP_EXPIRES_IN_SECONDS,
         allowedAttempts: OTP_MAX_ATTEMPTS,
         storeOTP: "hashed",
-        generateOTP: ({ email }) => fixedOtpByEmail.get(email.toLowerCase()),
+        generateOTP: ({ email }) => getFixedOtp(fixedOtpByEmail, email),
         async sendVerificationOTP({ email, otp, type }) {
-          if (fixedOtpByEmail.has(email.toLowerCase())) {
+          if (getFixedOtp(fixedOtpByEmail, email) !== undefined) {
             return;
           }
 
