@@ -9,6 +9,8 @@ import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { AdminThemePreference } from "~/shared/components/theme_preference/theme_preference";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
+import { ImageGalleryControl } from "~/shared/images/image-gallery-control";
+import { ImageUploadControl } from "~/shared/images/image-upload-control";
 
 import { BranchAddressAutocomplete } from "../components/branch-address-autocomplete";
 import { useBranchController } from "../hooks/use-branch-controller";
@@ -40,13 +42,31 @@ function BranchForm({ branchId }: { branchId: string }) {
             <BranchAddressAutocomplete branchId={branchId} />
             <FormTextInput<BranchFormValues> label="Teléfono" name="phone" />
             <FormTextInput<BranchFormValues> label="WhatsApp" name="whatsapp" />
-            <FormTextInput<BranchFormValues> label="URL del logo (icono de la app)" name="logoUrl" />
+            <ImageUploadControl
+              disabled={controller.pending}
+              draft={controller.logo.draft}
+              label="Logo (icono de la app)"
+              onRemove={controller.logo.remove}
+              onRetry={controller.logo.retry}
+              onSelect={controller.logo.selectFile}
+            />
             <FormSelect<BranchFormValues>
               label="Zona horaria del restaurante"
               name="timezone"
               options={TIMEZONE_OPTIONS}
             />
           </div>
+          <ImageGalleryControl
+            disabled={controller.pending}
+            drafts={controller.gallery.drafts}
+            error={controller.gallery.error}
+            label="Galería de la sucursal"
+            onAdd={controller.gallery.addFiles}
+            onMove={controller.gallery.move}
+            onRemove={controller.gallery.remove}
+            onReplace={controller.gallery.replace}
+            onRetry={controller.gallery.retry}
+          />
           <section className="admin-editor-section">
             <div className="admin-kicker">Horario semanal</div>
             <div className="admin-schedule-grid">

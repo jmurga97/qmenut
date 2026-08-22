@@ -5,6 +5,10 @@ import { useRef } from "react";
 import { useForm } from "react-hook-form";
 
 import { trpc } from "~/lib/trpc";
+import { isDraftBusy } from "~/shared/images/image-draft";
+import { useImageDraft } from "~/shared/images/use-image-drafts";
+import { useImageSave } from "~/shared/images/use-image-save";
+import { usePrepareImageDrafts } from "~/shared/images/use-image-uploads";
 import { formatMoney } from "~/shared/services/money";
 
 import {
@@ -43,7 +47,6 @@ export function useCategoryEditorController({ branchId, categoryId }: { branchId
   const form = useForm<CategoryFormValues>({
     defaultValues: {
       description: category?.description ?? "",
-      imageUrl: category?.imageUrl ?? "",
       isActive: category?.isActive ?? true,
       name: category?.name ?? "",
     },
@@ -53,23 +56,38 @@ export function useCategoryEditorController({ branchId, categoryId }: { branchId
   const options = getCategoryMutationOptions(mutationInput);
   const create = useMutation(options.create);
   const update = useMutation(options.update);
+  const image = useImageDraft(category?.imageUrl ?? null);
+  const { prepare } = usePrepareImageDrafts();
+  const imageSave = useImageSave();
   const cancel = () => void navigate({ to: "/menu" });
-  const submit = form.handleSubmit((values) => {
-    const data = {
-      ...values,
-      description: values.description || undefined,
-      imageUrl: values.imageUrl || undefined,
-      position: category?.position ?? categories.length,
-    };
-    if (categoryId) update.mutate({ categoryId, data }, { onSuccess: cancel });
-    else create.mutate({ branchId, data }, { onSuccess: cancel });
-  });
+  const submit = form.handleSubmit((values) =>
+    imageSave.run(async () => {
+      const [prepared] = await prepare({
+        branchId,
+        purpose: "categoryImage",
+        drafts: [image.draft],
+        updateDraft: image.update,
+      });
+      if (!prepared) throw new Error("No se pudo preparar la imagen.");
+      const data = {
+        ...values,
+        description: values.description || undefined,
+        imageUrl: prepared.imageUrl ?? undefined,
+        imageUploadId: prepared.uploadId,
+        position: category?.position ?? categories.length,
+      };
+      if (categoryId) await update.mutateAsync({ categoryId, data });
+      else await create.mutateAsync({ branchId, data });
+      cancel();
+    }),
+  );
   return {
-    busy: create.isPending || update.isPending,
+    busy: imageSave.pending || create.isPending || update.isPending || isDraftBusy(image.draft),
     cancel,
     category,
-    error: create.error ?? update.error,
+    error: imageSave.error ?? create.error ?? update.error,
     form,
+    image,
     submit,
   };
 }
@@ -90,6 +108,9 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
   const createIngredient = useMutation(options.createIngredient);
   const update = useMutation(options.update);
   const relations = useMutation(options.relations);
+  const image = useImageDraft(dish?.imageUrl ?? null);
+  const { prepare } = usePrepareImageDrafts();
+  const imageSave = useImageSave();
   const cancel = () => void navigate({ to: "/menu" });
   const addExtra = async ({ name, price }: { name: string; price: number }) => {
     const { id } = await createIngredient.mutateAsync({ isActive: true, name, price });
@@ -99,36 +120,54 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
       shouldValidate: true,
     });
   };
-  const submit = form.handleSubmit((values) => {
-    relations.reset();
-    const data = toDishInput({ position: dish?.position ?? 0, values });
-    const saveRelations = ({ id }: { id: string }) => {
-      dishId.current = id;
-      relations.mutate(
-        {
-          allergenIds: values.allergenIds,
-          dishId: id,
-          extraIngredientIds: values.extraIngredientIds,
-          tagIds: values.tagIds,
-        },
-        { onSuccess: cancel },
-      );
-    };
-    if (dishId.current) update.mutate({ branchId, data, dishId: dishId.current }, { onSuccess: saveRelations });
-    else create.mutate({ branchId, data }, { onSuccess: saveRelations });
-  });
+  const submit = form.handleSubmit((values) =>
+    imageSave.run(async () => {
+      relations.reset();
+      const [prepared] = await prepare({
+        branchId,
+        purpose: "dishImage",
+        drafts: [image.draft],
+        updateDraft: image.update,
+      });
+      if (!prepared) throw new Error("No se pudo preparar la imagen.");
+      const data = toDishInput({
+        imageUploadId: prepared.uploadId,
+        imageUrl: prepared.imageUrl,
+        position: dish?.position ?? 0,
+        values,
+      });
+      const saved = dishId.current
+        ? await update.mutateAsync({ branchId, data, dishId: dishId.current })
+        : await create.mutateAsync({ branchId, data });
+      dishId.current = saved.id;
+      await relations.mutateAsync({
+        allergenIds: values.allergenIds,
+        dishId: saved.id,
+        extraIngredientIds: values.extraIngredientIds,
+        tagIds: values.tagIds,
+      });
+      cancel();
+    }),
+  );
   return {
     allergenOptions: allergens.map(({ code, id }) => ({ id, label: code })),
     addExtra,
-    busy: create.isPending || createIngredient.isPending || update.isPending || relations.isPending,
+    busy:
+      imageSave.pending ||
+      create.isPending ||
+      createIngredient.isPending ||
+      update.isPending ||
+      relations.isPending ||
+      isDraftBusy(image.draft),
     cancel,
     categoryOptions: categories.map(({ id, name }) => ({ id, label: name })),
-    error: create.error ?? createIngredient.error ?? update.error ?? relations.error,
+    error: imageSave.error ?? create.error ?? createIngredient.error ?? update.error ?? relations.error,
     extraOptions: ingredients.map(({ id, name, price }) => ({
       id,
       label: price > 0 ? `${name} +${formatMoney(price)}` : name,
     })),
     form,
+    image,
     submit,
     tagOptions: tags.map((tag) => ({ id: tag.id, label: tag.label ?? tag.code ?? tag.id })),
   };

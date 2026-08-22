@@ -2,16 +2,54 @@
 
 import { z } from "zod";
 
-export interface EmailWorkerServiceBinding {
+export interface ServiceWorkerBinding {
   fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 }
 
-export interface ThemeWorkerServiceBinding {
-  fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
+type ImageContentType = "image/jpeg" | "image/png" | "image/webp";
+
+interface CreateImageWorkerUploadInput {
+  productId: string;
+  idempotencyKey: string;
+  upload: {
+    presetId: string;
+    externalId: string;
+    filename: string;
+    contentType: ImageContentType;
+    sizeBytes: number;
+    metadata: { source: string };
+  };
+}
+
+interface GetImageWorkerUploadInput {
+  productId: string;
+  uploadId: string;
+}
+
+export interface ImageWorkerBinding {
+  createUpload(input: CreateImageWorkerUploadInput): Promise<unknown>;
+  getUpload(input: GetImageWorkerUploadInput): Promise<unknown>;
 }
 
 const logLevelSchema = z.enum(["trace", "debug", "info", "warn", "error", "fatal"]);
 const nodeEnvSchema = z.enum(["development", "test", "production"]);
+
+function serviceWorkerBindingSchema(binding: string) {
+  return z.custom<ServiceWorkerBinding>(
+    (value) =>
+      typeof value === "object" && value !== null && typeof (value as { fetch?: unknown }).fetch === "function",
+    `El binding de servicio ${binding} debe implementar fetch`,
+  );
+}
+
+const imageWorkerBindingSchema = z.custom<ImageWorkerBinding>(
+  (value) =>
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { createUpload?: unknown }).createUpload === "function" &&
+    typeof (value as { getUpload?: unknown }).getUpload === "function",
+  "El binding de servicio IMAGE_WORKER debe implementar createUpload y getUpload",
+);
 
 export const envSchema = z.object({
   ALLOWED_ORIGINS: z
@@ -37,16 +75,9 @@ export const envSchema = z.object({
   DB: z.custom<D1Database>((value) => typeof value === "object" && value !== null, {
     error: "El binding DB es obligatorio",
   }),
-  EMAIL_WORKER: z.custom<EmailWorkerServiceBinding>(
-    (value) =>
-      typeof value === "object" && value !== null && typeof (value as { fetch?: unknown }).fetch === "function",
-    "El binding de servicio EMAIL_WORKER debe implementar fetch",
-  ),
-  THEME_WORKER: z.custom<ThemeWorkerServiceBinding>(
-    (value) =>
-      typeof value === "object" && value !== null && typeof (value as { fetch?: unknown }).fetch === "function",
-    "El binding de servicio THEME_WORKER debe implementar fetch",
-  ),
+  EMAIL_WORKER: serviceWorkerBindingSchema("EMAIL_WORKER"),
+  IMAGE_WORKER: imageWorkerBindingSchema,
+  THEME_WORKER: serviceWorkerBindingSchema("THEME_WORKER"),
   THEME_WORKER_TOKEN: z.string().min(1),
   LOYALTY_TOKEN_SECRET: z.string().min(1),
   LOYALTY_CODE_LIMITER: z.custom<RateLimit>(

@@ -8,6 +8,7 @@ interface BranchSettings {
   legalAddress: string | null;
   legalName: string | null;
   latitude: number | null;
+  logoUrl: string | null;
   longitude: number | null;
   name: string;
   phone: string | null;
@@ -31,6 +32,7 @@ function saveInput(settings: BranchSettings) {
       phone: settings.phone ?? undefined,
       whatsapp: settings.whatsapp ?? undefined,
       socialLinksJson: settings.socialLinksJson ?? undefined,
+      logoUrl: settings.logoUrl ?? undefined,
     },
     legal: {
       legalName: settings.legalName ?? undefined,
@@ -68,7 +70,6 @@ test("saves complete branch settings and invalidates every hosted branch", async
     socialLinksJson: JSON.stringify({ instagram: "https://instagram.com/qmenut-e2e" }),
     timezone: "Europe/Paris",
     schedules: [{ dayOfWeek: 1, openMinute: 600, closeMinute: 1200 }],
-    photos: [{ url: "https://picsum.photos/seed/qmenut-branch-e2e/800/600", position: 0 }],
   };
 
   await page.goto("/branch");

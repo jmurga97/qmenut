@@ -1,11 +1,12 @@
-import { getCategoryBranchId, softDeleteCategory } from "@qmenut/db/repositories/admin-categories.repository";
-import { getDishBranchId, setDishAvailability, softDeleteDish } from "@qmenut/db/repositories/admin-dishes.repository";
+import { getCategoryContext, softDeleteCategory } from "@qmenut/db/repositories/admin-categories.repository";
+import { getDishContext, setDishAvailability, softDeleteDish } from "@qmenut/db/repositories/admin-dishes.repository";
 import {
   createIngredient,
   listAllergens,
   listIngredients,
   listTags,
 } from "@qmenut/db/repositories/admin-menu-taxonomy.repository";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { getDishDetail } from "./get-dish-detail";
@@ -24,8 +25,13 @@ import { saveDish } from "./save-dish";
 import { saveDishRelations } from "./save-dish-relations";
 import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
+import { validateImageReference } from "../admin-images/validate-image-reference";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 import { requirePermission } from "../admin-tenant/require-permission";
+
+import type { RuntimeEnv } from "../../config/env/schema";
+import type { TenantContext } from "../../trpc/trpc";
+import type { ImagePurpose } from "../admin-images/image-input.schema";
 
 const dishDetailInputSchema = z.object({ dishId: z.string().trim().min(1) });
 const categoryIdInputSchema = z.object({ categoryId: z.string().trim().min(1) });
@@ -35,6 +41,36 @@ const setDishAvailabilityInputSchema = z.object({
   dishId: z.string().trim().min(1),
   isActive: z.boolean(),
 });
+
+interface AssertMenuImageInput {
+  env: RuntimeEnv;
+  tenant: TenantContext;
+  branchId: string;
+  purpose: ImagePurpose;
+  existingUrl: string | null;
+  imageUrl: string | null;
+  uploadId?: string;
+}
+
+function assertMenuImage({
+  env,
+  tenant,
+  branchId,
+  purpose,
+  existingUrl,
+  imageUrl,
+  uploadId,
+}: AssertMenuImageInput): Promise<void> {
+  return validateImageReference({
+    worker: env.IMAGE_WORKER,
+    restaurantId: tenant.restaurantId,
+    branchId,
+    purpose,
+    existingUrl,
+    imageUrl,
+    uploadId,
+  });
+}
 
 const categoriesRouter = router({
   list: tenantProcedure.input(branchScopedSchema).query(async ({ ctx, input }) => {
@@ -47,6 +83,20 @@ const categoriesRouter = router({
   }),
   create: tenantProcedure.input(createCategorySchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
+    await assertBranchAccess({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      branchId: input.branchId,
+    });
+    await assertMenuImage({
+      env: ctx.env,
+      tenant: ctx.tenant,
+      branchId: input.branchId,
+      purpose: "categoryImage",
+      existingUrl: null,
+      imageUrl: input.data.imageUrl,
+      uploadId: input.data.imageUploadId,
+    });
     const result = await createMenuCategory({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -63,44 +113,53 @@ const categoriesRouter = router({
   }),
   update: tenantProcedure.input(updateCategorySchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
+    const categoryContext = await getCategoryContext({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      categoryId: input.categoryId,
+    });
+    if (!categoryContext) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Categoría no encontrada" });
+    }
+    await assertMenuImage({
+      env: ctx.env,
+      tenant: ctx.tenant,
+      branchId: categoryContext.branchId,
+      purpose: "categoryImage",
+      existingUrl: categoryContext.imageUrl,
+      imageUrl: input.data.imageUrl,
+      uploadId: input.data.imageUploadId,
+    });
     const result = await updateMenuCategory({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       categoryId: input.categoryId,
       data: input.data,
     });
-    const branchId = await getCategoryBranchId({
+    await bumpPublicContentVersionForBranch({
       db: ctx.db,
+      env: ctx.env,
       restaurantId: ctx.tenant.restaurantId,
-      categoryId: input.categoryId,
+      branchId: categoryContext.branchId,
     });
-
-    if (branchId) {
-      await bumpPublicContentVersionForBranch({
-        db: ctx.db,
-        env: ctx.env,
-        restaurantId: ctx.tenant.restaurantId,
-        branchId,
-      });
-    }
 
     return result;
   }),
   remove: tenantProcedure.input(categoryIdInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
-    const branchId = await getCategoryBranchId({
+    const categoryContext = await getCategoryContext({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       categoryId: input.categoryId,
     });
     await softDeleteCategory({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, categoryId: input.categoryId });
 
-    if (branchId) {
+    if (categoryContext) {
       await bumpPublicContentVersionForBranch({
         db: ctx.db,
         env: ctx.env,
         restaurantId: ctx.tenant.restaurantId,
-        branchId,
+        branchId: categoryContext.branchId,
       });
     }
 
@@ -124,6 +183,20 @@ const dishesRouter = router({
     ),
   create: tenantProcedure.input(createDishSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
+    await assertBranchAccess({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      branchId: input.branchId,
+    });
+    await assertMenuImage({
+      env: ctx.env,
+      tenant: ctx.tenant,
+      branchId: input.branchId,
+      purpose: "dishImage",
+      existingUrl: null,
+      imageUrl: input.data.imageUrl,
+      uploadId: input.data.imageUploadId,
+    });
     const result = await saveDish({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -140,6 +213,23 @@ const dishesRouter = router({
   }),
   update: tenantProcedure.input(updateDishSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
+    const dishContext = await getDishContext({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      dishId: input.dishId,
+    });
+    if (!dishContext || dishContext.branchId !== input.branchId) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Plato no encontrado" });
+    }
+    await assertMenuImage({
+      env: ctx.env,
+      tenant: ctx.tenant,
+      branchId: input.branchId,
+      purpose: "dishImage",
+      existingUrl: dishContext.imageUrl,
+      imageUrl: input.data.imageUrl,
+      uploadId: input.data.imageUploadId,
+    });
     const result = await saveDish({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -157,38 +247,46 @@ const dishesRouter = router({
   }),
   saveRelations: tenantProcedure.input(dishRelationsSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
-    const branchId = await getDishBranchId({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, dishId: input.dishId });
-    await saveDishRelations({
+    const dishContext = await getDishContext({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
+      dishId: input.dishId,
+    });
+    if (!dishContext) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Plato no encontrado" });
+    }
+    await saveDishRelations({
+      db: ctx.db,
       dishId: input.dishId,
       tagIds: input.tagIds,
       allergenIds: input.allergenIds,
       extraIngredientIds: input.extraIngredientIds,
     });
 
-    if (branchId) {
-      await bumpPublicContentVersionForBranch({
-        db: ctx.db,
-        env: ctx.env,
-        restaurantId: ctx.tenant.restaurantId,
-        branchId,
-      });
-    }
+    await bumpPublicContentVersionForBranch({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+      branchId: dishContext.branchId,
+    });
 
     return { id: input.dishId };
   }),
   remove: tenantProcedure.input(dishIdInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
-    const branchId = await getDishBranchId({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, dishId: input.dishId });
+    const dishContext = await getDishContext({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      dishId: input.dishId,
+    });
     await softDeleteDish({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, dishId: input.dishId });
 
-    if (branchId) {
+    if (dishContext) {
       await bumpPublicContentVersionForBranch({
         db: ctx.db,
         env: ctx.env,
         restaurantId: ctx.tenant.restaurantId,
-        branchId,
+        branchId: dishContext.branchId,
       });
     }
 

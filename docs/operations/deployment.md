@@ -23,8 +23,15 @@ The repository includes an isolated `development` environment for the product Wo
 | `qmenut-admin-dev`         | `admin.dev.qmenut.app` | Build-time development API URL     |
 
 The landing Worker is intentionally not deployed to development. The development API keeps
-the private `EMAIL_WORKER` service binding to the existing `ming-email-worker`; no public
-email endpoint or second email Worker is created.
+private `EMAIL_WORKER` and `IMAGE_WORKER` service bindings to the existing shared workers; no
+public endpoint or second development instance of either infrastructure Worker is created.
+The canonical staging CORS origin list is maintained in [Image uploads](image-uploads.md#storage-and-delivery).
+
+`IMAGE_WORKER` selects the shared worker's named `ImageRpc` entrypoint and is also configured with
+`remote: true` for unqualified local `wrangler dev` and the Playwright E2E API. A local upload
+therefore calls the deployed shared image worker and creates real staging objects, queue messages,
+and optimized objects in the shared qmenut buckets. Do not add upload E2E coverage until the suite
+has an isolated local worker or fake service binding.
 
 ### Provision development resources
 
@@ -120,6 +127,10 @@ You need all of the following:
 - A PostHog EU project.
 - `ming-email-worker` deployed in the same Cloudflare account. The API's `EMAIL_WORKER`
   binding is remote and does not resolve across accounts.
+- `ming-image-worker` deployed in the same Cloudflare account with its D1, Images binding,
+  processing Queue/DLQ, qmenut R2 buckets, S3 signing credentials, event notification, CORS,
+  lifecycle rule, and `media.qmenut.app` custom domain. The API's `IMAGE_WORKER` binding is
+  also account-local.
 
 ## Step 1: Provision resources
 
@@ -147,6 +158,39 @@ Copy the returned `id` into both production bindings:
 The two values must be byte-identical. Leave `preview_id` unchanged: local development and
 end-to-end tests deliberately share that stable preview namespace in
 `.wrangler-shared/state`.
+
+Provision the qmenut image resources from the sibling `ming-image-worker` repository. Do not
+add R2 credentials to qmenut:
+
+```bash
+bunx wrangler r2 bucket create qmenut-image-staging
+bunx wrangler r2 bucket create qmenut-media
+```
+
+```bash
+bunx wrangler r2 bucket notification create qmenut-image-staging \
+  --event-type object-create \
+  --queue ming-image-processing-production \
+  --prefix "products/qmenut/uploads/" \
+  --description "qmenut image uploads"
+```
+
+```bash
+bunx wrangler r2 bucket cors set qmenut-image-staging \
+  --file examples/qmenut-staging-cors.json \
+  --cwd ../ming-image-worker
+```
+
+```bash
+bunx wrangler r2 bucket lifecycle add qmenut-image-staging \
+  qmenut-staging-fallback "products/qmenut/uploads/" --expire-days 1
+```
+
+The image Worker's `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` secrets must sign writes to both
+configured staging/original buckets and must not grant broader access than required. Connect
+`qmenut-media` to `media.qmenut.app` as a public R2 custom domain; keep
+`qmenut-image-staging` private. Full policy and smoke checks are in
+[Image uploads](image-uploads.md).
 
 ## Step 2: Fill in production configuration
 
@@ -248,9 +292,16 @@ cross-origin with session cookies.
 
 ## Step 6: Deploy in dependency order
 
-Deploy tenant-config, then the API, then web, then admin, then landing. Service bindings
-must reference Workers that already exist: the API needs `qmenut-tenant-config` and
-`ming-email-worker`, and web needs `qmenut-api`.
+Deploy the compatible `ming-image-worker` policy and bindings first, then tenant-config, the API,
+web, admin, and landing. Service bindings must reference Workers that already exist: the API needs
+`qmenut-tenant-config`, `ming-email-worker`, and `ming-image-worker`; web needs `qmenut-api`.
+
+From `../ming-image-worker`, apply its D1 migration and deploy before qmenut starts calling the new
+product policy:
+
+```bash
+bun run deploy
+```
 
 ```bash
 bunx wrangler deploy --env production --cwd apps/tenant-config
@@ -327,8 +378,12 @@ Configure or verify these mappings:
 - `admin.qmenut.app` to `qmenut-admin`. Add it under the Worker's Domains & Routes
   settings.
 - `qmenut.app` and `www.qmenut.app` to `qmenut-landing`.
+- `media.qmenut.app` to the public custom domain of the `qmenut-media` R2 bucket. Do not route
+  this hostname to a Worker.
 - `qmenut-tenant-config` gets no public route. It is reachable only through the API's
   `THEME_WORKER` service binding. Do not expose it in order to give it a hostname.
+- `ming-image-worker` gets no public route. It is reachable only through the API's
+  `IMAGE_WORKER` service binding; presigned R2 URLs are the only browser-facing upload surface.
 
 The admin dashboard and the API must share the `qmenut.app` registrable domain for the
 current Better Auth same-site cookie configuration. If they move to unrelated domains,
@@ -407,6 +462,14 @@ Expect `{"status":"ok"}`. Then open `https://admin.qmenut.app`, request an OTP f
 onboarded owner, confirm that the email arrives, and sign in. Check that the branch and
 theme load.
 
+Upload a JPEG logo, PNG category image, WebP dish image, and at least two branch photos. Keep the
+browser network panel open and verify that bytes go directly to a presigned R2 URL, polling goes
+through authenticated qmenut tRPC, and the final save contains only
+`https://media.qmenut.app/.../main.webp` URLs. In R2, confirm that successful staging objects are
+deleted, outputs have immutable cache metadata, and an intentionally abandoned staging object has
+the one-day lifecycle expiration. Also exercise a rejected oversized file and a partial gallery
+failure; neither may change domain data.
+
 Replace `TENANT_DOMAIN` with an attached live tenant hostname and run:
 
 ```bash
@@ -442,7 +505,8 @@ bunx wrangler rollback --name qmenut-api
 ```
 
 The same two commands work for `qmenut-tenant-config`, `qmenut-web`, `qmenut-admin`, and
-`qmenut-landing`.
+`qmenut-landing`. `ming-image-worker` is deployed and rolled back from its own repository. Keep
+its qmenut policy backward-compatible while any qmenut API deployment references it.
 
 Choose the previous healthy version when prompted, and record why it was restored.
 
