@@ -1,4 +1,4 @@
-import { createAuth as createEmailOtpAuth, createEmailWorkerOtpSender } from "@qmenut/auth";
+import { createAuth as createEmailOtpAuth, createEmailWorkerOtpSender, FIXED_OTP_WILDCARD } from "@qmenut/auth";
 import { OTP_EXPIRES_IN_LABEL } from "@qmenut/auth/store";
 import * as schema from "@qmenut/db/schema";
 
@@ -11,16 +11,12 @@ interface CreateAuthInput {
   env: RuntimeEnv;
 }
 
+const DEVELOPMENT_OTP = "000000";
+
 export function createAuth({ db, env }: CreateAuthInput) {
-  const fixedOtpAccounts =
-    env.E2E_FIXED_OTP === "true" && env.NODE_ENV !== "production"
-      ? [
-          { email: "e2e@test.local", otp: "000000" },
-          { email: "staff.e2e@test.local", otp: "000000" },
-          { email: "admin.e2e@test.local", otp: "000000" },
-          { email: "owner.fine@test.local", otp: "000000" },
-        ]
-      : undefined;
+  const usesDevelopmentOtp =
+    env.DEV_FIXED_OTP === "true" && (env.NODE_ENV === "development" || env.NODE_ENV === "test");
+  const fixedOtpAccounts = usesDevelopmentOtp ? [{ email: FIXED_OTP_WILDCARD, otp: DEVELOPMENT_OTP }] : undefined;
 
   return createEmailOtpAuth({
     db,

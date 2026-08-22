@@ -128,6 +128,7 @@
         "STRIPE_PRICE_BASIC": "price_dev_basic_replace_me",
         "LOG_LEVEL": "info",
         "NODE_ENV": "development",
+        "DEV_FIXED_OTP": "true",
         "SENTRY_DSN": "",
       },
     },

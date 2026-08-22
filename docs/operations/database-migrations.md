@@ -240,7 +240,7 @@ bun run --cwd apps/api db:seed:e2e
 bun run test:e2e
 ```
 
-Never set the end-to-end fixed OTP on a deployed Worker.
+Never set `DEV_FIXED_OTP` on the production Worker.
 
 ## Production migrations
 

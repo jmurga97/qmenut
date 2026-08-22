@@ -86,16 +86,19 @@ product deletes are soft deletes by design.
 
 Three environment variables control a run:
 
-| Variable              | Effect                                             |
-| --------------------- | -------------------------------------------------- |
-| `E2E_REUSE_SERVERS=1` | Reuses an already-running stack while you iterate. |
-| `E2E_VISUAL=1`        | Registers the visual template project locally.     |
-| `E2E_FIXED_OTP=true`  | Supplied only by `e2e/scripts/start-api.sh`.       |
+| Variable              | Effect                                                                                                                                    |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `E2E_REUSE_SERVERS=1` | Reuses an already-running stack while you iterate.                                                                                        |
+| `E2E_VISUAL=1`        | Registers the visual template project locally.                                                                                            |
+| `DEV_FIXED_OTP=true`  | Fixes OTP `000000` for every provisioned account; no email is sent. Supplied by the local and E2E API scripts and the development Worker. |
 
-Never configure `E2E_FIXED_OTP` on a deployed Worker. `create-auth.ts` also refuses a
-fixed OTP when `NODE_ENV === "production"`.
+Never configure `DEV_FIXED_OTP` on the production Worker. `create-auth.ts` only accepts
+the fixed OTP when `NODE_ENV` is `development` or `test`.
 
 ## Fixed identities
+
+When `DEV_FIXED_OTP=true`, every provisioned account signs in with `000000`; the table
+lists the seeded identities used by the suites.
 
 | Identity                | Role                       | OTP      |
 | ----------------------- | -------------------------- | -------- |

@@ -8,18 +8,53 @@ import { useLoginController } from "../hooks/use-login-controller";
 
 import type { LoginFormValues } from "../types";
 
+interface LoginCopyInput {
+  developmentOtp: string;
+  email: string;
+  emailStep: boolean;
+}
+
+function getLoginCopy({ developmentOtp, email, emailStep }: LoginCopyInput) {
+  if (!emailStep) {
+    return {
+      busyLabel: "Verificando...",
+      instructions: developmentOtp
+        ? `Development usa el código fijo ${developmentOtp}.`
+        : `Introduce el código enviado a ${email}.`,
+      submitLabel: "Entrar",
+    };
+  }
+
+  if (developmentOtp) {
+    return {
+      busyLabel: "Preparando...",
+      instructions: "Introduce el email de una cuenta provisionada.",
+      submitLabel: "Continuar",
+    };
+  }
+
+  return {
+    busyLabel: "Solicitando...",
+    instructions: "Solicita un código de acceso.",
+    submitLabel: "Solicitar código",
+  };
+}
+
 export function LoginPage() {
   const controller = useLoginController();
   const emailStep = controller.step === "email";
   const email = controller.form.watch("email");
-  const submitLabel = emailStep ? "Solicitar código" : "Entrar";
-  const busyLabel = emailStep ? "Solicitando..." : "Verificando...";
+  const { busyLabel, instructions, submitLabel } = getLoginCopy({
+    developmentOtp: controller.developmentOtp,
+    email,
+    emailStep,
+  });
   return (
     <main className="admin-login-shell">
       <section className="admin-login-panel" aria-labelledby="login-title">
         <div className="admin-page-header admin-login-header">
           <h2 id="login-title">QMenut Admin</h2>
-          <p>{emailStep ? "Solicita un código de acceso." : `Introduce el código enviado a ${email}.`}</p>
+          <p>{instructions}</p>
         </div>
         <FormProvider {...controller.form}>
           <div className="admin-login-form">
@@ -27,6 +62,7 @@ export function LoginPage() {
               autocomplete={emailStep ? "email" : "one-time-code"}
               disabled={controller.busy}
               inputMode={emailStep ? "email" : "numeric"}
+              key={emailStep ? "email" : "otp"}
               label={emailStep ? "Email" : "Código OTP"}
               maxLength={emailStep ? undefined : 6}
               name={emailStep ? "email" : "otp"}

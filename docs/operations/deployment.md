@@ -71,8 +71,9 @@ bunx wrangler secret put STRIPE_SECRET_KEY --env development --cwd apps/api
 bunx wrangler secret put STRIPE_WEBHOOK_SECRET --env development --cwd apps/api
 ```
 
-Use the same development `THEME_WORKER_TOKEN` value for both Workers. Do not set
-`E2E_FIXED_OTP` on the deployed development Worker. DeepL, Google Maps Geocoding, and Sentry are optional
+Use the same development `THEME_WORKER_TOKEN` value for both Workers. The checked-in
+development Worker variables enable `DEV_FIXED_OTP=true`, so every provisioned account
+uses `000000` without sending email. DeepL, Google Maps Geocoding, and Sentry are optional
 and are intentionally unset by default.
 
 ### Deploy and seed development
@@ -121,7 +122,8 @@ Verify the deployment with:
 curl --fail --show-error --silent https://api.dev.qmenut.app/health
 ```
 
-Then open `https://admin.dev.qmenut.app` to complete OTP login and
+Then open `https://admin.dev.qmenut.app` and sign in with a provisioned email; the admin
+prefills the development OTP `000000`. Open
 `https://dev.qmenut.app` to verify the seeded public menu and theme. Confirm that the
 development D1 and KV IDs are used by the deployed Workers and that production IDs and
 secrets remain unchanged.
@@ -261,8 +263,8 @@ bunx wrangler secret put STRIPE_WEBHOOK_SECRET --env production --cwd apps/api
 bunx wrangler secret put DEEPL_API_KEY --env production --cwd apps/api
 ```
 
-Never set `E2E_FIXED_OTP` on a deployed Worker. The local guard in `create-auth.ts` is
-defense in depth, not permission to configure the variable remotely.
+Never set `DEV_FIXED_OTP` on the production Worker. `create-auth.ts` ignores it when
+`NODE_ENV === "production"`, and the production preflight rejects a checked-in enabled flag.
 
 ## Step 4: Apply D1 migrations
 
@@ -292,10 +294,10 @@ post-apply verification.
 Vite variables are compiled into the SPA and client bundles and cannot be changed through
 Worker runtime variables. Any change requires a rebuild and a redeploy.
 
-| Application | Build-time variables                                       |
-| ----------- | ---------------------------------------------------------- |
-| Web         | `VITE_SENTRY_DSN`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` |
-| Admin       | `VITE_API_BASE_URL`, `VITE_SENTRY_DSN`                     |
+| Application | Build-time variables                                                            |
+| ----------- | ------------------------------------------------------------------------------- |
+| Web         | `VITE_SENTRY_DSN`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`                      |
+| Admin       | `VITE_API_BASE_URL`, `VITE_DEV_FIXED_OTP` (development only), `VITE_SENTRY_DSN` |
 
 Do not set `VITE_API_BASE_URL` for the web production build. Its browser client must use
 the tenant origin's `/trpc`, which `qmenut-web` proxies through `API_WORKER`. The admin
@@ -364,6 +366,7 @@ ID, the `API_WORKER` binding to `qmenut-api`, and the production runtime variabl
 
 ```bash
 VITE_API_BASE_URL='https://api.qmenut.app' \
+VITE_DEV_FIXED_OTP='' \
 VITE_SENTRY_DSN='ADMIN_CLIENT_DSN' \
 bun run --cwd apps/admin build
 ```

@@ -65,6 +65,10 @@ if (environment === "production" && apiEnvironmentConfig.match(/price_[a-z_]*rep
   errors.push("apps/api/wrangler.jsonc todavía contiene un placeholder de Stripe para production");
 }
 
+if (environment === "production" && apiEnvironmentConfig.match(/"DEV_FIXED_OTP"\s*:\s*"true"/i)) {
+  errors.push("apps/api/wrangler.jsonc no puede habilitar DEV_FIXED_OTP en production");
+}
+
 if (webEnvironmentConfig.match(/"id"\s*:\s*"0{20,}"/)) {
   errors.push("apps/web/wrangler.jsonc todavía contiene un KV id placeholder");
 }

@@ -66,7 +66,7 @@ export const envSchema = z.object({
   BETTER_AUTH_URL: z.url(),
   DEEPL_API_KEY: z.string().trim().min(1).optional(),
   DEEPL_API_URL: z.url().default("https://api-free.deepl.com"),
-  E2E_FIXED_OTP: z.string().trim().optional(),
+  DEV_FIXED_OTP: z.string().trim().optional(),
   GEOCODING_LIMITER: z.custom<RateLimit>(
     (value) =>
       typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",

@@ -10,7 +10,7 @@
     }
   },
   "scripts": {
-    "dev": "wrangler dev --port 8787 --inspector-port 9230 --var NODE_ENV:development",
+    "dev": "wrangler dev --port 8787 --inspector-port 9230 --var NODE_ENV:development --var DEV_FIXED_OTP:true",
     "dev:e2e": "bash ../../e2e/scripts/start-api.sh",
     "build": "wrangler types && tsc --noEmit",
     "check": "tsc --noEmit && bun run db:check",

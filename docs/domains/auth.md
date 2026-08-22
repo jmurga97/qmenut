@@ -20,9 +20,10 @@ Complete.
   plugin and the Drizzle adapter for SQLite with `usePlural`, a base path of `/api/auth`,
   and `disableSignUp: true`.
 - OTP delivery. Codes are sent through the Cloudflare `EMAIL_WORKER` service binding by
-  `createEmailWorkerOtpSender`. End-to-end tests use the fixed OTP `000000` for test
-  accounts, controlled by `E2E_FIXED_OTP` in `apps/api/src/auth/create-auth.ts`. That
-  variable is for local use only.
+  `createEmailWorkerOtpSender`. With `DEV_FIXED_OTP=true`, every provisioned account signs in
+  with the fixed OTP `000000` and no email is sent: `apps/api/src/auth/create-auth.ts` registers
+  a wildcard entry that `packages/auth/src/index.ts` resolves for any address. The local, test,
+  and deployed development environments enable this flag; production ignores it.
 - Configuration. `packages/auth/src/store.ts` sets the OTP length, expiry, attempt limit,
   and session expiry. The session schema is `packages/db/src/schema/auth.ts`.
 - Client. `packages/auth/src/client.ts` exports `createEmailOtpAuthClient`, which sets
@@ -56,4 +57,4 @@ that collects the email address and then the OTP. Its route is
 
 - Sign-up is disabled by design. Provision accounts, and their `restaurant_users`
   membership rows, out of band.
-- Never set `E2E_FIXED_OTP` on a deployed Worker.
+- Never set `DEV_FIXED_OTP` on the production Worker.

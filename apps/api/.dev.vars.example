@@ -14,8 +14,9 @@ LOYALTY_TOKEN_SECRET=dev-loyalty-secret
 # Restrict it to the Geocoding API in Google Cloud Console. It is never sent to the browser.
 GOOGLE_MAPS_API_KEY=google-maps-key
 
-# Local Playwright only. Never set this on a deployed worker.
-E2E_FIXED_OTP=false
+# Development only: every provisioned account signs in with the fixed OTP 000000; no email is sent.
+# Production ignores this flag and must never configure it.
+DEV_FIXED_OTP=true
 
 # Stripe test-mode keys (https://dashboard.stripe.com/test/apikeys).
 STRIPE_SECRET_KEY=sk_test_xxx

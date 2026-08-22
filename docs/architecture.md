@@ -209,9 +209,9 @@ Playwright end-to-end tests live in `e2e/` and run locally with `bun run test:e2
 is no CI workflow. The reset script recreates the local D1 database and the shared KV
 namespace before starting the api, tenant-config, admin, and public-menu Workers. Tests
 select a tenant with the `Host` header. End-to-end authentication uses `e2e@test.local`
-with the fixed OTP `000000`, supplied through `E2E_FIXED_OTP`. That variable is for local
-use only and must never be set on a deployed Worker. As stated in `AGENTS.md`, do not add
-tests unless you are asked to.
+with the fixed OTP `000000`, supplied through `DEV_FIXED_OTP`. Local, test, and the deployed
+development environment enable it; production ignores it and must never configure it.
+As stated in `AGENTS.md`, do not add tests unless you are asked to.
 
 Local end-to-end runs require `tapas.localhost`, `fine.localhost`, `cafe.localhost`,
 `her.localhost`, and `fast.localhost` to resolve to `127.0.0.1` in `/etc/hosts`. This is

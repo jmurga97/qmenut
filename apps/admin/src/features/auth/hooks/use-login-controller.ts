@@ -9,6 +9,8 @@ import { loginFormSchema } from "../types";
 
 import type { LoginFormValues } from "../types";
 
+const developmentOtp = import.meta.env.VITE_DEV_FIXED_OTP ?? "";
+
 export function useLoginController() {
   const navigate = useNavigate();
   const [step, setStep] = useState<"email" | "otp">("email");
@@ -18,7 +20,7 @@ export function useLoginController() {
   });
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
-    defaultValues: { email: "", otp: "" },
+    defaultValues: { email: "", otp: developmentOtp },
   });
   async function submit() {
     if (!(await form.trigger(step))) {
@@ -40,9 +42,18 @@ export function useLoginController() {
   function changeEmail() {
     requestOtp.reset();
     signIn.reset();
+    form.resetField("email");
     form.resetField("otp");
     setStep("email");
   }
   const mutation = step === "email" ? requestOtp : signIn;
-  return { busy: mutation.isPending, error: mutation.error, form, step, submit, changeEmail };
+  return {
+    busy: mutation.isPending,
+    developmentOtp,
+    error: mutation.error,
+    form,
+    step,
+    submit,
+    changeEmail,
+  };
 }
