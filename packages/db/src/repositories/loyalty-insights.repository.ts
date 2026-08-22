@@ -77,12 +77,7 @@ export async function getLoyaltySummary({
 }
 
 export type LoyaltyCustomerSortBy =
-  | "email"
-  | "firstVisitAt"
-  | "lastVisitAt"
-  | "rewardsRedeemed"
-  | "stampsBalance"
-  | "totalVisits";
+  "email" | "firstVisitAt" | "lastVisitAt" | "rewardsRedeemed" | "stampsBalance" | "totalVisits";
 export type SortDir = "asc" | "desc";
 
 export interface LoyaltyCustomerRow {

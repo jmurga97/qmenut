@@ -1,7 +1,7 @@
 // QMenut · Carga reproducible de contenido público para un tenant existente.
 //
-//   bun scripts/load-tenant-content.ts --file demo-tenants/cafe.content.json [--remote]
-//     [--env production|development] [--host host] [--force] [--dry-run]
+//   bun scripts/load-tenant-content.ts --file demo-tenants/cafe.content.json
+//     [--remote --env production|development] [--host host] [--force] [--dry-run]
 
 // Resuelve el tenant por host, valida las imágenes antes de escribir, actualiza los
 // datos públicos de contacto e inserta fotos, carta, relaciones y promociones. Al
@@ -14,9 +14,12 @@ import path from "node:path";
 
 import { z } from "zod";
 
+import { describeTenantTarget, getD1TargetArgs, getKvTargetArgs, resolveTenantEnvironment } from "./tenant-environment";
+
+import type { TenantEnvironmentName } from "./tenant-environment";
+
 const API_DIR = path.resolve(import.meta.dir, "..");
 const TENANT_CONFIG_DIR = path.resolve(API_DIR, "../tenant-config");
-const LOCAL_KV_PERSIST = "../../.wrangler-shared/state";
 
 const KEY_PATTERN = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
 const HOST_PATTERN = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
@@ -218,7 +221,7 @@ type ContentFile = z.infer<typeof contentFileSchema>;
 type PromotionInput = z.infer<typeof promotionSchema>;
 
 interface CliOptions {
-  environment: "production" | "development";
+  environment: TenantEnvironmentName;
   file: string;
   host?: string;
   remote: boolean;
@@ -326,7 +329,7 @@ function errorMessage(error: unknown): string {
 
 function parseArgs(argv: string[]): CliOptions {
   let file: string | undefined;
-  let environment: CliOptions["environment"] = "production";
+  let selectedEnvironment: string | undefined;
   let host: string | undefined;
   let remote = false;
   let force = false;
@@ -338,13 +341,7 @@ function parseArgs(argv: string[]): CliOptions {
     if (arg === "--file") {
       file = argv[++index];
     } else if (arg === "--env") {
-      const value = argv[++index];
-
-      if (value !== "production" && value !== "development") {
-        fail("--env debe ser production o development");
-      }
-
-      environment = value;
+      selectedEnvironment = argv[++index];
     } else if (arg === "--host") {
       host = argv[++index];
 
@@ -364,6 +361,13 @@ function parseArgs(argv: string[]): CliOptions {
 
   if (!file) {
     fail("Falta --file <content.json>");
+  }
+
+  let environment: TenantEnvironmentName;
+  try {
+    environment = resolveTenantEnvironment({ remote, selected: selectedEnvironment });
+  } catch (error) {
+    fail(errorMessage(error));
   }
 
   return { environment, file: path.resolve(process.cwd(), file), host, remote, force, dryRun };
@@ -391,19 +395,9 @@ function runWrangler(args: string[], cwd: string): string {
   return result.stdout;
 }
 
-function getD1TargetArgs(options: CliOptions): string[] {
-  return options.remote ? ["--remote", "--env", options.environment, "-y"] : ["--local"];
-}
-
-function getKvTargetArgs(options: CliOptions): string[] {
-  return options.remote
-    ? ["--remote", "--env", options.environment]
-    : ["--preview", "--local", "--persist-to", LOCAL_KV_PERSIST];
-}
-
 function queryRows<T>(command: string, options: CliOptions): T[] {
   const stdout = runWrangler(
-    ["d1", "execute", "DB", ...getD1TargetArgs(options), "--json", "--command", command],
+    ["d1", "execute", "DB", ...getD1TargetArgs(options.environment, options.remote), "--json", "--command", command],
     API_DIR,
   );
   const batches = JSON.parse(stdout) as Array<{ results: T[] }>;
@@ -648,7 +642,7 @@ function bumpContentVersion(host: string, options: CliOptions): void {
       String(Date.now()),
       "--binding",
       "TENANT_THEME",
-      ...getKvTargetArgs(options),
+      ...getKvTargetArgs(options.environment, options.remote),
     ],
     TENANT_CONFIG_DIR,
   );
@@ -698,6 +692,8 @@ if (!parsed.success) {
 }
 
 const content = options.host ? { ...parsed.data, host: options.host } : parsed.data;
+console.log(`→ Destino: ${describeTenantTarget(options.environment, options.remote)}`);
+console.log(`→ Host: ${content.host}`);
 const resolvedIds = resolveTenant(content.host, options);
 
 if (!resolvedIds && !options.dryRun) {
@@ -739,7 +735,10 @@ try {
   writeFileSync(sqlFile, sql);
 
   console.log(`→ Cargando contenido en D1 (${options.remote ? "--remote" : "--local"})…`);
-  runWrangler(["d1", "execute", "DB", ...getD1TargetArgs(options), "--file", sqlFile], API_DIR);
+  runWrangler(
+    ["d1", "execute", "DB", ...getD1TargetArgs(options.environment, options.remote), "--file", sqlFile],
+    API_DIR,
+  );
 
   console.log("→ Verificando contenido…");
   verifyContent(content, ids, options);

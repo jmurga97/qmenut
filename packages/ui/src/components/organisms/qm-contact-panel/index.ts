@@ -60,14 +60,6 @@ export class QmContactPanel extends LitElement {
       <section part="ubicacion" class="section map-section">
         <qm-map part="map" class="map" .value=${this.value.map}></qm-map>
         <div class="map-fade" aria-hidden="true"></div>
-        <!--<div class="map-header">
-          <qm-section-num
-            part="ubicacion-header"
-            .num=${this.value?.ubicacionNum ?? "01"}
-            .label=${this.value?.ubicacionLabel ?? "Ubicación"}
-          >
-          </qm-section-num>
-        </div>-->
       </section>
     `;
   }

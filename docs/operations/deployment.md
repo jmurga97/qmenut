@@ -77,7 +77,14 @@ and are intentionally unset by default.
 
 ### Deploy and seed development
 
-Run the following in order:
+First run the repository preflight. It intentionally fails while the development Stripe
+price remains a placeholder:
+
+```bash
+bun run --cwd apps/api preflight:development
+```
+
+After configuring the missing external values, run the following in order:
 
 ```bash
 bun run --cwd apps/tenant-config deploy:development
@@ -92,16 +99,21 @@ Before seeding, replace the placeholder owner email in
 tenant and reuse the existing tapas content fixture under the development hostname:
 
 ```bash
-bun run --cwd apps/api tenant:create -- --file tenants/development.tenant.json --remote --env development
+bun run --cwd apps/api tenant:create:development -- --file tenants/development.tenant.json
 ```
 
 ```bash
-bun run --cwd apps/api tenant:content -- --file demo-tenants/tapas.content.json --remote --env development --host dev.qmenut.app
+bun run --cwd apps/api tenant:content:development -- --file demo-tenants/tapas.content.json --host dev.qmenut.app
 ```
 
 The web, API, and admin custom-domain routes are declared in their development Wrangler
 environments. Cloudflare must still be authoritative for the `qmenut.app` zone so DNS and
 managed TLS can become active.
+
+For more than one development tenant, use a distinct exact hostname for each tenant, such
+as `cafe.dev.qmenut.app`. Add every hostname as a custom domain of `qmenut-web-dev`; do not
+reuse a production hostname. The creation script accepts `--host` so the same intake can be
+reused without changing its production domain.
 
 Verify the deployment with:
 
@@ -405,12 +417,17 @@ mapping: the `Host` header is the only selector, so the attached hostname and
 Create the D1 and KV tenant data after the domain is known:
 
 ```bash
-bun run --cwd apps/api tenant:create --file tenants/CUSTOMER.tenant.json --remote
+bun run --cwd apps/api tenant:create -- --file tenants/CUSTOMER.tenant.json --remote --env production
 ```
 
 The script publishes to KV first, inserts the D1 rows, verifies both, and prints the
-custom-domain attachment as its first manual follow-up. Its `--remote` mode selects the
-production Wrangler environment for both D1 and KV.
+environment-specific custom-domain attachment as its first manual follow-up. Remote mode
+requires an explicit named environment for both D1 and KV.
+
+Do not clone the complete production D1 database into development. A full clone includes
+sessions, OTP verifications, live Stripe references, customer data, orders, loyalty data,
+campaign state, and analytics. Recreate test tenants from their intake and content fixtures,
+or use a purpose-built allowlisted export that remaps IDs and excludes those tables.
 
 ## Step 8: Configure Stripe
 

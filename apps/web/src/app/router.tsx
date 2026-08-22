@@ -14,7 +14,7 @@ function getPublicViewTransitionIndex(pathname: string) {
   const pathWithoutLocale = LOCALE_PATTERN.test(pathSegments[0] ?? "") ? pathSegments.slice(1) : pathSegments;
   const publicPath = `/${pathWithoutLocale.join("/")}`;
 
-  return PUBLIC_VIEW_TRANSITION_PATHS.findIndex((path) => path === publicPath);
+  return PUBLIC_VIEW_TRANSITION_PATHS.indexOf(publicPath as (typeof PUBLIC_VIEW_TRANSITION_PATHS)[number]);
 }
 
 function createQueryClient() {
@@ -48,6 +48,8 @@ export function getRouter() {
     // for React's public-route ViewTransition boundary to capture the page swap.
     // Keep the temporary experiment limited to the four public content routes.
     defaultViewTransition: {
+      // TanStack intentionally uses false to disable a transition and string[] to enable one.
+      // eslint-disable-next-line sonarjs/function-return-type
       types: ({ fromLocation, toLocation }) => {
         if (!fromLocation) return false;
 

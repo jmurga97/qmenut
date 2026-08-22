@@ -1,7 +1,7 @@
 // QMenut · Alta de tenant desde un JSON de intake (ver tenants/example.tenant.json).
 //
-//   bun scripts/create-tenant.ts --file tenants/la-tasca.json [--remote] [--env production|development]
-//     [--force] [--dry-run]
+//   bun scripts/create-tenant.ts --file tenants/la-tasca.json [--remote --env production|development]
+//     [--host host] [--force] [--dry-run]
 //
 // Publica primero el tema + menuVersion en TENANT_THEME, inserta restaurante, sucursal,
 // suscripción trial, propietario (Better Auth: basta la fila en `users`), idiomas y horarios
@@ -16,9 +16,18 @@ import path from "node:path";
 import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import { z } from "zod";
 
+import {
+  describeTenantTarget,
+  getD1TargetArgs,
+  getKvTargetArgs,
+  resolveTenantEnvironment,
+  TENANT_ENVIRONMENTS,
+} from "./tenant-environment";
+
+import type { TenantEnvironmentName } from "./tenant-environment";
+
 const API_DIR = path.resolve(import.meta.dir, "..");
 const TENANT_CONFIG_DIR = path.resolve(API_DIR, "../tenant-config");
-const LOCAL_KV_PERSIST = "../../.wrangler-shared/state";
 
 const scheduleSchema = z
   .object({
@@ -50,6 +59,9 @@ const tenantFileSchema = z
       name: z.string().min(1),
       customDomain: z.string().regex(/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/, "host en minúsculas, sin esquema ni puerto"),
       address: z.string().min(1).optional(),
+      latitude: z.number().min(-90).max(90).optional(),
+      longitude: z.number().min(-180).max(180).optional(),
+      logoUrl: z.url().optional(),
       phone: z.string().min(1).optional(),
       whatsapp: z.string().min(1).optional(),
       socialLinks: z.record(z.string(), z.url()).optional(),
@@ -73,6 +85,10 @@ const tenantFileSchema = z
   .refine(
     (t) => t.restaurant.languages.includes(t.restaurant.defaultLanguageCode),
     "restaurant.languages debe incluir defaultLanguageCode",
+  )
+  .refine(
+    (t) => (t.branch.latitude === undefined) === (t.branch.longitude === undefined),
+    "branch.latitude y branch.longitude deben indicarse juntos",
   );
 
 type TenantFile = z.infer<typeof tenantFileSchema>;
@@ -86,8 +102,9 @@ function escOrNull(value: string | undefined): string {
 }
 
 interface CliOptions {
-  environment: "production" | "development";
+  environment: TenantEnvironmentName;
   file: string;
+  host?: string;
   remote: boolean;
   force: boolean;
   dryRun: boolean;
@@ -95,7 +112,8 @@ interface CliOptions {
 
 function parseArgs(argv: string[]): CliOptions {
   let file: string | undefined;
-  let environment: CliOptions["environment"] = "production";
+  let selectedEnvironment: string | undefined;
+  let host: string | undefined;
   let remote = false;
   let force = false;
   let dryRun = false;
@@ -105,13 +123,9 @@ function parseArgs(argv: string[]): CliOptions {
     if (arg === "--file") {
       file = argv[++i];
     } else if (arg === "--env") {
-      const value = argv[++i];
-
-      if (value !== "production" && value !== "development") {
-        fail("--env debe ser production o development");
-      }
-
-      environment = value;
+      selectedEnvironment = argv[++i];
+    } else if (arg === "--host") {
+      host = argv[++i];
     } else if (arg === "--remote") {
       remote = true;
     } else if (arg === "--force") {
@@ -127,7 +141,14 @@ function parseArgs(argv: string[]): CliOptions {
     fail("Falta --file <tenant.json>. Ejemplo: bun scripts/create-tenant.ts --file tenants/example.tenant.json");
   }
 
-  return { environment, file: path.resolve(process.cwd(), file), remote, force, dryRun };
+  let environment: TenantEnvironmentName;
+  try {
+    environment = resolveTenantEnvironment({ remote, selected: selectedEnvironment });
+  } catch (error) {
+    fail(errorMessage(error));
+  }
+
+  return { environment, file: path.resolve(process.cwd(), file), host, remote, force, dryRun };
 }
 
 function fail(message: string): never {
@@ -149,19 +170,12 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function getD1TargetArgs(options: CliOptions): string[] {
-  return options.remote ? ["--remote", "--env", options.environment, "-y"] : ["--local"];
-}
-
-function getKvTargetArgs(options: CliOptions): string[] {
-  return options.remote
-    ? ["--remote", "--env", options.environment]
-    : ["--preview", "--local", "--persist-to", LOCAL_KV_PERSIST];
-}
-
 function assertDomainFree(t: TenantFile, opts: CliOptions): void {
   const query = `SELECT id, deleted_at FROM branches WHERE custom_domain = ${esc(t.branch.customDomain)}`;
-  const stdout = runWrangler(["d1", "execute", "DB", ...getD1TargetArgs(opts), "--json", "--command", query], API_DIR);
+  const stdout = runWrangler(
+    ["d1", "execute", "DB", ...getD1TargetArgs(opts.environment, opts.remote), "--json", "--command", query],
+    API_DIR,
+  );
 
   const batches = JSON.parse(stdout) as Array<{ results: Array<{ deleted_at: number | null; id: string }> }>;
   const rows = batches.flatMap((batch) => batch.results);
@@ -219,8 +233,8 @@ function buildSql(t: TenantFile, ids: Record<string, string>, force: boolean): s
     "INSERT INTO restaurant_languages (restaurant_id, language_code, is_default, is_active, created_at) VALUES",
     `${languageValues};`,
     "",
-    `INSERT INTO branches (id, restaurant_id, name, address, phone, whatsapp, social_links_json, custom_domain, currency, plan_code, is_active, created_at, updated_at)`,
-    `VALUES (${esc(ids.branch)}, ${esc(ids.restaurant)}, ${esc(t.branch.name)}, ${escOrNull(t.branch.address)}, ${escOrNull(t.branch.phone)}, ${escOrNull(t.branch.whatsapp)}, ${escOrNull(t.branch.socialLinks && JSON.stringify(t.branch.socialLinks))}, ${esc(t.branch.customDomain)}, ${esc(t.branch.currency)}, ${esc(t.branch.planCode)}, 1, ${now}, ${now});`,
+    `INSERT INTO branches (id, restaurant_id, name, address, latitude, longitude, phone, whatsapp, social_links_json, logo_url, custom_domain, currency, plan_code, is_active, created_at, updated_at)`,
+    `VALUES (${esc(ids.branch)}, ${esc(ids.restaurant)}, ${esc(t.branch.name)}, ${escOrNull(t.branch.address)}, ${t.branch.latitude ?? "NULL"}, ${t.branch.longitude ?? "NULL"}, ${escOrNull(t.branch.phone)}, ${escOrNull(t.branch.whatsapp)}, ${escOrNull(t.branch.socialLinks && JSON.stringify(t.branch.socialLinks))}, ${escOrNull(t.branch.logoUrl)}, ${esc(t.branch.customDomain)}, ${esc(t.branch.currency)}, ${esc(t.branch.planCode)}, 1, ${now}, ${now});`,
     "",
     "-- Mantener esta fila alineada con plan_code; requirePlan todavía debe cablearse en los procedimientos premium.",
     `INSERT INTO branch_subscriptions (id, restaurant_id, branch_id, plan_code, status, stripe_subscription_id, stripe_price_id, current_period_end, cancel_at_period_end, created_at, updated_at)`,
@@ -251,7 +265,7 @@ function putThemeKv(t: TenantFile, options: CliOptions, tmpDir: string): void {
   const themeFile = path.join(tmpDir, "theme.json");
   writeFileSync(themeFile, JSON.stringify(theme, null, 2));
 
-  const targetArgs = getKvTargetArgs(options);
+  const targetArgs = getKvTargetArgs(options.environment, options.remote);
   const host = t.branch.customDomain;
 
   runWrangler(
@@ -265,7 +279,7 @@ function putThemeKv(t: TenantFile, options: CliOptions, tmpDir: string): void {
 }
 
 function deleteThemeKv(t: TenantFile, options: CliOptions): void {
-  const targetArgs = getKvTargetArgs(options);
+  const targetArgs = getKvTargetArgs(options.environment, options.remote);
   const keys = [t.branch.customDomain, `menuVersion:${t.branch.customDomain}`];
   const errors: string[] = [];
 
@@ -284,7 +298,15 @@ function deleteThemeKv(t: TenantFile, options: CliOptions): void {
 
 function verifyThemeKv(t: TenantFile, options: CliOptions): void {
   const stdout = runWrangler(
-    ["kv", "key", "get", t.branch.customDomain, "--binding", "TENANT_THEME", ...getKvTargetArgs(options)],
+    [
+      "kv",
+      "key",
+      "get",
+      t.branch.customDomain,
+      "--binding",
+      "TENANT_THEME",
+      ...getKvTargetArgs(options.environment, options.remote),
+    ],
     TENANT_CONFIG_DIR,
   );
   const theme = JSON.parse(stdout) as { template?: unknown };
@@ -298,7 +320,7 @@ function verifyBranch(t: TenantFile, options: CliOptions, branchId: string): voi
   const query =
     `SELECT id FROM branches WHERE id = ${esc(branchId)} ` + `AND custom_domain = ${esc(t.branch.customDomain)}`;
   const stdout = runWrangler(
-    ["d1", "execute", "DB", ...getD1TargetArgs(options), "--json", "--command", query],
+    ["d1", "execute", "DB", ...getD1TargetArgs(options.environment, options.remote), "--json", "--command", query],
     API_DIR,
   );
   const batches = JSON.parse(stdout) as Array<{ results: Array<{ id: string }> }>;
@@ -321,7 +343,14 @@ const parsed = tenantFileSchema.safeParse(rawJson);
 if (!parsed.success) {
   fail(`JSON de tenant inválido:\n${z.prettifyError(parsed.error)}`);
 }
-const tenant = parsed.data;
+const tenant: TenantFile = options.host
+  ? { ...parsed.data, branch: { ...parsed.data.branch, customDomain: options.host } }
+  : parsed.data;
+
+const tenantWithHost = tenantFileSchema.safeParse(tenant);
+if (!tenantWithHost.success) {
+  fail(`El --host indicado no es válido:\n${z.prettifyError(tenantWithHost.error)}`);
+}
 
 const ids = {
   user: crypto.randomUUID(),
@@ -332,6 +361,9 @@ const ids = {
 };
 
 const sql = buildSql(tenant, ids, options.force);
+
+console.log(`→ Destino: ${describeTenantTarget(options.environment, options.remote)}`);
+console.log(`→ Host: ${tenant.branch.customDomain}`);
 
 if (options.dryRun) {
   console.log(sql);
@@ -368,7 +400,10 @@ try {
   const target = options.remote ? "--remote" : "--local";
   console.log(`→ Insertando tenant en D1 (${target})…`);
   try {
-    runWrangler(["d1", "execute", "DB", ...getD1TargetArgs(options), "--file", sqlFile], API_DIR);
+    runWrangler(
+      ["d1", "execute", "DB", ...getD1TargetArgs(options.environment, options.remote), "--file", sqlFile],
+      API_DIR,
+    );
   } catch (error) {
     let cleanupNote = "Se eliminaron las dos claves KV publicadas.";
 
@@ -403,7 +438,7 @@ console.log(`
   Propietario : ${tenant.owner.email} (login por OTP en el panel de admin)
 
 Siguientes pasos:
-  1. Adjuntar https://${tenant.branch.customDomain} como custom domain del worker qmenut-web en Cloudflare.
+  1. Verificar https://${tenant.branch.customDomain} como custom domain del worker ${TENANT_ENVIRONMENTS[options.environment].webWorker} en Cloudflare.
   2. Cargar el menú desde el panel de admin (categorías, platos, promos).
   3. Descargar el código QR desde el panel de admin (sección "Código QR").
   4. Verificar el login OTP de ${tenant.owner.email}.

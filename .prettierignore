@@ -3,7 +3,10 @@ node_modules
 .wrangler
 .wrangler-shared
 .output
+apps/*/.astro/
+apps/api/migrations/meta/
 apps/*/src/app/route-tree.gen.ts
 apps/*/src/app/routeTree.gen.ts
+graphify-out/
 worker-configuration.d.ts
 bun.lock

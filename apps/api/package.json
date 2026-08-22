@@ -14,8 +14,11 @@
     "dev:e2e": "bash ../../e2e/scripts/start-api.sh",
     "build": "wrangler types && tsc --noEmit",
     "check": "tsc --noEmit && bun run db:check",
-    "deploy": "wrangler deploy",
-    "deploy:development": "wrangler deploy --env development",
+    "deploy": "bun run deploy:production",
+    "deploy:production": "bun scripts/check-deployment-config.ts production && wrangler deploy --env production",
+    "deploy:development": "bun scripts/check-deployment-config.ts development && wrangler deploy --env development",
+    "preflight:production": "bun scripts/check-deployment-config.ts production",
+    "preflight:development": "bun scripts/check-deployment-config.ts development",
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
     "db:generate:custom": "drizzle-kit generate --config drizzle.config.ts --custom",
     "db:check": "drizzle-kit check --config drizzle.config.ts && bun scripts/check-db-migrations.ts",
@@ -27,8 +30,13 @@
     "db:seed:local": "wrangler d1 execute DB --local --file seed/seed-public-menu.sql",
     "db:seed:e2e": "wrangler d1 execute DB --local --file seed/seed-e2e.sql",
     "db:cleanup:e2e": "wrangler d1 execute DB --local --file ../../e2e/seed/cleanup-e2e.sql",
+    "tenant:environments": "bun scripts/list-tenant-environments.ts",
     "tenant:create": "bun scripts/create-tenant.ts",
-    "tenant:content": "bun scripts/load-tenant-content.ts"
+    "tenant:create:production": "bun scripts/create-tenant.ts --remote --env production",
+    "tenant:create:development": "bun scripts/create-tenant.ts --remote --env development",
+    "tenant:content": "bun scripts/load-tenant-content.ts",
+    "tenant:content:production": "bun scripts/load-tenant-content.ts --remote --env production",
+    "tenant:content:development": "bun scripts/load-tenant-content.ts --remote --env development"
   },
   "dependencies": {
     "@qmenut/auth": "workspace:*",

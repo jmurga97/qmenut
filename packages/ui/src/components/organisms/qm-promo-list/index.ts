@@ -40,9 +40,11 @@ export class QmPromoList extends LitElement {
     return html`
       <div part="list" class="list">
         <slot @slotchange=${this.handleSlotChange}></slot>
-        ${!this.hasPromos && this.value?.emptyLabel
-          ? html`<p part="empty" class="empty">${this.value.emptyLabel}</p>`
-          : nothing}
+        ${
+          !this.hasPromos && this.value?.emptyLabel
+            ? html`<p part="empty" class="empty">${this.value.emptyLabel}</p>`
+            : nothing
+        }
       </div>
     `;
   }

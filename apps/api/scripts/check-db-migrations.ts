@@ -1,4 +1,4 @@
-import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
+import { cp, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 interface DrizzleJournal {
@@ -11,7 +11,44 @@ const temporaryDirectory = await mkdtemp(join(apiDirectory, ".drizzle-check-"));
 const temporaryMetaDirectory = join(temporaryDirectory, "meta");
 const temporaryOutputDirectory = relative(apiDirectory, temporaryDirectory);
 
+// This migration was applied remotely before the parent-table rebuild guard existed.
+// It is immutable migration history, so keep the exception explicit instead of editing it.
+const LEGACY_PARENT_TABLE_REBUILDS = new Set(["0002_branch_coordinates.sql"]);
+
+async function checkForUnsafeParentTableRebuilds(): Promise<void> {
+  const migrationsDirectory = join(apiDirectory, "migrations");
+  const migrationFiles = (await readdir(migrationsDirectory)).filter((file) => file.endsWith(".sql"));
+  const migrations = await Promise.all(
+    migrationFiles.map(async (file) => ({
+      file,
+      sql: await readFile(join(migrationsDirectory, file), "utf8"),
+    })),
+  );
+  const allSql = migrations.map(({ sql }) => sql).join("\n");
+  const referencedTables = new Set(
+    [...allSql.matchAll(/REFERENCES\s+[`"]?([A-Za-z0-9_]+)[`"]?/gi)].map((match) => match[1]),
+  );
+
+  for (const { file, sql } of migrations) {
+    if (LEGACY_PARENT_TABLE_REBUILDS.has(file)) continue;
+
+    const droppedTables = [...sql.matchAll(/DROP\s+TABLE(?:\s+IF\s+EXISTS)?\s+[`"]?([A-Za-z0-9_]+)[`"]?/gi)].map(
+      (match) => match[1],
+    );
+    const unsafeTables = droppedTables.filter((table) => referencedTables.has(table));
+
+    if (unsafeTables.length > 0) {
+      throw new Error(
+        `${file} rebuilds referenced table(s) ${unsafeTables.join(", ")} with DROP TABLE. ` +
+          "D1 can keep foreign-key cascades active during migrations and delete dependent rows. " +
+          "Use additive ALTER TABLE statements or a migration strategy that preserves child rows.",
+      );
+    }
+  }
+}
+
 try {
+  await checkForUnsafeParentTableRebuilds();
   await cp(migrationMetaDirectory, temporaryMetaDirectory, { recursive: true });
 
   const journalPath = join(temporaryMetaDirectory, "_journal.json");

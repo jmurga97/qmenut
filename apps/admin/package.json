@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --port 5174",
     "build": "vite build",
-    "deploy": "vite build && wrangler deploy",
+    "deploy": "bun run deploy:production",
+    "deploy:production": "VITE_API_BASE_URL=https://api.qmenut.app vite build && wrangler deploy --env production",
     "deploy:development": "VITE_API_BASE_URL=https://api.dev.qmenut.app vite build && wrangler deploy --env development",
     "preview": "wrangler dev",
     "check": "tsc --noEmit"
