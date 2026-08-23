@@ -1,6 +1,7 @@
 {
   "restaurant": {
     "name": "QMenut Development",
+    "countryCode": "VEN",
     "defaultLanguageCode": "es",
     "defaultCurrency": "EUR",
     "timezone": "Europe/Madrid",

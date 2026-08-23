@@ -1,0 +1,1 @@
+ALTER TABLE `restaurants` ADD `country_code` text DEFAULT 'ESP' NOT NULL;

@@ -36,6 +36,20 @@
       "when": 1787401083387,
       "tag": "0004_valencia_branch_coordinates",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1787508656374,
+      "tag": "0005_add_restaurant_country_code",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1787508656640,
+      "tag": "0006_enforce_restaurant_country_code",
+      "breakpoints": true
     }
   ]
 }

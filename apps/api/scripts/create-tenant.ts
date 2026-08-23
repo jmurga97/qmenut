@@ -41,6 +41,7 @@ const tenantFileSchema = z
   .object({
     restaurant: z.object({
       name: z.string().min(1),
+      countryCode: z.string().regex(/^[A-Z]{3}$/, "countryCode debe ser un código ISO 3166-1 alpha-3 en mayúsculas"),
       defaultLanguageCode: z.string().min(2).max(5).default("es"),
       defaultCurrency: z.string().length(3).default("EUR"),
       timezone: z.string().min(1).default("Europe/Madrid"),
@@ -213,8 +214,8 @@ function buildSql(t: TenantFile, ids: Record<string, string>, force: boolean): s
     `VALUES (${esc(ids.user)}, ${esc(t.owner.name)}, ${esc(t.owner.email)}, 1, ${now}, ${now})`,
     "ON CONFLICT (email) DO NOTHING;",
     "",
-    `INSERT INTO restaurants (id, name, default_language_code, default_currency, timezone, legal_name, tax_id, legal_address, data_protection_email, email_from_name, email_from_address, email_reply_to, created_at, updated_at)`,
-    `VALUES (${esc(ids.restaurant)}, ${esc(t.restaurant.name)}, ${esc(t.restaurant.defaultLanguageCode)}, ${esc(t.restaurant.defaultCurrency)}, ${esc(t.restaurant.timezone)}, ${esc(t.restaurant.legal.legalName)}, ${esc(t.restaurant.legal.taxId)}, ${esc(t.restaurant.legal.legalAddress)}, ${esc(t.restaurant.legal.dataProtectionEmail)}, ${escOrNull(t.restaurant.emailFromName)}, ${escOrNull(t.restaurant.emailFromAddress)}, ${escOrNull(t.restaurant.emailReplyTo)}, ${now}, ${now});`,
+    `INSERT INTO restaurants (id, name, country_code, default_language_code, default_currency, timezone, legal_name, tax_id, legal_address, data_protection_email, email_from_name, email_from_address, email_reply_to, created_at, updated_at)`,
+    `VALUES (${esc(ids.restaurant)}, ${esc(t.restaurant.name)}, ${esc(t.restaurant.countryCode)}, ${esc(t.restaurant.defaultLanguageCode)}, ${esc(t.restaurant.defaultCurrency)}, ${esc(t.restaurant.timezone)}, ${esc(t.restaurant.legal.legalName)}, ${esc(t.restaurant.legal.taxId)}, ${esc(t.restaurant.legal.legalAddress)}, ${esc(t.restaurant.legal.dataProtectionEmail)}, ${escOrNull(t.restaurant.emailFromName)}, ${escOrNull(t.restaurant.emailFromAddress)}, ${escOrNull(t.restaurant.emailReplyTo)}, ${now}, ${now});`,
     "",
     "-- SELECT en vez de VALUES: el propietario puede existir ya con otro id.",
     `INSERT INTO restaurant_users (id, restaurant_id, user_id, role_code, is_driver, is_active, created_at, updated_at)`,
@@ -318,15 +319,24 @@ function verifyThemeKv(t: TenantFile, options: CliOptions): void {
 
 function verifyBranch(t: TenantFile, options: CliOptions, branchId: string): void {
   const query =
-    `SELECT id FROM branches WHERE id = ${esc(branchId)} ` + `AND custom_domain = ${esc(t.branch.customDomain)}`;
+    `SELECT b.id, r.country_code FROM branches b ` +
+    `JOIN restaurants r ON r.id = b.restaurant_id ` +
+    `WHERE b.id = ${esc(branchId)} AND b.custom_domain = ${esc(t.branch.customDomain)}`;
   const stdout = runWrangler(
     ["d1", "execute", "DB", ...getD1TargetArgs(options.environment, options.remote), "--json", "--command", query],
     API_DIR,
   );
-  const batches = JSON.parse(stdout) as Array<{ results: Array<{ id: string }> }>;
+  const batches = JSON.parse(stdout) as Array<{ results: Array<{ country_code: string; id: string }> }>;
 
-  if (!batches.some((batch) => batch.results.some((row) => row.id === branchId))) {
-    throw new Error(`D1 no devolvió la sucursal ${branchId} para ${t.branch.customDomain}`);
+  if (
+    !batches.some((batch) =>
+      batch.results.some((row) => row.id === branchId && row.country_code === t.restaurant.countryCode),
+    )
+  ) {
+    throw new Error(
+      `D1 no devolvió la sucursal ${branchId} con country_code=${t.restaurant.countryCode} ` +
+        `para ${t.branch.customDomain}`,
+    );
   }
 }
 

@@ -1,6 +1,7 @@
 {
   "restaurant": {
     "name": "Bar Ejemplo",
+    "countryCode": "ESP",
     "defaultLanguageCode": "es",
     "defaultCurrency": "EUR",
     "legal": {

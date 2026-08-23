@@ -16,8 +16,8 @@ VALUES ('user_seed_owner', 'Juan', 'juanmurga97@gmail.com', 1, unixepoch() * 100
 -- TENANT 1 · Bar La Tasca · tapas.localhost · template "tapas"
 -- =============================================================================
 
-INSERT INTO restaurants (id, name, default_language_code, default_currency, legal_name, tax_id, legal_address, data_protection_email)
-VALUES ('rest_tapas', 'Bar La Tasca', 'es', 'EUR', 'La Tasca Hostelería S.L.', 'B12345678', 'Calle del Laurel 12, Logroño', 'privacidad@latasca.example');
+INSERT INTO restaurants (id, name, country_code, default_language_code, default_currency, legal_name, tax_id, legal_address, data_protection_email)
+VALUES ('rest_tapas', 'Bar La Tasca', 'ESP', 'es', 'EUR', 'La Tasca Hostelería S.L.', 'B12345678', 'Calle del Laurel 12, Logroño', 'privacidad@latasca.example');
 
 INSERT INTO restaurant_users (id, restaurant_id, user_id, role_code)
 VALUES ('ru_tapas_owner', 'rest_tapas', 'user_seed_owner', 'owner');
@@ -87,8 +87,8 @@ INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_co
 -- TENANT 2 · Aurum · fine.localhost · template "fine"
 -- =============================================================================
 
-INSERT INTO restaurants (id, name, default_language_code, default_currency, legal_name, tax_id, legal_address, data_protection_email)
-VALUES ('rest_fine', 'Aurum', 'es', 'EUR', 'Aurum Gastronomía S.L.', 'B87654321', 'Paseo de Gracia 88, Barcelona', 'privacidad@aurum.example');
+INSERT INTO restaurants (id, name, country_code, default_language_code, default_currency, legal_name, tax_id, legal_address, data_protection_email)
+VALUES ('rest_fine', 'Aurum', 'ESP', 'es', 'EUR', 'Aurum Gastronomía S.L.', 'B87654321', 'Paseo de Gracia 88, Barcelona', 'privacidad@aurum.example');
 
 INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALUES
     ('rest_fine', 'es', 1),
@@ -265,8 +265,8 @@ INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_co
 -- TENANT 3 · Café Brote · cafe.localhost · template default (sin entrada KV)
 -- =============================================================================
 
-INSERT INTO restaurants (id, name, default_language_code, default_currency)
-VALUES ('rest_cafe', 'Café Brote', 'es', 'EUR');
+INSERT INTO restaurants (id, name, country_code, default_language_code, default_currency)
+VALUES ('rest_cafe', 'Café Brote', 'ESP', 'es', 'EUR');
 
 INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALUES
     ('rest_cafe', 'es', 1),
