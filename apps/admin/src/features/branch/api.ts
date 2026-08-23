@@ -10,6 +10,19 @@ export function getBranchQueryOptions({ branchId, trpc }: BranchOptionsInput) {
 export function getAddressSuggestionsQueryOptions({ branchId, query, trpc }: BranchOptionsInput & { query: string }) {
   return trpc.admin.branches.searchAddresses.queryOptions({ branchId, query });
 }
+export function getGooglePlaceCandidatesQueryOptions({
+  branchId,
+  query,
+  trpc,
+}: BranchOptionsInput & { query: string }) {
+  return trpc.admin.branches.searchGooglePlaces.queryOptions({ branchId, query });
+}
+export function getGoogleReviewsConnectionMutationOptions(input: BranchOptionsInput & { queryClient: QueryClient }) {
+  const { branchId, queryClient, trpc } = input;
+  return trpc.admin.branches.setGoogleReviewsConnection.mutationOptions({
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: getBranchQueryOptions({ branchId, trpc }).queryKey }),
+  });
+}
 export function getSaveBranchMutationOptions(input: BranchOptionsInput & { queryClient: QueryClient }) {
   const { branchId, queryClient, trpc } = input;
   return trpc.admin.branches.save.mutationOptions({

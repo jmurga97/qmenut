@@ -50,6 +50,20 @@
       "when": 1787508656640,
       "tag": "0006_enforce_restaurant_country_code",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1787511090191,
+      "tag": "0007_google_reviews",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1787511090436,
+      "tag": "0008_enforce_google_reviews_connection",
+      "breakpoints": true
     }
   ]
 }

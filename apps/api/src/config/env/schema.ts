@@ -72,6 +72,11 @@ export const envSchema = z.object({
       typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",
     "El binding GEOCODING_LIMITER debe implementar limit",
   ),
+  PUBLIC_REVIEWS_LIMITER: z.custom<RateLimit>(
+    (value) =>
+      typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",
+    "El binding PUBLIC_REVIEWS_LIMITER debe implementar limit",
+  ),
   DB: z.custom<D1Database>((value) => typeof value === "object" && value !== null, {
     error: "El binding DB es obligatorio",
   }),
@@ -92,6 +97,7 @@ export const envSchema = z.object({
   SENTRY_DSN: z.string().trim().optional(),
   LOG_LEVEL: logLevelSchema.default("info"),
   GOOGLE_MAPS_API_KEY: z.string().trim().min(1).optional(),
+  GOOGLE_PLACES_API_KEY: z.string().trim().min(1).optional(),
   NODE_ENV: nodeEnvSchema.default("development"),
 });
 

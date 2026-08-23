@@ -105,13 +105,7 @@ export function mapPublicContactContent({ data, locale, t }: MapPublicContactCon
   });
 
   return {
-    form: {
-      messageLabel: t("contact.page.messageLabel"),
-      messagePlaceholder: t("contact.page.messagePlaceholder"),
-      nameLabel: t("contact.page.nameLabel"),
-      namePlaceholder: t("contact.page.namePlaceholder"),
-      submitLabel: t("contact.page.submitLabel"),
-    },
+    googleReviewsEnabled: data?.branch.googleReviewsEnabled ?? false,
     locations: branches.map((branch) => {
       const phone = normalizePhone(branch.phone);
       const whatsapp = normalizePhone(branch.whatsapp);
@@ -143,7 +137,6 @@ export function mapPublicContactContent({ data, locale, t }: MapPublicContactCon
           }
         : undefined,
     mapSectionLabel: t("contact.page.locationSectionLabel", { count: markers.length }),
-    messageSectionLabel: t("contact.page.messageSectionLabel"),
     sitesSectionLabel: t("contact.page.sitesSectionLabel"),
     socialLinks: uniqueSocialLinks(branches),
     socialLinksLabel: t("contact.page.socialLinksLabel"),

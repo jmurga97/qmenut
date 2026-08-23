@@ -38,7 +38,7 @@ async function handleRequest(request: Request, env: RuntimeEnv): Promise<Respons
   }
 
   if (url.pathname.startsWith(TRPC_ENDPOINT)) {
-    return fetchRequestHandler({
+    const response = await fetchRequestHandler({
       endpoint: TRPC_ENDPOINT,
       req: request,
       router: appRouter,
@@ -52,6 +52,13 @@ async function handleRequest(request: Request, env: RuntimeEnv): Promise<Respons
         }
       },
     });
+    if (url.pathname.includes("menu.googleReviews")) {
+      const headers = new Headers(response.headers);
+      headers.set("Cache-Control", "no-store");
+      headers.set("Pragma", "no-cache");
+      return new Response(response.body, { headers, status: response.status, statusText: response.statusText });
+    }
+    return response;
   }
 
   return jsonResponse({ error: "No encontrado" }, { status: 404 });

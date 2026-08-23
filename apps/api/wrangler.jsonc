@@ -41,6 +41,14 @@
       },
     },
     {
+      "name": "PUBLIC_REVIEWS_LIMITER",
+      "namespace_id": "1003",
+      "simple": {
+        "limit": 10,
+        "period": 60,
+      },
+    },
+    {
       "name": "LOYALTY_CODE_LIMITER",
       "namespace_id": "1001",
       "simple": {
@@ -105,6 +113,14 @@
           "namespace_id": "2002",
           "simple": {
             "limit": 30,
+            "period": 60,
+          },
+        },
+        {
+          "name": "PUBLIC_REVIEWS_LIMITER",
+          "namespace_id": "2003",
+          "simple": {
+            "limit": 10,
             "period": 60,
           },
         },
@@ -176,6 +192,14 @@
           },
         },
         {
+          "name": "PUBLIC_REVIEWS_LIMITER",
+          "namespace_id": "1003",
+          "simple": {
+            "limit": 10,
+            "period": 60,
+          },
+        },
+        {
           "name": "LOYALTY_CODE_LIMITER",
           "namespace_id": "1001",
           "simple": {
@@ -196,7 +220,7 @@
         "LOG_LEVEL": "info",
         "NODE_ENV": "production",
         "SENTRY_DSN": "https://b201dd7421ecf64b6b7c2f073bae0cf0@o4511851717394432.ingest.de.sentry.io/4511956009943120",
-        "DEV_FIXED_OTP": "false"
+        "DEV_FIXED_OTP": "false",
       },
     },
   },

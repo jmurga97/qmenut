@@ -75,6 +75,28 @@ export interface BranchSettingsWriteData {
   logoUrl: string | null;
 }
 
+interface UpdateGoogleReviewsConnectionInput extends GetBranchInput {
+  enabled: boolean;
+  placeId: string | null;
+}
+
+export async function updateGoogleReviewsConnection({
+  db,
+  restaurantId,
+  branchId,
+  enabled,
+  placeId,
+}: UpdateGoogleReviewsConnectionInput): Promise<void> {
+  await db
+    .update(branches)
+    .set({
+      googlePlaceId: placeId,
+      googleReviewsEnabled: enabled,
+      updatedAt: Date.now(),
+    })
+    .where(and(eq(branches.id, branchId), eq(branches.restaurantId, restaurantId), isNull(branches.deletedAt)));
+}
+
 interface UpdateBranchSettingsInput {
   db: DrizzleDb;
   restaurantId: string;
