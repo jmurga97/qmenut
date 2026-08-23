@@ -1,5 +1,6 @@
 import { FormProvider } from "react-hook-form";
 
+import { PrintableMenuPanel } from "~/features/printable-menu/components/printable-menu-panel";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormShell } from "~/shared/components/forms/form-shell";
 import { PageHeader } from "~/shared/components/page-header";
@@ -16,9 +17,9 @@ export function QrPage() {
   if (!branch) return <NoBranchState description="Crea una sucursal para generar su código QR." />;
   if (!branch.customDomain)
     return <NoDomainState description="El QR necesita un dominio. Contacta con QMenut para asignarlo." />;
-  return <QrPanel host={branch.customDomain} key={branch.id} />;
+  return <QrPanel branchId={branch.id} host={branch.customDomain} key={branch.id} />;
 }
-function QrPanel({ host }: { host: string }) {
+function QrPanel({ branchId, host }: { branchId: string; host: string }) {
   const controller = useQrController(host);
   return (
     <div className="admin-page">
@@ -48,6 +49,7 @@ function QrPanel({ host }: { host: string }) {
           </div>
         </FormShell>
       </FormProvider>
+      <PrintableMenuPanel branchId={branchId} host={host} />
     </div>
   );
 }

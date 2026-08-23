@@ -1,0 +1,134 @@
+.admin-printable-menu {
+  position: relative;
+  gap: 1.5rem;
+  overflow: hidden;
+  max-inline-size: 64rem;
+}
+
+.admin-printable-menu::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background: var(--color-mc-accent);
+  content: "";
+}
+
+.admin-printable-menu__intro {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.admin-printable-menu__intro > div:first-child {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.admin-printable-menu h3 {
+  margin: 0;
+  color: var(--color-mc-text-display);
+  font-family: "Space Mono", monospace;
+  font-size: var(--text-mc-heading);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.admin-printable-menu p,
+.admin-printable-fold figcaption,
+.admin-printable-menu__summary {
+  margin: 0;
+  color: var(--color-mc-text-secondary);
+  font-size: var(--text-mc-body-sm);
+  line-height: 1.5;
+}
+
+.admin-printable-fold {
+  display: grid;
+  grid-template-columns: minmax(7rem, 1fr) auto minmax(7rem, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  margin: 0;
+}
+
+.admin-printable-fold figcaption {
+  grid-column: 1 / -1;
+}
+
+.admin-printable-sheet {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  aspect-ratio: 1.414 / 1;
+  border: 1px solid var(--color-mc-border-visible);
+  background: var(--color-mc-surface-raised);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--color-mc-text-display) 8%, transparent);
+}
+
+.admin-printable-sheet span {
+  display: grid;
+  place-items: center;
+  color: var(--color-mc-text-display);
+  font-family: "Space Mono", monospace;
+  font-size: var(--text-mc-body-sm);
+}
+
+.admin-printable-sheet span + span {
+  border-inline-start: 1px dashed var(--color-mc-accent);
+}
+
+.admin-printable-sheet--inside {
+  background: var(--color-mc-surface);
+}
+
+.admin-printable-fold-mark {
+  color: var(--color-mc-text-tertiary);
+  font-family: "Space Mono", monospace;
+  font-size: var(--text-mc-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+}
+
+.admin-printable-menu__controls {
+  display: grid;
+  gap: 1rem;
+  padding-block: 1.25rem;
+  border-block: 1px solid var(--color-mc-border);
+}
+
+.admin-printable-menu__summary {
+  display: grid;
+  gap: 0.25rem;
+  align-content: center;
+}
+
+.admin-printable-menu__summary span:first-child {
+  color: var(--color-mc-text-primary);
+  font-family: "Space Mono", monospace;
+}
+
+.admin-printable-menu__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (min-width: 760px) {
+  .admin-printable-menu__intro {
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.8fr);
+  }
+
+  .admin-printable-menu__controls {
+    grid-template-columns: minmax(14rem, 0.45fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-printable-fold {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-printable-fold-mark {
+    justify-self: center;
+    writing-mode: horizontal-tb;
+  }
+}
