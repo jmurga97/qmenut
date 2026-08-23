@@ -1,5 +1,5 @@
 import { normalizeTenantHost } from "@qmenut/db/domain/tenant";
-import { TEMPLATES } from "@qmenut/ui/theme/presets";
+import { TEMPLATE_IDS, templateIdSchema } from "@qmenut/ui/theme/template-ids";
 import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 
 interface Env {
@@ -37,8 +37,8 @@ function parseThemeBody(raw: unknown): { error: string } | { value: string } {
 
   const template = (raw as { template?: unknown }).template;
 
-  if (typeof template !== "string" || !Object.hasOwn(TEMPLATES, template)) {
-    return { error: `"template" must be one of: ${Object.keys(TEMPLATES).join(", ")}` };
+  if (!templateIdSchema.safeParse(template).success) {
+    return { error: `"template" must be one of: ${TEMPLATE_IDS.join(", ")}` };
   }
 
   // Normalizes to a full preset object so KV always stores the complete config.

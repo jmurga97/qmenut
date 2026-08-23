@@ -1,4 +1,5 @@
 import { isBodyFontId, isHeadingFontId, QM_FONT_IDS } from "@qmenut/ui/theme/font-catalog";
+import { templateIdSchema } from "@qmenut/ui/theme/template-ids";
 import { z } from "zod";
 
 import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
@@ -19,7 +20,7 @@ const fontId = z.enum(QM_FONT_IDS);
 const saveThemeSchema = z.object({
   branchId: z.string().trim().min(1),
   config: z.object({
-    template: z.enum(["fine", "her", "fast", "cafe", "tapas"]),
+    template: templateIdSchema,
     primary: hexColor,
     secondary: hexColor,
     tagline: z.string().trim().max(120).optional(),

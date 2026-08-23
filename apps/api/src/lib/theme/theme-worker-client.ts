@@ -1,8 +1,9 @@
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { QmFontId } from "@qmenut/ui/theme/font-catalog";
+import type { TemplateId } from "@qmenut/ui/theme/template-ids";
 
 export interface TenantThemeInput {
-  template: string;
+  template: TemplateId;
   primary: string;
   secondary: string;
   tagline?: string;

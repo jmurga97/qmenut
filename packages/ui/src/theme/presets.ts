@@ -1,5 +1,8 @@
 import type { QmFontId } from "./font-catalog";
+import type { QmTemplateName } from "./template-ids";
 import type { QmThemeTokens } from "./tokens";
+
+export type { QmTemplateName, TemplateId } from "./template-ids";
 
 /**
  * The 5 QMenut templates — everything a tenant does NOT choose. A tenant only supplies a
@@ -10,8 +13,6 @@ import type { QmThemeTokens } from "./tokens";
  * Values began from the reference `qmenut-theme.js` engine and are now tuned as product
  * defaults for the mobile-first client menu view.
  */
-export type QmTemplateName = "fine" | "her" | "fast" | "cafe" | "tapas";
-
 export type QmPhotoMode = "none" | "thumb" | "hero" | "heroxl";
 export type QmBadgeShape = "outline" | "block" | "pill";
 export type QmNavStyle = "bar" | "floating" | "solid";

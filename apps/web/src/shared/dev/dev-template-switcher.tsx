@@ -1,9 +1,6 @@
+import { TEMPLATE_IDS } from "@qmenut/ui/theme/template-ids";
 import { useNavigate, useRouteContext } from "@tanstack/react-router";
 import { useEffect } from "react";
-
-import type { QmTemplateName } from "@qmenut/ui/theme/presets";
-
-const TEMPLATE_ORDER: QmTemplateName[] = ["fine", "her", "fast", "cafe", "tapas"];
 
 export function DevTemplateSwitcher() {
   const devTemplate = useRouteContext({ from: "/{-$locale}", select: (context) => context.devTemplate });
@@ -21,14 +18,14 @@ export function DevTemplateSwitcher() {
 
       const index = Number(event.key) - 1;
 
-      if (!Number.isSafeInteger(index) || index < 0 || index >= TEMPLATE_ORDER.length) {
+      if (!Number.isSafeInteger(index) || index < 0 || index >= TEMPLATE_IDS.length) {
         return;
       }
 
       event.preventDefault();
       void navigate({
         to: ".",
-        search: (prev) => ({ ...prev, template: TEMPLATE_ORDER[index] }),
+        search: (prev) => ({ ...prev, template: TEMPLATE_IDS[index] }),
         replace: true,
       });
     }

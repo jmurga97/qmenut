@@ -12,6 +12,10 @@
       "types": "./src/theme/presets.ts",
       "import": "./src/theme/presets.ts"
     },
+    "./theme/template-ids": {
+      "types": "./src/theme/template-ids.ts",
+      "import": "./src/theme/template-ids.ts"
+    },
     "./theme/derive": {
       "types": "./src/theme/derive.ts",
       "import": "./src/theme/derive.ts"
@@ -318,7 +322,8 @@
     "culori": "^4.0.2",
     "leaflet": "1.9.4",
     "lit": "^3.3.3",
-    "motion": "^12.43.0"
+    "motion": "^12.43.0",
+    "zod": "^4.4.3"
   },
   "peerDependencies": {
     "react": "^19.2.3"

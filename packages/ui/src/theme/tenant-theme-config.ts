@@ -1,8 +1,10 @@
 import { isBodyFontId, isHeadingFontId } from "./font-catalog";
 import { TEMPLATES } from "./presets";
+import { templateIdSchema } from "./template-ids";
 
 import type { QmFontId } from "./font-catalog";
-import type { QmTemplateName, QmTemplatePreset } from "./presets";
+import type { QmTemplatePreset } from "./presets";
+import type { QmTemplateName } from "./template-ids";
 
 /**
  * Per-tenant theme configuration stored in the `TENANT_THEME` KV namespace, keyed by the
@@ -27,10 +29,6 @@ export const DEFAULT_TENANT_COLORS = {
   primary: "#A23A28",
   secondary: "#3F7A4B",
 } as const;
-
-function isTemplateName(value: unknown): value is QmTemplateName {
-  return typeof value === "string" && Object.hasOwn(TEMPLATES, value);
-}
 
 function isColor(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
@@ -66,11 +64,13 @@ export function resolveTenantThemeConfig(
   // selected template, so drop the legacy field instead of returning it to consumers.
   delete candidate.layoutRecipe;
 
-  if (!isTemplateName(candidate.template)) {
+  const template = templateIdSchema.safeParse(candidate.template);
+
+  if (!template.success) {
     return buildDefaultTenantThemeConfig(fallbackTemplate);
   }
 
-  const base = TEMPLATES[candidate.template];
+  const base = TEMPLATES[template.data];
   const layout =
     candidate.layout && typeof candidate.layout === "object" && !Array.isArray(candidate.layout)
       ? { ...base.layout, ...candidate.layout }
@@ -92,7 +92,7 @@ export function resolveTenantThemeConfig(
     ...base,
     ...candidate,
     layout,
-    template: candidate.template,
+    template: template.data,
     primary,
     secondary,
     tagline: typeof candidate.tagline === "string" ? candidate.tagline : undefined,

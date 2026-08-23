@@ -1,4 +1,4 @@
-import { TEMPLATES } from "@qmenut/ui/theme/presets";
+import { templateIdSchema } from "@qmenut/ui/theme/template-ids";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
@@ -32,14 +32,12 @@ interface LocaleSearch {
   template?: QmTemplateName;
 }
 
-function isQmTemplateName(value: unknown): value is QmTemplateName {
-  return typeof value === "string" && Object.hasOwn(TEMPLATES, value);
-}
-
 export const Route = createFileRoute("/{-$locale}")({
-  validateSearch: (search: Record<string, unknown>): LocaleSearch => ({
-    template: isQmTemplateName(search.template) ? search.template : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): LocaleSearch => {
+    const template = templateIdSchema.safeParse(search.template);
+
+    return { template: template.success ? template.data : undefined };
+  },
   beforeLoad: async ({ context, location, params, search }): Promise<LocaleRouteContext> => {
     const requested = params.locale?.toLowerCase();
 

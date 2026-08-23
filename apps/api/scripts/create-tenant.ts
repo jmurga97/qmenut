@@ -14,6 +14,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
+import { templateIdSchema } from "@qmenut/ui/theme/template-ids";
 import { z } from "zod";
 
 import {
@@ -75,7 +76,7 @@ const tenantFileSchema = z
       email: z.email(),
     }),
     theme: z.object({
-      template: z.enum(["fine", "her", "fast", "cafe", "tapas"]),
+      template: templateIdSchema,
       primary: z.string().min(1),
       secondary: z.string().min(1),
       tagline: z.string().optional(),
