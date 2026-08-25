@@ -1,9 +1,10 @@
 import { QmCategoryChip } from "@qmenut/ui/components/qm-category-chip/react";
 import { QmCategoryNav } from "@qmenut/ui/components/qm-category-nav/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { menuSectionElementId } from "~/features/menu/components/menu-section-id";
+import { track } from "~/lib/analytics/posthog";
 
 import type { RefObject } from "react";
 import type { MenuSectionViewModel } from "~/features/menu/types/menu-view-model";
@@ -28,9 +29,12 @@ function scrollToMenuSection(index: number): void {
 export function MenuCategoryNav({ scrollContainerRef, sections }: MenuCategoryNavProps) {
   const { t } = useTranslation();
   const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
+  // Empieza en 0: la primera sección es visible al aterrizar y no cuenta como navegación.
+  const deepestIndexRef = useRef(0);
 
   useEffect(() => {
     setActiveId(sections[0]?.id ?? "");
+    deepestIndexRef.current = 0;
   }, [sections]);
 
   useEffect(() => {
@@ -53,9 +57,26 @@ export function MenuCategoryNav({ scrollContainerRef, sections }: MenuCategoryNa
         : (targets.findLast((target) => target.getBoundingClientRect().top <= anchorY) ?? targets[0]);
       const nextId = activeTarget?.dataset.menuSection;
 
-      if (nextId) {
-        setActiveId((currentId) => (currentId === nextId ? currentId : nextId));
-      }
+      if (!nextId) return;
+
+      setActiveId((currentId) => (currentId === nextId ? currentId : nextId));
+
+      // Profundidad máxima alcanzada: un solo evento por categoría, solo al avanzar.
+      const activeIndex = activeTarget ? targets.indexOf(activeTarget) : -1;
+
+      if (activeIndex <= deepestIndexRef.current) return;
+
+      deepestIndexRef.current = activeIndex;
+      const section = sections.find((candidate) => candidate.id === nextId);
+
+      if (!section) return;
+
+      track("menu_category_reached", {
+        category: section.label,
+        category_id: section.id,
+        position: activeIndex + 1,
+        total: sections.length,
+      });
     };
 
     const scheduleActiveCategoryUpdate = () => {
@@ -92,6 +113,7 @@ export function MenuCategoryNav({ scrollContainerRef, sections }: MenuCategoryNa
           value={section.id}
           active={section.id === activeId}
           onQmSelect={() => {
+            track("menu_category_selected", { category: section.label, category_id: section.id });
             scrollToMenuSection(index);
           }}
         >

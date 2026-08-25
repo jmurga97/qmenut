@@ -5,13 +5,13 @@ import { QmSectionHeader } from "@qmenut/ui/components/qm-section-header/react";
 import { menuSectionElementId } from "~/features/menu/components/menu-section-id";
 import { photoUrl } from "~/shared/lib/photo-url";
 
-import type { MenuDishViewModel, MenuSectionViewModel } from "~/features/menu/types/menu-view-model";
+import type { MenuSectionViewModel, SelectDishInput } from "~/features/menu/types/menu-view-model";
 
 const DISH_THUMB_WIDTH_PX = 60;
 
 interface MenuSectionProps {
   index: number;
-  onSelectDish: (dish: MenuDishViewModel, trigger: HTMLButtonElement) => void;
+  onSelectDish: (input: SelectDishInput) => void;
   section: MenuSectionViewModel;
   showDishPhotos: boolean;
 }
@@ -37,7 +37,7 @@ export function MenuSection({ index, onSelectDish, section, showDishPhotos }: Me
             key={dish.rowKey}
             type="button"
             className="dish-trigger"
-            onClick={(event) => onSelectDish(dish, event.currentTarget)}
+            onClick={(event) => onSelectDish({ dish, source: "section", trigger: event.currentTarget })}
           >
             <QmDishRow
               value={{

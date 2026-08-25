@@ -34,5 +34,7 @@ not one per table.
 - There are no per-table QR codes and no scan tracking. Table-level codes or scan
   attribution would be a new feature with a backend and database component, not an
   extension of this one.
-- The generated URL is `https://{customDomain}`, so the branch must have a domain set. See
-  [Custom domains](custom-domains.md).
+- The generated URL is `https://{customDomain}/?utm_source=qr`, so the branch must have a domain set. See
+  [Custom domains](custom-domains.md). The `utm_source=qr` parameter marks visits that come from the printed
+  code: the web app derives `fromQr` from it and PostHog receives a one-time `qr_visit` event plus a
+  `from_qr` property on `menu_view`.

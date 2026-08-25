@@ -25,6 +25,15 @@ export interface MenuDishViewModel {
   rowKey: string;
 }
 
+/** Desde qué superficie de la carta se abrió un plato (descubrimiento destacado vs navegación). */
+export type DishOpenSource = "featured" | "section";
+
+export interface SelectDishInput {
+  dish: MenuDishViewModel;
+  source: DishOpenSource;
+  trigger: HTMLButtonElement;
+}
+
 export interface MenuSectionViewModel {
   count: string;
   dishes: MenuDishViewModel[];
@@ -37,6 +46,8 @@ export interface MenuSectionViewModel {
 export interface MenuContentViewModel {
   featured: MenuDishViewModel | null;
   featuredPromo: QmFeaturedValue | null;
+  /** ID estable de la promoción destacada para analítica; null si no hay o es legado. */
+  featuredPromoId: string | null;
   heroLabel: string;
   logoLabel: string;
   sections: MenuSectionViewModel[];

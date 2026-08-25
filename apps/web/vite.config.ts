@@ -10,6 +10,10 @@ import type { Plugin } from "vite";
 const appDir = path.dirname(fileURLToPath(import.meta.url));
 const SSR_NODE_CONDITIONS = ["node", "module", "import", "default"];
 
+// Deployed dev-worker builds share the PostHog project with production; bake an empty key
+// so analytics compiles out entirely and dev traffic never pollutes real data.
+const isDevWorkerBuild = process.env.CLOUDFLARE_ENV === "development";
+
 function ssrNodeConditions(): Plugin {
   return {
     name: "qmenut:ssr-node-conditions",
@@ -39,6 +43,7 @@ function ssrNodeConditions(): Plugin {
 }
 
 export default defineConfig({
+  define: isDevWorkerBuild ? { "import.meta.env.VITE_POSTHOG_KEY": JSON.stringify("") } : undefined,
   plugins: [
     cloudflare({
       viteEnvironment: { name: "ssr" },

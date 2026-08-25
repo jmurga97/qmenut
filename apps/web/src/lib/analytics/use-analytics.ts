@@ -2,8 +2,10 @@ import { useEffect, useRef } from "react";
 
 import { track } from "~/lib/analytics/posthog";
 
-/** Emite un evento una sola vez al montar la página (guardado frente al doble mount de StrictMode). */
-export function useTrackPageView(event: string, props?: Record<string, unknown>): void {
+import type { AnalyticsEventName, TrackArgs } from "~/lib/analytics/event-catalog";
+
+/** Emite un evento del catálogo una sola vez al montar (guardado frente al doble mount de StrictMode). */
+export function useTrackPageView<E extends AnalyticsEventName>(event: E, ...args: TrackArgs<E>): void {
   const fired = useRef(false);
 
   useEffect(() => {
@@ -12,7 +14,7 @@ export function useTrackPageView(event: string, props?: Record<string, unknown>)
     }
 
     fired.current = true;
-    track(event, props);
+    track(event, ...args);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al montar
   }, []);
 }

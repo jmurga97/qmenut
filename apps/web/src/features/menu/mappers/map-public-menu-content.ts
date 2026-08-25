@@ -118,6 +118,7 @@ export function mapPublicMenuContent({ data, locale, t }: MapPublicMenuContentIn
     featuredPromo: featuredPromoEntity
       ? mapPromotionToFeatured({ data, formatPrice, promotion: featuredPromoEntity, t })
       : null,
+    featuredPromoId: featuredPromoEntity?.id ?? null,
     heroLabel: t("menu.heroLabel"),
     logoLabel: buildLogoLabel(data.branch.name),
     sections,

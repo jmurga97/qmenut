@@ -1,6 +1,8 @@
 import { QmContactPanel } from "@qmenut/ui/components/qm-contact-panel/react";
 import { QmLocation } from "@qmenut/ui/components/qm-location/react";
 
+import { useContactActionTracking } from "~/features/contact/hooks/use-contact-action-tracking";
+
 import type { RefObject } from "react";
 import type { ContactContentViewModel } from "~/features/contact/types/contact-view-model";
 
@@ -13,6 +15,8 @@ interface ContactPanelProps {
 }
 
 export function ContactPanel({ content, hostRef, messageValue, nameValue, submitLabel }: ContactPanelProps) {
+  useContactActionTracking(hostRef);
+
   return (
     <div ref={hostRef}>
       <QmContactPanel

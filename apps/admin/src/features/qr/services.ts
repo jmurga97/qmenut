@@ -2,8 +2,9 @@ import QRCode from "qrcode";
 
 const QR_OPTIONS = { errorCorrectionLevel: "Q", margin: 4 } as const;
 export const QR_PREVIEW_SIZE = 240;
+/** El parámetro marca la visita como procedente del QR físico (PostHog la atribuye a sala). */
 export function buildMenuUrl(host: string): string {
-  return `https://${host}`;
+  return `https://${host}/?utm_source=qr`;
 }
 export function buildQrFileBase(host: string): string {
   return `qr-${host.replaceAll(".", "-")}`;
