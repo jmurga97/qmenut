@@ -15,9 +15,10 @@ function readStoredTheme(): AdminTheme {
 }
 
 function applyTheme(theme: AdminTheme) {
-  document.documentElement.dataset.mcTheme = theme;
+  document.documentElement.classList.remove("light", "dark");
+  document.documentElement.classList.add(theme);
   document.documentElement.style.colorScheme = theme;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#181a1f" : "#f5f5f5");
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#171815" : "#f6f6f2");
 }
 
 export function AdminThemePreference() {

@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { Field, Input } from "@ming/components";
 import { useFormContext } from "react-hook-form";
 
 import type { HTMLInputTypeAttribute } from "react";
@@ -24,24 +24,19 @@ export function FormTextInput<TValues extends FieldValues>({
   placeholder,
   type = "text",
 }: FormTextInputProps<TValues>) {
-  const inputId = useId();
   const { formState, getFieldState, register } = useFormContext<TValues>();
   const error = getFieldState(name, formState).error?.message;
   return (
-    <label className="admin-field" htmlFor={inputId}>
-      <span>{label}</span>
-      <input
+    <Field error={error} invalid={Boolean(error)} label={label}>
+      <Input
         {...register(name)}
-        aria-invalid={Boolean(error)}
         autoComplete={autocomplete}
-        id={inputId}
         inputMode={inputMode}
         maxLength={maxLength}
         placeholder={placeholder}
         readOnly={disabled}
         type={type}
       />
-      {error ? <small role="alert">{error}</small> : null}
-    </label>
+    </Field>
   );
 }

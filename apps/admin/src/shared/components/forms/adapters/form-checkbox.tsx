@@ -1,4 +1,5 @@
-import { useFormContext } from "react-hook-form";
+import { Checkbox } from "@ming/components";
+import { useController, useFormContext } from "react-hook-form";
 
 import type { FieldPath, FieldValues } from "react-hook-form";
 
@@ -8,11 +9,16 @@ type FormCheckboxProps<TValues extends FieldValues> = {
   name: FieldPath<TValues>;
 };
 export function FormCheckbox<TValues extends FieldValues>({ disabled, label, name }: FormCheckboxProps<TValues>) {
-  const { register } = useFormContext<TValues>();
+  const { control } = useFormContext<TValues>();
+  const { field } = useController({ control, name });
   return (
-    <label className="admin-checkbox">
-      <input {...register(name)} disabled={disabled} type="checkbox" />
-      <span>{label}</span>
-    </label>
+    <div className="admin-form-checkbox">
+      <Checkbox
+        checked={Boolean(field.value)}
+        disabled={disabled}
+        label={label}
+        onCheckedChange={(checked) => field.onChange(checked)}
+      />
+    </div>
   );
 }

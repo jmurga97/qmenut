@@ -13,8 +13,9 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
+    "@base-ui/react": "^1.7.0",
     "@hookform/resolvers": "^5.2.2",
-    "@murga.ing/components": "^2.0.0",
+    "@ming/components": "../../../ming-components/ming-components-1.0.2.tgz",
     "@qmenut/api": "workspace:*",
     "@qmenut/auth": "workspace:*",
     "@qmenut/permissions": "workspace:*",
@@ -25,7 +26,6 @@
     "@trpc/client": "11.18.0",
     "@trpc/server": "11.18.0",
     "@trpc/tanstack-react-query": "11.18.0",
-    "lit": "^3.3.0",
     "qrcode": "^1.5.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",

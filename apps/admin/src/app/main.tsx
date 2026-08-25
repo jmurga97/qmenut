@@ -1,5 +1,4 @@
-import { registerMurgaComponents } from "@murga.ing/components/register";
-import "@murga.ing/components/react";
+import "@ming/components/styles.css";
 import * as Sentry from "@sentry/react";
 import { createBrowserHistory, createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
@@ -13,13 +12,16 @@ import { RouteErrorState } from "~/shared/components/state/error-state";
 import { LoadingState } from "~/shared/components/state/loading-state";
 import { NotFoundState } from "~/shared/components/state/not-found-state";
 import "./styles/global.css";
+import "../shared/components/charts/styles.css";
+import "../shared/components/controls/styles.css";
 import "../shared/components/forms/styles.css";
+import "../shared/components/metrics/styles.css";
 import "../shared/images/styles.css";
 import "../features/auth/styles.css";
 import "../features/branch/styles.css";
+import "../features/dashboard/styles.css";
 import "../features/languages/styles.css";
 import "../features/loyalty/styles.css";
-import "../features/overview/styles.css";
 import "../features/qr/styles.css";
 import "../features/theme/styles.css";
 
@@ -31,7 +33,6 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     tracesSampleRate: 0,
   });
 }
-registerMurgaComponents();
 const router = createRouter({
   routeTree,
   history: createBrowserHistory(),

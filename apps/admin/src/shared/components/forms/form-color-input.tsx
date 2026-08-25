@@ -1,3 +1,4 @@
+import { Field } from "@ming/components";
 import { useId } from "react";
 import { useController, useFormContext } from "react-hook-form";
 
@@ -13,7 +14,7 @@ export function FormColorInput<TValues extends FieldValues>({ label, name }: For
   const { field, fieldState } = useController({ control, name });
   const value = typeof field.value === "string" ? field.value : "";
   return (
-    <mc-field error={fieldState.error?.message} invalid={fieldState.invalid} label={label}>
+    <Field error={fieldState.error?.message} invalid={fieldState.invalid} label={label}>
       <div className="admin-color-row">
         <input
           aria-label={`${label}: selector`}
@@ -31,6 +32,6 @@ export function FormColorInput<TValues extends FieldValues>({ label, name }: For
           value={value}
         />
       </div>
-    </mc-field>
+    </Field>
   );
 }

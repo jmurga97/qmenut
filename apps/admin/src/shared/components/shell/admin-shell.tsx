@@ -1,4 +1,4 @@
-import { McAppShell, McSidebarNav } from "@murga.ing/components/react";
+import { AppShell } from "@ming/components";
 import { can } from "@qmenut/permissions";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate, useRouter } from "@tanstack/react-router";
@@ -8,42 +8,89 @@ import { useShellActions, useShellMobile, useSidebarOpen } from "~/app/store/she
 import { signOut } from "~/lib/auth-client";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
+import { buildPublicMenuUrl } from "~/shared/services/public-menu-url";
+
+import { AdminSidebar } from "./admin-sidebar";
+
+import type { AdminSidebarGroup, AdminSidebarIconName } from "./admin-sidebar";
+import type { Permission } from "@qmenut/permissions";
+
+type NavigationGroupId = "business" | "operations" | "public-menu";
+
+interface Section {
+  group: NavigationGroupId;
+  icon: AdminSidebarIconName;
+  id: string;
+  label: string;
+  path: string;
+  permission?: Permission;
+}
 
 const SECTIONS = [
-  { id: "overview", icon: "grid", label: "Resumen", path: "/" },
-  { id: "menu", icon: "list", label: "Menú", path: "/menu" },
-  { id: "branch", icon: "settings", label: "Sucursal", path: "/branch" },
-  { id: "promotions", icon: "tag", label: "Promociones", path: "/promotions" },
-  { id: "loyalty", icon: "user", label: "Fidelización", path: "/loyalty" },
-  { id: "theme", icon: "settings", label: "Tema", path: "/theme" },
-  { id: "qr", icon: "grid", label: "Código QR", path: "/qr" },
-  { id: "languages", icon: "list", label: "Idiomas", path: "/languages" },
+  { group: "operations", icon: "overview", id: "overview", label: "Resumen", path: "/" },
+  { group: "operations", icon: "menu", id: "menu", label: "Menú", path: "/menu" },
   {
+    group: "operations",
+    icon: "promotions",
+    id: "promotions",
+    label: "Promociones",
+    path: "/promotions",
+  },
+  {
+    group: "operations",
+    icon: "loyalty",
+    id: "loyalty",
+    label: "Fidelización",
+    path: "/loyalty",
+  },
+  { group: "public-menu", icon: "theme", id: "theme", label: "Tema", path: "/theme" },
+  {
+    group: "public-menu",
+    icon: "languages",
+    id: "languages",
+    label: "Idiomas",
+    path: "/languages",
+  },
+  { group: "public-menu", icon: "qr", id: "qr", label: "Código QR", path: "/qr" },
+  { group: "business", icon: "branch", id: "branch", label: "Sucursal", path: "/branch" },
+  {
+    group: "business",
+    icon: "billing",
     id: "billing",
-    icon: "settings",
     label: "Facturación",
     path: "/billing",
     permission: "billing.manage",
   },
+] as const satisfies readonly Section[];
+
+const NAVIGATION_GROUPS = [
+  { id: "operations", label: "Operación" },
+  { id: "public-menu", label: "Carta pública" },
+  { id: "business", label: "Negocio" },
 ] as const;
+
 function getCurrentSectionLabel(pathname: string) {
   const section = SECTIONS.find((item) => item.path !== "/" && pathname.startsWith(item.path));
   return section?.label ?? "Resumen";
 }
-function getNavigationItems(pathname: string, roleCode: Parameters<typeof can>[0]) {
-  return SECTIONS.filter((section) => !("permission" in section) || can(roleCode, section.permission)).map(
-    (section) => ({
-      id: section.id,
-      icon: section.icon,
-      label: section.label,
-      current: section.path === "/" ? pathname === "/" : pathname.startsWith(section.path),
-    }),
-  );
+
+function getNavigationGroups(pathname: string, roleCode: Parameters<typeof can>[0]): AdminSidebarGroup[] {
+  const visibleSections = SECTIONS.filter((section) => !("permission" in section) || can(roleCode, section.permission));
+  return NAVIGATION_GROUPS.map((group) => ({
+    id: group.id,
+    label: group.label,
+    items: visibleSections
+      .filter((section) => section.group === group.id)
+      .map((section) => ({
+        current: section.path === "/" ? pathname === "/" : pathname.startsWith(section.path),
+        href: section.path,
+        icon: section.icon,
+        id: section.id,
+        label: section.label,
+      })),
+  }));
 }
-const FOOTER_ITEMS = [
-  { id: "public-site", label: "Ver carta", description: "Abrir la carta pública de la sucursal" },
-  { id: "logout", label: "Salir", description: "Cerrar sesión del panel" },
-];
+
 export function AdminShell() {
   const navigate = useNavigate();
   const router = useRouter();
@@ -58,11 +105,7 @@ export function AdminShell() {
   const selectedBranch = resolveSelectedBranch(tenant.branches, selectedBranchId);
   const sectionLabel = getCurrentSectionLabel(location.pathname);
   async function selectNavigation(selectedId: string) {
-    if (selectedId === "public-site") {
-      if (selectedBranch?.customDomain) {
-        window.open(`http://${selectedBranch.customDomain}:5173`, "_blank", "noopener,noreferrer");
-      }
-    } else if (selectedId === "logout") {
+    if (selectedId === "logout") {
       await signOut();
       queryClient.clear();
       await navigate({ to: "/login" });
@@ -73,55 +116,37 @@ export function AdminShell() {
     if (isMobile) closeSidebar();
   }
   return (
-    <McAppShell
+    <AppShell
       className="admin-app-shell"
-      collapseLabel="Ocultar navegación"
-      expandLabel="Abrir navegación"
-      mobileOverlay={isMobile}
-      onMcSidebarOpenChange={(event) => setSidebarOpen(event.detail.open)}
-      sidebarOpen={isSidebarOpen}
+      header={
+        <header className="admin-topbar">
+          <div className="admin-topbar-copy">
+            {selectedBranch ? <div className="admin-topbar-context">{selectedBranch.name}</div> : null}
+            <h1>{sectionLabel}</h1>
+          </div>
+        </header>
+      }
+      navigation={
+        <AdminSidebar
+          branches={tenant.branches}
+          groups={getNavigationGroups(location.pathname, tenant.roleCode)}
+          onBranchChange={(branchId) => {
+            setSelectedBranchId(branchId);
+            void router.invalidate();
+          }}
+          onNavigate={(selectedId) => void selectNavigation(selectedId)}
+          publicMenuUrl={selectedBranch?.customDomain ? buildPublicMenuUrl(selectedBranch.customDomain) : null}
+          restaurantName={tenant.restaurant.name}
+          selectedBranch={selectedBranch}
+        />
+      }
+      navigationLabel="Navegación del panel"
+      onOpenChange={setSidebarOpen}
+      open={isSidebarOpen}
     >
-      <McSidebarNav
-        ariaLabel="Navegación del panel"
-        className="admin-sidebar-slot"
-        collapsed={!isSidebarOpen}
-        footerItems={FOOTER_ITEMS}
-        items={getNavigationItems(location.pathname, tenant.roleCode)}
-        onMcSelect={(event) => void selectNavigation(event.detail.selectedId)}
-        open={false}
-        slot="sidebar"
-      >
-        <div slot="header" className="admin-sidebar-identity">
-          <div className="admin-sidebar-kicker">QMenut</div>
-          <div className="admin-sidebar-title">{tenant.restaurant.name}</div>
-          <label className="admin-branch-select">
-            <span>Sucursal</span>
-            <select
-              disabled={tenant.branches.length < 2}
-              onChange={(event) => {
-                setSelectedBranchId(event.currentTarget.value);
-                void router.invalidate();
-              }}
-              value={selectedBranch?.id ?? ""}
-            >
-              {tenant.branches.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </McSidebarNav>
-      <header slot="header" className="admin-topbar">
-        <div>
-          <div className="admin-kicker">{tenant.restaurant.name}</div>
-          <h1>{sectionLabel}</h1>
-        </div>
-      </header>
-      <div slot="main" className="admin-main-slot">
+      <div className="admin-main-slot">
         <Outlet />
       </div>
-    </McAppShell>
+    </AppShell>
   );
 }

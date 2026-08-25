@@ -1,8 +1,18 @@
+import { InlineMessage } from "@ming/components";
 import { useController, useFormContext } from "react-hook-form";
 
 import type { FieldPath, FieldValues } from "react-hook-form";
 
 type ChipId = number | string;
+
+function SelectedChipIcon() {
+  return (
+    <svg aria-hidden="true" className="admin-chip__icon" fill="none" viewBox="0 0 16 16">
+      <path d="m3.5 8.25 2.75 2.75 6.25-6.25" stroke="currentColor" strokeLinecap="round" strokeWidth="1.75" />
+    </svg>
+  );
+}
+
 interface FormChipGroupProps<TValues extends FieldValues> {
   label: string;
   name: FieldPath<TValues>;
@@ -29,12 +39,13 @@ export function FormChipGroup<TValues extends FieldValues>({ label, name, option
               onClick={() => toggle(option.id)}
               type="button"
             >
-              {option.label}
+              {active ? <SelectedChipIcon /> : null}
+              <span>{option.label}</span>
             </button>
           );
         })}
       </div>
-      {fieldState.error?.message ? <mc-inline-message message={fieldState.error.message} tone="error" /> : null}
+      {fieldState.error?.message ? <InlineMessage message={fieldState.error.message} tone="error" /> : null}
     </section>
   );
 }

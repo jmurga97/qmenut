@@ -1,3 +1,5 @@
+import { Button } from "@ming/components";
+
 import type { ReactNode } from "react";
 
 interface FormActionsProps {
@@ -20,23 +22,23 @@ export function FormActions({
     <div className="admin-topbar-actions">
       {children}
       {onCancel ? (
-        <mc-button
+        <Button
           key={busy ? "cancel-busy" : "cancel-idle"}
           disabled={busy || undefined}
           onClick={onCancel}
           variant="secondary"
         >
           Cancelar
-        </mc-button>
+        </Button>
       ) : null}
-      <mc-button
+      <Button
         key={busy ? "submit-busy" : "submit-idle"}
         disabled={busy || undefined}
         onClick={onSubmit}
         variant="primary"
       >
         {busy ? busyLabel : submitLabel}
-      </mc-button>
+      </Button>
     </div>
   );
 }
