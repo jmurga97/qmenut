@@ -1,3 +1,4 @@
+import { Button, Field, Input, Switch } from "@ming/components";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -87,16 +88,13 @@ function MenuList({ branchId }: { branchId: string }) {
             <div className="admin-toolbar-controls">
               <span className="admin-list-meta">{formatMoney(dish.price)}</span>
               {canToggleAvailability ? (
-                <label className="admin-checkbox admin-list-meta">
-                  <input
-                    aria-label={`Disponibilidad de ${dish.name}`}
-                    checked={dish.isActive}
-                    disabled={availabilityPendingDishId === dish.id}
-                    onChange={(event) => setAvailability(dish.id, event.currentTarget.checked)}
-                    type="checkbox"
-                  />
-                  {dish.isActive ? "Disponible" : "Oculto"}
-                </label>
+                <Switch
+                  aria-label={`Disponibilidad de ${dish.name}`}
+                  checked={dish.isActive}
+                  disabled={availabilityPendingDishId === dish.id}
+                  label={dish.isActive ? "Disponible" : "Oculto"}
+                  onCheckedChange={(checked) => setAvailability(dish.id, checked)}
+                />
               ) : (
                 <span className="admin-list-meta">{dish.isActive ? "Disponible" : "Oculto"}</span>
               )}
@@ -118,7 +116,7 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
   const controller = useCategoryEditorController({ branchId, categoryId });
   if (categoryId && !controller.category) return <NotFoundState />;
   return (
-    <div className="admin-page">
+    <div className="admin-page admin-editor-page">
       <PageHeader
         kicker={categoryId ? "Editar categoría" : "Nueva categoría"}
         title={controller.category?.name ?? "Categoría"}
@@ -166,7 +164,7 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
   const canWrite = useCan("menu.write");
   const controller = useDishEditorController({ branchId, dish });
   return (
-    <div className="admin-page">
+    <div className="admin-page admin-editor-page">
       <PageHeader kicker={dish ? "Editar plato" : "Nuevo plato"} title={dish?.name ?? "Plato"} />
       <FormProvider {...controller.form}>
         <FormShell
@@ -189,7 +187,7 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
               onSelect={controller.image.selectFile}
             />
             <FormTextarea<DishFormValues> label="Descripción" name="description" rows={3} />
-            <div className="admin-form-grid--two">
+            <div className="admin-choice-grid">
               <FormCheckbox<DishFormValues> label="Activo" name="isActive" />
               <FormCheckbox<DishFormValues> label="Recomendado" name="isRecommended" />
               <FormCheckbox<DishFormValues> label="Destacado" name="isFeatured" />
@@ -229,17 +227,15 @@ function ExtraIngredientCreator({
   };
   return (
     <div className="admin-form-grid admin-form-grid--two">
-      <label className="admin-field">
-        <span>Nombre del extra</span>
-        <input onChange={(event) => setName(event.currentTarget.value)} value={name} />
-      </label>
-      <label className="admin-field">
-        <span>Precio en euros</span>
-        <input inputMode="decimal" onChange={(event) => setPrice(event.currentTarget.value)} value={price} />
-      </label>
-      <mc-button className="admin-inline-button" disabled={!canAdd || busy} onClick={add} variant="secondary">
+      <Field label="Nombre del extra">
+        <Input onValueChange={setName} value={name} />
+      </Field>
+      <Field label="Precio en euros">
+        <Input inputMode="decimal" onValueChange={setPrice} value={price} />
+      </Field>
+      <Button className="admin-inline-button" disabled={!canAdd || busy} onClick={add} variant="secondary">
         + Añadir extra
-      </mc-button>
+      </Button>
     </div>
   );
 }

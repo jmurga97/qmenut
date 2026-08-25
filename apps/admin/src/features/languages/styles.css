@@ -1,10 +1,20 @@
 /* Languages and translations */
 
+.admin-languages-workspace {
+  display: grid;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.admin-language-add {
+  align-content: start;
+}
+
 .admin-translation-row {
   display: grid;
   gap: 0.5rem;
   padding-block: 0.75rem;
-  border-bottom: 1px solid var(--color-mc-border);
+  border-bottom: 1px solid var(--border);
 }
 
 .admin-translation-row:last-child {
@@ -25,22 +35,51 @@
 .admin-translation-input textarea {
   flex: 1;
   min-height: 2.75rem;
-  border: 1px solid var(--color-mc-border-visible);
-  border-radius: 0.5rem;
-  background: var(--color-mc-surface);
-  color: var(--color-mc-text-display);
+  border: 1px solid var(--input);
+  border-radius: 0.375rem;
+  background: var(--card);
+  color: var(--foreground);
   padding: 0.5rem 0.75rem;
   outline: none;
   font-family: inherit;
 }
 
-.admin-translation-input input:focus,
-.admin-translation-input textarea:focus {
-  border-color: var(--color-mc-text-display);
+.admin-translation-input input:focus-visible,
+.admin-translation-input textarea:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
 }
 
 .admin-translation-nested {
   margin-inline-start: 1.25rem;
   padding-inline-start: 1rem;
-  border-inline-start: 1px solid var(--color-mc-border);
+  border-inline-start: 1px solid var(--border);
+}
+
+@media (max-width: 40rem) {
+  .admin-translation-input {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-translation-input .ming-field,
+  .admin-translation-input .ming-button {
+    width: 100%;
+  }
+
+  .admin-translation-nested {
+    margin-inline-start: 0.5rem;
+    padding-inline-start: 0.75rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .admin-languages-workspace {
+    grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.55fr);
+  }
+
+  .admin-language-add {
+    position: sticky;
+    top: 1.5rem;
+  }
 }

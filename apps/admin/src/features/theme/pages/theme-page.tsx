@@ -26,7 +26,7 @@ function ThemeForm({ branchId, host }: { branchId: string; host: string }) {
   const canWrite = useCan("theme.write");
   const controller = useThemeController(branchId);
   return (
-    <div className="admin-page">
+    <div className="admin-page admin-theme-page">
       <PageHeader kicker={`Tema · ${host}`} title="Personalización" />
       <FormProvider {...controller.form}>
         <FormShell
@@ -37,16 +37,22 @@ function ThemeForm({ branchId, host }: { branchId: string; host: string }) {
           submitLabel="Guardar tema"
           success={controller.feedback.success}
         >
-          <div className="admin-form-grid">
-            <FormSelect<ThemeFormValues> label="Plantilla" name="template" options={THEME_OPTIONS} />
-            <FormColorInput<ThemeFormValues> label="Color primario" name="primary" />
-            <FormColorInput<ThemeFormValues> label="Color secundario" name="secondary" />
-            <FormTextInput<ThemeFormValues> label="Eslogan" maxLength={120} name="tagline" />
-          </div>
-          <div className="admin-theme-preview" style={{ borderColor: controller.preview.primary }}>
-            <span className="admin-theme-swatch" style={{ background: controller.preview.primary }} />
-            <span className="admin-theme-swatch" style={{ background: controller.preview.secondary }} />
-            <span className="admin-list-meta">{controller.preview.tagline || "Sin eslogan"}</span>
+          <div className="admin-theme-workspace">
+            <div className="admin-form-grid">
+              <FormSelect<ThemeFormValues> label="Plantilla" name="template" options={THEME_OPTIONS} />
+              <FormColorInput<ThemeFormValues> label="Color primario" name="primary" />
+              <FormColorInput<ThemeFormValues> label="Color secundario" name="secondary" />
+              <FormTextInput<ThemeFormValues> label="Eslogan" maxLength={120} name="tagline" />
+            </div>
+            <aside className="admin-theme-preview" style={{ borderColor: controller.preview.primary }}>
+              <div className="admin-kicker">Vista previa</div>
+              <div className="admin-theme-preview-colors">
+                <span className="admin-theme-swatch" style={{ background: controller.preview.primary }} />
+                <span className="admin-theme-swatch" style={{ background: controller.preview.secondary }} />
+              </div>
+              <strong>{controller.preview.tagline || "Sin eslogan"}</strong>
+              <span className="admin-list-meta">Los colores se aplicarán a la carta pública.</span>
+            </aside>
           </div>
         </FormShell>
       </FormProvider>

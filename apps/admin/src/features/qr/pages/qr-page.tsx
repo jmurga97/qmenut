@@ -1,3 +1,4 @@
+import { Button } from "@ming/components";
 import { FormProvider } from "react-hook-form";
 
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
@@ -21,18 +22,18 @@ export function QrPage() {
 function QrPanel({ host }: { host: string }) {
   const controller = useQrController(host);
   return (
-    <div className="admin-page">
+    <div className="admin-page admin-qr-page">
       <PageHeader kicker={`Código QR · ${host}`} title="Código QR de la carta" />
       <FormProvider {...controller.form}>
         <FormShell
           actions={
             <>
-              <mc-button onClick={() => void controller.download("svg")} variant="secondary">
+              <Button onClick={() => void controller.download("svg")} variant="secondary">
                 Descargar SVG
-              </mc-button>
-              <mc-button onClick={() => void controller.copy()} variant="secondary">
+              </Button>
+              <Button onClick={() => void controller.copy()} variant="secondary">
                 Copiar URL
-              </mc-button>
+              </Button>
             </>
           }
           error={controller.error}
@@ -40,11 +41,17 @@ function QrPanel({ host }: { host: string }) {
           submitLabel="Descargar PNG"
           success={controller.success}
         >
-          <div className="admin-qr-preview">
-            <canvas ref={controller.canvasRef} height={QR_PREVIEW_SIZE} width={QR_PREVIEW_SIZE} />
-          </div>
-          <div className="admin-form-grid">
-            <FormSelect label="Tamaño del PNG" name="size" options={QR_SIZE_OPTIONS} />
+          <div className="admin-qr-workspace">
+            <div className="admin-qr-preview">
+              <canvas ref={controller.canvasRef} height={QR_PREVIEW_SIZE} width={QR_PREVIEW_SIZE} />
+            </div>
+            <section className="admin-qr-controls" aria-labelledby="admin-qr-controls-title">
+              <div className="admin-kicker" id="admin-qr-controls-title">
+                Archivo de descarga
+              </div>
+              <p className="admin-copy">Elige el tamaño según dónde vayas a imprimir o compartir el código.</p>
+              <FormSelect label="Tamaño del PNG" name="size" options={QR_SIZE_OPTIONS} />
+            </section>
           </div>
         </FormShell>
       </FormProvider>

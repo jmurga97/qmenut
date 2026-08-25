@@ -1,3 +1,4 @@
+import { InlineMessage } from "@ming/components";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { FormProvider } from "react-hook-form";
@@ -101,9 +102,9 @@ function UnsupportedPromotion({ name }: { name: string }) {
   return (
     <div className="admin-page">
       <PageHeader kicker="Promoción no editable" title={name} />
-      <mc-inline-message
+      <InlineMessage
         message="Este tipo de promoción se conserva sin cambios, pero todavía no puede editarse desde este formulario."
-        tone="idle"
+        tone="warning"
       />
     </div>
   );
@@ -112,7 +113,7 @@ function PromotionForm({ branchId, promotion }: { branchId: string; promotion: E
   const canWrite = useCan("promotions.write");
   const controller = usePromotionEditorController({ branchId, promotion });
   return (
-    <div className="admin-page">
+    <div className="admin-page admin-editor-page">
       <PageHeader kicker={promotion ? "Editar promoción" : "Nueva promoción"} title={promotion?.name ?? "Promoción"} />
       <FormProvider {...controller.form}>
         <FormShell

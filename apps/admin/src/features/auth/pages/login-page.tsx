@@ -1,5 +1,6 @@
 import { FormProvider } from "react-hook-form";
 
+import { FormOtpInput } from "~/shared/components/forms/adapters/form-otp-input";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
 import { FormActions } from "~/shared/components/forms/form-actions";
 import { FormFeedback } from "~/shared/components/forms/form-feedback";
@@ -58,17 +59,19 @@ export function LoginPage() {
         </div>
         <FormProvider {...controller.form}>
           <div className="admin-login-form">
-            <FormTextInput<LoginFormValues>
-              autocomplete={emailStep ? "email" : "one-time-code"}
-              disabled={controller.busy}
-              inputMode={emailStep ? "email" : "numeric"}
-              key={emailStep ? "email" : "otp"}
-              label={emailStep ? "Email" : "Código OTP"}
-              maxLength={emailStep ? undefined : 6}
-              name={emailStep ? "email" : "otp"}
-              placeholder={emailStep ? "nombre@turestaurante.com" : "000000"}
-              type={emailStep ? "email" : "text"}
-            />
+            {emailStep ? (
+              <FormTextInput<LoginFormValues>
+                autocomplete="email"
+                disabled={controller.busy}
+                inputMode="email"
+                label="Email"
+                name="email"
+                placeholder="nombre@turestaurante.com"
+                type="email"
+              />
+            ) : (
+              <FormOtpInput<LoginFormValues> disabled={controller.busy} label="Código OTP" length={6} name="otp" />
+            )}
             <FormFeedback error={controller.error} />
             <FormActions
               busy={controller.busy}

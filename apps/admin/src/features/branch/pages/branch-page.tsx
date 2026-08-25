@@ -27,7 +27,7 @@ function BranchForm({ branchId }: { branchId: string }) {
   const canWrite = useCan("branch.write");
   const controller = useBranchController(branchId);
   return (
-    <div className="admin-page">
+    <div className="admin-page admin-branch-page">
       <PageHeader kicker="Sucursal" title={controller.settings.name} />
       <FormProvider {...controller.form}>
         <FormShell
@@ -37,36 +37,44 @@ function BranchForm({ branchId }: { branchId: string }) {
           readOnly={!canWrite}
           success={controller.feedback.success}
         >
-          <div className="admin-form-grid">
-            <FormTextInput<BranchFormValues> label="Nombre" name="name" />
-            <BranchAddressAutocomplete branchId={branchId} />
-            <FormTextInput<BranchFormValues> label="Teléfono" name="phone" />
-            <FormTextInput<BranchFormValues> label="WhatsApp" name="whatsapp" />
-            <ImageUploadControl
-              disabled={controller.pending}
-              draft={controller.logo.draft}
-              label="Logo (icono de la app)"
-              onRemove={controller.logo.remove}
-              onRetry={controller.logo.retry}
-              onSelect={controller.logo.selectFile}
-            />
-            <FormSelect<BranchFormValues>
-              label="Zona horaria del restaurante"
-              name="timezone"
-              options={TIMEZONE_OPTIONS}
-            />
-          </div>
-          <ImageGalleryControl
-            disabled={controller.pending}
-            drafts={controller.gallery.drafts}
-            error={controller.gallery.error}
-            label="Galería de la sucursal"
-            onAdd={controller.gallery.addFiles}
-            onMove={controller.gallery.move}
-            onRemove={controller.gallery.remove}
-            onReplace={controller.gallery.replace}
-            onRetry={controller.gallery.retry}
-          />
+          <section className="admin-editor-section">
+            <div className="admin-kicker">Identidad y contacto</div>
+            <div className="admin-form-grid admin-form-grid--two">
+              <FormTextInput<BranchFormValues> label="Nombre" name="name" />
+              <BranchAddressAutocomplete branchId={branchId} />
+              <FormTextInput<BranchFormValues> label="Teléfono" name="phone" />
+              <FormTextInput<BranchFormValues> label="WhatsApp" name="whatsapp" />
+              <FormSelect<BranchFormValues>
+                label="Zona horaria del restaurante"
+                name="timezone"
+                options={TIMEZONE_OPTIONS}
+              />
+            </div>
+          </section>
+          <section className="admin-editor-section">
+            <div className="admin-kicker">Imágenes públicas</div>
+            <div className="admin-branch-media-grid">
+              <ImageUploadControl
+                disabled={controller.pending}
+                draft={controller.logo.draft}
+                label="Logo (icono de la app)"
+                onRemove={controller.logo.remove}
+                onRetry={controller.logo.retry}
+                onSelect={controller.logo.selectFile}
+              />
+              <ImageGalleryControl
+                disabled={controller.pending}
+                drafts={controller.gallery.drafts}
+                error={controller.gallery.error}
+                label="Galería de la sucursal"
+                onAdd={controller.gallery.addFiles}
+                onMove={controller.gallery.move}
+                onRemove={controller.gallery.remove}
+                onReplace={controller.gallery.replace}
+                onRetry={controller.gallery.retry}
+              />
+            </div>
+          </section>
           <section className="admin-editor-section">
             <div className="admin-kicker">Horario semanal</div>
             <div className="admin-schedule-grid">

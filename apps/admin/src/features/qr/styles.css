@@ -2,9 +2,41 @@
 
 .admin-qr-preview {
   display: flex;
-  width: fit-content;
-  padding: 12px;
-  border: 1px solid var(--mc-border, #e2e2e2);
-  border-radius: 12px;
+  width: min(100%, 22rem);
+  align-self: start;
+  padding: 1rem;
+  border: 1px solid var(--border, #e0e2da);
+  border-radius: 0.5rem;
   background: #ffffff;
+}
+
+.admin-qr-preview canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.admin-qr-workspace {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.admin-qr-controls {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--card);
+}
+
+@media (min-width: 48rem) {
+  .admin-qr-page .admin-editor-shell {
+    max-width: 56rem;
+  }
+
+  .admin-qr-workspace {
+    grid-template-columns: minmax(16rem, 22rem) minmax(16rem, 1fr);
+  }
 }

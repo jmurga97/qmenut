@@ -2,6 +2,43 @@ import { centsToEuros, eurosToCents } from "~/shared/services/money";
 
 import type { DishDetail, DishFormValues } from "./types";
 
+const ALLERGEN_LABELS: Record<string, string> = {
+  celery: "Apio",
+  crustaceans: "Crustáceos",
+  eggs: "Huevos",
+  fish: "Pescado",
+  gluten: "Gluten",
+  lupin: "Altramuces",
+  milk: "Leche",
+  molluscs: "Moluscos",
+  mustard: "Mostaza",
+  nuts: "Frutos de cáscara",
+  peanuts: "Cacahuetes",
+  sesame: "Sésamo",
+  soybeans: "Soja",
+  sulphites: "Sulfitos",
+};
+
+const TAG_LABELS: Record<string, string> = {
+  contains_alcohol: "Contiene alcohol",
+  gluten_free: "Sin gluten",
+  lactose_free: "Sin lactosa",
+  new: "Novedad",
+  seasonal: "De temporada",
+  spicy: "Picante",
+  vegan: "Vegano",
+};
+
+export function toAllergenDisplayLabel(code: string) {
+  return ALLERGEN_LABELS[code] ?? code;
+}
+
+export function toTagDisplayLabel(tag: { code: string | null; id: string; label: string | null }) {
+  if (tag.label) return tag.label;
+  if (tag.code) return TAG_LABELS[tag.code] ?? tag.code;
+  return tag.id;
+}
+
 export function toDishFormValues(dish: DishDetail | null): DishFormValues {
   return {
     allergenIds: dish?.allergenIds ?? [],

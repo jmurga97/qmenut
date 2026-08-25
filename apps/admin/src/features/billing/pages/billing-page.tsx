@@ -1,3 +1,5 @@
+import { Button } from "@ming/components";
+
 import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { PageHeader } from "~/shared/components/page-header";
 
@@ -30,19 +32,24 @@ export function BillingPage() {
               {branch.cancelAtPeriodEnd ? <p className="admin-copy">Cancelación programada.</p> : null}
               <div className="admin-topbar-actions">
                 {active ? (
-                  <mc-button disabled={controller.busy} onClick={controller.openPortal}>
+                  <Button
+                    aria-label={`Gestionar ${branch.branchName} en Stripe`}
+                    disabled={controller.busy}
+                    onClick={controller.openPortal}
+                  >
                     Gestionar en Stripe
-                  </mc-button>
+                  </Button>
                 ) : (
                   PLANS.map((plan) => (
-                    <mc-button
+                    <Button
+                      aria-label={`${plan.label} para ${branch.branchName}`}
                       disabled={controller.busy}
                       key={plan.code}
                       onClick={() => controller.subscribe(branch.branchId, plan.code)}
                       variant={plan.variant}
                     >
                       {plan.label}
-                    </mc-button>
+                    </Button>
                   ))
                 )}
               </div>

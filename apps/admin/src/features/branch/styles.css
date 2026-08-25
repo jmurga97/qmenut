@@ -13,45 +13,44 @@
   left: 0;
   display: grid;
   overflow: hidden;
-  border: 1px solid var(--color-mc-border-visible);
+  border: 1px solid var(--input);
   border-radius: 0.5rem;
-  background: var(--color-mc-surface-raised);
-  box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--color-mc-background) 68%, transparent);
+  background: var(--popover);
+  box-shadow: 0 0.5rem 1.5rem rgb(20 22 18 / 5%);
 }
 
 .admin-address-option {
   min-height: 2.75rem;
   padding: 0.65rem 0.75rem;
   border: 0;
-  border-bottom: 1px solid var(--color-mc-border);
+  border-bottom: 1px solid var(--border);
   background: transparent;
-  color: var(--color-mc-text-primary);
+  color: var(--foreground);
   text-align: left;
   cursor: pointer;
 }
 
 .admin-address-option:hover,
 .admin-address-option[aria-selected="true"] {
-  background: var(--color-mc-surface);
-  color: var(--color-mc-text-display);
+  background: var(--card);
+  color: var(--foreground);
 }
 
 .admin-address-option:focus-visible {
-  outline: 2px solid var(--color-mc-interactive);
+  outline: 2px solid var(--ring);
   outline-offset: -2px;
 }
 
 .admin-address-state,
 .admin-address-attribution {
   padding: 0.7rem 0.75rem;
-  color: var(--color-mc-text-secondary);
-  font-size: var(--text-mc-body-sm);
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-body-sm);
 }
 
 .admin-address-attribution {
-  color: var(--color-mc-text-disabled);
-  font-family: "Space Mono", monospace;
-  font-size: var(--text-mc-caption);
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-caption);
 }
 
 .admin-address-linked {
@@ -61,16 +60,16 @@
   align-items: center;
   justify-content: space-between;
   margin-top: 0.5rem;
-  color: var(--color-mc-success);
-  font-size: var(--text-mc-body-sm);
+  color: var(--ming-success);
+  font-size: var(--admin-text-body-sm);
 }
 
 .admin-address-linked button {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--color-mc-text-secondary);
-  font-size: var(--text-mc-caption);
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-caption);
   text-decoration: underline;
   text-underline-offset: 0.2em;
   cursor: pointer;
@@ -78,14 +77,27 @@
 
 .admin-field-hint {
   margin: 0.5rem 0 0;
-  color: var(--color-mc-text-disabled);
-  font-size: var(--text-mc-caption);
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-caption);
   line-height: 1.4;
 }
 
 .admin-schedule-grid {
   display: grid;
   gap: 0.625rem;
+}
+
+.admin-branch-media-grid {
+  display: grid;
+  min-width: 0;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .admin-branch-media-grid {
+    grid-template-columns: minmax(14rem, 0.4fr) minmax(0, 1.6fr);
+  }
 }
 
 .admin-schedule-row {
@@ -97,13 +109,33 @@
 
 .admin-schedule-row input[type="time"] {
   min-height: 2.5rem;
-  border: 1px solid var(--color-mc-border-visible);
-  border-radius: 0.5rem;
-  background: var(--color-mc-surface);
-  color: var(--color-mc-text-display);
+  border: 1px solid var(--input);
+  border-radius: 0.375rem;
+  background: var(--card);
+  color: var(--foreground);
   padding: 0.375rem 0.625rem;
 }
 
 .admin-schedule-row input[type="time"]:disabled {
   opacity: 0.4;
+}
+
+@media (max-width: 40rem) {
+  .admin-schedule-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-block: 0.75rem;
+    border-block-start: 1px solid var(--border);
+  }
+
+  .admin-schedule-row:first-child {
+    border-block-start: 0;
+  }
+
+  .admin-schedule-row .admin-form-checkbox {
+    grid-column: 1 / -1;
+  }
+
+  .admin-schedule-row .ming-field {
+    min-width: 0;
+  }
 }

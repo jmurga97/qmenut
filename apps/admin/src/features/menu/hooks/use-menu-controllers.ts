@@ -21,7 +21,7 @@ import {
   getMenuIngredientsQueryOptions,
   getMenuTagsQueryOptions,
 } from "../api";
-import { toDishFormValues, toDishInput } from "../mappers";
+import { toAllergenDisplayLabel, toDishFormValues, toDishInput, toTagDisplayLabel } from "../mappers";
 import { categoryFormSchema, dishFormSchema } from "../types";
 
 import type { CategoryFormValues, DishDetail, DishFormValues } from "../types";
@@ -150,7 +150,7 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
     }),
   );
   return {
-    allergenOptions: allergens.map(({ code, id }) => ({ id, label: code })),
+    allergenOptions: allergens.map(({ code, id }) => ({ id, label: toAllergenDisplayLabel(code) })),
     addExtra,
     busy:
       imageSave.pending ||
@@ -169,6 +169,6 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
     form,
     image,
     submit,
-    tagOptions: tags.map((tag) => ({ id: tag.id, label: tag.label ?? tag.code ?? tag.id })),
+    tagOptions: tags.map((tag) => ({ id: tag.id, label: toTagDisplayLabel(tag) })),
   };
 }

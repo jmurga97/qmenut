@@ -1,3 +1,4 @@
+import { Button, InlineMessage } from "@ming/components";
 import { Link } from "@tanstack/react-router";
 import { FormProvider } from "react-hook-form";
 
@@ -43,9 +44,14 @@ function TranslationField({
           <FormTextInput<TranslationsFormValues> disabled={readOnly} label={label} name={name} />
         )}
         {readOnly ? null : (
-          <mc-button disabled={!dirty || busy} onClick={() => save(index)} variant="secondary">
+          <Button
+            aria-label={`Guardar traducción de ${row.fieldLabel}`}
+            disabled={!dirty || busy}
+            onClick={() => save(index)}
+            variant="secondary"
+          >
             {busy ? "Guardando…" : "Guardar"}
-          </mc-button>
+          </Button>
         )}
       </div>
     </div>
@@ -65,16 +71,16 @@ function TranslationsContent({ branchId, languageCode }: { branchId: string; lan
   if (controller.deeplSupported && canWrite) {
     translationAction = (
       <div className="admin-toolbar">
-        <mc-button disabled={controller.translateBusy} onClick={controller.translateMissing} variant="primary">
+        <Button disabled={controller.translateBusy} onClick={controller.translateMissing} variant="primary">
           {controller.translateBusy ? "Traduciendo…" : "Traducir faltantes y pendientes"}
-        </mc-button>
+        </Button>
       </div>
     );
   } else if (!controller.deeplSupported) {
     translationAction = (
-      <mc-inline-message
+      <InlineMessage
         message="Este idioma no está soportado por DeepL: las traducciones deben editarse manualmente."
-        tone="idle"
+        tone="warning"
       />
     );
   }
