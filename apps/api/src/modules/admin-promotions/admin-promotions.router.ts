@@ -59,22 +59,24 @@ export const adminPromotionsRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       promotionId: input.promotionId,
     });
+    if (!branchId) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Promoción no encontrada" });
+    }
     const result = await updateBranchPromotion({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
+      branchId,
       promotionId: input.promotionId,
       data: input.data,
       targets: input.targets,
     });
 
-    if (branchId) {
-      await bumpPublicContentVersionForBranch({
-        branchId,
-        db: ctx.db,
-        env: ctx.env,
-        restaurantId: ctx.tenant.restaurantId,
-      });
-    }
+    await bumpPublicContentVersionForBranch({
+      branchId,
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+    });
 
     return result;
   }),

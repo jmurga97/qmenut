@@ -26,6 +26,21 @@ test("keeps authenticated admin access inside each owner tenant", async ({ page,
   });
   expect(forbiddenWrite, forbiddenWrite.body).toMatchObject({ ok: false, status: 404 });
 
+  const dishBefore = await callTrpcQuery(page, "admin.menu.dishes.detail", {
+    dishId: "dish_tapas_croquetas",
+  });
+  const forbiddenRelation = await callTrpcMutation(page, "admin.menu.dishes.saveRelations", {
+    dishId: "dish_tapas_croquetas",
+    tagIds: [],
+    allergenIds: [999_999],
+    extraIngredientIds: ["ing_fine_extra_cheese"],
+  });
+  expect(forbiddenRelation, forbiddenRelation.body).toMatchObject({ ok: false, status: 400 });
+  const dishAfter = await callTrpcQuery(page, "admin.menu.dishes.detail", {
+    dishId: "dish_tapas_croquetas",
+  });
+  expect(dishAfter.json).toEqual(dishBefore.json);
+
   await fineOwner.goto("/", { waitUntil: "domcontentloaded" });
   await expect(fineOwner.getByText("Aurum", { exact: true }).first()).toBeVisible();
   const fineMenu = await callTrpcQuery(fineOwner, "admin.menu.dishes.list", { branchId: "branch_fine" });

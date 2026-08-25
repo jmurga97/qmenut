@@ -1,6 +1,7 @@
-import { createPromotion, getPromotion, updatePromotion } from "@qmenut/db/repositories/admin-promotions.repository";
+import { createPromotion, updatePromotion } from "@qmenut/db/repositories/admin-promotions.repository";
 import { TRPCError } from "@trpc/server";
 
+import { getMenuCatalog } from "../admin-menu/get-menu-catalog";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 
 import type { DrizzleDb } from "@qmenut/db/client";
@@ -22,12 +23,14 @@ export async function createBranchPromotion({
   targets,
 }: CreatePromotionInput): Promise<{ id: string }> {
   await assertBranchAccess({ db, restaurantId, branchId });
+  const normalizedTargets = normalizeTargets(data.scope, targets);
+  await assertPromotionTargets({ db, restaurantId, branchId, targets: normalizedTargets });
   const id = await createPromotion({
     db,
     restaurantId,
     branchId,
     data,
-    targets: normalizeTargets(data.scope, targets),
+    targets: normalizedTargets,
   });
   return { id };
 }
@@ -35,6 +38,7 @@ export async function createBranchPromotion({
 interface UpdatePromotionInput {
   db: DrizzleDb;
   restaurantId: string;
+  branchId: string;
   promotionId: string;
   data: PromotionWriteData;
   targets: PromotionTargetRow[];
@@ -43,17 +47,14 @@ interface UpdatePromotionInput {
 export async function updateBranchPromotion({
   db,
   restaurantId,
+  branchId,
   promotionId,
   data,
   targets,
 }: UpdatePromotionInput): Promise<{ id: string }> {
-  const existing = await getPromotion({ db, restaurantId, promotionId });
-
-  if (!existing) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Promoción no encontrada" });
-  }
-
-  await updatePromotion({ db, restaurantId, promotionId, data, targets: normalizeTargets(data.scope, targets) });
+  const normalizedTargets = normalizeTargets(data.scope, targets);
+  await assertPromotionTargets({ db, restaurantId, branchId, targets: normalizedTargets });
+  await updatePromotion({ db, restaurantId, promotionId, data, targets: normalizedTargets });
   return { id: promotionId };
 }
 
@@ -63,10 +64,39 @@ function normalizeTargets(scope: PromotionWriteData["scope"], targets: Promotion
     return [];
   }
 
-  if (targets.length === 0) {
+  const expectedType = scope === "dish" ? "dish" : "category";
+  const normalizedTargets = targets.filter((target) => target.targetType === expectedType);
+
+  if (normalizedTargets.length === 0) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "Selecciona al menos un plato o categoría" });
   }
 
-  const expectedType = scope === "dish" ? "dish" : "category";
-  return targets.filter((target) => target.targetType === expectedType);
+  return normalizedTargets;
+}
+
+interface AssertPromotionTargetsInput {
+  db: DrizzleDb;
+  restaurantId: string;
+  branchId: string;
+  targets: PromotionTargetRow[];
+}
+
+async function assertPromotionTargets({
+  db,
+  restaurantId,
+  branchId,
+  targets,
+}: AssertPromotionTargetsInput): Promise<void> {
+  if (targets.length === 0) return;
+
+  const catalog = await getMenuCatalog({ db, restaurantId, branchId });
+  const dishIds = new Set(catalog.dishes.map((dish) => dish.id));
+  const categoryIds = new Set(catalog.categories.map((category) => category.id));
+  const hasInvalidTarget = targets.some((target) =>
+    target.targetType === "dish" ? !dishIds.has(target.targetId) : !categoryIds.has(target.targetId),
+  );
+
+  if (hasInvalidTarget) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "La promoción contiene destinos no válidos" });
+  }
 }

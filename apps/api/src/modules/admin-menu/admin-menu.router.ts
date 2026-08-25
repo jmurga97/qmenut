@@ -258,6 +258,7 @@ const dishesRouter = router({
     await saveDishRelations({
       db: ctx.db,
       dishId: input.dishId,
+      restaurantId: ctx.tenant.restaurantId,
       tagIds: input.tagIds,
       allergenIds: input.allergenIds,
       extraIngredientIds: input.extraIngredientIds,
