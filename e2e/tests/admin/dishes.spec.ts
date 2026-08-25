@@ -1,4 +1,5 @@
 import { expect, test } from "../../fixtures/test";
+import { selectMingOption } from "../../helpers/form-controls";
 import { callTrpcMutation, callTrpcQuery } from "../../helpers/trpc";
 
 test("lists the seeded tapas dishes", async ({ page }) => {
@@ -13,7 +14,7 @@ test("creates, edits, and deletes a dish", async ({ page }) => {
 
   await page.goto("/menu/dishes/new", { waitUntil: "domcontentloaded" });
   await page.getByRole("textbox").nth(0).fill(dishName);
-  await page.getByLabel("Categoría").selectOption({ label: "Tapas" });
+  await selectMingOption(page, "Categoría", "Tapas");
   await page.getByRole("textbox").nth(1).fill("9.50");
   await page.getByText("Guardar", { exact: true }).click();
 

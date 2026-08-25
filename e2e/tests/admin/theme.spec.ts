@@ -1,5 +1,6 @@
 import { expect, test } from "../../fixtures/test";
 import { getTenantTheme } from "../../helpers/tenant-config";
+import { selectMingOption } from "../../helpers/form-controls";
 import { callTrpcMutation } from "../../helpers/trpc";
 
 function writableTheme(theme: Record<string, unknown>) {
@@ -16,12 +17,10 @@ function writableTheme(theme: Record<string, unknown>) {
 test("publishes a normalized theme through tenant-config and the public worker", async ({ page, request }) => {
   const original = await getTenantTheme(request, "her.localhost");
   await page.goto("/");
-  const branchSelect = page.locator(".admin-branch-select select");
-  await expect(branchSelect).toBeVisible();
-  await branchSelect.selectOption("branch_her");
+  await selectMingOption(page, "Sucursal activa", "Mesón Herencia");
   await page.goto("/theme");
 
-  await page.getByLabel("Plantilla").selectOption("fast");
+  await selectMingOption(page, "Plantilla", "Fast food");
   await page.locator('input[type="text"]').nth(0).fill("#D13A2F");
   await page.locator('input[type="text"]').nth(1).fill("#FFD447");
   await page.getByLabel("Eslogan").fill("Tema E2E publicado");
@@ -54,7 +53,7 @@ test("publishes a normalized theme through tenant-config and the public worker",
     });
     expect(noDomain, noDomain.body).toMatchObject({ ok: false, status: 412 });
 
-    await branchSelect.selectOption("branch_nodomain");
+    await selectMingOption(page, "Sucursal activa", "Sucursal sin dominio");
     await page.goto("/theme");
     await expect(page.getByText(/El tema se guarda por dominio/)).toBeVisible();
   } finally {

@@ -1,5 +1,7 @@
 import { expect, test as base } from "@playwright/test";
 
+import { expectOtpValue } from "../helpers/form-controls";
+
 import type { Browser, Page } from "@playwright/test";
 
 async function blockPlaceholderImages(page: Page): Promise<void> {
@@ -22,9 +24,9 @@ async function useAuthenticatedPage({ browser, email, use }: AuthenticatedPageIn
   await page.goto("/login");
   await page.getByLabel("Email").fill(email);
   await page.getByRole("button", { name: "Continuar" }).click();
-  await expect(page.getByLabel("Código OTP")).toHaveValue("000000");
+  await expectOtpValue(page, "000000");
   await page.getByRole("button", { name: "Entrar" }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/(?:\?.*)?$/);
 
   try {
     await use(page);

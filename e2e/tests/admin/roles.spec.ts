@@ -6,13 +6,13 @@ test("limits staff controls while allowing dish availability changes", async ({ 
   await expect(staff.getByText("Facturación", { exact: true })).toBeHidden();
 
   await staff.goto("/billing", { waitUntil: "domcontentloaded" });
-  await expect(staff).toHaveURL(/\/$/);
+  await expect(staff).toHaveURL(/\/(?:\?.*)?$/);
 
   await staff.goto("/menu", { waitUntil: "domcontentloaded" });
   await expect(staff.getByRole("link", { name: "+ Nueva categoría" })).toBeHidden();
   await expect(staff.getByRole("link", { name: "+ Nuevo plato" })).toBeHidden();
 
-  const availability = staff.getByRole("checkbox", { name: "Disponibilidad de Patatas bravas" });
+  const availability = staff.getByRole("switch", { name: "Disponibilidad de Patatas bravas" });
   await expect(availability).toBeChecked();
 
   try {
@@ -25,7 +25,7 @@ test("limits staff controls while allowing dish availability changes", async ({ 
     await expect(staff.getByText("Guardar", { exact: true })).toBeHidden();
   } finally {
     await staff.goto("/menu", { waitUntil: "domcontentloaded" });
-    const restoreAvailability = staff.getByRole("checkbox", { name: "Disponibilidad de Patatas bravas" });
+    const restoreAvailability = staff.getByRole("switch", { name: "Disponibilidad de Patatas bravas" });
     if (!(await restoreAvailability.isChecked())) {
       await restoreAvailability.click();
       await expect(restoreAvailability).toBeChecked();

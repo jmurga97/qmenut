@@ -1,9 +1,32 @@
 import { expect, test } from "../../fixtures/test";
+import { selectMingOption } from "../../helpers/form-controls";
 import { callTrpcMutation, callTrpcQuery } from "../../helpers/trpc";
 
 test("lists the seeded promotion", async ({ page }) => {
   await page.goto("/promotions", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("link", { name: "Happy tapa -20%" })).toBeVisible();
+});
+
+test("rejects mismatched and cross-tenant promotion targets", async ({ page }) => {
+  const data = {
+    name: "Destino inválido",
+    percentage: 10,
+    scope: "dish",
+    type: "percentage_discount",
+  };
+  const mismatched = await callTrpcMutation(page, "admin.promotions.create", {
+    branchId: "branch_tapas",
+    data,
+    targets: [{ targetId: "cat_tapas_tapas", targetType: "category" }],
+  });
+  expect(mismatched, mismatched.body).toMatchObject({ ok: false, status: 400 });
+
+  const crossTenant = await callTrpcMutation(page, "admin.promotions.create", {
+    branchId: "branch_tapas",
+    data,
+    targets: [{ targetId: "dish_fine_margherita", targetType: "dish" }],
+  });
+  expect(crossTenant, crossTenant.body).toMatchObject({ ok: false, status: 400 });
 });
 
 test("creates and edits a promotion", async ({ page }) => {
@@ -58,12 +81,12 @@ test("creates and edits a 2x1 promotion", async ({ page }) => {
   try {
     await page.goto("/promotions/new", { waitUntil: "domcontentloaded" });
     await page.getByLabel("Nombre").fill(initialName);
-    await page.getByLabel("Tipo").selectOption({ label: "2x1" });
+    await selectMingOption(page, "Tipo", "2x1");
     await page.getByLabel("Unidades que lleva").fill("2");
     await page.getByLabel("Unidades que paga").fill("3");
     await page.getByRole("button", { name: "Patatas bravas" }).click();
     await page.getByText("Guardar", { exact: true }).click();
-    await expect(page.getByRole("alert")).toHaveText("Las unidades pagadas no pueden superar las compradas");
+    await expect(page.getByText("Las unidades pagadas no pueden superar las compradas", { exact: true })).toBeVisible();
 
     await page.getByLabel("Unidades que paga").fill("1");
     await page.getByText("Guardar", { exact: true }).click();

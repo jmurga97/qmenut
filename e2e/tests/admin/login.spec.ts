@@ -1,4 +1,5 @@
 import { expect, test } from "../../fixtures/test";
+import { expectOtpValue, fillOtp } from "../../helpers/form-controls";
 import { callTrpcQuery } from "../../helpers/trpc";
 
 test.use({ storageState: { cookies: [], origins: [] } });
@@ -7,11 +8,11 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/login", { waitUntil: "domcontentloaded" });
   await page.getByLabel("Email").fill("e2e@test.local");
   await page.getByRole("button", { name: "Continuar" }).click();
-  await expect(page.getByLabel("Código OTP")).toHaveValue("000000");
+  await expectOtpValue(page, "000000");
 });
 
 test("shows an error for a wrong OTP", async ({ page }) => {
-  await page.getByLabel("Código OTP").fill("111111");
+  await fillOtp(page, "111111");
   await page.getByRole("button", { name: "Entrar" }).click();
 
   await expect(page.getByText("Invalid OTP", { exact: true })).toBeVisible();
@@ -29,7 +30,7 @@ test("rejects an account that has not been provisioned", async ({ page }) => {
   await page.getByRole("button", { name: "Cancelar" }).click();
   await page.getByLabel("Email").fill("not-provisioned@test.local");
   await page.getByRole("button", { name: "Continuar" }).click();
-  await expect(page.getByLabel("Código OTP")).toHaveValue("000000");
+  await expectOtpValue(page, "000000");
   await page.getByRole("button", { name: "Entrar" }).click();
 
   await expect(page.getByText("Invalid OTP", { exact: true })).toBeVisible();
