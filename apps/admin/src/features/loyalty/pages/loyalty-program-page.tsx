@@ -1,3 +1,5 @@
+import { Button, ConfirmAction, DropdownMenu } from "@ming/components";
+import { buttonVariants } from "@ming/components/button";
 import { QmLoyaltyCard } from "@qmenut/ui/components/qm-loyalty-card/react";
 import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
 import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
@@ -58,13 +60,13 @@ function LoyaltyProgramContent({ branchId }: { branchId: string }) {
             </section>
             <EntityListCard
               action={
-                <mc-button
+                <Button
                   disabled={loyalty.rewardBusy || loyalty.editingIndex !== null}
                   onClick={loyalty.newReward}
                   variant="primary"
                 >
                   + Nuevo premio
-                </mc-button>
+                </Button>
               }
               count={loyalty.rewards.fields.length}
               emptyText="Crea el primer premio para que los sellos tengan una meta."
@@ -95,8 +97,28 @@ function LoyaltyProgramContent({ branchId }: { branchId: string }) {
             </QmLoyaltyCard>
           </aside>
         </div>
+        <DeleteRewardConfirm loyalty={loyalty} />
       </div>
     </FormProvider>
+  );
+}
+function DeleteRewardConfirm({ loyalty }: { loyalty: ProgramController }) {
+  if (loyalty.deletingIndex === null) return null;
+  return (
+    <ConfirmAction
+      cancelLabel="Cancelar"
+      confirmLabel="Eliminar"
+      message={`Se eliminará “${loyalty.deletingRewardName ?? "este premio"}”. Esta acción no se puede deshacer.`}
+      onCancel={loyalty.cancelDeleteReward}
+      onConfirm={loyalty.confirmDeleteReward}
+      onOpenChange={(open) => {
+        if (open) return;
+        loyalty.cancelDeleteReward();
+      }}
+      open
+      pending={loyalty.rewardBusy}
+      title="Eliminar premio"
+    />
   );
 }
 function RewardRow({ index, loyalty }: { index: number; loyalty: ProgramController }) {
@@ -111,17 +133,28 @@ function RewardRow({ index, loyalty }: { index: number; loyalty: ProgramControll
             {TYPE_LABELS[reward.type]} · {reward.cost} sellos · {reward.isActive ? "activo" : "inactivo"}
           </p>
         </div>
-        <select
-          aria-label={`Acciones para ${reward.name}`}
+        <DropdownMenu
+          align="end"
+          ariaLabel={`Acciones para ${reward.name}`}
+          className={buttonVariants({ size: "sm", variant: "secondary" })}
           disabled={loyalty.rewardBusy}
-          onChange={(event) => loyalty.rewardAction(index, event.currentTarget.value)}
-          value=""
-        >
-          <option value="">Acciones…</option>
-          <option value="edit">Editar</option>
-          <option value="toggle">{reward.isActive ? "Desactivar" : "Activar"}</option>
-          <option value="delete">Eliminar</option>
-        </select>
+          items={[
+            { id: "edit", label: "Editar", onSelect: () => loyalty.rewardAction(index, "edit") },
+            {
+              id: "toggle",
+              label: reward.isActive ? "Desactivar" : "Activar",
+              onSelect: () => loyalty.rewardAction(index, "toggle"),
+            },
+            {
+              id: "delete",
+              label: "Eliminar",
+              onSelect: () => loyalty.rewardAction(index, "delete"),
+              separatorBefore: true,
+              tone: "destructive",
+            },
+          ]}
+          trigger="Acciones"
+        />
       </li>
     );
   const field = (name: keyof typeof reward) => `rewards.${index}.${name}` as const;

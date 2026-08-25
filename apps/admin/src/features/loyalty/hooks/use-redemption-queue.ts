@@ -5,39 +5,33 @@ import * as api from "~/features/loyalty/api";
 import * as services from "~/features/loyalty/services";
 import { getErrorMessage } from "~/lib/errors";
 import { trpc } from "~/lib/trpc";
+import { useNowTicker } from "~/shared/hooks/use-now-ticker";
 
 import type { PendingRedemption } from "~/features/loyalty/types";
 
-type UndoNotice = { error: string | null; message: string; transactionId: number };
+export interface UndoNotice {
+  error: string | null;
+  message: string;
+  transactionId: number;
+}
+
 const UNDO_NOTICE_MS = 8000;
-export function useLoyaltyOperationsController(branchId: string) {
+
+export type RedemptionQueueState = ReturnType<typeof useRedemptionQueue>;
+
+export function useRedemptionQueue(branchId: string) {
   const queryClient = useQueryClient();
-  const [now, setNow] = useState(Date.now());
+  const now = useNowTicker();
   const [undoNotice, setUndoNotice] = useState<UndoNotice | null>(null);
-  const venueCodeQuery = useQuery({
-    ...api.getVenueCodeQueryOptions({ branchId, trpc }),
-    refetchInterval: (query) => {
-      const expiry = query.state.data?.expiresAt;
-      return expiry ? Math.max(1000, expiry - Date.now()) : false;
-    },
-    refetchOnWindowFocus: true,
-  });
   const pendingQuery = useQuery({
     ...api.getPendingRedemptionsQueryOptions({ trpc }),
     refetchInterval: () => (document.visibilityState === "visible" ? services.LOYALTY_POLL_INTERVAL_MS : false),
     refetchOnWindowFocus: true,
   });
-  const mutationContext = { queryClient, trpc };
-  const options = api.getLoyaltyMutationOptions(mutationContext);
+  const options = api.getLoyaltyMutationOptions({ queryClient, trpc });
   const validateMutation = useMutation(options.validate);
   const rejectMutation = useMutation(options.reject);
   const undoMutation = useMutation(options.undo);
-  const expiresAt = venueCodeQuery.data?.expiresAt ?? now;
-  const remainingMs = Math.max(0, expiresAt - now);
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
   useEffect(() => {
     if (!undoNotice) return;
     const timer = window.setTimeout(() => setUndoNotice(null), UNDO_NOTICE_MS);
@@ -74,19 +68,16 @@ export function useLoyaltyOperationsController(branchId: string) {
       },
     );
   }
-  const actionBusy = validateMutation.isPending || rejectMutation.isPending;
   let rowError: string | null = null;
   if (validateMutation.error) rowError = services.getValidationError(validateMutation.error);
   else if (rejectMutation.error) rowError = getErrorMessage(rejectMutation.error);
   return {
-    actionBusy,
+    actionBusy: validateMutation.isPending || rejectMutation.isPending,
     now,
     pendingQuery,
-    remainingMs,
     rowError,
     undoBusy: undoMutation.isPending,
     undoNotice,
-    venueCodeQuery,
     reject,
     undo,
     validate,

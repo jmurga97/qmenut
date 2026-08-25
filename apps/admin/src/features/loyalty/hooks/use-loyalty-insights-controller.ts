@@ -5,6 +5,7 @@ import * as api from "~/features/loyalty/api";
 import * as services from "~/features/loyalty/services";
 import { trpc } from "~/lib/trpc";
 import { useDebouncedCallback } from "~/shared/hooks/use-debounced-callback";
+import { aggregateWeekly, getVisitsRange, sumVisits } from "~/shared/services/visit-series";
 
 import type * as Loyalty from "~/features/loyalty/types";
 
@@ -15,7 +16,7 @@ export function useLoyaltyInsightsController() {
   const queryClient = useQueryClient();
   const navigate = insightsRoute.useNavigate();
   const search = insightsRoute.useSearch();
-  const range = services.getVisitsRange(search.period);
+  const range = getVisitsRange(search.period);
   const { data: summary } = useSuspenseQuery(api.getLoyaltySummaryQueryOptions({ trpc }));
   const { data: loyaltyReturn } = useSuspenseQuery(api.getLoyaltyReturnQueryOptions({ trpc }));
   const { data: visits } = useSuspenseQuery(api.getLoyaltyVisitsQueryOptions({ ...range, trpc }));
@@ -55,8 +56,8 @@ export function useLoyaltyInsightsController() {
       services.downloadCustomersCsv(rows);
     },
   });
-  const visitsPoints = search.period === "12m" ? services.aggregateWeekly(visits) : visits;
-  const visitsTotals = services.sumVisits(visitsPoints);
+  const visitsPoints = search.period === "12m" ? aggregateWeekly(visits) : visits;
+  const visitsTotals = sumVisits(visitsPoints);
   const returnTotals = services.sumReturn(loyaltyReturn.points);
   return {
     customers,

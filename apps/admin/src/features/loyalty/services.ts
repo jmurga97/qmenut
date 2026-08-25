@@ -1,9 +1,9 @@
 import { getErrorMessage } from "~/lib/errors";
+import { formatDate } from "~/shared/services/format";
 
-import type { LoyaltyCustomer, LoyaltyVisitsPoint, VisitsPeriod } from "~/features/loyalty/types";
+import type { LoyaltyCustomer } from "~/features/loyalty/types";
 
 export const LOYALTY_POLL_INTERVAL_MS = 5000;
-const DAY_MS = 24 * 60 * 60 * 1000;
 export function formatRelativeAge(createdAt: number, now: number): string {
   const elapsedSeconds = Math.max(0, Math.floor((now - createdAt) / 1000));
   if (elapsedSeconds < 60) return `hace ${elapsedSeconds} s`;
@@ -29,47 +29,11 @@ export function getUndoError(error: unknown): string {
   }
   return "No se pudo deshacer la validación. Puedes volver a intentarlo.";
 }
-export function getVisitsRange(period: VisitsPeriod, now = Date.now()) {
-  const date = new Date(now);
-  const to = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1);
-  return { from: to - (period === "30d" ? 30 : 365) * DAY_MS, to };
-}
-function getWeekStart(day: string): string {
-  const date = new Date(`${day}T00:00:00Z`);
-  const weekday = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() - weekday + 1);
-  return date.toISOString().slice(0, 10);
-}
-export function aggregateWeekly(points: LoyaltyVisitsPoint[]): LoyaltyVisitsPoint[] {
-  const weeks = new Map<string, LoyaltyVisitsPoint>();
-  for (const point of points) {
-    const day = getWeekStart(point.day);
-    const current = weeks.get(day) ?? { day, total: 0, newVisits: 0, returningVisits: 0 };
-    current.total += point.total;
-    current.newVisits += point.newVisits;
-    current.returningVisits += point.returningVisits;
-    weeks.set(day, current);
-  }
-  return weeks.values().toArray();
-}
-export function sumVisits(points: LoyaltyVisitsPoint[]) {
-  return {
-    newVisits: points.reduce((sum, point) => sum + point.newVisits, 0),
-    returningVisits: points.reduce((sum, point) => sum + point.returningVisits, 0),
-  };
-}
 export function sumReturn(points: Array<{ estimatedRevenue: number; rewardCost: number }>) {
   return {
     estimatedRevenue: points.reduce((sum, point) => sum + point.estimatedRevenue, 0),
     rewardCost: points.reduce((sum, point) => sum + point.rewardCost, 0),
   };
-}
-export const formatNumber = (value: number) => value.toLocaleString("es-ES");
-export function formatPercent(value: number): string {
-  return value.toLocaleString("es-ES", { style: "percent", maximumFractionDigits: 1 });
-}
-export function formatDate(value: number | null): string {
-  return value === null ? "—" : new Intl.DateTimeFormat("es-ES", { dateStyle: "medium" }).format(new Date(value));
 }
 export function formatReturnRatio(ratio: number | null): string {
   return ratio === null ? "—" : `${ratio.toLocaleString("es-ES", { maximumFractionDigits: 1 })}×`;

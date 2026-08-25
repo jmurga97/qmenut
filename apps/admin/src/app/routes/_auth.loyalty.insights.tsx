@@ -3,8 +3,8 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import * as loyaltyApi from "~/features/loyalty/api";
 import { LoyaltyInsightsPage } from "~/features/loyalty/pages/loyalty-insights-page";
-import { getVisitsRange } from "~/features/loyalty/services";
 import { loyaltyInsightsSearchSchema } from "~/features/loyalty/types";
+import { getVisitsRange } from "~/shared/services/visit-series";
 
 export const Route = createFileRoute("/_auth/loyalty/insights")({
   validateSearch: loyaltyInsightsSearchSchema,

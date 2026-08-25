@@ -29,6 +29,7 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
   });
   const rewards = useFieldArray({ control: form.control, name: "rewards" });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
   const context = { queryClient, trpc };
   const options = api.getLoyaltyMutationOptions(context);
   const saveProgramMutation = useMutation(options.saveProgram);
@@ -80,13 +81,17 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
   }
   function deleteReward(index: number) {
     const reward = form.getValues(`rewards.${index}`);
-    if (!reward.rewardId || !window.confirm(`¿Eliminar “${reward.name}”?`)) return;
+    if (!reward.rewardId) return;
     resetFeedback();
     deleteRewardMutation.mutate({ rewardId: reward.rewardId }, { onSuccess: () => rewards.remove(index) });
+    setDeletingIndex(null);
   }
   function rewardAction(index: number, action: string) {
     const actions: Record<string, () => void> = {
-      delete: () => deleteReward(index),
+      delete: () => {
+        resetFeedback();
+        setDeletingIndex(index);
+      },
       edit: () => {
         resetFeedback();
         setEditingIndex(index);
@@ -105,6 +110,12 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
   else if (deleteRewardMutation.isSuccess) success = "Premio eliminado.";
   return {
     activeRewards,
+    cancelDeleteReward: () => setDeletingIndex(null),
+    confirmDeleteReward: () => {
+      if (deletingIndex !== null) deleteReward(deletingIndex);
+    },
+    deletingIndex,
+    deletingRewardName: deletingIndex === null ? null : form.getValues(`rewards.${deletingIndex}.name`),
     dishes: mappers.toDishOptions({ branches: tenant.branches, dishLists: dishQueries.map((query) => query.data) }),
     editingIndex,
     error:

@@ -1,0 +1,94 @@
+.admin-dashboard {
+  gap: 1.5rem;
+}
+
+.admin-dashboard-top,
+.admin-dashboard-bottom {
+  display: grid;
+  align-items: start;
+  gap: 1.25rem;
+}
+
+.admin-dashboard-bottom .admin-dashboard-ops {
+  display: grid;
+  align-content: start;
+  gap: 1.25rem;
+}
+
+.admin-attention h3,
+.admin-visits-card h3 {
+  margin-block: 0.3rem;
+}
+
+.admin-attention-pending {
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-caption);
+}
+
+.admin-attention-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-attention-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding-block: 0.75rem;
+  border-block-end: 1px solid var(--border);
+}
+
+.admin-attention-item:first-child {
+  padding-block-start: 0.25rem;
+  border-block-start: 0;
+}
+
+.admin-attention-item:last-child {
+  border-block-end: 0;
+}
+
+.admin-attention-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.125rem;
+}
+
+.admin-attention-copy a,
+.admin-attention-copy strong {
+  color: var(--foreground);
+  font-weight: 550;
+  line-height: 1.35;
+}
+
+.admin-attention-copy small {
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-caption);
+  line-height: 1.45;
+}
+
+.admin-chart-summary {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-body-sm);
+  line-height: 1.5;
+}
+
+.admin-dashboard-scroll {
+  max-height: 28rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+@media (min-width: 64rem) {
+  .admin-dashboard-top {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .admin-dashboard-bottom {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  }
+}

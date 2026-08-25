@@ -20,6 +20,7 @@ export function LoyaltyLayout() {
       <nav aria-label="Secciones de fidelización" className="admin-loyalty-tabs">
         {tabs.map((tab) => (
           <Link
+            activeOptions={{ exact: true }}
             aria-current={location.pathname === tab.path ? "page" : undefined}
             className="admin-loyalty-tab"
             key={tab.path}

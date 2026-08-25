@@ -1,11 +1,19 @@
+import { Button, Checkbox, InlineMessage, SearchField } from "@ming/components";
 import { Link } from "@tanstack/react-router";
 
 import { useLoyaltyInsightsController } from "~/features/loyalty/hooks/use-loyalty-insights-controller";
 import * as services from "~/features/loyalty/services";
+import { StackedBarChart } from "~/shared/components/charts/stacked-bar-chart";
+import { SegmentedToggle } from "~/shared/components/controls/segmented-toggle";
+import { Metric } from "~/shared/components/metrics/metric";
+import { MetricSummary } from "~/shared/components/metrics/metric-summary";
 import { PageHeader } from "~/shared/components/page-header";
+import { formatDate, formatNumber, formatPercent } from "~/shared/services/format";
 import { formatMoney } from "~/shared/services/money";
+import { formatDayLabel } from "~/shared/services/visit-series";
 
-import type { CustomerSort, LoyaltyVisitsPoint } from "~/features/loyalty/types";
+import type { LoyaltyVisitsPoint, CustomerSort } from "~/features/loyalty/types";
+import type { StackedBarSeries } from "~/shared/components/charts/stacked-bar-chart";
 
 const COLUMNS: Array<{ key: CustomerSort; label: string }> = [
   { key: "email", label: "Email" },
@@ -15,91 +23,105 @@ const COLUMNS: Array<{ key: CustomerSort; label: string }> = [
   { key: "lastVisitAt", label: "Última visita" },
   { key: "rewardsRedeemed", label: "Premios" },
 ];
-const INDICATORS = { asc: " ↑", desc: " ↓" } as const;
+const VISIT_SERIES: ReadonlyArray<StackedBarSeries> = [
+  { key: "newVisits", label: "nuevas", tone: "service" },
+  { key: "returningVisits", label: "recurrentes", tone: "ink" },
+];
+function toChartPoints(points: LoyaltyVisitsPoint[]) {
+  return points.map((point) => ({
+    id: point.day,
+    label: formatDayLabel(point.day),
+    values: { newVisits: point.newVisits, returningVisits: point.returningVisits },
+  }));
+}
 export function LoyaltyInsightsPage() {
   const loyalty = useLoyaltyInsightsController();
   const { customers, loyaltyReturn, search, summary } = loyalty;
   return (
     <div className="admin-page admin-loyalty-page">
       <PageHeader kicker="Insights" title="La salud del programa" />
-      <section aria-label="Indicadores de fidelización" className="loyalty-metric-grid">
-        <Metric label="Tarjetas activas" value={services.formatNumber(summary.activeCards)} />
-        <Metric label="Sellos este mes" value={services.formatNumber(summary.stampsThisMonth)} />
-        <Metric label="Canjes este mes" value={services.formatNumber(summary.redemptionsThisMonth)} />
-        <Metric label="Tasa de canje" value={services.formatPercent(summary.redemptionRate)} />
-        <Metric label="Visita repetida" value={services.formatPercent(summary.repeatVisitRate)} />
-      </section>
-      <section className="admin-card loyalty-chart-card">
-        <div className="admin-toolbar">
-          <h3>Nuevos y recurrentes</h3>
-          <div className="loyalty-segmented" aria-label="Periodo del gráfico">
-            {(["30d", "12m"] as const).map((period) => (
-              <button
-                aria-pressed={search.period === period}
-                key={period}
-                onClick={() => loyalty.setPeriod(period)}
-                type="button"
-              >
-                {period === "30d" ? "30 días" : "12 meses"}
-              </button>
-            ))}
+      <MetricSummary
+        focusLabel="Tarjetas activas"
+        focusValue={formatNumber(summary.activeCards)}
+        label="Indicadores de fidelización"
+        supporting={[
+          { label: "Sellos este mes", value: formatNumber(summary.stampsThisMonth) },
+          { label: "Canjes este mes", value: formatNumber(summary.redemptionsThisMonth) },
+          { label: "Tasa de canje", value: formatPercent(summary.redemptionRate) },
+          { label: "Visita repetida", value: formatPercent(summary.repeatVisitRate) },
+        ]}
+      />
+      <div className="loyalty-insights-grid">
+        <section className="admin-card loyalty-chart-card">
+          <div className="admin-toolbar">
+            <h3>Nuevos y recurrentes</h3>
+            <SegmentedToggle
+              ariaLabel="Periodo del gráfico"
+              onChange={loyalty.setPeriod}
+              options={[
+                { label: "30 días", value: "30d" },
+                { label: "12 meses", value: "12m" },
+              ]}
+              value={search.period}
+            />
           </div>
-        </div>
-        <VisitsChart points={loyalty.visitsPoints} />
-        <p className="loyalty-chart-summary">
-          {services.formatNumber(loyalty.visitsTotals.newVisits)} primeras visitas ·{" "}
-          {services.formatNumber(loyalty.visitsTotals.returningVisits)} visitas recurrentes
-        </p>
-      </section>
-      <section className="admin-card loyalty-return-card">
-        <h3>Retorno estimado por premio</h3>
-        {loyaltyReturn.ticketMedio === null ? (
-          <div className="loyalty-return-empty">
-            <p>Indica el ticket medio para calcular una estimación del retorno.</p>
-            <Link className="admin-link" to="/loyalty/program">
-              Configurar ticket medio →
-            </Link>
-          </div>
-        ) : (
-          <>
-            <div className="loyalty-return-headline">
-              <strong>{services.formatReturnRatio(loyalty.returnRatio)}</strong>
+          <StackedBarChart
+            ariaLabel="Visitas nuevas y recurrentes durante el periodo seleccionado"
+            emptyLabel="Las primeras visitas aparecerán aquí."
+            points={toChartPoints(loyalty.visitsPoints)}
+            series={VISIT_SERIES}
+          />
+          <p className="loyalty-chart-summary">
+            {formatNumber(loyalty.visitsTotals.newVisits)} primeras visitas ·{" "}
+            {formatNumber(loyalty.visitsTotals.returningVisits)} visitas recurrentes
+          </p>
+        </section>
+        <section className="admin-card loyalty-return-card">
+          <h3>Retorno estimado por premio</h3>
+          {loyaltyReturn.ticketMedio === null ? (
+            <div className="loyalty-return-empty">
+              <p>Indica el ticket medio para calcular una estimación del retorno.</p>
+              <Link className="admin-link" to="/loyalty/program">
+                Configurar ticket medio →
+              </Link>
             </div>
-            <div className="loyalty-return-totals">
-              <Metric label="Ingresos estimados" value={formatMoney(loyalty.returnTotals.estimatedRevenue)} />
-              <Metric label="Coste de premios" value={formatMoney(loyalty.returnTotals.rewardCost)} />
-            </div>
-          </>
-        )}
-      </section>
+          ) : (
+            <>
+              <div className="loyalty-return-headline">
+                <strong>{services.formatReturnRatio(loyalty.returnRatio)}</strong>
+              </div>
+              <div className="loyalty-return-totals">
+                <Metric label="Ingresos estimados" value={formatMoney(loyalty.returnTotals.estimatedRevenue)} />
+                <Metric label="Coste de premios" value={formatMoney(loyalty.returnTotals.rewardCost)} />
+              </div>
+            </>
+          )}
+        </section>
+      </div>
       <section className="admin-card loyalty-customers">
         <div className="admin-toolbar">
           <h3>Clientes ({customers.total})</h3>
-          <mc-button disabled={loyalty.exporting} onClick={() => loyalty.exportCustomers()} variant="secondary">
+          <Button disabled={loyalty.exporting} onClick={() => loyalty.exportCustomers()} variant="secondary">
             {loyalty.exporting ? "Preparando CSV…" : "Exportar CSV"}
-          </mc-button>
+          </Button>
         </div>
         <div className="loyalty-customer-filters">
-          <label className="admin-field">
-            <span>Buscar por email</span>
-            <input
-              defaultValue={search.search}
-              key={search.search}
-              onChange={(event) => loyalty.setCustomerSearch(event.currentTarget.value)}
-              placeholder="cliente@ejemplo.com"
-              type="search"
-            />
-          </label>
-          <label className="admin-checkbox loyalty-inactive-filter">
-            <input
+          <SearchField
+            aria-label="Buscar por email"
+            clearLabel="Limpiar búsqueda"
+            onValueChange={(value) => loyalty.setCustomerSearch(value)}
+            placeholder="cliente@ejemplo.com"
+            value={search.search}
+          />
+          <div className="loyalty-inactive-filter">
+            <Checkbox
               checked={search.inactive}
-              onChange={(event) => loyalty.setInactive(event.currentTarget.checked)}
-              type="checkbox"
+              label="Sin visita en los últimos 30 días"
+              onCheckedChange={(checked) => loyalty.setInactive(checked)}
             />
-            Sin visita en los últimos 30 días
-          </label>
+          </div>
         </div>
-        {loyalty.exportError ? <mc-inline-message message="No se pudo exportar el CSV." tone="error" /> : null}
+        {loyalty.exportError ? <InlineMessage message="No se pudo exportar el CSV." tone="error" /> : null}
         {customers.rows.length === 0 ? (
           <p className="loyalty-empty-list">No hay clientes que coincidan con estos filtros.</p>
         ) : (
@@ -111,7 +133,7 @@ export function LoyaltyInsightsPage() {
                     <th key={column.key} scope="col">
                       <button onClick={() => loyalty.sortBy(column.key)} type="button">
                         {column.label}
-                        {search.sortBy === column.key ? INDICATORS[search.sortDir] : ""}
+                        {search.sortBy === column.key ? <SortDirectionIcon direction={search.sortDir} /> : null}
                       </button>
                     </th>
                   ))}
@@ -121,11 +143,11 @@ export function LoyaltyInsightsPage() {
                 {customers.rows.map((customer) => (
                   <tr key={customer.customerId}>
                     <td>{customer.email}</td>
-                    <td>{services.formatNumber(customer.stampsBalance)}</td>
-                    <td>{services.formatNumber(customer.totalVisits)}</td>
-                    <td>{services.formatDate(customer.firstVisitAt)}</td>
-                    <td>{services.formatDate(customer.lastVisitAt)}</td>
-                    <td>{services.formatNumber(customer.rewardsRedeemed)}</td>
+                    <td>{formatNumber(customer.stampsBalance)}</td>
+                    <td>{formatNumber(customer.totalVisits)}</td>
+                    <td>{formatDate(customer.firstVisitAt)}</td>
+                    <td>{formatDate(customer.lastVisitAt)}</td>
+                    <td>{formatNumber(customer.rewardsRedeemed)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -153,26 +175,17 @@ export function LoyaltyInsightsPage() {
     </div>
   );
 }
-function Metric({ label, value }: { label: string; value: string }) {
+
+function SortDirectionIcon({ direction }: { direction: "asc" | "desc" }) {
   return (
-    <article className="loyalty-metric">
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </article>
-  );
-}
-function VisitsChart({ points }: { points: LoyaltyVisitsPoint[] }) {
-  if (points.length === 0) return <div className="loyalty-chart-empty">Las primeras visitas aparecerán aquí.</div>;
-  return (
-    <ul className="admin-list" aria-label="Visitas nuevas y recurrentes durante el periodo seleccionado">
-      {points.map((point) => (
-        <li className="admin-list-item" key={point.day}>
-          <strong>{point.day}</strong>
-          <span className="admin-list-meta">
-            {point.newVisits} nuevas · {point.returningVisits} recurrentes
-          </span>
-        </li>
-      ))}
-    </ul>
+    <svg aria-hidden="true" className="loyalty-sort-icon" fill="none" viewBox="0 0 16 16">
+      <path
+        d={direction === "asc" ? "m4.5 9 3.5-3.5L11.5 9M8 5.5v6" : "m4.5 7 3.5 3.5L11.5 7M8 4.5v6"}
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+      />
+    </svg>
   );
 }
