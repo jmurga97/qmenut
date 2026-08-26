@@ -17,10 +17,12 @@ export function mapBranch({
   photos,
   row,
   schedules,
+  timeZone,
 }: {
   photos: PublicBranchPhoto[];
   row: typeof branches.$inferSelect;
   schedules: PublicBranchSchedule[];
+  timeZone: string;
 }): PublicBranch {
   return {
     id: row.id,
@@ -37,6 +39,7 @@ export function mapBranch({
     longitude: row.longitude,
     photos,
     schedules,
+    timeZone,
   };
 }
 

@@ -5,11 +5,16 @@
  */
 
 function createVisitId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
 
-  return `visit-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  // Reserva sin dependencias criptográficas: la ID es efímera y no identifica a nadie.
+  const random = new Uint32Array(2);
+
+  crypto.getRandomValues(random);
+
+  return `${Date.now().toString(36)}-${random[0].toString(36)}-${random[1].toString(36)}`;
 }
 
 const visitId = createVisitId();
@@ -56,7 +61,7 @@ export function restaurantLocalDayHour(timestampMs: number, timeZone: string): R
     const day = dayFormatter(timeZone).format(timestampMs);
     const hour = Number(hourFormatter(timeZone).format(timestampMs));
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !Number.isInteger(hour) || hour < 0 || hour > 23) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !Number.isSafeInteger(hour) || hour < 0 || hour > 23) {
       return null;
     }
 
@@ -65,19 +70,6 @@ export function restaurantLocalDayHour(timestampMs: number, timeZone: string): R
     return null;
   }
 }
-
-/** Ejecuta `fn` una sola vez por carga del documento bajo `key` (p. ej. ttfb de menu_view). */
-export function runOncePerVisit<T>(key: string, fn: () => T): T | undefined {
-  if (oncePerVisitKeys.has(key)) {
-    return undefined;
-  }
-
-  oncePerVisitKeys.add(key);
-
-  return fn();
-}
-
-const oncePerVisitKeys = new Set<string>();
 
 export function getAnalyticsVisitId(): string {
   return visitId;

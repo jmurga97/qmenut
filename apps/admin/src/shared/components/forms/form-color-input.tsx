@@ -1,4 +1,4 @@
-import { Field } from "@ming/components";
+import { Field } from "@jmurga97/components";
 import { useId } from "react";
 import { useController, useFormContext } from "react-hook-form";
 

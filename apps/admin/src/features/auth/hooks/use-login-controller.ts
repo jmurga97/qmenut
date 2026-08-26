@@ -22,6 +22,7 @@ export function useLoginController() {
     resolver: zodResolver(loginFormSchema),
     defaultValues: { email: "", otp: developmentOtp },
   });
+
   async function submit() {
     if (!(await form.trigger(step))) {
       return;
@@ -37,7 +38,12 @@ export function useLoginController() {
       });
       return;
     }
-    signIn.mutate(values, { onSuccess: () => void navigate({ to: "/" }) });
+    try {
+      await signIn.mutateAsync(values);
+      await navigate({ to: "/" });
+    } catch {
+      // useMutation conserva el error para FormFeedback.
+    }
   }
   function changeEmail() {
     requestOtp.reset();
@@ -46,11 +52,13 @@ export function useLoginController() {
     form.resetField("otp");
     setStep("email");
   }
-  const mutation = step === "email" ? requestOtp : signIn;
+  const activeMutation = step === "email" ? requestOtp : signIn;
+  const busy = activeMutation.isPending;
+  const error = activeMutation.error;
   return {
-    busy: mutation.isPending,
+    busy,
     developmentOtp,
-    error: mutation.error,
+    error,
     form,
     step,
     submit,

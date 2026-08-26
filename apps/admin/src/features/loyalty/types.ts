@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { VISIT_PERIODS } from "~/shared/services/visit-series";
+
 import type { AppRouter } from "@qmenut/api/router";
 import type { inferRouterOutputs } from "@trpc/server";
 
@@ -14,7 +16,7 @@ const customerSortSchema = z.enum([
   "rewardsRedeemed",
 ]);
 const sortDirectionSchema = z.enum(["asc", "desc"]);
-const visitsPeriodSchema = z.enum(["30d", "12m"]);
+const visitsPeriodSchema = z.enum(VISIT_PERIODS);
 const searchBoolean = z.union([z.boolean(), z.stringbool()]).catch(false);
 export const loyaltyInsightsSearchSchema = z.object({
   search: z.string().trim().catch(""),
@@ -75,7 +77,7 @@ export type LoyaltyProgramFormValues = z.infer<typeof loyaltyProgramFormSchema>;
 export type RewardFormValues = z.infer<typeof rewardFormSchema>;
 export type RewardType = z.infer<typeof rewardTypeSchema>;
 export type SortDirection = z.infer<typeof sortDirectionSchema>;
-export type VisitsPeriod = z.infer<typeof visitsPeriodSchema>;
+export type VisitsPeriod = (typeof VISIT_PERIODS)[number];
 export type LoyaltyProgramResponse = RouterOutputs["admin"]["loyalty"]["getProgram"];
 export type PendingRedemption = RouterOutputs["admin"]["loyalty"]["pendingRedemptions"][number];
 export type LoyaltyCustomer = RouterOutputs["admin"]["loyalty"]["insights"]["customers"]["rows"][number];

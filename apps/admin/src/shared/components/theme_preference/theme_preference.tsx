@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 
+import { SegmentedToggle } from "~/shared/components/controls/segmented-toggle";
+
+import type { SegmentedOption } from "~/shared/components/controls/segmented-toggle";
+
 import "./theme_preference.css";
 
 export type AdminTheme = "light" | "dark";
 
 export const ADMIN_THEME_STORAGE_KEY = "qmenut-admin-theme";
+
+const THEME_OPTIONS: ReadonlyArray<SegmentedOption<AdminTheme>> = [
+  { label: "Claro", value: "light" },
+  { label: "Oscuro", value: "dark" },
+];
 
 function readStoredTheme(): AdminTheme {
   try {
@@ -18,7 +27,10 @@ function applyTheme(theme: AdminTheme) {
   document.documentElement.classList.remove("light", "dark");
   document.documentElement.classList.add(theme);
   document.documentElement.style.colorScheme = theme;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#171815" : "#f6f6f2");
+  const background = getComputedStyle(document.documentElement).getPropertyValue("--background").trim();
+  if (background) {
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", background);
+  }
 }
 
 export function AdminThemePreference() {
@@ -39,19 +51,7 @@ export function AdminThemePreference() {
         <h2 id="admin-theme-preference-title">Tema del panel</h2>
         <p>Solo cambia cómo ves QMenut en este dispositivo.</p>
       </div>
-      <div aria-label="Tema del panel" className="admin-theme-preference-options" role="group">
-        {(["light", "dark"] as const).map((option) => (
-          <button
-            aria-pressed={theme === option}
-            className="admin-theme-preference-option"
-            key={option}
-            onClick={() => setTheme(option)}
-            type="button"
-          >
-            {option === "light" ? "Claro" : "Oscuro"}
-          </button>
-        ))}
-      </div>
+      <SegmentedToggle ariaLabel="Tema del panel" onChange={setTheme} options={THEME_OPTIONS} value={theme} />
     </section>
   );
 }

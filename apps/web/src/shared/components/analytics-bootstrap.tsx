@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouteContext, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 
@@ -16,14 +16,16 @@ import { useTenantContext } from "~/shared/hooks/use-tenant-context";
  */
 export function AnalyticsBootstrap() {
   const trpc = useAppTrpc();
-  const queryClient = useQueryClient();
   const { host } = useTenantContext();
   const { effectiveLocale, locale } = useRouteContext({ from: "/{-$locale}" });
-  const { fromQr } = useSearch({ from: "/{-$locale}" });
+  const { utm_source: utmSource } = useSearch({ from: "/{-$locale}" });
   const qrVisitFired = useRef(false);
+  const { data } = useSuspenseQuery(getPublicMenuQueryOptions({ host, locale, trpc }));
 
   useEffect(() => {
-    const data = queryClient.getQueryData(getPublicMenuQueryOptions({ host, locale, trpc }).queryKey);
+    if (!data) {
+      return;
+    }
 
     registerTenantProperties({
       tenantHost: host,
@@ -32,18 +34,19 @@ export function AnalyticsBootstrap() {
       displayMode: window.matchMedia("(display-mode: standalone)").matches ? "standalone" : "browser",
       // Effective language of the visit, not the URL prefix the visitor happened to type.
       locale: effectiveLocale,
-      ...(data && { restaurantId: data.branch.restaurantId, branchId: data.branch.id }),
+      restaurantId: data.branch.restaurantId,
+      branchId: data.branch.id,
       // Public dimension used only to compute analytics_day/analytics_hour locally.
-      ...(data && { timeZone: data.branch.timeZone }),
+      timeZone: data.branch.timeZone,
     });
 
-    if (fromQr && !qrVisitFired.current) {
+    if (utmSource === "qr" && !qrVisitFired.current) {
       qrVisitFired.current = true;
       track("qr_visit");
     }
 
     scheduleAnalyticsLoad();
-  }, [effectiveLocale, fromQr, host, locale, queryClient, trpc]);
+  }, [data, effectiveLocale, utmSource, host]);
 
   return null;
 }

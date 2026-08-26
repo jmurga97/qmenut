@@ -5,7 +5,9 @@ export interface VisitSeriesPoint {
   returningVisits: number;
 }
 
-export type VisitsPeriod = "12m" | "30d";
+export const VISIT_PERIODS = ["30d", "12m"] as const;
+
+export type VisitsPeriod = (typeof VISIT_PERIODS)[number];
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -43,5 +45,7 @@ export function sumVisits(points: VisitSeriesPoint[]): { newVisits: number; retu
 }
 
 export function formatDayLabel(day: string): string {
-  return new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(new Date(`${day}T00:00:00Z`));
+  return new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" }).format(
+    new Date(`${day}T00:00:00Z`),
+  );
 }

@@ -4,8 +4,9 @@ import { getRouteApi } from "@tanstack/react-router";
 import * as api from "~/features/loyalty/api";
 import * as services from "~/features/loyalty/services";
 import { trpc } from "~/lib/trpc";
+import { resolveVisitPoints } from "~/shared/components/charts/visit-chart";
 import { useDebouncedCallback } from "~/shared/hooks/use-debounced-callback";
-import { aggregateWeekly, getVisitsRange, sumVisits } from "~/shared/services/visit-series";
+import { getVisitsRange, sumVisits } from "~/shared/services/visit-series";
 
 import type * as Loyalty from "~/features/loyalty/types";
 
@@ -56,7 +57,7 @@ export function useLoyaltyInsightsController() {
       services.downloadCustomersCsv(rows);
     },
   });
-  const visitsPoints = search.period === "12m" ? aggregateWeekly(visits) : visits;
+  const visitsPoints = resolveVisitPoints(search.period, visits);
   const visitsTotals = sumVisits(visitsPoints);
   const returnTotals = services.sumReturn(loyaltyReturn.points);
   return {

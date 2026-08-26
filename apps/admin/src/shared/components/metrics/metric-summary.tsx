@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 export interface MetricSummaryProps {
   description?: string;
   focusLabel: string;
@@ -29,5 +27,3 @@ export function MetricSummary({ description, focusLabel, focusValue, label, supp
     </section>
   );
 }
-
-export type { ReactNode };

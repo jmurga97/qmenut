@@ -1,6 +1,7 @@
-import { Switch } from "@ming/components";
+import { Switch } from "@jmurga97/components";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { useMemo } from "react";
 
 import * as api from "~/features/dashboard/api";
 import { trpc } from "~/lib/trpc";
@@ -20,8 +21,11 @@ function AvailabilityList({ branchId }: { branchId: string }) {
   const categories = useSuspenseQuery(api.getMenuCategoriesQueryOptions({ branchId, trpc })).data;
   const dishes = useSuspenseQuery(api.getMenuDishesQueryOptions({ branchId, trpc })).data;
   const availability = useMutation(api.getDishAvailabilityMutationOptions({ branchId, queryClient, trpc }));
-  const nameByCategory = new Map(categories.map((category) => [category.id, category.name]));
-  const sortedDishes = dishes.toSorted((a, b) => Number(a.isActive) - Number(b.isActive));
+  const nameByCategory = useMemo(
+    () => new Map(categories.map((category) => [category.id, category.name])),
+    [categories],
+  );
+  const sortedDishes = useMemo(() => dishes.toSorted((a, b) => Number(a.isActive) - Number(b.isActive)), [dishes]);
   return (
     <div className="admin-dashboard-scroll">
       <FormFeedback error={availability.error} />

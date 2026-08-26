@@ -6,6 +6,7 @@ import { createAuth } from "@/auth/create-auth";
 import { parseEnv } from "@/config/env";
 import { applyCorsHeaders, createOptionsResponse } from "@/http/cors";
 import { jsonResponse } from "@/http/json";
+import { runAnalyticsDailyJob } from "@/modules/analytics/digest/run-analytics-daily-job";
 import { handleStripeWebhook } from "@/modules/billing/handle-stripe-webhook";
 import { createContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/router";
@@ -57,6 +58,14 @@ async function handleRequest(request: Request, env: RuntimeEnv): Promise<Respons
   return jsonResponse({ error: "No encontrado" }, { status: 404 });
 }
 
+async function handleScheduledAnalytics(rawEnv: EnvBindings): Promise<void> {
+  try {
+    await runAnalyticsDailyJob(rawEnv);
+  } catch (error) {
+    Sentry.captureException(error, { tags: { module: "analytics-cron" } });
+  }
+}
+
 export default Sentry.withSentry(
   (rawEnv: EnvBindings) => ({
     dsn: rawEnv.SENTRY_DSN || undefined,
@@ -70,6 +79,11 @@ export default Sentry.withSentry(
       const response = await handleRequest(request, env);
 
       return applyCorsHeaders({ env, request, response });
+    },
+    // eslint-disable-next-line max-params -- Cloudflare ScheduledHandler contract.
+    scheduled(_controller: ScheduledController, rawEnv: EnvBindings, ctx: ExecutionContext): void {
+      // Cron diario de producción: sincroniza PostHog → D1 y despacha el digest quincenal.
+      ctx.waitUntil(handleScheduledAnalytics(rawEnv));
     },
   },
 );

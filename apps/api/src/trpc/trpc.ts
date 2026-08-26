@@ -1,4 +1,4 @@
-import { findMembershipByUserId } from "@qmenut/db/repositories/restaurant-users.repository";
+import { resolveActiveMembership } from "@qmenut/db/repositories/restaurant-users.repository";
 import { initTRPC, TRPCError } from "@trpc/server";
 
 import type { TrpcContext } from "./context";
@@ -32,7 +32,11 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
 });
 
 export const tenantProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const membership = await findMembershipByUserId({ db: ctx.db, userId: ctx.session.user.id });
+  const membership = await resolveActiveMembership({
+    activeRestaurantId: ctx.session.session.activeRestaurantId ?? null,
+    db: ctx.db,
+    userId: ctx.session.user.id,
+  });
 
   if (!membership) {
     throw new TRPCError({ code: "FORBIDDEN", message: "No hay ninguna membresía activa en un restaurante" });

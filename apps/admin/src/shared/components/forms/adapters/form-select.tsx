@@ -1,4 +1,4 @@
-import { Field, Select } from "@ming/components";
+import { Field, Select } from "@jmurga97/components";
 import { useController, useFormContext } from "react-hook-form";
 
 import type { FieldPath, FieldValues } from "react-hook-form";

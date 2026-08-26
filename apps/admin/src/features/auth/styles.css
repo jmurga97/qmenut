@@ -28,6 +28,65 @@
   gap: 1rem;
 }
 
+.admin-select-restaurant-list {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.admin-select-restaurant-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block-start: 1rem;
+  border-block-start: 1px solid var(--border);
+}
+
+.admin-select-restaurant-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.875rem;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--input);
+  border-radius: 0.375rem;
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  text-align: start;
+  transition:
+    border-color 140ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-select-restaurant-option:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--input) 55%, var(--foreground));
+}
+
+.admin-select-restaurant-option:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.admin-select-restaurant-option:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.admin-select-restaurant-name {
+  overflow: hidden;
+  font-weight: 550;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-select-restaurant-role {
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-label);
+}
+
 .admin-login-header h2 {
   font-family: var(--font-display);
   font-size: var(--admin-text-display);

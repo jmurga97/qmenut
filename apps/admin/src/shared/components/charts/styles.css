@@ -71,8 +71,7 @@
   border-radius: 0.1875rem;
 }
 
-.stacked-bar__empty,
-.chart-empty {
+.stacked-bar__empty {
   display: grid;
   place-items: center;
   min-height: 8rem;

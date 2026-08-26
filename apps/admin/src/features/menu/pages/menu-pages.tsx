@@ -1,4 +1,4 @@
-import { Button, Field, Input, Switch } from "@ming/components";
+import { Button, Field, Input, Switch } from "@jmurga97/components";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";

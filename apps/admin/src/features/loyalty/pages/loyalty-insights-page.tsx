@@ -1,19 +1,18 @@
-import { Button, Checkbox, InlineMessage, SearchField } from "@ming/components";
+import { Button, Checkbox, InlineMessage, SearchField } from "@jmurga97/components";
 import { Link } from "@tanstack/react-router";
 
 import { useLoyaltyInsightsController } from "~/features/loyalty/hooks/use-loyalty-insights-controller";
 import * as services from "~/features/loyalty/services";
 import { StackedBarChart } from "~/shared/components/charts/stacked-bar-chart";
+import { VISIT_SERIES, toVisitChartPoints } from "~/shared/components/charts/visit-chart";
 import { SegmentedToggle } from "~/shared/components/controls/segmented-toggle";
 import { Metric } from "~/shared/components/metrics/metric";
 import { MetricSummary } from "~/shared/components/metrics/metric-summary";
 import { PageHeader } from "~/shared/components/page-header";
 import { formatDate, formatNumber, formatPercent } from "~/shared/services/format";
 import { formatMoney } from "~/shared/services/money";
-import { formatDayLabel } from "~/shared/services/visit-series";
 
-import type { LoyaltyVisitsPoint, CustomerSort } from "~/features/loyalty/types";
-import type { StackedBarSeries } from "~/shared/components/charts/stacked-bar-chart";
+import type { CustomerSort } from "~/features/loyalty/types";
 
 const COLUMNS: Array<{ key: CustomerSort; label: string }> = [
   { key: "email", label: "Email" },
@@ -23,17 +22,7 @@ const COLUMNS: Array<{ key: CustomerSort; label: string }> = [
   { key: "lastVisitAt", label: "Última visita" },
   { key: "rewardsRedeemed", label: "Premios" },
 ];
-const VISIT_SERIES: ReadonlyArray<StackedBarSeries> = [
-  { key: "newVisits", label: "nuevas", tone: "service" },
-  { key: "returningVisits", label: "recurrentes", tone: "ink" },
-];
-function toChartPoints(points: LoyaltyVisitsPoint[]) {
-  return points.map((point) => ({
-    id: point.day,
-    label: formatDayLabel(point.day),
-    values: { newVisits: point.newVisits, returningVisits: point.returningVisits },
-  }));
-}
+
 export function LoyaltyInsightsPage() {
   const loyalty = useLoyaltyInsightsController();
   const { customers, loyaltyReturn, search, summary } = loyalty;
@@ -68,7 +57,7 @@ export function LoyaltyInsightsPage() {
           <StackedBarChart
             ariaLabel="Visitas nuevas y recurrentes durante el periodo seleccionado"
             emptyLabel="Las primeras visitas aparecerán aquí."
-            points={toChartPoints(loyalty.visitsPoints)}
+            points={toVisitChartPoints(loyalty.visitsPoints)}
             series={VISIT_SERIES}
           />
           <p className="loyalty-chart-summary">

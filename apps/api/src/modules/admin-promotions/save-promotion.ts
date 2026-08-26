@@ -24,7 +24,9 @@ export async function createBranchPromotion({
 }: CreatePromotionInput): Promise<{ id: string }> {
   await assertBranchAccess({ db, restaurantId, branchId });
   const normalizedTargets = normalizeTargets(data.scope, targets);
-  await assertPromotionTargets({ db, restaurantId, branchId, targets: normalizedTargets });
+  if (normalizedTargets.length > 0) {
+    await assertPromotionTargets({ db, restaurantId, branchId, targets: normalizedTargets });
+  }
   const id = await createPromotion({
     db,
     restaurantId,
@@ -53,7 +55,9 @@ export async function updateBranchPromotion({
   targets,
 }: UpdatePromotionInput): Promise<{ id: string }> {
   const normalizedTargets = normalizeTargets(data.scope, targets);
-  await assertPromotionTargets({ db, restaurantId, branchId, targets: normalizedTargets });
+  if (normalizedTargets.length > 0) {
+    await assertPromotionTargets({ db, restaurantId, branchId, targets: normalizedTargets });
+  }
   await updatePromotion({ db, restaurantId, promotionId, data, targets: normalizedTargets });
   return { id: promotionId };
 }
@@ -87,8 +91,6 @@ async function assertPromotionTargets({
   branchId,
   targets,
 }: AssertPromotionTargetsInput): Promise<void> {
-  if (targets.length === 0) return;
-
   const catalog = await getMenuCatalog({ db, restaurantId, branchId });
   const dishIds = new Set(catalog.dishes.map((dish) => dish.id));
   const categoryIds = new Set(catalog.categories.map((category) => category.id));

@@ -19,8 +19,14 @@ const SOCIAL_HOSTS = [
   "youtube.com",
 ];
 
+const WHATSAPP_HOSTS = ["wa.me", "whatsapp.com"];
+
 function isSocialHost(hostname: string): boolean {
   return SOCIAL_HOSTS.some((social) => hostname === social || hostname.endsWith(`.${social}`));
+}
+
+function isWhatsappHost(hostname: string): boolean {
+  return WHATSAPP_HOSTS.some((whatsapp) => hostname === whatsapp || hostname.endsWith(`.${whatsapp}`));
 }
 
 /** Clasifica el canal de intención desde el href; `null` para enlaces sin señal (p. ej. OSM). */
@@ -38,7 +44,7 @@ function contactChannel(href: string): ContactActionChannel | null {
 
   const host = url.hostname.toLowerCase();
 
-  if (host === "wa.me" || host.endsWith(".wa.me") || host.includes("whatsapp")) {
+  if (url.protocol === "whatsapp:" || isWhatsappHost(host)) {
     return "whatsapp";
   }
 

@@ -1,6 +1,6 @@
 import { OTPField } from "@base-ui/react/otp-field";
-import { Field } from "@ming/components";
-import { useFormContext, useWatch } from "react-hook-form";
+import { Field } from "@jmurga97/components";
+import { useController, useFormContext } from "react-hook-form";
 
 import type { FieldPath, FieldValues } from "react-hook-form";
 
@@ -17,9 +17,9 @@ export function FormOtpInput<TValues extends FieldValues>({
   length,
   name,
 }: FormOtpInputProps<TValues>) {
-  const { control, formState, getFieldState, setValue } = useFormContext<TValues>();
-  const error = getFieldState(name, formState).error?.message;
-  const value = useWatch({ control, name });
+  const { control } = useFormContext<TValues>();
+  const { field, fieldState } = useController({ control, name });
+  const error = fieldState.error?.message;
   return (
     <Field error={error} invalid={Boolean(error)} label={label}>
       <OTPField.Root
@@ -27,16 +27,16 @@ export function FormOtpInput<TValues extends FieldValues>({
         disabled={disabled}
         inputMode="numeric"
         length={length}
-        name={name}
+        name={field.name}
         validationType="numeric"
-        value={typeof value === "string" ? value : ""}
+        value={typeof field.value === "string" ? field.value : ""}
         onValueChange={(next: string) => {
-          setValue(name, next as never, { shouldDirty: true, shouldValidate: true });
+          field.onChange(next);
         }}
       >
         <div className="admin-otp-field__slots">
           {Array.from({ length }, (_, index) => (
-            <OTPField.Input key={index} className="admin-otp-field__slot" />
+            <OTPField.Input key={index} className="admin-otp-field__slot" onBlur={field.onBlur} />
           ))}
         </div>
       </OTPField.Root>

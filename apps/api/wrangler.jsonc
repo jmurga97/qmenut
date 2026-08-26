@@ -57,6 +57,7 @@
     "BETTER_AUTH_URL": "http://localhost:8787",
     "ADMIN_APP_URL": "http://localhost:5174",
     "DEEPL_API_URL": "https://api-free.deepl.com",
+    "POSTHOG_API_HOST": "https://eu.posthog.com",
     "STRIPE_PRICE_BASIC": "price_1U120eEnGfbzQ006un87QMk4",
     "LOG_LEVEL": "info",
     "NODE_ENV": "production",
@@ -141,6 +142,11 @@
           "custom_domain": true,
         },
       ],
+      // Único Cron Trigger de producción: sincroniza PostHog → D1 y envía el digest
+      // quincenal. Development no tiene cron.
+      "triggers": {
+        "crons": ["45 4 * * *"],
+      },
       "d1_databases": [
         {
           "binding": "DB",
@@ -192,11 +198,12 @@
         "BETTER_AUTH_URL": "https://api.qmenut.app",
         "ADMIN_APP_URL": "https://admin.qmenut.app",
         "DEEPL_API_URL": "https://api-free.deepl.com",
+        "POSTHOG_API_HOST": "https://eu.posthog.com",
         "STRIPE_PRICE_BASIC": "price_1U120eEnGfbzQ006un87QMk4",
         "LOG_LEVEL": "info",
         "NODE_ENV": "production",
         "SENTRY_DSN": "https://b201dd7421ecf64b6b7c2f073bae0cf0@o4511851717394432.ingest.de.sentry.io/4511956009943120",
-        "DEV_FIXED_OTP": "false"
+        "DEV_FIXED_OTP": "false",
       },
     },
   },

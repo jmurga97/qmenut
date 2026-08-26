@@ -26,13 +26,15 @@ export interface LocaleRouteContext {
   devTemplate: QmTemplateName | undefined;
   effectiveLocale: string;
   locale: string | undefined;
-  /** Duración (ms) de la descarga real de `menu.publicData` en el navegador; ausente si vino de SSR o caché. */
-  menuLoadMs: number | undefined;
 }
 
 interface LocaleSearch {
-  /** Entrada atribuida al QR físico (`?utm_source=qr`); `undefined` evita re-serializarlo. */
-  fromQr?: boolean;
+  /**
+   * Clave literal `?utm_source=qr` del QR impreso. Debe conservar su nombre original:
+   * el router re-serializa las claves validadas en cada navegación y renombrarla
+   * reescribiría la URL compartible de `/?utm_source=qr` a otra cosa.
+   */
+  utm_source?: string;
   template?: QmTemplateName;
 }
 
@@ -42,7 +44,7 @@ function isQmTemplateName(value: unknown): value is QmTemplateName {
 
 export const Route = createFileRoute("/{-$locale}")({
   validateSearch: (search: Record<string, unknown>): LocaleSearch => ({
-    fromQr: search.utm_source === "qr" || undefined,
+    utm_source: typeof search.utm_source === "string" ? search.utm_source : undefined,
     template: isQmTemplateName(search.template) ? search.template : undefined,
   }),
   beforeLoad: async ({ context, location, params, search }): Promise<LocaleRouteContext> => {
@@ -57,13 +59,7 @@ export const Route = createFileRoute("/{-$locale}")({
       locale: requested,
       trpc: context.trpc,
     });
-    const wasCached = context.queryClient.getQueryData(publicMenuOptions.queryKey) !== undefined;
-    const fetchStartedAt = typeof window === "undefined" ? 0 : performance.now();
     const data = await context.queryClient.ensureQueryData(publicMenuOptions);
-    // Solo la descarga real en el navegador refleja la red del visitante; con SSR o caché
-    // caliente el cronómetro no dice nada de utilidad.
-    const menuLoadMs =
-      typeof window !== "undefined" && !wasCached ? Math.round(performance.now() - fetchStartedAt) : undefined;
     const language = data?.language;
 
     // Prefix doesn't map to an active language for this tenant — fall back to the
@@ -87,7 +83,6 @@ export const Route = createFileRoute("/{-$locale}")({
       devTemplate: import.meta.env.DEV ? search.template : undefined,
       effectiveLocale,
       locale: requested,
-      menuLoadMs,
     };
   },
   head: ({ match }) => ({

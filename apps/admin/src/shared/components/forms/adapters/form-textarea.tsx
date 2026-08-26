@@ -1,4 +1,4 @@
-import { Field, Textarea } from "@ming/components";
+import { Field, Textarea } from "@jmurga97/components";
 import { useFormContext } from "react-hook-form";
 
 import type { FieldPath, FieldValues } from "react-hook-form";
@@ -19,7 +19,7 @@ export function FormTextarea<TValues extends FieldValues>({
   const error = getFieldState(name, formState).error?.message;
   return (
     <Field error={error} invalid={Boolean(error)} label={label}>
-      <Textarea {...register(name)} readOnly={disabled} rows={rows} />
+      <Textarea {...register(name)} disabled={disabled} rows={rows} />
     </Field>
   );
 }

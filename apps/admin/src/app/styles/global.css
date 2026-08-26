@@ -364,6 +364,24 @@ button {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.admin-restaurant-select {
+  display: grid;
+  min-width: 0;
+  gap: 0.3125rem;
+}
+.admin-restaurant-select > span:first-child {
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-label);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.admin-restaurant-select .ming-select__trigger {
+  min-height: 2.375rem;
+  border-radius: 0.375rem;
+  padding-inline: 0.625rem;
+  font-size: var(--admin-text-body-sm);
+  font-weight: 550;
+}
 .admin-branch-select {
   display: grid;
   min-width: 0;
@@ -637,16 +655,6 @@ button {
   outline: 3px solid var(--ring);
   outline-offset: 2px;
 }
-.admin-checkbox {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--foreground);
-  cursor: pointer;
-}
-.admin-checkbox input {
-  accent-color: var(--admin-identity-accent);
-}
 .admin-form-checkbox {
   display: flex;
   min-width: 0;
@@ -690,6 +698,14 @@ button {
   }
 }
 
+/*
+  Desktop grid overrides start at 56.0625rem on purpose: the @jmurga97/components AppShell
+  flips to its mobile navigation with (max-width: 56rem), so starting our desktop grid
+  at exactly 56rem would apply both layouts in the same viewport. The offset leaves a
+  1px window (56–56.0625rem) where the package already renders the desktop nav column
+  but the base single-column grid still applies — an empty reserved nav slot is the
+  known trade-off for never overlapping the package breakpoint.
+*/
 @media (min-width: 56.0625rem) {
   .admin-app-shell[data-navigation-open="true"] {
     grid-template:

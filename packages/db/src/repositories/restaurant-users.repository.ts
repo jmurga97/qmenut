@@ -1,8 +1,8 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 export type { RestaurantRoleCode } from "@qmenut/permissions";
 
-import { restaurantUsers } from "../schema/restaurants";
+import { restaurantUsers, restaurants } from "../schema/restaurants";
 
 import type { DrizzleDb } from "../client";
 import type { RestaurantRoleCode } from "@qmenut/permissions";
@@ -14,26 +14,62 @@ export interface RestaurantMembership {
   isActive: boolean;
 }
 
-interface FindMembershipByUserIdInput {
+export interface ActiveMembership extends RestaurantMembership {
+  restaurantName: string;
+}
+
+interface UserIdInput {
   db: DrizzleDb;
   userId: string;
 }
 
-export async function findMembershipByUserId({
+interface ResolveActiveMembershipInput extends UserIdInput {
+  activeRestaurantId: string | null;
+}
+
+const membershipColumns = {
+  id: restaurantUsers.id,
+  restaurantId: restaurantUsers.restaurantId,
+  roleCode: restaurantUsers.roleCode,
+  isActive: restaurantUsers.isActive,
+  restaurantName: restaurants.name,
+};
+
+function activeMembershipWhere(userId: string) {
+  return and(eq(restaurantUsers.userId, userId), eq(restaurantUsers.isActive, true), isNull(restaurants.deletedAt));
+}
+
+export async function findActiveMembershipsByUserId({ db, userId }: UserIdInput): Promise<ActiveMembership[]> {
+  const rows = await db
+    .select(membershipColumns)
+    .from(restaurantUsers)
+    .innerJoin(restaurants, eq(restaurants.id, restaurantUsers.restaurantId))
+    .where(activeMembershipWhere(userId))
+    .orderBy(restaurants.name)
+    .all();
+
+  return rows;
+}
+
+export async function resolveActiveMembership({
+  activeRestaurantId,
   db,
   userId,
-}: FindMembershipByUserIdInput): Promise<RestaurantMembership | null> {
-  const row = await db
-    .select({
-      id: restaurantUsers.id,
-      restaurantId: restaurantUsers.restaurantId,
-      roleCode: restaurantUsers.roleCode,
-      isActive: restaurantUsers.isActive,
-    })
-    .from(restaurantUsers)
-    .where(and(eq(restaurantUsers.userId, userId), eq(restaurantUsers.isActive, true)))
-    .orderBy(restaurantUsers.createdAt)
-    .get();
+}: ResolveActiveMembershipInput): Promise<ActiveMembership | null> {
+  if (activeRestaurantId) {
+    const selected = await db
+      .select(membershipColumns)
+      .from(restaurantUsers)
+      .innerJoin(restaurants, eq(restaurants.id, restaurantUsers.restaurantId))
+      .where(and(activeMembershipWhere(userId), eq(restaurantUsers.restaurantId, activeRestaurantId)))
+      .get();
 
-  return row ?? null;
+    if (selected) {
+      return selected;
+    }
+  }
+
+  const memberships = await findActiveMembershipsByUserId({ db, userId });
+
+  return memberships.length === 1 ? memberships[0] : null;
 }

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SelectRestaurantRouteImport } from './routes/select-restaurant'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth.index'
@@ -34,6 +35,11 @@ import { Route as AuthMenuDishesDishIdRouteImport } from './routes/_auth.menu.di
 import { Route as AuthMenuCategoriesNewRouteImport } from './routes/_auth.menu.categories.new'
 import { Route as AuthMenuCategoriesCategoryIdRouteImport } from './routes/_auth.menu.categories.$categoryId'
 
+const SelectRestaurantRoute = SelectRestaurantRouteImport.update({
+  id: '/select-restaurant',
+  path: '/select-restaurant',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -160,6 +166,7 @@ const AuthMenuCategoriesCategoryIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
   '/login': typeof LoginRoute
+  '/select-restaurant': typeof SelectRestaurantRoute
   '/billing': typeof AuthBillingRoute
   '/branch': typeof AuthBranchRoute
   '/languages': typeof AuthLanguagesRouteWithChildren
@@ -184,6 +191,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/select-restaurant': typeof SelectRestaurantRoute
   '/billing': typeof AuthBillingRoute
   '/branch': typeof AuthBranchRoute
   '/qr': typeof AuthQrRoute
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
+  '/select-restaurant': typeof SelectRestaurantRoute
   '/_auth/billing': typeof AuthBillingRoute
   '/_auth/branch': typeof AuthBranchRoute
   '/_auth/languages': typeof AuthLanguagesRouteWithChildren
@@ -235,6 +244,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/select-restaurant'
     | '/billing'
     | '/branch'
     | '/languages'
@@ -259,6 +269,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/select-restaurant'
     | '/billing'
     | '/branch'
     | '/qr'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_auth'
     | '/login'
+    | '/select-restaurant'
     | '/_auth/billing'
     | '/_auth/branch'
     | '/_auth/languages'
@@ -308,10 +320,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SelectRestaurantRoute: typeof SelectRestaurantRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/select-restaurant': {
+      id: '/select-restaurant'
+      path: '/select-restaurant'
+      fullPath: '/select-restaurant'
+      preLoaderRoute: typeof SelectRestaurantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -578,6 +598,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   LoginRoute: LoginRoute,
+  SelectRestaurantRoute: SelectRestaurantRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

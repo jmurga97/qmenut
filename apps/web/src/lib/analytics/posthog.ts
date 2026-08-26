@@ -7,8 +7,9 @@
 
 import { createClientOnlyFn } from "@tanstack/react-start";
 
-import type { AnalyticsEventName, AnalyticsEventPayloads, AnalyticsTenantContextInput, TrackArgs } from "./event-catalog";
 import { getAnalyticsVisitId, restaurantLocalDayHour } from "./visit";
+
+import type { AnalyticsEventName, AnalyticsTenantContextInput, TrackArgs } from "./event-catalog";
 import type { PostHog } from "posthog-js";
 
 interface PendingEvent {
@@ -25,12 +26,8 @@ const state: {
   timeZone: string | null;
 } = { instance: null, loading: null, superProps: null, tenantReady: false, timeZone: null };
 
-/** Eventos a la espera del contexto del tenant (restaurant_id, branch_id…). */
-const pendingContext = new Map<number, PendingEvent>();
-/** Contexto registrado pero SDK aún cargando. */
-const pendingSdk = new Map<number, PendingEvent>();
-
-let pendingSequence = 0;
+/** Cola única para conservar el orden hasta tener contexto de tenant y SDK. */
+const pendingEvents: PendingEvent[] = [];
 
 function isEnabled(): boolean {
   return typeof window !== "undefined" && Boolean(import.meta.env.VITE_POSTHOG_KEY);
@@ -46,23 +43,36 @@ function commonProperties(occurredAt: number): Record<string, unknown> {
   };
 }
 
-function capture(event: AnalyticsEventName, props: object | undefined, occurredAt: number): void {
+interface CaptureInput {
+  event: AnalyticsEventName;
+  occurredAt: number;
+  props: object | undefined;
+}
+
+function enqueue(bucket: PendingEvent[], event: PendingEvent): void {
+  bucket.push(event);
+}
+
+function capture({ event, occurredAt, props }: CaptureInput): void {
   if (!state.instance) {
-    pendingSdk.set(pendingSequence, { event, occurredAt, props });
-    void ensureLoaded();
+    enqueue(pendingEvents, { event, occurredAt, props });
 
     return;
   }
 
-  state.instance.capture(event, { ...props, ...commonProperties(occurredAt) }, { timestamp: new Date(occurredAt) });
+  const payload = { ...props, ...commonProperties(occurredAt) };
+
+  state.instance.capture(event, payload, { timestamp: new Date(occurredAt) });
 }
 
-function flushPending(bucket: Map<number, PendingEvent>): void {
-  for (const queued of bucket.values()) {
-    capture(queued.event, queued.props, queued.occurredAt);
-  }
+function flushPending(bucket: PendingEvent[]): void {
+  const queued = [...bucket];
 
-  bucket.clear();
+  bucket.length = 0;
+
+  for (const event of queued) {
+    capture(event);
+  }
 }
 
 const load = createClientOnlyFn(async (): Promise<void> => {
@@ -85,8 +95,9 @@ const load = createClientOnlyFn(async (): Promise<void> => {
     state.instance.register(state.superProps);
   }
 
-  flushPending(pendingContext);
-  flushPending(pendingSdk);
+  if (state.tenantReady) {
+    flushPending(pendingEvents);
+  }
 });
 
 async function ensureLoaded(): Promise<void> {
@@ -121,7 +132,7 @@ export function registerTenantProperties(props: AnalyticsTenantContextInput): vo
 
   if (state.instance) {
     state.instance.register(state.superProps);
-    flushPending(pendingContext);
+    flushPending(pendingEvents);
   }
 }
 
@@ -130,18 +141,21 @@ export function track<E extends AnalyticsEventName>(event: E, ...args: TrackArgs
     return;
   }
 
-  const props = args[0] as AnalyticsEventPayloads[E] | undefined;
+  const props = args[0];
   const occurredAt = Date.now();
 
   // Sin contexto del tenant el evento se retiene: sin restaurant_id/branch_id no es útil.
   if (!state.tenantReady || !state.instance) {
-    pendingContext.set(pendingSequence, { event, occurredAt, props });
-    void ensureLoaded();
+    enqueue(pendingEvents, { event, occurredAt, props });
+
+    if (state.tenantReady) {
+      void ensureLoaded();
+    }
 
     return;
   }
 
-  capture(event, props, occurredAt);
+  capture({ event, occurredAt, props });
 }
 
 /** Arranca la carga diferida cuando el hilo principal queda libre tras hidratar. */

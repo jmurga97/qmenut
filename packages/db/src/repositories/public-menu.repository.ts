@@ -187,7 +187,7 @@ async function getPublicBranchContext({
   const [photos, schedules] = await Promise.all([getBranchPhotos({ db, tenant }), getBranchSchedules({ db, tenant })]);
 
   return {
-    branch: mapBranch({ row, photos, schedules }),
+    branch: mapBranch({ row, photos, schedules, timeZone: row.timeZone }),
     legal: {
       address: row.legalAddress,
       dataProtectionEmail: row.dataProtectionEmail,

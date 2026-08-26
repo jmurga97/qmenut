@@ -224,14 +224,16 @@ service bindings.
 
 ## Step 3: Set secrets
 
-| Secret                  | Workers               | Description                                                                               |
-| ----------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
-| `BETTER_AUTH_SECRET`    | API                   | A long, cryptographically random value.                                                   |
-| `THEME_WORKER_TOKEN`    | API and tenant-config | Generate once and enter the same bytes twice. tenant-config compares it in constant time. |
-| `LOYALTY_TOKEN_SECRET`  | API                   | A long random key for loyalty card and redemption tokens.                                 |
-| `STRIPE_SECRET_KEY`     | API                   | The Stripe live-mode secret key.                                                          |
-| `STRIPE_WEBHOOK_SECRET` | API                   | The signing secret for the live `https://api.qmenut.app/webhooks/stripe` endpoint.        |
-| `DEEPL_API_KEY`         | API                   | Optional. Translation calls degrade without it.                                           |
+| Secret                     | Workers               | Description                                                                               |
+| -------------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
+| `BETTER_AUTH_SECRET`       | API                   | A long, cryptographically random value.                                                   |
+| `THEME_WORKER_TOKEN`       | API and tenant-config | Generate once and enter the same bytes twice. tenant-config compares it in constant time. |
+| `LOYALTY_TOKEN_SECRET`     | API                   | A long random key for loyalty card and redemption tokens.                                 |
+| `STRIPE_SECRET_KEY`        | API                   | The Stripe live-mode secret key.                                                          |
+| `STRIPE_WEBHOOK_SECRET`    | API                   | The signing secret for the live `https://api.qmenut.app/webhooks/stripe` endpoint.        |
+| `DEEPL_API_KEY`            | API                   | Optional. Translation calls degrade without it.                                           |
+| `POSTHOG_PROJECT_ID`       | API                   | Numeric project ID used by the nightly Query API materialization.                         |
+| `POSTHOG_PERSONAL_API_KEY` | API                   | Read-only personal API key for the same PostHog project.                                  |
 
 Each command prompts for the value and does not write it to your shell history:
 
@@ -261,6 +263,14 @@ bunx wrangler secret put STRIPE_WEBHOOK_SECRET --env production --cwd apps/api
 
 ```bash
 bunx wrangler secret put DEEPL_API_KEY --env production --cwd apps/api
+```
+
+```bash
+bunx wrangler secret put POSTHOG_PROJECT_ID --env production --cwd apps/api
+```
+
+```bash
+bunx wrangler secret put POSTHOG_PERSONAL_API_KEY --env production --cwd apps/api
 ```
 
 Never set `DEV_FIXED_OTP` on the production Worker. `create-auth.ts` ignores it when
@@ -306,9 +316,14 @@ cross-origin with session cookies.
 
 ## Step 6: Deploy in dependency order
 
-Deploy the compatible `ming-image-worker` policy and bindings first, then tenant-config, the API,
-web, admin, and landing. Service bindings must reference Workers that already exist: the API needs
-`qmenut-tenant-config`, `ming-email-worker`, and `ming-image-worker`; web needs `qmenut-api`.
+Deploy the compatible `ming-email-worker` analytics-digest contract and `ming-image-worker`
+policy first, then tenant-config, the API, web, admin, and landing. Service bindings must reference
+Workers that already exist: the API needs `qmenut-tenant-config`, `ming-email-worker`, and
+`ming-image-worker`; web needs `qmenut-api`.
+
+The email worker's qmenut contract must accept only count, currency, and percent metrics; it must
+not require the removed latency codes or a milliseconds format. Deploy that sibling before the API
+so the first scheduled digest cannot reach an incompatible template.
 
 From `../ming-image-worker`, apply its D1 migration and deploy before qmenut starts calling the new
 product policy:
@@ -467,8 +482,21 @@ Create separate Sentry projects and assign their DSNs:
 
 The web server and browser may use the same Sentry project, but they are configured
 through different paths. Put the PostHog EU key and host only in the web build
-environment. Worker production environments have observability enabled so that Cloudflare
-logs remain available.
+environment. The API additionally uses `POSTHOG_PROJECT_ID` and
+`POSTHOG_PERSONAL_API_KEY` server-side to materialize behavioral aggregates. Worker production
+environments have observability enabled so that Cloudflare logs remain available. Sentry remains
+configured with `tracesSampleRate: 0`; QMenut does not collect a parallel custom performance
+dataset.
+
+The API production Cron Trigger runs daily at `04:45 UTC`. It recomputes the last three complete
+days (or backfills 90 days on its first successful run), then creates a closed 15-day digest when
+due and processes eligible deliveries from every older period. Each active owner receives the
+digest automatically for this launch. There is currently no preference or unsubscribe flow; this
+is an accepted launch constraint that should be revisited before broader campaign features.
+
+Digest rows use a lease and three-attempt retry limit. The delivery ID is forwarded as
+`metadata.requestId`, but the shared email worker has no provider-level idempotency store, so the
+contract is explicitly at-least-once: a crash after provider acceptance can produce a duplicate.
 
 ## Step 10: Run the smoke test
 

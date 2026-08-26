@@ -26,6 +26,10 @@ Complete.
   and deployed development environments enable this flag; production ignores it.
 - Configuration. `packages/auth/src/store.ts` sets the OTP length, expiry, attempt limit,
   and session expiry. The session schema is `packages/db/src/schema/auth.ts`.
+- Active restaurant. The session carries an `activeRestaurantId` additional field
+  (`packages/auth/src/index.ts`, column added to `sessions` in the same schema). It is
+  written only through the `admin.auth.selectRestaurant` tRPC procedure, which re-checks
+  membership before updating the session row; see [Multi-tenancy](multi-tenancy.md).
 - Client. `packages/auth/src/client.ts` exports `createEmailOtpAuthClient`, which sets
   `credentials: include`. `apps/admin/src/lib/auth-client.ts` wraps it with the base URL
   and `signOut`.
@@ -38,8 +42,12 @@ Complete.
 
 The sign-in page is `apps/admin/src/features/auth/pages/login-page.tsx`, a two-step flow
 that collects the email address and then the OTP. Its route is
-`apps/admin/src/app/routes/login.tsx`. Protected routes are gated by
-`apps/admin/src/app/routes/_auth.tsx`.
+`apps/admin/src/app/routes/login.tsx`. When the account belongs to more than one
+restaurant, sign-in continues on
+`apps/admin/src/app/routes/select-restaurant.tsx`, which stores the choice in the
+session before entering the dashboard. Protected routes are gated by
+`apps/admin/src/app/routes/_auth.tsx`, which redirects to the selector when no tenant
+resolves for the session.
 
 ## Key files
 
@@ -51,6 +59,7 @@ that collects the email address and then the OTP. Its route is
 | Auth client                | `packages/auth/src/client.ts`, `apps/admin/src/lib/auth-client.ts`             |
 | API mount point            | `apps/api/src/index.ts` (`/api/auth/*`)                                        |
 | Session in tRPC            | `apps/api/src/trpc/trpc.ts` (`protectedProcedure`)                             |
+| Restaurant switching       | `apps/api/src/trpc/routers/auth.ts`, `apps/admin/src/features/auth/`           |
 | Sign-in UI and route guard | `apps/admin/src/features/auth/`, `apps/admin/src/app/routes/{login,_auth}.tsx` |
 
 ## Limitations

@@ -1,4 +1,4 @@
-import { cn } from "@ming/components";
+import { cn } from "@jmurga97/components";
 
 export interface MetricProps {
   className?: string;

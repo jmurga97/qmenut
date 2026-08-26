@@ -4,28 +4,18 @@ import * as api from "~/features/dashboard/api";
 import { useVisitsPeriod } from "~/features/dashboard/hooks/use-visits-period";
 import { trpc } from "~/lib/trpc";
 import { StackedBarChart } from "~/shared/components/charts/stacked-bar-chart";
+import { VISIT_SERIES, resolveVisitPoints, toVisitChartPoints } from "~/shared/components/charts/visit-chart";
 import { SegmentedToggle } from "~/shared/components/controls/segmented-toggle";
 import { formatNumber } from "~/shared/services/format";
-import { aggregateWeekly, formatDayLabel, getVisitsRange, sumVisits } from "~/shared/services/visit-series";
-
-import type { StackedBarSeries, StackedBarPoint } from "~/shared/components/charts/stacked-bar-chart";
-
-const VISIT_SERIES: ReadonlyArray<StackedBarSeries> = [
-  { key: "newVisits", label: "primeras visitas", tone: "service" },
-  { key: "returningVisits", label: "recurrentes", tone: "ink" },
-];
+import { getVisitsRange, sumVisits } from "~/shared/services/visit-series";
 
 export function VisitsChartCard() {
   const { period, setPeriod } = useVisitsPeriod();
   const range = getVisitsRange(period);
   const { data: visits } = useSuspenseQuery(api.getLoyaltyVisitsQueryOptions({ ...range, trpc }));
-  const points = period === "12m" ? aggregateWeekly(visits) : visits;
+  const points = resolveVisitPoints(period, visits);
   const totals = sumVisits(points);
-  const chartPoints: StackedBarPoint[] = points.map((point) => ({
-    id: point.day,
-    label: formatDayLabel(point.day),
-    values: { newVisits: point.newVisits, returningVisits: point.returningVisits },
-  }));
+  const chartPoints = toVisitChartPoints(points);
   return (
     <section className="admin-card admin-visits-card">
       <div className="admin-toolbar">

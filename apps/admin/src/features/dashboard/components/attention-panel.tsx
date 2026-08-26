@@ -1,4 +1,4 @@
-import { Badge, StatusText } from "@ming/components";
+import { Badge, StatusText } from "@jmurga97/components";
 import { useQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useMemo } from "react";
@@ -50,37 +50,37 @@ function AttentionContent() {
       (language) => language.isActive && language.languageCode !== languages.defaultLanguageCode,
     );
   }, [languages]);
-  const translationResults = useQueries({
+  const translations = useQueries({
     queries: translationTargets.map((language) => ({
       ...api.getTranslationsQueryOptions({ branchId: branchId ?? "", languageCode: language.languageCode, trpc }),
       enabled: branchId !== null,
     })),
+    combine: (results) => ({
+      isPending: results.some((result) => result.isPending),
+      coverages: results
+        .map((result, index) => {
+          const target = translationTargets[index];
+          if (!target || !result.data || branchId === null) return null;
+          return {
+            languageCode: target.languageCode,
+            label: labelByCode.get(target.languageCode) ?? target.languageCode.toUpperCase(),
+            ...result.data.stats,
+          };
+        })
+        .filter((coverage) => coverage !== null),
+    }),
   });
-  const items = (() => {
+  const items = useMemo(() => {
     const list: ReturnType<typeof getBranchAttentionItems> = [...getBranchAttentionItems(tenant.branches)];
     if (billingQuery.data) list.push(...getSubscriptionAttentionItems(billingQuery.data));
     if (categoriesQuery.data && dishesQuery.data) {
       list.push(...getMenuAttentionItems(categoriesQuery.data, dishesQuery.data));
     }
-    const coverages = translationResults
-      .map((result, index) => {
-        const target = translationTargets[index];
-        if (!target || !result.data || branchId === null) return null;
-        return {
-          languageCode: target.languageCode,
-          label: labelByCode.get(target.languageCode) ?? target.languageCode.toUpperCase(),
-          ...result.data.stats,
-        };
-      })
-      .filter((coverage) => coverage !== null);
-    list.push(...getTranslationCoverageItems(coverages));
+    list.push(...getTranslationCoverageItems(translations.coverages));
     return sortAttentionItems(list);
-  })();
+  }, [tenant.branches, billingQuery.data, categoriesQuery.data, dishesQuery.data, translations.coverages]);
   const isPending =
-    categoriesQuery.isPending ||
-    dishesQuery.isPending ||
-    languagesQuery.isPending ||
-    translationResults.some((result) => result.isPending);
+    categoriesQuery.isPending || dishesQuery.isPending || languagesQuery.isPending || translations.isPending;
   return (
     <section aria-labelledby="admin-attention-title" className="admin-card admin-attention">
       <div className="admin-toolbar">

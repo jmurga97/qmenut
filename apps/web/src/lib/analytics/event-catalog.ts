@@ -1,5 +1,5 @@
-import type { DishOpenSource } from "~/features/menu/types/menu-view-model";
 import type { InstallMode } from "~/features/install/use-install-prompt";
+import type { DishOpenSource } from "~/features/menu/types/menu-view-model";
 
 /** Canal de una acción de contacto, clasificado desde el href del enlace. */
 export type ContactActionChannel = "map" | "phone" | "social" | "whatsapp";
@@ -25,7 +25,7 @@ export interface AnalyticsEventPayloads {
     total: number;
   };
   menu_category_selected: { category: string; category_id: string | null };
-  menu_view: { from_qr: boolean; load_ms?: number; ttfb_ms?: number };
+  menu_view: { from_qr: boolean };
   offline_retry_clicked: Record<string, never>;
   offline_view: Record<string, never>;
   promo_opened: { name?: string; promotion_id: string | null; source: "featured" };
@@ -49,11 +49,11 @@ export type TrackArgs<E extends AnalyticsEventName> = AnalyticsEventPayloads[E] 
 
 /** Dimensiones comunes adjuntas a todos los eventos una vez registrado el tenant. */
 export interface AnalyticsTenantContextInput {
-  branchId?: string;
+  branchId: string;
   displayMode: DisplayMode;
   /** Zona horaria del restaurante (p. ej. "Europe/Madrid") para analytics_day/analytics_hour. */
   locale: string;
-  restaurantId?: string;
+  restaurantId: string;
   tenantHost: string;
-  timeZone?: string;
+  timeZone: string;
 }

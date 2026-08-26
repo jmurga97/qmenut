@@ -1,4 +1,4 @@
-import { InlineMessage } from "@ming/components";
+import { InlineMessage } from "@jmurga97/components";
 import { useController, useFormContext } from "react-hook-form";
 
 import type { FieldPath, FieldValues } from "react-hook-form";

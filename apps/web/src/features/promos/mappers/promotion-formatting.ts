@@ -60,7 +60,7 @@ export function formatValidity({
   if (parts.length > 0) return parts.join(" · ");
 
   if (promotion.startsAt !== null || promotion.endsAt !== null) {
-    const formatter = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" });
+    const formatter = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "UTC" });
     const start = promotion.startsAt === null ? null : formatter.format(new Date(promotion.startsAt));
     const end = promotion.endsAt === null ? null : formatter.format(new Date(promotion.endsAt));
 

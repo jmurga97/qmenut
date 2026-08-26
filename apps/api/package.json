@@ -34,6 +34,9 @@
     "tenant:create": "bun scripts/create-tenant.ts",
     "tenant:create:production": "bun scripts/create-tenant.ts --remote --env production",
     "tenant:create:development": "bun scripts/create-tenant.ts --remote --env development",
+    "tenant:delete": "bun scripts/delete-tenant.ts",
+    "tenant:delete:production": "bun scripts/delete-tenant.ts --remote --env production",
+    "tenant:delete:development": "bun scripts/delete-tenant.ts --remote --env development",
     "tenant:content": "bun scripts/load-tenant-content.ts",
     "tenant:content:production": "bun scripts/load-tenant-content.ts --remote --env production",
     "tenant:content:development": "bun scripts/load-tenant-content.ts --remote --env development"

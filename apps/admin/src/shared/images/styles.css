@@ -1,14 +1,5 @@
 /* Preview-first image inputs and the branch photography strip */
-
-.admin-visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
+/* .admin-visually-hidden comes from the app-wide definition in src/app/styles/global.css */
 
 .admin-image-control,
 .admin-image-gallery {

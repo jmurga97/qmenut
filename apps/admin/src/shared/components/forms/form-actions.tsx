@@ -1,4 +1,4 @@
-import { Button } from "@ming/components";
+import { Button } from "@jmurga97/components";
 
 import type { ReactNode } from "react";
 

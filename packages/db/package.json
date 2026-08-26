@@ -60,6 +60,14 @@
       "types": "./src/repositories/public-menu.repository.ts",
       "import": "./src/repositories/public-menu.repository.ts"
     },
+    "./repositories/restaurant-analytics.repository": {
+      "types": "./src/repositories/restaurant-analytics.repository.ts",
+      "import": "./src/repositories/restaurant-analytics.repository.ts"
+    },
+    "./repositories/sessions.repository": {
+      "types": "./src/repositories/sessions.repository.ts",
+      "import": "./src/repositories/sessions.repository.ts"
+    },
     "./repositories/promotions.repository": {
       "types": "./src/repositories/promotions.repository.ts",
       "import": "./src/repositories/promotions.repository.ts"

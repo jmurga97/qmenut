@@ -35,7 +35,7 @@
       "dependencies": {
         "@base-ui/react": "^1.7.0",
         "@hookform/resolvers": "^5.2.2",
-        "@ming/components": "../../../ming-components/ming-components-1.0.2.tgz",
+        "@jmurga97/components": "^1.0.4",
         "@qmenut/api": "workspace:*",
         "@qmenut/auth": "workspace:*",
         "@qmenut/permissions": "workspace:*",
@@ -493,6 +493,8 @@
 
     "@img/sharp-win32-x64": ["@img/sharp-win32-x64@0.34.5", "", { "os": "win32", "cpu": "x64" }, "sha512-+29YMsqY2/9eFEiW93eqWnuLcWcufowXewwSNIT6UwZdUUCrM3oFjMWH/Z6/TMmb4hlFenmfAVbpWeup2jryCw=="],
 
+    "@jmurga97/components": ["@jmurga97/components@1.0.4", "https://npm.pkg.github.com/download/@jmurga97/components/1.0.4/5500f42556f2ce8a960a0268a50145ec5c451a24", { "dependencies": { "@base-ui/react": "^1.7.0", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "tailwind-merge": "^3.6.0" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }, "sha512-x9Uw0TZe8B1na4+nhbzJtFVNJcnt5DRdWxcWAkuKt9RnUhclt//5CPzPq1Y/FPegNwu91xuWLk8lh33A/njU5g=="],
+
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 
     "@jridgewell/remapping": ["@jridgewell/remapping@2.3.5", "", { "dependencies": { "@jridgewell/gen-mapping": "^0.3.5", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ=="],
@@ -514,8 +516,6 @@
     "@lit/react": ["@lit/react@1.0.8", "", { "peerDependencies": { "@types/react": "17 || 18 || 19" } }, "sha512-p2+YcF+JE67SRX3mMlJ1TKCSTsgyOVdAwd/nxp3NuV1+Cb6MWALbN6nT7Ld4tpmYofcE5kcaSY1YBB9erY+6fw=="],
 
     "@lit/reactive-element": ["@lit/reactive-element@2.1.2", "", { "dependencies": { "@lit-labs/ssr-dom-shim": "^1.5.0" } }, "sha512-pbCDiVMnne1lYUIaYNN5wrwQXDtHaYtg7YEFPeW+hws6U47WeFvISGUWekPGKWOP1ygrs0ef0o1VJMk1exos5A=="],
-
-    "@ming/components": ["@ming/components@../../../ming-components/ming-components-1.0.2.tgz", { "dependencies": { "@base-ui/react": "^1.7.0", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "tailwind-merge": "^3.6.0" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.1.5", "", { "dependencies": { "@tybys/wasm-util": "^0.10.2" }, "peerDependencies": { "@emnapi/core": "^1.7.1", "@emnapi/runtime": "^1.7.1" } }, "sha512-AWPoBRJ9tsnVhor4sjO7rkni+7p+2IAEFj6cx06UgP10jkQHqay/36uRV/bFkgrh18D9vb4cr8Q0Pthskgzy+Q=="],
 

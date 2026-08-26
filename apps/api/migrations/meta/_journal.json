@@ -36,6 +36,27 @@
       "when": 1787401083387,
       "tag": "0004_valencia_branch_coordinates",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1787732983218,
+      "tag": "0005_analytics_aggregate_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1787733001288,
+      "tag": "0006_materialize_posthog_analytics",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1787733037935,
+      "tag": "0007_session_active_restaurant",
+      "breakpoints": true
     }
   ]
 }

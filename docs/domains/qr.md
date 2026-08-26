@@ -36,5 +36,6 @@ not one per table.
   extension of this one.
 - The generated URL is `https://{customDomain}/?utm_source=qr`, so the branch must have a domain set. See
   [Custom domains](custom-domains.md). The `utm_source=qr` parameter marks visits that come from the printed
-  code: the web app derives `fromQr` from it and PostHog receives a one-time `qr_visit` event plus a
-  `from_qr` property on `menu_view`.
+  code: the web app reads `utm_source` from its validated search (kept under the literal key so
+  client-side navigation never rewrites the URL) and PostHog receives a one-time `qr_visit` event
+  plus a `from_qr` property on `menu_view`.

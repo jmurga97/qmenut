@@ -91,12 +91,18 @@ fallbacks, see [Custom domains](custom-domains.md).
 Owners are authenticated, so the tenant is derived from their membership and never from a
 request parameter.
 
-- `tenantProcedure` (`apps/api/src/trpc/trpc.ts:34`) runs after `protectedProcedure`,
-  calls `findMembershipByUserId`, and sets
+- `tenantProcedure` (`apps/api/src/trpc/trpc.ts:34`) runs after `protectedProcedure`
+  and resolves the active membership with `resolveActiveMembership`
+  (`packages/db/src/repositories/restaurant-users.repository.ts`). Resolution prefers the
+  restaurant stored in `sessions.activeRestaurantId`, falls back to the only active
+  membership when the user has exactly one, and otherwise finds none. When nothing
+  resolves, it throws `FORBIDDEN`. On success it sets
   `ctx.tenant = { membershipId, restaurantId, roleCode }` on the context. If there is no
   active membership, it throws `FORBIDDEN`.
 - Every `admin.*` procedure reads `ctx.tenant.restaurantId`. Clients never send a
-  restaurant ID, so they cannot request another tenant's data.
+  restaurant ID, so they cannot request another tenant's data. The exception is
+  `admin.auth.selectRestaurant`, which takes a restaurant ID but only writes it to the
+  session after re-checking an active membership for that restaurant.
 - Any mutation that receives a `branchId` must first call `assertBranchAccess`
   (`apps/api/src/modules/admin-tenant/assert-branch-access.ts:17`). It loads the branch
   scoped to `restaurantId` and throws `NOT_FOUND`, not `FORBIDDEN`, when the branch does
@@ -130,24 +136,29 @@ request parameter.
 
 ## Key files
 
-| Concern                                         | Path                                                                              |
-| ----------------------------------------------- | --------------------------------------------------------------------------------- |
-| Restaurant, membership, and subscription schema | `packages/db/src/schema/restaurants.ts`                                           |
-| Branch schema, including `customDomain`         | `packages/db/src/schema/branches.ts`                                              |
-| Menu schema, scoped by branch                   | `packages/db/src/schema/menu.ts`                                                  |
-| `ResolvedTenant` type and host normalization    | `packages/db/src/domain/tenant.ts`                                                |
-| Host to branch and restaurant lookup            | `packages/db/src/repositories/tenant.repository.ts`                               |
-| Public query isolation                          | `packages/db/src/repositories/public-menu.repository.ts`                          |
-| Admin session to tenant                         | `apps/api/src/trpc/trpc.ts` (`tenantProcedure`)                                   |
-| Branch access guard                             | `apps/api/src/modules/admin-tenant/assert-branch-access.ts`                       |
-| Permission checks                               | `apps/api/src/modules/admin-tenant/require-permission.ts`, `packages/permissions` |
+| Concern                                         | Path                                                                                       |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Restaurant, membership, and subscription schema | `packages/db/src/schema/restaurants.ts`                                                    |
+| Branch schema, including `customDomain`         | `packages/db/src/schema/branches.ts`                                                       |
+| Menu schema, scoped by branch                   | `packages/db/src/schema/menu.ts`                                                           |
+| `ResolvedTenant` type and host normalization    | `packages/db/src/domain/tenant.ts`                                                         |
+| Host to branch and restaurant lookup            | `packages/db/src/repositories/tenant.repository.ts`                                        |
+| Public query isolation                          | `packages/db/src/repositories/public-menu.repository.ts`                                   |
+| Admin session to tenant                         | `apps/api/src/trpc/trpc.ts` (`tenantProcedure`)                                            |
+| Restaurant listing and switching                | `apps/api/src/trpc/routers/auth.ts`, `packages/db/src/repositories/sessions.repository.ts` |
+| Branch access guard                             | `apps/api/src/modules/admin-tenant/assert-branch-access.ts`                                |
+| Permission checks                               | `apps/api/src/modules/admin-tenant/require-permission.ts`, `packages/permissions`          |
 
 ## Limitations
 
-- One membership per user. `tenantProcedure` resolves a single membership through
-  `findMembershipByUserId`. As of MVP1 there is no active-restaurant switching, so a user
-  who belongs to more than one restaurant is not handled clearly. If multi-restaurant
-  staff become a requirement, add an active-restaurant selector here.
+- Multi-restaurant users pick an active restaurant. The choice lives in the Better Auth
+  session (`sessions.activeRestaurantId`, declared as a session additional field in
+  `packages/auth/src/index.ts`). `admin.auth.listRestaurants` lists the caller's active
+  memberships and `admin.auth.selectRestaurant` switches after re-checking membership.
+  The admin SPA shows a selector screen after sign-in, and a sidebar switcher once the
+  account belongs to more than one restaurant; single-restaurant accounts keep signing
+  in straight to their dashboard. Revoking a membership cuts access on the next request
+  because resolution re-validates against active memberships every time.
 - `assertBranchAccess` returns `NOT_FOUND` rather than `FORBIDDEN` so that the API does
   not disclose the existence of another tenant's branch. Keep new branch-scoped mutations
   consistent with this behavior.

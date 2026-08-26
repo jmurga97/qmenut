@@ -1,5 +1,5 @@
-import { DropdownMenu, InlineMessage } from "@ming/components";
-import { buttonVariants } from "@ming/components/button";
+import { DropdownMenu, InlineMessage } from "@jmurga97/components";
+import { buttonVariants } from "@jmurga97/components/button";
 import { Link } from "@tanstack/react-router";
 import { FormProvider } from "react-hook-form";
 

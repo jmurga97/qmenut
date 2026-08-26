@@ -25,6 +25,8 @@ export interface PublicBranch {
   restaurantId: string;
   schedules: PublicBranchSchedule[];
   socialLinks: unknown;
+  /** Zona horaria del restaurante; pública para calcular día/hora local en analítica. */
+  timeZone: string;
   whatsapp: string | null;
 }
 

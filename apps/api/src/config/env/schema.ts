@@ -93,6 +93,9 @@ export const envSchema = z.object({
   LOG_LEVEL: logLevelSchema.default("info"),
   GOOGLE_MAPS_API_KEY: z.string().trim().min(1).optional(),
   NODE_ENV: nodeEnvSchema.default("development"),
+  POSTHOG_API_HOST: z.url().default("https://eu.posthog.com"),
+  POSTHOG_PERSONAL_API_KEY: z.string().trim().min(1).optional(),
+  POSTHOG_PROJECT_ID: z.string().trim().min(1).optional(),
 });
 
 export type EnvBindings = z.input<typeof envSchema>;

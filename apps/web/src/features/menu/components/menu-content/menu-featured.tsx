@@ -1,5 +1,5 @@
 import { QmFeatured } from "@qmenut/ui/components/qm-featured/react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate, useRouter, useSearch } from "@tanstack/react-router";
 
 import { track } from "~/lib/analytics/posthog";
 import { photoUrl } from "~/shared/lib/photo-url";
@@ -27,7 +27,16 @@ export function MenuFeatured({
   showDishPhotos,
 }: MenuFeaturedProps) {
   const navigate = useNavigate();
+  const router = useRouter();
   const search = useSearch({ from: "/{-$locale}" });
+
+  function preloadHighlights() {
+    void router.preloadRoute({
+      to: "/{-$locale}/destacados",
+      params: (prev) => prev,
+      search,
+    });
+  }
 
   function handlePromoSelect() {
     track("promo_opened", { name: featuredPromo?.name, promotion_id: featuredPromoId, source: "featured" });
@@ -57,7 +66,14 @@ export function MenuFeatured({
         </button>
       ) : null}
       {featuredPromo ? (
-        <button type="button" className="dish-trigger public-route-content-stage" onClick={handlePromoSelect}>
+        <button
+          type="button"
+          className="dish-trigger public-route-content-stage"
+          onPointerEnter={preloadHighlights}
+          onFocus={preloadHighlights}
+          onTouchStart={preloadHighlights}
+          onClick={handlePromoSelect}
+        >
           <QmFeatured value={featuredPromo} />
         </button>
       ) : null}

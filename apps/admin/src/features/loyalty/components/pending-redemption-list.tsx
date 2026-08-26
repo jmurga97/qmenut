@@ -1,4 +1,4 @@
-import { Button, ConfirmAction } from "@ming/components";
+import { Button, ConfirmAction } from "@jmurga97/components";
 import { useRef, useState } from "react";
 
 import { formatRelativeAge } from "~/features/loyalty/services";

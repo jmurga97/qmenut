@@ -1,10 +1,12 @@
-import { AppShell } from "@ming/components";
+import { AppShell } from "@jmurga97/components";
 import { can } from "@qmenut/permissions";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate, useRouter } from "@tanstack/react-router";
 
 import { resolveSelectedBranch, useBranchStore } from "~/app/store/branch-store";
 import { useShellActions, useShellMobile, useSidebarOpen } from "~/app/store/shell-store";
+import { getListRestaurantsQueryOptions } from "~/features/auth/api";
+import { useSelectRestaurant } from "~/features/auth/hooks/use-select-restaurant";
 import { signOut } from "~/lib/auth-client";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
@@ -97,6 +99,8 @@ export function AdminShell() {
   const queryClient = useQueryClient();
   const location = useLocation();
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
+  const { data: memberships } = useSuspenseQuery(getListRestaurantsQueryOptions({ trpc }));
+  const selectRestaurant = useSelectRestaurant();
   const isMobile = useShellMobile();
   const isSidebarOpen = useSidebarOpen();
   const { closeSidebar, setSidebarOpen } = useShellActions();
@@ -105,14 +109,14 @@ export function AdminShell() {
   const selectedBranch = resolveSelectedBranch(tenant.branches, selectedBranchId);
   const sectionLabel = getCurrentSectionLabel(location.pathname);
   async function selectNavigation(selectedId: string) {
-    if (selectedId === "logout") {
-      await signOut();
-      queryClient.clear();
-      await navigate({ to: "/login" });
-    } else {
-      const section = SECTIONS.find((item) => item.id === selectedId);
-      await navigate({ to: section?.path ?? "/" });
-    }
+    const section = SECTIONS.find((item) => item.id === selectedId);
+    await navigate({ to: section?.path ?? "/" });
+    if (isMobile) closeSidebar();
+  }
+  async function logout() {
+    await signOut();
+    queryClient.clear();
+    await navigate({ to: "/login" });
     if (isMobile) closeSidebar();
   }
   return (
@@ -128,6 +132,7 @@ export function AdminShell() {
       }
       navigation={
         <AdminSidebar
+          activeRestaurantId={tenant.restaurant.id}
           branches={tenant.branches}
           groups={getNavigationGroups(location.pathname, tenant.roleCode)}
           onBranchChange={(branchId) => {
@@ -135,8 +140,12 @@ export function AdminShell() {
             void router.invalidate();
           }}
           onNavigate={(selectedId) => void selectNavigation(selectedId)}
+          onLogout={() => void logout()}
+          onRestaurantChange={(restaurantId) => selectRestaurant.mutate({ restaurantId })}
           publicMenuUrl={selectedBranch?.customDomain ? buildPublicMenuUrl(selectedBranch.customDomain) : null}
           restaurantName={tenant.restaurant.name}
+          restaurants={memberships.map((membership) => ({ id: membership.restaurantId, label: membership.name }))}
+          restaurantSwitching={selectRestaurant.isPending}
           selectedBranch={selectedBranch}
         />
       }

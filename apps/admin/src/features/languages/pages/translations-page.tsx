@@ -1,4 +1,4 @@
-import { Button, InlineMessage } from "@ming/components";
+import { Button, InlineMessage } from "@jmurga97/components";
 import { Link } from "@tanstack/react-router";
 import { FormProvider } from "react-hook-form";
 

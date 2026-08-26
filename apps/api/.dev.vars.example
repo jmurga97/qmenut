@@ -22,3 +22,8 @@ DEV_FIXED_OTP=true
 STRIPE_SECRET_KEY=sk_test_xxx
 # From `stripe listen --forward-to http://localhost:8787/webhooks/stripe`.
 STRIPE_WEBHOOK_SECRET=whsec_xxx
+
+# Server-side PostHog Query API credentials used by the analytics materialization job.
+# Use a read-only personal API key; the project ID is the numeric PostHog project ID.
+POSTHOG_PROJECT_ID=12345
+POSTHOG_PERSONAL_API_KEY=phx_xxx

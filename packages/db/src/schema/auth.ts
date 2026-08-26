@@ -20,6 +20,7 @@ export const sessions = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
+    activeRestaurantId: text("active_restaurant_id"),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),

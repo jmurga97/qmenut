@@ -26,50 +26,12 @@
   color: var(--muted-foreground);
   font-size: var(--admin-text-body-sm);
 }
-.admin-theme-preference-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background: var(--secondary);
-}
-.admin-theme-preference-option {
-  position: relative;
-  min-width: 4rem;
-  padding: 0.45rem 0.75rem;
-  border: 0;
-  border-radius: 0.375rem;
-  background: transparent;
-  color: var(--muted-foreground);
-  font-size: var(--admin-text-body-sm);
-  cursor: pointer;
-}
-.admin-theme-preference-option:hover {
-  color: var(--foreground);
-}
-.admin-theme-preference-option[aria-pressed="true"] {
-  background: var(--card);
-  color: var(--foreground);
-  font-weight: 600;
-}
-.admin-theme-preference-option[aria-pressed="true"]::after {
-  position: absolute;
-  inset: auto 0.75rem 0.2rem;
-  height: 0.125rem;
-  background: var(--ming-service);
-  content: "";
-}
-.admin-theme-preference-option:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 2px;
-}
 @media (max-width: 30rem) {
   .admin-theme-preference {
     align-items: stretch;
   }
-  .admin-theme-preference-options {
+  .admin-theme-preference .admin-segmented {
     width: 100%;
+    justify-content: space-around;
   }
 }

@@ -1,4 +1,4 @@
-import { Button } from "@ming/components";
+import { Button } from "@jmurga97/components";
 
 import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { PageHeader } from "~/shared/components/page-header";

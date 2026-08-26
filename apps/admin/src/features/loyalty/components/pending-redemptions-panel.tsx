@@ -1,4 +1,4 @@
-import { InlineMessage } from "@ming/components";
+import { InlineMessage } from "@jmurga97/components";
 
 import { useRedemptionQueue } from "~/features/loyalty/hooks/use-redemption-queue";
 

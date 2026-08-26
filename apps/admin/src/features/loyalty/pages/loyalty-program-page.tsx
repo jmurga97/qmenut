@@ -1,5 +1,5 @@
-import { Button, ConfirmAction, DropdownMenu } from "@ming/components";
-import { buttonVariants } from "@ming/components/button";
+import { Button, ConfirmAction, DropdownMenu } from "@jmurga97/components";
+import { buttonVariants } from "@jmurga97/components/button";
 import { QmLoyaltyCard } from "@qmenut/ui/components/qm-loyalty-card/react";
 import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
 import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";

@@ -1,12 +1,14 @@
 import { z } from "zod";
 
+import { VISIT_PERIODS } from "~/shared/services/visit-series";
+
 import type { AppRouter } from "@qmenut/api/router";
 import type { inferRouterOutputs } from "@trpc/server";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export const dashboardSearchSchema = z.object({
-  period: z.enum(["12m", "30d"]).default("30d"),
+  period: z.enum(VISIT_PERIODS).default("30d"),
 });
 export type DashboardSearch = z.infer<typeof dashboardSearchSchema>;
 export type DashboardTenant = RouterOutputs["admin"]["tenant"]["me"];

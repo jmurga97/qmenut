@@ -90,10 +90,6 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-.loyalty-code-panel.loyalty-code-panel--compact {
-  grid-template-columns: minmax(0, 1fr);
-}
-
 .loyalty-code-panel--compact .loyalty-code-live {
   min-width: 0;
 }
@@ -403,25 +399,6 @@
   .loyalty-reward-admin-row {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-  }
-
-  .loyalty-summary {
-    grid-template-columns: minmax(12rem, 0.8fr) minmax(0, 2.2fr);
-  }
-
-  .loyalty-summary-supporting {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    border-block-start: 0;
-    border-inline-start: 1px solid var(--border);
-  }
-
-  .loyalty-summary-supporting .loyalty-metric {
-    border-block-end: 0;
-    border-inline-end: 1px solid var(--border);
-  }
-
-  .loyalty-summary-supporting .loyalty-metric:last-child {
-    border-inline-end: 0;
   }
 
   .loyalty-customer-filters {

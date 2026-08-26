@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f6f6f2" />
+    <!--
+      Pre-paint theme bootstrap; runs before any CSS/JS, so the hexes below must stay
+      in sync with --background for .light/.dark in src/app/styles/global.css and the
+      storage key with ADMIN_THEME_STORAGE_KEY in shared/components/theme_preference.
+    -->
     <script>
       (() => {
         let theme = "light";

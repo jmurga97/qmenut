@@ -1,0 +1,5811 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "661de1b1-e4d9-4439-bf8b-347f491a7e21",
+  "prevId": "2be25f3e-43dd-4dd5-9813-04891879e0dc",
+  "tables": {
+    "analytics_sync_state": {
+      "name": "analytics_sync_state",
+      "columns": {
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "backfill_completed_at": {
+          "name": "backfill_completed_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_successful_day": {
+          "name": "last_successful_day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_run_at": {
+          "name": "last_run_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_success_at": {
+          "name": "last_success_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_error_code": {
+          "name": "last_error_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "analytics_sync_state_scope": {
+          "name": "analytics_sync_state_scope",
+          "value": "\"analytics_sync_state\".\"scope\" = 'posthog'"
+        }
+      }
+    },
+    "category_activity_daily": {
+      "name": "category_activity_daily",
+      "columns": {
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "day": {
+          "name": "day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "language_code": {
+          "name": "language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'all'"
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category_label": {
+          "name": "category_label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "reached_count": {
+          "name": "reached_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "selected_count": {
+          "name": "selected_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "max_position": {
+          "name": "max_position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "category_activity_daily_branch_id_branches_id_fk": {
+          "name": "category_activity_daily_branch_id_branches_id_fk",
+          "tableFrom": "category_activity_daily",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "category_activity_daily_branch_id_day_language_code_category_id_pk": {
+          "columns": [
+            "branch_id",
+            "day",
+            "language_code",
+            "category_id"
+          ],
+          "name": "category_activity_daily_branch_id_day_language_code_category_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "category_activity_daily_reached": {
+          "name": "category_activity_daily_reached",
+          "value": "\"category_activity_daily\".\"reached_count\" >= 0"
+        },
+        "category_activity_daily_selected": {
+          "name": "category_activity_daily_selected",
+          "value": "\"category_activity_daily\".\"selected_count\" >= 0"
+        }
+      }
+    },
+    "contact_action_daily": {
+      "name": "contact_action_daily",
+      "columns": {
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "day": {
+          "name": "day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "language_code": {
+          "name": "language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'all'"
+        },
+        "channel": {
+          "name": "channel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "action_count": {
+          "name": "action_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "contact_action_daily_branch_id_branches_id_fk": {
+          "name": "contact_action_daily_branch_id_branches_id_fk",
+          "tableFrom": "contact_action_daily",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "contact_action_daily_branch_id_day_language_code_channel_pk": {
+          "columns": [
+            "branch_id",
+            "day",
+            "language_code",
+            "channel"
+          ],
+          "name": "contact_action_daily_branch_id_day_language_code_channel_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "contact_action_daily_channel": {
+          "name": "contact_action_daily_channel",
+          "value": "\"contact_action_daily\".\"channel\" IN ('map', 'phone', 'social', 'whatsapp')"
+        },
+        "contact_action_daily_count": {
+          "name": "contact_action_daily_count",
+          "value": "\"contact_action_daily\".\"action_count\" >= 0"
+        }
+      }
+    },
+    "digest_deliveries": {
+      "name": "digest_deliveries",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "period_start_day": {
+          "name": "period_start_day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "period_end_day": {
+          "name": "period_end_day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "last_error_code": {
+          "name": "last_error_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lease_expires_at": {
+          "name": "lease_expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "sent_at": {
+          "name": "sent_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_digest_deliveries_status": {
+          "name": "idx_digest_deliveries_status",
+          "columns": [
+            "status",
+            "lease_expires_at"
+          ],
+          "isUnique": false
+        },
+        "ux_digest_deliveries_recipient_period": {
+          "name": "ux_digest_deliveries_recipient_period",
+          "columns": [
+            "restaurant_id",
+            "user_id",
+            "period_end_day"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "digest_deliveries_restaurant_id_restaurants_id_fk": {
+          "name": "digest_deliveries_restaurant_id_restaurants_id_fk",
+          "tableFrom": "digest_deliveries",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "digest_deliveries_user_id_users_id_fk": {
+          "name": "digest_deliveries_user_id_users_id_fk",
+          "tableFrom": "digest_deliveries",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "digest_deliveries_status": {
+          "name": "digest_deliveries_status",
+          "value": "\"digest_deliveries\".\"status\" IN ('pending', 'sending', 'sent', 'failed')"
+        },
+        "digest_deliveries_attempts": {
+          "name": "digest_deliveries_attempts",
+          "value": "\"digest_deliveries\".\"attempts\" >= 0"
+        }
+      }
+    },
+    "digest_schedule": {
+      "name": "digest_schedule",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "anchor_end_day": {
+          "name": "anchor_end_day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "digest_schedule_singleton": {
+          "name": "digest_schedule_singleton",
+          "value": "\"digest_schedule\".\"id\" = 1"
+        }
+      }
+    },
+    "dish_view_daily": {
+      "name": "dish_view_daily",
+      "columns": {
+        "dish_id": {
+          "name": "dish_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "day": {
+          "name": "day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "views": {
+          "name": "views",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "language_code": {
+          "name": "language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'legacy'"
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'legacy'"
+        },
+        "visits_with_open": {
+          "name": "visits_with_open",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "idx_dish_view_daily_branch": {
+          "name": "idx_dish_view_daily_branch",
+          "columns": [
+            "branch_id",
+            "day"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "dish_view_daily_dish_id_dishes_id_fk": {
+          "name": "dish_view_daily_dish_id_dishes_id_fk",
+          "tableFrom": "dish_view_daily",
+          "tableTo": "dishes",
+          "columnsFrom": [
+            "dish_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "dish_view_daily_branch_id_branches_id_fk": {
+          "name": "dish_view_daily_branch_id_branches_id_fk",
+          "tableFrom": "dish_view_daily",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "dish_view_daily_dish_id_branch_id_day_language_code_source_pk": {
+          "columns": [
+            "dish_id",
+            "branch_id",
+            "day",
+            "language_code",
+            "source"
+          ],
+          "name": "dish_view_daily_dish_id_branch_id_day_language_code_source_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "dish_view_daily_views": {
+          "name": "dish_view_daily_views",
+          "value": "\"dish_view_daily\".\"views\" >= 0"
+        },
+        "dish_view_daily_visits_with_open": {
+          "name": "dish_view_daily_visits_with_open",
+          "value": "\"dish_view_daily\".\"visits_with_open\" >= 0"
+        }
+      }
+    },
+    "event_counter_daily": {
+      "name": "event_counter_daily",
+      "columns": {
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "day": {
+          "name": "day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "event_code": {
+          "name": "event_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "count": {
+          "name": "count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "event_counter_daily_branch_id_branches_id_fk": {
+          "name": "event_counter_daily_branch_id_branches_id_fk",
+          "tableFrom": "event_counter_daily",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "event_counter_daily_branch_id_day_event_code_pk": {
+          "columns": [
+            "branch_id",
+            "day",
+            "event_code"
+          ],
+          "name": "event_counter_daily_branch_id_day_event_code_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "event_counter_daily_count": {
+          "name": "event_counter_daily_count",
+          "value": "\"event_counter_daily\".\"count\" >= 0"
+        }
+      }
+    },
+    "hourly_activity_daily": {
+      "name": "hourly_activity_daily",
+      "columns": {
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "day": {
+          "name": "day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "hour": {
+          "name": "hour",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "loads": {
+          "name": "loads",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "hourly_activity_daily_branch_id_branches_id_fk": {
+          "name": "hourly_activity_daily_branch_id_branches_id_fk",
+          "tableFrom": "hourly_activity_daily",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "hourly_activity_daily_branch_id_day_hour_pk": {
+          "columns": [
+            "branch_id",
+            "day",
+            "hour"
+          ],
+          "name": "hourly_activity_daily_branch_id_day_hour_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "hourly_activity_daily_hour": {
+          "name": "hourly_activity_daily_hour",
+          "value": "\"hourly_activity_daily\".\"hour\" BETWEEN 0 AND 23"
+        },
+        "hourly_activity_daily_loads": {
+          "name": "hourly_activity_daily_loads",
+          "value": "\"hourly_activity_daily\".\"loads\" >= 0"
+        }
+      }
+    },
+    "menu_view_daily": {
+      "name": "menu_view_daily",
+      "columns": {
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "day": {
+          "name": "day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "language_code": {
+          "name": "language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'all'"
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'all'"
+        },
+        "views": {
+          "name": "views",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "visits": {
+          "name": "visits",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "display_mode": {
+          "name": "display_mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'legacy'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "menu_view_daily_branch_id_branches_id_fk": {
+          "name": "menu_view_daily_branch_id_branches_id_fk",
+          "tableFrom": "menu_view_daily",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "menu_view_daily_branch_id_day_language_code_source_display_mode_pk": {
+          "columns": [
+            "branch_id",
+            "day",
+            "language_code",
+            "source",
+            "display_mode"
+          ],
+          "name": "menu_view_daily_branch_id_day_language_code_source_display_mode_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "menu_view_daily_views": {
+          "name": "menu_view_daily_views",
+          "value": "\"menu_view_daily\".\"views\" >= 0"
+        },
+        "menu_view_daily_visits": {
+          "name": "menu_view_daily_visits",
+          "value": "\"menu_view_daily\".\"visits\" >= 0"
+        }
+      }
+    },
+    "promotion_open_daily": {
+      "name": "promotion_open_daily",
+      "columns": {
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "day": {
+          "name": "day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "language_code": {
+          "name": "language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'all'"
+        },
+        "promotion_id": {
+          "name": "promotion_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "promotion_name": {
+          "name": "promotion_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "open_count": {
+          "name": "open_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "promotion_open_daily_restaurant_id_restaurants_id_fk": {
+          "name": "promotion_open_daily_restaurant_id_restaurants_id_fk",
+          "tableFrom": "promotion_open_daily",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "promotion_open_daily_restaurant_id_day_language_code_promotion_id_pk": {
+          "columns": [
+            "restaurant_id",
+            "day",
+            "language_code",
+            "promotion_id"
+          ],
+          "name": "promotion_open_daily_restaurant_id_day_language_code_promotion_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "promotion_open_daily_count": {
+          "name": "promotion_open_daily_count",
+          "value": "\"promotion_open_daily\".\"open_count\" >= 0"
+        }
+      }
+    },
+    "accounts": {
+      "name": "accounts",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "provider_id": {
+          "name": "provider_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "id_token": {
+          "name": "id_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "access_token_expires_at": {
+          "name": "access_token_expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "refresh_token_expires_at": {
+          "name": "refresh_token_expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_accounts_user": {
+          "name": "idx_accounts_user",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "accounts_user_id_users_id_fk": {
+          "name": "accounts_user_id_users_id_fk",
+          "tableFrom": "accounts",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "sessions": {
+      "name": "sessions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "active_restaurant_id": {
+          "name": "active_restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "sessions_token_unique": {
+          "name": "sessions_token_unique",
+          "columns": [
+            "token"
+          ],
+          "isUnique": true
+        },
+        "idx_sessions_user": {
+          "name": "idx_sessions_user",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "sessions_user_id_users_id_fk": {
+          "name": "sessions_user_id_users_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "users": {
+      "name": "users",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email_verified": {
+          "name": "email_verified",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "verifications": {
+      "name": "verifications",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "identifier": {
+          "name": "identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_verifications_identifier": {
+          "name": "idx_verifications_identifier",
+          "columns": [
+            "identifier"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "stripe_customers": {
+      "name": "stripe_customers",
+      "columns": {
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stripe_customer_id": {
+          "name": "stripe_customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "stripe_customers_stripe_customer_id_unique": {
+          "name": "stripe_customers_stripe_customer_id_unique",
+          "columns": [
+            "stripe_customer_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "stripe_customers_restaurant_id_restaurants_id_fk": {
+          "name": "stripe_customers_restaurant_id_restaurants_id_fk",
+          "tableFrom": "stripe_customers",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "branch_photos": {
+      "name": "branch_photos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_branch_photos_branch": {
+          "name": "idx_branch_photos_branch",
+          "columns": [
+            "branch_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "branch_photos_branch_id_branches_id_fk": {
+          "name": "branch_photos_branch_id_branches_id_fk",
+          "tableFrom": "branch_photos",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "branch_schedules": {
+      "name": "branch_schedules",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "day_of_week": {
+          "name": "day_of_week",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "open_minute": {
+          "name": "open_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "close_minute": {
+          "name": "close_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_branch_schedules_branch": {
+          "name": "idx_branch_schedules_branch",
+          "columns": [
+            "branch_id",
+            "day_of_week"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "branch_schedules_branch_id_branches_id_fk": {
+          "name": "branch_schedules_branch_id_branches_id_fk",
+          "tableFrom": "branch_schedules",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "branch_schedules_day": {
+          "name": "branch_schedules_day",
+          "value": "\"branch_schedules\".\"day_of_week\" BETWEEN 1 AND 7"
+        },
+        "branch_schedules_open": {
+          "name": "branch_schedules_open",
+          "value": "\"branch_schedules\".\"open_minute\" BETWEEN 0 AND 1439"
+        },
+        "branch_schedules_close": {
+          "name": "branch_schedules_close",
+          "value": "\"branch_schedules\".\"close_minute\" BETWEEN 0 AND 1439"
+        }
+      }
+    },
+    "branches": {
+      "name": "branches",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "whatsapp": {
+          "name": "whatsapp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "social_links_json": {
+          "name": "social_links_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "logo_url": {
+          "name": "logo_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "custom_domain": {
+          "name": "custom_domain",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'EUR'"
+        },
+        "plan_code": {
+          "name": "plan_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'basic'"
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_branches_restaurant": {
+          "name": "idx_branches_restaurant",
+          "columns": [
+            "restaurant_id"
+          ],
+          "isUnique": false,
+          "where": "\"branches\".\"deleted_at\" IS NULL"
+        },
+        "ux_branches_custom_domain": {
+          "name": "ux_branches_custom_domain",
+          "columns": [
+            "custom_domain"
+          ],
+          "isUnique": true,
+          "where": "\"branches\".\"custom_domain\" IS NOT NULL"
+        },
+        "ux_branches_id_restaurant": {
+          "name": "ux_branches_id_restaurant",
+          "columns": [
+            "id",
+            "restaurant_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "branches_restaurant_id_restaurants_id_fk": {
+          "name": "branches_restaurant_id_restaurants_id_fk",
+          "tableFrom": "branches",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "branches_currency_length": {
+          "name": "branches_currency_length",
+          "value": "length(\"branches\".\"currency\") = 3"
+        },
+        "branches_plan_code": {
+          "name": "branches_plan_code",
+          "value": "\"branches\".\"plan_code\" IN ('basic', 'business')"
+        },
+        "branches_coordinates_pair": {
+          "name": "branches_coordinates_pair",
+          "value": "(\"branches\".\"latitude\" IS NULL AND \"branches\".\"longitude\" IS NULL) OR (\"branches\".\"latitude\" IS NOT NULL AND \"branches\".\"longitude\" IS NOT NULL)"
+        },
+        "branches_latitude_range": {
+          "name": "branches_latitude_range",
+          "value": "\"branches\".\"latitude\" IS NULL OR \"branches\".\"latitude\" BETWEEN -90 AND 90"
+        },
+        "branches_longitude_range": {
+          "name": "branches_longitude_range",
+          "value": "\"branches\".\"longitude\" IS NULL OR \"branches\".\"longitude\" BETWEEN -180 AND 180"
+        }
+      }
+    },
+    "campaign_sends": {
+      "name": "campaign_sends",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "campaign_id": {
+          "name": "campaign_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'queued'"
+        },
+        "sent_at": {
+          "name": "sent_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "opened_at": {
+          "name": "opened_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "redeemed_at": {
+          "name": "redeemed_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_campaign_sends_campaign": {
+          "name": "idx_campaign_sends_campaign",
+          "columns": [
+            "campaign_id",
+            "status"
+          ],
+          "isUnique": false
+        },
+        "idx_campaign_sends_customer": {
+          "name": "idx_campaign_sends_customer",
+          "columns": [
+            "customer_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "campaign_sends_campaign_id_campaigns_id_fk": {
+          "name": "campaign_sends_campaign_id_campaigns_id_fk",
+          "tableFrom": "campaign_sends",
+          "tableTo": "campaigns",
+          "columnsFrom": [
+            "campaign_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "campaign_sends_customer_id_customers_id_fk": {
+          "name": "campaign_sends_customer_id_customers_id_fk",
+          "tableFrom": "campaign_sends",
+          "tableTo": "customers",
+          "columnsFrom": [
+            "customer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "campaign_sends_status": {
+          "name": "campaign_sends_status",
+          "value": "\"campaign_sends\".\"status\" IN ('queued', 'sent', 'opened', 'redeemed', 'failed')"
+        }
+      }
+    },
+    "campaigns": {
+      "name": "campaigns",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "inactivity_days": {
+          "name": "inactivity_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "points_threshold": {
+          "name": "points_threshold",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "trigger_config": {
+          "name": "trigger_config",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "email_subject": {
+          "name": "email_subject",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email_body": {
+          "name": "email_body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reward_id": {
+          "name": "reward_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'active'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_campaigns_restaurant": {
+          "name": "idx_campaigns_restaurant",
+          "columns": [
+            "restaurant_id",
+            "status"
+          ],
+          "isUnique": false,
+          "where": "\"campaigns\".\"deleted_at\" IS NULL"
+        }
+      },
+      "foreignKeys": {
+        "campaigns_restaurant_id_restaurants_id_fk": {
+          "name": "campaigns_restaurant_id_restaurants_id_fk",
+          "tableFrom": "campaigns",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "campaigns_reward_id_loyalty_rewards_id_fk": {
+          "name": "campaigns_reward_id_loyalty_rewards_id_fk",
+          "tableFrom": "campaigns",
+          "tableTo": "loyalty_rewards",
+          "columnsFrom": [
+            "reward_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "campaigns_type": {
+          "name": "campaigns_type",
+          "value": "\"campaigns\".\"type\" IN ('reactivation', 'birthday', 'points_level')"
+        },
+        "campaigns_inactivity": {
+          "name": "campaigns_inactivity",
+          "value": "\"campaigns\".\"inactivity_days\" IS NULL OR \"campaigns\".\"inactivity_days\" > 0"
+        },
+        "campaigns_points": {
+          "name": "campaigns_points",
+          "value": "\"campaigns\".\"points_threshold\" IS NULL OR \"campaigns\".\"points_threshold\" >= 0"
+        },
+        "campaigns_status": {
+          "name": "campaigns_status",
+          "value": "\"campaigns\".\"status\" IN ('active', 'paused')"
+        }
+      }
+    },
+    "customer_restaurants": {
+      "name": "customer_restaurants",
+      "columns": {
+        "customer_id": {
+          "name": "customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "points_balance": {
+          "name": "points_balance",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "stamps_balance": {
+          "name": "stamps_balance",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "first_visit_at": {
+          "name": "first_visit_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_visit_at": {
+          "name": "last_visit_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_customer_restaurants_restaurant": {
+          "name": "idx_customer_restaurants_restaurant",
+          "columns": [
+            "restaurant_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "customer_restaurants_customer_id_customers_id_fk": {
+          "name": "customer_restaurants_customer_id_customers_id_fk",
+          "tableFrom": "customer_restaurants",
+          "tableTo": "customers",
+          "columnsFrom": [
+            "customer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "customer_restaurants_restaurant_id_restaurants_id_fk": {
+          "name": "customer_restaurants_restaurant_id_restaurants_id_fk",
+          "tableFrom": "customer_restaurants",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "customer_restaurants_customer_id_restaurant_id_pk": {
+          "columns": [
+            "customer_id",
+            "restaurant_id"
+          ],
+          "name": "customer_restaurants_customer_id_restaurant_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "customer_restaurants_points": {
+          "name": "customer_restaurants_points",
+          "value": "\"customer_restaurants\".\"points_balance\" >= 0"
+        },
+        "customer_restaurants_stamps": {
+          "name": "customer_restaurants_stamps",
+          "value": "\"customer_restaurants\".\"stamps_balance\" >= 0"
+        }
+      }
+    },
+    "customer_visits": {
+      "name": "customer_visits",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_customer_visits_customer": {
+          "name": "idx_customer_visits_customer",
+          "columns": [
+            "customer_id",
+            "created_at"
+          ],
+          "isUnique": false
+        },
+        "idx_customer_visits_branch": {
+          "name": "idx_customer_visits_branch",
+          "columns": [
+            "branch_id",
+            "created_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "customer_visits_customer_id_customers_id_fk": {
+          "name": "customer_visits_customer_id_customers_id_fk",
+          "tableFrom": "customer_visits",
+          "tableTo": "customers",
+          "columnsFrom": [
+            "customer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "customer_visits_branch_id_restaurant_id_branches_id_restaurant_id_fk": {
+          "name": "customer_visits_branch_id_restaurant_id_branches_id_restaurant_id_fk",
+          "tableFrom": "customer_visits",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id",
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id",
+            "restaurant_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "customer_visits_source": {
+          "name": "customer_visits_source",
+          "value": "\"customer_visits\".\"source\" IN ('qr', 'direct', 'domain', 'order')"
+        }
+      }
+    },
+    "customers": {
+      "name": "customers",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "birthdate": {
+          "name": "birthdate",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "customers_email_unique": {
+          "name": "customers_email_unique",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "loyalty_programs": {
+      "name": "loyalty_programs",
+      "columns": {
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "points_per_currency_unit": {
+          "name": "points_per_currency_unit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "points_per_visit": {
+          "name": "points_per_visit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "stamps_per_visit": {
+          "name": "stamps_per_visit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "rules_json": {
+          "name": "rules_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "loyalty_programs_restaurant_id_restaurants_id_fk": {
+          "name": "loyalty_programs_restaurant_id_restaurants_id_fk",
+          "tableFrom": "loyalty_programs",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "loyalty_programs_type": {
+          "name": "loyalty_programs_type",
+          "value": "\"loyalty_programs\".\"type\" IN ('points', 'stamps')"
+        },
+        "loyalty_programs_currency_points": {
+          "name": "loyalty_programs_currency_points",
+          "value": "\"loyalty_programs\".\"points_per_currency_unit\" >= 0"
+        },
+        "loyalty_programs_visit_points": {
+          "name": "loyalty_programs_visit_points",
+          "value": "\"loyalty_programs\".\"points_per_visit\" >= 0"
+        },
+        "loyalty_programs_visit_stamps": {
+          "name": "loyalty_programs_visit_stamps",
+          "value": "\"loyalty_programs\".\"stamps_per_visit\" >= 0"
+        }
+      }
+    },
+    "loyalty_redemptions": {
+      "name": "loyalty_redemptions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "reward_id": {
+          "name": "reward_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cost": {
+          "name": "cost",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "validated_by": {
+          "name": "validated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "validated_at": {
+          "name": "validated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_loyalty_redemptions_customer": {
+          "name": "idx_loyalty_redemptions_customer",
+          "columns": [
+            "customer_id",
+            "restaurant_id",
+            "created_at"
+          ],
+          "isUnique": false
+        },
+        "idx_loyalty_redemptions_status": {
+          "name": "idx_loyalty_redemptions_status",
+          "columns": [
+            "restaurant_id",
+            "status"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "loyalty_redemptions_customer_id_customers_id_fk": {
+          "name": "loyalty_redemptions_customer_id_customers_id_fk",
+          "tableFrom": "loyalty_redemptions",
+          "tableTo": "customers",
+          "columnsFrom": [
+            "customer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "loyalty_redemptions_restaurant_id_restaurants_id_fk": {
+          "name": "loyalty_redemptions_restaurant_id_restaurants_id_fk",
+          "tableFrom": "loyalty_redemptions",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "loyalty_redemptions_branch_id_branches_id_fk": {
+          "name": "loyalty_redemptions_branch_id_branches_id_fk",
+          "tableFrom": "loyalty_redemptions",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "loyalty_redemptions_reward_id_loyalty_rewards_id_fk": {
+          "name": "loyalty_redemptions_reward_id_loyalty_rewards_id_fk",
+          "tableFrom": "loyalty_redemptions",
+          "tableTo": "loyalty_rewards",
+          "columnsFrom": [
+            "reward_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "loyalty_redemptions_validated_by_restaurant_users_id_fk": {
+          "name": "loyalty_redemptions_validated_by_restaurant_users_id_fk",
+          "tableFrom": "loyalty_redemptions",
+          "tableTo": "restaurant_users",
+          "columnsFrom": [
+            "validated_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "loyalty_redemptions_cost": {
+          "name": "loyalty_redemptions_cost",
+          "value": "\"loyalty_redemptions\".\"cost\" >= 0"
+        },
+        "loyalty_redemptions_status": {
+          "name": "loyalty_redemptions_status",
+          "value": "\"loyalty_redemptions\".\"status\" IN ('pending', 'validated', 'rejected', 'expired')"
+        }
+      }
+    },
+    "loyalty_rewards": {
+      "name": "loyalty_rewards",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cost": {
+          "name": "cost",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "percentage": {
+          "name": "percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "special_price": {
+          "name": "special_price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "free_dish_id": {
+          "name": "free_dish_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_loyalty_rewards_restaurant": {
+          "name": "idx_loyalty_rewards_restaurant",
+          "columns": [
+            "restaurant_id"
+          ],
+          "isUnique": false,
+          "where": "\"loyalty_rewards\".\"deleted_at\" IS NULL"
+        }
+      },
+      "foreignKeys": {
+        "loyalty_rewards_restaurant_id_restaurants_id_fk": {
+          "name": "loyalty_rewards_restaurant_id_restaurants_id_fk",
+          "tableFrom": "loyalty_rewards",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "loyalty_rewards_free_dish_id_dishes_id_fk": {
+          "name": "loyalty_rewards_free_dish_id_dishes_id_fk",
+          "tableFrom": "loyalty_rewards",
+          "tableTo": "dishes",
+          "columnsFrom": [
+            "free_dish_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "loyalty_rewards_cost": {
+          "name": "loyalty_rewards_cost",
+          "value": "\"loyalty_rewards\".\"cost\" >= 0"
+        },
+        "loyalty_rewards_type": {
+          "name": "loyalty_rewards_type",
+          "value": "\"loyalty_rewards\".\"type\" IN ('percentage_discount', 'free_dish', 'special_price')"
+        },
+        "loyalty_rewards_percentage": {
+          "name": "loyalty_rewards_percentage",
+          "value": "\"loyalty_rewards\".\"percentage\" IS NULL OR \"loyalty_rewards\".\"percentage\" BETWEEN 0 AND 100"
+        },
+        "loyalty_rewards_special_price": {
+          "name": "loyalty_rewards_special_price",
+          "value": "\"loyalty_rewards\".\"special_price\" IS NULL OR \"loyalty_rewards\".\"special_price\" >= 0"
+        }
+      }
+    },
+    "loyalty_transactions": {
+      "name": "loyalty_transactions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "points": {
+          "name": "points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reason_code": {
+          "name": "reason_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "order_id": {
+          "name": "order_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "redemption_id": {
+          "name": "redemption_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_loyalty_tx_customer": {
+          "name": "idx_loyalty_tx_customer",
+          "columns": [
+            "customer_id",
+            "restaurant_id",
+            "created_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "loyalty_transactions_customer_id_customers_id_fk": {
+          "name": "loyalty_transactions_customer_id_customers_id_fk",
+          "tableFrom": "loyalty_transactions",
+          "tableTo": "customers",
+          "columnsFrom": [
+            "customer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "loyalty_transactions_restaurant_id_restaurants_id_fk": {
+          "name": "loyalty_transactions_restaurant_id_restaurants_id_fk",
+          "tableFrom": "loyalty_transactions",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "loyalty_transactions_branch_id_branches_id_fk": {
+          "name": "loyalty_transactions_branch_id_branches_id_fk",
+          "tableFrom": "loyalty_transactions",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "loyalty_transactions_type": {
+          "name": "loyalty_transactions_type",
+          "value": "\"loyalty_transactions\".\"type\" IN ('earn', 'redeem', 'adjust', 'expire')"
+        }
+      }
+    },
+    "allergens": {
+      "name": "allergens",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "allergens_code_unique": {
+          "name": "allergens_code_unique",
+          "columns": [
+            "code"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "categories": {
+      "name": "categories",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_categories_branch": {
+          "name": "idx_categories_branch",
+          "columns": [
+            "branch_id",
+            "position"
+          ],
+          "isUnique": false,
+          "where": "\"categories\".\"deleted_at\" IS NULL"
+        },
+        "ux_categories_id_branch": {
+          "name": "ux_categories_id_branch",
+          "columns": [
+            "id",
+            "branch_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "categories_branch_id_restaurant_id_branches_id_restaurant_id_fk": {
+          "name": "categories_branch_id_restaurant_id_branches_id_restaurant_id_fk",
+          "tableFrom": "categories",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id",
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id",
+            "restaurant_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "dish_allergens": {
+      "name": "dish_allergens",
+      "columns": {
+        "dish_id": {
+          "name": "dish_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "allergen_id": {
+          "name": "allergen_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_dish_allergens_allergen": {
+          "name": "idx_dish_allergens_allergen",
+          "columns": [
+            "allergen_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "dish_allergens_dish_id_dishes_id_fk": {
+          "name": "dish_allergens_dish_id_dishes_id_fk",
+          "tableFrom": "dish_allergens",
+          "tableTo": "dishes",
+          "columnsFrom": [
+            "dish_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "dish_allergens_allergen_id_allergens_id_fk": {
+          "name": "dish_allergens_allergen_id_allergens_id_fk",
+          "tableFrom": "dish_allergens",
+          "tableTo": "allergens",
+          "columnsFrom": [
+            "allergen_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "dish_allergens_dish_id_allergen_id_pk": {
+          "columns": [
+            "dish_id",
+            "allergen_id"
+          ],
+          "name": "dish_allergens_dish_id_allergen_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "dish_availability_windows": {
+      "name": "dish_availability_windows",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dish_id": {
+          "name": "dish_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "day_of_week": {
+          "name": "day_of_week",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "start_minute": {
+          "name": "start_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "end_minute": {
+          "name": "end_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_dish_availability_dish": {
+          "name": "idx_dish_availability_dish",
+          "columns": [
+            "dish_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "dish_availability_windows_dish_id_dishes_id_fk": {
+          "name": "dish_availability_windows_dish_id_dishes_id_fk",
+          "tableFrom": "dish_availability_windows",
+          "tableTo": "dishes",
+          "columnsFrom": [
+            "dish_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "dish_availability_day": {
+          "name": "dish_availability_day",
+          "value": "\"dish_availability_windows\".\"day_of_week\" BETWEEN 1 AND 7"
+        },
+        "dish_availability_start": {
+          "name": "dish_availability_start",
+          "value": "\"dish_availability_windows\".\"start_minute\" BETWEEN 0 AND 1439"
+        },
+        "dish_availability_end": {
+          "name": "dish_availability_end",
+          "value": "\"dish_availability_windows\".\"end_minute\" BETWEEN 0 AND 1439"
+        }
+      }
+    },
+    "dish_extras": {
+      "name": "dish_extras",
+      "columns": {
+        "dish_id": {
+          "name": "dish_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ingredient_id": {
+          "name": "ingredient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "idx_dish_extras_dish": {
+          "name": "idx_dish_extras_dish",
+          "columns": [
+            "dish_id",
+            "position"
+          ],
+          "isUnique": false
+        },
+        "idx_dish_extras_ingredient": {
+          "name": "idx_dish_extras_ingredient",
+          "columns": [
+            "ingredient_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "dish_extras_dish_id_dishes_id_fk": {
+          "name": "dish_extras_dish_id_dishes_id_fk",
+          "tableFrom": "dish_extras",
+          "tableTo": "dishes",
+          "columnsFrom": [
+            "dish_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "dish_extras_ingredient_id_ingredients_id_fk": {
+          "name": "dish_extras_ingredient_id_ingredients_id_fk",
+          "tableFrom": "dish_extras",
+          "tableTo": "ingredients",
+          "columnsFrom": [
+            "ingredient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "dish_extras_dish_id_ingredient_id_pk": {
+          "columns": [
+            "dish_id",
+            "ingredient_id"
+          ],
+          "name": "dish_extras_dish_id_ingredient_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "dish_tags": {
+      "name": "dish_tags",
+      "columns": {
+        "dish_id": {
+          "name": "dish_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tag_id": {
+          "name": "tag_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_dish_tags_tag": {
+          "name": "idx_dish_tags_tag",
+          "columns": [
+            "tag_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "dish_tags_dish_id_dishes_id_fk": {
+          "name": "dish_tags_dish_id_dishes_id_fk",
+          "tableFrom": "dish_tags",
+          "tableTo": "dishes",
+          "columnsFrom": [
+            "dish_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "dish_tags_tag_id_tags_id_fk": {
+          "name": "dish_tags_tag_id_tags_id_fk",
+          "tableFrom": "dish_tags",
+          "tableTo": "tags",
+          "columnsFrom": [
+            "tag_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "dish_tags_dish_id_tag_id_pk": {
+          "columns": [
+            "dish_id",
+            "tag_id"
+          ],
+          "name": "dish_tags_dish_id_tag_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "dish_variant_groups": {
+      "name": "dish_variant_groups",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dish_id": {
+          "name": "dish_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "selection_type": {
+          "name": "selection_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_required": {
+          "name": "is_required",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "min_select": {
+          "name": "min_select",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "max_select": {
+          "name": "max_select",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_variant_groups_dish": {
+          "name": "idx_variant_groups_dish",
+          "columns": [
+            "dish_id",
+            "position"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "dish_variant_groups_dish_id_dishes_id_fk": {
+          "name": "dish_variant_groups_dish_id_dishes_id_fk",
+          "tableFrom": "dish_variant_groups",
+          "tableTo": "dishes",
+          "columnsFrom": [
+            "dish_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "dish_variant_groups_selection": {
+          "name": "dish_variant_groups_selection",
+          "value": "\"dish_variant_groups\".\"selection_type\" IN ('single', 'multiple')"
+        },
+        "dish_variant_groups_min": {
+          "name": "dish_variant_groups_min",
+          "value": "\"dish_variant_groups\".\"min_select\" >= 0"
+        },
+        "dish_variant_groups_max": {
+          "name": "dish_variant_groups_max",
+          "value": "\"dish_variant_groups\".\"max_select\" IS NULL OR \"dish_variant_groups\".\"max_select\" >= \"dish_variant_groups\".\"min_select\""
+        }
+      }
+    },
+    "dish_variant_options": {
+      "name": "dish_variant_options",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "group_id": {
+          "name": "group_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "price_delta": {
+          "name": "price_delta",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_variant_options_group": {
+          "name": "idx_variant_options_group",
+          "columns": [
+            "group_id",
+            "position"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "dish_variant_options_group_id_dish_variant_groups_id_fk": {
+          "name": "dish_variant_options_group_id_dish_variant_groups_id_fk",
+          "tableFrom": "dish_variant_options",
+          "tableTo": "dish_variant_groups",
+          "columnsFrom": [
+            "group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "dish_variant_options_price_delta": {
+          "name": "dish_variant_options_price_delta",
+          "value": "\"dish_variant_options\".\"price_delta\" >= 0"
+        }
+      }
+    },
+    "dishes": {
+      "name": "dishes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "price": {
+          "name": "price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "is_recommended": {
+          "name": "is_recommended",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "is_featured": {
+          "name": "is_featured",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_dishes_category": {
+          "name": "idx_dishes_category",
+          "columns": [
+            "category_id",
+            "position"
+          ],
+          "isUnique": false,
+          "where": "\"dishes\".\"deleted_at\" IS NULL"
+        },
+        "idx_dishes_branch": {
+          "name": "idx_dishes_branch",
+          "columns": [
+            "branch_id"
+          ],
+          "isUnique": false,
+          "where": "\"dishes\".\"deleted_at\" IS NULL"
+        }
+      },
+      "foreignKeys": {
+        "dishes_branch_id_restaurant_id_branches_id_restaurant_id_fk": {
+          "name": "dishes_branch_id_restaurant_id_branches_id_restaurant_id_fk",
+          "tableFrom": "dishes",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id",
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id",
+            "restaurant_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "dishes_category_id_branch_id_categories_id_branch_id_fk": {
+          "name": "dishes_category_id_branch_id_categories_id_branch_id_fk",
+          "tableFrom": "dishes",
+          "tableTo": "categories",
+          "columnsFrom": [
+            "category_id",
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id",
+            "branch_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "dishes_price": {
+          "name": "dishes_price",
+          "value": "\"dishes\".\"price\" >= 0"
+        }
+      }
+    },
+    "ingredients": {
+      "name": "ingredients",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "price": {
+          "name": "price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_ingredients_restaurant": {
+          "name": "idx_ingredients_restaurant",
+          "columns": [
+            "restaurant_id",
+            "name"
+          ],
+          "isUnique": false,
+          "where": "\"ingredients\".\"deleted_at\" IS NULL"
+        }
+      },
+      "foreignKeys": {
+        "ingredients_restaurant_id_restaurants_id_fk": {
+          "name": "ingredients_restaurant_id_restaurants_id_fk",
+          "tableFrom": "ingredients",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ingredients_price": {
+          "name": "ingredients_price",
+          "value": "\"ingredients\".\"price\" >= 0"
+        }
+      }
+    },
+    "tags": {
+      "name": "tags",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_system": {
+          "name": "is_system",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_tags_system_code": {
+          "name": "idx_tags_system_code",
+          "columns": [
+            "code"
+          ],
+          "isUnique": true,
+          "where": "\"tags\".\"is_system\" = 1"
+        },
+        "idx_tags_restaurant": {
+          "name": "idx_tags_restaurant",
+          "columns": [
+            "restaurant_id"
+          ],
+          "isUnique": false,
+          "where": "\"tags\".\"is_system\" = 0"
+        }
+      },
+      "foreignKeys": {
+        "tags_restaurant_id_restaurants_id_fk": {
+          "name": "tags_restaurant_id_restaurants_id_fk",
+          "tableFrom": "tags",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "tags_ownership": {
+          "name": "tags_ownership",
+          "value": "\n        (\"tags\".\"is_system\" = 1 AND \"tags\".\"code\" IS NOT NULL AND \"tags\".\"restaurant_id\" IS NULL)\n        OR (\"tags\".\"is_system\" = 0 AND \"tags\".\"label\" IS NOT NULL AND \"tags\".\"restaurant_id\" IS NOT NULL)\n      "
+        }
+      }
+    },
+    "internal_alerts": {
+      "name": "internal_alerts",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "severity": {
+          "name": "severity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'info'"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'open'"
+        },
+        "message_code": {
+          "name": "message_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "payload_json": {
+          "name": "payload_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "resolved_at": {
+          "name": "resolved_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_internal_alerts_status": {
+          "name": "idx_internal_alerts_status",
+          "columns": [
+            "status",
+            "type",
+            "created_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "internal_alerts_restaurant_id_restaurants_id_fk": {
+          "name": "internal_alerts_restaurant_id_restaurants_id_fk",
+          "tableFrom": "internal_alerts",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "internal_alerts_branch_id_branches_id_fk": {
+          "name": "internal_alerts_branch_id_branches_id_fk",
+          "tableFrom": "internal_alerts",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "internal_alerts_type": {
+          "name": "internal_alerts_type",
+          "value": "\"internal_alerts\".\"type\" IN ('domain_renewal', 'inactive_restaurant', 'plan_issue', 'other')"
+        },
+        "internal_alerts_severity": {
+          "name": "internal_alerts_severity",
+          "value": "\"internal_alerts\".\"severity\" IN ('info', 'warning', 'critical')"
+        },
+        "internal_alerts_status": {
+          "name": "internal_alerts_status",
+          "value": "\"internal_alerts\".\"status\" IN ('open', 'resolved', 'dismissed')"
+        }
+      }
+    },
+    "plan_change_logs": {
+      "name": "plan_change_logs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "from_plan": {
+          "name": "from_plan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "to_plan": {
+          "name": "to_plan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "changed_by_clerk_user_id": {
+          "name": "changed_by_clerk_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_plan_change_logs_restaurant": {
+          "name": "idx_plan_change_logs_restaurant",
+          "columns": [
+            "restaurant_id",
+            "created_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "plan_change_logs_restaurant_id_restaurants_id_fk": {
+          "name": "plan_change_logs_restaurant_id_restaurants_id_fk",
+          "tableFrom": "plan_change_logs",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "plan_change_logs_branch_id_branches_id_fk": {
+          "name": "plan_change_logs_branch_id_branches_id_fk",
+          "tableFrom": "plan_change_logs",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "delivery_zones": {
+      "name": "delivery_zones",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "radius_km": {
+          "name": "radius_km",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "delivery_fee": {
+          "name": "delivery_fee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "min_order_amount": {
+          "name": "min_order_amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_delivery_zones_branch": {
+          "name": "idx_delivery_zones_branch",
+          "columns": [
+            "branch_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "delivery_zones_branch_id_restaurant_id_branches_id_restaurant_id_fk": {
+          "name": "delivery_zones_branch_id_restaurant_id_branches_id_restaurant_id_fk",
+          "tableFrom": "delivery_zones",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id",
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id",
+            "restaurant_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "delivery_zones_radius": {
+          "name": "delivery_zones_radius",
+          "value": "\"delivery_zones\".\"radius_km\" > 0"
+        },
+        "delivery_zones_fee": {
+          "name": "delivery_zones_fee",
+          "value": "\"delivery_zones\".\"delivery_fee\" >= 0"
+        },
+        "delivery_zones_min_order": {
+          "name": "delivery_zones_min_order",
+          "value": "\"delivery_zones\".\"min_order_amount\" >= 0"
+        }
+      }
+    },
+    "order_items": {
+      "name": "order_items",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "order_id": {
+          "name": "order_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dish_id": {
+          "name": "dish_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "dish_name": {
+          "name": "dish_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "selected_options_json": {
+          "name": "selected_options_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "unit_price": {
+          "name": "unit_price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "line_total": {
+          "name": "line_total",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_order_items_order": {
+          "name": "idx_order_items_order",
+          "columns": [
+            "order_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "order_items_order_id_orders_id_fk": {
+          "name": "order_items_order_id_orders_id_fk",
+          "tableFrom": "order_items",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "order_items_dish_id_dishes_id_fk": {
+          "name": "order_items_dish_id_dishes_id_fk",
+          "tableFrom": "order_items",
+          "tableTo": "dishes",
+          "columnsFrom": [
+            "dish_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "order_items_quantity": {
+          "name": "order_items_quantity",
+          "value": "\"order_items\".\"quantity\" > 0"
+        },
+        "order_items_unit_price": {
+          "name": "order_items_unit_price",
+          "value": "\"order_items\".\"unit_price\" >= 0"
+        },
+        "order_items_line_total": {
+          "name": "order_items_line_total",
+          "value": "\"order_items\".\"line_total\" >= 0"
+        }
+      }
+    },
+    "orders": {
+      "name": "orders",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "mode": {
+          "name": "mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'received'"
+        },
+        "delivery_address": {
+          "name": "delivery_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "delivery_zone_id": {
+          "name": "delivery_zone_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "delivery_fee": {
+          "name": "delivery_fee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "subtotal": {
+          "name": "subtotal",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "total": {
+          "name": "total",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'EUR'"
+        },
+        "desired_time": {
+          "name": "desired_time",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "kitchen_note": {
+          "name": "kitchen_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "driver_id": {
+          "name": "driver_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_orders_branch_status": {
+          "name": "idx_orders_branch_status",
+          "columns": [
+            "branch_id",
+            "status",
+            "created_at"
+          ],
+          "isUnique": false
+        },
+        "idx_orders_customer": {
+          "name": "idx_orders_customer",
+          "columns": [
+            "customer_id",
+            "created_at"
+          ],
+          "isUnique": false
+        },
+        "idx_orders_driver": {
+          "name": "idx_orders_driver",
+          "columns": [
+            "driver_id",
+            "status"
+          ],
+          "isUnique": false
+        },
+        "ux_orders_id_restaurant": {
+          "name": "ux_orders_id_restaurant",
+          "columns": [
+            "id",
+            "restaurant_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "orders_customer_id_customers_id_fk": {
+          "name": "orders_customer_id_customers_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "customers",
+          "columnsFrom": [
+            "customer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orders_delivery_zone_id_delivery_zones_id_fk": {
+          "name": "orders_delivery_zone_id_delivery_zones_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "delivery_zones",
+          "columnsFrom": [
+            "delivery_zone_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orders_driver_id_restaurant_users_id_fk": {
+          "name": "orders_driver_id_restaurant_users_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "restaurant_users",
+          "columnsFrom": [
+            "driver_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orders_branch_id_restaurant_id_branches_id_restaurant_id_fk": {
+          "name": "orders_branch_id_restaurant_id_branches_id_restaurant_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id",
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id",
+            "restaurant_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "orders_mode": {
+          "name": "orders_mode",
+          "value": "\"orders\".\"mode\" IN ('pickup', 'delivery')"
+        },
+        "orders_status": {
+          "name": "orders_status",
+          "value": "\"orders\".\"status\" IN ('received', 'preparing', 'ready', 'on_the_way', 'delivered', 'canceled')"
+        },
+        "orders_delivery_fee": {
+          "name": "orders_delivery_fee",
+          "value": "\"orders\".\"delivery_fee\" >= 0"
+        },
+        "orders_subtotal": {
+          "name": "orders_subtotal",
+          "value": "\"orders\".\"subtotal\" >= 0"
+        },
+        "orders_total": {
+          "name": "orders_total",
+          "value": "\"orders\".\"total\" >= 0"
+        },
+        "orders_currency_length": {
+          "name": "orders_currency_length",
+          "value": "length(\"orders\".\"currency\") = 3"
+        }
+      }
+    },
+    "payments": {
+      "name": "payments",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "order_id": {
+          "name": "order_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stripe_payment_intent_id": {
+          "name": "stripe_payment_intent_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'requires_payment'"
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'EUR'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_payments_order": {
+          "name": "idx_payments_order",
+          "columns": [
+            "order_id"
+          ],
+          "isUnique": false
+        },
+        "idx_payments_intent": {
+          "name": "idx_payments_intent",
+          "columns": [
+            "stripe_payment_intent_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "payments_order_id_restaurant_id_orders_id_restaurant_id_fk": {
+          "name": "payments_order_id_restaurant_id_orders_id_restaurant_id_fk",
+          "tableFrom": "payments",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "order_id",
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id",
+            "restaurant_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "payments_status": {
+          "name": "payments_status",
+          "value": "\"payments\".\"status\" IN ('requires_payment', 'processing', 'succeeded', 'failed', 'refunded')"
+        },
+        "payments_amount": {
+          "name": "payments_amount",
+          "value": "\"payments\".\"amount\" >= 0"
+        },
+        "payments_currency_length": {
+          "name": "payments_currency_length",
+          "value": "length(\"payments\".\"currency\") = 3"
+        }
+      }
+    },
+    "promotion_targets": {
+      "name": "promotion_targets",
+      "columns": {
+        "promotion_id": {
+          "name": "promotion_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_type": {
+          "name": "target_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_id": {
+          "name": "target_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_promotion_targets_target": {
+          "name": "idx_promotion_targets_target",
+          "columns": [
+            "target_type",
+            "target_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "promotion_targets_promotion_id_promotions_id_fk": {
+          "name": "promotion_targets_promotion_id_promotions_id_fk",
+          "tableFrom": "promotion_targets",
+          "tableTo": "promotions",
+          "columnsFrom": [
+            "promotion_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "promotion_targets_promotion_id_target_type_target_id_pk": {
+          "columns": [
+            "promotion_id",
+            "target_type",
+            "target_id"
+          ],
+          "name": "promotion_targets_promotion_id_target_type_target_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "promotion_targets_type": {
+          "name": "promotion_targets_type",
+          "value": "\"promotion_targets\".\"target_type\" IN ('dish', 'category')"
+        }
+      }
+    },
+    "promotions": {
+      "name": "promotions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'info'"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "percentage": {
+          "name": "percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "special_price": {
+          "name": "special_price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "buy_quantity": {
+          "name": "buy_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "paid_quantity": {
+          "name": "paid_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "priority": {
+          "name": "priority",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "starts_at": {
+          "name": "starts_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ends_at": {
+          "name": "ends_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_recurring": {
+          "name": "is_recurring",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "recurring_days": {
+          "name": "recurring_days",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "recurring_start_minute": {
+          "name": "recurring_start_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "recurring_end_minute": {
+          "name": "recurring_end_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'active'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_promotions_branch": {
+          "name": "idx_promotions_branch",
+          "columns": [
+            "branch_id",
+            "status",
+            "scope"
+          ],
+          "isUnique": false,
+          "where": "\"promotions\".\"deleted_at\" IS NULL"
+        }
+      },
+      "foreignKeys": {
+        "promotions_branch_id_restaurant_id_branches_id_restaurant_id_fk": {
+          "name": "promotions_branch_id_restaurant_id_branches_id_restaurant_id_fk",
+          "tableFrom": "promotions",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id",
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id",
+            "restaurant_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "promotions_type": {
+          "name": "promotions_type",
+          "value": "\"promotions\".\"type\" IN ('percentage_discount', 'special_price', 'daily_menu', 'happy_hour', 'two_for_one')"
+        },
+        "promotions_scope": {
+          "name": "promotions_scope",
+          "value": "\"promotions\".\"scope\" IN ('info', 'branch', 'category', 'dish')"
+        },
+        "promotions_percentage": {
+          "name": "promotions_percentage",
+          "value": "\"promotions\".\"percentage\" IS NULL OR \"promotions\".\"percentage\" BETWEEN 0 AND 100"
+        },
+        "promotions_special_price": {
+          "name": "promotions_special_price",
+          "value": "\"promotions\".\"special_price\" IS NULL OR \"promotions\".\"special_price\" >= 0"
+        },
+        "promotions_buy_quantity": {
+          "name": "promotions_buy_quantity",
+          "value": "\"promotions\".\"buy_quantity\" IS NULL OR \"promotions\".\"buy_quantity\" > 0"
+        },
+        "promotions_paid_quantity": {
+          "name": "promotions_paid_quantity",
+          "value": "\"promotions\".\"paid_quantity\" IS NULL OR \"promotions\".\"paid_quantity\" > 0"
+        },
+        "promotions_recurring_start": {
+          "name": "promotions_recurring_start",
+          "value": "\"promotions\".\"recurring_start_minute\" IS NULL OR \"promotions\".\"recurring_start_minute\" BETWEEN 0 AND 1439"
+        },
+        "promotions_recurring_end": {
+          "name": "promotions_recurring_end",
+          "value": "\"promotions\".\"recurring_end_minute\" IS NULL OR \"promotions\".\"recurring_end_minute\" BETWEEN 0 AND 1439"
+        },
+        "promotions_status": {
+          "name": "promotions_status",
+          "value": "\"promotions\".\"status\" IN ('active', 'inactive', 'expired')"
+        },
+        "promotions_required_values": {
+          "name": "promotions_required_values",
+          "value": "\n        \"promotions\".\"scope\" = 'info'\n        OR (\"promotions\".\"type\" = 'percentage_discount' AND \"promotions\".\"percentage\" IS NOT NULL)\n        OR (\"promotions\".\"type\" IN ('special_price', 'daily_menu') AND \"promotions\".\"special_price\" IS NOT NULL)\n        OR (\"promotions\".\"type\" = 'happy_hour' AND (\"promotions\".\"percentage\" IS NOT NULL OR \"promotions\".\"special_price\" IS NOT NULL))\n        OR (\"promotions\".\"type\" = 'two_for_one' AND \"promotions\".\"buy_quantity\" IS NOT NULL AND \"promotions\".\"paid_quantity\" IS NOT NULL AND \"promotions\".\"paid_quantity\" <= \"promotions\".\"buy_quantity\")\n      "
+        }
+      }
+    },
+    "branch_subscriptions": {
+      "name": "branch_subscriptions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "plan_code": {
+          "name": "plan_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'trialing'"
+        },
+        "stripe_subscription_id": {
+          "name": "stripe_subscription_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "current_period_end": {
+          "name": "current_period_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "stripe_price_id": {
+          "name": "stripe_price_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cancel_at_period_end": {
+          "name": "cancel_at_period_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        }
+      },
+      "indexes": {
+        "idx_branch_subscriptions_restaurant": {
+          "name": "idx_branch_subscriptions_restaurant",
+          "columns": [
+            "restaurant_id"
+          ],
+          "isUnique": false
+        },
+        "ux_branch_subscriptions_active": {
+          "name": "ux_branch_subscriptions_active",
+          "columns": [
+            "branch_id"
+          ],
+          "isUnique": true,
+          "where": "\"branch_subscriptions\".\"status\" <> 'canceled'"
+        },
+        "ux_branch_subscriptions_branch": {
+          "name": "ux_branch_subscriptions_branch",
+          "columns": [
+            "branch_id"
+          ],
+          "isUnique": true
+        },
+        "ux_branch_subscriptions_stripe_sub": {
+          "name": "ux_branch_subscriptions_stripe_sub",
+          "columns": [
+            "stripe_subscription_id"
+          ],
+          "isUnique": true,
+          "where": "\"branch_subscriptions\".\"stripe_subscription_id\" IS NOT NULL"
+        }
+      },
+      "foreignKeys": {
+        "branch_subscriptions_branch_id_restaurant_id_branches_id_restaurant_id_fk": {
+          "name": "branch_subscriptions_branch_id_restaurant_id_branches_id_restaurant_id_fk",
+          "tableFrom": "branch_subscriptions",
+          "tableTo": "branches",
+          "columnsFrom": [
+            "branch_id",
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id",
+            "restaurant_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "branch_subscriptions_plan": {
+          "name": "branch_subscriptions_plan",
+          "value": "\"branch_subscriptions\".\"plan_code\" IN ('basic', 'business')"
+        },
+        "branch_subscriptions_status": {
+          "name": "branch_subscriptions_status",
+          "value": "\"branch_subscriptions\".\"status\" IN ('trialing', 'active', 'past_due', 'canceled')"
+        }
+      }
+    },
+    "restaurant_languages": {
+      "name": "restaurant_languages",
+      "columns": {
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "language_code": {
+          "name": "language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_default": {
+          "name": "is_default",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "ux_restaurant_languages_default": {
+          "name": "ux_restaurant_languages_default",
+          "columns": [
+            "restaurant_id"
+          ],
+          "isUnique": true,
+          "where": "\"restaurant_languages\".\"is_default\" = 1"
+        }
+      },
+      "foreignKeys": {
+        "restaurant_languages_restaurant_id_restaurants_id_fk": {
+          "name": "restaurant_languages_restaurant_id_restaurants_id_fk",
+          "tableFrom": "restaurant_languages",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "restaurant_languages_restaurant_id_language_code_pk": {
+          "columns": [
+            "restaurant_id",
+            "language_code"
+          ],
+          "name": "restaurant_languages_restaurant_id_language_code_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "restaurant_stripe_accounts": {
+      "name": "restaurant_stripe_accounts",
+      "columns": {
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stripe_account_id": {
+          "name": "stripe_account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "restaurant_stripe_accounts_stripe_account_id_unique": {
+          "name": "restaurant_stripe_accounts_stripe_account_id_unique",
+          "columns": [
+            "stripe_account_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "restaurant_stripe_accounts_restaurant_id_restaurants_id_fk": {
+          "name": "restaurant_stripe_accounts_restaurant_id_restaurants_id_fk",
+          "tableFrom": "restaurant_stripe_accounts",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "restaurant_stripe_accounts_status": {
+          "name": "restaurant_stripe_accounts_status",
+          "value": "\"restaurant_stripe_accounts\".\"status\" IN ('pending', 'connected', 'disabled')"
+        }
+      }
+    },
+    "restaurant_users": {
+      "name": "restaurant_users",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "role_code": {
+          "name": "role_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'staff'"
+        },
+        "is_driver": {
+          "name": "is_driver",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_restaurant_users_user": {
+          "name": "idx_restaurant_users_user",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        },
+        "ux_restaurant_users_restaurant_user": {
+          "name": "ux_restaurant_users_restaurant_user",
+          "columns": [
+            "restaurant_id",
+            "user_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "restaurant_users_restaurant_id_restaurants_id_fk": {
+          "name": "restaurant_users_restaurant_id_restaurants_id_fk",
+          "tableFrom": "restaurant_users",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "restaurant_users_user_id_users_id_fk": {
+          "name": "restaurant_users_user_id_users_id_fk",
+          "tableFrom": "restaurant_users",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "restaurant_users_role": {
+          "name": "restaurant_users_role",
+          "value": "\"restaurant_users\".\"role_code\" IN ('owner', 'admin', 'staff')"
+        }
+      }
+    },
+    "restaurants": {
+      "name": "restaurants",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "default_language_code": {
+          "name": "default_language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'es'"
+        },
+        "default_currency": {
+          "name": "default_currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'EUR'"
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Europe/Madrid'"
+        },
+        "email_from_name": {
+          "name": "email_from_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "email_from_address": {
+          "name": "email_from_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "email_reply_to": {
+          "name": "email_reply_to",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "legal_name": {
+          "name": "legal_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tax_id": {
+          "name": "tax_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "legal_address": {
+          "name": "legal_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "data_protection_email": {
+          "name": "data_protection_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "restaurants_default_currency_length": {
+          "name": "restaurants_default_currency_length",
+          "value": "length(\"restaurants\".\"default_currency\") = 3"
+        }
+      }
+    },
+    "translations": {
+      "name": "translations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entity_id": {
+          "name": "entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "language_code": {
+          "name": "language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "field": {
+          "name": "field",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'ok'"
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'machine'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch() * 1000)"
+        }
+      },
+      "indexes": {
+        "idx_translations_lookup": {
+          "name": "idx_translations_lookup",
+          "columns": [
+            "entity_type",
+            "entity_id",
+            "language_code"
+          ],
+          "isUnique": false
+        },
+        "idx_translations_pending": {
+          "name": "idx_translations_pending",
+          "columns": [
+            "restaurant_id",
+            "status"
+          ],
+          "isUnique": false
+        },
+        "ux_translations_lookup": {
+          "name": "ux_translations_lookup",
+          "columns": [
+            "entity_type",
+            "entity_id",
+            "language_code",
+            "field"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "translations_restaurant_id_restaurants_id_fk": {
+          "name": "translations_restaurant_id_restaurants_id_fk",
+          "tableFrom": "translations",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "translations_entity_type": {
+          "name": "translations_entity_type",
+          "value": "\"translations\".\"entity_type\" IN ('dish', 'category', 'variant_group', 'variant_option', 'ingredient')"
+        },
+        "translations_status": {
+          "name": "translations_status",
+          "value": "\"translations\".\"status\" IN ('ok', 'pending_update')"
+        },
+        "translations_source": {
+          "name": "translations_source",
+          "value": "\"translations\".\"source\" IN ('machine', 'manual')"
+        }
+      }
+    }
+  },
+  "views": {
+    "v_dish_promotion_prices": {
+      "columns": {
+        "dish_id": {
+          "name": "dish_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "base_price": {
+          "name": "base_price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "promotion_id": {
+          "name": "promotion_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "promotion_type": {
+          "name": "promotion_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "promotion_scope": {
+          "name": "promotion_scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "priority": {
+          "name": "priority",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "effective_unit_price": {
+          "name": "effective_unit_price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "buy_quantity": {
+          "name": "buy_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "paid_quantity": {
+          "name": "paid_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "starts_at": {
+          "name": "starts_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ends_at": {
+          "name": "ends_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_recurring": {
+          "name": "is_recurring",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recurring_days": {
+          "name": "recurring_days",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "recurring_start_minute": {
+          "name": "recurring_start_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "recurring_end_minute": {
+          "name": "recurring_end_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "name": "v_dish_promotion_prices",
+      "isExisting": false,
+      "definition": "\n  SELECT\n      d.id        AS dish_id,\n      d.branch_id AS branch_id,\n      d.price     AS base_price,\n      p.id        AS promotion_id,\n      p.type      AS promotion_type,\n      p.scope     AS promotion_scope,\n      p.priority  AS priority,\n      CASE\n          WHEN p.type = 'percentage_discount'\n              THEN CAST(ROUND(d.price * (100 - p.percentage) / 100.0) AS INTEGER)\n          WHEN p.type IN ('special_price','daily_menu')\n              THEN p.special_price\n          WHEN p.type = 'happy_hour'\n              THEN COALESCE(p.special_price, CAST(ROUND(d.price * (100 - p.percentage) / 100.0) AS INTEGER))\n          ELSE d.price\n      END         AS effective_unit_price,\n      p.buy_quantity,\n      p.paid_quantity,\n      p.starts_at,\n      p.ends_at,\n      p.is_recurring,\n      p.recurring_days,\n      p.recurring_start_minute,\n      p.recurring_end_minute\n  FROM dishes d\n  JOIN promotions p\n    ON p.branch_id = d.branch_id\n   AND p.deleted_at IS NULL\n   AND p.status = 'active'\n   AND p.scope <> 'info'\n  WHERE d.deleted_at IS NULL\n    AND (\n          p.scope = 'branch'\n       OR (p.scope = 'dish' AND EXISTS (\n            SELECT 1 FROM promotion_targets t\n            WHERE t.promotion_id = p.id AND t.target_type = 'dish' AND t.target_id = d.id\n          ))\n       OR (p.scope = 'category' AND EXISTS (\n            SELECT 1 FROM promotion_targets t\n            WHERE t.promotion_id = p.id AND t.target_type = 'category' AND t.target_id = d.category_id\n          ))\n        )\n"
+    }
+  },
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

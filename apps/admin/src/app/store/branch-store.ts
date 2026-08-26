@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 interface BranchStore {
   selectedBranchId: string | null;
+  resetSelectedBranchId: () => void;
   setSelectedBranchId: (branchId: string) => void;
 }
 const BRANCH_STORAGE_KEY = "qmenut-admin-branch";
@@ -10,6 +11,7 @@ export const useBranchStore = create<BranchStore>()(
   persist(
     (set) => ({
       selectedBranchId: null,
+      resetSelectedBranchId: () => set({ selectedBranchId: null }),
       setSelectedBranchId: (selectedBranchId) => set({ selectedBranchId }),
     }),
     {

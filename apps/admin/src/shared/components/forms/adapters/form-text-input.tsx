@@ -1,4 +1,4 @@
-import { Field, Input } from "@ming/components";
+import { Field, Input } from "@jmurga97/components";
 import { useFormContext } from "react-hook-form";
 
 import type { HTMLInputTypeAttribute } from "react";
@@ -34,7 +34,7 @@ export function FormTextInput<TValues extends FieldValues>({
         inputMode={inputMode}
         maxLength={maxLength}
         placeholder={placeholder}
-        readOnly={disabled}
+        disabled={disabled}
         type={type}
       />
     </Field>

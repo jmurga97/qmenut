@@ -1,4 +1,4 @@
-import "@ming/components/styles.css";
+import "@jmurga97/components/styles.css";
 import * as Sentry from "@sentry/react";
 import { createBrowserHistory, createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";

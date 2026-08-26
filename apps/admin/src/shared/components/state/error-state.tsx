@@ -1,4 +1,4 @@
-import { Button } from "@ming/components";
+import { Button } from "@jmurga97/components";
 import { Link } from "@tanstack/react-router";
 
 import { getErrorMessage } from "~/lib/errors";

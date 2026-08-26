@@ -1,4 +1,4 @@
-import { InlineMessage } from "@ming/components";
+import { InlineMessage } from "@jmurga97/components";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { FormProvider } from "react-hook-form";

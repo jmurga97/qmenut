@@ -1,4 +1,4 @@
-import { Button } from "@ming/components";
+import { Button } from "@jmurga97/components";
 import { useId } from "react";
 
 import { useVenueCode } from "~/features/loyalty/hooks/use-venue-code";

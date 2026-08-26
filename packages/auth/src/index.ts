@@ -51,14 +51,7 @@ export interface CreateAuthOptions {
   }[];
 }
 
-type BetterAuthInstance = ReturnType<typeof betterAuth>;
-
-export interface Auth {
-  handler: BetterAuthInstance["handler"];
-  api: BetterAuthInstance["api"];
-  $Infer: BetterAuthInstance["$Infer"];
-}
-
+export type Auth = ReturnType<typeof createAuth>;
 export type Session = Auth["$Infer"]["Session"];
 
 interface SendOtpPayload {
@@ -180,7 +173,7 @@ export function createAuth({
   emailOtpSender,
   cookieMode = "same-site",
   fixedOtpAccounts,
-}: CreateAuthOptions): Auth {
+}: CreateAuthOptions) {
   const fixedOtpByEmail = new Map(
     fixedOtpAccounts?.map((account) => [account.email.toLowerCase(), account.otp] as const),
   );
@@ -196,6 +189,13 @@ export function createAuth({
     }),
     session: {
       expiresIn: SESSION_EXPIRES_IN_SECONDS,
+      additionalFields: {
+        activeRestaurantId: {
+          type: "string",
+          required: false,
+          input: false,
+        },
+      },
     },
     trustedOrigins,
     advanced: getAdvancedCookieOptions(cookieMode),

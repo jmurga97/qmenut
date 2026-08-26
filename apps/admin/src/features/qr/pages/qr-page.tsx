@@ -1,4 +1,4 @@
-import { Button } from "@ming/components";
+import { Button } from "@jmurga97/components";
 import { FormProvider } from "react-hook-form";
 
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
