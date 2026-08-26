@@ -18,7 +18,7 @@ export const QM_CONTACT_PANEL_TAG_NAME = "qm-contact-panel";
 
 const componentStyles = createComponentStyles(componentStylesText);
 
-/** Public contact body with an optional immersive map, branch cards, and message form. */
+/** Public contact body with an optional immersive map, branch cards, message form, and trailing content slot. */
 export interface QmContactPanelValue {
   ubicacionNum?: string;
   ubicacionLabel?: string;
@@ -116,9 +116,12 @@ export class QmContactPanel extends LitElement {
 
   render() {
     const hasMap = Boolean(this.value?.map?.markers.length);
-    return html`${this.renderUbicacion()}${this.renderSocialLinks()}${this.renderSedes(hasMap ? "02" : "01")}${this.renderMensaje(
-      hasMap ? "03" : "02",
-    )}`;
+    return html`
+      ${this.renderUbicacion()}${this.renderSocialLinks()}${this.renderSedes(hasMap ? "02" : "01")}${this.renderMensaje(
+        hasMap ? "03" : "02",
+      )}
+      <slot name="reviews"></slot>
+    `;
   }
 }
 

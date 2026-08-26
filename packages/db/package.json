@@ -12,6 +12,10 @@
       "types": "./src/repositories/admin-branches.repository.ts",
       "import": "./src/repositories/admin-branches.repository.ts"
     },
+    "./repositories/google-reviews.repository": {
+      "types": "./src/repositories/google-reviews.repository.ts",
+      "import": "./src/repositories/google-reviews.repository.ts"
+    },
     "./repositories/admin-categories.repository": {
       "types": "./src/repositories/admin-categories.repository.ts",
       "import": "./src/repositories/admin-categories.repository.ts"

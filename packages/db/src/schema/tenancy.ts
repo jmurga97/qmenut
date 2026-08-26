@@ -54,6 +54,8 @@ export const branches = sqliteTable(
     whatsapp: text("whatsapp"),
     socialLinksJson: text("social_links_json"),
     logoUrl: text("logo_url"),
+    googlePlaceId: text("google_place_id"),
+    googleReviewsEnabled: integer("google_reviews_enabled", { mode: "boolean" }).notNull().default(false),
     customDomain: text("custom_domain"),
     currency: text("currency").notNull().default("EUR"),
     planCode: text("plan_code", { enum: ["basic", "business"] })

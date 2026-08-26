@@ -112,6 +112,7 @@ export function mapPublicContactContent({ data, locale, t }: MapPublicContactCon
       namePlaceholder: t("contact.page.namePlaceholder"),
       submitLabel: t("contact.page.submitLabel"),
     },
+    googleReviewsEnabled: data?.branch.googleReviewsEnabled ?? false,
     locations: branches.map((branch) => {
       const phone = normalizePhone(branch.phone);
       const whatsapp = normalizePhone(branch.whatsapp);

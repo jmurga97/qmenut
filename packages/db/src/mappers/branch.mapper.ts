@@ -34,6 +34,7 @@ export function mapBranch({
     socialLinks: parseSocialLinks(row.socialLinksJson),
     logoUrl: row.logoUrl,
     customDomain: row.customDomain,
+    googleReviewsEnabled: row.googleReviewsEnabled,
     currency: row.currency,
     latitude: row.latitude,
     longitude: row.longitude,

@@ -13,6 +13,7 @@ import { ImageGalleryControl } from "~/shared/images/image-gallery-control";
 import { ImageUploadControl } from "~/shared/images/image-upload-control";
 
 import { BranchAddressAutocomplete } from "../components/branch-address-autocomplete";
+import { GoogleReviewsSettings } from "../components/google-reviews-settings";
 import { useBranchController } from "../hooks/use-branch-controller";
 import { DAYS, TIMEZONE_OPTIONS } from "../types";
 
@@ -75,6 +76,13 @@ function BranchForm({ branchId }: { branchId: string }) {
               />
             </div>
           </section>
+          <GoogleReviewsSettings
+            address={controller.settings.address}
+            branchId={branchId}
+            branchName={controller.settings.name}
+            enabled={controller.settings.googleReviewsEnabled}
+            placeId={controller.settings.googlePlaceId}
+          />
           <section className="admin-editor-section">
             <div className="admin-kicker">Horario semanal</div>
             <div className="admin-schedule-grid">

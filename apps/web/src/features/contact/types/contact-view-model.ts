@@ -14,6 +14,7 @@ export interface ContactFormViewModel {
 
 export interface ContactContentViewModel {
   form: ContactFormViewModel;
+  googleReviewsEnabled: boolean;
   locations: ContactLocationViewModel[];
   map?: QmMapValue;
   mapSectionLabel: string;

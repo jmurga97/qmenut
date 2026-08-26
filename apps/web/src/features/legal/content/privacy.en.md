@@ -17,6 +17,7 @@ The **QMenut** platform ({{operatorLegalName}}, tax ID {{operatorLegalTaxId}}) p
 
 - **Contact form:** the name and message you choose to send are used only to respond to your enquiry.
 - **Technical connection data:** the IP address and basic browser data are processed temporarily to serve the page securely (abuse prevention and error logging). They are not used to create profiles.
+- **Google reviews (when enabled):** public reviews are requested from Google when you approach that section. QMenut does not store their content. The IP address is used transiently to limit abusive requests, without creating profiles.
 - **Loyalty programme (when enabled):** if the establishment enables its points programme and you choose to participate, your email, name, and date of birth will be processed to manage your points and benefits. You will be informed when you register.
 
 ## 4. Cookie-free analytics
@@ -27,6 +28,7 @@ To understand which dishes and sections attract the most interest, **PostHog** (
 
 - Contact form: consent of the data subject (Article 6(1)(a) GDPR).
 - Technical data and anonymous analytics: legitimate interest in security and service improvement (Article 6(1)(f) GDPR).
+- Loading public Google reviews: legitimate interest in providing information about the establishment’s public reputation (Article 6(1)(f) GDPR).
 - Loyalty programme: performance of the relationship with the participant (Article 6(1)(b) GDPR).
 
 ## 6. Recipients and processors
@@ -36,13 +38,16 @@ Data is not disclosed to third parties except where legally required. The follow
 - QMenut — digital-menu platform.
 - Cloudflare, Inc. — hosting and content delivery network.
 - PostHog EU — anonymous, cookie-free analytics (data hosted in the EU).
+- Google LLC — provider of public Google Maps reviews when the establishment enables this feature.
 - Email delivery provider — transactional messages (e.g. access codes).
 
 Payments by the establishment to the platform are handled by Stripe and do not affect visitors’ menu data.
 
+Reviews are fetched by the server and are not stored in the digital menu. If you open a Google Maps link, you will leave this website and the [Google Privacy Policy](https://policies.google.com/privacy) and the relevant Google terms will apply.
+
 ## 7. Retention
 
-Contact messages are kept for as long as necessary to handle the enquiry. Loyalty-programme data is kept while you participate or until you request removal.
+Contact messages are kept for as long as necessary to handle the enquiry. The identifier used to rate-limit review requests is retained only for the technical rate-limit window. Loyalty-programme data is kept while you participate or until you request removal.
 
 ## 8. Your rights
 
@@ -58,4 +63,4 @@ This website **does not use cookies** or equivalent storage technologies on your
 
 This policy may be updated to reflect regulatory or service changes. The current version will always be published on this page.
 
-<p class="legal-updated">Last updated: 7 July 2026.</p>
+<p class="legal-updated">Last updated: 26 August 2026.</p>

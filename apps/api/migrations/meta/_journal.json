@@ -57,6 +57,20 @@
       "when": 1787733037935,
       "tag": "0007_session_active_restaurant",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1787767128182,
+      "tag": "0008_google_reviews",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1787767134895,
+      "tag": "0009_enforce_google_reviews_connection",
+      "breakpoints": true
     }
   ]
 }

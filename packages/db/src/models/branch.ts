@@ -15,6 +15,7 @@ export interface PublicBranch {
   address: string | null;
   currency: string;
   customDomain: string | null;
+  googleReviewsEnabled: boolean;
   id: string;
   latitude: number | null;
   logoUrl: string | null;

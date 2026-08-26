@@ -120,6 +120,114 @@
   opacity: 0.4;
 }
 
+.admin-google-reviews__intro,
+.admin-google-reviews__connection p,
+.admin-google-reviews__candidate p,
+.admin-google-reviews__status {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-body-sm);
+  line-height: 1.5;
+}
+
+.admin-google-reviews__connection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--ming-success) 45%, var(--border));
+  border-radius: 0.5rem;
+  background: var(--ming-success-surface);
+}
+
+.admin-google-reviews__connection > div:first-child {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.admin-google-reviews__connection span {
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-caption);
+}
+
+.admin-google-reviews__actions,
+.admin-google-reviews__search-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-google-reviews__search {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-google-reviews__search-row .ming-input {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.admin-google-reviews__candidates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 0.75rem;
+}
+
+.admin-google-reviews__candidate {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--card);
+}
+
+.admin-google-reviews__candidate h3 {
+  margin: 0 0 0.35rem;
+  color: var(--foreground);
+  font-size: var(--admin-text-body);
+  font-weight: 600;
+}
+
+.admin-google-reviews__candidate small {
+  display: block;
+  margin-top: 0.65rem;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: var(--admin-text-caption);
+}
+
+.admin-google-reviews__google-attribution {
+  padding: 0.1rem 0.25rem;
+  border-radius: 0.15rem;
+  background: #fff;
+  color: #5e5e5e;
+  font-family: sans-serif;
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+
+.admin-google-reviews__candidate .admin-google-reviews__rating {
+  margin-top: 0.45rem;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.admin-google-reviews__disconnect {
+  color: var(--destructive);
+}
+
+.admin-google-reviews__toggle {
+  width: fit-content;
+}
+
 @media (max-width: 40rem) {
   .admin-schedule-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));

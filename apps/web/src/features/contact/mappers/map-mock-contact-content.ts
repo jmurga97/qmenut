@@ -4,6 +4,7 @@ import type { ContactContentViewModel } from "~/features/contact/types/contact-v
 export function mapMockContactContent(content: MockContactContent): ContactContentViewModel {
   return {
     form: content.form,
+    googleReviewsEnabled: false,
     locations: content.locations,
     mapSectionLabel: "Ubicaciones",
     messageSectionLabel: "Mensaje",

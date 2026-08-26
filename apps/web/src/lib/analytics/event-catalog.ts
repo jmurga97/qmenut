@@ -34,6 +34,8 @@ export interface AnalyticsEventPayloads {
   pwa_install_prompt_accepted: Record<string, never>;
   pwa_install_prompt_dismissed: Record<string, never>;
   pwa_installed: Record<string, never>;
+  google_reviews_cta_clicked: Record<string, never>;
+  google_reviews_loaded: { rating_count: number; review_count: number };
   /** Carga atribuible a un enlace QR (utm_source=qr); no equivale a escaneo ni visitante único. */
   qr_visit: Record<string, never>;
 }

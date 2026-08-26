@@ -17,6 +17,8 @@ export interface BranchSettings {
   whatsapp: string | null;
   socialLinksJson: string | null;
   logoUrl: string | null;
+  googlePlaceId: string | null;
+  googleReviewsEnabled: boolean;
   customDomain: string | null;
   dataProtectionEmail: string | null;
   legalAddress: string | null;
@@ -60,6 +62,8 @@ export async function getBranchSettings({
     whatsapp: branch.whatsapp,
     socialLinksJson: branch.socialLinksJson,
     logoUrl: branch.logoUrl,
+    googlePlaceId: branch.googlePlaceId,
+    googleReviewsEnabled: branch.googleReviewsEnabled,
     customDomain: branch.customDomain,
     dataProtectionEmail: restaurant.dataProtectionEmail,
     legalAddress: restaurant.legalAddress,

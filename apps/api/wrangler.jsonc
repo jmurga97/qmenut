@@ -41,6 +41,14 @@
       },
     },
     {
+      "name": "PUBLIC_REVIEWS_LIMITER",
+      "namespace_id": "1003",
+      "simple": {
+        "limit": 10,
+        "period": 60,
+      },
+    },
+    {
       "name": "LOYALTY_CODE_LIMITER",
       "namespace_id": "1001",
       "simple": {
@@ -106,6 +114,14 @@
           "namespace_id": "2002",
           "simple": {
             "limit": 30,
+            "period": 60,
+          },
+        },
+        {
+          "name": "PUBLIC_REVIEWS_LIMITER",
+          "namespace_id": "2003",
+          "simple": {
+            "limit": 10,
             "period": 60,
           },
         },
@@ -178,6 +194,14 @@
           "namespace_id": "1002",
           "simple": {
             "limit": 30,
+            "period": 60,
+          },
+        },
+        {
+          "name": "PUBLIC_REVIEWS_LIMITER",
+          "namespace_id": "1003",
+          "simple": {
+            "limit": 10,
             "period": 60,
           },
         },
