@@ -31,8 +31,8 @@ import type { RewardReturnRow } from "@qmenut/db/repositories/restaurant-analyti
 /**
  * Servicio interno de snapshots de analítica por restaurante. Agrupa el comportamiento
  * anónimo materializado desde PostHog y la fidelización calculada desde D1, compara el
- * periodo con los 15 días anteriores y deriva insights deterministas. El futuro endpoint
- * autenticado del admin debe reutilizar exactamente esta función.
+ * periodo con el periodo anterior y deriva insights deterministas. El endpoint autenticado
+ * del admin reutiliza exactamente esta función.
  */
 
 const TOP_DISHES_LIMIT = 10;

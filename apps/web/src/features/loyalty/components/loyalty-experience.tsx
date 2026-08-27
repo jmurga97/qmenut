@@ -8,9 +8,12 @@ import { useTranslation } from "react-i18next";
 import { useLoyaltyController } from "~/features/loyalty/hooks/use-loyalty-controller";
 
 import type { TFunction } from "i18next";
-import type { LoyaltyReward } from "~/features/loyalty/hooks/use-loyalty-controller";
+import type { LoyaltyController } from "~/features/loyalty/hooks/use-loyalty-controller";
+import type { LoyaltyReward } from "~/features/loyalty/types";
 
-type LoyaltyController = ReturnType<typeof useLoyaltyController>;
+type SignupController = Extract<LoyaltyController, { phase: "signup" }>;
+type RedemptionController = Extract<LoyaltyController, { phase: "redemption" }>;
+type CardController = Extract<LoyaltyController, { phase: "card" }>;
 
 function formatCountdown(milliseconds: number): string {
   const totalSeconds = Math.ceil(milliseconds / 1000);
@@ -19,43 +22,44 @@ function formatCountdown(milliseconds: number): string {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
+function assertNever(value: never): never {
+  throw new Error(`Unhandled loyalty phase: ${JSON.stringify(value)}`);
+}
+
 export function LoyaltyExperience({ restaurantName }: { restaurantName: string }) {
   const { t } = useTranslation();
   const loyalty = useLoyaltyController();
 
-  if (!loyalty.program || loyalty.program.rewards.length === 0) {
-    return (
-      <div className="public-route-content-stage" key="unavailable">
-        <UnavailableState />
-      </div>
-    );
+  switch (loyalty.phase) {
+    case "unavailable":
+      return (
+        <div className="public-route-content-stage" key="unavailable">
+          <UnavailableState />
+        </div>
+      );
+    case "loading":
+      return <div className="loyalty-loading" aria-label={t("loyalty.loading")} />;
+    case "signup":
+      return (
+        <div className="public-route-content-stage" key="signup">
+          <SignupState loyalty={loyalty} />
+        </div>
+      );
+    case "redemption":
+      return (
+        <div className="public-route-content-stage" key="redemption">
+          <RedemptionState loyalty={loyalty} />
+        </div>
+      );
+    case "card":
+      return (
+        <div className="public-route-content-stage" key="card">
+          <CardState loyalty={loyalty} restaurantName={restaurantName} />
+        </div>
+      );
+    default:
+      return assertNever(loyalty);
   }
-
-  if (!loyalty.hydrated || loyalty.cardLoading) {
-    return <div className="loyalty-loading" aria-label={t("loyalty.loading")} />;
-  }
-
-  if (!loyalty.card) {
-    return (
-      <div className="public-route-content-stage" key="signup">
-        <SignupState loyalty={loyalty} />
-      </div>
-    );
-  }
-
-  if (loyalty.redemption) {
-    return (
-      <div className="public-route-content-stage" key="redemption">
-        <RedemptionState loyalty={loyalty} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="public-route-content-stage" key="card">
-      <CardState loyalty={loyalty} restaurantName={restaurantName} />
-    </div>
-  );
 }
 
 function UnavailableState() {
@@ -69,24 +73,24 @@ function UnavailableState() {
   );
 }
 
-function SignupState({ loyalty }: { loyalty: LoyaltyController }) {
+function SignupState({ loyalty }: { loyalty: SignupController }) {
   const { t } = useTranslation();
-  const firstReward = loyalty.program?.rewards[0];
-  const submitLabel = t(loyalty.signupBusy ? "loyalty.signup.creating" : "loyalty.signup.submit");
+  const firstReward = loyalty.program.rewards[0];
+  const submitLabel = t(loyalty.signup.busy ? "loyalty.signup.creating" : "loyalty.signup.submit");
 
   return (
     <QmLoyaltySignup
       pitch={t("loyalty.signup.pitch", { count: firstReward?.cost ?? 0, reward: firstReward?.name ?? "" })}
       explainer={t("loyalty.signup.explainer")}
-      email={loyalty.email}
+      email={loyalty.signup.email}
       emailLabel={t("loyalty.signup.emailLabel")}
       emailPlaceholder={t("loyalty.signup.emailPlaceholder")}
       submitLabel={submitLabel}
       reassurance={t("loyalty.signup.reassurance")}
-      error={loyalty.signupError || loyalty.cardError}
-      busy={loyalty.signupBusy}
-      onQmInput={(event) => loyalty.setEmail(event.detail.email)}
-      onQmSubmit={(event) => void loyalty.submitEmail(event.detail.email)}
+      error={loyalty.signup.error}
+      busy={loyalty.signup.busy}
+      onQmInput={(event) => loyalty.signup.setEmail(event.detail.email)}
+      onQmSubmit={(event) => void loyalty.signup.submit(event.detail.email)}
     />
   );
 }
@@ -112,13 +116,12 @@ function redemptionCopy({ status, remainingMs, t }: RedemptionCopyInput) {
   return { title: t("loyalty.redeem.expiredTitle"), hint: "", countdown: "0:00", action: t("loyalty.redeem.return") };
 }
 
-function RedemptionState({ loyalty }: { loyalty: LoyaltyController }) {
+function RedemptionState({ loyalty }: { loyalty: RedemptionController }) {
   const { t } = useTranslation();
-  const redemption = loyalty.redemption;
-  if (!redemption) return null;
+  const redemption = loyalty.redemption.current;
   const copy = redemptionCopy({
     status: redemption.status,
-    remainingMs: loyalty.redemptionRemainingMs,
+    remainingMs: loyalty.redemption.remainingMs,
     t,
   });
 
@@ -132,59 +135,63 @@ function RedemptionState({ loyalty }: { loyalty: LoyaltyController }) {
       countdown={copy.countdown}
       cancelLabel={copy.action}
       retryLabel={copy.action}
-      onQmCancel={() => void loyalty.cancelRedemption()}
-      onQmRetry={() => void loyalty.retryRedemption()}
+      onQmCancel={() => void loyalty.redemption.cancel()}
+      onQmRetry={() => void loyalty.redemption.returnToCard()}
     />
   );
 }
 
-function CardState({ loyalty, restaurantName }: { loyalty: LoyaltyController; restaurantName: string }) {
+function CardState({ loyalty, restaurantName }: { loyalty: CardController; restaurantName: string }) {
   const { t } = useTranslation();
-  const card = loyalty.card;
-  if (!card) return null;
+  const card = loyalty.card.data;
   const balance = card.card.stampsBalance;
-  const filled = Math.min(balance, loyalty.target);
+  const filled = Math.min(balance, loyalty.card.target);
 
   return (
     <QmLoyaltyCard
       restaurantName={restaurantName}
       email={card.card.email}
       balance={balance}
-      target={loyalty.target}
-      animatedIndex={loyalty.animatedIndex}
+      target={loyalty.card.target}
+      animatedIndex={loyalty.stamp.animatedIndex}
       progressLabel={t("loyalty.card.progress")}
-      gridLabel={t("loyalty.card.gridLabel", { filled, total: loyalty.target })}
+      gridLabel={t("loyalty.card.gridLabel", { filled, total: loyalty.card.target })}
       stampLabel={t("loyalty.card.requestStamp")}
-      stampOpen={loyalty.stampOpen}
-      redeemed={loyalty.redeemedReward !== null}
+      stampOpen={loyalty.stamp.open}
+      redeemed={loyalty.card.redeemedReward !== null}
       redeemedLabel={t("loyalty.card.redeemed")}
-      redeemedReward={loyalty.redeemedReward ?? ""}
-      redeemedFooter={t("loyalty.card.redeemedFooter", { balance, total: loyalty.target })}
-      onQmStampRequest={() => loyalty.setStampOpen(true)}
+      redeemedReward={loyalty.card.redeemedReward ?? ""}
+      redeemedFooter={t("loyalty.card.redeemedFooter", { balance, total: loyalty.card.target })}
+      onQmStampRequest={loyalty.stamp.openPanel}
     >
-      {loyalty.stampOpen && <StampCode loyalty={loyalty} />}
+      {loyalty.stamp.open && <StampCode stamp={loyalty.stamp} />}
       {card.rewards.map((reward) => (
-        <RewardRow balance={balance} key={reward.id} reward={reward} onRedeem={() => void loyalty.redeem(reward)} />
+        <RewardRow
+          balance={balance}
+          key={reward.id}
+          reward={reward}
+          onRedeem={() => void loyalty.card.redeem(reward)}
+        />
       ))}
     </QmLoyaltyCard>
   );
 }
 
-function StampCode({ loyalty }: { loyalty: LoyaltyController }) {
+function StampCode({ stamp }: { stamp: CardController["stamp"] }) {
   const { t } = useTranslation();
   return (
     <QmCodeInput
       slot="stamp-panel"
-      value={loyalty.code}
-      status={loyalty.codeStatus}
+      value={stamp.code}
+      status={stamp.status}
       title={t("loyalty.code.title")}
       hint={t("loyalty.code.hint")}
       footnote={t("loyalty.code.footnote")}
-      message={loyalty.codeMessage}
+      message={stamp.message}
       inputLabel={t("loyalty.code.inputLabel")}
-      disabled={loyalty.codeStatus === "throttled"}
-      onQmInput={(event) => loyalty.setCode(event.detail.value)}
-      onQmComplete={(event) => void loyalty.submitCode(event.detail.value)}
+      disabled={stamp.status === "throttled"}
+      onQmInput={(event) => stamp.changeCode(event.detail.value)}
+      onQmComplete={(event) => void stamp.submit(event.detail.value)}
     />
   );
 }

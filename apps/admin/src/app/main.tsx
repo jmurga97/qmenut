@@ -18,6 +18,7 @@ import "../shared/components/forms/styles.css";
 import "../shared/components/metrics/styles.css";
 import "../shared/images/styles.css";
 import "../features/auth/styles.css";
+import "../features/analytics/styles.css";
 import "../features/branch/styles.css";
 import "../features/dashboard/styles.css";
 import "../features/languages/styles.css";

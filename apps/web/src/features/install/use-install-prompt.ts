@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 
 import { track } from "~/lib/analytics/posthog";
 
@@ -22,6 +22,7 @@ export type InstallMode = "hidden" | "ios-instructions" | "prompt";
 
 const DISMISSED_STORAGE_KEY = "qm-install-dismissed";
 const SERVER_SNAPSHOT: InstallPromptSnapshot = { canPrompt: false, installed: false };
+const SERVER_ENVIRONMENT: InstallEnvironment | undefined = undefined;
 const listeners = new Set<() => void>();
 const promptState: {
   captureInitialized: boolean;
@@ -34,6 +35,15 @@ const promptState: {
   shownTracked: false,
   snapshot: SERVER_SNAPSHOT,
 };
+const environmentStore: {
+  initialized: boolean;
+  snapshot: InstallEnvironment | undefined;
+  listeners: Set<() => void>;
+} = {
+  initialized: false,
+  snapshot: undefined,
+  listeners: new Set(),
+};
 
 function publish(snapshot: InstallPromptSnapshot): void {
   promptState.snapshot = snapshot;
@@ -41,6 +51,62 @@ function publish(snapshot: InstallPromptSnapshot): void {
   for (const listener of listeners) {
     listener();
   }
+}
+
+function publishEnvironment(next: InstallEnvironment): void {
+  const current = environmentStore.snapshot;
+
+  if (current?.dismissed === next.dismissed && current?.ios === next.ios && current?.standalone === next.standalone) {
+    return;
+  }
+
+  environmentStore.snapshot = next;
+
+  for (const listener of environmentStore.listeners) {
+    listener();
+  }
+}
+
+function refreshEnvironment(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  publishEnvironment({
+    dismissed: readDismissed(),
+    ios: isIos(),
+    standalone: isStandalone(),
+  });
+}
+
+function initializeEnvironmentStore(): void {
+  if (environmentStore.initialized || typeof window === "undefined") {
+    return;
+  }
+
+  environmentStore.initialized = true;
+
+  const displayModeQuery = window.matchMedia("(display-mode: standalone)");
+
+  displayModeQuery.addEventListener("change", refreshEnvironment);
+  window.addEventListener("pageshow", refreshEnvironment);
+
+  refreshEnvironment();
+}
+
+function subscribeEnvironment(listener: () => void): () => void {
+  environmentStore.listeners.add(listener);
+  initializeEnvironmentStore();
+
+  return () => environmentStore.listeners.delete(listener);
+}
+
+function getEnvironmentSnapshot(): InstallEnvironment | undefined {
+  return environmentStore.snapshot;
+}
+
+function getServerEnvironmentSnapshot(): InstallEnvironment | undefined {
+  return SERVER_ENVIRONMENT;
 }
 
 export function initInstallPromptCapture(): void {
@@ -60,6 +126,7 @@ export function initInstallPromptCapture(): void {
     promptState.deferredPrompt = null;
     track("pwa_installed");
     publish({ canPrompt: false, installed: true });
+    refreshEnvironment();
   });
 }
 
@@ -134,12 +201,8 @@ export function useInstallPrompt(): UseInstallPromptResult {
     () => promptState.snapshot,
     () => SERVER_SNAPSHOT,
   );
-  const [environment, setEnvironment] = useState<InstallEnvironment>();
+  const environment = useSyncExternalStore(subscribeEnvironment, getEnvironmentSnapshot, getServerEnvironmentSnapshot);
   const mode = resolveMode(snapshot, environment);
-
-  useEffect(() => {
-    setEnvironment({ dismissed: readDismissed(), ios: isIos(), standalone: isStandalone() });
-  }, []);
 
   useEffect(() => {
     if (mode === "hidden" || promptState.shownTracked) {
@@ -158,7 +221,11 @@ export function useInstallPrompt(): UseInstallPromptResult {
     }
 
     track("pwa_install_card_dismissed");
-    setEnvironment((current) => current && { ...current, dismissed: true });
+    publishEnvironment({
+      dismissed: true,
+      ios: environmentStore.snapshot?.ios ?? isIos(),
+      standalone: environmentStore.snapshot?.standalone ?? isStandalone(),
+    });
   }, []);
 
   const install = useCallback(() => {

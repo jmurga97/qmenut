@@ -4,6 +4,7 @@
  * query/mutation factories so cache keys stay shared with their owning features.
  */
 export { getBillingOverviewQueryOptions } from "~/features/billing/api";
+export { getAnalyticsSnapshotQueryOptions } from "~/features/analytics/api";
 export {
   getLanguageCatalogQueryOptions,
   getLanguagesQueryOptions,

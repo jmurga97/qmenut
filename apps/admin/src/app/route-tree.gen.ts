@@ -21,6 +21,7 @@ import { Route as AuthLoyaltyRouteImport } from './routes/_auth.loyalty'
 import { Route as AuthLanguagesRouteImport } from './routes/_auth.languages'
 import { Route as AuthBranchRouteImport } from './routes/_auth.branch'
 import { Route as AuthBillingRouteImport } from './routes/_auth.billing'
+import { Route as AuthAnalyticsRouteImport } from './routes/_auth.analytics'
 import { Route as AuthPromotionsIndexRouteImport } from './routes/_auth.promotions.index'
 import { Route as AuthMenuIndexRouteImport } from './routes/_auth.menu.index'
 import { Route as AuthLoyaltyIndexRouteImport } from './routes/_auth.loyalty.index'
@@ -92,6 +93,11 @@ const AuthBranchRoute = AuthBranchRouteImport.update({
 const AuthBillingRoute = AuthBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthAnalyticsRoute = AuthAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthPromotionsIndexRoute = AuthPromotionsIndexRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
   '/login': typeof LoginRoute
   '/select-restaurant': typeof SelectRestaurantRoute
+  '/analytics': typeof AuthAnalyticsRoute
   '/billing': typeof AuthBillingRoute
   '/branch': typeof AuthBranchRoute
   '/languages': typeof AuthLanguagesRouteWithChildren
@@ -192,6 +199,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/select-restaurant': typeof SelectRestaurantRoute
+  '/analytics': typeof AuthAnalyticsRoute
   '/billing': typeof AuthBillingRoute
   '/branch': typeof AuthBranchRoute
   '/qr': typeof AuthQrRoute
@@ -216,6 +224,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
   '/select-restaurant': typeof SelectRestaurantRoute
+  '/_auth/analytics': typeof AuthAnalyticsRoute
   '/_auth/billing': typeof AuthBillingRoute
   '/_auth/branch': typeof AuthBranchRoute
   '/_auth/languages': typeof AuthLanguagesRouteWithChildren
@@ -245,6 +254,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/select-restaurant'
+    | '/analytics'
     | '/billing'
     | '/branch'
     | '/languages'
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/select-restaurant'
+    | '/analytics'
     | '/billing'
     | '/branch'
     | '/qr'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/login'
     | '/select-restaurant'
+    | '/_auth/analytics'
     | '/_auth/billing'
     | '/_auth/branch'
     | '/_auth/languages'
@@ -407,6 +419,13 @@ declare module '@tanstack/react-router' {
       path: '/billing'
       fullPath: '/billing'
       preLoaderRoute: typeof AuthBillingRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/analytics': {
+      id: '/_auth/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AuthAnalyticsRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/promotions/': {
@@ -570,6 +589,7 @@ const AuthPromotionsRouteWithChildren = AuthPromotionsRoute._addFileChildren(
 )
 
 interface AuthRouteChildren {
+  AuthAnalyticsRoute: typeof AuthAnalyticsRoute
   AuthBillingRoute: typeof AuthBillingRoute
   AuthBranchRoute: typeof AuthBranchRoute
   AuthLanguagesRoute: typeof AuthLanguagesRouteWithChildren
@@ -582,6 +602,7 @@ interface AuthRouteChildren {
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthAnalyticsRoute: AuthAnalyticsRoute,
   AuthBillingRoute: AuthBillingRoute,
   AuthBranchRoute: AuthBranchRoute,
   AuthLanguagesRoute: AuthLanguagesRouteWithChildren,

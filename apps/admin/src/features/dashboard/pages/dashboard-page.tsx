@@ -7,6 +7,7 @@ import { PageHeader } from "~/shared/components/page-header";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 
+import { AnalyticsPulseCard } from "../components/analytics-pulse-card";
 import { AttentionPanel } from "../components/attention-panel";
 import { AvailabilityCard } from "../components/availability-card";
 import { PendingRedemptionsCard } from "../components/pending-redemptions-card";
@@ -34,6 +35,7 @@ export function DashboardPage() {
           <AttentionPanel />
         </div>
       ) : null}
+      {canInsights ? <AnalyticsPulseCard /> : null}
       {canInsights || canOperate ? (
         <div className="admin-dashboard-bottom">
           {canInsights ? <VisitsChartCard /> : null}

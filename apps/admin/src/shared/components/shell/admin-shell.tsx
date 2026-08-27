@@ -30,6 +30,14 @@ interface Section {
 
 const SECTIONS = [
   { group: "operations", icon: "overview", id: "overview", label: "Resumen", path: "/" },
+  {
+    group: "operations",
+    icon: "analytics",
+    id: "analytics",
+    label: "Analítica",
+    path: "/analytics",
+    permission: "loyalty.insights",
+  },
   { group: "operations", icon: "menu", id: "menu", label: "Menú", path: "/menu" },
   {
     group: "operations",

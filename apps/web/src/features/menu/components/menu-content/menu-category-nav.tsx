@@ -16,6 +16,11 @@ interface MenuCategoryNavProps {
   sections: MenuSectionViewModel[];
 }
 
+interface ActiveCategoryState {
+  sections: MenuSectionViewModel[];
+  id: string;
+}
+
 function scrollToMenuSection(index: number): void {
   const target = document.querySelector(`#${menuSectionElementId(index)}`);
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -28,14 +33,17 @@ function scrollToMenuSection(index: number): void {
 
 export function MenuCategoryNav({ scrollContainerRef, sections }: MenuCategoryNavProps) {
   const { t } = useTranslation();
-  const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
+  const [activeCategory, setActiveCategory] = useState<ActiveCategoryState>(() => ({
+    sections,
+    id: sections[0]?.id ?? "",
+  }));
+  const activeId = activeCategory.sections === sections ? activeCategory.id : (sections[0]?.id ?? "");
   // Empieza en 0: la primera sección es visible al aterrizar y no cuenta como navegación.
   const deepestIndexRef = useRef(0);
 
   useEffect(() => {
-    setActiveId(sections[0]?.id ?? "");
     deepestIndexRef.current = 0;
-  }, [sections]);
+  }, [scrollContainerRef, sections]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -59,7 +67,16 @@ export function MenuCategoryNav({ scrollContainerRef, sections }: MenuCategoryNa
 
       if (!nextId) return;
 
-      setActiveId((currentId) => (currentId === nextId ? currentId : nextId));
+      setActiveCategory((current) => {
+        if (current.sections === sections && current.id === nextId) {
+          return current;
+        }
+
+        return {
+          sections,
+          id: nextId,
+        };
+      });
 
       // Profundidad máxima alcanzada: un solo evento por categoría, solo al avanzar.
       const activeIndex = activeTarget ? targets.indexOf(activeTarget) : -1;
@@ -94,7 +111,7 @@ export function MenuCategoryNav({ scrollContainerRef, sections }: MenuCategoryNa
     }
 
     container.addEventListener("scroll", scheduleActiveCategoryUpdate, { passive: true });
-    updateActiveCategory();
+    scheduleActiveCategoryUpdate();
 
     return () => {
       container.removeEventListener("scroll", scheduleActiveCategoryUpdate);

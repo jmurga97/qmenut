@@ -39,6 +39,7 @@ export const Route = createFileRoute("/_auth/")({
     if (can(roleCode, "loyalty.insights")) {
       const range = getVisitsRange(deps.period);
       jobs.push(
+        queryClient.ensureQueryData(api.getAnalyticsSnapshotQueryOptions({ period: "15d", trpc })),
         queryClient.ensureQueryData(api.getLoyaltySummaryQueryOptions({ trpc })),
         queryClient.ensureQueryData(api.getLoyaltyVisitsQueryOptions({ ...range, trpc })),
       );
