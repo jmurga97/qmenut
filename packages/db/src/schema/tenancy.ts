@@ -22,6 +22,7 @@ export const restaurants = sqliteTable(
   {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
+    countryCode: text("country_code").notNull().default("ESP"),
     defaultLanguageCode: text("default_language_code").notNull().default("es"),
     defaultCurrency: text("default_currency").notNull().default("EUR"),
     timezone: text("timezone").notNull().default("Europe/Madrid"),

@@ -19,6 +19,8 @@ recursos y Workers seleccionados por cada ambiente.
 ## 1. Datos del restaurante
 
 - [ ] Nombre comercial → `restaurant.name`
+- [ ] País como código ISO 3166-1 alpha-3 en mayúsculas (por ejemplo, ESP o VEN) →
+      `restaurant.countryCode`
 - [ ] Idioma principal de la carta (es, en, …) → `restaurant.defaultLanguageCode`
 - [ ] Otros idiomas de la carta → `restaurant.languages`
 - [ ] Moneda; EUR salvo excepción → `restaurant.defaultCurrency`

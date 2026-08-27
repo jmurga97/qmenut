@@ -6,6 +6,7 @@ import type { DrizzleDb } from "../client";
 import type { BatchItem } from "drizzle-orm/batch";
 
 export interface RestaurantSummary {
+  countryCode: string;
   dataProtectionEmail: string | null;
   defaultCurrency: string;
   defaultLanguageCode: string;
@@ -30,6 +31,7 @@ export async function getRestaurantById({
     .select({
       id: restaurants.id,
       name: restaurants.name,
+      countryCode: restaurants.countryCode,
       defaultLanguageCode: restaurants.defaultLanguageCode,
       defaultCurrency: restaurants.defaultCurrency,
       dataProtectionEmail: restaurants.dataProtectionEmail,
