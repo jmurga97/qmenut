@@ -8,6 +8,7 @@ import { getEnvString } from "~/lib/env";
 import { serveWithEdgeCache } from "~/server/edge-cache";
 
 const LOCAL_API_ORIGIN = "http://localhost:8787";
+const NO_INDEX_ROBOTS_HEADER = "noindex, nofollow";
 
 function resolveApiProxyUrl(request: Request): URL {
   const configuredOrigin = getEnvString("VITE_API_BASE_URL") ?? LOCAL_API_ORIGIN;
@@ -22,6 +23,21 @@ function proxyTrpcRequest(request: Request, env: Cloudflare.Env): Promise<Respon
   }
 
   return fetch(new Request(resolveApiProxyUrl(request), request));
+}
+
+function applyRobotsPolicy(response: Response, allowIndexing: boolean): Response {
+  if (allowIndexing) {
+    return response;
+  }
+
+  const headers = new Headers(response.headers);
+  headers.set("X-Robots-Tag", NO_INDEX_ROBOTS_HEADER);
+
+  return new Response(response.body, {
+    headers,
+    status: response.status,
+    statusText: response.statusText,
+  });
 }
 
 export default Sentry.withSentry<Cloudflare.Env>(
@@ -39,7 +55,7 @@ export default Sentry.withSentry<Cloudflare.Env>(
     // eslint-disable-next-line max-params
     async fetch(request, env, ctx) {
       if (new URL(request.url).pathname.startsWith("/trpc")) {
-        return proxyTrpcRequest(request, env);
+        return applyRobotsPolicy(await proxyTrpcRequest(request, env), env.ALLOW_INDEXING === "true");
       }
 
       const response = await serveWithEdgeCache({
@@ -56,7 +72,7 @@ export default Sentry.withSentry<Cloudflare.Env>(
         });
       }
 
-      return response;
+      return applyRobotsPolicy(response, env.ALLOW_INDEXING === "true");
     },
   },
 );

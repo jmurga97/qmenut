@@ -2,14 +2,15 @@ import { expect, test } from "../../fixtures/test";
 
 const ROUTE_PATHS = ["/", "/contacto", "/destacados", "/puntos", "/aviso-legal", "/privacidad"];
 
-test("serves host-specific robots and a complete localized sitemap through the edge cache", async ({ request }) => {
+test("serves a development-wide noindex policy and localized sitemap through the edge cache", async ({ request }) => {
   const cacheKey = Date.now();
   const robotsUrl = `http://fine.localhost:4011/robots.txt?seo=${cacheKey}`;
   const firstRobots = await request.get(robotsUrl);
   const robotsBody = await firstRobots.text();
 
   expect(firstRobots.ok(), robotsBody).toBe(true);
-  expect(robotsBody).toContain("Sitemap: https://fine.localhost/sitemap.xml");
+  expect(robotsBody).toBe("User-agent: *\nDisallow: /\n");
+  expect(firstRobots.headers()["x-robots-tag"]).toBe("noindex, nofollow");
   expect(firstRobots.headers()["x-qmenut-cache"]).toBe("MISS");
   expect((await request.get(robotsUrl)).headers()["x-qmenut-cache"]).toBe("HIT");
 
@@ -19,6 +20,7 @@ test("serves host-specific robots and a complete localized sitemap through the e
 
   expect(firstSitemap.ok(), sitemap).toBe(true);
   expect(firstSitemap.headers()["content-type"]).toContain("application/xml");
+  expect(firstSitemap.headers()["x-robots-tag"]).toBe("noindex, nofollow");
   expect(firstSitemap.headers()["x-qmenut-cache"]).toBe("MISS");
   expect((sitemap.match(/<url>/g) ?? []).length).toBe(ROUTE_PATHS.length);
   for (const path of ROUTE_PATHS) {
@@ -30,8 +32,10 @@ test("serves host-specific robots and a complete localized sitemap through the e
 });
 
 test("renders JSON-LD and language alternates on the menu root", async ({ page }) => {
-  await page.goto("/");
+  const response = await page.goto("/");
 
+  expect(response?.headers()["x-robots-tag"]).toBe("noindex, nofollow");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex,nofollow");
   await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(1);
   await expect(page.locator('link[rel="alternate"][hreflang="es"]')).toHaveCount(1);
   await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveCount(1);

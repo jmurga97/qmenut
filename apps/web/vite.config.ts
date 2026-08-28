@@ -13,6 +13,7 @@ const SSR_NODE_CONDITIONS = ["node", "module", "import", "default"];
 // Deployed dev-worker builds share the PostHog project with production; bake an empty key
 // so analytics compiles out entirely and dev traffic never pollutes real data.
 const isDevWorkerBuild = process.env.CLOUDFLARE_ENV === "development";
+const allowIndexing = process.env.CLOUDFLARE_ENV === "production";
 
 function ssrNodeConditions(): Plugin {
   return {
@@ -43,7 +44,10 @@ function ssrNodeConditions(): Plugin {
 }
 
 export default defineConfig({
-  define: isDevWorkerBuild ? { "import.meta.env.VITE_POSTHOG_KEY": JSON.stringify("") } : undefined,
+  define: {
+    "import.meta.env.VITE_ALLOW_INDEXING": JSON.stringify(String(allowIndexing)),
+    ...(isDevWorkerBuild ? { "import.meta.env.VITE_POSTHOG_KEY": JSON.stringify("") } : {}),
+  },
   plugins: [
     cloudflare({
       viteEnvironment: { name: "ssr" },

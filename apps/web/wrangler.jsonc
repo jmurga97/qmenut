@@ -28,6 +28,7 @@
     },
   ],
   "vars": {
+    "ALLOW_INDEXING": "false",
     "SENTRY_DSN": "",
   },
   "observability": {
@@ -58,6 +59,7 @@
         },
       ],
       "vars": {
+        "ALLOW_INDEXING": "false",
         "DISABLE_EDGE_CACHE": "true",
         "SENTRY_DSN": "https://69120b8a5d45193dac3ca3acb95fce42@o4511851717394432.ingest.de.sentry.io/4511869342777424",
       },
@@ -80,6 +82,7 @@
         },
       ],
       "vars": {
+        "ALLOW_INDEXING": "true",
         "SENTRY_DSN": "https://69120b8a5d45193dac3ca3acb95fce42@o4511851717394432.ingest.de.sentry.io/4511869342777424",
       },
       "observability": {

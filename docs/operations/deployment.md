@@ -126,7 +126,9 @@ Then open `https://admin.dev.qmenut.app` and sign in with a provisioned email; t
 prefills the development OTP `000000`. Open
 `https://dev.qmenut.app` to verify the seeded public menu and theme. Confirm that the
 development D1 and KV IDs are used by the deployed Workers and that production IDs and
-secrets remain unchanged.
+secrets remain unchanged. The web Worker is globally non-indexable in development:
+`ALLOW_INDEXING=false` adds `X-Robots-Tag: noindex, nofollow`, the HTML contains a `noindex`
+meta tag, and `/robots.txt` returns `Disallow: /` for every tenant.
 
 ## Before you begin
 

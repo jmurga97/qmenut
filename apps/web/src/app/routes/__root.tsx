@@ -4,6 +4,7 @@ import { I18nextProvider } from "react-i18next";
 import { FONT_CSS_URLS, getFontPreloadUrl, resolveTenantFontIds } from "~/app/fonts/font-css";
 import appCss from "~/app/styles.css?url";
 import { DEFAULT_LOCALE } from "~/lib/i18n/create-i18n";
+import { ROBOTS_META_CONTENT } from "~/lib/robots";
 import { getCachedTenantContext } from "~/server/tenant-theme";
 
 import type { ReactNode } from "react";
@@ -57,7 +58,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
         // Required for the bottom navigation's safe-area insets in standalone mode.
         { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "robots", content: "index,follow,max-image-preview:large" },
+        { name: "robots", content: ROBOTS_META_CONTENT },
         { name: "theme-color", content: theme.primary },
         { name: "mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-capable", content: "yes" },

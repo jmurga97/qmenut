@@ -74,6 +74,12 @@ description, canonical URL, Open Graph metadata and image, `og:locale:alternate`
 links, and optional JSON-LD. A route with no tenant loader data emits `noindex` instead of
 advertising an empty tenant.
 
+Indexing is controlled at Worker-environment level, never in tenant data. `ALLOW_INDEXING`
+is false by default and in development, and true only in production. The Vite build bakes
+the matching root `robots` meta tag into the HTML; the Worker adds `X-Robots-Tag: noindex,
+nofollow` after the cache/proxy layer in non-indexable environments. Development's
+`robots.txt` responds with `Disallow: /` for every tenant and does not advertise a sitemap.
+
 The related helpers are:
 
 - `build-hreflang-alternates.ts` emits only the tenant's active languages plus
@@ -81,7 +87,8 @@ The related helpers are:
 - `build-restaurant-json-ld.ts` emits the restaurant, its address, hours, images, menu
   sections, dishes, and prices.
 - `build-promotions-json-ld.ts` emits promotions as schema.org offers.
-- `robots[.]txt.ts` emits the crawler policy and a host-specific sitemap URL.
+- `robots[.]txt.ts` emits the production crawler policy and host-specific sitemap URL, or a
+  global restrictive policy in development.
 - `sitemap[.]xml.ts` emits localized alternates for every public route. Its `lastmod`
   value reads `menuVersion:{host}`, the same KV version used in the edge-cache key.
 
