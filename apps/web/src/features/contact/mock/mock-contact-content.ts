@@ -9,13 +9,6 @@ export interface MockContactContent {
   subtitle: string;
   mapLabel: string;
   locations: MockContactLocation[];
-  form: {
-    nameLabel: string;
-    namePlaceholder: string;
-    messageLabel: string;
-    messagePlaceholder: string;
-    submitLabel: string;
-  };
 }
 
 export const MOCK_CONTACT_CONTENT: MockContactContent = {
@@ -34,11 +27,4 @@ export const MOCK_CONTACT_CONTENT: MockContactContent = {
       status: "23:30",
     },
   ],
-  form: {
-    nameLabel: "Nombre",
-    namePlaceholder: "Nombre",
-    messageLabel: "Mensaje",
-    messagePlaceholder: "Mensaje",
-    submitLabel: "Enviar",
-  },
 };

@@ -15,7 +15,6 @@ La plataforma **QMenut** ({{operatorLegalName}}, NIF {{operatorLegalTaxId}}) pre
 
 ## 3. Datos que se tratan y finalidades
 
-- **Formulario de contacto:** el nombre y el mensaje que decidas enviar se utilizan únicamente para atender tu consulta.
 - **Datos técnicos de conexión:** la dirección IP y datos básicos del navegador se procesan de forma transitoria para servir la página de forma segura (prevención de abuso, registro de errores). No se usan para elaborar perfiles.
 - **Reseñas de Google (cuando se activen):** las reseñas públicas se solicitan a Google al acercarte a esa sección. QMenut no guarda su contenido. La dirección IP se utiliza de forma transitoria para limitar solicitudes abusivas, sin crear perfiles.
 - **Programa de fidelidad (cuando se active):** si el establecimiento activa su programa de puntos y decides participar, se tratarán tu email, nombre y fecha de nacimiento para gestionar tus puntos y ventajas. Se informará de ello en el momento del registro.
@@ -26,7 +25,6 @@ Para conocer qué platos y secciones despiertan más interés se utiliza **PostH
 
 ## 5. Base jurídica
 
-- Formulario de contacto: consentimiento del interesado (art. 6.1.a RGPD).
 - Datos técnicos y analítica anónima: interés legítimo en la seguridad y mejora del servicio (art. 6.1.f RGPD).
 - Carga de reseñas públicas de Google: interés legítimo en informar sobre la reputación pública del establecimiento (art. 6.1.f RGPD).
 - Programa de fidelidad: ejecución de la relación con el participante (art. 6.1.b RGPD).
@@ -47,7 +45,7 @@ Las reseñas se obtienen desde el servidor y no se guardan en la carta digital. 
 
 ## 7. Conservación
 
-Los mensajes de contacto se conservan el tiempo necesario para atender la consulta. El identificador usado para limitar solicitudes de reseñas se conserva únicamente durante la ventana técnica del límite de uso. Los datos del programa de fidelidad se conservan mientras dure la participación o hasta que solicites la baja.
+El identificador usado para limitar solicitudes de reseñas se conserva únicamente durante la ventana técnica del límite de uso. Los datos del programa de fidelidad se conservan mientras dure la participación o hasta que solicites la baja.
 
 ## 8. Derechos
 

@@ -15,7 +15,6 @@ The **QMenut** platform ({{operatorLegalName}}, tax ID {{operatorLegalTaxId}}) p
 
 ## 3. Data processed and purposes
 
-- **Contact form:** the name and message you choose to send are used only to respond to your enquiry.
 - **Technical connection data:** the IP address and basic browser data are processed temporarily to serve the page securely (abuse prevention and error logging). They are not used to create profiles.
 - **Google reviews (when enabled):** public reviews are requested from Google when you approach that section. QMenut does not store their content. The IP address is used transiently to limit abusive requests, without creating profiles.
 - **Loyalty programme (when enabled):** if the establishment enables its points programme and you choose to participate, your email, name, and date of birth will be processed to manage your points and benefits. You will be informed when you register.
@@ -26,7 +25,6 @@ To understand which dishes and sections attract the most interest, **PostHog** (
 
 ## 5. Legal basis
 
-- Contact form: consent of the data subject (Article 6(1)(a) GDPR).
 - Technical data and anonymous analytics: legitimate interest in security and service improvement (Article 6(1)(f) GDPR).
 - Loading public Google reviews: legitimate interest in providing information about the establishment’s public reputation (Article 6(1)(f) GDPR).
 - Loyalty programme: performance of the relationship with the participant (Article 6(1)(b) GDPR).
@@ -47,7 +45,7 @@ Reviews are fetched by the server and are not stored in the digital menu. If you
 
 ## 7. Retention
 
-Contact messages are kept for as long as necessary to handle the enquiry. The identifier used to rate-limit review requests is retained only for the technical rate-limit window. Loyalty-programme data is kept while you participate or until you request removal.
+The identifier used to rate-limit review requests is retained only for the technical rate-limit window. Loyalty-programme data is kept while you participate or until you request removal.
 
 ## 8. Your rights
 

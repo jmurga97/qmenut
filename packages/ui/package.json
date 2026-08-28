@@ -212,14 +212,6 @@
       "types": "./src/components/molecules/qm-stamp-grid/index.ts",
       "import": "./src/components/molecules/qm-stamp-grid/index.ts"
     },
-    "./components/qm-field-group": {
-      "types": "./src/components/molecules/qm-field-group/index.ts",
-      "import": "./src/components/molecules/qm-field-group/index.ts"
-    },
-    "./components/qm-field-group/react": {
-      "types": "./src/components/molecules/qm-field-group/react.ts",
-      "import": "./src/components/molecules/qm-field-group/react.ts"
-    },
     "./components/qm-hero-header": {
       "types": "./src/components/organisms/qm-hero-header/index.ts",
       "import": "./src/components/organisms/qm-hero-header/index.ts"

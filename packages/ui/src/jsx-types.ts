@@ -20,7 +20,6 @@ import type { QmCategoryNav, QmCategoryNavArgs } from "./components/molecules/qm
 import type { QmCodeInput, QmCodeInputArgs } from "./components/molecules/qm-code-input";
 import type { QmDishRow, QmDishRowArgs } from "./components/molecules/qm-dish-row";
 import type { QmFeatured, QmFeaturedArgs } from "./components/molecules/qm-featured";
-import type { QmFieldGroup, QmFieldGroupArgs } from "./components/molecules/qm-field-group";
 import type { QmLocation, QmLocationArgs } from "./components/molecules/qm-location";
 import type { QmMap, QmMapArgs } from "./components/molecules/qm-map";
 import type { QmPromo, QmPromoArgs } from "./components/molecules/qm-promo";
@@ -86,7 +85,6 @@ declare module "react/jsx-runtime" {
       "qm-category-nav": GenericWebComponent<QmCategoryNavArgs, QmCategoryNav>;
       "qm-dish-row": GenericWebComponent<QmDishRowArgs, QmDishRow>;
       "qm-featured": GenericWebComponent<QmFeaturedArgs, QmFeatured>;
-      "qm-field-group": GenericWebComponent<QmFieldGroupArgs, QmFieldGroup>;
       "qm-location": GenericWebComponent<QmLocationArgs, QmLocation>;
       "qm-map": GenericWebComponent<QmMapArgs, QmMap>;
       "qm-code-input": GenericWebComponent<QmCodeInputArgs, QmCodeInput>;

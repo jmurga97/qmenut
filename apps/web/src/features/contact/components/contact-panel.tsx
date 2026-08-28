@@ -10,12 +10,9 @@ import type { ContactContentViewModel } from "~/features/contact/types/contact-v
 interface ContactPanelProps {
   content: ContactContentViewModel;
   hostRef: RefObject<HTMLDivElement | null>;
-  messageValue: string;
-  nameValue: string;
-  submitLabel: string;
 }
 
-export function ContactPanel({ content, hostRef, messageValue, nameValue, submitLabel }: ContactPanelProps) {
+export function ContactPanel({ content, hostRef }: ContactPanelProps) {
   useContactActionTracking(hostRef);
 
   return (
@@ -25,17 +22,9 @@ export function ContactPanel({ content, hostRef, messageValue, nameValue, submit
           map: content.map,
           ubicacionLabel: content.mapSectionLabel,
           sedesLabel: content.sitesSectionLabel,
-          mensajeLabel: content.messageSectionLabel,
-          nameLabel: content.form.nameLabel,
-          namePlaceholder: content.form.namePlaceholder,
-          messageLabel: content.form.messageLabel,
-          messagePlaceholder: content.form.messagePlaceholder,
           socialLinks: content.socialLinks,
           socialLinksLabel: content.socialLinksLabel,
         }}
-        nameValue={nameValue}
-        messageValue={messageValue}
-        submitLabel={submitLabel}
       >
         {content.locations.map((location) => (
           <QmLocation key={location.id ?? location.name} slot="sedes" value={location} />

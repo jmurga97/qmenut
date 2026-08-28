@@ -5,7 +5,6 @@ import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
 import { defineQmSectionNum } from "../../atoms/qm-section-num";
-import { defineQmFieldGroup } from "../../molecules/qm-field-group";
 import { defineQmLocation } from "../../molecules/qm-location";
 import { defineQmMap } from "../../molecules/qm-map";
 import { defineQmSocialLinks } from "../../molecules/qm-social-links";
@@ -18,21 +17,15 @@ export const QM_CONTACT_PANEL_TAG_NAME = "qm-contact-panel";
 
 const componentStyles = createComponentStyles(componentStylesText);
 
-/** Public contact body with an optional immersive map, branch cards, message form, and trailing content slot. */
+/** Public contact body with an optional immersive map, branch cards, social links, and trailing content slot. */
 export interface QmContactPanelValue {
   ubicacionNum?: string;
   ubicacionLabel?: string;
   sedesNum?: string;
   sedesLabel?: string;
-  mensajeNum?: string;
-  mensajeLabel?: string;
   map?: QmMapValue;
   socialLinks?: QmSocialLink[];
   socialLinksLabel?: string;
-  nameLabel?: string;
-  namePlaceholder?: string;
-  messageLabel?: string;
-  messagePlaceholder?: string;
 }
 
 export class QmContactPanel extends LitElement {
@@ -40,18 +33,6 @@ export class QmContactPanel extends LitElement {
 
   @property({ attribute: false })
   value?: QmContactPanelValue;
-
-  @property({ type: String, attribute: "name-value" })
-  nameValue = "";
-
-  @property({ type: String, attribute: "message-value" })
-  messageValue = "";
-
-  @property({ type: String, attribute: "submit-label" })
-  submitLabel = "Enviar";
-
-  @property({ type: Boolean, reflect: true })
-  disabled = false;
 
   private renderUbicacion(): TemplateResult {
     if (!this.value?.map?.markers.length) return html``;
@@ -91,35 +72,10 @@ export class QmContactPanel extends LitElement {
     `;
   }
 
-  private renderMensaje(num: string): TemplateResult {
-    return html`
-      <section part="mensaje" class="section">
-        <qm-section-num
-          part="mensaje-header"
-          .num=${this.value?.mensajeNum ?? num}
-          .label=${this.value?.mensajeLabel ?? "Mensaje"}
-        ></qm-section-num>
-        <qm-field-group
-          part="form"
-          .nameLabel=${this.value?.nameLabel ?? "Nombre"}
-          .nameValue=${this.nameValue}
-          .namePlaceholder=${this.value?.namePlaceholder ?? ""}
-          .messageLabel=${this.value?.messageLabel ?? "Mensaje"}
-          .messageValue=${this.messageValue}
-          .messagePlaceholder=${this.value?.messagePlaceholder ?? ""}
-          .submitLabel=${this.submitLabel}
-          ?disabled=${this.disabled}
-        ></qm-field-group>
-      </section>
-    `;
-  }
-
   render() {
     const hasMap = Boolean(this.value?.map?.markers.length);
     return html`
-      ${this.renderUbicacion()}${this.renderSocialLinks()}${this.renderSedes(hasMap ? "02" : "01")}${this.renderMensaje(
-        hasMap ? "03" : "02",
-      )}
+      ${this.renderUbicacion()}${this.renderSocialLinks()}${this.renderSedes(hasMap ? "02" : "01")}
       <slot name="reviews"></slot>
     `;
   }
@@ -130,16 +86,13 @@ export function defineQmContactPanel() {
   defineQmLocation();
   defineQmMap();
   defineQmSocialLinks();
-  defineQmFieldGroup();
 
   if (!customElements.get(QM_CONTACT_PANEL_TAG_NAME)) {
     customElements.define(QM_CONTACT_PANEL_TAG_NAME, QmContactPanel);
   }
 }
 
-export type QmContactPanelArgs = Partial<
-  Pick<QmContactPanel, "value" | "nameValue" | "messageValue" | "submitLabel" | "disabled">
->;
+export type QmContactPanelArgs = Partial<Pick<QmContactPanel, "value">>;
 
 declare global {
   interface HTMLElementTagNameMap {
