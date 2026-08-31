@@ -16,12 +16,13 @@ the signed-in user's membership.
 The tenant model has two levels: restaurant and branch.
 
 - `restaurants` (`packages/db/src/schema/restaurants.ts:4`) is the top-level tenant
-  entity. It holds `name`, `defaultLanguageCode`, `defaultCurrency`, `timezone`, the
+  entity. It holds `name`, `countryCode`, `sourceCurrency`, `defaultLanguageCode`, `timezone`, the
   email-sender settings, and a `deletedAt` soft-delete column.
 - `branches` (`packages/db/src/schema/branches.ts:3`) belongs to a restaurant through
   `restaurantId` and is the entity that gets a public menu. Its key column is
   `customDomain` (`branches.ts:13`), the host that maps an incoming request to the
-  branch. A branch also has `planCode`, `currency`, `isActive`, and `deletedAt`. New
+  branch. A branch also has `planCode`, `isActive`, and `deletedAt`; its prices use the
+  restaurant's `sourceCurrency`. New
   tenants get the `basic` plan; the database still contains the legacy `business` value.
   The unique constraint `ux_branches_id_restaurant` on `(id, restaurantId)` lets any
   branch ID be qualified by its restaurant.
@@ -53,13 +54,27 @@ restaurants (tenant root)
      ├─ branch_photos, branch_schedules
 ```
 
-### Users and staff
+### User accounts and restaurant memberships
 
-Staff belong to a restaurant, not to a branch. The join table is `restaurantUsers`
-(`restaurants.ts:18`), which holds `restaurantId`, `userId`, `roleCode` (from
-`packages/permissions`), and `isActive`, with a unique constraint on
-`(restaurantId, userId)`. Sign-in itself is handled by Better Auth, described in
-[Auth](auth.md). This table is the authorization layer on top of it.
+`users` (`packages/db/src/schema/auth.ts`) is the global account identified by a normalized
+email. `restaurantUsers` (`restaurants.ts:18`) is a restaurant membership, not another
+account: it connects one account to one restaurant and owns that relationship's role and
+active state. The unique constraint on `(restaurantId, userId)` makes provisioning idempotent
+and lets one account belong to multiple restaurants without copying or renaming the account.
+
+Membership roles are `owner`, `admin`, and `staff`. Owners are protected from role changes and
+deactivation in the Users panel; the signed-in owner also cannot deactivate their own
+membership. Only `owner` has `users.manage`. `admin` has configuration, theme, loyalty,
+analytics, and exchange-rate permissions; `staff` operates the menu, availability, operational
+loyalty actions, and exchange rates. `loyalty.insights` remains specific to loyalty insights,
+while general analytics uses `analytics.read`.
+
+The membership stores only the latest invitation state (`not_sent`, `sent`, or `failed`) and
+the last stable error code/timestamps. An invitation is sent after the account and membership
+commit; if it fails, the membership remains active and can be retried explicitly.
+
+Sign-in itself is handled by Better Auth, described in [Auth](auth.md). This table is the
+authorization layer on top of it.
 
 ## Tenant isolation
 

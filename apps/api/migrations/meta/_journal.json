@@ -85,6 +85,20 @@
       "when": 1787847571305,
       "tag": "0011_enforce_restaurant_country_code",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1787935039712,
+      "tag": "0012_source_currency_contract",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1787935078514,
+      "tag": "0013_populate_source_currency_from_country",
+      "breakpoints": true
     }
   ]
 }

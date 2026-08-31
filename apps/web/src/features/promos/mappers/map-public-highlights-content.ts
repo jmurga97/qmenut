@@ -5,7 +5,7 @@ import {
   pickFeaturedDish,
   pickRecommendedDishes,
 } from "~/features/promos/mappers/map-recommended-content";
-import { createPriceFormatter } from "~/features/promos/mappers/promotion-formatting";
+import { createPriceFormatter } from "~/shared/lib/price-formatter";
 
 import type { TFunction } from "i18next";
 import type { PublicMenuData } from "~/features/menu/api/public-menu-types";
@@ -22,14 +22,29 @@ export function mapPublicHighlightsContent({
   locale,
   t,
 }: MapPublicHighlightsContentInput): HighlightsContentViewModel {
-  const formatPrice = createPriceFormatter(locale, data?.branch.currency ?? "EUR");
-  const featuredDish = data ? pickFeaturedDish(data) : null;
+  const promos = mapPublicPromosContent({ data, locale, t });
+
+  if (!data) {
+    return {
+      featured: null,
+      promos,
+      recommended: {
+        dishes: [],
+        emptyLabel: t("destacados.page.recommendedEmptyLabel"),
+      },
+      subtitle: t("destacados.page.subtitle"),
+      title: t("destacados.page.title"),
+    };
+  }
+
+  const formatPrice = createPriceFormatter(locale, data.sourceCurrency);
+  const featuredDish = pickFeaturedDish(data);
 
   return {
     featured: featuredDish ? mapDish({ dish: featuredDish, formatPrice, t }) : null,
-    promos: mapPublicPromosContent({ data, locale, t }),
+    promos,
     recommended: {
-      dishes: data ? pickRecommendedDishes(data).map((dish) => mapRecommendedDish({ dish, formatPrice, t })) : [],
+      dishes: pickRecommendedDishes(data).map((dish) => mapRecommendedDish({ dish, formatPrice, t })),
       emptyLabel: t("destacados.page.recommendedEmptyLabel"),
     },
     subtitle: t("destacados.page.subtitle"),

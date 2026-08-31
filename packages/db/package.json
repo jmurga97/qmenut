@@ -96,6 +96,10 @@
       "types": "./src/domain/promotions.ts",
       "import": "./src/domain/promotions.ts"
     },
+    "./domain/country-currency": {
+      "types": "./src/domain/country-currency.ts",
+      "import": "./src/domain/country-currency.ts"
+    },
     "./domain/tenant": {
       "types": "./src/domain/tenant.ts",
       "import": "./src/domain/tenant.ts"

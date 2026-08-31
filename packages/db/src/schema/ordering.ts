@@ -64,7 +64,7 @@ export const orders = sqliteTable(
     deliveryFee: integer("delivery_fee").notNull().default(0),
     subtotal: integer("subtotal").notNull().default(0),
     total: integer("total").notNull().default(0),
-    currency: text("currency").notNull().default("EUR"),
+    currency: text("currency").notNull(),
     desiredTime: integer("desired_time"),
     kitchenNote: text("kitchen_note"),
     driverId: text("driver_id").references(() => restaurantUsers.id, { onDelete: "set null" }),
@@ -127,7 +127,7 @@ export const payments = sqliteTable(
       .notNull()
       .default("requires_payment"),
     amount: integer("amount").notNull(),
-    currency: text("currency").notNull().default("EUR"),
+    currency: text("currency").notNull(),
     createdAt: integer("created_at").notNull().default(epochMilliseconds),
     updatedAt: integer("updated_at").notNull().default(epochMilliseconds),
   },

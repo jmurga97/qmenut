@@ -1,3 +1,4 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
 import { AnalyticsBarList } from "~/features/analytics/components/analytics-bar-list";
@@ -12,6 +13,8 @@ import {
   getAnalyticsTrend,
 } from "~/features/analytics/services";
 import { ANALYTICS_PERIOD_OPTIONS } from "~/features/analytics/types";
+import { trpc } from "~/lib/trpc";
+import { getTenantQueryOptions } from "~/shared/api";
 import { SegmentedToggle } from "~/shared/components/controls/segmented-toggle";
 import { PageHeader } from "~/shared/components/page-header";
 import { formatNumber, formatPercent } from "~/shared/services/format";
@@ -82,6 +85,7 @@ function AnalyticsInsightsContent({ snapshot }: { snapshot: AnalyticsSnapshot })
 }
 
 export function AnalyticsPage() {
+  const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const { search, setPeriod, snapshot } = useAnalyticsController();
   const current = snapshot.current;
   const comparison = snapshot.comparison;
@@ -336,7 +340,7 @@ export function AnalyticsPage() {
                 value={
                   current.rewards.estimatedRewardCostCents === null
                     ? "—"
-                    : formatMoney(current.rewards.estimatedRewardCostCents)
+                    : formatMoney(current.rewards.estimatedRewardCostCents, tenant.restaurant.sourceCurrency)
                 }
               />
             </div>

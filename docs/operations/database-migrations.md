@@ -269,8 +269,11 @@ Perform these ten steps around every production migration:
    For a parent table referenced by foreign keys, do not rely on
    `PRAGMA foreign_keys=OFF`: remote D1 migration execution can retain cascade behavior.
    Prefer additive `ALTER TABLE` statements. `db:check` rejects new migrations that drop a
-   referenced table. `0002_branch_coordinates.sql` is an explicit historical exception because
-   it was already applied before this guard existed; do not copy that pattern.
+   referenced table, except for explicitly reviewed migrations. `0012_source_currency_contract.sql`
+   is allowlisted because SQLite requires the reviewed parent-table rebuild to remove the legacy
+   currency contract; it still requires the Time Travel preflight above. `0002_branch_coordinates.sql`
+   is an explicit historical exception because it was already applied before this guard existed;
+   do not copy either pattern without the same review.
 6. Apply the migration with Wrangler and the production environment:
 
    ```bash

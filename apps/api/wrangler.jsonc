@@ -27,6 +27,12 @@
       "remote": true,
     },
     {
+      "binding": "EXCHANGE_RATE_WORKER",
+      "service": "ming-exchange-rate-worker",
+      "entrypoint": "ExchangeRateRpc",
+      "remote": true,
+    },
+    {
       "binding": "THEME_WORKER",
       "service": "qmenut-tenant-config",
     },
@@ -101,6 +107,12 @@
           "binding": "IMAGE_WORKER",
           "service": "ming-image-worker",
           "entrypoint": "ImageRpc",
+          "remote": true,
+        },
+        {
+          "binding": "EXCHANGE_RATE_WORKER",
+          "service": "ming-exchange-rate-worker",
+          "entrypoint": "ExchangeRateRpc",
           "remote": true,
         },
         {
@@ -181,6 +193,12 @@
           "binding": "IMAGE_WORKER",
           "service": "ming-image-worker",
           "entrypoint": "ImageRpc",
+          "remote": true,
+        },
+        {
+          "binding": "EXCHANGE_RATE_WORKER",
+          "service": "ming-exchange-rate-worker",
+          "entrypoint": "ExchangeRateRpc",
           "remote": true,
         },
         {

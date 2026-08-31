@@ -43,7 +43,7 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
     deleteRewardMutation.reset();
   }
   async function saveProgram() {
-    if (!(await form.trigger(["isActive", "ticketMedioEuros"]))) return;
+    if (!(await form.trigger(["isActive", "averageTicket"]))) return;
     resetFeedback();
     saveProgramMutation.mutate(mappers.toLoyaltyProgramInput(form.getValues()));
   }
