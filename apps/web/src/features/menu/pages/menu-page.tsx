@@ -20,7 +20,7 @@ export function MenuPage() {
   const { scrollContainerRef, template, tenant } = usePublicRouteLayout();
   const { utm_source: utmSource } = useSearch({ from: "/{-$locale}" });
   const { content, selectedDish, setSelectedDish, showDishPhotos } = useMenuPage({
-    template,
+    showDishPhotos: tenant.showMenuPhotos,
   });
 
   useTrackPageView("menu_view", {
@@ -71,7 +71,7 @@ export function MenuPage() {
           ))}
         </>
       )}
-      <MenuDishModal dish={selectedDish} onClose={handleCloseDish} />
+      <MenuDishModal dish={selectedDish} showDishPhoto={tenant.showDishPhoto} onClose={handleCloseDish} />
     </>
   );
 }

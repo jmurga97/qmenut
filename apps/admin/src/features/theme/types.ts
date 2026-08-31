@@ -9,11 +9,15 @@ export const themeFormSchema = z.object({
   primary: z.string().regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, "Color no válido"),
   secondary: z.string().regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, "Color no válido"),
   tagline: z.string().trim().max(120, "Máximo 120 caracteres"),
+  showMenuPhotos: z.boolean(),
+  showDishPhoto: z.boolean(),
 });
 export const defaultThemeFormValues = {
   template: "tapas",
   primary: DEFAULT_TENANT_COLORS.primary,
   secondary: DEFAULT_TENANT_COLORS.secondary,
   tagline: "",
+  showMenuPhotos: true,
+  showDishPhoto: true,
 } satisfies ThemeFormValues;
 export type ThemeFormValues = z.infer<typeof themeFormSchema>;

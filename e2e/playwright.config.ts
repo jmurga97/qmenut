@@ -34,13 +34,14 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: "bun run --cwd ../apps/admin dev",
+      command: "VITE_PUBLIC_MENU_PORT=4011 bun run --cwd ../apps/admin dev",
       url: "http://localhost:5174",
       reuseExistingServer,
       timeout: 120_000,
     },
     {
-      command: "bun run --cwd ../apps/web build && bun run --cwd ../apps/web serve",
+      command:
+        "VITE_ADMIN_ORIGIN=http://localhost:5174 bun run --cwd ../apps/web build && bun run --cwd ../apps/web serve",
       url: "http://tapas.localhost:4011/robots.txt",
       reuseExistingServer,
       timeout: 180_000,

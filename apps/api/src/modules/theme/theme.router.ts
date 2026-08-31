@@ -1,8 +1,7 @@
 import { isBodyFontId, isHeadingFontId, QM_FONT_IDS } from "@qmenut/ui/theme/font-catalog";
 import { z } from "zod";
 
-import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
-import { getTheme, putTheme } from "../../lib/theme/theme-worker-client";
+import { bumpPublicContentVersion, getTheme, putTheme } from "../../lib/theme/theme-worker-client";
 import { router, tenantProcedure } from "../../trpc/trpc";
 import { requirePermission } from "../admin-tenant/require-permission";
 import { resolveBranchHost } from "../admin-tenant/resolve-branch-host";
@@ -23,6 +22,8 @@ const saveThemeSchema = z.object({
     primary: hexColor,
     secondary: hexColor,
     tagline: z.string().trim().max(120).optional(),
+    showMenuPhotos: z.boolean().optional(),
+    showDishPhoto: z.boolean().optional(),
     headingFont: fontId.refine(isHeadingFontId, { message: "La fuente no es válida para títulos" }).optional(),
     bodyFont: fontId.refine(isBodyFontId, { message: "La fuente no es válida para el cuerpo" }).optional(),
   }),
@@ -45,12 +46,7 @@ export const themeRouter = router({
       branchId: input.branchId,
     });
     await putTheme({ config: input.config, env: ctx.env, host });
-    await bumpPublicContentVersionForBranch({
-      branchId: input.branchId,
-      db: ctx.db,
-      env: ctx.env,
-      restaurantId: ctx.tenant.restaurantId,
-    });
+    await bumpPublicContentVersion(ctx.env, host);
     return { host };
   }),
 });

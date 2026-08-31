@@ -59,7 +59,9 @@ async function handleThemeRequest({ request, env, host }: TenantRequestInput): P
       return jsonResponse({ error: "No theme configured for this tenant" }, { status: 404 });
     }
 
-    return jsonResponse(theme);
+    // Reads are normalized without mutating KV so legacy partial entries retain their
+    // current appearance until the next explicit save.
+    return jsonResponse(resolveTenantThemeConfig(theme));
   }
 
   if (!(await isAuthorized(request, env))) {

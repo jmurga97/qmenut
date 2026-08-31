@@ -6,7 +6,7 @@ import { trpc } from "~/lib/trpc";
 import { useMutationFeedback } from "~/shared/hooks/use-mutation-feedback";
 
 import { getSaveThemeMutationOptions, getThemeQueryOptions } from "../api";
-import { toThemeFormValues, toThemeInput } from "../mappers";
+import { toThemeDraft, toThemeFormValues, toThemeInput } from "../mappers";
 import { themeFormSchema } from "../types";
 
 import type { ThemeFormValues } from "../types";
@@ -19,15 +19,15 @@ export function useThemeController(branchId: string) {
     defaultValues: toThemeFormValues(current),
   });
   const save = useMutation(getSaveThemeMutationOptions({ branchId, queryClient, trpc }));
-  const [primary, secondary, tagline] = useWatch({
+  const watchedValues = useWatch({
     control: form.control,
-    name: ["primary", "secondary", "tagline"],
   });
+  const parsedPreview = themeFormSchema.safeParse(watchedValues);
   return {
     form,
     feedback: useMutationFeedback(save, "Tema guardado."),
     pending: save.isPending,
-    preview: { primary, secondary, tagline },
+    preview: parsedPreview.success ? toThemeDraft({ current, values: parsedPreview.data }) : null,
     submit: form.handleSubmit((values) => save.mutate(toThemeInput({ branchId, current, values }))),
   };
 }

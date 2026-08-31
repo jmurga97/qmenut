@@ -5,6 +5,7 @@
  * conservando el instante real en que ocurrieron.
  */
 
+import { QM_THEME_PREVIEW_SEARCH_PARAM, QM_THEME_PREVIEW_SEARCH_VALUE } from "@qmenut/ui/theme/tenant-theme-config";
 import { createClientOnlyFn } from "@tanstack/react-start";
 
 import { getAnalyticsVisitId, restaurantLocalDayHour } from "./visit";
@@ -30,7 +31,11 @@ const state: {
 const pendingEvents: PendingEvent[] = [];
 
 function isEnabled(): boolean {
-  return typeof window !== "undefined" && Boolean(import.meta.env.VITE_POSTHOG_KEY);
+  if (typeof window === "undefined" || !import.meta.env.VITE_POSTHOG_KEY) return false;
+
+  return (
+    new URLSearchParams(window.location.search).get(QM_THEME_PREVIEW_SEARCH_PARAM) !== QM_THEME_PREVIEW_SEARCH_VALUE
+  );
 }
 
 function commonProperties(occurredAt: number): Record<string, unknown> {

@@ -6,6 +6,7 @@ import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query
 import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
 
+import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import type { PublicTenant } from "~/shared/types/public-tenant";
 
 const FALLBACK_HERO_PHOTO_URL = "https://picsum.photos/seed/qmenut-branch/800/600";
@@ -20,9 +21,10 @@ interface PublicTenantState {
  * query (same cache entry the menu uses); branding comes from the KV theme config resolved by
  * the root route. `tenant` is `null` when the host doesn't match any seeded branch.
  */
-export function usePublicTenant(): PublicTenantState {
+export function usePublicTenant(themeOverride?: QmTenantThemeConfig): PublicTenantState {
   const trpc = useAppTrpc();
-  const { host, theme } = useTenantContext();
+  const { host, theme: persistedTheme } = useTenantContext();
+  const theme = themeOverride ?? persistedTheme;
   const { locale } = useRouteContext({ from: "/{-$locale}" });
   const { data } = useSuspenseQuery(getPublicMenuQueryOptions({ host, locale, trpc }));
 
@@ -34,6 +36,8 @@ export function usePublicTenant(): PublicTenantState {
     return {
       heroPhotoUrl: data.branch.photos[0]?.url ?? FALLBACK_HERO_PHOTO_URL,
       primary: theme.primary,
+      showDishPhoto: theme.showDishPhoto,
+      showMenuPhotos: theme.showMenuPhotos,
       secondary: theme.secondary,
       template: theme.template,
       tenantName: data.branch.name,

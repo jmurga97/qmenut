@@ -1,14 +1,10 @@
 import type { RuntimeEnv } from "../../config/env/schema";
-import type { QmFontId } from "@qmenut/ui/theme/font-catalog";
+import type { QmTenantThemeConfig, QmTenantThemeEditableConfig } from "@qmenut/ui/theme/tenant-theme-config";
 
-export interface TenantThemeInput {
-  template: string;
-  primary: string;
-  secondary: string;
-  tagline?: string;
-  headingFont?: QmFontId;
-  bodyFont?: QmFontId;
-}
+export type TenantThemeInput = Omit<QmTenantThemeEditableConfig, "showDishPhoto" | "showMenuPhotos"> & {
+  showDishPhoto?: boolean;
+  showMenuPhotos?: boolean;
+};
 
 const THEME_ORIGIN = "https://theme-worker.internal";
 
@@ -21,7 +17,7 @@ function publicContentVersionUrl(host: string): string {
   return `${THEME_ORIGIN}/tenants/${encodeURIComponent(host)}/menu-version`;
 }
 
-export async function getTheme(env: RuntimeEnv, host: string): Promise<TenantThemeInput | null> {
+export async function getTheme(env: RuntimeEnv, host: string): Promise<QmTenantThemeConfig | null> {
   const response = await env.THEME_WORKER.fetch(themeUrl(host), { method: "GET" });
 
   if (response.status === 404) {

@@ -16,6 +16,8 @@ export type QmThemeInput = QmThemeConfig &
     headingFont?: QmFontId;
     bodyFont?: QmFontId;
     layout?: Partial<QmTemplateLayoutDefaults>;
+    showMenuPhotos?: boolean;
+    showDishPhoto?: boolean;
   };
 
 const PHOTO_GROUPS: Record<QmPhotoMode, Record<string, string>> = {
@@ -287,6 +289,9 @@ export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
   const resolved = resolveTemplate(input);
   const colors = deriveQmTheme(input);
   const hasDivider = resolved.photoMode === "none" || resolved.photoMode === "thumb";
+  const showPresetPhotos = resolved.photoMode !== "none";
+  const showMenuPhotos = input.showMenuPhotos ?? showPresetPhotos;
+  const showDishPhoto = input.showDishPhoto ?? showPresetPhotos;
 
   return {
     "--qm-primary": colors.primary,
@@ -333,6 +338,11 @@ export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
     "--qm-divider2": `1px solid ${colors.hairline}`,
 
     ...PHOTO_GROUPS[resolved.photoMode],
+    // Semantic tenant choices win over the template's photo defaults while retaining its
+    // sizing, ordering and layout tokens.
+    "--qm-photo": showDishPhoto ? "block" : "none",
+    "--qm-dish-photo": showMenuPhotos ? "block" : "none",
+    "--qm-featured-img": showMenuPhotos ? "block" : "none",
     ...buildBadgeTokens({ shape: resolved.badgeShape, colors, radius: `${resolved.radius}px` }),
     ...buildNavTokens({ navStyle: resolved.navStyle, colors, rule: `${resolved.rule}px` }),
   };
