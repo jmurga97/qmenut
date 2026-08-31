@@ -9,6 +9,7 @@ import { defineQmLang } from "../../atoms/qm-lang";
 import { defineQmWordmark } from "../../atoms/qm-wordmark";
 
 import type { QmLangOption } from "../../atoms/qm-lang";
+import type { TemplateResult } from "lit";
 
 export const QM_PAGE_HEADER_TAG_NAME = "qm-page-header";
 
@@ -56,6 +57,15 @@ export class QmPageHeader extends LitElement {
   @property({ type: String, attribute: "lang-label" })
   langLabel = "";
 
+  @property({ type: String, attribute: "currency-value" })
+  currencyValue = "";
+
+  @property({ attribute: false })
+  currencyOptions: QmLangOption[] = [];
+
+  @property({ type: String, attribute: "currency-label" })
+  currencyLabel = "";
+
   @property({ type: String, attribute: "title-size", reflect: true })
   titleSize: "lg" | "md" = "lg";
 
@@ -71,11 +81,40 @@ export class QmPageHeader extends LitElement {
     return this.topbarBrand || this.topbarName;
   }
 
+  private readonly handleCurrencyChange = (event: Event) => {
+    event.stopPropagation();
+    const value = (event.target as HTMLElement & { value?: string }).value ?? "";
+    this.dispatchEvent(
+      new CustomEvent("qm-currency-change", {
+        bubbles: true,
+        composed: true,
+        detail: { value },
+      }),
+    );
+  };
+
+  private renderCurrencySelector(): TemplateResult {
+    if (this.currencyOptions.length === 0) return html``;
+
+    return html`
+      <qm-lang
+        part="currency"
+        .value=${this.currencyValue}
+        .options=${this.currencyOptions}
+        .label=${this.currencyLabel}
+        @qm-change=${this.handleCurrencyChange}
+      ></qm-lang>
+    `;
+  }
+
   render() {
     return html`
       <div part="topbar" class="topbar">
         <span part="topbar-text" class="topbar-text">${this.renderTopbarText()}</span>
-        <qm-lang part="lang" .value=${this.langValue} .options=${this.langOptions} .label=${this.langLabel}></qm-lang>
+        <div class="topbar-controls">
+          <qm-lang part="lang" .value=${this.langValue} .options=${this.langOptions} .label=${this.langLabel}></qm-lang>
+          ${this.renderCurrencySelector()}
+        </div>
       </div>
       <div part="title-wrap" class="title-wrap" role="heading" aria-level=${this.headingLevel}>
         <qm-wordmark part="title" class="title" data-size=${this.titleSize} .text=${this.title}></qm-wordmark>
@@ -106,6 +145,9 @@ export type QmPageHeaderArgs = Partial<
     | "langValue"
     | "langOptions"
     | "langLabel"
+    | "currencyValue"
+    | "currencyOptions"
+    | "currencyLabel"
     | "titleSize"
     | "headingLevel"
     | "hideSeparator"

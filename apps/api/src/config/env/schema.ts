@@ -33,7 +33,6 @@ export interface ImageWorkerBinding {
 
 export interface ExchangeRateWorkerBinding {
   getLatestRates(input: { currencies?: Array<"USD" | "EUR"> }): Promise<unknown>;
-  getCaptureStatus(): Promise<unknown>;
 }
 
 const logLevelSchema = z.enum(["trace", "debug", "info", "warn", "error", "fatal"]);
@@ -60,9 +59,8 @@ const exchangeRateWorkerBindingSchema = z.custom<ExchangeRateWorkerBinding>(
   (value) =>
     typeof value === "object" &&
     value !== null &&
-    typeof (value as { getLatestRates?: unknown }).getLatestRates === "function" &&
-    typeof (value as { getCaptureStatus?: unknown }).getCaptureStatus === "function",
-  "El binding de servicio EXCHANGE_RATE_WORKER debe implementar getLatestRates y getCaptureStatus",
+    typeof (value as { getLatestRates?: unknown }).getLatestRates === "function",
+  "El binding de servicio EXCHANGE_RATE_WORKER debe implementar getLatestRates",
 );
 
 export const envSchema = z.object({
@@ -96,7 +94,7 @@ export const envSchema = z.object({
   }),
   EMAIL_WORKER: serviceWorkerBindingSchema("EMAIL_WORKER"),
   IMAGE_WORKER: imageWorkerBindingSchema,
-  EXCHANGE_RATE_WORKER: exchangeRateWorkerBindingSchema,
+  EXCHANGE_RATE_WORKER: exchangeRateWorkerBindingSchema.optional(),
   THEME_WORKER: serviceWorkerBindingSchema("THEME_WORKER"),
   THEME_WORKER_TOKEN: z.string().min(1),
   LOYALTY_TOKEN_SECRET: z.string().min(1),

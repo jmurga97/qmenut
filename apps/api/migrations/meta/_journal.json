@@ -99,6 +99,13 @@
       "when": 1787935078514,
       "tag": "0013_populate_source_currency_from_country",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1788175615529,
+      "tag": "0014_add_restaurant_exchange_rate",
+      "breakpoints": true
     }
   ]
 }

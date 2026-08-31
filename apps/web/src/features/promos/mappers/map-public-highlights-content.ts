@@ -1,3 +1,4 @@
+import { createPublicPriceFormatter } from "~/features/menu/mappers/create-public-price-formatter";
 import { mapDish } from "~/features/menu/mappers/map-public-menu-content";
 import { mapPublicPromosContent } from "~/features/promos/mappers/map-public-promos-content";
 import {
@@ -5,7 +6,6 @@ import {
   pickFeaturedDish,
   pickRecommendedDishes,
 } from "~/features/promos/mappers/map-recommended-content";
-import { createPriceFormatter } from "~/shared/lib/price-formatter";
 
 import type { TFunction } from "i18next";
 import type { PublicMenuData } from "~/features/menu/api/public-menu-types";
@@ -13,16 +13,18 @@ import type { HighlightsContentViewModel } from "~/features/promos/types/highlig
 
 interface MapPublicHighlightsContentInput {
   data: PublicMenuData | null;
+  displayCurrency: string;
   locale: string;
   t: TFunction;
 }
 
 export function mapPublicHighlightsContent({
   data,
+  displayCurrency,
   locale,
   t,
 }: MapPublicHighlightsContentInput): HighlightsContentViewModel {
-  const promos = mapPublicPromosContent({ data, locale, t });
+  const promos = mapPublicPromosContent({ data, displayCurrency, locale, t });
 
   if (!data) {
     return {
@@ -37,7 +39,7 @@ export function mapPublicHighlightsContent({
     };
   }
 
-  const formatPrice = createPriceFormatter(locale, data.sourceCurrency);
+  const formatPrice = createPublicPriceFormatter({ data, displayCurrency, locale });
   const featuredDish = pickFeaturedDish(data);
 
   return {

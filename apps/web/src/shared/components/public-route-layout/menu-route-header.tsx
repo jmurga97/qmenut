@@ -5,6 +5,7 @@ import { ScrollCompactHeroHeader } from "~/shared/components/scroll-compact-hero
 import { ScrollHidePageHeader } from "~/shared/components/scroll-hide-page-header";
 import { photoUrl } from "~/shared/lib/photo-url";
 
+import type { QmLangOption } from "@qmenut/ui/components/qm-lang";
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 import type { RefObject } from "react";
 import type { useLocale } from "~/shared/hooks/use-locale";
@@ -14,12 +15,25 @@ const HERO_IMAGE_WIDTH_PX = 430;
 
 interface MenuRouteHeaderProps {
   locale: ReturnType<typeof useLocale>;
+  currencyLabel: string;
+  currencyOptions: QmLangOption[];
+  currencyValue: string;
+  onQmCurrencyChange: (event: CustomEvent<{ value: string }>) => void;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   template: QmTemplateName;
   tenant: PublicTenant;
 }
 
-export function MenuRouteHeader({ locale, scrollContainerRef, template, tenant }: MenuRouteHeaderProps) {
+export function MenuRouteHeader({
+  currencyLabel,
+  currencyOptions,
+  currencyValue,
+  locale,
+  onQmCurrencyChange,
+  scrollContainerRef,
+  template,
+  tenant,
+}: MenuRouteHeaderProps) {
   const content = useMenuContent();
   const useHeroHeader = TEMPLATES[template].photoMode === "hero" || TEMPLATES[template].photoMode === "heroxl";
 
@@ -35,6 +49,10 @@ export function MenuRouteHeader({ locale, scrollContainerRef, template, tenant }
         langLabel={locale.langLabel}
         logoLabel={content?.logoLabel ?? "QM"}
         onQmChange={locale.handleLanguageChange}
+        currencyLabel={currencyLabel}
+        currencyOptions={currencyOptions}
+        currencyValue={currencyValue}
+        onQmCurrencyChange={onQmCurrencyChange}
       >
         <img
           slot="photo"
@@ -56,8 +74,12 @@ export function MenuRouteHeader({ locale, scrollContainerRef, template, tenant }
       langValue={locale.lang}
       langOptions={locale.langOptions}
       langLabel={locale.langLabel}
+      currencyLabel={currencyLabel}
+      currencyOptions={currencyOptions}
+      currencyValue={currencyValue}
       titleSize="lg"
       onQmChange={locale.handleLanguageChange}
+      onQmCurrencyChange={onQmCurrencyChange}
     />
   );
 }

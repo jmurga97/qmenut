@@ -99,4 +99,6 @@ export interface PublicMenuData {
   legal: PublicLegalEntity;
   promotions: PublicPromotion[];
   sourceCurrency: string;
+  vesExchangeRate: string | null;
+  vesPricesEnabled: boolean;
 }

@@ -1,5 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 
+import { ExchangeRatesCard } from "~/features/exchange-rates/components/exchange-rates-card";
 import { VenueCodeCard } from "~/features/loyalty/components/venue-code-card";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
@@ -21,6 +22,7 @@ export function DashboardPage() {
   const canOperate = useCan("loyalty.operate");
   const canToggleAvailability = useCan("menu.toggleDishAvailability");
   const canSeeAttention = useCan("branch.write");
+  const canExchangeRates = useCan("exchangeRates.write");
   const showServiceZone = canInsights || canSeeAttention;
   return (
     <div className="admin-page admin-dashboard">
@@ -36,6 +38,7 @@ export function DashboardPage() {
         </div>
       ) : null}
       {canInsights ? <AnalyticsPulseCard /> : null}
+      {canExchangeRates && tenant.restaurant.sourceCurrency === "USD" ? <ExchangeRatesCard /> : null}
       {canInsights || canOperate ? (
         <div className="admin-dashboard-bottom">
           {canInsights ? <VisitsChartCard /> : null}

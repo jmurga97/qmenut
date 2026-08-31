@@ -30,20 +30,8 @@ const latestRatesSchema = z.object({
   }),
 });
 
-const captureStatusSchema = z.object({
-  success: z.literal(true),
-  data: z.object({
-    lastRunAt: z.iso.datetime().nullable(),
-    lastSuccessAt: z.iso.datetime().nullable(),
-    lastRunStatus: z.enum(["succeeded", "partial", "failed"]).nullable(),
-    lastErrorCode: z.string().nullable(),
-    rates: z.array(rateReferenceSchema),
-  }),
-});
-
 export type ExchangeRateReference = z.infer<typeof rateReferenceSchema>;
 export type LatestExchangeRates = z.infer<typeof latestRatesSchema>["data"];
-export type ExchangeRateCaptureStatus = z.infer<typeof captureStatusSchema>["data"];
 
 interface WorkerInput {
   worker: ExchangeRateWorkerBinding;
@@ -71,7 +59,7 @@ function invalidWorkerResponse(): TRPCError {
 }
 
 /**
- * Lee la referencia oficial BCV (VES por 1 USD/EUR) del worker privado mediante RPC.
+ * Lee una referencia de mercado BCV (VES por 1 USD/EUR) del worker privado mediante RPC.
  * La lista puede venir vacía antes de la primera captura del cron.
  */
 export async function getLatestExchangeRates(input: LatestRatesInput): Promise<LatestExchangeRates> {
@@ -80,21 +68,6 @@ export async function getLatestExchangeRates(input: LatestRatesInput): Promise<L
   if (error.success) throw mapWorkerError(error.data.error);
 
   const parsed = latestRatesSchema.safeParse(body);
-  if (!parsed.success) throw invalidWorkerResponse();
-
-  return parsed.data.data;
-}
-
-/**
- * Respuesta administrativa del worker: estado de la última captura y fecha del
- * último snapshot por moneda, para mostrar la referencia externa en el panel.
- */
-export async function getExchangeRateCaptureStatus(input: WorkerInput): Promise<ExchangeRateCaptureStatus> {
-  const body = await input.worker.getCaptureStatus();
-  const error = workerErrorSchema.safeParse(body);
-  if (error.success) throw mapWorkerError(error.data.error);
-
-  const parsed = captureStatusSchema.safeParse(body);
   if (!parsed.success) throw invalidWorkerResponse();
 
   return parsed.data.data;
