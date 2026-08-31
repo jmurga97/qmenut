@@ -89,6 +89,7 @@ async function getBranchRow({ db, tenant }: TenantInput) {
       legalAddress: restaurants.legalAddress,
       dataProtectionEmail: restaurants.dataProtectionEmail,
       legalName: restaurants.legalName,
+      countryCode: restaurants.countryCode,
       taxId: restaurants.taxId,
       timeZone: restaurants.timezone,
     })
@@ -174,10 +175,12 @@ async function getPublicContactBranches({ db, tenant }: TenantInput): Promise<Pu
   );
 }
 
-async function getPublicBranchContext({
-  db,
-  tenant,
-}: TenantInput): Promise<{ branch: PublicBranch; legal: PublicLegalEntity; timeZone: string } | null> {
+async function getPublicBranchContext({ db, tenant }: TenantInput): Promise<{
+  branch: PublicBranch;
+  countryCode: string;
+  legal: PublicLegalEntity;
+  timeZone: string;
+} | null> {
   const row = await getBranchRow({ db, tenant });
 
   if (!row) {
@@ -188,6 +191,7 @@ async function getPublicBranchContext({
 
   return {
     branch: mapBranch({ row, photos, schedules, timeZone: row.timeZone }),
+    countryCode: row.countryCode,
     legal: {
       address: row.legalAddress,
       dataProtectionEmail: row.dataProtectionEmail,
@@ -357,7 +361,7 @@ export async function getPublicMenu({
     return null;
   }
 
-  const { branch, legal, timeZone } = branchContext;
+  const { branch, countryCode, legal, timeZone } = branchContext;
   const [categoryRows, contactBranches, dishRows, promotionRows] = await Promise.all([
     getCategoryRows({ db, tenant }),
     getPublicContactBranches({ db, tenant }),
@@ -418,6 +422,7 @@ export async function getPublicMenu({
     branch,
     categories: mapPublicCategories({ categoryRows, dishesByCategory, translationsByEntity }),
     contactBranches,
+    countryCode,
     legal,
     promotions: activePromotions.map((row): PublicPromotion => mapPromotion(row)),
   };

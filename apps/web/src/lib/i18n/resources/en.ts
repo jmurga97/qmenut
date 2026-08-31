@@ -105,13 +105,13 @@ export default {
     privacyLink: "Privacy policy",
     privacy: {
       title: "Privacy policy",
-      subtitle: "Data protection (GDPR)",
+      subtitle: "Data protection",
       seoTitle: "Privacy policy – {{name}}",
       seoDescription: "Privacy policy and data protection information for {{name}}",
     },
     legalNotice: {
       title: "Legal notice",
-      subtitle: "Owner information (LSSI-CE)",
+      subtitle: "Owner information",
       seoTitle: "Legal notice – {{name}}",
       seoDescription: "Legal notice and owner information for {{name}}",
     },

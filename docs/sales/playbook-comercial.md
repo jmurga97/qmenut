@@ -72,11 +72,11 @@ condición inmediata sí significa que Qmenut todavía no es la solución adecua
 
 Dominios de demostración disponibles:
 
-- `fine.qmenut.app`
-- `her.qmenut.app`
-- `fast.qmenut.app`
-- `cafe.qmenut.app`
-- `tapas.qmenut.app`
+- `fine.dev.qmenut.app`
+- `her.dev.qmenut.app`
+- `fast.dev.qmenut.app`
+- `cafe.dev.qmenut.app`
+- `tapas.dev.qmenut.app`
 
 ## 5. Demostración de 22 minutos
 

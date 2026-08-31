@@ -17,17 +17,17 @@ The **QMenut** platform ({{operatorLegalName}}, tax ID {{operatorLegalTaxId}}) p
 
 - **Technical connection data:** the IP address and basic browser data are processed temporarily to serve the page securely (abuse prevention and error logging). They are not used to create profiles.
 - **Google reviews (when enabled):** public reviews are requested from Google when you approach that section. QMenut does not store their content. The IP address is used transiently to limit abusive requests, without creating profiles.
-- **Loyalty programme (when enabled):** if the establishment enables its points programme and you choose to participate, your email, name, and date of birth will be processed to manage your points and benefits. You will be informed when you register.
+- **Loyalty programme (when enabled):** if the establishment enables its points programme and you choose to participate, your email will be processed to create and manage your card, points, and benefits. Your name and date of birth are not requested. Participation requires expressly accepting this policy at registration.
 
 ## 4. Cookie-free analytics
 
-To understand which dishes and sections attract the most interest, **PostHog** (PostHog EU, with data hosted in the European Union) is used anonymously: without cookies, without storing data on your device, and without identifying you across visits. Recorded events (for example, viewing the menu or opening a dish) are not associated with your identity.
+To understand which dishes and sections attract the most interest, **PostHog** (PostHog EU, with data hosted in the European Union) is used anonymously: without cookies, without analytic storage on your device, and without identifying you across visits. Each page load uses a random, short-lived identifier kept only in memory; recorded events are not associated with your identity.
 
 ## 5. Legal basis
 
 - Technical data and anonymous analytics: legitimate interest in security and service improvement (Article 6(1)(f) GDPR).
 - Loading public Google reviews: legitimate interest in providing information about the establishment’s public reputation (Article 6(1)(f) GDPR).
-- Loyalty programme: performance of the relationship with the participant (Article 6(1)(b) GDPR).
+- Loyalty programme: the participant’s express consent (Article 6(1)(a) GDPR), which may be withdrawn by requesting removal.
 
 ## 6. Recipients and processors
 
@@ -45,7 +45,7 @@ Reviews are fetched by the server and are not stored in the digital menu. If you
 
 ## 7. Retention
 
-The identifier used to rate-limit review requests is retained only for the technical rate-limit window. Loyalty-programme data is kept while you participate or until you request removal.
+The identifier used to rate-limit review requests is retained only for the technical rate-limit window. The email, programme relationship, and consent record are kept while you participate or until you request removal, without prejudice to legal retention obligations.
 
 ## 8. Your rights
 
@@ -55,10 +55,10 @@ You may exercise your rights of access, rectification, erasure, objection, restr
 
 ## 9. Cookies and storage technologies
 
-This website **does not use cookies** or equivalent storage technologies on your device for advertising or tracking. That is why no cookie banner is displayed. Only the technical storage strictly necessary for the website to function is used (for example, remembering the language you selected to view the menu), which is exempt from consent under Article 22.2 of the LSSI-CE.
+This website **does not use cookies** or equivalent technologies for advertising or tracking. When you register for loyalty, your card token is stored in the browser’s `localStorage`, associated with the establishment’s domain, so the card remains available on that device. Your selected language may also be stored in `localStorage`; one-time language detection and some installation states use `sessionStorage`. Analytics is kept in memory only. These technical technologies support functions you requested and their treatment should be reviewed under Article 22(2) of the LSSI-CE.
 
 ## 10. Changes to this policy
 
 This policy may be updated to reflect regulatory or service changes. The current version will always be published on this page.
 
-<p class="legal-updated">Last updated: 26 August 2026.</p>
+<p class="legal-updated">Last updated: 28 August 2026.</p>
