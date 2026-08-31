@@ -16,12 +16,19 @@ the signed-in user's membership.
 The tenant model has two levels: restaurant and branch.
 
 - `restaurants` (`packages/db/src/schema/restaurants.ts:4`) is the top-level tenant
-  entity. It holds `name`, `defaultLanguageCode`, `defaultCurrency`, `timezone`, the
+  entity. It holds `name`, `countryCode`, `sourceCurrency`, `defaultLanguageCode`, `timezone`, the
   email-sender settings, and a `deletedAt` soft-delete column.
+- `restaurant_exchange_rates` (`packages/db/src/schema/exchange-rates.ts`) stores the
+  restaurant's current VES display rate. `restaurantId` is both its primary key and its
+  foreign key to `restaurants`, so there is at most one row and no rate history. The row
+  stores the decimal rate as text, the VES visibility flag, the last updating user, and the
+  update timestamp. Before the first configuration there is no row, no local rate, and VES
+  is disabled.
 - `branches` (`packages/db/src/schema/branches.ts:3`) belongs to a restaurant through
   `restaurantId` and is the entity that gets a public menu. Its key column is
   `customDomain` (`branches.ts:13`), the host that maps an incoming request to the
-  branch. A branch also has `planCode`, `currency`, `isActive`, and `deletedAt`. New
+  branch. A branch also has `planCode`, `isActive`, and `deletedAt`; its prices use the
+  restaurant's `sourceCurrency`. New
   tenants get the `basic` plan; the database still contains the legacy `business` value.
   The unique constraint `ux_branches_id_restaurant` on `(id, restaurantId)` lets any
   branch ID be qualified by its restaurant.
@@ -41,6 +48,7 @@ Menu content hangs off the branch and is denormalized with both IDs:
 restaurants (tenant root)
  ├─ restaurant_users        (membership: user ↔ restaurant + role)
  ├─ restaurant_languages    (enabled menu languages)
+ ├─ restaurant_exchange_rates (one current VES display rate, no history)
  ├─ branch_subscriptions    (Stripe subscription per branch)
  ├─ ingredients, tags       (restaurant-scoped catalogs)
  └─ branches                (customDomain → public menu)
@@ -53,13 +61,33 @@ restaurants (tenant root)
      ├─ branch_photos, branch_schedules
 ```
 
-### Users and staff
+### User accounts and restaurant memberships
 
-Staff belong to a restaurant, not to a branch. The join table is `restaurantUsers`
-(`restaurants.ts:18`), which holds `restaurantId`, `userId`, `roleCode` (from
-`packages/permissions`), and `isActive`, with a unique constraint on
-`(restaurantId, userId)`. Sign-in itself is handled by Better Auth, described in
-[Auth](auth.md). This table is the authorization layer on top of it.
+`users` (`packages/db/src/schema/auth.ts`) is the global account identified by a normalized
+email. `restaurantUsers` (`restaurants.ts:18`) is a restaurant membership, not another
+account: it connects one account to one restaurant and owns that relationship's role and
+active state. The unique constraint on `(restaurantId, userId)` makes provisioning idempotent
+and lets one account belong to multiple restaurants without copying or renaming the account.
+
+Membership roles are `owner`, `admin`, and `staff`. Owners are protected from role changes and
+deactivation in the Users panel; the signed-in owner also cannot deactivate their own
+membership. Only `owner` has `users.manage`. `admin` has configuration, theme, loyalty,
+analytics, and `exchangeRates.write`; `staff` operates the menu, availability, operational
+loyalty actions, and `exchangeRates.write`. `loyalty.insights` remains specific to loyalty insights,
+while general analytics uses its existing permission.
+
+The administrative procedures `admin.exchangeRates.summary` and `admin.exchangeRates.save`
+are restaurant-scoped. The save procedure accepts a positive decimal string with at most six
+fractional digits and performs an upsert. It only applies to restaurants whose source price
+currency is USD. Saving invalidates every public branch of the restaurant because the rate is
+shared by all of them.
+
+The membership stores only the latest invitation state (`not_sent`, `sent`, or `failed`) and
+the last stable error code/timestamps. An invitation is sent after the account and membership
+commit; if it fails, the membership remains active and can be retried explicitly.
+
+Sign-in itself is handled by Better Auth, described in [Auth](auth.md). This table is the
+authorization layer on top of it.
 
 ## Tenant isolation
 

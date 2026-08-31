@@ -98,4 +98,7 @@ export interface PublicMenuData {
   contactBranches: PublicContactBranch[];
   legal: PublicLegalEntity;
   promotions: PublicPromotion[];
+  sourceCurrency: string;
+  vesExchangeRate: string | null;
+  vesPricesEnabled: boolean;
 }

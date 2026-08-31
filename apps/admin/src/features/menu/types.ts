@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { moneyInputSchema } from "~/shared/services/money";
+
 import type { AppRouter } from "@qmenut/api/router";
 import type { inferRouterOutputs } from "@trpc/server";
 
@@ -19,10 +21,7 @@ export const dishFormSchema = z.object({
   isFeatured: z.boolean(),
   isRecommended: z.boolean(),
   name: z.string().trim().min(1, { message: "El nombre es obligatorio" }),
-  priceEuros: z
-    .string()
-    .trim()
-    .regex(/^\d+(?:\.\d+)?$/, "Introduce un precio válido"),
+  price: moneyInputSchema,
   tagIds: z.array(z.string()),
 });
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;

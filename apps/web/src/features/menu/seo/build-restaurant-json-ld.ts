@@ -31,7 +31,7 @@ export function buildRestaurantJsonLd({
   includeMenu = true,
   origin,
 }: BuildRestaurantJsonLdInput): Record<string, unknown> {
-  const { branch, categories, language } = data;
+  const { branch, categories, language, sourceCurrency } = data;
 
   return {
     "@context": "https://schema.org",
@@ -65,7 +65,7 @@ export function buildRestaurantJsonLd({
             offers: {
               "@type": "Offer",
               price: (dish.price / 100).toFixed(2),
-              priceCurrency: branch.currency,
+              priceCurrency: sourceCurrency,
             },
           })),
         })),

@@ -36,11 +36,11 @@ VALUES ('ru_fine_owner_e2e', 'rest_fine', 'user_fine_owner_e2e', 'owner');
 
 -- Extra branches make every public template reachable through the same Worker and exercise the
 -- admin branch selector. The no-domain branch deliberately covers resolveBranchHost's guard.
-INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain, currency)
+INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain)
 VALUES
-  ('branch_her', 'rest_tapas', 'Mesón Herencia', 'Calle Mayor 4, Logroño', '+34941000101', 'her.localhost', 'EUR'),
-  ('branch_fast', 'rest_tapas', 'Tasca Express', 'Avenida de la Paz 18, Logroño', '+34941000102', 'fast.localhost', 'EUR'),
-  ('branch_nodomain', 'rest_tapas', 'Sucursal sin dominio', 'Plaza del Mercado 1, Logroño', '+34941000103', NULL, 'EUR');
+  ('branch_her', 'rest_tapas', 'Mesón Herencia', 'Calle Mayor 4, Logroño', '+34941000101', 'her.localhost'),
+  ('branch_fast', 'rest_tapas', 'Tasca Express', 'Avenida de la Paz 18, Logroño', '+34941000102', 'fast.localhost'),
+  ('branch_nodomain', 'rest_tapas', 'Sucursal sin dominio', 'Plaza del Mercado 1, Logroño', '+34941000103', NULL);
 
 INSERT INTO categories (id, restaurant_id, branch_id, name, description, position) VALUES
   ('cat_her_guisos', 'rest_tapas', 'branch_her', 'Guisos de la casa', 'Recetas de siempre', 0),

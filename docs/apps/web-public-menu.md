@@ -13,7 +13,8 @@ tRPC over D1 supplies its content. See [Custom domains](../domains/custom-domain
 
 Complete for the menu and loyalty pages. The promotions and contact pages are still
 mock-backed: `use-promos-content.ts` and `use-contact-content.ts` map `MOCK_*` constants,
-even though the promotions API and the effective-price view exist.
+even though the promotions API and the effective-price view exist. USD-source menus can
+also expose a restaurant-selected VES display rate.
 
 ## Worker entry point and rendering errors
 
@@ -63,6 +64,24 @@ binding is available. In the browser, production requests go to same-origin `/tr
 Two consequences follow. A new tenant domain does not need an API CORS entry, and public
 loyalty does not use authentication cookies, because its `cardToken` lives in local
 storage. The Vite development proxy provides the same `/trpc` shape locally.
+
+## Currency display
+
+Menu prices remain stored and edited in the restaurant's `sourceCurrency`. For USD-source
+restaurants, the public payload may include `vesExchangeRate` and `vesPricesEnabled`. The
+currency selector is shown beside the language selector only when both values allow VES
+display, and the selection is persisted in local storage under `qm-currency-choice`.
+
+VES values are derived at display time from source minor units and the restaurant-selected
+rate. The client uses fixed-point arithmetic and formats two decimal places; it never rewrites
+the stored source price. The menu, highlights, promotions, discounts, extras, and featured
+prices use the same selected display currency, while structured data continues to publish
+source-currency prices.
+
+The BCV/Ming reference is shown only in the authenticated admin dashboard as information for
+the restaurant. Ming is optional for that summary and is not used when saving the local rate.
+Its absence or failure never replaces the local rate and does not create an automatic warning
+based on a percentage difference.
 
 Client-reachable modules guard `cloudflare:workers` dynamic imports with
 `import.meta.env.SSR`, so the browser bundle cannot import Worker-only runtime code.

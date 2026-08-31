@@ -62,6 +62,7 @@ export class QmLang extends QmElement {
 
   private readonly handleChange = (event: Event) => {
     const value = (event.target as HTMLSelectElement).value;
+    this.value = value;
     this.postEvent({ name: "qm-change", detail: { value } });
   };
 

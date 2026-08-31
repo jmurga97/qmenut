@@ -13,7 +13,6 @@ export interface PublicBranchSchedule {
 
 export interface PublicBranch {
   address: string | null;
-  currency: string;
   customDomain: string | null;
   googleReviewsEnabled: boolean;
   id: string;

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FormProvider } from "react-hook-form";
 
 import { trpc } from "~/lib/trpc";
+import { getTenantQueryOptions } from "~/shared/api";
 import { EntityListCard } from "~/shared/components/entity-list-card";
 import { FormCheckbox } from "~/shared/components/forms/adapters/form-checkbox";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
@@ -19,7 +20,7 @@ import { NotFoundState } from "~/shared/components/state/not-found-state";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 import { ImageUploadControl } from "~/shared/images/image-upload-control";
-import { eurosToCents, formatMoney } from "~/shared/services/money";
+import { formatMoney, parseMoneyInput } from "~/shared/services/money";
 
 import { getDishDetailQueryOptions } from "../api";
 import {
@@ -36,6 +37,7 @@ export function MenuListPage() {
   return <MenuList branchId={branch.id} />;
 }
 function MenuList({ branchId }: { branchId: string }) {
+  const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const canToggleAvailability = useCan("menu.toggleDishAvailability");
   const canWrite = useCan("menu.write");
   const { availabilityError, availabilityPendingDishId, categories, dishes, setAvailability } =
@@ -86,7 +88,7 @@ function MenuList({ branchId }: { branchId: string }) {
               {dish.name}
             </Link>
             <div className="admin-toolbar-controls">
-              <span className="admin-list-meta">{formatMoney(dish.price)}</span>
+              <span className="admin-list-meta">{formatMoney(dish.price, tenant.restaurant.sourceCurrency)}</span>
               {canToggleAvailability ? (
                 <Switch
                   aria-label={`Disponibilidad de ${dish.name}`}
@@ -177,7 +179,7 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
           <div className="admin-form-grid">
             <FormTextInput<DishFormValues> label="Nombre" name="name" />
             <FormSelect<DishFormValues> label="Categoría" name="categoryId" options={controller.categoryOptions} />
-            <FormTextInput<DishFormValues> inputMode="decimal" label="Precio" name="priceEuros" />
+            <FormTextInput<DishFormValues> inputMode="decimal" label="Precio" name="price" />
             <ImageUploadControl
               disabled={controller.busy}
               draft={controller.image.draft}
@@ -212,7 +214,7 @@ function ExtraIngredientCreator({
 }) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("0");
-  const priceInCents = eurosToCents(price);
+  const priceInCents = parseMoneyInput(price);
   const canAdd =
     name.trim().length > 0 && price.trim().length > 0 && Number.isFinite(priceInCents) && priceInCents >= 0;
   const add = () => {
@@ -230,7 +232,7 @@ function ExtraIngredientCreator({
       <Field label="Nombre del extra">
         <Input onValueChange={setName} value={name} />
       </Field>
-      <Field label="Precio en euros">
+      <Field label="Precio">
         <Input inputMode="decimal" onValueChange={setPrice} value={price} />
       </Field>
       <Button className="admin-inline-button" disabled={!canAdd || busy} onClick={add} variant="secondary">

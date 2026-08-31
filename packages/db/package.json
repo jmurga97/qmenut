@@ -52,6 +52,10 @@
       "types": "./src/repositories/restaurant-languages.repository.ts",
       "import": "./src/repositories/restaurant-languages.repository.ts"
     },
+    "./repositories/restaurant-exchange-rates.repository": {
+      "types": "./src/repositories/restaurant-exchange-rates.repository.ts",
+      "import": "./src/repositories/restaurant-exchange-rates.repository.ts"
+    },
     "./repositories/admin-translations.repository": {
       "types": "./src/repositories/admin-translations.repository.ts",
       "import": "./src/repositories/admin-translations.repository.ts"
@@ -95,6 +99,14 @@
     "./domain/promotions": {
       "types": "./src/domain/promotions.ts",
       "import": "./src/domain/promotions.ts"
+    },
+    "./domain/country-currency": {
+      "types": "./src/domain/country-currency.ts",
+      "import": "./src/domain/country-currency.ts"
+    },
+    "./domain/exchange-rates": {
+      "types": "./src/domain/exchange-rates.ts",
+      "import": "./src/domain/exchange-rates.ts"
     },
     "./domain/tenant": {
       "types": "./src/domain/tenant.ts",
@@ -159,6 +171,10 @@
     "./schema/customers": {
       "types": "./src/schema/customers.ts",
       "import": "./src/schema/customers.ts"
+    },
+    "./schema/exchange-rates": {
+      "types": "./src/schema/exchange-rates.ts",
+      "import": "./src/schema/exchange-rates.ts"
     },
     "./schema/loyalty": {
       "types": "./src/schema/loyalty.ts",

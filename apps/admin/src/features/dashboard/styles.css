@@ -6,6 +6,73 @@
   gap: 1.25rem;
 }
 
+.admin-exchange-rates-card {
+  gap: 1rem;
+}
+
+.admin-exchange-rates-card h3 {
+  margin: 0.25rem 0 0;
+}
+
+.admin-exchange-rates-unit,
+.admin-exchange-rates-empty,
+.admin-exchange-rates-note {
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-caption);
+}
+
+.admin-exchange-rates-empty {
+  margin: 0;
+}
+
+.admin-exchange-rates-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(12rem, 0.8fr) minmax(0, 1.2fr);
+}
+
+.admin-exchange-rates-reference {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-exchange-rates-reference div {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+  border-block-end: 1px solid var(--border);
+  padding-block-end: 0.5rem;
+}
+
+.admin-exchange-rates-reference dt {
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-caption);
+}
+
+.admin-exchange-rates-reference dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: var(--admin-text-body-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.admin-exchange-rates-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-exchange-rates-note {
+  margin: 0;
+  line-height: 1.45;
+}
+
 .admin-dashboard-analytics-pulse h3 {
   margin: 0;
 }
@@ -141,6 +208,10 @@
 }
 
 @media (max-width: 40rem) {
+  .admin-exchange-rates-grid {
+    grid-template-columns: 1fr;
+  }
+
   .admin-dashboard-pulse-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem 0;

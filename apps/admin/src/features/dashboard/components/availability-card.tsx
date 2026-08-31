@@ -5,6 +5,7 @@ import { useMemo } from "react";
 
 import * as api from "~/features/dashboard/api";
 import { trpc } from "~/lib/trpc";
+import { getTenantQueryOptions } from "~/shared/api";
 import { EntityListCard } from "~/shared/components/entity-list-card";
 import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
@@ -18,6 +19,7 @@ export function AvailabilityCard() {
 
 function AvailabilityList({ branchId }: { branchId: string }) {
   const queryClient = useQueryClient();
+  const tenant = useSuspenseQuery(getTenantQueryOptions({ trpc })).data;
   const categories = useSuspenseQuery(api.getMenuCategoriesQueryOptions({ branchId, trpc })).data;
   const dishes = useSuspenseQuery(api.getMenuDishesQueryOptions({ branchId, trpc })).data;
   const availability = useMutation(api.getDishAvailabilityMutationOptions({ branchId, queryClient, trpc }));
@@ -46,7 +48,8 @@ function AvailabilityList({ branchId }: { branchId: string }) {
             </Link>
             <div className="admin-toolbar-controls">
               <span className="admin-list-meta">
-                {nameByCategory.get(dish.categoryId) ?? ""} · {formatMoney(dish.price)}
+                {nameByCategory.get(dish.categoryId) ?? ""} ·{" "}
+                {formatMoney(dish.price, tenant.restaurant.sourceCurrency)}
               </span>
               <Switch
                 aria-label={`Disponibilidad de ${dish.name}`}

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { moneyInputSchema } from "~/shared/services/money";
+
 import type { AppRouter } from "@qmenut/api/router";
 import type { inferRouterOutputs } from "@trpc/server";
 
@@ -12,10 +14,7 @@ const percentage = z
   .string()
   .trim()
   .regex(/^(?:100|\d{1,2}|)$/, "Introduce un porcentaje entre 0 y 100");
-const price = z
-  .string()
-  .trim()
-  .regex(/^(?:\d+(?:\.\d+)?|)$/, "Introduce un precio válido");
+const price = moneyInputSchema.or(z.literal(""));
 const quantity = z
   .string()
   .trim()
@@ -27,7 +26,7 @@ export const promotionFormSchema = z
     paidQuantity: quantity,
     percentage,
     scope: z.enum(promotionScopes),
-    specialPriceEuros: price,
+    specialPrice: price,
     status: z.enum(promotionStatuses),
     targetIds: z.array(z.string()),
     type: z.enum(promotionTypes),
@@ -39,8 +38,8 @@ export const promotionFormSchema = z
     if (values.type === "percentage_discount" && values.percentage === "") {
       context.addIssue({ code: "custom", message: "Indica un porcentaje", path: ["percentage"] });
     }
-    if (values.type === "special_price" && values.specialPriceEuros === "") {
-      context.addIssue({ code: "custom", message: "Indica un precio", path: ["specialPriceEuros"] });
+    if (values.type === "special_price" && values.specialPrice === "") {
+      context.addIssue({ code: "custom", message: "Indica un precio", path: ["specialPrice"] });
     }
     if (values.type === "two_for_one") {
       if (values.buyQuantity === "") {

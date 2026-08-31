@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { useForm } from "react-hook-form";
 
 import { trpc } from "~/lib/trpc";
+import { getTenantQueryOptions } from "~/shared/api";
 import { isDraftBusy } from "~/shared/images/image-draft";
 import { useImageDraft } from "~/shared/images/use-image-drafts";
 import { useImageSave } from "~/shared/images/use-image-save";
@@ -96,6 +97,7 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
   const queryClient = useQueryClient();
   const dishId = useRef(dish?.id);
   const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, trpc })).data;
+  const tenant = useSuspenseQuery(getTenantQueryOptions({ trpc })).data;
   const tags = useSuspenseQuery(getMenuTagsQueryOptions({ trpc })).data;
   const allergens = useSuspenseQuery(getMenuAllergensQueryOptions({ trpc })).data;
   const ingredients = useSuspenseQuery(getMenuIngredientsQueryOptions({ trpc })).data;
@@ -164,7 +166,7 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
     error: imageSave.error ?? create.error ?? createIngredient.error ?? update.error ?? relations.error,
     extraOptions: ingredients.map(({ id, name, price }) => ({
       id,
-      label: price > 0 ? `${name} +${formatMoney(price)}` : name,
+      label: price > 0 ? `${name} +${formatMoney(price, tenant.restaurant.sourceCurrency)}` : name,
     })),
     form,
     image,
