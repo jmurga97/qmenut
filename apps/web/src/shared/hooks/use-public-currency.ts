@@ -59,10 +59,15 @@ export function usePublicCurrency({
     [canDisplayVes, sourceCurrency],
   );
 
-  return {
-    currencyLabel: t("common.currencyLabel"),
-    currencyOptions,
-    displayCurrency,
-    handleCurrencyChange,
-  };
+  const currencyLabel = t("common.currencyLabel");
+
+  return useMemo(
+    () => ({
+      currencyLabel,
+      currencyOptions,
+      displayCurrency,
+      handleCurrencyChange,
+    }),
+    [currencyLabel, currencyOptions, displayCurrency, handleCurrencyChange],
+  );
 }

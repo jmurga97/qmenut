@@ -81,9 +81,9 @@ export class QmPageHeader extends LitElement {
     return this.topbarBrand || this.topbarName;
   }
 
-  private readonly handleCurrencyChange = (event: Event) => {
+  private readonly handleCurrencyChange = (event: CustomEvent<{ value?: string }>) => {
     event.stopPropagation();
-    const value = (event.target as HTMLElement & { value?: string }).value ?? "";
+    const value = event.detail?.value ?? "";
     this.dispatchEvent(
       new CustomEvent("qm-currency-change", {
         bubbles: true,
