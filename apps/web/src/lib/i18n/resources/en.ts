@@ -146,11 +146,20 @@ export default {
       title: "There are no rewards yet",
       body: "The venue will publish its loyalty program here when it is ready.",
     },
+    intro: {
+      title: "Visit us and earn points",
+      body: "Every visit adds a stamp. {{count}} stamps earns {{reward}}.",
+      hint: "Scan the QR code at your table in the venue to activate your card and redeem rewards.",
+      menuLink: "View the menu",
+    },
     signup: {
       pitch: "One visit, one stamp. {{count}} stamps earns {{reward}}.",
       explainer: "Create your card with your email and recover it on any device.",
       emailLabel: "Email",
       emailPlaceholder: "you@email.com",
+      consentLabel: "I agree to the processing of my email to manage my loyalty card.",
+      consentPrivacyLink: "Read the privacy policy",
+      consentRequired: "You must accept the privacy policy to create your card.",
       submit: "Create my card →",
       creating: "Creating…",
       reassurance: "No password · just your email · valid at every location",
@@ -177,6 +186,7 @@ export default {
       remaining_other: "{{count}} to go",
       redeem: "Redeem",
       redeeming: "Sending…",
+      locked: "Scan the venue QR code to redeem",
     },
     redeem: {
       badge: "Redeem · {{reward}}",

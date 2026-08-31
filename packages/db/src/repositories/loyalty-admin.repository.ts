@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, count, eq, isNull } from "drizzle-orm";
 
 import { loyaltyPrograms, loyaltyRewards } from "../schema/loyalty";
 import { dishes } from "../schema/menu";
@@ -120,6 +120,22 @@ export async function listRewards({
     .all();
 
   return rows.map((row) => ({ ...row, freeDishName: row.freeDishName ?? null }));
+}
+
+export async function countActiveRewards({ db, restaurantId }: RestaurantInput): Promise<number> {
+  const row = await db
+    .select({ count: count() })
+    .from(loyaltyRewards)
+    .where(
+      and(
+        eq(loyaltyRewards.restaurantId, restaurantId),
+        eq(loyaltyRewards.isActive, true),
+        isNull(loyaltyRewards.deletedAt),
+      ),
+    )
+    .get();
+
+  return row?.count ?? 0;
 }
 
 interface GetRewardInput extends RestaurantInput {

@@ -63,3 +63,11 @@ INSERT INTO loyalty_rewards
 VALUES
   ('reward_tapas_discount', 'rest_tapas', 'Descuento del 10%', 'Descuento en tu próxima visita', 2, 'percentage_discount', 10, NULL, 1, unixepoch() * 1000, unixepoch() * 1000),
   ('reward_tapas_croquetas', 'rest_tapas', 'Croquetas gratis', 'Una ración de croquetas', 1, 'free_dish', NULL, 'dish_tapas_croquetas', 1, unixepoch() * 1000, unixepoch() * 1000);
+
+-- Existing cards without a consent record must be forced through the current consent flow again.
+INSERT INTO customers (id, email, created_at, updated_at)
+VALUES ('customer_legacy_consent', 'legacy-consent.e2e@test.local', unixepoch() * 1000, unixepoch() * 1000);
+
+INSERT INTO customer_restaurants
+  (customer_id, restaurant_id, points_balance, stamps_balance, created_at, updated_at)
+VALUES ('customer_legacy_consent', 'rest_tapas', 0, 0, unixepoch() * 1000, unixepoch() * 1000);

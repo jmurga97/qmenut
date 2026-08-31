@@ -33,6 +33,7 @@ export function useLocale(): LocaleState {
       void navigate({
         to: ".",
         params: (prev) => ({ ...prev, locale: value === defaultLanguage ? undefined : value }),
+        search: (prev) => prev,
       });
     },
     [defaultLanguage, effectiveLocale, navigate],

@@ -85,6 +85,13 @@
       "when": 1787847571305,
       "tag": "0011_enforce_restaurant_country_code",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1787937318345,
+      "tag": "0014_loyalty_consent",
+      "breakpoints": true
     }
   ]
 }

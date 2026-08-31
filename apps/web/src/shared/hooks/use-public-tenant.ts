@@ -34,6 +34,7 @@ export function usePublicTenant(): PublicTenantState {
     return {
       heroPhotoUrl: data.branch.photos[0]?.url ?? FALLBACK_HERO_PHOTO_URL,
       primary: theme.primary,
+      publicFeatures: data.publicFeatures,
       secondary: theme.secondary,
       template: theme.template,
       tenantName: data.branch.name,

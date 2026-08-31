@@ -12,14 +12,19 @@ interface LoyaltySignupInput {
 }
 
 export function useLoyaltySignup({ host, setToken, trpc }: LoyaltySignupInput) {
+  const [consentAccepted, setConsentAccepted] = useState(false);
   const [email, setEmail] = useState("");
   const mutation = useMutation(getLoyaltyMutationOptions(trpc).createCard);
 
-  async function submit(nextEmail: string): Promise<void> {
+  async function submit(nextEmail: string, accepted = consentAccepted): Promise<void> {
     mutation.reset();
 
+    if (!accepted) {
+      return;
+    }
+
     try {
-      const result = await mutation.mutateAsync({ host, email: nextEmail });
+      const result = await mutation.mutateAsync({ consentAccepted: true, host, email: nextEmail });
       setToken(result.cardToken);
     } catch {
       // The mutation exposes the translated error through the controller model.
@@ -28,8 +33,10 @@ export function useLoyaltySignup({ host, setToken, trpc }: LoyaltySignupInput) {
 
   return {
     busy: mutation.isPending,
+    consentAccepted,
     email,
     error: mutation.isError,
+    setConsentAccepted,
     setEmail,
     submit,
   };

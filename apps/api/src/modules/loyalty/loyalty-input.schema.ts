@@ -4,7 +4,10 @@ export const hostInputSchema = z.object({ host: z.string().trim().min(1).optiona
 
 const emailSchema = z.email().trim().toLowerCase().max(254);
 
-export const createCardInputSchema = hostInputSchema.extend({ email: emailSchema });
+export const createCardInputSchema = hostInputSchema.extend({
+  consentAccepted: z.literal(true),
+  email: emailSchema,
+});
 
 export const cardTokenInputSchema = hostInputSchema.extend({ cardToken: z.string().trim().min(1) });
 

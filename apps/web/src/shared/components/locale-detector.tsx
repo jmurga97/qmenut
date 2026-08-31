@@ -35,7 +35,12 @@ export function LocaleDetector() {
       .find((code) => activeCodes.has(code));
 
     if (match && match !== defaultLanguage) {
-      void navigate({ to: ".", params: (prev) => ({ ...prev, locale: match }), replace: true });
+      void navigate({
+        to: ".",
+        params: (prev) => ({ ...prev, locale: match }),
+        search: (prev) => prev,
+        replace: true,
+      });
     }
   }, [availableLanguages, defaultLanguage, locale, navigate]);
 

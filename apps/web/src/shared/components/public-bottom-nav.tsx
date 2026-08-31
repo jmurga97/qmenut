@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 const NAV_ICON_SIZE = 19;
 const NAV_ICON_STROKE_WIDTH = 1.9;
 
-export function PublicBottomNav() {
+export function PublicBottomNav({ showLoyalty }: { showLoyalty: boolean }) {
   const navigate = useNavigate();
   const router = useRouter();
   const search = useSearch({ from: "/{-$locale}" });
@@ -72,17 +72,19 @@ export function PublicBottomNav() {
         <Phone slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
         {t("common.navigation.contact")}
       </QmTab>
-      <QmTab
-        value="/puntos"
-        active={routeId === "/{-$locale}/puntos"}
-        onPointerEnter={preloadLoyalty}
-        onFocus={preloadLoyalty}
-        onTouchStart={preloadLoyalty}
-        onQmSelect={() => void navigate({ to: "/{-$locale}/puntos", params: (prev) => prev, search })}
-      >
-        <Gift slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
-        {t("common.navigation.loyalty")}
-      </QmTab>
+      {showLoyalty ? (
+        <QmTab
+          value="/puntos"
+          active={routeId === "/{-$locale}/puntos"}
+          onPointerEnter={preloadLoyalty}
+          onFocus={preloadLoyalty}
+          onTouchStart={preloadLoyalty}
+          onQmSelect={() => void navigate({ to: "/{-$locale}/puntos", params: (prev) => prev, search })}
+        >
+          <Gift slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
+          {t("common.navigation.loyalty")}
+        </QmTab>
+      ) : null}
     </QmNavBar>
   );
 }

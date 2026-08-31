@@ -1,4 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { getLoyaltyProgramQueryOptions } from "~/features/loyalty/api/loyalty-query-options";
@@ -22,6 +23,7 @@ export function useLoyaltyController() {
   const trpc = useAppTrpc();
   const { host } = useTenantContext();
   const { t } = useTranslation();
+  const fromQr = useSearch({ from: "/{-$locale}", select: (search) => search.utm_source === "qr" });
   const { data: program } = useSuspenseQuery(getLoyaltyProgramQueryOptions({ host, trpc }));
   const session = useLoyaltyCardSession({ host, trpc });
   const signupFlow = useLoyaltySignup({ host, trpc, setToken: session.setToken });
@@ -43,8 +45,10 @@ export function useLoyaltyController() {
   const cardError = session.error ? t("loyalty.errors.loadCard") : "";
   const signup = {
     busy: signupFlow.busy,
+    consentAccepted: signupFlow.consentAccepted,
     email: signupFlow.email,
     error: signupFlow.error ? t("loyalty.errors.createCard") : cardError,
+    setConsentAccepted: signupFlow.setConsentAccepted,
     setEmail: signupFlow.setEmail,
     submit: signupFlow.submit,
   };
@@ -67,6 +71,7 @@ export function useLoyaltyController() {
   };
   const card = {
     data: session.card,
+    canRedeem: fromQr,
     error: cardError,
     redeemedReward: redemptionFlow.redeemedReward,
     target: session.target,
@@ -83,6 +88,9 @@ export function useLoyaltyController() {
   }
 
   if (!session.card) {
+    if (!fromQr) {
+      return { ...models, phase: "intro" as const, program };
+    }
     return { ...models, phase: "signup" as const, program };
   }
 

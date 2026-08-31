@@ -3,6 +3,7 @@ import { QmLoyaltyCard } from "@qmenut/ui/components/qm-loyalty-card/react";
 import { QmLoyaltySignup } from "@qmenut/ui/components/qm-loyalty-signup/react";
 import { QmRedeemWait } from "@qmenut/ui/components/qm-redeem-wait/react";
 import { QmRewardRow } from "@qmenut/ui/components/qm-reward-row/react";
+import { useRouteContext } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { useLoyaltyController } from "~/features/loyalty/hooks/use-loyalty-controller";
@@ -11,6 +12,7 @@ import type { TFunction } from "i18next";
 import type { LoyaltyController } from "~/features/loyalty/hooks/use-loyalty-controller";
 import type { LoyaltyReward } from "~/features/loyalty/types";
 
+type IntroController = Extract<LoyaltyController, { phase: "intro" }>;
 type SignupController = Extract<LoyaltyController, { phase: "signup" }>;
 type RedemptionController = Extract<LoyaltyController, { phase: "redemption" }>;
 type CardController = Extract<LoyaltyController, { phase: "card" }>;
@@ -39,6 +41,12 @@ export function LoyaltyExperience({ restaurantName }: { restaurantName: string }
       );
     case "loading":
       return <div className="loyalty-loading" aria-label={t("loyalty.loading")} />;
+    case "intro":
+      return (
+        <div className="public-route-content-stage" key="intro">
+          <IntroState loyalty={loyalty} />
+        </div>
+      );
     case "signup":
       return (
         <div className="public-route-content-stage" key="signup">
@@ -73,8 +81,28 @@ function UnavailableState() {
   );
 }
 
+function IntroState({ loyalty }: { loyalty: IntroController }) {
+  const { t } = useTranslation();
+  const { locale } = useRouteContext({ from: "/{-$locale}" });
+  const firstReward = loyalty.program.rewards[0];
+  const menuHref = locale ? `/${locale}` : "/";
+
+  return (
+    <section className="loyalty-status" aria-labelledby="loyalty-intro-title">
+      <span className="loyalty-status__stamp" aria-hidden="true" />
+      <h2 id="loyalty-intro-title">{t("loyalty.intro.title")}</h2>
+      <p>{t("loyalty.intro.body", { count: firstReward?.cost ?? 0, reward: firstReward?.name ?? "" })}</p>
+      <p>{t("loyalty.intro.hint")}</p>
+      <a className="loyalty-status__cta" href={menuHref}>
+        {t("loyalty.intro.menuLink")}
+      </a>
+    </section>
+  );
+}
+
 function SignupState({ loyalty }: { loyalty: SignupController }) {
   const { t } = useTranslation();
+  const { locale } = useRouteContext({ from: "/{-$locale}" });
   const firstReward = loyalty.program.rewards[0];
   const submitLabel = t(loyalty.signup.busy ? "loyalty.signup.creating" : "loyalty.signup.submit");
 
@@ -86,11 +114,17 @@ function SignupState({ loyalty }: { loyalty: SignupController }) {
       emailLabel={t("loyalty.signup.emailLabel")}
       emailPlaceholder={t("loyalty.signup.emailPlaceholder")}
       submitLabel={submitLabel}
+      consentAccepted={loyalty.signup.consentAccepted}
+      consentLabel={t("loyalty.signup.consentLabel")}
+      privacyHref={locale ? `/${locale}/privacidad` : "/privacidad"}
+      privacyLinkLabel={t("loyalty.signup.consentPrivacyLink")}
+      consentError={t("loyalty.signup.consentRequired")}
       reassurance={t("loyalty.signup.reassurance")}
       error={loyalty.signup.error}
       busy={loyalty.signup.busy}
       onQmInput={(event) => loyalty.signup.setEmail(event.detail.email)}
-      onQmSubmit={(event) => void loyalty.signup.submit(event.detail.email)}
+      onQmConsentChange={(event) => loyalty.signup.setConsentAccepted(event.detail.accepted)}
+      onQmSubmit={(event) => void loyalty.signup.submit(event.detail.email, event.detail.consentAccepted)}
     />
   );
 }
@@ -168,6 +202,7 @@ function CardState({ loyalty, restaurantName }: { loyalty: CardController; resta
       {card.rewards.map((reward) => (
         <RewardRow
           balance={balance}
+          canRedeem={loyalty.card.canRedeem}
           key={reward.id}
           reward={reward}
           onRedeem={() => void loyalty.card.redeem(reward)}
@@ -196,7 +231,17 @@ function StampCode({ stamp }: { stamp: CardController["stamp"] }) {
   );
 }
 
-function RewardRow({ balance, onRedeem, reward }: { balance: number; onRedeem: () => void; reward: LoyaltyReward }) {
+function RewardRow({
+  balance,
+  canRedeem,
+  onRedeem,
+  reward,
+}: {
+  balance: number;
+  canRedeem: boolean;
+  onRedeem: () => void;
+  reward: LoyaltyReward;
+}) {
   const { t } = useTranslation();
   const remaining = Math.max(0, reward.cost - balance);
 
@@ -208,9 +253,10 @@ function RewardRow({ balance, onRedeem, reward }: { balance: number; onRedeem: (
       cost={reward.cost}
       remaining={remaining}
       unlocked={reward.unlocked}
+      disabled={!canRedeem}
       stampsLabel={t("loyalty.reward.stamps")}
       remainingLabel={t("loyalty.reward.remaining", { count: remaining })}
-      redeemLabel={t("loyalty.reward.redeem")}
+      redeemLabel={t(canRedeem ? "loyalty.reward.redeem" : "loyalty.reward.locked")}
       busyLabel={t("loyalty.reward.redeeming")}
       onQmRedeem={onRedeem}
     />

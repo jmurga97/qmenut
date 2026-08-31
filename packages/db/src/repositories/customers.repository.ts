@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { customerRestaurants, customers } from "../schema/customers";
 
@@ -24,6 +24,7 @@ export async function findCustomerByEmail({
 }
 
 interface UpsertCustomerCardInput {
+  consentVersion: string;
   db: DrizzleDb;
   email: string;
   restaurantId: string;
@@ -31,6 +32,7 @@ interface UpsertCustomerCardInput {
 
 /** Idempotent: same email on any device resolves to the same card (card recovery). */
 export async function upsertCustomerCard({
+  consentVersion,
   db,
   email,
   restaurantId,
@@ -60,12 +62,28 @@ export async function upsertCustomerCard({
       restaurantId,
       pointsBalance: 0,
       stampsBalance: 0,
+      loyaltyConsentAcceptedAt: now,
+      loyaltyConsentVersion: consentVersion,
       firstVisitAt: null,
       lastVisitAt: null,
       createdAt: now,
       updatedAt: now,
     })
-    .onConflictDoNothing();
+    .onConflictDoUpdate({
+      target: [customerRestaurants.customerId, customerRestaurants.restaurantId],
+      set: {
+        loyaltyConsentAcceptedAt: sql`
+          CASE
+            WHEN ${customerRestaurants.loyaltyConsentVersion} = ${consentVersion}
+              AND ${customerRestaurants.loyaltyConsentAcceptedAt} IS NOT NULL
+            THEN ${customerRestaurants.loyaltyConsentAcceptedAt}
+            ELSE ${now}
+          END
+        `,
+        loyaltyConsentVersion: consentVersion,
+        updatedAt: now,
+      },
+    });
 
   const state = await getCardState({ db, customerId: customer.id, restaurantId });
 
@@ -74,6 +92,31 @@ export async function upsertCustomerCard({
   }
 
   return state;
+}
+
+interface HasCurrentLoyaltyConsentInput {
+  consentVersion: string;
+  db: DrizzleDb;
+  customerId: string;
+  restaurantId: string;
+}
+
+export async function hasCurrentLoyaltyConsent({
+  consentVersion,
+  db,
+  customerId,
+  restaurantId,
+}: HasCurrentLoyaltyConsentInput): Promise<boolean> {
+  const row = await db
+    .select({
+      loyaltyConsentAcceptedAt: customerRestaurants.loyaltyConsentAcceptedAt,
+      loyaltyConsentVersion: customerRestaurants.loyaltyConsentVersion,
+    })
+    .from(customerRestaurants)
+    .where(and(eq(customerRestaurants.customerId, customerId), eq(customerRestaurants.restaurantId, restaurantId)))
+    .get();
+
+  return row?.loyaltyConsentVersion === consentVersion && row.loyaltyConsentAcceptedAt !== null;
 }
 
 interface GetCardStateInput {
