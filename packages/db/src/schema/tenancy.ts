@@ -132,6 +132,12 @@ export const restaurantUsers = sqliteTable(
     roleCode: text("role_code", { enum: ROLE_CODES }).notNull().default("staff"),
     isDriver: integer("is_driver", { mode: "boolean" }).notNull().default(false),
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    inviteStatus: text("invite_status", { enum: ["not_sent", "sent", "failed"] })
+      .notNull()
+      .default("not_sent"),
+    inviteLastErrorCode: text("invite_last_error_code"),
+    inviteLastAttemptAt: integer("invite_last_attempt_at"),
+    inviteSentAt: integer("invite_sent_at"),
     createdAt: integer("created_at").notNull().default(epochMilliseconds),
     updatedAt: integer("updated_at").notNull().default(epochMilliseconds),
   },

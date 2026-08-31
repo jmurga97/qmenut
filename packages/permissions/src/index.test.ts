@@ -15,12 +15,15 @@ const ALL_PERMISSIONS: readonly Permission[] = [
   "loyalty.insights",
   "loyalty.operate",
   "billing.manage",
+  "analytics.read",
+  "exchangeRates.write",
+  "users.manage",
 ];
 
 const EXPECTED: Record<RestaurantRoleCode, readonly Permission[]> = {
   owner: ALL_PERMISSIONS,
-  admin: ALL_PERMISSIONS.filter((permission) => permission !== "billing.manage"),
-  staff: ["menu.toggleDishAvailability", "loyalty.operate"],
+  admin: ALL_PERMISSIONS.filter((permission) => permission !== "billing.manage" && permission !== "users.manage"),
+  staff: ["menu.write", "menu.toggleDishAvailability", "loyalty.operate", "exchangeRates.write"],
 };
 
 describe("permission matrix", () => {

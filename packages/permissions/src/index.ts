@@ -12,7 +12,10 @@ export type Permission =
   | "loyalty.manage"
   | "loyalty.insights"
   | "loyalty.operate"
-  | "billing.manage";
+  | "billing.manage"
+  | "analytics.read"
+  | "exchangeRates.write"
+  | "users.manage";
 
 const ROLE_PERMISSIONS: Record<RestaurantRoleCode, readonly Permission[]> = {
   owner: [
@@ -26,6 +29,9 @@ const ROLE_PERMISSIONS: Record<RestaurantRoleCode, readonly Permission[]> = {
     "loyalty.insights",
     "loyalty.operate",
     "billing.manage",
+    "analytics.read",
+    "exchangeRates.write",
+    "users.manage",
   ],
   admin: [
     "menu.write",
@@ -37,8 +43,10 @@ const ROLE_PERMISSIONS: Record<RestaurantRoleCode, readonly Permission[]> = {
     "loyalty.manage",
     "loyalty.insights",
     "loyalty.operate",
+    "analytics.read",
+    "exchangeRates.write",
   ],
-  staff: ["menu.toggleDishAvailability", "loyalty.operate"],
+  staff: ["menu.write", "menu.toggleDishAvailability", "loyalty.operate", "exchangeRates.write"],
 };
 
 export function can(role: RestaurantRoleCode, permission: Permission): boolean {

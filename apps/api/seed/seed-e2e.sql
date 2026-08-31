@@ -1,13 +1,15 @@
 -- Fixed-OTP Playwright account. Re-runnable after the public-menu seed.
 DELETE FROM restaurant_users
-WHERE id IN ('ru_tapas_e2e', 'ru_tapas_staff_e2e', 'ru_tapas_admin_e2e', 'ru_fine_owner_e2e');
+WHERE id IN ('ru_tapas_e2e', 'ru_tapas_staff_e2e', 'ru_tapas_admin_e2e', 'ru_fine_owner_e2e')
+   OR user_id = 'user_invite_e2e';
 DELETE FROM users
-WHERE id IN ('user_e2e', 'user_staff_e2e', 'user_admin_e2e', 'user_fine_owner_e2e')
+WHERE id IN ('user_e2e', 'user_staff_e2e', 'user_admin_e2e', 'user_fine_owner_e2e', 'user_invite_e2e')
    OR email IN (
      'e2e@test.local',
      'staff.e2e@test.local',
      'admin.e2e@test.local',
-     'owner.fine@test.local'
+     'owner.fine@test.local',
+     'invite.e2e@test.local'
    );
 
 INSERT INTO users (id, name, email, email_verified, created_at, updated_at)
@@ -33,6 +35,10 @@ VALUES ('user_fine_owner_e2e', 'E2E Fine Owner', 'owner.fine@test.local', 1, uni
 
 INSERT INTO restaurant_users (id, restaurant_id, user_id, role_code)
 VALUES ('ru_fine_owner_e2e', 'rest_fine', 'user_fine_owner_e2e', 'owner');
+
+-- Existing global account used to verify provisioning without replacing its canonical name.
+INSERT INTO users (id, name, email, email_verified, created_at, updated_at)
+VALUES ('user_invite_e2e', 'Cuenta e2e existente', 'invite.e2e@test.local', 1, unixepoch() * 1000, unixepoch() * 1000);
 
 -- Extra branches make every public template reachable through the same Worker and exercise the
 -- admin branch selector. The no-domain branch deliberately covers resolveBranchHost's guard.

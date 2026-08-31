@@ -16,7 +16,8 @@ export type AdminSidebarIconName =
   | "promotions"
   | "public-site"
   | "qr"
-  | "theme";
+  | "theme"
+  | "users";
 
 export interface AdminSidebarItem extends Omit<NavListItem, "icon"> {
   icon: AdminSidebarIconName;
@@ -118,6 +119,13 @@ const ICONS: Record<AdminSidebarIconName, ReactNode> = {
     <>
       <circle cx="10" cy="10" r="6.5" />
       <path d="M10 3.5a6.5 6.5 0 0 0 0 13V3.5Z" />
+    </>
+  ),
+  users: (
+    <>
+      <circle cx="10" cy="7" r="2.5" />
+      <path d="M5.5 16c.35-2.35 2-3.75 4.5-3.75s4.15 1.4 4.5 3.75" />
+      <path d="M15 5.25a2.3 2.3 0 0 1 0 4.5M16.5 13c.8.55 1.25 1.5 1.4 2.5" />
     </>
   ),
 };

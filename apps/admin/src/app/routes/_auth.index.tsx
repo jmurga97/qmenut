@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_auth/")({
   loader: async ({ context, deps }) => {
     const { queryClient, roleCode, trpc } = context;
     const jobs: Array<Promise<unknown>> = [];
-    if (can(roleCode, "loyalty.insights")) {
+    if (can(roleCode, "analytics.read")) {
       const range = getVisitsRange(deps.period);
       jobs.push(
         queryClient.ensureQueryData(api.getAnalyticsSnapshotQueryOptions({ period: "15d", trpc })),

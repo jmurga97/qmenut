@@ -25,6 +25,7 @@ import "../features/languages/styles.css";
 import "../features/loyalty/styles.css";
 import "../features/qr/styles.css";
 import "../features/theme/styles.css";
+import "../features/users/styles.css";
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
