@@ -1,6 +1,5 @@
 import { QmFeatured } from "@qmenut/ui/components/qm-featured/react";
 import { QmHeading } from "@qmenut/ui/components/qm-heading/react";
-import { TEMPLATES } from "@qmenut/ui/theme/presets";
 import { ChefHat, Sparkles, Tag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -15,8 +14,8 @@ const FEATURED_IMAGE_WIDTH_PX = 430;
 
 export function HighlightsPage() {
   const content = useHighlightsContent();
-  const { template } = usePublicRouteLayout();
-  const showDishPhotos = TEMPLATES[template].photoMode !== "none";
+  const { template, tenant } = usePublicRouteLayout();
+  const showDishPhotos = tenant.showMenuPhotos;
   const { t } = useTranslation();
 
   useTrackPageView("highlights_view");

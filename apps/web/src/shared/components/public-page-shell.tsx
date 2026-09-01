@@ -3,10 +3,10 @@ import { useEffect, useMemo } from "react";
 
 import { FONT_CSS_URLS, resolveTenantFontIds } from "~/app/fonts/font-css";
 import { PublicBottomNav } from "~/shared/components/public-bottom-nav";
-import { useTenantContext } from "~/shared/hooks/use-tenant-context";
 
 import type { QmFontId } from "@qmenut/ui/theme/font-catalog";
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";
+import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import type { ReactNode } from "react";
 import type { PublicTenant } from "~/shared/types/public-tenant";
 
@@ -14,11 +14,10 @@ interface PublicPageShellProps {
   children: ReactNode;
   template: QmTemplateName;
   tenant: PublicTenant;
+  theme: QmTenantThemeConfig;
 }
 
-export function PublicPageShell({ children, template, tenant }: PublicPageShellProps) {
-  const { theme } = useTenantContext();
-
+export function PublicPageShell({ children, template, tenant, theme }: PublicPageShellProps) {
   const themeVars = useMemo(() => {
     // KV preset overrides only apply while the tenant's own template is active; switching
     // templates (dev switcher) falls back to that template's stock preset.
@@ -64,7 +63,7 @@ export function PublicPageShell({ children, template, tenant }: PublicPageShellP
     <div className="home-shell" data-template={template} style={themeVars}>
       <div className="home-column">
         {children}
-        <PublicBottomNav />
+        <PublicBottomNav showLoyalty={tenant.publicFeatures.loyalty} />
       </div>
     </div>
   );

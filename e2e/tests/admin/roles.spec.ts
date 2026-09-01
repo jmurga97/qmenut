@@ -4,13 +4,14 @@ import { callTrpcMutation, callTrpcQuery } from "../../helpers/trpc";
 test("limits staff controls while allowing dish availability changes", async ({ staff }) => {
   await staff.goto("/", { waitUntil: "domcontentloaded" });
   await expect(staff.getByText("Facturación", { exact: true })).toBeHidden();
+  await expect(staff.getByText("Usuarios", { exact: true })).toBeHidden();
 
   await staff.goto("/billing", { waitUntil: "domcontentloaded" });
   await expect(staff).toHaveURL(/\/(?:\?.*)?$/);
 
   await staff.goto("/menu", { waitUntil: "domcontentloaded" });
-  await expect(staff.getByRole("link", { name: "+ Nueva categoría" })).toBeHidden();
-  await expect(staff.getByRole("link", { name: "+ Nuevo plato" })).toBeHidden();
+  await expect(staff.getByRole("link", { name: "+ Nueva categoría" })).toBeVisible();
+  await expect(staff.getByRole("link", { name: "+ Nuevo plato" })).toBeVisible();
 
   const availability = staff.getByRole("switch", { name: "Disponibilidad de Patatas bravas" });
   await expect(availability).toBeChecked();
@@ -36,6 +37,7 @@ test("limits staff controls while allowing dish availability changes", async ({ 
 test("gives admins owner-level operational access while keeping billing owner-only", async ({ adminRole }) => {
   await adminRole.goto("/", { waitUntil: "domcontentloaded" });
   await expect(adminRole.getByText("Facturación", { exact: true })).toBeHidden();
+  await expect(adminRole.getByText("Usuarios", { exact: true })).toBeHidden();
   await expect(adminRole.getByText("Menú", { exact: true }).first()).toBeVisible();
   await expect(adminRole.getByText("Tema", { exact: true }).first()).toBeVisible();
   await expect(adminRole.getByText("Idiomas", { exact: true }).first()).toBeVisible();
@@ -50,6 +52,10 @@ test("gives admins owner-level operational access while keeping billing owner-on
   expect(languageCatalog, languageCatalog.body).toMatchObject({ ok: true, status: 200 });
   const billing = await callTrpcQuery(adminRole, "admin.billing.overview");
   expect(billing, billing.body).toMatchObject({ ok: false, status: 403 });
+  const analytics = await callTrpcQuery(adminRole, "admin.analytics.snapshot", { period: "15d" });
+  expect(analytics, analytics.body).toMatchObject({ ok: true, status: 200 });
+  const users = await callTrpcQuery(adminRole, "admin.users.list");
+  expect(users, users.body).toMatchObject({ ok: false, status: 403 });
 
   const forbiddenOwnerAction = await callTrpcMutation(adminRole, "admin.billing.portal", undefined);
   expect(forbiddenOwnerAction, forbiddenOwnerAction.body).toMatchObject({ ok: false, status: 403 });

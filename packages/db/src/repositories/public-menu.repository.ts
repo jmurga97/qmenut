@@ -3,11 +3,13 @@ import { and, asc, eq, getTableColumns, inArray, isNull, or } from "drizzle-orm"
 import { getPromotionCandidateRows, getPromotionRows } from "./promotions.repository";
 import { resolveTenantByHost } from "./tenant.repository";
 import { getTranslationRows } from "./translations.repository";
+import { isUsableRestaurantExchangeRate } from "../domain/exchange-rates";
 import { createBestPromotionMap, isPromotionLikeActiveNow } from "../domain/promotions";
 import { mapBranch, mapContactBranch } from "../mappers/branch.mapper";
 import { mapPromotion } from "../mappers/promotion.mapper";
 import { createTranslationFieldMap, mapPublicCategories, mapPublicDishes } from "../mappers/public-menu.mapper";
 import { branchPhotos, branches, branchSchedules } from "../schema/branches";
+import { restaurantExchangeRates } from "../schema/exchange-rates";
 import {
   allergens,
   categories,
@@ -90,11 +92,15 @@ async function getBranchRow({ db, tenant }: TenantInput) {
       dataProtectionEmail: restaurants.dataProtectionEmail,
       legalName: restaurants.legalName,
       countryCode: restaurants.countryCode,
+      sourceCurrency: restaurants.sourceCurrency,
       taxId: restaurants.taxId,
       timeZone: restaurants.timezone,
+      vesExchangeRate: restaurantExchangeRates.rate,
+      vesPricesEnabled: restaurantExchangeRates.isEnabled,
     })
     .from(branches)
     .innerJoin(restaurants, eq(restaurants.id, branches.restaurantId))
+    .leftJoin(restaurantExchangeRates, eq(restaurantExchangeRates.restaurantId, restaurants.id))
     .where(
       and(
         eq(branches.id, tenant.branchId),
@@ -179,7 +185,10 @@ async function getPublicBranchContext({ db, tenant }: TenantInput): Promise<{
   branch: PublicBranch;
   countryCode: string;
   legal: PublicLegalEntity;
+  sourceCurrency: string;
   timeZone: string;
+  vesExchangeRate: string | null;
+  vesPricesEnabled: boolean;
 } | null> {
   const row = await getBranchRow({ db, tenant });
 
@@ -188,6 +197,9 @@ async function getPublicBranchContext({ db, tenant }: TenantInput): Promise<{
   }
 
   const [photos, schedules] = await Promise.all([getBranchPhotos({ db, tenant }), getBranchSchedules({ db, tenant })]);
+
+  const vesExchangeRate =
+    row.sourceCurrency === "USD" && isUsableRestaurantExchangeRate(row.vesExchangeRate) ? row.vesExchangeRate : null;
 
   return {
     branch: mapBranch({ row, photos, schedules, timeZone: row.timeZone }),
@@ -198,7 +210,10 @@ async function getPublicBranchContext({ db, tenant }: TenantInput): Promise<{
       name: row.legalName,
       taxId: row.taxId,
     },
+    sourceCurrency: row.sourceCurrency,
     timeZone: row.timeZone,
+    vesExchangeRate,
+    vesPricesEnabled: row.vesPricesEnabled === true && vesExchangeRate !== null,
   };
 }
 
@@ -361,7 +376,7 @@ export async function getPublicMenu({
     return null;
   }
 
-  const { branch, countryCode, legal, timeZone } = branchContext;
+  const { branch, countryCode, legal, sourceCurrency, timeZone, vesExchangeRate, vesPricesEnabled } = branchContext;
   const [categoryRows, contactBranches, dishRows, promotionRows] = await Promise.all([
     getCategoryRows({ db, tenant }),
     getPublicContactBranches({ db, tenant }),
@@ -425,5 +440,8 @@ export async function getPublicMenu({
     countryCode,
     legal,
     promotions: activePromotions.map((row): PublicPromotion => mapPromotion(row)),
+    sourceCurrency,
+    vesExchangeRate,
+    vesPricesEnabled,
   };
 }

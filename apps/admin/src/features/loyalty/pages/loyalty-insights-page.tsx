@@ -1,8 +1,11 @@
 import { Button, Checkbox, InlineMessage, SearchField } from "@jmurga97/components";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
 import { useLoyaltyInsightsController } from "~/features/loyalty/hooks/use-loyalty-insights-controller";
 import * as services from "~/features/loyalty/services";
+import { trpc } from "~/lib/trpc";
+import { getTenantQueryOptions } from "~/shared/api";
 import { StackedBarChart } from "~/shared/components/charts/stacked-bar-chart";
 import { VISIT_SERIES, toVisitChartPoints } from "~/shared/components/charts/visit-chart";
 import { SegmentedToggle } from "~/shared/components/controls/segmented-toggle";
@@ -24,6 +27,7 @@ const COLUMNS: Array<{ key: CustomerSort; label: string }> = [
 ];
 
 export function LoyaltyInsightsPage() {
+  const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const loyalty = useLoyaltyInsightsController();
   const { customers, loyaltyReturn, search, summary } = loyalty;
   return (
@@ -80,8 +84,14 @@ export function LoyaltyInsightsPage() {
                 <strong>{services.formatReturnRatio(loyalty.returnRatio)}</strong>
               </div>
               <div className="loyalty-return-totals">
-                <Metric label="Ingresos estimados" value={formatMoney(loyalty.returnTotals.estimatedRevenue)} />
-                <Metric label="Coste de premios" value={formatMoney(loyalty.returnTotals.rewardCost)} />
+                <Metric
+                  label="Ingresos estimados"
+                  value={formatMoney(loyalty.returnTotals.estimatedRevenue, tenant.restaurant.sourceCurrency)}
+                />
+                <Metric
+                  label="Coste de premios"
+                  value={formatMoney(loyalty.returnTotals.rewardCost, tenant.restaurant.sourceCurrency)}
+                />
               </div>
             </>
           )}

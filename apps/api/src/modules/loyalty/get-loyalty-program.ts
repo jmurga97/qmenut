@@ -1,4 +1,8 @@
-import { getLoyaltyProgram as findProgram, listRewards } from "@qmenut/db/repositories/loyalty-admin.repository";
+import {
+  countActiveRewards,
+  getLoyaltyProgram as findProgram,
+  listRewards,
+} from "@qmenut/db/repositories/loyalty-admin.repository";
 
 import { resolvePublicTenant } from "../public-menu/resolve-public-tenant";
 
@@ -14,6 +18,27 @@ interface GetLoyaltyProgramForClientInput {
 export interface PublicLoyaltyProgram {
   program: { stampsPerVisit: number };
   rewards: LoyaltyRewardView[];
+}
+
+export interface PublicLoyaltyFeatures {
+  loyalty: boolean;
+}
+
+interface PublicLoyaltyFeaturesInput {
+  db: DrizzleDb;
+  restaurantId: string;
+}
+
+export async function getPublicLoyaltyFeatures({
+  db,
+  restaurantId,
+}: PublicLoyaltyFeaturesInput): Promise<PublicLoyaltyFeatures> {
+  const [program, activeRewardCount] = await Promise.all([
+    findProgram({ db, restaurantId }),
+    countActiveRewards({ db, restaurantId }),
+  ]);
+
+  return { loyalty: program?.isActive === true && activeRewardCount > 0 };
 }
 
 export async function getLoyaltyProgramForClient({

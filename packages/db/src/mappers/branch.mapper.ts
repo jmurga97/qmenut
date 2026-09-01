@@ -35,7 +35,6 @@ export function mapBranch({
     logoUrl: row.logoUrl,
     customDomain: row.customDomain,
     googleReviewsEnabled: row.googleReviewsEnabled,
-    currency: row.currency,
     latitude: row.latitude,
     longitude: row.longitude,
     photos,

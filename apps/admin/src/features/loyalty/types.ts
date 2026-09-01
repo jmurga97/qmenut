@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { moneyInputSchema } from "~/shared/services/money";
 import { VISIT_PERIODS } from "~/shared/services/visit-series";
 
 import type { AppRouter } from "@qmenut/api/router";
@@ -26,10 +27,7 @@ export const loyaltyInsightsSearchSchema = z.object({
   inactive: searchBoolean,
   period: visitsPeriodSchema.catch("30d"),
 });
-const optionalMoneySchema = z
-  .string()
-  .trim()
-  .regex(/^(?:\d+(?:\.\d+)?|)$/, "Indica un importe válido");
+const optionalMoneySchema = moneyInputSchema.or(z.literal(""));
 const costSchema = z
   .string()
   .trim()
@@ -46,7 +44,7 @@ export const rewardFormSchema = z
     cost: costSchema,
     type: rewardTypeSchema,
     percentage: percentageSchema,
-    specialPriceEuros: optionalMoneySchema,
+    specialPrice: optionalMoneySchema,
     freeDishId: z.string(),
     isActive: z.boolean(),
   })
@@ -61,14 +59,14 @@ export const rewardFormSchema = z
       if (!reward.freeDishId) {
         context.addIssue({ code: "custom", path: ["freeDishId"], message: "Selecciona un plato" });
       }
-      if (reward.specialPriceEuros === "") {
-        context.addIssue({ code: "custom", path: ["specialPriceEuros"], message: "Indica un precio especial" });
+      if (reward.specialPrice === "") {
+        context.addIssue({ code: "custom", path: ["specialPrice"], message: "Indica un precio especial" });
       }
     }
   });
 export const loyaltyProgramFormSchema = z.object({
   isActive: z.boolean(),
-  ticketMedioEuros: optionalMoneySchema,
+  averageTicket: optionalMoneySchema,
   rewards: z.array(rewardFormSchema),
 });
 export type CustomerSort = z.infer<typeof customerSortSchema>;

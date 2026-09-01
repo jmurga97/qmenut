@@ -1,5 +1,6 @@
 export default {
   common: {
+    currencyLabel: "Moneda",
     languageLabel: "Idioma",
     primaryNavigationLabel: "Navegación principal",
     navigation: {
@@ -146,14 +147,35 @@ export default {
       title: "Todavía no hay premios disponibles",
       body: "El establecimiento publicará aquí su programa de fidelización cuando esté listo.",
     },
+    intro: {
+      title: "Visítanos y gana puntos",
+      body: "Cada visita suma un sello. Con {{count}} sellos te llevas {{reward}}.",
+      hint: "Escanea el QR de la mesa en el local para activar tu tarjeta y canjear premios.",
+      menuLink: "Ver la carta",
+    },
     signup: {
       pitch: "Cada visita, un sello. {{count}} sellos, {{reward}}.",
       explainer: "Crea tu tarjeta con tu email y recupérala desde cualquier dispositivo.",
       emailLabel: "Email",
       emailPlaceholder: "tu@email.com",
+      consentLabel: "Acepto el tratamiento de mi email para gestionar mi tarjeta de fidelización.",
+      consentPrivacyLink: "Leer la política de privacidad",
+      consentRequired: "Debes aceptar la política de privacidad para crear la tarjeta.",
       submit: "Crear mi tarjeta →",
       creating: "Creando…",
       reassurance: "Sin contraseña · solo tu email · válida en todas las sedes",
+    },
+    consent: {
+      pitch: "Nueva política de privacidad",
+      explainer: "Confirma tu email ({{email}}) para desbloquear tu tarjeta. Tus sellos y premios están a salvo.",
+      emailLabel: "Email",
+      emailPlaceholder: "tu@email.com",
+      consentLabel: "Acepto el tratamiento de mi email para gestionar mi tarjeta de fidelización.",
+      consentPrivacyLink: "Leer la política de privacidad",
+      consentRequired: "Debes aceptar la política de privacidad para desbloquear la tarjeta.",
+      submit: "Confirmar y desbloquear →",
+      confirming: "Confirmando…",
+      reassurance: "Sin contraseña · solo tu email",
     },
     card: {
       progress: "Tus sellos",
@@ -177,6 +199,7 @@ export default {
       remaining_other: "faltan {{count}}",
       redeem: "Canjear",
       redeeming: "Enviando…",
+      locked: "Escanea el QR del local para canjear",
     },
     redeem: {
       badge: "Canje · {{reward}}",
@@ -190,6 +213,7 @@ export default {
       return: "Volver a canjear",
     },
     errors: {
+      acceptConsent: "No pudimos confirmar tu tarjeta. Revisa el email e inténtalo de nuevo.",
       createCard: "No pudimos crear tu tarjeta. Revisa el email e inténtalo de nuevo.",
       loadCard: "No pudimos cargar tu tarjeta. Inténtalo de nuevo.",
     },

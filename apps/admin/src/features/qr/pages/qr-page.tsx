@@ -12,6 +12,10 @@ import { useQrController } from "../hooks/use-qr-controller";
 import { QR_PREVIEW_SIZE } from "../services";
 
 const QR_SIZE_OPTIONS = [512, 1024, 2048].map((size) => ({ id: String(size), label: `${size} × ${size} px` }));
+const QR_TARGET_OPTIONS = [
+  { id: "menu", label: "Carta" },
+  { id: "loyalty", label: "Fidelización" },
+];
 export function QrPage() {
   const branch = useSelectedBranch();
   if (!branch) return <NoBranchState description="Crea una sucursal para generar su código QR." />;
@@ -49,7 +53,11 @@ function QrPanel({ host }: { host: string }) {
               <div className="admin-kicker" id="admin-qr-controls-title">
                 Archivo de descarga
               </div>
-              <p className="admin-copy">Elige el tamaño según dónde vayas a imprimir o compartir el código.</p>
+              <p className="admin-copy">
+                «Carta» abre el menú. «Fidelización» lleva a la tarjeta de puntos y habilita el canje de premios (solo
+                funciona escaneando el QR en el local).
+              </p>
+              <FormSelect label="Destino del QR" name="target" options={QR_TARGET_OPTIONS} />
               <FormSelect label="Tamaño del PNG" name="size" options={QR_SIZE_OPTIONS} />
             </section>
           </div>

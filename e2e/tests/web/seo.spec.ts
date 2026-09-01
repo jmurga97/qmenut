@@ -1,6 +1,6 @@
 import { expect, test } from "../../fixtures/test";
 
-const ROUTE_PATHS = ["/", "/contacto", "/destacados", "/puntos", "/aviso-legal", "/privacidad"];
+const ROUTE_PATHS_WITHOUT_LOYALTY = ["/", "/contacto", "/destacados", "/aviso-legal", "/privacidad"];
 
 test("serves a development-wide noindex policy and localized sitemap through the edge cache", async ({ request }) => {
   const cacheKey = Date.now();
@@ -22,11 +22,12 @@ test("serves a development-wide noindex policy and localized sitemap through the
   expect(firstSitemap.headers()["content-type"]).toContain("application/xml");
   expect(firstSitemap.headers()["x-robots-tag"]).toBe("noindex, nofollow");
   expect(firstSitemap.headers()["x-qmenut-cache"]).toBe("MISS");
-  expect((sitemap.match(/<url>/g) ?? []).length).toBe(ROUTE_PATHS.length);
-  for (const path of ROUTE_PATHS) {
+  expect((sitemap.match(/<url>/g) ?? []).length).toBe(ROUTE_PATHS_WITHOUT_LOYALTY.length);
+  for (const path of ROUTE_PATHS_WITHOUT_LOYALTY) {
     expect(sitemap).toContain(`https://fine.localhost${path}`);
     expect(sitemap).toContain(`https://fine.localhost/en${path === "/" ? "/" : path}`);
   }
+  expect(sitemap).not.toContain("https://fine.localhost/puntos");
   expect(sitemap).toContain('hreflang="x-default"');
   expect((await request.get(sitemapUrl)).headers()["x-qmenut-cache"]).toBe("HIT");
 });
@@ -40,4 +41,14 @@ test("renders JSON-LD and language alternates on the menu root", async ({ page }
   await expect(page.locator('link[rel="alternate"][hreflang="es"]')).toHaveCount(1);
   await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveCount(1);
   await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveCount(1);
+});
+
+test("hides unavailable loyalty navigation but keeps the direct route available", async ({ page }) => {
+  await page.goto("http://fine.localhost:4011/");
+
+  await expect(page.getByRole("tab", { name: "Puntos" })).toHaveCount(0);
+
+  await page.goto("http://fine.localhost:4011/puntos");
+  await expect(page.getByRole("heading", { name: "Todavía no hay premios disponibles" })).toBeVisible();
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
 });

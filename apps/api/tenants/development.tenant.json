@@ -3,7 +3,7 @@
     "name": "QMenut Development",
     "countryCode": "VEN",
     "defaultLanguageCode": "es",
-    "defaultCurrency": "EUR",
+    "sourceCurrency": "USD",
     "timezone": "Europe/Madrid",
     "legal": {
       "legalName": "QMenut Development",
@@ -20,7 +20,6 @@
     "customDomain": "dev.qmenut.app",
     "address": "Development environment",
     "phone": "+34900000000",
-    "currency": "EUR",
     "planCode": "basic",
     "schedules": [
       { "dayOfWeek": 1, "openMinute": 540, "closeMinute": 1320 },

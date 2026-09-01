@@ -23,11 +23,11 @@ export function useLoyaltyCardSession({ host, trpc }: LoyaltyCardSessionInput) {
     enabled: tokenState.hydrated && tokenState.token !== null,
     retry: false,
   });
-  const unauthorized = getTrpcErrorCode(cardQuery.error) === "UNAUTHORIZED";
+  const invalidSession = getTrpcErrorCode(cardQuery.error) === "UNAUTHORIZED";
 
   useEffect(() => {
-    if (unauthorized) clearToken();
-  }, [clearToken, unauthorized]);
+    if (invalidSession) clearToken();
+  }, [clearToken, invalidSession]);
 
   const refreshCard = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: cardOptions.queryKey });
@@ -43,12 +43,14 @@ export function useLoyaltyCardSession({ host, trpc }: LoyaltyCardSessionInput) {
     [cardOptions.queryKey, queryClient],
   );
 
-  const card = unauthorized ? null : (cardQuery.data ?? null);
+  const card = invalidSession ? null : (cardQuery.data ?? null);
+  const consentRequired = card?.consentRequired === true;
   const target = card ? getLoyaltyTarget(card.rewards, card.card.stampsBalance) : 0;
 
   return {
     card,
-    error: cardQuery.error && !unauthorized,
+    consentRequired,
+    error: cardQuery.error && !invalidSession,
     hydrated: tokenState.hydrated,
     loading: tokenState.token !== null && cardQuery.isLoading,
     target,

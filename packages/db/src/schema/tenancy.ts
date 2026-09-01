@@ -22,9 +22,9 @@ export const restaurants = sqliteTable(
   {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
-    countryCode: text("country_code").notNull().default("ESP"),
+    countryCode: text("country_code").notNull(),
     defaultLanguageCode: text("default_language_code").notNull().default("es"),
-    defaultCurrency: text("default_currency").notNull().default("EUR"),
+    sourceCurrency: text("source_currency").notNull(),
     timezone: text("timezone").notNull().default("Europe/Madrid"),
     emailFromName: text("email_from_name"),
     emailFromAddress: text("email_from_address"),
@@ -37,7 +37,7 @@ export const restaurants = sqliteTable(
     updatedAt: integer("updated_at").notNull().default(epochMilliseconds),
     deletedAt: integer("deleted_at"),
   },
-  (table) => [check("restaurants_default_currency_length", sql`length(${table.defaultCurrency}) = 3`)],
+  (table) => [check("restaurants_source_currency_length", sql`length(${table.sourceCurrency}) = 3`)],
 );
 
 export const branches = sqliteTable(
@@ -58,7 +58,6 @@ export const branches = sqliteTable(
     googlePlaceId: text("google_place_id"),
     googleReviewsEnabled: integer("google_reviews_enabled", { mode: "boolean" }).notNull().default(false),
     customDomain: text("custom_domain"),
-    currency: text("currency").notNull().default("EUR"),
     planCode: text("plan_code", { enum: ["basic", "business"] })
       .notNull()
       .default("basic"),
@@ -75,7 +74,6 @@ export const branches = sqliteTable(
     uniqueIndex("ux_branches_custom_domain")
       .on(table.customDomain)
       .where(sql`${table.customDomain} IS NOT NULL`),
-    check("branches_currency_length", sql`length(${table.currency}) = 3`),
     check("branches_plan_code", sql`${table.planCode} IN ('basic', 'business')`),
     check(
       "branches_coordinates_pair",
@@ -132,6 +130,12 @@ export const restaurantUsers = sqliteTable(
     roleCode: text("role_code", { enum: ROLE_CODES }).notNull().default("staff"),
     isDriver: integer("is_driver", { mode: "boolean" }).notNull().default(false),
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    inviteStatus: text("invite_status", { enum: ["not_sent", "sent", "failed"] })
+      .notNull()
+      .default("not_sent"),
+    inviteLastErrorCode: text("invite_last_error_code"),
+    inviteLastAttemptAt: integer("invite_last_attempt_at"),
+    inviteSentAt: integer("invite_sent_at"),
     createdAt: integer("created_at").notNull().default(epochMilliseconds),
     updatedAt: integer("updated_at").notNull().default(epochMilliseconds),
   },

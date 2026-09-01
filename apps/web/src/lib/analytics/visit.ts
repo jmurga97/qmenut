@@ -17,7 +17,7 @@ function createVisitId(): string {
   return `${Date.now().toString(36)}-${random[0].toString(36)}-${random[1].toString(36)}`;
 }
 
-const visitId = createVisitId();
+const visitState: { id?: string } = {};
 
 const dayFormatters = new Map<string, Intl.DateTimeFormat>();
 const hourFormatters = new Map<string, Intl.DateTimeFormat>();
@@ -72,5 +72,9 @@ export function restaurantLocalDayHour(timestampMs: number, timeZone: string): R
 }
 
 export function getAnalyticsVisitId(): string {
-  return visitId;
+  // Cloudflare forbids random generation at Worker module scope. Analytics calls this only
+  // in the hydrated browser, so create the ephemeral id lazily on first capture.
+  visitState.id ??= createVisitId();
+
+  return visitState.id;
 }

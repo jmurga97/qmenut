@@ -3,6 +3,7 @@ import { getLoyaltyProgram, listRewards } from "@qmenut/db/repositories/loyalty-
 import { expireStaleRedemptions, findPendingRedemption } from "@qmenut/db/repositories/loyalty-ledger.repository";
 import { TRPCError } from "@trpc/server";
 
+import { maskEmail } from "./mask-email";
 import { resolveCard } from "./resolve-card";
 import { REDEMPTION_TTL_MS } from "../../lib/loyalty/token";
 
@@ -32,13 +33,22 @@ export interface PendingRedemptionForClient {
 
 export interface GetCardResult {
   card: CustomerCardState;
+  /** True when the card is view-only until the customer re-accepts the current privacy policy. */
+  consentRequired: boolean;
   pendingRedemption: PendingRedemptionForClient | null;
   programActive: boolean;
   rewards: CardRewardView[];
 }
 
 export async function getCard({ db, env, request, host, cardToken }: GetCardInput): Promise<GetCardResult> {
-  const { tenant, customerId } = await resolveCard({ db, env, request, host, cardToken });
+  const { tenant, customerId, consentSatisfied } = await resolveCard({
+    db,
+    env,
+    request,
+    host,
+    cardToken,
+    requireConsent: false,
+  });
 
   await expireStaleRedemptions({ db, restaurantId: tenant.restaurantId, olderThanMs: REDEMPTION_TTL_MS });
 
@@ -70,5 +80,11 @@ export async function getCard({ db, env, request, host, cardToken }: GetCardInpu
     };
   }
 
-  return { card, rewards: rewardViews, programActive: program?.isActive ?? false, pendingRedemption };
+  return {
+    card: consentSatisfied ? card : { ...card, email: maskEmail(card.email) },
+    consentRequired: !consentSatisfied,
+    rewards: rewardViews,
+    programActive: program?.isActive ?? false,
+    pendingRedemption,
+  };
 }

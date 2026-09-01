@@ -5,16 +5,26 @@ import { PublicRouteContentTransition } from "~/shared/components/public-route-l
 import { PublicRouteHeader } from "~/shared/components/public-route-layout/public-route-header";
 import { PublicRouteLayoutContext } from "~/shared/components/public-route-layout/public-route-layout-context";
 import { TenantNotFound } from "~/shared/components/tenant-not-found";
+import { usePublicCurrency } from "~/shared/hooks/use-public-currency";
 import { usePublicTenant } from "~/shared/hooks/use-public-tenant";
 import { useTemplateSelection } from "~/shared/hooks/use-template-selection";
+import { useTenantContext } from "~/shared/hooks/use-tenant-context";
+import { useThemePreview } from "~/shared/hooks/use-theme-preview";
 
 export function PublicRouteLayout() {
-  const { tenant } = usePublicTenant();
+  const { theme: persistedTheme } = useTenantContext();
+  const theme = useThemePreview(persistedTheme);
+  const { tenant } = usePublicTenant(theme);
   const { template } = useTemplateSelection(tenant);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const currency = usePublicCurrency({
+    sourceCurrency: tenant?.sourceCurrency ?? "USD",
+    vesExchangeRate: tenant?.vesExchangeRate ?? null,
+    vesPricesEnabled: tenant?.vesPricesEnabled ?? false,
+  });
   const layoutContextValue = useMemo(
-    () => (tenant ? { scrollContainerRef, template, tenant } : null),
-    [template, tenant],
+    () => (tenant ? { ...currency, scrollContainerRef, template, tenant } : null),
+    [currency, template, tenant],
   );
 
   if (!tenant || !layoutContextValue) {
@@ -23,7 +33,7 @@ export function PublicRouteLayout() {
 
   return (
     <PublicRouteLayoutContext.Provider value={layoutContextValue}>
-      <PublicPageShell tenant={tenant} template={template}>
+      <PublicPageShell tenant={tenant} template={template} theme={theme}>
         <PublicRouteHeader scrollContainerRef={scrollContainerRef} template={template} tenant={tenant} />
         <div className="home-scroll" ref={scrollContainerRef}>
           <PublicRouteContentTransition />

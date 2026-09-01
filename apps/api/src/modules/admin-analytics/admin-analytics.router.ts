@@ -6,7 +6,7 @@ import { getRestaurantAnalyticsSnapshot } from "../analytics/get-restaurant-anal
 
 export const adminAnalyticsRouter = router({
   snapshot: tenantProcedure.input(analyticsSnapshotInputSchema).query(({ ctx, input }) => {
-    requirePermission(ctx.tenant, "loyalty.insights");
+    requirePermission(ctx.tenant, "analytics.read");
 
     const bounds = resolveAnalyticsPeriod({ period: input.period });
 

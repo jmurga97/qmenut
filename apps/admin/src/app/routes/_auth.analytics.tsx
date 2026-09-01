@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_auth/analytics")({
   validateSearch: analyticsSearchSchema,
   loaderDeps: ({ search }) => search,
   beforeLoad: ({ context }) => {
-    if (!can(context.roleCode, "loyalty.insights")) redirect({ to: "/", throw: true });
+    if (!can(context.roleCode, "analytics.read")) redirect({ to: "/", throw: true });
   },
   loader: async ({ context: { queryClient, trpc }, deps }) => {
     await queryClient.ensureQueryData(analyticsApi.getAnalyticsSnapshotQueryOptions({ period: deps.period, trpc }));

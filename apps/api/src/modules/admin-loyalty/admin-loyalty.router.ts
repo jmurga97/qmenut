@@ -22,6 +22,7 @@ import { createRewardSchema, rewardIdInputSchema, updateRewardSchema } from "./r
 import { saveReward } from "./save-reward";
 import { undoLoyaltyAction } from "./undo-loyalty-action";
 import { validateRedemption } from "./validate-redemption";
+import { bumpPublicContentVersionForRestaurant } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
 import { requirePermission } from "../admin-tenant/require-permission";
 
@@ -72,34 +73,59 @@ export const adminLoyaltyRouter = router({
 
     return { program, rewards };
   }),
-  saveProgram: tenantProcedure.input(programInputSchema).mutation(({ ctx, input }) => {
+  saveProgram: tenantProcedure.input(programInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.manage");
 
-    return saveLoyaltyProgram({
+    await saveLoyaltyProgram({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       isActive: input.isActive,
       ticketMedio: input.ticketMedio,
     });
+
+    await bumpPublicContentVersionForRestaurant({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+    });
   }),
-  createReward: tenantProcedure.input(createRewardSchema).mutation(({ ctx, input }) => {
+  createReward: tenantProcedure.input(createRewardSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.manage");
 
-    return saveReward({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, data: input.data });
+    const result = await saveReward({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, data: input.data });
+    await bumpPublicContentVersionForRestaurant({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+    });
+
+    return result;
   }),
-  updateReward: tenantProcedure.input(updateRewardSchema).mutation(({ ctx, input }) => {
+  updateReward: tenantProcedure.input(updateRewardSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.manage");
 
-    return saveReward({
+    const result = await saveReward({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       rewardId: input.rewardId,
       data: input.data,
     });
+    await bumpPublicContentVersionForRestaurant({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+    });
+
+    return result;
   }),
   deleteReward: tenantProcedure.input(rewardIdInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.manage");
     await softDeleteReward({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, rewardId: input.rewardId });
+    await bumpPublicContentVersionForRestaurant({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+    });
 
     return { id: input.rewardId };
   }),

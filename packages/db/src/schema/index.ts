@@ -4,6 +4,7 @@ export * from "./billing";
 export * from "./branches";
 export * from "./campaigns";
 export * from "./customers";
+export * from "./exchange-rates";
 export * from "./loyalty";
 export * from "./menu";
 export * from "./operations";

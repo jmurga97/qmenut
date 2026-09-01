@@ -1,4 +1,4 @@
-import { centsToEuros, eurosToCents } from "~/shared/services/money";
+import { formatMoneyInput, parseMoneyInput } from "~/shared/services/money";
 
 import type * as Loyalty from "~/features/loyalty/types";
 
@@ -12,7 +12,7 @@ export function toRewardFormValues(
     cost: String(reward.cost),
     type: reward.type,
     percentage: reward.percentage === null ? "" : String(reward.percentage),
-    specialPriceEuros: centsToEuros(reward.specialPrice),
+    specialPrice: formatMoneyInput(reward.specialPrice),
     freeDishId: reward.freeDishId ?? "",
     isActive: reward.isActive,
   };
@@ -25,7 +25,7 @@ export function createEmptyRewardFormValues(): Loyalty.RewardFormValues {
     cost: "8",
     type: "free_dish",
     percentage: "10",
-    specialPriceEuros: "",
+    specialPrice: "",
     freeDishId: "",
     isActive: true,
   };
@@ -33,14 +33,14 @@ export function createEmptyRewardFormValues(): Loyalty.RewardFormValues {
 export function toLoyaltyProgramFormValues(data: Loyalty.LoyaltyProgramResponse): Loyalty.LoyaltyProgramFormValues {
   return {
     isActive: data.program?.isActive ?? false,
-    ticketMedioEuros: centsToEuros(data.program?.ticketMedio),
+    averageTicket: formatMoneyInput(data.program?.ticketMedio),
     rewards: data.rewards.map((reward) => toRewardFormValues(reward)),
   };
 }
 export function toLoyaltyProgramInput(values: Loyalty.LoyaltyProgramFormValues) {
   return {
     isActive: values.isActive,
-    ticketMedio: values.ticketMedioEuros === "" ? null : eurosToCents(values.ticketMedioEuros),
+    ticketMedio: values.averageTicket === "" ? null : parseMoneyInput(values.averageTicket),
   };
 }
 export function toRewardInput(values: Loyalty.RewardFormValues) {
@@ -50,7 +50,7 @@ export function toRewardInput(values: Loyalty.RewardFormValues) {
     cost: Number(values.cost),
     type: values.type,
     percentage: values.type === "percentage_discount" ? Number(values.percentage) : null,
-    specialPrice: values.type === "special_price" ? eurosToCents(values.specialPriceEuros) : null,
+    specialPrice: values.type === "special_price" ? parseMoneyInput(values.specialPrice) : null,
     freeDishId: values.type === "percentage_discount" ? null : values.freeDishId,
     isActive: values.isActive,
   };

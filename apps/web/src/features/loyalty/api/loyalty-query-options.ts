@@ -32,6 +32,7 @@ export function getRedemptionStatusQueryOptions({
 
 export function getLoyaltyMutationOptions(trpc: TrpcOptionsProxy) {
   return {
+    acceptConsent: trpc.loyalty.acceptConsent.mutationOptions(),
     cancelRedemption: trpc.loyalty.cancelRedemption.mutationOptions(),
     createCard: trpc.loyalty.createCard.mutationOptions(),
     earnStamp: trpc.loyalty.earnStamp.mutationOptions(),

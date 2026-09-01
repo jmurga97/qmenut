@@ -13,6 +13,7 @@ import { Route as SelectRestaurantRouteImport } from './routes/select-restaurant
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth.index'
+import { Route as AuthUsersRouteImport } from './routes/_auth.users'
 import { Route as AuthThemeRouteImport } from './routes/_auth.theme'
 import { Route as AuthQrRouteImport } from './routes/_auth.qr'
 import { Route as AuthPromotionsRouteImport } from './routes/_auth.promotions'
@@ -53,6 +54,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthIndexRoute = AuthIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthUsersRoute = AuthUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthThemeRoute = AuthThemeRouteImport.update({
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/promotions': typeof AuthPromotionsRouteWithChildren
   '/qr': typeof AuthQrRoute
   '/theme': typeof AuthThemeRoute
+  '/users': typeof AuthUsersRoute
   '/languages/$languageCode': typeof AuthLanguagesLanguageCodeRoute
   '/loyalty/insights': typeof AuthLoyaltyInsightsRoute
   '/loyalty/program': typeof AuthLoyaltyProgramRoute
@@ -204,6 +211,7 @@ export interface FileRoutesByTo {
   '/branch': typeof AuthBranchRoute
   '/qr': typeof AuthQrRoute
   '/theme': typeof AuthThemeRoute
+  '/users': typeof AuthUsersRoute
   '/': typeof AuthIndexRoute
   '/languages/$languageCode': typeof AuthLanguagesLanguageCodeRoute
   '/loyalty/insights': typeof AuthLoyaltyInsightsRoute
@@ -233,6 +241,7 @@ export interface FileRoutesById {
   '/_auth/promotions': typeof AuthPromotionsRouteWithChildren
   '/_auth/qr': typeof AuthQrRoute
   '/_auth/theme': typeof AuthThemeRoute
+  '/_auth/users': typeof AuthUsersRoute
   '/_auth/': typeof AuthIndexRoute
   '/_auth/languages/$languageCode': typeof AuthLanguagesLanguageCodeRoute
   '/_auth/loyalty/insights': typeof AuthLoyaltyInsightsRoute
@@ -263,6 +272,7 @@ export interface FileRouteTypes {
     | '/promotions'
     | '/qr'
     | '/theme'
+    | '/users'
     | '/languages/$languageCode'
     | '/loyalty/insights'
     | '/loyalty/program'
@@ -285,6 +295,7 @@ export interface FileRouteTypes {
     | '/branch'
     | '/qr'
     | '/theme'
+    | '/users'
     | '/'
     | '/languages/$languageCode'
     | '/loyalty/insights'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/_auth/promotions'
     | '/_auth/qr'
     | '/_auth/theme'
+    | '/_auth/users'
     | '/_auth/'
     | '/_auth/languages/$languageCode'
     | '/_auth/loyalty/insights'
@@ -363,6 +375,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/users': {
+      id: '/_auth/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthUsersRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/theme': {
@@ -598,6 +617,7 @@ interface AuthRouteChildren {
   AuthPromotionsRoute: typeof AuthPromotionsRouteWithChildren
   AuthQrRoute: typeof AuthQrRoute
   AuthThemeRoute: typeof AuthThemeRoute
+  AuthUsersRoute: typeof AuthUsersRoute
   AuthIndexRoute: typeof AuthIndexRoute
 }
 
@@ -611,6 +631,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthPromotionsRoute: AuthPromotionsRouteWithChildren,
   AuthQrRoute: AuthQrRoute,
   AuthThemeRoute: AuthThemeRoute,
+  AuthUsersRoute: AuthUsersRoute,
   AuthIndexRoute: AuthIndexRoute,
 }
 

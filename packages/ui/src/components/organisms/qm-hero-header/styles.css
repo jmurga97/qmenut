@@ -97,6 +97,12 @@
   --qm-emph-ink: #fff;
 }
 
+.selectors {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 :host([compact]) .lang-wrap {
   top: 50%;
   right: 14px;
@@ -123,7 +129,7 @@
 }
 
 :host([compact]) .footer {
-  right: 72px;
+  right: 104px;
   bottom: 0;
   height: var(--qm-hero-compact-h);
   align-items: center;
