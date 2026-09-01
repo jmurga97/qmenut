@@ -14,9 +14,9 @@ const ALL_PERMISSIONS: readonly Permission[] = [
   "loyalty.manage",
   "loyalty.insights",
   "loyalty.operate",
+  "exchangeRates.write",
   "billing.manage",
   "analytics.read",
-  "exchangeRates.write",
   "users.manage",
 ];
 

@@ -117,6 +117,18 @@ without replacing the restaurant's source price. For Venezuela, the proposed der
 display price is VES using the official BCV rate.
 _Avoid_: Price entered by the restaurant, guaranteed real-time price
 
+**Restaurant-selected display rate**:
+The VES-per-USD rate that a Venezuelan restaurant stores and controls in Qmenut for its
+guest-facing derived prices. The owner and authorised restaurant operators may change it;
+it is independent from the external market reference.
+_Avoid_: Official BCV rate, automatic rate, source price currency
+
+**Market exchange-rate reference**:
+A read-only external reference captured from BCV sources by Ming Exchange Rate Worker and
+exposed to Qmenut through a private service binding. It informs the admin panel but never
+changes menu prices or the restaurant-selected display rate.
+_Avoid_: Restaurant-selected display rate, price source, public exchange-rate API
+
 **Consent-light analytics**:
 Measurement configured without tracking cookies or persistent analytics identifiers on
 the guest's device, while retaining only storage that is technically necessary for a

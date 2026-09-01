@@ -1,9 +1,5 @@
-import {
-  createPriceFormatter,
-  formatDiscount,
-  formatValidity,
-  resolvePromotionPrice,
-} from "~/features/promos/mappers/promotion-formatting";
+import { createPublicPriceFormatter } from "~/features/menu/mappers/create-public-price-formatter";
+import { formatDiscount, formatValidity, resolvePromotionPrice } from "~/features/promos/mappers/promotion-formatting";
 
 import type { TFunction } from "i18next";
 import type { PublicMenuData, PublicMenuPromotion } from "~/features/menu/api/public-menu-types";
@@ -11,6 +7,7 @@ import type { PromoViewModel, PromosContentViewModel } from "~/features/promos/t
 
 interface MapPublicPromosContentInput {
   data: PublicMenuData | null;
+  displayCurrency: string;
   locale: string;
   t: TFunction;
 }
@@ -40,13 +37,25 @@ function mapPromotion({
   };
 }
 
-export function mapPublicPromosContent({ data, locale, t }: MapPublicPromosContentInput): PromosContentViewModel {
-  const promotions = data?.promotions ?? [];
-  const formatPrice = createPriceFormatter(locale, data?.branch.currency ?? "EUR");
+export function mapPublicPromosContent({
+  data,
+  displayCurrency,
+  locale,
+  t,
+}: MapPublicPromosContentInput): PromosContentViewModel {
+  if (!data) {
+    return {
+      emptyLabel: t("promos.page.emptyLabel"),
+      promos: [],
+      title: t("promos.page.title"),
+    };
+  }
+
+  const formatPrice = createPublicPriceFormatter({ data, displayCurrency, locale });
 
   return {
     emptyLabel: t("promos.page.emptyLabel"),
-    promos: data ? promotions.map((promotion) => mapPromotion({ data, formatPrice, locale, promotion, t })) : [],
+    promos: data.promotions.map((promotion) => mapPromotion({ data, formatPrice, locale, promotion, t })),
     title: t("promos.page.title"),
   };
 }

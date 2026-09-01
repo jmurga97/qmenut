@@ -3,6 +3,7 @@ import { healthRouter } from "./routers/health";
 import { router } from "./trpc";
 import { adminAnalyticsRouter } from "../modules/admin-analytics/admin-analytics.router";
 import { adminBranchesRouter } from "../modules/admin-branches/admin-branches.router";
+import { adminExchangeRatesRouter } from "../modules/admin-exchange-rates/admin-exchange-rates.router";
 import { adminImagesRouter } from "../modules/admin-images/admin-images.router";
 import { adminLoyaltyRouter } from "../modules/admin-loyalty/admin-loyalty.router";
 import { adminMenuRouter } from "../modules/admin-menu/admin-menu.router";
@@ -25,6 +26,7 @@ export const appRouter = router({
     tenant: adminTenantRouter,
     menu: adminMenuRouter,
     branches: adminBranchesRouter,
+    exchangeRates: adminExchangeRatesRouter,
     images: adminImagesRouter,
     promotions: adminPromotionsRouter,
     theme: themeRouter,

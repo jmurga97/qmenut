@@ -9,6 +9,7 @@ import { defineQmLang } from "../../atoms/qm-lang";
 import { defineQmWordmark } from "../../atoms/qm-wordmark";
 
 import type { QmLangOption } from "../../atoms/qm-lang";
+import type { TemplateResult } from "lit";
 
 export const QM_HERO_HEADER_TAG_NAME = "qm-hero-header";
 
@@ -45,11 +46,46 @@ export class QmHeroHeader extends LitElement {
   @property({ type: String, attribute: "lang-label" })
   langLabel = "";
 
+  @property({ type: String, attribute: "currency-value" })
+  currencyValue = "";
+
+  @property({ attribute: false })
+  currencyOptions: QmLangOption[] = [];
+
+  @property({ type: String, attribute: "currency-label" })
+  currencyLabel = "";
+
   @property({ type: String, attribute: "logo-label" })
   logoLabel = "LOGO";
 
   @property({ type: Boolean, reflect: true })
   compact = false;
+
+  private readonly handleCurrencyChange = (event: CustomEvent<{ value?: string }>) => {
+    event.stopPropagation();
+    const value = event.detail?.value ?? "";
+    this.dispatchEvent(
+      new CustomEvent("qm-currency-change", {
+        bubbles: true,
+        composed: true,
+        detail: { value },
+      }),
+    );
+  };
+
+  private renderCurrencySelector(): TemplateResult {
+    if (this.currencyOptions.length === 0) return html``;
+
+    return html`
+      <qm-lang
+        part="currency"
+        .value=${this.currencyValue}
+        .options=${this.currencyOptions}
+        .label=${this.currencyLabel}
+        @qm-change=${this.handleCurrencyChange}
+      ></qm-lang>
+    `;
+  }
 
   render() {
     return html`
@@ -60,7 +96,15 @@ export class QmHeroHeader extends LitElement {
         <div part="scrim" class="scrim"></div>
         ${this.heroLabel ? html`<span part="hero-label" class="hero-label">${this.heroLabel}</span>` : ""}
         <div part="lang-wrap" class="lang-wrap">
-          <qm-lang part="lang" .value=${this.langValue} .options=${this.langOptions} .label=${this.langLabel}></qm-lang>
+          <div class="selectors">
+            <qm-lang
+              part="lang"
+              .value=${this.langValue}
+              .options=${this.langOptions}
+              .label=${this.langLabel}
+            ></qm-lang>
+            ${this.renderCurrencySelector()}
+          </div>
         </div>
         <div part="footer" class="footer">
           <qm-image part="logo" class="logo" label=${this.logoLabel}><slot name="logo"></slot></qm-image>
@@ -87,7 +131,17 @@ export function defineQmHeroHeader() {
 export type QmHeroHeaderArgs = Partial<
   Pick<
     QmHeroHeader,
-    "heroLabel" | "name" | "tagline" | "langValue" | "langOptions" | "langLabel" | "logoLabel" | "compact"
+    | "heroLabel"
+    | "name"
+    | "tagline"
+    | "langValue"
+    | "langOptions"
+    | "langLabel"
+    | "currencyValue"
+    | "currencyOptions"
+    | "currencyLabel"
+    | "logoLabel"
+    | "compact"
   >
 >;
 

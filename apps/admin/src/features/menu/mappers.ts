@@ -1,4 +1,4 @@
-import { centsToEuros, eurosToCents } from "~/shared/services/money";
+import { formatMoneyInput, parseMoneyInput } from "~/shared/services/money";
 
 import type { DishDetail, DishFormValues } from "./types";
 
@@ -49,7 +49,7 @@ export function toDishFormValues(dish: DishDetail | null): DishFormValues {
     isFeatured: dish?.isFeatured ?? false,
     isRecommended: dish?.isRecommended ?? false,
     name: dish?.name ?? "",
-    priceEuros: centsToEuros(dish?.price),
+    price: formatMoneyInput(dish?.price),
     tagIds: dish?.tagIds ?? [],
   };
 }
@@ -74,6 +74,6 @@ export function toDishInput({
     isRecommended: values.isRecommended,
     name: values.name,
     position,
-    price: eurosToCents(values.priceEuros),
+    price: parseMoneyInput(values.price),
   };
 }

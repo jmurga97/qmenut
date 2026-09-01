@@ -9,18 +9,6 @@ interface PromotionBadgeSource {
   type: PromotionType;
 }
 
-export function createPriceFormatter(locale: string, currency: string) {
-  let formatter: Intl.NumberFormat;
-
-  try {
-    formatter = new Intl.NumberFormat(locale, { style: "currency", currency });
-  } catch {
-    formatter = new Intl.NumberFormat("es-ES", { style: "currency", currency });
-  }
-
-  return (cents: number) => formatter.format(cents / 100);
-}
-
 function formatMinute(minute: number): string {
   return `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
 }

@@ -1,4 +1,4 @@
-import { centsToEuros, eurosToCents } from "~/shared/services/money";
+import { formatMoneyInput, parseMoneyInput } from "~/shared/services/money";
 
 import type { EditablePromotion, PromotionDetail, PromotionFormValues } from "./types";
 
@@ -19,7 +19,7 @@ export function toPromotionFormValues(promotion: EditablePromotion | null): Prom
     paidQuantity: String(promotion?.paidQuantity ?? ""),
     percentage: String(promotion?.percentage ?? ""),
     scope: promotion?.scope ?? "dish",
-    specialPriceEuros: centsToEuros(promotion?.specialPrice),
+    specialPrice: formatMoneyInput(promotion?.specialPrice),
     status: promotion?.status ?? "active",
     targetIds: promotion?.targets.map(({ targetId }) => targetId) ?? [],
     type: promotion?.type ?? "percentage_discount",
@@ -42,7 +42,7 @@ export function toPromotionInput({
       percentage: values.type === "percentage_discount" ? optionalNumber(values.percentage) : null,
       scope: values.scope,
       recurringDays: promotion?.recurringDays ?? undefined,
-      specialPrice: values.type === "special_price" ? eurosToCents(values.specialPriceEuros) : null,
+      specialPrice: values.type === "special_price" ? parseMoneyInput(values.specialPrice) : null,
       status: values.status,
       type: values.type,
     },

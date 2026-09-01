@@ -1,4 +1,5 @@
 import { ALLERGEN_META } from "~/features/menu/constants/allergens";
+import { createPublicPriceFormatter } from "~/features/menu/mappers/create-public-price-formatter";
 import { mapPromotionToFeatured } from "~/features/promos/mappers/map-promotion-to-featured";
 import { pickFeaturedPromo } from "~/features/promos/mappers/pick-featured-promo";
 import { formatDiscount } from "~/features/promos/mappers/promotion-formatting";
@@ -15,6 +16,7 @@ import type {
 
 interface MapPublicMenuContentInput {
   data: PublicMenuData;
+  displayCurrency: string;
   locale: string;
   t: TFunction;
 }
@@ -35,18 +37,6 @@ function buildLogoLabel(name: string): string {
     .map((word) => word[0]?.toUpperCase() ?? "");
 
   return initials.join("") || "QM";
-}
-
-function createPriceFormatter(locale: string, currency: string) {
-  let formatter: Intl.NumberFormat;
-
-  try {
-    formatter = new Intl.NumberFormat(locale, { style: "currency", currency });
-  } catch {
-    formatter = new Intl.NumberFormat("es-ES", { style: "currency", currency });
-  }
-
-  return (cents: number) => formatter.format(cents / 100);
 }
 
 export function mapDish({
@@ -98,8 +88,13 @@ function pickFeaturedDish(data: PublicMenuData): PublicMenuDish | null {
   return dishes.find((dish) => dish.isFeatured) ?? dishes.find((dish) => dish.isRecommended) ?? dishes[0] ?? null;
 }
 
-export function mapPublicMenuContent({ data, locale, t }: MapPublicMenuContentInput): MenuContentViewModel {
-  const formatPrice = createPriceFormatter(locale, data.branch.currency);
+export function mapPublicMenuContent({
+  data,
+  displayCurrency,
+  locale,
+  t,
+}: MapPublicMenuContentInput): MenuContentViewModel {
+  const formatPrice = createPublicPriceFormatter({ data, displayCurrency, locale });
   const sections: MenuSectionViewModel[] = data.categories
     .filter((category) => category.dishes.length > 0)
     .map((category, index) => ({

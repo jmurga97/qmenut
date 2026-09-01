@@ -3,7 +3,7 @@
     "name": "Bar Ejemplo",
     "countryCode": "ESP",
     "defaultLanguageCode": "es",
-    "defaultCurrency": "EUR",
+    "sourceCurrency": "EUR",
     "legal": {
       "legalName": "Bar Ejemplo Hostelería S.L.",
       "taxId": "B12345678",
@@ -23,7 +23,6 @@
     "socialLinks": {
       "instagram": "https://instagram.com/barejemplo"
     },
-    "currency": "EUR",
     "planCode": "basic",
     "schedules": [
       { "dayOfWeek": 5, "openMinute": 720, "closeMinute": 1439 },

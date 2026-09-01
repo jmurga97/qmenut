@@ -28,9 +28,9 @@ const ROLE_PERMISSIONS: Record<RestaurantRoleCode, readonly Permission[]> = {
     "loyalty.manage",
     "loyalty.insights",
     "loyalty.operate",
+    "exchangeRates.write",
     "billing.manage",
     "analytics.read",
-    "exchangeRates.write",
     "users.manage",
   ],
   admin: [
