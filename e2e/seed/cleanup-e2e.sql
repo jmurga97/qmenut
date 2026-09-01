@@ -27,5 +27,7 @@ DELETE FROM sessions WHERE user_id = 'user_e2e';
 DELETE FROM sessions WHERE user_id = 'user_staff_e2e';
 DELETE FROM sessions WHERE user_id = 'user_admin_e2e';
 DELETE FROM sessions WHERE user_id = 'user_fine_owner_e2e';
+DELETE FROM restaurant_users WHERE user_id = 'user_invite_e2e';
+DELETE FROM users WHERE id = 'user_invite_e2e';
 DELETE FROM verifications WHERE identifier LIKE '%e2e@test.local%';
 DELETE FROM verifications WHERE identifier = 'owner.fine@test.local';

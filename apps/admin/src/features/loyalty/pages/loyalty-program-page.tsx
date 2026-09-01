@@ -46,12 +46,7 @@ function LoyaltyProgramContent({ branchId }: { branchId: string }) {
                 <h3 id="program-settings-title">Configuración</h3>
                 <FormCheckbox<LoyaltyProgramFormValues> label="Programa activo" name="isActive" />
               </div>
-              <FormTextInput<LoyaltyProgramFormValues>
-                inputMode="decimal"
-                label="Ticket medio (€)"
-                name="ticketMedioEuros"
-                type="number"
-              />
+              <FormTextInput<LoyaltyProgramFormValues> inputMode="decimal" label="Ticket medio" name="averageTicket" />
               <FormActions
                 busy={loyalty.saveProgramBusy}
                 onSubmit={() => void loyalty.saveProgram()}
@@ -187,9 +182,8 @@ function RewardRow({ index, loyalty }: { index: number; loyalty: ProgramControll
         {reward.type === "special_price" ? (
           <FormTextInput<LoyaltyProgramFormValues>
             inputMode="decimal"
-            label="Precio especial (€)"
-            name={field("specialPriceEuros")}
-            type="number"
+            label="Precio especial"
+            name={field("specialPrice")}
           />
         ) : null}
       </div>

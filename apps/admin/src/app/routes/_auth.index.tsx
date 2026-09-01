@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_auth/")({
   loader: async ({ context, deps }) => {
     const { queryClient, roleCode, trpc } = context;
     const jobs: Array<Promise<unknown>> = [];
-    if (can(roleCode, "loyalty.insights")) {
+    if (can(roleCode, "analytics.read")) {
       const range = getVisitsRange(deps.period);
       jobs.push(
         queryClient.ensureQueryData(api.getAnalyticsSnapshotQueryOptions({ period: "15d", trpc })),
@@ -45,6 +45,10 @@ export const Route = createFileRoute("/_auth/")({
       );
     }
     const branch = await getSelectedBranch(context);
+    const tenant = await queryClient.ensureQueryData(trpc.admin.tenant.me.queryOptions());
+    if (tenant.restaurant.sourceCurrency === "USD" && can(roleCode, "exchangeRates.write")) {
+      jobs.push(queryClient.ensureQueryData(api.getExchangeRatesSummaryQueryOptions({ trpc })));
+    }
     if (branch && can(roleCode, "loyalty.operate")) {
       jobs.push(
         queryClient.ensureQueryData(api.getPendingRedemptionsQueryOptions({ trpc })),

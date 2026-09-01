@@ -1,5 +1,6 @@
 export default {
   common: {
+    currencyLabel: "Moneda",
     languageLabel: "Idioma",
     primaryNavigationLabel: "Navegación principal",
     navigation: {

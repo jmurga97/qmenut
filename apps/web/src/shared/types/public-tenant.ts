@@ -10,4 +10,7 @@ export interface PublicTenant {
   template: QmTemplateName;
   tenantName: string;
   tenantTagline: string;
+  sourceCurrency: string;
+  vesExchangeRate: string | null;
+  vesPricesEnabled: boolean;
 }

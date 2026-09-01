@@ -15,6 +15,11 @@ const temporaryOutputDirectory = relative(apiDirectory, temporaryDirectory);
 // It is immutable migration history, so keep the exception explicit instead of editing it.
 const LEGACY_PARENT_TABLE_REBUILDS = new Set(["0002_branch_coordinates.sql"]);
 
+// The source-currency contract intentionally rebuilds these tables to remove defaults and
+// columns that SQLite cannot alter in place. This is the only planned exception; production
+// still requires the Time Travel preflight documented in database-migrations.md.
+const REVIEWED_PARENT_TABLE_REBUILDS = new Set(["0012_source_currency_contract.sql"]);
+
 async function checkForUnsafeParentTableRebuilds(): Promise<void> {
   const migrationsDirectory = join(apiDirectory, "migrations");
   const migrationFiles = (await readdir(migrationsDirectory)).filter((file) => file.endsWith(".sql"));
@@ -30,7 +35,7 @@ async function checkForUnsafeParentTableRebuilds(): Promise<void> {
   );
 
   for (const { file, sql } of migrations) {
-    if (LEGACY_PARENT_TABLE_REBUILDS.has(file)) continue;
+    if (LEGACY_PARENT_TABLE_REBUILDS.has(file) || REVIEWED_PARENT_TABLE_REBUILDS.has(file)) continue;
 
     const droppedTables = [...sql.matchAll(/DROP\s+TABLE(?:\s+IF\s+EXISTS)?\s+[`"]?([A-Za-z0-9_]+)[`"]?/gi)].map(
       (match) => match[1],

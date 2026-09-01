@@ -1,8 +1,8 @@
 # Auth
 
 This page describes how staff sign in. Authentication uses Better Auth with passwordless
-email OTP. Sign-up is disabled: accounts are provisioned, and the user then signs in with
-an emailed one-time code.
+email OTP. Sign-up is disabled: the owner provisions accounts from the Users panel, and the
+person then signs in with an emailed one-time code.
 
 This page is partial. It states the purpose, the structure, and the key files, but does
 not yet contain a full walkthrough.
@@ -64,6 +64,10 @@ resolves for the session.
 
 ## Limitations
 
-- Sign-up is disabled by design. Provision accounts, and their `restaurant_users`
-  membership rows, out of band.
+- Sign-up is disabled by design. The owner provisions a user account and its
+  `restaurant_users` membership from `apps/admin/src/features/users/`; no public registration
+  flow exists.
+- An invitation email is informational: it links to the panel and explains the OTP flow. A
+  failed invitation does not roll back the account or membership; the owner can resend it from
+  the Users panel.
 - Never set `DEV_FIXED_OTP` on the production Worker.

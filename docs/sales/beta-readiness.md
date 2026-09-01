@@ -13,9 +13,10 @@ Spain or Venezuela beta.
       and maintain prices in USD without Qmenut rewriting those source amounts.
 - [ ] Keep one visible currency at a time in the public interface. Add a currency selector
       beside the language selector so the guest can switch between USD and VES.
-- [ ] Use the official BCV rate for any derived VES display, subject to local legal review.
-      Define a resilient ingestion method, refresh frequency, rate timestamp, caching, and
-      failure behavior. Never show a zero or silently use an undated stale rate.
+- [ ] Show the Ming-provided BCV reference only as an informational comparison for the
+      restaurant-selected rate. Keep the local rate independent from Ming, preserve the
+      reference timestamp, and show no automatic percentage-threshold warning. Derived VES
+      prices must never fall back to zero or an undated rate.
 - [ ] Design a safe bulk-price workflow before promising fast exchange-rate updates. The
       current menu editor stores item prices individually and has no bulk currency update.
 - [ ] Ensure the public menu, admin editor, analytics, loyalty values, promotions, and

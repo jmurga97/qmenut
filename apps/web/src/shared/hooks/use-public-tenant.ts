@@ -39,6 +39,9 @@ export function usePublicTenant(): PublicTenantState {
       template: theme.template,
       tenantName: data.branch.name,
       tenantTagline: theme.tagline ?? "",
+      sourceCurrency: data.sourceCurrency,
+      vesExchangeRate: data.vesExchangeRate,
+      vesPricesEnabled: data.vesPricesEnabled,
     };
   }, [data, theme]);
 

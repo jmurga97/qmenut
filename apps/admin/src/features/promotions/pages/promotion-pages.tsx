@@ -146,9 +146,7 @@ function PromotionValueFields({ type }: { type: PromotionType }) {
   }
 
   if (type === "special_price") {
-    return (
-      <FormTextInput<PromotionFormValues> inputMode="decimal" label="Precio especial (€)" name="specialPriceEuros" />
-    );
+    return <FormTextInput<PromotionFormValues> inputMode="decimal" label="Precio especial" name="specialPrice" />;
   }
 
   return (

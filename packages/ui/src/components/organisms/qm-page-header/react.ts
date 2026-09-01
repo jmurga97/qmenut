@@ -7,7 +7,7 @@ import type { EventName } from "@lit/react";
 
 defineQmPageHeader();
 
-/** `qm-change` bubbles up (composed) from the nested `qm-lang`. `langOptions` is a non-string property, set correctly here rather than serialized as an attribute. */
+/** Language and currency options are non-string properties, set correctly here rather than serialized as attributes. */
 export const QmPageHeader = createComponent({
   react: React,
   tagName: QM_PAGE_HEADER_TAG_NAME,
@@ -15,5 +15,6 @@ export const QmPageHeader = createComponent({
   displayName: "QmPageHeader",
   events: {
     onQmChange: "qm-change" as EventName<CustomEvent<{ value: string }>>,
+    onQmCurrencyChange: "qm-currency-change" as EventName<CustomEvent<{ value: string }>>,
   },
 });
