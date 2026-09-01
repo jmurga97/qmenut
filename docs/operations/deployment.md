@@ -130,6 +130,38 @@ secrets remain unchanged. The web Worker is globally non-indexable in developmen
 `ALLOW_INDEXING=false` adds `X-Robots-Tag: noindex, nofollow`, the HTML contains a `noindex`
 meta tag, and `/robots.txt` returns `Disallow: /` for every tenant.
 
+## Continuous deployment with Workers Builds
+
+Workers Builds clones the whole repository, so every Worker's build installs the entire Bun
+workspace regardless of its configured root directory. `apps/admin` depends on
+`@jmurga97/components`, published to GitHub Packages, and the committed root `.npmrc`
+authenticates that scope with `${NPM_TOKEN}`:
+
+```
+@jmurga97:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NPM_TOKEN}
+```
+
+Without that variable the registry answers `401` and the install aborts before any build
+step runs, for the API and tenant-config Workers too. Add `NPM_TOKEN` as an encrypted build
+variable in the Build settings of **every** connected Worker, using a GitHub personal access
+token with only the `read:packages` scope. Rotate it in each build configuration; there is
+no account-wide build variable.
+
+Use the repository's pinned Wrangler rather than `npx wrangler`, which downloads the latest
+release on every build and can drift from the `compatibility_date` in the configuration. The
+package scripts also run the deployment preflight:
+
+| Worker                 | Root directory       | Build command   | Deploy command               |
+| ---------------------- | -------------------- | --------------- | ---------------------------- |
+| `qmenut-api-dev`       | `apps/api`           | `bun run build` | `bun run deploy:development` |
+| `qmenut-api`           | `apps/api`           | `bun run build` | `bun run deploy:production`  |
+| `qmenut-tenant-config` | `apps/tenant-config` | `bun run build` | `bun run deploy:development` |
+
+The web Worker cannot use a plain deploy command: `CLOUDFLARE_ENV` must be set for the build
+so `@cloudflare/vite-plugin` writes the redirected configuration, and the deploy then takes
+no `--env` flag. See [Deploying the web Worker](#deploying-the-web-worker).
+
 ## Before you begin
 
 You need all of the following:
