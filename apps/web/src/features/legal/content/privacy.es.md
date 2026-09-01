@@ -17,17 +17,17 @@ La plataforma **QMenut** ({{operatorLegalName}}, NIF {{operatorLegalTaxId}}) pre
 
 - **Datos técnicos de conexión:** la dirección IP y datos básicos del navegador se procesan de forma transitoria para servir la página de forma segura (prevención de abuso, registro de errores). No se usan para elaborar perfiles.
 - **Reseñas de Google (cuando se activen):** las reseñas públicas se solicitan a Google al acercarte a esa sección. QMenut no guarda su contenido. La dirección IP se utiliza de forma transitoria para limitar solicitudes abusivas, sin crear perfiles.
-- **Programa de fidelidad (cuando se active):** si el establecimiento activa su programa de puntos y decides participar, se tratarán tu email, nombre y fecha de nacimiento para gestionar tus puntos y ventajas. Se informará de ello en el momento del registro.
+- **Programa de fidelidad (cuando se active):** si el establecimiento activa su programa de puntos y decides participar, se tratará tu email para crear y gestionar tu tarjeta, puntos y ventajas. No se solicitan nombre ni fecha de nacimiento. La participación requiere aceptar expresamente esta política en el momento del registro.
 
 ## 4. Analítica sin cookies
 
-Para conocer qué platos y secciones despiertan más interés se utiliza **PostHog** (PostHog EU, con alojamiento de datos en la Unión Europea) en modo anónimo: sin cookies, sin almacenamiento en tu dispositivo y sin identificarte entre visitas. Los eventos registrados (por ejemplo, ver la carta o abrir un plato) no se asocian a tu identidad.
+Para conocer qué platos y secciones despiertan más interés se utiliza **PostHog** (PostHog EU, con alojamiento de datos en la Unión Europea) en modo anónimo: sin cookies, sin almacenamiento analítico en tu dispositivo y sin identificarte entre visitas. Cada carga de página usa un identificador aleatorio efímero conservado solo en memoria; los eventos registrados no se asocian a tu identidad.
 
 ## 5. Base jurídica
 
 - Datos técnicos y analítica anónima: interés legítimo en la seguridad y mejora del servicio (art. 6.1.f RGPD).
 - Carga de reseñas públicas de Google: interés legítimo en informar sobre la reputación pública del establecimiento (art. 6.1.f RGPD).
-- Programa de fidelidad: ejecución de la relación con el participante (art. 6.1.b RGPD).
+- Programa de fidelidad: consentimiento expreso del participante (art. 6.1.a RGPD), que puede retirarse solicitando la baja.
 
 ## 6. Destinatarios y encargados
 
@@ -45,7 +45,7 @@ Las reseñas se obtienen desde el servidor y no se guardan en la carta digital. 
 
 ## 7. Conservación
 
-El identificador usado para limitar solicitudes de reseñas se conserva únicamente durante la ventana técnica del límite de uso. Los datos del programa de fidelidad se conservan mientras dure la participación o hasta que solicites la baja.
+El identificador usado para limitar solicitudes de reseñas se conserva únicamente durante la ventana técnica del límite de uso. El email, la relación con el programa y el registro del consentimiento se conservan mientras dure la participación o hasta que solicites la baja, sin perjuicio de las obligaciones legales de conservación.
 
 ## 8. Derechos
 
@@ -55,10 +55,10 @@ Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, l
 
 ## 9. Cookies y tecnologías de almacenamiento
 
-Este sitio **no utiliza cookies** ni tecnologías equivalentes de almacenamiento en tu dispositivo con fines publicitarios o de seguimiento. Por eso no se muestra ningún banner de cookies. Solo se emplea el almacenamiento técnico imprescindible para el funcionamiento de la página (por ejemplo, recordar el idioma que has elegido para ver la carta), exento de consentimiento conforme al art. 22.2 LSSI-CE.
+Este sitio **no utiliza cookies** ni tecnologías equivalentes con fines publicitarios o de seguimiento. Cuando te registras en fidelización, el token de tu tarjeta se guarda en el `localStorage` del navegador, asociado al dominio del establecimiento, para mantener la tarjeta en ese dispositivo. El idioma elegido también puede guardarse en `localStorage`; la detección puntual del idioma y algunos estados de instalación usan `sessionStorage`. La analítica se conserva únicamente en memoria. Estas tecnologías técnicas se utilizan para las funciones que has solicitado y su tratamiento debe revisarse conforme al art. 22.2 LSSI-CE.
 
 ## 10. Cambios en esta política
 
 Esta política puede actualizarse para reflejar cambios normativos o del servicio. La versión vigente estará siempre publicada en esta página.
 
-<p class="legal-updated">Última actualización: 26 de agosto de 2026.</p>
+<p class="legal-updated">Última actualización: 28 de agosto de 2026.</p>

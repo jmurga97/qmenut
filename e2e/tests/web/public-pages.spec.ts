@@ -6,6 +6,7 @@ test("renders every public information route for its requesting tenant and local
     ["http://fine.localhost:4011/en/contacto", "Aurum"],
     ["http://cafe.localhost:4011/aviso-legal", "Café Brote"],
     ["http://tapas.localhost:4011/privacidad", "Bar La Tasca"],
+    ["http://ven.localhost:4011/privacidad", "Sazón Caracas"],
     ["http://tapas.localhost:4011/puntos", "Descuento del 10%"],
   ] as const;
 
@@ -30,6 +31,20 @@ test("renders tenant legal identity without placeholder markers", async ({ reque
     expect(body).toContain(expectedName);
     expect(body).toContain(expectedTaxId);
     expect(body).not.toMatch(/\[(?:Razón social|NIF|Dirección fiscal|email de contacto|QMenut)/);
+  }
+});
+
+test("uses Venezuelan legal copy without Spanish legal references", async ({ request }) => {
+  for (const path of ["/aviso-legal", "/privacidad", "/en/aviso-legal", "/en/privacidad"]) {
+    const response = await request.get(`http://ven.localhost:4011${path}`);
+    const body = await response.text();
+
+    expect(response.ok(), body).toBe(true);
+    expect(body).toContain("Sazón Caracas C.A.");
+    expect(body).toContain("J-12345678-9");
+    expect(body).not.toMatch(/España|Valencia|NIF|LSSI|RGPD|LOPDGDD|AEPD/);
+    expect(body).not.toContain("Z1225135E");
+    expect(body).not.toMatch(/\{\{.*\}\}/);
   }
 });
 

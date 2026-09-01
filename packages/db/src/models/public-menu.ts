@@ -96,6 +96,7 @@ export interface PublicMenuData {
   branch: PublicBranch;
   categories: PublicCategory[];
   contactBranches: PublicContactBranch[];
+  countryCode: string;
   legal: PublicLegalEntity;
   promotions: PublicPromotion[];
   sourceCurrency: string;

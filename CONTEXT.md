@@ -34,6 +34,18 @@ One restaurant brand operating two or more branches under a shared commercial
 relationship, centralized billing, and one price per branch in Qmenut.
 _Avoid_: Franchise when the business is not franchised, multi-tenant account
 
+## Access
+
+**User account**:
+A global identity identified by email that can sign in to Qmenut and may belong to one or more
+restaurants.
+_Avoid_: Guest, restaurant, membership
+
+**Restaurant membership**:
+The relationship between a user account and one restaurant, including its role and active
+state. A membership is the authorization boundary for the admin panel.
+_Avoid_: User, account, branch access
+
 ## Product
 
 **Qmenut**:

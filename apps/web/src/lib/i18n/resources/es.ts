@@ -106,13 +106,13 @@ export default {
     privacyLink: "Política de privacidad",
     privacy: {
       title: "Política de privacidad",
-      subtitle: "Protección de datos (RGPD)",
+      subtitle: "Protección de datos",
       seoTitle: "Política de privacidad – {{name}}",
       seoDescription: "Política de privacidad y protección de datos de {{name}}",
     },
     legalNotice: {
       title: "Aviso legal",
-      subtitle: "Información del titular (LSSI-CE)",
+      subtitle: "Información del titular",
       seoTitle: "Aviso legal – {{name}}",
       seoDescription: "Aviso legal e información del titular de {{name}}",
     },
