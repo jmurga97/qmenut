@@ -18,7 +18,7 @@ import { VisitsChartCard } from "../components/visits-chart-card";
 export function DashboardPage() {
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const branch = useSelectedBranch();
-  const canInsights = useCan("loyalty.insights");
+  const canInsights = useCan("analytics.read");
   const canOperate = useCan("loyalty.operate");
   const canToggleAvailability = useCan("menu.toggleDishAvailability");
   const canSeeAttention = useCan("branch.write");

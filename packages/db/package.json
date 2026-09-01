@@ -84,6 +84,10 @@
       "types": "./src/repositories/restaurant-users.repository.ts",
       "import": "./src/repositories/restaurant-users.repository.ts"
     },
+    "./repositories/admin-users.repository": {
+      "types": "./src/repositories/admin-users.repository.ts",
+      "import": "./src/repositories/admin-users.repository.ts"
+    },
     "./repositories/restaurants.repository": {
       "types": "./src/repositories/restaurants.repository.ts",
       "import": "./src/repositories/restaurants.repository.ts"

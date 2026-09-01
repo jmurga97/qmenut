@@ -11,6 +11,7 @@ import type { RestaurantSummary } from "@qmenut/db/repositories/restaurants.repo
 export interface AdminTenantContext {
   restaurant: RestaurantSummary;
   branches: AdminBranchSummary[];
+  membershipId: string;
   roleCode: RestaurantRoleCode;
 }
 
@@ -32,6 +33,7 @@ export async function getTenantContext({ db, tenant }: GetTenantContextInput): P
   return {
     restaurant,
     branches,
+    membershipId: tenant.membershipId,
     roleCode: tenant.roleCode,
   };
 }
