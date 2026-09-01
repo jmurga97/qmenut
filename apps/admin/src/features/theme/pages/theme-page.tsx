@@ -1,5 +1,6 @@
 import { FormProvider } from "react-hook-form";
 
+import { FormCheckbox } from "~/shared/components/forms/adapters/form-checkbox";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
 import { FormColorInput } from "~/shared/components/forms/form-color-input";
@@ -10,6 +11,7 @@ import { NoDomainState } from "~/shared/components/state/no-domain-state";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 
+import { ThemePreview } from "../components/theme-preview";
 import { useThemeController } from "../hooks/use-theme-controller";
 import { THEME_OPTIONS } from "../types";
 
@@ -29,32 +31,44 @@ function ThemeForm({ branchId, host }: { branchId: string; host: string }) {
     <div className="admin-page admin-theme-page">
       <PageHeader kicker={`Tema · ${host}`} title="Personalización" />
       <FormProvider {...controller.form}>
-        <FormShell
-          busy={controller.pending}
-          error={controller.feedback.error}
-          onSubmit={() => void controller.submit()}
-          readOnly={!canWrite}
-          submitLabel="Guardar tema"
-          success={controller.feedback.success}
-        >
-          <div className="admin-theme-workspace">
-            <div className="admin-form-grid">
-              <FormSelect<ThemeFormValues> label="Plantilla" name="template" options={THEME_OPTIONS} />
-              <FormColorInput<ThemeFormValues> label="Color primario" name="primary" />
-              <FormColorInput<ThemeFormValues> label="Color secundario" name="secondary" />
-              <FormTextInput<ThemeFormValues> label="Eslogan" maxLength={120} name="tagline" />
+        <div className="admin-theme-workspace">
+          <FormShell
+            busy={controller.pending}
+            error={controller.feedback.error}
+            onSubmit={() => void controller.submit()}
+            readOnly={!canWrite}
+            submitLabel="Guardar tema"
+            success={controller.feedback.success}
+          >
+            <div className="admin-theme-controls">
+              <section className="admin-theme-section" aria-labelledby="theme-identity-heading">
+                <div className="admin-theme-section__heading">
+                  <h3 id="theme-identity-heading">Identidad de la carta</h3>
+                  <p>Elige el estilo, los colores de marca y el mensaje de bienvenida.</p>
+                </div>
+                <div className="admin-form-grid">
+                  <FormSelect<ThemeFormValues> label="Plantilla" name="template" options={THEME_OPTIONS} />
+                  <div className="admin-form-grid admin-form-grid--two">
+                    <FormColorInput<ThemeFormValues> label="Color primario" name="primary" />
+                    <FormColorInput<ThemeFormValues> label="Color secundario" name="secondary" />
+                  </div>
+                  <FormTextInput<ThemeFormValues> label="Eslogan" maxLength={120} name="tagline" />
+                </div>
+              </section>
+              <section className="admin-theme-section" aria-labelledby="theme-photos-heading">
+                <div className="admin-theme-section__heading">
+                  <h3 id="theme-photos-heading">Fotografías</h3>
+                  <p>Estas opciones prevalecen sobre el estilo recomendado por la plantilla.</p>
+                </div>
+                <div className="admin-choice-grid admin-theme-photo-controls">
+                  <FormCheckbox<ThemeFormValues> label="Mostrar fotos en la carta" name="showMenuPhotos" />
+                  <FormCheckbox<ThemeFormValues> label="Mostrar foto al abrir un plato" name="showDishPhoto" />
+                </div>
+              </section>
             </div>
-            <aside className="admin-theme-preview" style={{ borderColor: controller.preview.primary }}>
-              <div className="admin-kicker">Vista previa</div>
-              <div className="admin-theme-preview-colors">
-                <span className="admin-theme-swatch" style={{ background: controller.preview.primary }} />
-                <span className="admin-theme-swatch" style={{ background: controller.preview.secondary }} />
-              </div>
-              <strong>{controller.preview.tagline || "Sin eslogan"}</strong>
-              <span className="admin-list-meta">Los colores se aplicarán a la carta pública.</span>
-            </aside>
-          </div>
-        </FormShell>
+          </FormShell>
+          <ThemePreview draft={controller.preview} host={host} />
+        </div>
       </FormProvider>
     </div>
   );

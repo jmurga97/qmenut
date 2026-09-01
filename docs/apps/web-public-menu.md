@@ -63,7 +63,9 @@ binding is available. In the browser, production requests go to same-origin `/tr
 
 Two consequences follow. A new tenant domain does not need an API CORS entry, and public
 loyalty does not use authentication cookies, because its `cardToken` lives in local
-storage. The Vite development proxy provides the same `/trpc` shape locally.
+storage after the visitor accepts the privacy policy. The selected language and one-time
+locale/install state use browser storage, while analytics uses memory-only persistence.
+The Vite development proxy provides the same `/trpc` shape locally.
 
 ## Currency display
 
@@ -108,8 +110,11 @@ The related helpers are:
 - `build-promotions-json-ld.ts` emits promotions as schema.org offers.
 - `robots[.]txt.ts` emits the production crawler policy and host-specific sitemap URL, or a
   global restrictive policy in development.
-- `sitemap[.]xml.ts` emits localized alternates for every public route. Its `lastmod`
-  value reads `menuVersion:{host}`, the same KV version used in the edge-cache key.
+- `sitemap[.]xml.ts` emits localized alternates for every currently available public route.
+  It omits `/puntos` when the server-derived loyalty capability is disabled. Its `lastmod`
+  value reads `menuVersion:{host}`, the same KV version used in the edge-cache key; admin
+  loyalty writes bump that version so navigation, `/puntos`, and the sitemap converge on
+  the current program state.
 
 The same server-handler pattern serves the per-tenant web app manifest and icons through
 `site[.]webmanifest.ts`, `icon[.]svg.ts`, `icon-maskable[.]svg.ts`, and

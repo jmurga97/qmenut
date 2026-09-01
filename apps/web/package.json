@@ -8,8 +8,8 @@
     "build": "vite build",
     "check": "tsc --noEmit",
     "preview": "vite preview",
-    "deploy": "CLOUDFLARE_ENV=production vite build && wrangler deploy",
-    "deploy:development": "CLOUDFLARE_ENV=development vite build && wrangler deploy",
+    "deploy": "VITE_ADMIN_ORIGIN=https://admin.qmenut.app CLOUDFLARE_ENV=production vite build && wrangler deploy",
+    "deploy:development": "VITE_ADMIN_ORIGIN=https://admin.dev.qmenut.app CLOUDFLARE_ENV=development vite build && wrangler deploy",
     "serve": "wrangler dev --port 4011 --persist-to ../../.wrangler-shared/state"
   },
   "dependencies": {

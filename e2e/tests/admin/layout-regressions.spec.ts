@@ -22,7 +22,7 @@ test("uses semantic navigation and an environment-aware public menu link", async
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
   await expect(page.getByRole("link", { name: "Menú", exact: true })).toHaveAttribute("href", "/menu");
-  await expect(page.getByRole("link", { name: "Ver carta" })).toHaveAttribute("href", "http://tapas.localhost:5173");
+  await expect(page.getByRole("link", { name: "Ver carta" })).toHaveAttribute("href", "http://tapas.localhost:4011");
 });
 
 test("keeps Select popups exactly as wide as their trigger", async ({ page }) => {

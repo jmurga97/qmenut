@@ -1,4 +1,5 @@
 import { TEMPLATES } from "@qmenut/ui/theme/presets";
+import { QM_THEME_PREVIEW_SEARCH_VALUE } from "@qmenut/ui/theme/tenant-theme-config";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
@@ -36,6 +37,7 @@ interface LocaleSearch {
    */
   utm_source?: string;
   template?: QmTemplateName;
+  themePreview?: typeof QM_THEME_PREVIEW_SEARCH_VALUE;
 }
 
 function isQmTemplateName(value: unknown): value is QmTemplateName {
@@ -46,6 +48,7 @@ export const Route = createFileRoute("/{-$locale}")({
   validateSearch: (search: Record<string, unknown>): LocaleSearch => ({
     utm_source: typeof search.utm_source === "string" ? search.utm_source : undefined,
     template: isQmTemplateName(search.template) ? search.template : undefined,
+    themePreview: search.themePreview === QM_THEME_PREVIEW_SEARCH_VALUE ? search.themePreview : undefined,
   }),
   beforeLoad: async ({ context, location, params, search }): Promise<LocaleRouteContext> => {
     const requested = params.locale?.toLowerCase();

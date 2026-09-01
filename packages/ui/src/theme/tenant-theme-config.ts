@@ -4,21 +4,41 @@ import { TEMPLATES } from "./presets";
 import type { QmFontId } from "./font-catalog";
 import type { QmTemplateName, QmTemplatePreset } from "./presets";
 
+export interface QmTenantThemeEditableConfig {
+  template: QmTemplateName;
+  primary: string;
+  secondary: string;
+  tagline?: string;
+  showMenuPhotos: boolean;
+  showDishPhoto: boolean;
+  /** Optional font-catalog overrides retained even though they are not exposed by the editor. */
+  headingFont?: QmFontId;
+  bodyFont?: QmFontId;
+}
+
 /**
  * Per-tenant theme configuration stored in the `TENANT_THEME` KV namespace, keyed by the
  * tenant's normalized host. A stored value is a FULL preset object (every `QmTemplatePreset`
  * field) plus the tenant's own choices: template name, brand colors and optional tagline.
  * Tenants without a KV entry fall back to `TEMPLATES[DEFAULT_TEMPLATE]`.
  */
-export interface QmTenantThemeConfig extends QmTemplatePreset {
-  template: QmTemplateName;
-  primary: string;
-  secondary: string;
-  tagline?: string;
-  /** Optional font-catalog overrides. Resolved to `--qm-heading` / `--qm-body` by the engine;
-   *  omitted (or role-invalid) falls back to the template preset's `heading` / `body`. */
-  headingFont?: QmFontId;
-  bodyFont?: QmFontId;
+export interface QmTenantThemeConfig extends QmTemplatePreset, QmTenantThemeEditableConfig {}
+
+export const QM_THEME_PREVIEW_READY = "qmenut.theme-preview.ready" as const;
+export const QM_THEME_PREVIEW_UPDATE = "qmenut.theme-preview.update" as const;
+export const QM_THEME_PREVIEW_VERSION = 1 as const;
+export const QM_THEME_PREVIEW_SEARCH_PARAM = "themePreview" as const;
+export const QM_THEME_PREVIEW_SEARCH_VALUE = "admin" as const;
+
+export interface QmThemePreviewReadyMessage {
+  type: typeof QM_THEME_PREVIEW_READY;
+  version: typeof QM_THEME_PREVIEW_VERSION;
+}
+
+export interface QmThemePreviewUpdateMessage {
+  type: typeof QM_THEME_PREVIEW_UPDATE;
+  version: typeof QM_THEME_PREVIEW_VERSION;
+  payload: QmTenantThemeEditableConfig;
 }
 
 export const DEFAULT_TEMPLATE: QmTemplateName = "her";
@@ -37,11 +57,16 @@ function isColor(value: unknown): value is string {
 }
 
 export function buildDefaultTenantThemeConfig(template: QmTemplateName = DEFAULT_TEMPLATE): QmTenantThemeConfig {
+  const preset = TEMPLATES[template];
+  const showPresetPhotos = preset.photoMode !== "none";
+
   return {
-    ...TEMPLATES[template],
+    ...preset,
     template,
     primary: DEFAULT_TENANT_COLORS.primary,
     secondary: DEFAULT_TENANT_COLORS.secondary,
+    showMenuPhotos: showPresetPhotos,
+    showDishPhoto: showPresetPhotos,
   };
 }
 
@@ -71,6 +96,7 @@ export function resolveTenantThemeConfig(
   }
 
   const base = TEMPLATES[candidate.template];
+  const showPresetPhotos = (candidate.photoMode ?? base.photoMode) !== "none";
   const layout =
     candidate.layout && typeof candidate.layout === "object" && !Array.isArray(candidate.layout)
       ? { ...base.layout, ...candidate.layout }
@@ -96,7 +122,59 @@ export function resolveTenantThemeConfig(
     primary,
     secondary,
     tagline: typeof candidate.tagline === "string" ? candidate.tagline : undefined,
+    showMenuPhotos: typeof candidate.showMenuPhotos === "boolean" ? candidate.showMenuPhotos : showPresetPhotos,
+    showDishPhoto: typeof candidate.showDishPhoto === "boolean" ? candidate.showDishPhoto : showPresetPhotos,
     headingFont: isHeadingFontId(candidate.headingFont) ? candidate.headingFont : undefined,
     bodyFont: isBodyFontId(candidate.bodyFont) ? candidate.bodyFont : undefined,
+  };
+}
+
+export function createThemePreviewReadyMessage(): QmThemePreviewReadyMessage {
+  return { type: QM_THEME_PREVIEW_READY, version: QM_THEME_PREVIEW_VERSION };
+}
+
+export function createThemePreviewUpdateMessage(payload: QmTenantThemeEditableConfig): QmThemePreviewUpdateMessage {
+  return { type: QM_THEME_PREVIEW_UPDATE, version: QM_THEME_PREVIEW_VERSION, payload };
+}
+
+export function isThemePreviewReadyMessage(value: unknown): value is QmThemePreviewReadyMessage {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+
+  const candidate = value as Partial<QmThemePreviewReadyMessage>;
+  return candidate.type === QM_THEME_PREVIEW_READY && candidate.version === QM_THEME_PREVIEW_VERSION;
+}
+
+export function parseThemePreviewUpdateMessage(value: unknown): QmTenantThemeEditableConfig | null {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
+
+  const candidate = value as { payload?: unknown; type?: unknown; version?: unknown };
+  if (candidate.type !== QM_THEME_PREVIEW_UPDATE || candidate.version !== QM_THEME_PREVIEW_VERSION) return null;
+
+  const payload = candidate.payload;
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload)) return null;
+  const config = payload as Partial<QmTenantThemeEditableConfig>;
+  if (!isTemplateName(config.template)) return null;
+  if (typeof config.primary !== "string" || !/^#(?:[\dA-Fa-f]{3}|[\dA-Fa-f]{6})$/.test(config.primary)) {
+    return null;
+  }
+  if (typeof config.secondary !== "string" || !/^#(?:[\dA-Fa-f]{3}|[\dA-Fa-f]{6})$/.test(config.secondary)) {
+    return null;
+  }
+  if (config.tagline !== undefined && (typeof config.tagline !== "string" || config.tagline.length > 120)) {
+    return null;
+  }
+  if (typeof config.showMenuPhotos !== "boolean" || typeof config.showDishPhoto !== "boolean") return null;
+  if (config.headingFont !== undefined && !isHeadingFontId(config.headingFont)) return null;
+  if (config.bodyFont !== undefined && !isBodyFontId(config.bodyFont)) return null;
+
+  return {
+    template: config.template,
+    primary: config.primary,
+    secondary: config.secondary,
+    tagline: config.tagline,
+    showMenuPhotos: config.showMenuPhotos,
+    showDishPhoto: config.showDishPhoto,
+    headingFont: config.headingFont,
+    bodyFont: config.bodyFont,
   };
 }

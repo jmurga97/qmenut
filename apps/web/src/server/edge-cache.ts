@@ -1,3 +1,4 @@
+import { QM_THEME_PREVIEW_SEARCH_PARAM, QM_THEME_PREVIEW_SEARCH_VALUE } from "@qmenut/ui/theme/tenant-theme-config";
 import { env } from "cloudflare:workers";
 
 import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
@@ -31,6 +32,10 @@ const CACHEABLE_ROUTES = new Set([
 const revalidations = new Map<string, Promise<void>>();
 
 type CacheStatus = "BYPASS" | "HIT" | "MISS" | "STALE";
+
+function isThemePreviewRequest(request: Request): boolean {
+  return new URL(request.url).searchParams.get(QM_THEME_PREVIEW_SEARCH_PARAM) === QM_THEME_PREVIEW_SEARCH_VALUE;
+}
 
 async function readPublicContentVersion(host: string): Promise<string | null> {
   return (await env.TENANT_THEME?.get(`${LEGACY_CONTENT_VERSION_KEY_PREFIX}${host}`)) ?? null;
@@ -221,6 +226,17 @@ interface ServeWithEdgeCacheInput {
  * the background. Callers always receive the short browser-cache contract.
  */
 export async function serveWithEdgeCache({ ctx, render, request }: ServeWithEdgeCacheInput): Promise<Response> {
+  if (isThemePreviewRequest(request)) {
+    const response = await render();
+
+    return withCacheStatus({
+      browserCacheControl: false,
+      cacheStatus: "BYPASS",
+      noStore: true,
+      response,
+    });
+  }
+
   if (env.DISABLE_EDGE_CACHE === "true") {
     const response = await render();
 

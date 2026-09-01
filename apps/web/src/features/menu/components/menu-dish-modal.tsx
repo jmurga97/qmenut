@@ -14,9 +14,10 @@ const MODAL_IMAGE_WIDTH_PX = 430;
 interface MenuDishModalProps {
   dish: MenuDishViewModel | null;
   onClose: () => void;
+  showDishPhoto: boolean;
 }
 
-export function MenuDishModal({ dish, onClose }: MenuDishModalProps) {
+export function MenuDishModal({ dish, onClose, showDishPhoto }: MenuDishModalProps) {
   const { t } = useTranslation();
 
   if (!dish) {
@@ -27,7 +28,7 @@ export function MenuDishModal({ dish, onClose }: MenuDishModalProps) {
     <QmDishModal
       open
       name={dish.name}
-      photoUrl={photoUrl(dish.photoUrl, MODAL_IMAGE_WIDTH_PX)}
+      photoUrl={showDishPhoto ? photoUrl(dish.photoUrl, MODAL_IMAGE_WIDTH_PX) : undefined}
       photoLabel={t("menu.photoLabel")}
       closeLabel={t("menu.closeLabel")}
       price={dish.price}

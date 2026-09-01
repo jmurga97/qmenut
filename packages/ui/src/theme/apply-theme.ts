@@ -16,6 +16,8 @@ export type QmThemeInput = QmThemeConfig &
     headingFont?: QmFontId;
     bodyFont?: QmFontId;
     layout?: Partial<QmTemplateLayoutDefaults>;
+    showMenuPhotos?: boolean;
+    showDishPhoto?: boolean;
   };
 
 const PHOTO_GROUPS: Record<QmPhotoMode, Record<string, string>> = {
@@ -287,6 +289,16 @@ export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
   const resolved = resolveTemplate(input);
   const colors = deriveQmTheme(input);
   const hasDivider = resolved.photoMode === "none" || resolved.photoMode === "thumb";
+  const showPresetPhotos = resolved.photoMode !== "none";
+  const showMenuPhotos = input.showMenuPhotos ?? showPresetPhotos;
+  const showDishPhoto = input.showDishPhoto ?? showPresetPhotos;
+  // When a flag turns photos on over a photo-less template, none's group has no photo sizing
+  // (thumbnails would fall back to raw CSS defaults) and keeps the baseline row alignment, so
+  // mix in thumb's sizing, alignment and ordering tokens.
+  const photoGroup =
+    resolved.photoMode === "none" && (showMenuPhotos || showDishPhoto)
+      ? { ...PHOTO_GROUPS.none, ...PHOTO_GROUPS.thumb }
+      : PHOTO_GROUPS[resolved.photoMode];
 
   return {
     "--qm-primary": colors.primary,
@@ -332,7 +344,11 @@ export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
     "--qm-divider": hasDivider ? `1px solid ${colors.hairline}` : "none",
     "--qm-divider2": `1px solid ${colors.hairline}`,
 
-    ...PHOTO_GROUPS[resolved.photoMode],
+    ...photoGroup,
+    // Semantic tenant choices win over the template's photo display defaults.
+    "--qm-photo": showDishPhoto ? "block" : "none",
+    "--qm-dish-photo": showMenuPhotos ? "block" : "none",
+    "--qm-featured-img": showMenuPhotos ? "block" : "none",
     ...buildBadgeTokens({ shape: resolved.badgeShape, colors, radius: `${resolved.radius}px` }),
     ...buildNavTokens({ navStyle: resolved.navStyle, colors, rule: `${resolved.rule}px` }),
   };
