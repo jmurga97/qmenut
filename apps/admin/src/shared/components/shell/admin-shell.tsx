@@ -36,7 +36,7 @@ const SECTIONS = [
     id: "analytics",
     label: "Analítica",
     path: "/analytics",
-    permission: "loyalty.insights",
+    permission: "analytics.read",
   },
   { group: "operations", icon: "menu", id: "menu", label: "Menú", path: "/menu" },
   {
@@ -70,6 +70,14 @@ const SECTIONS = [
     label: "Facturación",
     path: "/billing",
     permission: "billing.manage",
+  },
+  {
+    group: "business",
+    icon: "users",
+    id: "users",
+    label: "Usuarios",
+    path: "/users",
+    permission: "users.manage",
   },
 ] as const satisfies readonly Section[];
 

@@ -63,7 +63,7 @@ export function PublicPageShell({ children, template, tenant, theme }: PublicPag
     <div className="home-shell" data-template={template} style={themeVars}>
       <div className="home-column">
         {children}
-        <PublicBottomNav />
+        <PublicBottomNav showLoyalty={tenant.publicFeatures.loyalty} />
       </div>
     </div>
   );

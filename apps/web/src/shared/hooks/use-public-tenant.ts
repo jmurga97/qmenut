@@ -38,10 +38,14 @@ export function usePublicTenant(themeOverride?: QmTenantThemeConfig): PublicTena
       primary: theme.primary,
       showDishPhoto: theme.showDishPhoto,
       showMenuPhotos: theme.showMenuPhotos,
+      publicFeatures: data.publicFeatures,
       secondary: theme.secondary,
       template: theme.template,
       tenantName: data.branch.name,
       tenantTagline: theme.tagline ?? "",
+      sourceCurrency: data.sourceCurrency,
+      vesExchangeRate: data.vesExchangeRate,
+      vesPricesEnabled: data.vesPricesEnabled,
     };
   }, [data, theme]);
 

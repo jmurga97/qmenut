@@ -23,7 +23,9 @@ recursos y Workers seleccionados por cada ambiente.
       `restaurant.countryCode`
 - [ ] Idioma principal de la carta (es, en, …) → `restaurant.defaultLanguageCode`
 - [ ] Otros idiomas de la carta → `restaurant.languages`
-- [ ] Moneda; EUR salvo excepción → `restaurant.defaultCurrency`
+- [ ] Moneda de origen como código ISO 4217 en mayúsculas; obligatoria y determinada por
+      el país: ESP → EUR, VEN → USD (no hay más parejas admitidas) →
+      `restaurant.sourceCurrency`
 - [ ] Zona horaria IANA; opcional, por defecto `Europe/Madrid` → `restaurant.timezone`
 - [ ] Razón social → `restaurant.legal.legalName`
 - [ ] NIF o CIF → `restaurant.legal.taxId`

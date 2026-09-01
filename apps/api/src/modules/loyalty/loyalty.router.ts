@@ -1,3 +1,4 @@
+import { acceptConsent } from "./accept-consent";
 import { cancelRedemption } from "./cancel-redemption";
 import { createCard } from "./create-card";
 import { earnStamp } from "./earn-stamp";
@@ -5,6 +6,7 @@ import { getCard } from "./get-card";
 import { getLoyaltyProgramForClient } from "./get-loyalty-program";
 import { getRedemptionStatus } from "./get-redemption-status";
 import {
+  acceptConsentInputSchema,
   cardTokenInputSchema,
   createCardInputSchema,
   earnStampInputSchema,
@@ -19,16 +21,31 @@ export const loyaltyRouter = router({
   program: publicProcedure
     .input(hostInputSchema.optional())
     .query(({ ctx, input }) => getLoyaltyProgramForClient({ db: ctx.db, request: ctx.request, host: input?.host })),
-  createCard: publicProcedure
-    .input(createCardInputSchema)
-    .mutation(({ ctx, input }) =>
-      createCard({ db: ctx.db, env: ctx.env, request: ctx.request, host: input.host, email: input.email }),
-    ),
+  createCard: publicProcedure.input(createCardInputSchema).mutation(({ ctx, input }) =>
+    createCard({
+      consentAccepted: input.consentAccepted,
+      db: ctx.db,
+      env: ctx.env,
+      request: ctx.request,
+      host: input.host,
+      email: input.email,
+    }),
+  ),
   getCard: publicProcedure
     .input(cardTokenInputSchema)
     .query(({ ctx, input }) =>
       getCard({ db: ctx.db, env: ctx.env, request: ctx.request, host: input.host, cardToken: input.cardToken }),
     ),
+  acceptConsent: publicProcedure.input(acceptConsentInputSchema).mutation(({ ctx, input }) =>
+    acceptConsent({
+      db: ctx.db,
+      email: input.email,
+      env: ctx.env,
+      request: ctx.request,
+      host: input.host,
+      cardToken: input.cardToken,
+    }),
+  ),
   earnStamp: publicProcedure.input(earnStampInputSchema).mutation(({ ctx, input }) =>
     earnStamp({
       db: ctx.db,

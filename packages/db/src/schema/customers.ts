@@ -26,6 +26,8 @@ export const customerRestaurants = sqliteTable(
       .references(() => restaurants.id, { onDelete: "cascade" }),
     pointsBalance: integer("points_balance").notNull().default(0),
     stampsBalance: integer("stamps_balance").notNull().default(0),
+    loyaltyConsentAcceptedAt: integer("loyalty_consent_accepted_at"),
+    loyaltyConsentVersion: text("loyalty_consent_version"),
     firstVisitAt: integer("first_visit_at"),
     lastVisitAt: integer("last_visit_at"),
     createdAt: integer("created_at").notNull().default(epochMilliseconds),

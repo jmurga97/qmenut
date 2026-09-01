@@ -17,7 +17,7 @@ export interface AnalyticsEventPayloads {
   dish_opened: { dish_id: string; dish_name: string; source: DishOpenSource };
   highlights_view: Record<string, never>;
   language_changed: { from: string; to: string };
-  loyalty_view: Record<string, never>;
+  loyalty_view: { from_qr: boolean };
   menu_category_reached: {
     category: string;
     category_id: string | null;

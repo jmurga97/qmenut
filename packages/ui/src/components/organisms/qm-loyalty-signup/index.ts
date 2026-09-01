@@ -10,6 +10,12 @@ export const QM_LOYALTY_SIGNUP_TAG_NAME = "qm-loyalty-signup";
 export interface QmLoyaltyEmailEventDetail {
   email: string;
 }
+export interface QmLoyaltyConsentChangeEventDetail {
+  accepted: boolean;
+}
+export interface QmLoyaltySubmitEventDetail extends QmLoyaltyEmailEventDetail {
+  consentAccepted: boolean;
+}
 
 const componentStyles = createComponentStyles(componentStylesText);
 let instanceCount = 0;
@@ -23,10 +29,17 @@ export class QmLoyaltySignup extends QmElement {
   @property({ type: String, attribute: "email-label" }) emailLabel = "";
   @property({ type: String, attribute: "email-placeholder" }) emailPlaceholder = "";
   @property({ type: String, attribute: "submit-label" }) submitLabel = "";
+  @property({ type: Boolean, attribute: "consent-accepted" }) consentAccepted = false;
+  @property({ type: String, attribute: "consent-label" }) consentLabel = "";
+  @property({ type: String, attribute: "privacy-href" }) privacyHref = "/privacidad";
+  @property({ type: String, attribute: "privacy-link-label" }) privacyLinkLabel = "";
+  @property({ type: String, attribute: "consent-error" }) consentError = "";
   @property({ type: String }) reassurance = "";
   @property({ type: String }) error = "";
   @property({ type: Boolean, reflect: true }) busy = false;
   private readonly inputId = `qm-loyalty-email-${++instanceCount}`;
+  private readonly consentId = `${this.inputId}-consent`;
+  private consentInvalid = false;
 
   private readonly handleInput = (event: Event) => {
     this.postEvent<QmLoyaltyEmailEventDetail>({
@@ -37,7 +50,27 @@ export class QmLoyaltySignup extends QmElement {
 
   private readonly handleSubmit = (event: SubmitEvent) => {
     event.preventDefault();
-    this.postEvent<QmLoyaltyEmailEventDetail>({ name: "qm-submit", detail: { email: this.email.trim() } });
+
+    if (!this.consentAccepted) {
+      this.consentInvalid = true;
+      this.requestUpdate();
+      this.renderRoot.querySelector<HTMLInputElement>(`#${this.consentId}`)?.focus();
+      return;
+    }
+
+    this.postEvent<QmLoyaltySubmitEventDetail>({
+      name: "qm-submit",
+      detail: { consentAccepted: true, email: this.email.trim() },
+    });
+  };
+
+  private readonly handleConsentChange = (event: Event) => {
+    this.consentAccepted = (event.target as HTMLInputElement).checked;
+    this.consentInvalid = false;
+    this.postEvent<QmLoyaltyConsentChangeEventDetail>({
+      name: "qm-consent-change",
+      detail: { accepted: this.consentAccepted },
+    });
   };
 
   render() {
@@ -62,6 +95,25 @@ export class QmLoyaltySignup extends QmElement {
             aria-describedby=${`${this.inputId}-error ${this.inputId}-reassurance`}
             @input=${this.handleInput}
           />
+          <div class="consent">
+            <input
+              id=${this.consentId}
+              type="checkbox"
+              .checked=${this.consentAccepted}
+              aria-invalid=${this.consentInvalid ? "true" : "false"}
+              aria-required="true"
+              aria-describedby=${`${this.consentId}-error`}
+              ?disabled=${this.busy}
+              @change=${this.handleConsentChange}
+            />
+            <label for=${this.consentId}>
+              ${this.consentLabel}
+              <a href=${this.privacyHref}>${this.privacyLinkLabel}</a>
+            </label>
+          </div>
+          <p id=${`${this.consentId}-error`} class="consent-error" aria-live="polite" ?hidden=${!this.consentInvalid}>
+            ${this.consentError}
+          </p>
           <p id=${`${this.inputId}-error`} class="error" aria-live="polite">${this.error}</p>
           <button type="submit" ?disabled=${this.busy}>${this.submitLabel}</button>
         </form>
@@ -86,6 +138,11 @@ export type QmLoyaltySignupArgs = Partial<
     | "emailLabel"
     | "emailPlaceholder"
     | "submitLabel"
+    | "consentAccepted"
+    | "consentLabel"
+    | "privacyHref"
+    | "privacyLinkLabel"
+    | "consentError"
     | "reassurance"
     | "error"
     | "busy"

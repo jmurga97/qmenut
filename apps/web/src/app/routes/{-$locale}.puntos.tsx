@@ -21,6 +21,7 @@ export const Route = createFileRoute("/{-$locale}/puntos")({
       descriptionKey: "loyalty.seoDescription",
       loaderData,
       match,
+      noIndex: loaderData?.publicFeatures.loyalty === false,
       path: "/puntos",
       titleKey: "loyalty.seoTitle",
     }),

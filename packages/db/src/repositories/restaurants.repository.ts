@@ -8,7 +8,7 @@ import type { BatchItem } from "drizzle-orm/batch";
 export interface RestaurantSummary {
   countryCode: string;
   dataProtectionEmail: string | null;
-  defaultCurrency: string;
+  sourceCurrency: string;
   defaultLanguageCode: string;
   id: string;
   legalAddress: string | null;
@@ -33,7 +33,7 @@ export async function getRestaurantById({
       name: restaurants.name,
       countryCode: restaurants.countryCode,
       defaultLanguageCode: restaurants.defaultLanguageCode,
-      defaultCurrency: restaurants.defaultCurrency,
+      sourceCurrency: restaurants.sourceCurrency,
       dataProtectionEmail: restaurants.dataProtectionEmail,
       legalAddress: restaurants.legalAddress,
       legalName: restaurants.legalName,

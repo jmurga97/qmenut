@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { mapPublicMenuContent } from "~/features/menu/mappers/map-public-menu-content";
+import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
 import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
 
@@ -15,10 +16,11 @@ export function useMenuContent(): MenuContentViewModel | null {
   const { host } = useTenantContext();
   const { effectiveLocale, locale } = useRouteContext({ from: "/{-$locale}" });
   const { t } = useTranslation();
+  const { displayCurrency } = usePublicRouteLayout();
   const { data } = useSuspenseQuery(getPublicMenuQueryOptions({ host, locale, trpc }));
 
   return useMemo(
-    () => (data ? mapPublicMenuContent({ data, locale: effectiveLocale, t }) : null),
-    [data, effectiveLocale, t],
+    () => (data ? mapPublicMenuContent({ data, displayCurrency, locale: effectiveLocale, t }) : null),
+    [data, displayCurrency, effectiveLocale, t],
   );
 }

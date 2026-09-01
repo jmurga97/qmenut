@@ -2,6 +2,7 @@ import { upsertCustomerCard } from "@qmenut/db/repositories/customers.repository
 import { getLoyaltyProgram } from "@qmenut/db/repositories/loyalty-admin.repository";
 import { TRPCError } from "@trpc/server";
 
+import { LOYALTY_CONSENT_VERSION } from "./consent";
 import { signLoyaltyToken } from "../../lib/loyalty/token";
 import { resolvePublicTenant } from "../public-menu/resolve-public-tenant";
 
@@ -10,6 +11,7 @@ import type { DrizzleDb } from "@qmenut/db/client";
 import type { CustomerCardState } from "@qmenut/db/models/loyalty";
 
 interface CreateCardInput {
+  consentAccepted: boolean;
   db: DrizzleDb;
   env: RuntimeEnv;
   request: Request;
@@ -24,7 +26,18 @@ export interface CreateCardResult {
 }
 
 /** Idempotent by email — this is also the card-recovery path (re-entering the same email anywhere). */
-export async function createCard({ db, env, request, host, email }: CreateCardInput): Promise<CreateCardResult> {
+export async function createCard({
+  consentAccepted,
+  db,
+  env,
+  request,
+  host,
+  email,
+}: CreateCardInput): Promise<CreateCardResult> {
+  if (!consentAccepted) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Es necesario aceptar la política de privacidad" });
+  }
+
   const tenant = await resolvePublicTenant({ db, request, host });
 
   if (!tenant) {
@@ -37,7 +50,12 @@ export async function createCard({ db, env, request, host, email }: CreateCardIn
     throw new TRPCError({ code: "PRECONDITION_FAILED", message: "El programa de fidelización no está activo" });
   }
 
-  const card = await upsertCustomerCard({ db, email, restaurantId: tenant.restaurantId });
+  const card = await upsertCustomerCard({
+    consentVersion: LOYALTY_CONSENT_VERSION,
+    db,
+    email,
+    restaurantId: tenant.restaurantId,
+  });
   const cardToken = await signLoyaltyToken({
     secret: env.LOYALTY_TOKEN_SECRET,
     payload: { v: 1, t: "card", cid: card.customerId, rid: tenant.restaurantId },

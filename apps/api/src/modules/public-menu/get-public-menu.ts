@@ -2,7 +2,9 @@ import { getPublicMenu as findPublicMenu } from "@qmenut/db/repositories/public-
 import { getRestaurantLanguageInfo } from "@qmenut/db/repositories/restaurant-languages.repository";
 
 import { sanitizeNullableDescription } from "./sanitize-description";
+import { getPublicLoyaltyFeatures } from "../loyalty/get-loyalty-program";
 
+import type { PublicLoyaltyFeatures } from "../loyalty/get-loyalty-program";
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { ResolvedTenant } from "@qmenut/db/domain/tenant";
 import type { PublicCategory, PublicMenuData, PublicMenuLanguage } from "@qmenut/db/models/public-menu";
@@ -16,7 +18,10 @@ interface GetPublicMenuInput {
   tenant: ResolvedTenant;
 }
 
-export type PublicMenuPayload = PublicMenuData & { language: PublicMenuLanguage };
+export type PublicMenuPayload = PublicMenuData & {
+  language: PublicMenuLanguage;
+  publicFeatures: PublicLoyaltyFeatures;
+};
 
 function sanitizeCategories(categories: PublicCategory[]): PublicCategory[] {
   return categories.map((category) => ({
@@ -43,13 +48,16 @@ export async function getPublicMenu({
     requested !== null && activeLanguages.some((language) => language.languageCode === requested)
       ? requested
       : defaultLanguage;
-  const data = await findPublicMenu({
-    db,
-    nowMs,
-    tenant,
-    locale: effective,
-    isDefaultLocale: effective === defaultLanguage,
-  });
+  const [data, publicFeatures] = await Promise.all([
+    findPublicMenu({
+      db,
+      nowMs,
+      tenant,
+      locale: effective,
+      isDefaultLocale: effective === defaultLanguage,
+    }),
+    getPublicLoyaltyFeatures({ db, restaurantId: tenant.restaurantId }),
+  ]);
 
   if (!data) {
     return null;
@@ -67,5 +75,6 @@ export async function getPublicMenu({
       effective,
       requested,
     },
+    publicFeatures,
   };
 }

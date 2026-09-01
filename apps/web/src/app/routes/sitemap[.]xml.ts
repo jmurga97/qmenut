@@ -4,7 +4,7 @@ import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alte
 import { createServerTrpcCaller } from "~/lib/trpc-client";
 import { resolveSsrTenantHost } from "~/server/tenant-host";
 
-const ROUTE_PATHS = ["/", "/contacto", "/destacados", "/puntos", "/aviso-legal", "/privacidad"];
+const ROUTE_PATHS = ["/", "/contacto", "/destacados", "/puntos", "/aviso-legal", "/privacidad"] as const;
 const CONTENT_VERSION_KEY_PREFIX = "menuVersion:";
 
 function escapeXml(value: string): string {
@@ -41,7 +41,8 @@ export const Route = createFileRoute("/sitemap.xml")({
           return new Response("Not found", { status: 404 });
         }
 
-        const urlEntries = ROUTE_PATHS.map((path) => {
+        const publicRoutePaths = ROUTE_PATHS.filter((path) => path !== "/puntos" || data.publicFeatures.loyalty);
+        const urlEntries = publicRoutePaths.map((path) => {
           const alternates = buildHreflangAlternates({ language: data.language, origin, path });
           const defaultHref = alternates.find((alt) => alt.hreflang === "x-default")?.href ?? origin + path;
           const alternateLinks = alternates

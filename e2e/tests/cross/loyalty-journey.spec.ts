@@ -1,3 +1,4 @@
+import { signLoyaltyToken } from "../../../apps/api/src/lib/loyalty/token";
 import { getVenueCode } from "../../../apps/api/src/lib/loyalty/venue-code";
 import { expect, test } from "../../fixtures/test";
 import {
@@ -10,12 +11,63 @@ import {
 
 const LOYALTY_SECRET = "qmenut-e2e-loyalty-token-secret-2026-change-before-deploy";
 
+test("requires current consent before an existing loyalty card can operate", async ({ request }) => {
+  const legacyToken = await signLoyaltyToken({
+    secret: LOYALTY_SECRET,
+    payload: { v: 1, t: "card", cid: "customer_legacy_consent", rid: "rest_tapas" },
+  });
+
+  const peek = await callPublicTrpc(request, "loyalty.getCard", {
+    host: "tapas.localhost",
+    cardToken: legacyToken,
+  });
+  expect(peek, peek.body).toMatchObject({ ok: true, status: 200 });
+  expect(getTrpcData<{ card: { email: string }; consentRequired: boolean }>(peek)).toMatchObject({
+    consentRequired: true,
+    card: { email: "l***@test.local" },
+  });
+
+  const blockedWrite = await callPublicTrpcMutation(request, "loyalty.earnStamp", {
+    host: "tapas.localhost",
+    cardToken: legacyToken,
+    venueCode: "0000",
+  });
+  expect(blockedWrite, blockedWrite.body).toMatchObject({ ok: false, status: 403 });
+
+  const wrongEmail = await callPublicTrpcMutation(request, "loyalty.acceptConsent", {
+    cardToken: legacyToken,
+    consentAccepted: true,
+    host: "tapas.localhost",
+    email: "wrong.e2e@test.local",
+  });
+  expect(wrongEmail, wrongEmail.body).toMatchObject({ ok: false, status: 403 });
+
+  const accepted = await callPublicTrpcMutation(request, "loyalty.acceptConsent", {
+    cardToken: legacyToken,
+    consentAccepted: true,
+    host: "tapas.localhost",
+    email: "legacy-consent.e2e@test.local",
+  });
+  expect(accepted, accepted.body).toMatchObject({ ok: true, status: 200 });
+
+  const card = await callPublicTrpc(request, "loyalty.getCard", {
+    host: "tapas.localhost",
+    cardToken: legacyToken,
+  });
+  expect(card, card.body).toMatchObject({ ok: true, status: 200 });
+  expect(getTrpcData<{ card: { email: string }; consentRequired: boolean }>(card)).toMatchObject({
+    consentRequired: false,
+    card: { email: "legacy-consent.e2e@test.local" },
+  });
+});
+
 test("runs the diner-to-admin loyalty journey and enforces venue-code throttling", async ({ page, request }) => {
   const venueResponse = await callTrpcQuery(page, "admin.loyalty.venueCode", { branchId: "branch_tapas" });
   const venue = getTrpcData<{ code: string; expiresAt: number }>(venueResponse);
 
-  await page.goto("http://tapas.localhost:4011/es/puntos", { waitUntil: "networkidle" });
-  await page.getByLabel("Email").fill("journey.e2e@test.local");
+  await page.goto("http://tapas.localhost:4011/es/puntos?utm_source=qr", { waitUntil: "networkidle" });
+  await page.getByRole("textbox", { name: "Email", exact: true }).fill("journey.e2e@test.local");
+  await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: /Crear mi tarjeta/ }).click();
   await expect(page.getByText("journey.e2e@test.local")).toBeVisible();
   await page.getByRole("button", { name: "Pedir mi sello" }).click();
@@ -52,6 +104,7 @@ test("runs the diner-to-admin loyalty journey and enforces venue-code throttling
   expect(undone, undone.body).toMatchObject({ ok: true, status: 200 });
 
   const throttleCard = await callPublicTrpcMutation(request, "loyalty.createCard", {
+    consentAccepted: true,
     host: "tapas.localhost",
     email: "throttle.e2e@test.local",
   });
@@ -79,4 +132,11 @@ test("runs the diner-to-admin loyalty journey and enforces venue-code throttling
     venueCode: "0004",
   });
   expect(limited, limited.body).toMatchObject({ ok: false, status: 429 });
+});
+
+test("shows the visit-us cover on /puntos when the visit does not come from the QR", async ({ page }) => {
+  await page.goto("http://tapas.localhost:4011/es/puntos", { waitUntil: "networkidle" });
+
+  await expect(page.getByRole("heading", { name: "Visítanos y gana puntos" })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Email", exact: true })).toHaveCount(0);
 });

@@ -16,7 +16,7 @@ VALUES ('user_seed_owner', 'Juan', 'juanmurga97@gmail.com', 1, unixepoch() * 100
 -- TENANT 1 · Bar La Tasca · tapas.localhost · template "tapas"
 -- =============================================================================
 
-INSERT INTO restaurants (id, name, country_code, default_language_code, default_currency, legal_name, tax_id, legal_address, data_protection_email)
+INSERT INTO restaurants (id, name, country_code, default_language_code, source_currency, legal_name, tax_id, legal_address, data_protection_email)
 VALUES ('rest_tapas', 'Bar La Tasca', 'ESP', 'es', 'EUR', 'La Tasca Hostelería S.L.', 'B12345678', 'Calle del Laurel 12, Logroño', 'privacidad@latasca.example');
 
 INSERT INTO restaurant_users (id, restaurant_id, user_id, role_code)
@@ -26,8 +26,8 @@ INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALU
     ('rest_tapas', 'es', 1),
     ('rest_tapas', 'en', 0);
 
-INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain, currency)
-VALUES ('branch_tapas', 'rest_tapas', 'Bar La Tasca', 'Calle del Laurel 12, Logroño', '+34941222333', 'tapas.localhost', 'EUR');
+INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain)
+VALUES ('branch_tapas', 'rest_tapas', 'Bar La Tasca', 'Calle del Laurel 12, Logroño', '+34941222333', 'tapas.localhost');
 
 INSERT INTO branch_photos (id, branch_id, url, position) VALUES
     ('bp_tapas_1', 'branch_tapas', 'https://picsum.photos/seed/qmenut-tasca/800/600', 0);
@@ -87,7 +87,7 @@ INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_co
 -- TENANT 2 · Aurum · fine.localhost · template "fine"
 -- =============================================================================
 
-INSERT INTO restaurants (id, name, country_code, default_language_code, default_currency, legal_name, tax_id, legal_address, data_protection_email)
+INSERT INTO restaurants (id, name, country_code, default_language_code, source_currency, legal_name, tax_id, legal_address, data_protection_email)
 VALUES ('rest_fine', 'Aurum', 'ESP', 'es', 'EUR', 'Aurum Gastronomía S.L.', 'B87654321', 'Paseo de Gracia 88, Barcelona', 'privacidad@aurum.example');
 
 INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALUES
@@ -104,8 +104,7 @@ INSERT INTO branches (
     phone,
     whatsapp,
     social_links_json,
-    custom_domain,
-    currency
+    custom_domain
 ) VALUES
     (
         'branch_fine',
@@ -117,8 +116,7 @@ INSERT INTO branches (
         '+34932111444',
         '+34600111222',
         '{"instagram":"https://www.instagram.com/aurum"}',
-        'fine.localhost',
-        'EUR'
+        'fine.localhost'
     ),
     (
         'branch_fine_born',
@@ -130,8 +128,7 @@ INSERT INTO branches (
         '+34932111555',
         '+34600111333',
         '{"instagram":"https://www.instagram.com/aurum"}',
-        NULL,
-        'EUR'
+        NULL
     ),
     (
         'branch_fine_sarria',
@@ -143,8 +140,7 @@ INSERT INTO branches (
         '+34932111666',
         '+34600111444',
         '{"instagram":"https://www.instagram.com/aurum"}',
-        NULL,
-        'EUR'
+        NULL
     );
 
 INSERT INTO branch_photos (id, branch_id, url, position) VALUES
@@ -265,15 +261,15 @@ INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_co
 -- TENANT 3 · Café Brote · cafe.localhost · template default (sin entrada KV)
 -- =============================================================================
 
-INSERT INTO restaurants (id, name, country_code, default_language_code, default_currency)
+INSERT INTO restaurants (id, name, country_code, default_language_code, source_currency)
 VALUES ('rest_cafe', 'Café Brote', 'ESP', 'es', 'EUR');
 
 INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALUES
     ('rest_cafe', 'es', 1),
     ('rest_cafe', 'en', 0);
 
-INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain, currency)
-VALUES ('branch_cafe', 'rest_cafe', 'Café Brote', 'Calle Fuencarral 45, Madrid', '+34915666777', 'cafe.localhost', 'EUR');
+INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain)
+VALUES ('branch_cafe', 'rest_cafe', 'Café Brote', 'Calle Fuencarral 45, Madrid', '+34915666777', 'cafe.localhost');
 
 INSERT INTO branch_photos (id, branch_id, url, position) VALUES
     ('bp_cafe_1', 'branch_cafe', 'https://picsum.photos/seed/qmenut-brote/800/600', 0);
@@ -328,3 +324,17 @@ INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_co
     ('tr_cafe_tostada_name',  'rest_cafe', 'dish',     'dish_cafe_tostada',  'en', 'name',        'Avocado toast'),
     ('tr_cafe_tostada_desc',  'rest_cafe', 'dish',     'dish_cafe_tostada',  'en', 'description', 'Sourdough, poached egg'),
     ('tr_cafe_carrot_name',   'rest_cafe', 'dish',     'dish_cafe_carrot',   'en', 'name',        'Carrot cake');
+
+-- =============================================================================
+-- TENANT 4 · Sazón Caracas · ven.localhost · Venezuela
+-- =============================================================================
+
+INSERT INTO restaurants (id, name, country_code, default_language_code, source_currency, legal_name, tax_id, legal_address, data_protection_email)
+VALUES ('rest_ven', 'Sazón Caracas', 'VEN', 'es', 'USD', 'Sazón Caracas C.A.', 'J-12345678-9', 'Av. Francisco de Miranda 100, Caracas', 'privacidad@sazon.example');
+
+INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALUES
+    ('rest_ven', 'es', 1),
+    ('rest_ven', 'en', 0);
+
+INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain)
+VALUES ('branch_ven', 'rest_ven', 'Sazón Caracas', 'Av. Francisco de Miranda 100, Caracas', '+582129990000', 'ven.localhost');
