@@ -5,27 +5,28 @@ import { getLoyaltyMutationOptions } from "~/features/loyalty/api/loyalty-query-
 
 import type { TrpcOptionsProxy } from "~/lib/trpc-client";
 
-interface LoyaltySignupInput {
+interface LoyaltyConsentInput {
+  cardToken: string | null | undefined;
   host: string;
-  setToken: (token: string) => void;
+  refreshCard: () => Promise<void>;
   trpc: TrpcOptionsProxy;
 }
 
-export function useLoyaltySignup({ host, setToken, trpc }: LoyaltySignupInput) {
+export function useLoyaltyConsent({ cardToken, host, refreshCard, trpc }: LoyaltyConsentInput) {
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [email, setEmail] = useState("");
-  const mutation = useMutation(getLoyaltyMutationOptions(trpc).createCard);
+  const mutation = useMutation(getLoyaltyMutationOptions(trpc).acceptConsent);
 
   async function submit(nextEmail: string, accepted = consentAccepted): Promise<void> {
     mutation.reset();
 
-    if (!accepted) {
+    if (!accepted || !cardToken) {
       return;
     }
 
     try {
-      const result = await mutation.mutateAsync({ consentAccepted: true, host, email: nextEmail });
-      setToken(result.cardToken);
+      await mutation.mutateAsync({ cardToken, consentAccepted: true, host, email: nextEmail });
+      await refreshCard();
     } catch {
       // The mutation exposes the translated error through the controller model.
     }

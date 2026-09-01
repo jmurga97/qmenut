@@ -34,6 +34,15 @@
   font-size: var(--qm-text-sm, 12px);
 }
 
+.loyalty-status__cta {
+  margin-top: 3px;
+  color: var(--qm-emph, var(--qm-secondary, #555));
+  font-size: var(--qm-text-sm, 12px);
+  font-weight: var(--qm-hw, 700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .loyalty-status__stamp {
   position: relative;
   width: 30px;

@@ -25,6 +25,8 @@ export class QmLoyaltyCard extends QmElement {
   @property({ type: String, attribute: "grid-label" }) gridLabel = "";
   @property({ type: String, attribute: "stamp-label" }) stampLabel = "";
   @property({ type: Boolean, attribute: "stamp-open", reflect: true }) stampOpen = false;
+  /** View-only mode: hides the stamp action until any blocking condition (e.g. consent) is resolved. */
+  @property({ type: Boolean, reflect: true }) locked = false;
   @property({ type: Boolean, reflect: true }) redeemed = false;
   @property({ type: String, attribute: "redeemed-label" }) redeemedLabel = "";
   @property({ type: String, attribute: "redeemed-reward" }) redeemedReward = "";
@@ -73,7 +75,7 @@ export class QmLoyaltyCard extends QmElement {
   }
 
   private renderStampAction() {
-    if (this.stampOpen) return html``;
+    if (this.locked || this.stampOpen) return html``;
     return html`
       <qm-button class="stamp-action" type="button" @click=${this.handleStamp}>
         <span slot="icon-start" class="stamp-glyph" aria-hidden="true"></span>
@@ -104,6 +106,7 @@ export type QmLoyaltyCardArgs = Partial<
     | "gridLabel"
     | "stampLabel"
     | "stampOpen"
+    | "locked"
     | "redeemed"
     | "redeemedLabel"
     | "redeemedReward"

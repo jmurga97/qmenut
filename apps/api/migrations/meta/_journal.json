@@ -113,6 +113,13 @@
       "when": 1788096940582,
       "tag": "0015_user_invite_status",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1787937318345,
+      "tag": "0016_loyalty_consent",
+      "breakpoints": true
     }
   ]
 }

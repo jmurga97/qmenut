@@ -15,6 +15,7 @@ async function createStampedCard(
   venueCode: string,
 ): Promise<string> {
   const card = await callPublicTrpcMutation(request, "loyalty.createCard", {
+    consentAccepted: true,
     host: "tapas.localhost",
     email,
   });
@@ -27,6 +28,21 @@ async function createStampedCard(
   expect(stamp, stamp.body).toMatchObject({ ok: true, status: 200 });
   return cardToken;
 }
+
+test("requires privacy consent before creating a loyalty card", async ({ request }) => {
+  const missingConsent = await callPublicTrpcMutation(request, "loyalty.createCard", {
+    host: "tapas.localhost",
+    email: "consent-required.e2e@test.local",
+  });
+  expect(missingConsent, missingConsent.body).toMatchObject({ ok: false, status: 400 });
+
+  const accepted = await callPublicTrpcMutation(request, "loyalty.createCard", {
+    consentAccepted: true,
+    host: "tapas.localhost",
+    email: "consent-required.e2e@test.local",
+  });
+  expect(accepted, accepted.body).toMatchObject({ ok: true, status: 200 });
+});
 
 test("covers loyalty program, reward, operations, and insights procedures", async ({ page, request }) => {
   const programResponse = await callTrpcQuery(page, "admin.loyalty.getProgram");

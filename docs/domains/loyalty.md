@@ -36,8 +36,10 @@ Customers and balances are defined in `packages/db/src/schema/customers.ts`:
 - `customers` (`customers.ts:3`) identifies a customer by email, which is unique. There is
   no password.
 - `customer_restaurants` (`customers.ts:12`) holds per-restaurant balances,
-  `pointsBalance` and `stampsBalance`, and the first and last visit timestamps. Its
-  primary key is `(customerId, restaurantId)`.
+  `pointsBalance` and `stampsBalance`, the first and last visit timestamps, and the
+  version/date of the loyalty privacy consent. The current server version is `loyalty-v1`;
+  the migration does not backfill existing relations. Its primary key is
+  `(customerId, restaurantId)`.
 - `customer_visits` (`customers.ts:30`) is the visit log. Its `source` is `qr`, `direct`,
   `domain`, or `order`, and it is used for insights.
 
@@ -51,14 +53,25 @@ The public router is `loyalty.*` in `apps/api/src/modules/loyalty/`. Every proce
 `publicProcedure` (`loyalty.router.ts:18`). The customer is identified by an opaque card
 token held in `localStorage`, and every call carries the tenant `host`.
 
-| Procedure                              | Description                                                         |
-| -------------------------------------- | ------------------------------------------------------------------- |
-| `program`                              | Returns the active program and its rewards for the tenant.          |
-| `createCard`                           | Creates or links a card for an email (`create-card.ts`).            |
-| `getCard`                              | Returns the card, its balance, and its history (`get-card.ts`).     |
-| `earnStamp`                            | Earns a stamp or points, gated by the venue code (`earn-stamp.ts`). |
-| `requestRedemption`                    | Opens a `pending` redemption (`request-redemption.ts`).             |
-| `cancelRedemption`, `redemptionStatus` | Cancel or poll a redemption.                                        |
+The public menu contract also exposes `publicFeatures.loyalty`. The API derives it from the
+real program state (`isActive`) and the count of active, non-deleted rewards. The public
+layout hides the loyalty tab when this capability is false, while direct `/puntos` links
+remain available and render the existing unavailable state with `noindex,nofollow`.
+
+`createCard` requires `consentAccepted: true`. The server records the current consent version
+and timestamp in `customer_restaurants`; repeating the same registration keeps the balance and
+the original timestamp, while a newer policy version updates the consent. Card reads and
+operations reject tokens whose relation has no current consent, so older cards return to the
+signup flow before they can be used.
+
+| Procedure                              | Description                                                                             |
+| -------------------------------------- | --------------------------------------------------------------------------------------- |
+| `program`                              | Returns the active program and its rewards for the tenant.                              |
+| `createCard`                           | Creates or links a card for an email after explicit privacy consent (`create-card.ts`). |
+| `getCard`                              | Returns the card, its balance, and its history (`get-card.ts`).                         |
+| `earnStamp`                            | Earns a stamp or points, gated by the venue code (`earn-stamp.ts`).                     |
+| `requestRedemption`                    | Opens a `pending` redemption (`request-redemption.ts`).                                 |
+| `cancelRedemption`, `redemptionStatus` | Cancel or poll a redemption.                                                            |
 
 ### Admin router
 
@@ -103,8 +116,9 @@ The admin interface is in `apps/admin`. The routes are `_auth.loyalty.tsx` for t
 
 ## Example: earning a stamp in the restaurant
 
-1. The diner opens the menu, taps the loyalty card at `/puntos`, and signs up with an
-   email address. `loyalty.createCard` stores a card token in `localStorage`.
+1. The diner opens the menu, taps the loyalty card at `/puntos`, accepts the privacy policy,
+   and signs up with an email address. `loyalty.createCard` records the consent version and
+   stores a card token in `localStorage`.
 2. The diner asks for a stamp, and staff read the current four-digit code from the admin
    operations screen (`admin.loyalty.venueCode`, backed by `getVenueCode`).
 3. The diner types the code, and the client calls

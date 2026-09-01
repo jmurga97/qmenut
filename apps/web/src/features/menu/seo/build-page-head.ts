@@ -20,6 +20,7 @@ interface BuildPageHeadInput {
   jsonLd?: Record<string, unknown>;
   loaderData: PublicMenuData | null | undefined;
   match: PageHeadMatch;
+  noIndex?: boolean;
   path: string;
   titleKey?: string;
 }
@@ -55,6 +56,7 @@ export function buildPageHead({
   jsonLd,
   loaderData,
   match,
+  noIndex = false,
   path,
   titleKey,
 }: BuildPageHeadInput) {
@@ -94,6 +96,7 @@ export function buildPageHead({
       { property: "og:locale", content: ogLocale },
       ...alternateLocales.map((locale) => ({ property: "og:locale:alternate", content: locale })),
       ...(jsonLd ? [{ "script:ld+json": jsonLd }] : []),
+      ...(noIndex ? [{ name: "robots", content: "noindex,nofollow" }] : []),
     ],
     links: [
       { rel: "canonical", href: canonicalUrl },
