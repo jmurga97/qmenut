@@ -10,7 +10,10 @@ import privacyVenEs from "./content/privacy.ven.es.md?raw";
 import type { BUNDLED_LOCALES } from "~/lib/i18n/create-i18n";
 
 type LegalLocale = Extract<(typeof BUNDLED_LOCALES)[number], "en" | "es">;
-export type LegalCountryCode = "ESP" | "VEN";
+
+export const LEGAL_COUNTRY_CODES = ["ESP", "VEN"] as const;
+
+export type LegalCountryCode = (typeof LEGAL_COUNTRY_CODES)[number];
 export type LegalPage = "legalNotice" | "privacy";
 
 export const LEGAL_OPERATOR = {
@@ -34,8 +37,12 @@ const legalContent: Record<LegalPage, Record<LegalCountryCode, Record<LegalLocal
 const TOKEN_PATTERN = /{{\s*(\w+)\s*}}/g;
 const LIST_LINE_PATTERN = /^\s*(?:[-*+]\s+|\d+[.)]\s+)/;
 
-export function getLegalCountryCode(countryCode: string): LegalCountryCode {
-  if (countryCode === "ESP" || countryCode === "VEN") {
+export function isLegalCountryCode(countryCode: string): countryCode is LegalCountryCode {
+  return (LEGAL_COUNTRY_CODES as readonly string[]).includes(countryCode);
+}
+
+function getLegalCountryCode(countryCode: string): LegalCountryCode {
+  if (isLegalCountryCode(countryCode)) {
     return countryCode;
   }
 
