@@ -40,6 +40,12 @@ export function useUsersController() {
       onSuccess: (result) => {
         form.reset();
         setCreateOpen(false);
+        if (!result.created) {
+          setInviteFailure(
+            "La cuenta ya existía en este restaurante, así que no se envió un acceso nuevo. Puedes reenviarlo desde Acciones.",
+          );
+          return;
+        }
         if (result.invitation.status === "failed") {
           setInviteFailure(
             "La cuenta y la membresía se crearon, pero no se pudo enviar el acceso. Puedes reenviarlo desde Acciones.",

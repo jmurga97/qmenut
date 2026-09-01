@@ -97,7 +97,10 @@ function CreateUserDialog({ controller }: { controller: ReturnType<typeof useUse
             <FormProvider {...controller.form}>
               <form
                 className="admin-users-form"
-                onSubmit={() => void controller.form.handleSubmit(controller.create)()}
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void controller.form.handleSubmit(controller.create)();
+                }}
               >
                 <FormTextInput<CreateUserFormValues> autocomplete="name" label="Nombre" name="name" maxLength={120} />
                 <FormTextInput<CreateUserFormValues>
