@@ -16,23 +16,49 @@ test("requires current consent before an existing loyalty card can operate", asy
     secret: LOYALTY_SECRET,
     payload: { v: 1, t: "card", cid: "customer_legacy_consent", rid: "rest_tapas" },
   });
-  const blocked = await callPublicTrpc(request, "loyalty.getCard", {
+
+  const peek = await callPublicTrpc(request, "loyalty.getCard", {
     host: "tapas.localhost",
     cardToken: legacyToken,
   });
-  expect(blocked, blocked.body).toMatchObject({ ok: false, status: 403 });
+  expect(peek, peek.body).toMatchObject({ ok: true, status: 200 });
+  expect(getTrpcData<{ card: { email: string }; consentRequired: boolean }>(peek)).toMatchObject({
+    consentRequired: true,
+    card: { email: "l***@test.local" },
+  });
 
-  const reconsented = await callPublicTrpcMutation(request, "loyalty.createCard", {
+  const blockedWrite = await callPublicTrpcMutation(request, "loyalty.earnStamp", {
+    host: "tapas.localhost",
+    cardToken: legacyToken,
+    venueCode: "0000",
+  });
+  expect(blockedWrite, blockedWrite.body).toMatchObject({ ok: false, status: 403 });
+
+  const wrongEmail = await callPublicTrpcMutation(request, "loyalty.acceptConsent", {
+    cardToken: legacyToken,
+    consentAccepted: true,
+    host: "tapas.localhost",
+    email: "wrong.e2e@test.local",
+  });
+  expect(wrongEmail, wrongEmail.body).toMatchObject({ ok: false, status: 403 });
+
+  const accepted = await callPublicTrpcMutation(request, "loyalty.acceptConsent", {
+    cardToken: legacyToken,
     consentAccepted: true,
     host: "tapas.localhost",
     email: "legacy-consent.e2e@test.local",
   });
-  const cardToken = getTrpcData<{ cardToken: string }>(reconsented).cardToken;
+  expect(accepted, accepted.body).toMatchObject({ ok: true, status: 200 });
+
   const card = await callPublicTrpc(request, "loyalty.getCard", {
     host: "tapas.localhost",
-    cardToken,
+    cardToken: legacyToken,
   });
   expect(card, card.body).toMatchObject({ ok: true, status: 200 });
+  expect(getTrpcData<{ card: { email: string }; consentRequired: boolean }>(card)).toMatchObject({
+    consentRequired: false,
+    card: { email: "legacy-consent.e2e@test.local" },
+  });
 });
 
 test("runs the diner-to-admin loyalty journey and enforces venue-code throttling", async ({ page, request }) => {

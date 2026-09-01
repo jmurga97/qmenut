@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { getLoyaltyProgramQueryOptions } from "~/features/loyalty/api/loyalty-query-options";
 import { useLoyaltyCardSession } from "~/features/loyalty/hooks/use-loyalty-card-session";
+import { useLoyaltyConsent } from "~/features/loyalty/hooks/use-loyalty-consent";
 import { useLoyaltySignup } from "~/features/loyalty/hooks/use-loyalty-signup";
 import { useRedemptionFlow } from "~/features/loyalty/hooks/use-redemption-flow";
 import { useStampFlow } from "~/features/loyalty/hooks/use-stamp-flow";
@@ -27,6 +28,12 @@ export function useLoyaltyController() {
   const { data: program } = useSuspenseQuery(getLoyaltyProgramQueryOptions({ host, trpc }));
   const session = useLoyaltyCardSession({ host, trpc });
   const signupFlow = useLoyaltySignup({ host, trpc, setToken: session.setToken });
+  const consentFlow = useLoyaltyConsent({
+    cardToken: session.token,
+    host,
+    refreshCard: session.refreshCard,
+    trpc,
+  });
   const stampFlow = useStampFlow({
     host,
     trpc,
@@ -52,6 +59,15 @@ export function useLoyaltyController() {
     setEmail: signupFlow.setEmail,
     submit: signupFlow.submit,
   };
+  const consent = {
+    busy: consentFlow.busy,
+    consentAccepted: consentFlow.consentAccepted,
+    email: consentFlow.email,
+    error: consentFlow.error ? t("loyalty.errors.acceptConsent") : "",
+    setConsentAccepted: consentFlow.setConsentAccepted,
+    setEmail: consentFlow.setEmail,
+    submit: consentFlow.submit,
+  };
   const stamp = {
     animatedIndex: stampFlow.animatedIndex,
     code: stampFlow.code,
@@ -71,13 +87,13 @@ export function useLoyaltyController() {
   };
   const card = {
     data: session.card,
-    canRedeem: fromQr,
+    canRedeem: fromQr && !session.consentRequired,
     error: cardError,
     redeemedReward: redemptionFlow.redeemedReward,
     target: session.target,
     redeem: redemptionFlow.redeem,
   };
-  const models = { card, program, redemption, signup, stamp };
+  const models = { card, consent, program, redemption, signup, stamp };
 
   if (!program || program.rewards.length === 0) {
     return { ...models, phase: "unavailable" as const };
@@ -92,6 +108,15 @@ export function useLoyaltyController() {
       return { ...models, phase: "intro" as const, program };
     }
     return { ...models, phase: "signup" as const, program };
+  }
+
+  if (session.consentRequired) {
+    return {
+      ...models,
+      phase: "consent" as const,
+      card: { ...card, data: session.card },
+      program,
+    };
   }
 
   if (redemptionFlow.current) {

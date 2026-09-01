@@ -15,15 +15,25 @@ interface ResolveCardInput {
   request: Request;
   host?: string;
   cardToken: string;
+  /** Read-only callers (getCard) may resolve without consent to let the customer re-accept. */
+  requireConsent?: boolean;
 }
 
 export interface ResolvedCard {
+  consentSatisfied: boolean;
   customerId: string;
   tenant: ResolvedTenant;
 }
 
 /** Resolves the public tenant from the host and cross-checks the token's restaurant id against it. */
-export async function resolveCard({ db, env, request, host, cardToken }: ResolveCardInput): Promise<ResolvedCard> {
+export async function resolveCard({
+  db,
+  env,
+  request,
+  host,
+  cardToken,
+  requireConsent = true,
+}: ResolveCardInput): Promise<ResolvedCard> {
   const tenant = await resolvePublicTenant({ db, request, host });
 
   if (!tenant) {
@@ -36,16 +46,16 @@ export async function resolveCard({ db, env, request, host, cardToken }: Resolve
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
-  const hasConsent = await hasCurrentLoyaltyConsent({
+  const consentSatisfied = await hasCurrentLoyaltyConsent({
     consentVersion: LOYALTY_CONSENT_VERSION,
     db,
     customerId: payload.cid,
     restaurantId: tenant.restaurantId,
   });
 
-  if (!hasConsent) {
+  if (requireConsent && !consentSatisfied) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Se requiere aceptar la política de privacidad" });
   }
 
-  return { tenant, customerId: payload.cid };
+  return { consentSatisfied, customerId: payload.cid, tenant };
 }

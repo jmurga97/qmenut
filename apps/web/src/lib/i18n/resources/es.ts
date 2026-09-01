@@ -165,6 +165,18 @@ export default {
       creating: "Creando…",
       reassurance: "Sin contraseña · solo tu email · válida en todas las sedes",
     },
+    consent: {
+      pitch: "Nueva política de privacidad",
+      explainer: "Confirma tu email ({{email}}) para desbloquear tu tarjeta. Tus sellos y premios están a salvo.",
+      emailLabel: "Email",
+      emailPlaceholder: "tu@email.com",
+      consentLabel: "Acepto el tratamiento de mi email para gestionar mi tarjeta de fidelización.",
+      consentPrivacyLink: "Leer la política de privacidad",
+      consentRequired: "Debes aceptar la política de privacidad para desbloquear la tarjeta.",
+      submit: "Confirmar y desbloquear →",
+      confirming: "Confirmando…",
+      reassurance: "Sin contraseña · solo tu email",
+    },
     card: {
       progress: "Tus sellos",
       gridLabel: "{{filled}} de {{total}} sellos",
@@ -201,6 +213,7 @@ export default {
       return: "Volver a canjear",
     },
     errors: {
+      acceptConsent: "No pudimos confirmar tu tarjeta. Revisa el email e inténtalo de nuevo.",
       createCard: "No pudimos crear tu tarjeta. Revisa el email e inténtalo de nuevo.",
       loadCard: "No pudimos cargar tu tarjeta. Inténtalo de nuevo.",
     },

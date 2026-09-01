@@ -14,6 +14,7 @@ import type { LoyaltyReward } from "~/features/loyalty/types";
 
 type IntroController = Extract<LoyaltyController, { phase: "intro" }>;
 type SignupController = Extract<LoyaltyController, { phase: "signup" }>;
+type ConsentController = Extract<LoyaltyController, { phase: "consent" }>;
 type RedemptionController = Extract<LoyaltyController, { phase: "redemption" }>;
 type CardController = Extract<LoyaltyController, { phase: "card" }>;
 
@@ -51,6 +52,12 @@ export function LoyaltyExperience({ restaurantName }: { restaurantName: string }
       return (
         <div className="public-route-content-stage" key="signup">
           <SignupState loyalty={loyalty} />
+        </div>
+      );
+    case "consent":
+      return (
+        <div className="public-route-content-stage" key="consent">
+          <ConsentState loyalty={loyalty} restaurantName={restaurantName} />
         </div>
       );
     case "redemption":
@@ -126,6 +133,47 @@ function SignupState({ loyalty }: { loyalty: SignupController }) {
       onQmConsentChange={(event) => loyalty.signup.setConsentAccepted(event.detail.accepted)}
       onQmSubmit={(event) => void loyalty.signup.submit(event.detail.email, event.detail.consentAccepted)}
     />
+  );
+}
+
+function ConsentState({ loyalty, restaurantName }: { loyalty: ConsentController; restaurantName: string }) {
+  const { t } = useTranslation();
+  const { locale } = useRouteContext({ from: "/{-$locale}" });
+  const card = loyalty.card.data;
+  const filled = Math.min(card.card.stampsBalance, loyalty.card.target);
+  const submitLabel = t(loyalty.consent.busy ? "loyalty.consent.confirming" : "loyalty.consent.submit");
+
+  return (
+    <>
+      <QmLoyaltyCard
+        restaurantName={restaurantName}
+        email={card.card.email}
+        balance={card.card.stampsBalance}
+        target={loyalty.card.target}
+        gridLabel={t("loyalty.card.gridLabel", { filled, total: loyalty.card.target })}
+        progressLabel={t("loyalty.card.progress")}
+        locked
+      />
+      <QmLoyaltySignup
+        pitch={t("loyalty.consent.pitch")}
+        explainer={t("loyalty.consent.explainer", { email: card.card.email })}
+        email={loyalty.consent.email}
+        emailLabel={t("loyalty.consent.emailLabel")}
+        emailPlaceholder={t("loyalty.consent.emailPlaceholder")}
+        submitLabel={submitLabel}
+        consentAccepted={loyalty.consent.consentAccepted}
+        consentLabel={t("loyalty.consent.consentLabel")}
+        privacyHref={locale ? `/${locale}/privacidad` : "/privacidad"}
+        privacyLinkLabel={t("loyalty.consent.consentPrivacyLink")}
+        consentError={t("loyalty.consent.consentRequired")}
+        reassurance={t("loyalty.consent.reassurance")}
+        error={loyalty.consent.error}
+        busy={loyalty.consent.busy}
+        onQmInput={(event) => loyalty.consent.setEmail(event.detail.email)}
+        onQmConsentChange={(event) => loyalty.consent.setConsentAccepted(event.detail.accepted)}
+        onQmSubmit={(event) => void loyalty.consent.submit(event.detail.email, event.detail.consentAccepted)}
+      />
+    </>
   );
 }
 

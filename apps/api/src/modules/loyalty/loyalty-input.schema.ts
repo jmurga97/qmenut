@@ -11,6 +11,11 @@ export const createCardInputSchema = hostInputSchema.extend({
 
 export const cardTokenInputSchema = hostInputSchema.extend({ cardToken: z.string().trim().min(1) });
 
+export const acceptConsentInputSchema = cardTokenInputSchema.extend({
+  consentAccepted: z.literal(true),
+  email: emailSchema,
+});
+
 export const earnStampInputSchema = cardTokenInputSchema.extend({
   venueCode: z
     .string()

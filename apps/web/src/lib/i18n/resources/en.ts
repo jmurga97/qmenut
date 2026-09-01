@@ -165,6 +165,18 @@ export default {
       creating: "Creating…",
       reassurance: "No password · just your email · valid at every location",
     },
+    consent: {
+      pitch: "New privacy policy",
+      explainer: "Confirm your email ({{email}}) to unlock your card. Your stamps and rewards are safe.",
+      emailLabel: "Email",
+      emailPlaceholder: "you@email.com",
+      consentLabel: "I agree to the processing of my email to manage my loyalty card.",
+      consentPrivacyLink: "Read the privacy policy",
+      consentRequired: "You must accept the privacy policy to unlock your card.",
+      submit: "Confirm and unlock →",
+      confirming: "Confirming…",
+      reassurance: "No password · just your email",
+    },
     card: {
       progress: "Your stamps",
       gridLabel: "{{filled}} of {{total}} stamps",
@@ -201,6 +213,7 @@ export default {
       return: "Back to rewards",
     },
     errors: {
+      acceptConsent: "We couldn't confirm your card. Check the email and try again.",
       createCard: "We couldn't create your card. Check the email and try again.",
       loadCard: "We couldn't load your card. Try again.",
     },

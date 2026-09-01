@@ -23,7 +23,7 @@ export function useLoyaltyCardSession({ host, trpc }: LoyaltyCardSessionInput) {
     enabled: tokenState.hydrated && tokenState.token !== null,
     retry: false,
   });
-  const invalidSession = ["FORBIDDEN", "UNAUTHORIZED"].includes(getTrpcErrorCode(cardQuery.error) ?? "");
+  const invalidSession = getTrpcErrorCode(cardQuery.error) === "UNAUTHORIZED";
 
   useEffect(() => {
     if (invalidSession) clearToken();
@@ -44,10 +44,12 @@ export function useLoyaltyCardSession({ host, trpc }: LoyaltyCardSessionInput) {
   );
 
   const card = invalidSession ? null : (cardQuery.data ?? null);
+  const consentRequired = card?.consentRequired === true;
   const target = card ? getLoyaltyTarget(card.rewards, card.card.stampsBalance) : 0;
 
   return {
     card,
+    consentRequired,
     error: cardQuery.error && !invalidSession,
     hydrated: tokenState.hydrated,
     loading: tokenState.token !== null && cardQuery.isLoading,
