@@ -1,3 +1,5 @@
+import { DEFAULT_TEMPLATE } from "@qmenut/ui/theme/tenant-theme-config";
+
 import { defaultThemeFormValues, themeFormSchema } from "./types";
 
 import type { ThemeFormValues } from "./types";
@@ -8,7 +10,10 @@ import type { inferRouterOutputs } from "@trpc/server";
 type ThemeConfig = inferRouterOutputs<AppRouter>["admin"]["theme"]["get"];
 export function toThemeFormValues(theme: ThemeConfig): ThemeFormValues {
   const parsed = themeFormSchema.safeParse({ ...theme, tagline: theme?.tagline ?? "" });
-  return parsed.success ? parsed.data : { ...defaultThemeFormValues };
+  if (parsed.success) return parsed.data;
+  // Fall back to the tenant's own template so the photo flags match its preset (a photo-less
+  // template must not default to both photo checkboxes checked).
+  return defaultThemeFormValues(theme?.template ?? DEFAULT_TEMPLATE);
 }
 type ThemeMapperInput = {
   branchId: string;

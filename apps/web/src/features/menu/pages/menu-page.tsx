@@ -1,27 +1,26 @@
 import { QmMenuList } from "@qmenut/ui/components/qm-menu-list/react";
 import { useSearch } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { MenuCategoryNav } from "~/features/menu/components/menu-content/menu-category-nav";
 import { MenuFeatured } from "~/features/menu/components/menu-content/menu-featured";
 import { MenuSection } from "~/features/menu/components/menu-content/menu-section";
 import { MenuDishModal } from "~/features/menu/components/menu-dish-modal";
-import { useMenuPage } from "~/features/menu/hooks/use-menu-page";
+import { useMenuContent } from "~/features/menu/hooks/use-menu-content";
 import { track } from "~/lib/analytics/posthog";
 import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
 
-import type { SelectDishInput } from "~/features/menu/types/menu-view-model";
+import type { MenuDishViewModel, SelectDishInput } from "~/features/menu/types/menu-view-model";
 
 export function MenuPage() {
   const { t } = useTranslation();
   const dishTriggerRef = useRef<HTMLElement | null>(null);
+  const [selectedDish, setSelectedDish] = useState<MenuDishViewModel | null>(null);
   const { scrollContainerRef, template, tenant } = usePublicRouteLayout();
   const { utm_source: utmSource } = useSearch({ from: "/{-$locale}" });
-  const { content, selectedDish, setSelectedDish, showDishPhotos } = useMenuPage({
-    showDishPhotos: tenant.showMenuPhotos,
-  });
+  const content = useMenuContent();
 
   useTrackPageView("menu_view", {
     from_qr: utmSource === "qr",
@@ -56,7 +55,7 @@ export function MenuPage() {
             featuredLabel={t(`menu.featuredBadges.${template}`)}
             featuredPromo={content.featuredPromo}
             featuredPromoId={content.featuredPromoId}
-            showDishPhotos={showDishPhotos}
+            showDishPhotos={tenant.showMenuPhotos}
             onSelectDish={handleSelectDish}
           />
           <MenuCategoryNav scrollContainerRef={scrollContainerRef} sections={content.sections} />
@@ -65,7 +64,7 @@ export function MenuPage() {
               key={section.id}
               index={index}
               section={section}
-              showDishPhotos={showDishPhotos}
+              showDishPhotos={tenant.showMenuPhotos}
               onSelectDish={handleSelectDish}
             />
           ))}

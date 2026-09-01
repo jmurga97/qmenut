@@ -46,7 +46,13 @@ export const themeRouter = router({
       branchId: input.branchId,
     });
     await putTheme({ config: input.config, env: ctx.env, host });
-    await bumpPublicContentVersion(ctx.env, host);
+    // Best-effort invalidation: the theme is already persisted, so a failed bump must not
+    // surface as a failed save.
+    try {
+      await bumpPublicContentVersion(ctx.env, host);
+    } catch (error) {
+      console.error(`No se pudo actualizar la versión del contenido público para ${host}`, error);
+    }
     return { host };
   }),
 });

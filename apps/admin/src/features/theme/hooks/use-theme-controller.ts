@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { trpc } from "~/lib/trpc";
@@ -22,12 +23,18 @@ export function useThemeController(branchId: string) {
   const watchedValues = useWatch({
     control: form.control,
   });
-  const parsedPreview = themeFormSchema.safeParse(watchedValues);
+  const { primary, secondary, showDishPhoto, showMenuPhotos, tagline, template } = watchedValues;
+  // Keyed on the parsed values' primitives so the draft keeps referential identity across
+  // unrelated re-renders and ThemePreview only postMessages when the draft really changes.
+  const preview = useMemo(() => {
+    const parsed = themeFormSchema.safeParse({ primary, secondary, showDishPhoto, showMenuPhotos, tagline, template });
+    return parsed.success ? toThemeDraft({ current, values: parsed.data }) : null;
+  }, [current, primary, secondary, showDishPhoto, showMenuPhotos, tagline, template]);
   return {
     form,
     feedback: useMutationFeedback(save, "Tema guardado."),
     pending: save.isPending,
-    preview: parsedPreview.success ? toThemeDraft({ current, values: parsedPreview.data }) : null,
+    preview,
     submit: form.handleSubmit((values) => save.mutate(toThemeInput({ branchId, current, values }))),
   };
 }
