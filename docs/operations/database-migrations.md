@@ -168,6 +168,14 @@ named Wrangler environment does not inherit the D1 binding.
 An applied migration is immutable. Do not edit, rename, reorder, or delete a migration
 after D1 has applied it.
 
+D1 keys `d1_migrations` on the filename, so a rename makes an already applied migration
+look new and D1 replays it. That is why two numeric prefixes are duplicated:
+`0005_add_restaurant_country_code.sql` and `0006_enforce_restaurant_country_code.sql`
+were applied to both databases before the analytics work claimed `0005`-`0009`. Their
+filenames are fixed history. Do not renumber them, and do not close the `0010`/`0011`
+gap. Wrangler sorts by the leading number and then by the full filename, so the
+duplicated prefixes still order deterministically.
+
 ## Custom and data migrations
 
 Use a custom migration only in these four cases:
