@@ -40,12 +40,6 @@
     "development": {
       "name": "qmenut-web-dev",
       "workers_dev": false,
-      "routes": [
-        {
-          "pattern": "dev.qmenut.app",
-          "custom_domain": true,
-        },
-      ],
       "kv_namespaces": [
         {
           "binding": "TENANT_THEME",

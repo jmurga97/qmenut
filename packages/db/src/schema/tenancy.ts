@@ -37,7 +37,10 @@ export const restaurants = sqliteTable(
     updatedAt: integer("updated_at").notNull().default(epochMilliseconds),
     deletedAt: integer("deleted_at"),
   },
-  (table) => [check("restaurants_source_currency_length", sql`length(${table.sourceCurrency}) = 3`)],
+  (table) => [
+    check("restaurants_source_currency_length", sql`length(${table.sourceCurrency}) = 3`),
+    check("restaurants_country_code_iso_alpha_3", sql`${table.countryCode} GLOB '[A-Z][A-Z][A-Z]'`),
+  ],
 );
 
 export const branches = sqliteTable(
@@ -81,6 +84,10 @@ export const branches = sqliteTable(
     ),
     check("branches_latitude_range", sql`${table.latitude} IS NULL OR ${table.latitude} BETWEEN -90 AND 90`),
     check("branches_longitude_range", sql`${table.longitude} IS NULL OR ${table.longitude} BETWEEN -180 AND 180`),
+    check(
+      "branches_google_reviews_connection",
+      sql`${table.googleReviewsEnabled} = 0 OR ${table.googlePlaceId} IS NOT NULL`,
+    ),
   ],
 );
 

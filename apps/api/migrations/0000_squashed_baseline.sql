@@ -1,24 +1,130 @@
+CREATE TABLE `analytics_sync_state` (
+	`scope` text PRIMARY KEY NOT NULL,
+	`backfill_completed_at` integer,
+	`last_successful_day` text,
+	`last_run_at` integer,
+	`last_success_at` integer,
+	`last_error_code` text,
+	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	CONSTRAINT "analytics_sync_state_scope" CHECK("analytics_sync_state"."scope" = 'posthog')
+);
+--> statement-breakpoint
+CREATE TABLE `category_activity_daily` (
+	`branch_id` text NOT NULL,
+	`day` text NOT NULL,
+	`language_code` text DEFAULT 'all' NOT NULL,
+	`category_id` text NOT NULL,
+	`category_label` text,
+	`reached_count` integer DEFAULT 0 NOT NULL,
+	`selected_count` integer DEFAULT 0 NOT NULL,
+	`max_position` integer,
+	PRIMARY KEY(`branch_id`, `day`, `language_code`, `category_id`),
+	FOREIGN KEY (`branch_id`) REFERENCES `branches`(`id`) ON UPDATE no action ON DELETE cascade,
+	CONSTRAINT "category_activity_daily_reached" CHECK("category_activity_daily"."reached_count" >= 0),
+	CONSTRAINT "category_activity_daily_selected" CHECK("category_activity_daily"."selected_count" >= 0)
+);
+--> statement-breakpoint
+CREATE TABLE `contact_action_daily` (
+	`branch_id` text NOT NULL,
+	`day` text NOT NULL,
+	`language_code` text DEFAULT 'all' NOT NULL,
+	`channel` text NOT NULL,
+	`action_count` integer DEFAULT 0 NOT NULL,
+	PRIMARY KEY(`branch_id`, `day`, `language_code`, `channel`),
+	FOREIGN KEY (`branch_id`) REFERENCES `branches`(`id`) ON UPDATE no action ON DELETE cascade,
+	CONSTRAINT "contact_action_daily_channel" CHECK("contact_action_daily"."channel" IN ('map', 'phone', 'social', 'whatsapp')),
+	CONSTRAINT "contact_action_daily_count" CHECK("contact_action_daily"."action_count" >= 0)
+);
+--> statement-breakpoint
+CREATE TABLE `digest_deliveries` (
+	`id` text PRIMARY KEY NOT NULL,
+	`restaurant_id` text NOT NULL,
+	`user_id` text NOT NULL,
+	`period_start_day` text NOT NULL,
+	`period_end_day` text NOT NULL,
+	`status` text DEFAULT 'pending' NOT NULL,
+	`attempts` integer DEFAULT 0 NOT NULL,
+	`last_error_code` text,
+	`lease_expires_at` integer,
+	`sent_at` integer,
+	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	CONSTRAINT "digest_deliveries_status" CHECK("digest_deliveries"."status" IN ('pending', 'sending', 'sent', 'failed')),
+	CONSTRAINT "digest_deliveries_attempts" CHECK("digest_deliveries"."attempts" >= 0)
+);
+--> statement-breakpoint
+CREATE INDEX `idx_digest_deliveries_status` ON `digest_deliveries` (`status`,`lease_expires_at`);--> statement-breakpoint
+CREATE UNIQUE INDEX `ux_digest_deliveries_recipient_period` ON `digest_deliveries` (`restaurant_id`,`user_id`,`period_end_day`);--> statement-breakpoint
+CREATE TABLE `digest_schedule` (
+	`id` integer PRIMARY KEY NOT NULL,
+	`anchor_end_day` text,
+	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	CONSTRAINT "digest_schedule_singleton" CHECK("digest_schedule"."id" = 1)
+);
+--> statement-breakpoint
 CREATE TABLE `dish_view_daily` (
 	`dish_id` text NOT NULL,
 	`branch_id` text NOT NULL,
 	`day` text NOT NULL,
 	`views` integer DEFAULT 0 NOT NULL,
-	PRIMARY KEY(`dish_id`, `day`),
+	`language_code` text DEFAULT 'legacy' NOT NULL,
+	`source` text DEFAULT 'legacy' NOT NULL,
+	`visits_with_open` integer DEFAULT 0 NOT NULL,
+	PRIMARY KEY(`dish_id`, `branch_id`, `day`, `language_code`, `source`),
 	FOREIGN KEY (`dish_id`) REFERENCES `dishes`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`branch_id`) REFERENCES `branches`(`id`) ON UPDATE no action ON DELETE cascade,
-	CONSTRAINT "dish_view_daily_views" CHECK("dish_view_daily"."views" >= 0)
+	CONSTRAINT "dish_view_daily_views" CHECK("dish_view_daily"."views" >= 0),
+	CONSTRAINT "dish_view_daily_visits_with_open" CHECK("dish_view_daily"."visits_with_open" >= 0)
 );
 --> statement-breakpoint
 CREATE INDEX `idx_dish_view_daily_branch` ON `dish_view_daily` (`branch_id`,`day`);--> statement-breakpoint
+CREATE TABLE `event_counter_daily` (
+	`branch_id` text NOT NULL,
+	`day` text NOT NULL,
+	`event_code` text NOT NULL,
+	`count` integer DEFAULT 0 NOT NULL,
+	PRIMARY KEY(`branch_id`, `day`, `event_code`),
+	FOREIGN KEY (`branch_id`) REFERENCES `branches`(`id`) ON UPDATE no action ON DELETE cascade,
+	CONSTRAINT "event_counter_daily_count" CHECK("event_counter_daily"."count" >= 0)
+);
+--> statement-breakpoint
+CREATE TABLE `hourly_activity_daily` (
+	`branch_id` text NOT NULL,
+	`day` text NOT NULL,
+	`hour` integer NOT NULL,
+	`loads` integer DEFAULT 0 NOT NULL,
+	PRIMARY KEY(`branch_id`, `day`, `hour`),
+	FOREIGN KEY (`branch_id`) REFERENCES `branches`(`id`) ON UPDATE no action ON DELETE cascade,
+	CONSTRAINT "hourly_activity_daily_hour" CHECK("hourly_activity_daily"."hour" BETWEEN 0 AND 23),
+	CONSTRAINT "hourly_activity_daily_loads" CHECK("hourly_activity_daily"."loads" >= 0)
+);
+--> statement-breakpoint
 CREATE TABLE `menu_view_daily` (
 	`branch_id` text NOT NULL,
 	`day` text NOT NULL,
 	`language_code` text DEFAULT 'all' NOT NULL,
 	`source` text DEFAULT 'all' NOT NULL,
 	`views` integer DEFAULT 0 NOT NULL,
-	PRIMARY KEY(`branch_id`, `day`, `language_code`, `source`),
+	`visits` integer DEFAULT 0 NOT NULL,
+	`display_mode` text DEFAULT 'legacy' NOT NULL,
+	PRIMARY KEY(`branch_id`, `day`, `language_code`, `source`, `display_mode`),
 	FOREIGN KEY (`branch_id`) REFERENCES `branches`(`id`) ON UPDATE no action ON DELETE cascade,
-	CONSTRAINT "menu_view_daily_views" CHECK("menu_view_daily"."views" >= 0)
+	CONSTRAINT "menu_view_daily_views" CHECK("menu_view_daily"."views" >= 0),
+	CONSTRAINT "menu_view_daily_visits" CHECK("menu_view_daily"."visits" >= 0)
+);
+--> statement-breakpoint
+CREATE TABLE `promotion_open_daily` (
+	`restaurant_id` text NOT NULL,
+	`day` text NOT NULL,
+	`language_code` text DEFAULT 'all' NOT NULL,
+	`promotion_id` text NOT NULL,
+	`promotion_name` text,
+	`open_count` integer DEFAULT 0 NOT NULL,
+	PRIMARY KEY(`restaurant_id`, `day`, `language_code`, `promotion_id`),
+	FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON UPDATE no action ON DELETE cascade,
+	CONSTRAINT "promotion_open_daily_count" CHECK("promotion_open_daily"."open_count" >= 0)
 );
 --> statement-breakpoint
 CREATE TABLE `accounts` (
@@ -47,6 +153,7 @@ CREATE TABLE `sessions` (
 	`updated_at` integer NOT NULL,
 	`ip_address` text,
 	`user_agent` text,
+	`active_restaurant_id` text,
 	`user_id` text NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
@@ -111,19 +218,26 @@ CREATE TABLE `branches` (
 	`restaurant_id` text NOT NULL,
 	`name` text NOT NULL,
 	`address` text,
+	`latitude` real,
+	`longitude` real,
 	`phone` text,
 	`whatsapp` text,
 	`social_links_json` text,
+	`logo_url` text,
+	`google_place_id` text,
+	`google_reviews_enabled` integer DEFAULT false NOT NULL,
 	`custom_domain` text,
-	`currency` text DEFAULT 'EUR' NOT NULL,
 	`plan_code` text DEFAULT 'basic' NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`deleted_at` integer,
 	FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON UPDATE no action ON DELETE cascade,
-	CONSTRAINT "branches_currency_length" CHECK(length("branches"."currency") = 3),
-	CONSTRAINT "branches_plan_code" CHECK("branches"."plan_code" IN ('basic', 'business'))
+	CONSTRAINT "branches_plan_code" CHECK("branches"."plan_code" IN ('basic', 'business')),
+	CONSTRAINT "branches_coordinates_pair" CHECK(("branches"."latitude" IS NULL AND "branches"."longitude" IS NULL) OR ("branches"."latitude" IS NOT NULL AND "branches"."longitude" IS NOT NULL)),
+	CONSTRAINT "branches_latitude_range" CHECK("branches"."latitude" IS NULL OR "branches"."latitude" BETWEEN -90 AND 90),
+	CONSTRAINT "branches_longitude_range" CHECK("branches"."longitude" IS NULL OR "branches"."longitude" BETWEEN -180 AND 180),
+	CONSTRAINT "branches_google_reviews_connection" CHECK("branches"."google_reviews_enabled" = 0 OR "branches"."google_place_id" IS NOT NULL)
 );
 --> statement-breakpoint
 CREATE INDEX `idx_branches_restaurant` ON `branches` (`restaurant_id`) WHERE "branches"."deleted_at" IS NULL;--> statement-breakpoint
@@ -174,6 +288,8 @@ CREATE TABLE `customer_restaurants` (
 	`restaurant_id` text NOT NULL,
 	`points_balance` integer DEFAULT 0 NOT NULL,
 	`stamps_balance` integer DEFAULT 0 NOT NULL,
+	`loyalty_consent_accepted_at` integer,
+	`loyalty_consent_version` text,
 	`first_visit_at` integer,
 	`last_visit_at` integer,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
@@ -210,6 +326,16 @@ CREATE TABLE `customers` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `customers_email_unique` ON `customers` (`email`);--> statement-breakpoint
+CREATE TABLE `restaurant_exchange_rates` (
+	`restaurant_id` text PRIMARY KEY NOT NULL,
+	`rate` text NOT NULL,
+	`is_enabled` integer DEFAULT false NOT NULL,
+	`updated_by` text NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`updated_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
 CREATE TABLE `loyalty_programs` (
 	`restaurant_id` text PRIMARY KEY NOT NULL,
 	`type` text NOT NULL,
@@ -434,8 +560,10 @@ CREATE TABLE `tags` (
 	`is_system` integer DEFAULT false NOT NULL,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON UPDATE no action ON DELETE cascade,
-	CONSTRAINT "tags_ownership" CHECK(("tags"."is_system" = 1 AND "tags"."code" IS NOT NULL AND "tags"."restaurant_id" IS NULL)
-          OR ("tags"."is_system" = 0 AND "tags"."label" IS NOT NULL AND "tags"."restaurant_id" IS NOT NULL))
+	CONSTRAINT "tags_ownership" CHECK(
+        ("tags"."is_system" = 1 AND "tags"."code" IS NOT NULL AND "tags"."restaurant_id" IS NULL)
+        OR ("tags"."is_system" = 0 AND "tags"."label" IS NOT NULL AND "tags"."restaurant_id" IS NOT NULL)
+      )
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `idx_tags_system_code` ON `tags` (`code`) WHERE "tags"."is_system" = 1;--> statement-breakpoint
@@ -520,7 +648,7 @@ CREATE TABLE `orders` (
 	`delivery_fee` integer DEFAULT 0 NOT NULL,
 	`subtotal` integer DEFAULT 0 NOT NULL,
 	`total` integer DEFAULT 0 NOT NULL,
-	`currency` text DEFAULT 'EUR' NOT NULL,
+	`currency` text NOT NULL,
 	`desired_time` integer,
 	`kitchen_note` text,
 	`driver_id` text,
@@ -549,7 +677,7 @@ CREATE TABLE `payments` (
 	`stripe_payment_intent_id` text NOT NULL,
 	`status` text DEFAULT 'requires_payment' NOT NULL,
 	`amount` integer NOT NULL,
-	`currency` text DEFAULT 'EUR' NOT NULL,
+	`currency` text NOT NULL,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	FOREIGN KEY (`order_id`,`restaurant_id`) REFERENCES `orders`(`id`,`restaurant_id`) ON UPDATE no action ON DELETE cascade,
@@ -603,11 +731,13 @@ CREATE TABLE `promotions` (
 	CONSTRAINT "promotions_recurring_start" CHECK("promotions"."recurring_start_minute" IS NULL OR "promotions"."recurring_start_minute" BETWEEN 0 AND 1439),
 	CONSTRAINT "promotions_recurring_end" CHECK("promotions"."recurring_end_minute" IS NULL OR "promotions"."recurring_end_minute" BETWEEN 0 AND 1439),
 	CONSTRAINT "promotions_status" CHECK("promotions"."status" IN ('active', 'inactive', 'expired')),
-	CONSTRAINT "promotions_required_values" CHECK("promotions"."scope" = 'info'
-          OR ("promotions"."type" = 'percentage_discount' AND "promotions"."percentage" IS NOT NULL)
-          OR ("promotions"."type" IN ('special_price', 'daily_menu') AND "promotions"."special_price" IS NOT NULL)
-          OR ("promotions"."type" = 'happy_hour' AND ("promotions"."percentage" IS NOT NULL OR "promotions"."special_price" IS NOT NULL))
-          OR ("promotions"."type" = 'two_for_one' AND "promotions"."buy_quantity" IS NOT NULL AND "promotions"."paid_quantity" IS NOT NULL AND "promotions"."paid_quantity" <= "promotions"."buy_quantity"))
+	CONSTRAINT "promotions_required_values" CHECK(
+        "promotions"."scope" = 'info'
+        OR ("promotions"."type" = 'percentage_discount' AND "promotions"."percentage" IS NOT NULL)
+        OR ("promotions"."type" IN ('special_price', 'daily_menu') AND "promotions"."special_price" IS NOT NULL)
+        OR ("promotions"."type" = 'happy_hour' AND ("promotions"."percentage" IS NOT NULL OR "promotions"."special_price" IS NOT NULL))
+        OR ("promotions"."type" = 'two_for_one' AND "promotions"."buy_quantity" IS NOT NULL AND "promotions"."paid_quantity" IS NOT NULL AND "promotions"."paid_quantity" <= "promotions"."buy_quantity")
+      )
 );
 --> statement-breakpoint
 CREATE INDEX `idx_promotions_branch` ON `promotions` (`branch_id`,`status`,`scope`) WHERE "promotions"."deleted_at" IS NULL;--> statement-breakpoint
@@ -661,6 +791,10 @@ CREATE TABLE `restaurant_users` (
 	`role_code` text DEFAULT 'staff' NOT NULL,
 	`is_driver` integer DEFAULT false NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
+	`invite_status` text DEFAULT 'not_sent' NOT NULL,
+	`invite_last_error_code` text,
+	`invite_last_attempt_at` integer,
+	`invite_sent_at` integer,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON UPDATE no action ON DELETE cascade,
@@ -673,16 +807,22 @@ CREATE UNIQUE INDEX `ux_restaurant_users_restaurant_user` ON `restaurant_users` 
 CREATE TABLE `restaurants` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
+	`country_code` text NOT NULL,
 	`default_language_code` text DEFAULT 'es' NOT NULL,
-	`default_currency` text DEFAULT 'EUR' NOT NULL,
+	`source_currency` text NOT NULL,
 	`timezone` text DEFAULT 'Europe/Madrid' NOT NULL,
 	`email_from_name` text,
 	`email_from_address` text,
 	`email_reply_to` text,
+	`legal_name` text,
+	`tax_id` text,
+	`legal_address` text,
+	`data_protection_email` text,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`deleted_at` integer,
-	CONSTRAINT "restaurants_default_currency_length" CHECK(length("restaurants"."default_currency") = 3)
+	CONSTRAINT "restaurants_source_currency_length" CHECK(length("restaurants"."source_currency") = 3),
+	CONSTRAINT "restaurants_country_code_iso_alpha_3" CHECK("restaurants"."country_code" GLOB '[A-Z][A-Z][A-Z]')
 );
 --> statement-breakpoint
 CREATE TABLE `translations` (

@@ -316,7 +316,7 @@ Generate migrations only from the Drizzle schema, then apply the committed forwa
 migrations from `apps/api`:
 
 ```bash
-bunx wrangler d1 migrations apply DB --remote --env production --cwd apps/api
+bun run --cwd apps/api db:migrate -- --confirm-production
 ```
 
 The initial sequence contains `0000_baseline.sql`. Later files are generated with
@@ -324,9 +324,10 @@ The initial sequence contains `0000_baseline.sql`. Later files are generated wit
 `drizzle-kit push` or `wrangler d1 migrations create`, and never edit an applied
 migration.
 
-The `--env production` flag is required, because D1 bindings are non-inheritable and the
-named environment must declare the database. Review the command's remote database and
-account summary before you confirm.
+The wrapper targets the immutable production database name, validates the migration set,
+records a Time Travel bookmark, checks protected row counts, and requires the explicit
+`--confirm-production` acknowledgement. Review the command's remote database and account
+summary before you confirm.
 
 Run the production preflight in
 [Database migrations](database-migrations.md) before every remote apply. It covers

@@ -43,10 +43,9 @@ Two rules follow from this:
 
 ## The baseline
 
-The first six hand-written migrations were squashed into one file, accompanied by its
-metadata:
+The whole migration history is squashed into one file, accompanied by its metadata:
 
-- `apps/api/migrations/0000_baseline.sql`
+- `apps/api/migrations/0000_squashed_baseline.sql`
 - `apps/api/migrations/meta/0000_snapshot.json`
 - `apps/api/migrations/meta/_journal.json`
 
@@ -61,6 +60,47 @@ file, which is 14 allergens and 7 system tags.
 Drizzle writes a single-column primary key with an explicit `NOT NULL`, and it may write
 an inline SQLite unique constraint as a named unique index. Both are correct. Do not
 correct these differences by hand.
+
+## The squash
+
+The history was reset once, at migration 0016. `0012_source_currency_contract.sql` had rebuilt
+`restaurants`, `branches`, `orders` and `payments` with `DROP TABLE`; on D1 that cascaded into
+every child table and had to be recovered from a backup. Rewriting 0012 as an additive
+`ALTER TABLE` plus enforcement triggers fixed the migration, but left the physical database
+carrying `restaurants.default_currency` and `branches.currency`, a nullable `source_currency`,
+and `DEFAULT 'EUR'` on `orders.currency` and `payments.currency` — none of which the Drizzle
+snapshot described any more. Drizzle Kit compares the schema against the snapshot, never against
+the SQL, so nothing caught the drift, and every future generated migration would have diffed
+against a database that did not exist.
+
+Those columns could not be removed in place. Drizzle writes table-level checks with
+self-qualified references (`CHECK(length("restaurants"."default_currency") = 3)`), which makes
+SQLite refuse both `ALTER TABLE ... DROP COLUMN` and `ALTER TABLE ... RENAME`, and `DROP TABLE`
+cascades. The database was therefore rebuilt from the baseline and the rows copied across.
+
+The squash also moved four enforcement triggers into the schema as checks, now that the tables
+are created from scratch: `restaurants_country_code_iso_alpha_3` and
+`branches_google_reviews_connection`. Drizzle Kit does not track triggers, so those invariants
+were previously invisible to it and would have been silently dropped by any table rebuild.
+There are no triggers left in the database.
+
+### Rebuilding a database onto the baseline
+
+`0000_squashed_baseline.sql` only applies to an empty database. Pointing it at a pre-squash
+database fails loudly on the first `CREATE TABLE`, which is intentional.
+
+```bash
+bun run --cwd apps/api db:rebuild:development
+```
+
+The script exports the source database, reshapes the rows locally against the baseline, drops
+the legacy columns, verifies that no row was lost and that the foreign keys still resolve, and
+writes an import file. It never writes to a remote database; it prints the commands to create
+the new database, apply the baseline and import the data. Run it for `development` first,
+smoke-test, then repeat with `db:rebuild:production`.
+
+The import file clears every table before it inserts, so it is safe to re-run, and it is ordered
+parents first so the foreign keys hold as it streams.
 
 ## Where the schema lives
 
@@ -159,11 +199,13 @@ Use this workflow for every structural change.
     [Production migrations](#production-migrations):
 
     ```bash
-    bun run --cwd apps/api db:migrate
+    bun run --cwd apps/api db:migrate -- --confirm-production
     ```
 
-`db:migrate` selects the production Wrangler environment. This is required, because a
-named Wrangler environment does not inherit the D1 binding.
+`db:migrate` selects the production Wrangler environment and requires the explicit
+`--confirm-production` acknowledgement. This is required because a named Wrangler
+environment does not inherit the D1 binding, and because production must never be the
+implicit target.
 
 An applied migration is immutable. Do not edit, rename, reorder, or delete a migration
 after D1 has applied it.
@@ -252,16 +294,16 @@ Never set `DEV_FIXED_OTP` on the production Worker.
 
 ## Production migrations
 
-The production database has the name `qmenut-db-v2` and the ID
-`2bb09db5-d6c8-477c-bf19-040a471ff879`. Its first applied migration is
-`0000_baseline.sql`. The top-level binding and the `env.production` binding in
-`apps/api/wrangler.jsonc` both point to it.
+The production database has the name `qmenut-db`, and development uses `qmenut-db-dev`. Their
+only applied migration is `0000_squashed_baseline.sql`. The top-level binding and the
+`env.production` binding in `apps/api/wrangler.jsonc` both point to production.
 
-The previous, empty database (`qmenut-db`, `f3138d43-a32e-46f2-a9d9-b4e777b02d8a`) is kept
-for rollback. Read [Deployment](deployment.md) before you change or delete either
-database.
+`qmenut-db-v2` (`2bb09db5-d6c8-477c-bf19-040a471ff879`) and `qmenut-db-v2-dev`
+(`f83a9c25-39a3-4003-80f5-633a6b9de41b`) are the pre-squash databases, kept read-only for
+rollback. Read [Deployment](deployment.md) before you change or delete either. See
+[The squash](#the-squash) for why the history was reset.
 
-Perform these ten steps around every production migration:
+Perform these eleven steps around every production migration:
 
 1. Run `db:check`.
 2. Read the generated SQL again.
@@ -273,25 +315,28 @@ Perform these ten steps around every production migration:
 
 4. Query the affected production tables and confirm that your assumptions about the
    existing rows hold. Never assume that a table is empty.
-5. Create and record a D1 Time Travel bookmark immediately before applying the migration.
-   For a parent table referenced by foreign keys, do not rely on
+5. The migration wrapper creates and records a D1 Time Travel bookmark immediately before
+   applying the migration. For a parent table referenced by foreign keys, do not rely on
    `PRAGMA foreign_keys=OFF`: remote D1 migration execution can retain cascade behavior.
-   Prefer additive `ALTER TABLE` statements. `db:check` rejects new migrations that drop a
-   referenced table, except for explicitly reviewed migrations. `0012_source_currency_contract.sql`
-   is allowlisted because SQLite requires the reviewed parent-table rebuild to remove the legacy
-   currency contract; it still requires the Time Travel preflight above. `0002_branch_coordinates.sql`
-   is an explicit historical exception because it was already applied before this guard existed;
-   do not copy either pattern without the same review.
+   Prefer additive `ALTER TABLE` statements. `db:check` rejects any migration that drops a
+   referenced table, with no exceptions.
 6. Apply the migration with Wrangler and the production environment:
 
    ```bash
-   bun run --cwd apps/api db:migrate
+   bun run --cwd apps/api db:migrate -- --confirm-production
    ```
 
 7. Check the `d1_migrations` table.
-8. Check the changed schema and the changed data directly.
-9. Smoke-test `/health`, sign-in, and one route that reads the database.
-10. Confirm that Wrangler reports no pending migrations.
+8. The wrapper compares critical row counts before and after. If Wrangler fails or any protected
+   business table loses rows, it stops, leaves the database untouched, and prints the exact
+   Time Travel command to roll back. It does not roll back on its own: a restore rewinds the
+   whole database and discards every write made since the bookmark, and ordinary traffic
+   deleting a row is enough to trip the check. Review first, then run the printed command.
+   Pass `--allow-data-loss` for a reviewed data-deletion migration, or `--auto-rollback` to let
+   the wrapper restore unattended.
+9. Check the changed schema and the changed data directly.
+10. Smoke-test `/health`, sign-in, and one route that reads the database.
+11. Confirm that Wrangler reports no pending migrations.
 
 ## Prohibited operations
 
@@ -332,7 +377,10 @@ Write the TypeScript yourself. Do not copy a finished migration. After each exer
 | `bun run --cwd apps/api db:generate:custom -- --name <name>` | Generates an empty custom migration for data. |
 | `bun run --cwd apps/api db:check`                            | Validates the metadata and the snapshot.      |
 | `bun run --cwd apps/api db:migrate:local`                    | Applies the migrations to local D1.           |
-| `bun run --cwd apps/api db:migrate`                          | Applies the migrations to production D1.      |
+| `bun run --cwd apps/api db:rebuild:development`              | Rebuilds development D1 onto the baseline.    |
+| `bun run --cwd apps/api db:rebuild:production`               | Rebuilds production D1 onto the baseline.     |
+| `bun run --cwd apps/api db:migrate -- --confirm-production`  | Safely applies migrations to production D1.   |
+| `bun run --cwd apps/api db:migrate:development`              | Safely applies migrations to development D1.  |
 | `bun run --cwd apps/api db:migrations:list`                  | Lists the pending production migrations.      |
 | `bun run --cwd apps/api db:seed:local`                       | Seeds the public-menu rows.                   |
 | `bun run --cwd apps/api db:seed:e2e`                         | Seeds the end-to-end rows.                    |

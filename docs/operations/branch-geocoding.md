@@ -47,7 +47,8 @@ bunx wrangler secret put GOOGLE_MAPS_API_KEY --env production --cwd apps/api
 
 Deploy in this order:
 
-1. Apply the D1 migrations with `bun run --cwd apps/api db:migrate`.
+1. Apply the D1 migrations with
+   `bun run --cwd apps/api db:migrate -- --confirm-production`.
 2. Deploy the API, so that coordinates and geocoding are available.
 3. Deploy admin and web.
 

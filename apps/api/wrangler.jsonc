@@ -92,8 +92,8 @@
       "d1_databases": [
         {
           "binding": "DB",
-          "database_name": "qmenut-db-v2-dev",
-          "database_id": "f83a9c25-39a3-4003-80f5-633a6b9de41b",
+          "database_name": "qmenut-db-dev",
+          "database_id": "dcebccba-de2b-4d50-86e0-501c6eb3e47c",
           "migrations_dir": "migrations",
         },
       ],
@@ -178,8 +178,8 @@
       "d1_databases": [
         {
           "binding": "DB",
-          "database_name": "qmenut-db-v2",
-          "database_id": "2bb09db5-d6c8-477c-bf19-040a471ff879",
+          "database_name": "qmenut-db",
+          "database_id": "9c6420ce-ea7c-4928-a294-a3c125e14c62",
           "migrations_dir": "migrations",
         },
       ],
