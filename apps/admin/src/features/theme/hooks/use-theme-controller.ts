@@ -23,13 +23,22 @@ export function useThemeController(branchId: string) {
   const watchedValues = useWatch({
     control: form.control,
   });
-  const { primary, secondary, showDishPhoto, showMenuPhotos, tagline, template } = watchedValues;
+  const { bodyFont, headingFont, primary, secondary, showDishPhoto, showMenuPhotos, tagline, template } = watchedValues;
   // Keyed on the parsed values' primitives so the draft keeps referential identity across
   // unrelated re-renders and ThemePreview only postMessages when the draft really changes.
   const preview = useMemo(() => {
-    const parsed = themeFormSchema.safeParse({ primary, secondary, showDishPhoto, showMenuPhotos, tagline, template });
+    const parsed = themeFormSchema.safeParse({
+      bodyFont,
+      headingFont,
+      primary,
+      secondary,
+      showDishPhoto,
+      showMenuPhotos,
+      tagline,
+      template,
+    });
     return parsed.success ? toThemeDraft({ current, values: parsed.data }) : null;
-  }, [current, primary, secondary, showDishPhoto, showMenuPhotos, tagline, template]);
+  }, [bodyFont, current, headingFont, primary, secondary, showDishPhoto, showMenuPhotos, tagline, template]);
   return {
     form,
     feedback: useMutationFeedback(save, "Tema guardado."),

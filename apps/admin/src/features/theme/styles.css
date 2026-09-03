@@ -125,11 +125,11 @@
 }
 
 .admin-theme-preview__status--ready {
-  color: var(--ming-service);
+  color: var(--ming-success);
 }
 
 .admin-theme-preview__status--ready::before {
-  background: var(--ming-service);
+  background: var(--ming-success);
 }
 
 .admin-theme-preview__status--error {

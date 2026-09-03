@@ -27,9 +27,30 @@ test("publishes a normalized theme through tenant-config and the public worker",
   const previewShell = preview.locator(".home-shell");
   const showMenuPhotos = page.getByRole("checkbox", { name: "Mostrar fotos en la carta" });
   const showDishPhoto = page.getByRole("checkbox", { name: "Mostrar foto al abrir un plato" });
+  const headingFont = page.getByRole("combobox", { name: "Tipografía de títulos", exact: true });
+  const bodyFont = page.getByRole("combobox", { name: "Tipografía de cuerpo", exact: true });
 
   await expect(page.getByText("En directo", { exact: true })).toBeVisible({ timeout: 15_000 });
   await expect(previewShell).toHaveAttribute("data-template", "tapas");
+
+  await headingFont.click();
+  await expect(page.getByRole("option", { name: "Playfair Display", exact: true })).toBeVisible();
+  await expect(page.getByRole("option", { name: "DM Sans", exact: true })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+
+  await bodyFont.click();
+  await expect(page.getByRole("option", { name: "DM Sans", exact: true })).toBeVisible();
+  await expect(page.getByRole("option", { name: "Anton", exact: true })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+
+  await selectMingOption(page, "Tipografía de títulos", "Playfair Display");
+  await selectMingOption(page, "Tipografía de cuerpo", "DM Sans");
+  await expect
+    .poll(() => previewShell.evaluate((element) => getComputedStyle(element).getPropertyValue("--qm-heading").trim()))
+    .toBe("'Playfair Display',serif");
+  await expect
+    .poll(() => previewShell.evaluate((element) => getComputedStyle(element).getPropertyValue("--qm-body").trim()))
+    .toBe("'DM Sans',sans-serif");
 
   // The explicit choice survives a template whose preset hides photos.
   await selectMingOption(page, "Plantilla", "Alta cocina");
@@ -63,6 +84,8 @@ test("publishes a normalized theme through tenant-config and the public worker",
   await expect(primaryInput).toHaveValue("#D13A2F");
   await expect(secondaryInput).toHaveValue("#FFD447");
   await expect(taglineInput).toHaveValue("Tema E2E publicado");
+  await expect(headingFont).toHaveText("Playfair Display");
+  await expect(bodyFont).toHaveText("DM Sans");
 
   expect(await getTenantTheme(request, "tapas.localhost")).toEqual(original);
   expect(await getContentVersion(request, "tapas.localhost")).toBe(versionBeforeDraft);
@@ -79,6 +102,8 @@ test("publishes a normalized theme through tenant-config and the public worker",
       tagline: "Tema E2E publicado",
       showMenuPhotos: false,
       showDishPhoto: false,
+      headingFont: "playfair-display",
+      bodyFont: "dm-sans",
     });
     expect(stored.layout).toBeTruthy();
     expect(stored.heading).toBeTruthy();
@@ -88,6 +113,12 @@ test("publishes a normalized theme through tenant-config and the public worker",
     await page.goto(`http://tapas.localhost:4011/?theme=${Date.now()}`);
     const shell = page.locator(".home-shell");
     await expect(shell).toHaveAttribute("data-template", "fast");
+    await expect
+      .poll(() => shell.evaluate((element) => getComputedStyle(element).getPropertyValue("--qm-heading").trim()))
+      .toBe("'Playfair Display',serif");
+    await expect
+      .poll(() => shell.evaluate((element) => getComputedStyle(element).getPropertyValue("--qm-body").trim()))
+      .toBe("'DM Sans',sans-serif");
     await expect
       .poll(() => shell.evaluate((element) => getComputedStyle(element).getPropertyValue("--qm-primary").trim()))
       .not.toBe("");

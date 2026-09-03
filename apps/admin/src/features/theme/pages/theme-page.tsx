@@ -13,7 +13,7 @@ import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 
 import { ThemePreview } from "../components/theme-preview";
 import { useThemeController } from "../hooks/use-theme-controller";
-import { THEME_OPTIONS } from "../types";
+import { BODY_FONT_OPTIONS, HEADING_FONT_OPTIONS, THEME_OPTIONS } from "../types";
 
 import type { ThemeFormValues } from "../types";
 
@@ -53,6 +53,24 @@ function ThemeForm({ branchId, host }: { branchId: string; host: string }) {
                     <FormColorInput<ThemeFormValues> label="Color secundario" name="secondary" />
                   </div>
                   <FormTextInput<ThemeFormValues> label="Eslogan" maxLength={120} name="tagline" />
+                </div>
+              </section>
+              <section className="admin-theme-section" aria-labelledby="theme-typography-heading">
+                <div className="admin-theme-section__heading">
+                  <h3 id="theme-typography-heading">Tipografía</h3>
+                  <p>Combina una familia para los títulos con otra para el contenido de la carta.</p>
+                </div>
+                <div className="admin-form-grid admin-form-grid--two">
+                  <FormSelect<ThemeFormValues>
+                    label="Tipografía de títulos"
+                    name="headingFont"
+                    options={HEADING_FONT_OPTIONS}
+                  />
+                  <FormSelect<ThemeFormValues>
+                    label="Tipografía de cuerpo"
+                    name="bodyFont"
+                    options={BODY_FONT_OPTIONS}
+                  />
                 </div>
               </section>
               <section className="admin-theme-section" aria-labelledby="theme-photos-heading">

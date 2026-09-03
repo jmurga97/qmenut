@@ -11,7 +11,7 @@ export interface QmTenantThemeEditableConfig {
   tagline?: string;
   showMenuPhotos: boolean;
   showDishPhoto: boolean;
-  /** Optional font-catalog overrides retained even though they are not exposed by the editor. */
+  /** Optional font-catalog overrides; omitted values inherit the selected template. */
   headingFont?: QmFontId;
   bodyFont?: QmFontId;
 }
