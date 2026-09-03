@@ -109,7 +109,6 @@ export const envSchema = z.object({
   ADMIN_APP_URL: z.url(),
   SENTRY_DSN: z.string().trim().optional(),
   LOG_LEVEL: logLevelSchema.default("info"),
-  GOOGLE_MAPS_API_KEY: z.string().trim().min(1).optional(),
   GOOGLE_PLACES_API_KEY: z.string().trim().min(1).optional(),
   NODE_ENV: nodeEnvSchema.default("development"),
   POSTHOG_API_HOST: z.url().default("https://eu.posthog.com"),

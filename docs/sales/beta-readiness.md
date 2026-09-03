@@ -210,8 +210,9 @@ debe incrementar la versión pública de todas las sucursales del restaurante.
 ### 11. Completar configuración remota prometida en la demo
 
 - [ ] Configurar reseñas de Google en ambos entornos de API.
-      **Fix:** añadir `GOOGLE_PLACES_API_KEY` restringida a Places API; la key existente
-      `GOOGLE_MAPS_API_KEY` solo cubre geocodificación. Conectar y probar un `placeId` válido.
+      **Fix:** añadir `GOOGLE_PLACES_API_KEY` restringida a Places API (New); la misma key
+      alimenta el autocompletado de direcciones de sucursal. Conectar y probar un `placeId`
+      válido.
 - [ ] Configurar la lectura de PostHog para analítica.
       **Fix:** añadir `POSTHOG_PROJECT_ID` y una `POSTHOG_PERSONAL_API_KEY` de solo lectura;
       declarar también `POSTHOG_API_HOST` dentro de development y ejecutar una

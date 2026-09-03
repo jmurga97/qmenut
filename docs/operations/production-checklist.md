@@ -20,8 +20,9 @@ items need Cloudflare, vendor-account, product, or legal work.
 - [x] Set all production secrets. Configure `BETTER_AUTH_SECRET`, a byte-identical
       `THEME_WORKER_TOKEN` on the API and tenant-config, `LOYALTY_TOKEN_SECRET`,
       `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and, if translations are enabled,
-      `DEEPL_API_KEY`. Configure `GOOGLE_MAPS_API_KEY` on the API before enabling branch
-      address autocomplete. Never set `DEV_FIXED_OTP` in production.
+      `DEEPL_API_KEY`. Configure `GOOGLE_PLACES_API_KEY` (Places API (New)) on the API
+      before enabling branch address autocomplete or Google reviews. Never set
+      `DEV_FIXED_OTP` in production.
 - [x] Replace the Stripe price placeholders, including `STRIPE_PRICE_BASIC` in the
       production variables.
 - [x] Confirm and migrate the remote D1 database. Verify that database

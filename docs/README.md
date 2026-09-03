@@ -56,17 +56,17 @@ The marketing site, `apps/landing`, is covered in [Architecture](architecture.md
 
 ### Design and operations
 
-| Page                                                             | Description                                               | Status   |
-| ---------------------------------------------------------------- | --------------------------------------------------------- | -------- |
-| [Loyalty UX](design/loyalty-ux.md)                               | Loyalty UX decisions and the reasoning behind them.       | Complete |
-| [Restaurant intake](operations/onboarding-intake.md)             | Data to collect before onboarding a restaurant (Spanish). | Complete |
-| [Branch geocoding](operations/branch-geocoding.md)               | Leaflet maps, Google autocomplete, and key handling.      | Complete |
-| [Database migrations](operations/database-migrations.md)         | Drizzle schema to generated SQL to D1.                    | Complete |
-| [Image uploads](operations/image-uploads.md)                     | Private R2 uploads, optimization, and verified URLs.      | Complete |
-| [Deployment](operations/deployment.md)                           | Cloudflare deployment runbook.                            | Complete |
-| [Performance and caching](operations/performance-and-caching.md) | Edge and browser caching, and cache invalidation.         | Complete |
-| [Testing](operations/testing.md)                                 | Local end-to-end topology, reset, and visual snapshots.   | Complete |
-| [Production checklist](operations/production-checklist.md)       | Ranked production blockers and follow-up work.            | Complete |
+| Page                                                             | Description                                                | Status   |
+| ---------------------------------------------------------------- | ---------------------------------------------------------- | -------- |
+| [Loyalty UX](design/loyalty-ux.md)                               | Loyalty UX decisions and the reasoning behind them.        | Complete |
+| [Restaurant intake](operations/onboarding-intake.md)             | Data to collect before onboarding a restaurant (Spanish).  | Complete |
+| [Branch address maps](operations/branch-geocoding.md)            | Leaflet maps, Places API (New) autocomplete, key handling. | Complete |
+| [Database migrations](operations/database-migrations.md)         | Drizzle schema to generated SQL to D1.                     | Complete |
+| [Image uploads](operations/image-uploads.md)                     | Private R2 uploads, optimization, and verified URLs.       | Complete |
+| [Deployment](operations/deployment.md)                           | Cloudflare deployment runbook.                             | Complete |
+| [Performance and caching](operations/performance-and-caching.md) | Edge and browser caching, and cache invalidation.          | Complete |
+| [Testing](operations/testing.md)                                 | Local end-to-end topology, reset, and visual snapshots.    | Complete |
+| [Production checklist](operations/production-checklist.md)       | Ranked production blockers and follow-up work.             | Complete |
 
 ### Archive
 

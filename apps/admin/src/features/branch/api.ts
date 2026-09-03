@@ -7,8 +7,21 @@ type BranchOptionsInput = { branchId: string; trpc: TrpcOptionsProxy };
 export function getBranchQueryOptions({ branchId, trpc }: BranchOptionsInput) {
   return trpc.admin.branches.get.queryOptions({ branchId });
 }
-export function getAddressSuggestionsQueryOptions({ branchId, query, trpc }: BranchOptionsInput & { query: string }) {
-  return trpc.admin.branches.searchAddresses.queryOptions({ branchId, query });
+export function getAddressSuggestionsQueryOptions({
+  branchId,
+  query,
+  sessionToken,
+  trpc,
+}: BranchOptionsInput & { query: string; sessionToken: string }) {
+  return trpc.admin.branches.searchAddresses.queryOptions({ branchId, query, sessionToken });
+}
+export function getAddressLocationQueryOptions({
+  branchId,
+  placeId,
+  sessionToken,
+  trpc,
+}: BranchOptionsInput & { placeId: string; sessionToken: string }) {
+  return trpc.admin.branches.getAddressLocation.queryOptions({ branchId, placeId, sessionToken });
 }
 export function getGooglePlaceCandidatesQueryOptions({
   branchId,

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { saveBranchSettingsSchema } from "./branch-input.schema";
 import { getBranchSettings } from "./get-branch-settings";
-import { searchGoogleAddresses } from "./google-geocoding.service";
+import { autocompleteAddresses, getPlaceLocation } from "./google-places-autocomplete.service";
 import { searchGooglePlaces } from "./google-places.service";
 import { saveBranchSettings } from "./save-branch-settings";
 import {
@@ -18,6 +18,11 @@ import { requirePermission } from "../admin-tenant/require-permission";
 
 const branchIdSchema = z.object({ branchId: z.string().trim().min(1) });
 const searchAddressesSchema = branchIdSchema.extend({ query: z.string().trim().min(3).max(200) });
+const autocompleteAddressesSchema = searchAddressesSchema.extend({ sessionToken: z.uuid() });
+const resolveAddressSchema = branchIdSchema.extend({
+  placeId: z.string().trim().min(1).max(500),
+  sessionToken: z.uuid(),
+});
 const googleReviewsConnectionSchema = branchIdSchema
   .extend({
     enabled: z.boolean(),
@@ -34,7 +39,44 @@ export const adminBranchesRouter = router({
     .query(({ ctx, input }) =>
       getBranchSettings({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, branchId: input.branchId }),
     ),
-  searchAddresses: tenantProcedure.input(searchAddressesSchema).query(async ({ ctx, input }) => {
+  searchAddresses: tenantProcedure.input(autocompleteAddressesSchema).query(async ({ ctx, input }) => {
+    requirePermission(ctx.tenant, "branch.write");
+    const branch = await assertBranchAccess({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      branchId: input.branchId,
+    });
+
+    const throttle = await ctx.env.GEOCODING_LIMITER.limit({ key: ctx.tenant.membershipId });
+    if (!throttle.success) {
+      throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Demasiadas búsquedas, espera un momento" });
+    }
+
+    if (!ctx.env.GOOGLE_PLACES_API_KEY) {
+      throw new TRPCError({
+        code: "PRECONDITION_FAILED",
+        message: "El autocompletado de direcciones no está configurado",
+      });
+    }
+
+    try {
+      return await autocompleteAddresses({
+        apiKey: ctx.env.GOOGLE_PLACES_API_KEY,
+        latitude: branch.latitude,
+        longitude: branch.longitude,
+        query: input.query,
+        sessionToken: input.sessionToken,
+      });
+    } catch (error) {
+      console.error("No se pudieron obtener sugerencias de direcciones", error);
+      throw new TRPCError({
+        cause: error,
+        code: "BAD_GATEWAY",
+        message: "No se pudieron buscar direcciones en este momento",
+      });
+    }
+  }),
+  getAddressLocation: tenantProcedure.input(resolveAddressSchema).query(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "branch.write");
     await assertBranchAccess({
       db: ctx.db,
@@ -47,7 +89,7 @@ export const adminBranchesRouter = router({
       throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Demasiadas búsquedas, espera un momento" });
     }
 
-    if (!ctx.env.GOOGLE_MAPS_API_KEY) {
+    if (!ctx.env.GOOGLE_PLACES_API_KEY) {
       throw new TRPCError({
         code: "PRECONDITION_FAILED",
         message: "El autocompletado de direcciones no está configurado",
@@ -55,13 +97,17 @@ export const adminBranchesRouter = router({
     }
 
     try {
-      return await searchGoogleAddresses({ apiKey: ctx.env.GOOGLE_MAPS_API_KEY, query: input.query });
+      return await getPlaceLocation({
+        apiKey: ctx.env.GOOGLE_PLACES_API_KEY,
+        placeId: input.placeId,
+        sessionToken: input.sessionToken,
+      });
     } catch (error) {
-      console.error("No se pudieron obtener sugerencias de Google Maps", error);
+      console.error("No se pudo obtener la ubicación de la dirección", error);
       throw new TRPCError({
         cause: error,
         code: "BAD_GATEWAY",
-        message: "No se pudieron buscar direcciones en este momento",
+        message: "No se pudo obtener la ubicación de la dirección",
       });
     }
   }),

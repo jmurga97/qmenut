@@ -10,9 +10,9 @@ THEME_WORKER_TOKEN=dev-token
 # Signs loyalty card/redemption QR tokens (any long random string in dev).
 LOYALTY_TOKEN_SECRET=dev-loyalty-secret
 
-# Server-side key for the Google Geocoding API used by the admin address combobox.
-# Restrict it to the Geocoding API in Google Cloud Console. It is never sent to the browser.
-GOOGLE_MAPS_API_KEY=google-maps-key
+# Server-side key for Places API (New): admin address autocomplete + Place Details, and
+# the Google reviews lookup. Enable "Places API (New)" and restrict the key to it in
+# Google Cloud Console. It is never sent to the browser.
 GOOGLE_PLACES_API_KEY=google-places-key
 
 # Development only: every provisioned account signs in with the fixed OTP 000000; no email is sent.

@@ -1,11 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useRef, useState } from "react";
 import { useController, useFormContext, useWatch } from "react-hook-form";
 
 import { trpc } from "~/lib/trpc";
 import { useDebouncedCallback } from "~/shared/hooks/use-debounced-callback";
 
-import { getAddressSuggestionsQueryOptions } from "../api";
+import { getAddressLocationQueryOptions, getAddressSuggestionsQueryOptions } from "../api";
 
 import type { BranchFormValues } from "../types";
 import type { FocusEvent, KeyboardEvent } from "react";
@@ -17,11 +17,9 @@ interface BranchAddressAutocompleteProps {
   branchId: string;
 }
 
-interface AddressSuggestion {
+interface AddressPrediction {
   id: string;
   label: string;
-  latitude: number;
-  longitude: number;
 }
 
 interface AddressResultsProps {
@@ -29,10 +27,12 @@ interface AddressResultsProps {
   attribution?: string;
   fetching: boolean;
   listboxId: string;
+  locationFailed: boolean;
   onSelect: (index: number) => void;
   rateLimited: boolean;
   requestFailed: boolean;
-  suggestions: AddressSuggestion[];
+  resolving: boolean;
+  suggestions: AddressPrediction[];
 }
 
 function AddressResults({
@@ -40,42 +40,60 @@ function AddressResults({
   attribution,
   fetching,
   listboxId,
+  locationFailed,
   onSelect,
   rateLimited,
   requestFailed,
+  resolving,
   suggestions,
 }: AddressResultsProps) {
+  const showSuggestions = !resolving && !locationFailed;
+
   return (
     <div className="admin-address-results" id={listboxId} role="listbox">
       {fetching ? <div className="admin-address-state">Buscando direcciones…</div> : null}
+      {resolving ? (
+        <div className="admin-address-state" role="status">
+          Obteniendo la ubicación…
+        </div>
+      ) : null}
+      {locationFailed ? (
+        <div className="admin-address-state" role="status">
+          No se pudo obtener la ubicación del mapa. Puedes guardar la dirección sin mapa.
+        </div>
+      ) : null}
       {rateLimited ? (
         <div className="admin-address-state" role="status">
           Has alcanzado el límite de búsquedas. Espera un minuto antes de continuar.
         </div>
       ) : null}
-      {requestFailed && !rateLimited ? (
+      {requestFailed && !rateLimited && !resolving && !locationFailed ? (
         <div className="admin-address-state" role="status">
           No se pudo buscar ahora. Puedes guardar la dirección sin mapa.
         </div>
       ) : null}
-      {!fetching && !requestFailed && suggestions.length === 0 ? (
+      {showSuggestions && !fetching && !requestFailed && suggestions.length === 0 ? (
         <div className="admin-address-state">No hay resultados para esta búsqueda.</div>
       ) : null}
-      {suggestions.map((suggestion, index) => (
-        <button
-          aria-selected={activeIndex === index}
-          className="admin-address-option"
-          id={`${listboxId}-${index}`}
-          key={suggestion.id}
-          onClick={() => onSelect(index)}
-          onMouseDown={(event) => event.preventDefault()}
-          role="option"
-          type="button"
-        >
-          {suggestion.label}
-        </button>
-      ))}
-      {attribution ? <div className="admin-address-attribution">{attribution}</div> : null}
+      {showSuggestions
+        ? suggestions.map((suggestion, index) => (
+            <button
+              aria-selected={activeIndex === index}
+              className="admin-address-option"
+              id={`${listboxId}-${index}`}
+              key={suggestion.id}
+              onClick={() => {
+                onSelect(index);
+              }}
+              onMouseDown={(event) => event.preventDefault()}
+              role="option"
+              type="button"
+            >
+              {suggestion.label}
+            </button>
+          ))
+        : null}
+      {attribution && showSuggestions ? <div className="admin-address-attribution">{attribution}</div> : null}
     </div>
   );
 }
@@ -84,9 +102,14 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
   const inputId = useId();
   const listboxId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const sessionTokenRef = useRef("");
+  if (!sessionTokenRef.current) sessionTokenRef.current = crypto.randomUUID();
+  const queryClient = useQueryClient();
   const [activeIndex, setActiveIndex] = useState(-1);
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [resolving, setResolving] = useState(false);
+  const [locationFailed, setLocationFailed] = useState(false);
   const { control, formState, getFieldState, setValue } = useFormContext<BranchFormValues>();
   const { field } = useController({ control, name: "address" });
   const [latitude, longitude] = useWatch({ control, name: ["latitude", "longitude"] });
@@ -95,7 +118,12 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
   const debounceSearch = useDebouncedCallback(setDebouncedQuery, SEARCH_DELAY_MS);
   const normalizedQuery = debouncedQuery.trim();
   const suggestionsQuery = useQuery({
-    ...getAddressSuggestionsQueryOptions({ branchId, query: normalizedQuery, trpc }),
+    ...getAddressSuggestionsQueryOptions({
+      branchId,
+      query: normalizedQuery,
+      sessionToken: sessionTokenRef.current,
+      trpc,
+    }),
     enabled: normalizedQuery.length >= MIN_QUERY_LENGTH,
     retry: false,
     staleTime: 5 * 60 * 1000,
@@ -113,20 +141,39 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
     field.onChange(value);
     if (linked) clearCoordinates();
     setActiveIndex(-1);
+    setLocationFailed(false);
     setOpen(true);
     debounceSearch(value);
   }
 
-  function selectSuggestion(index: number) {
+  async function selectSuggestion(index: number) {
     const suggestion = suggestions[index];
     if (!suggestion) return;
 
     field.onChange(suggestion.label);
-    setValue("latitude", String(suggestion.latitude), { shouldDirty: true, shouldValidate: true });
-    setValue("longitude", String(suggestion.longitude), { shouldDirty: true, shouldValidate: true });
     setActiveIndex(-1);
-    setDebouncedQuery("");
-    setOpen(false);
+    setLocationFailed(false);
+    setResolving(true);
+
+    try {
+      const location = await queryClient.ensureQueryData(
+        getAddressLocationQueryOptions({
+          branchId,
+          placeId: suggestion.id,
+          sessionToken: sessionTokenRef.current,
+          trpc,
+        }),
+      );
+      setValue("latitude", String(location.latitude), { shouldDirty: true, shouldValidate: true });
+      setValue("longitude", String(location.longitude), { shouldDirty: true, shouldValidate: true });
+      setDebouncedQuery("");
+      setOpen(false);
+    } catch {
+      setLocationFailed(true);
+    } finally {
+      setResolving(false);
+      sessionTokenRef.current = crypto.randomUUID();
+    }
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -144,7 +191,7 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
       case "Enter":
         if (activeIndex < 0) return;
         event.preventDefault();
-        selectSuggestion(activeIndex);
+        void selectSuggestion(activeIndex);
         break;
       case "Escape":
         setOpen(false);
@@ -162,6 +209,8 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
     setOpen(false);
   }
 
+  const showResults = open && (searchReady || resolving || locationFailed);
+
   return (
     <div className="admin-address-autocomplete" onBlur={handleBlur} ref={rootRef}>
       <label className="admin-field" htmlFor={inputId}>
@@ -170,7 +219,7 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
           aria-activedescendant={activeIndex < 0 ? undefined : `${listboxId}-${activeIndex}`}
           aria-autocomplete="list"
           aria-controls={listboxId}
-          aria-expanded={open && searchReady}
+          aria-expanded={showResults}
           aria-invalid={Boolean(error)}
           autoComplete="off"
           id={inputId}
@@ -184,15 +233,17 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
         {error ? <small role="alert">{error}</small> : null}
       </label>
 
-      {open && searchReady ? (
+      {showResults ? (
         <AddressResults
           activeIndex={activeIndex}
           attribution={suggestionsQuery.data?.attribution}
           fetching={suggestionsQuery.isFetching}
           listboxId={listboxId}
-          onSelect={selectSuggestion}
+          locationFailed={locationFailed}
+          onSelect={(index) => void selectSuggestion(index)}
           rateLimited={rateLimited}
           requestFailed={suggestionsQuery.isError}
+          resolving={resolving}
           suggestions={suggestions}
         />
       ) : null}
