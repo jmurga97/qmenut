@@ -1,3 +1,4 @@
+import { INTERNAL_SUPPORT_EMAILS } from "@qmenut/permissions";
 import { and, asc, eq, ne, sql } from "drizzle-orm";
 
 import { users } from "../schema/auth";
@@ -45,7 +46,12 @@ export async function listRestaurantUsers({ db, restaurantId }: RestaurantUsersI
     .select(adminUserColumns)
     .from(restaurantUsers)
     .innerJoin(users, eq(users.id, restaurantUsers.userId))
-    .where(eq(restaurantUsers.restaurantId, restaurantId))
+    .where(
+      and(
+        eq(restaurantUsers.restaurantId, restaurantId),
+        ...INTERNAL_SUPPORT_EMAILS.map((email) => sql`lower(${users.email}) <> ${email}`),
+      ),
+    )
     .orderBy(asc(users.name), asc(users.email))
     .all();
 }

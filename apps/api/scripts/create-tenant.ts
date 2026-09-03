@@ -17,6 +17,7 @@ import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import { z } from "zod";
 
 import { assertCountryCurrencyPair } from "@qmenut/db/domain/country-currency";
+import { INTERNAL_SUPPORT_ACCOUNTS, isInternalSupportEmail } from "@qmenut/permissions";
 
 import {
   describeTenantTarget,
@@ -106,6 +107,18 @@ const tenantFileSchema = z
 
 type TenantFile = z.infer<typeof tenantFileSchema>;
 
+interface TenantIds {
+  branch: string;
+  restaurant: string;
+  restaurantUser: string;
+  subscription: string;
+  support: readonly {
+    restaurantUser: string;
+    user: string;
+  }[];
+  user: string;
+}
+
 function esc(value: string): string {
   return `'${value.replaceAll("'", "''")}'`;
 }
@@ -183,6 +196,15 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+function assertOwnerEmailIsNotInternalSupport(tenant: TenantFile): void {
+  if (isInternalSupportEmail(tenant.owner.email)) {
+    fail(
+      `owner.email (${tenant.owner.email}) está reservado para soporte interno. ` +
+        "Usa el correo real del propietario del restaurante.",
+    );
+  }
+}
+
 function assertDomainFree(t: TenantFile, opts: CliOptions): void {
   const query = `SELECT id, deleted_at FROM branches WHERE custom_domain = ${esc(t.branch.customDomain)}`;
   const stdout = runWrangler(
@@ -208,7 +230,7 @@ function assertDomainFree(t: TenantFile, opts: CliOptions): void {
   }
 }
 
-function buildSql(t: TenantFile, ids: Record<string, string>, force: boolean): string {
+function buildSql(t: TenantFile, ids: TenantIds, force: boolean): string {
   const now = Date.now();
   const lines: string[] = ["-- Generado por scripts/create-tenant.ts — no editar a mano.", ""];
 
@@ -234,6 +256,27 @@ function buildSql(t: TenantFile, ids: Record<string, string>, force: boolean): s
     `SELECT ${esc(ids.restaurantUser)}, ${esc(ids.restaurant)}, id, 'owner', 0, 1, ${now}, ${now} FROM users WHERE email = ${esc(t.owner.email)};`,
     "",
   );
+
+  INTERNAL_SUPPORT_ACCOUNTS.forEach((account, index) => {
+    const supportIds = ids.support[index];
+    if (!supportIds) {
+      throw new Error(`Faltan IDs para la cuenta interna ${account.email}`);
+    }
+
+    lines.push(
+      `-- Cuenta interna de soporte (${account.email}); no aparece en admin.users.list.`,
+      `INSERT INTO users (id, name, email, email_verified, created_at, updated_at)`,
+      `SELECT ${esc(supportIds.user)}, ${esc(account.name)}, ${esc(account.email)}, 1, ${now}, ${now}`,
+      `WHERE NOT EXISTS (SELECT 1 FROM users WHERE lower(email) = lower(${esc(account.email)}));`,
+      "",
+      `INSERT INTO restaurant_users (id, restaurant_id, user_id, role_code, is_driver, is_active, created_at, updated_at)`,
+      `SELECT ${esc(supportIds.restaurantUser)}, ${esc(ids.restaurant)}, id, 'admin', 0, 1, ${now}, ${now}`,
+      `FROM users WHERE lower(email) = lower(${esc(account.email)})`,
+      "ON CONFLICT (restaurant_id, user_id) DO UPDATE SET role_code = 'admin', is_active = 1, updated_at = " +
+        `${now};`,
+      "",
+    );
+  });
 
   const languageValues = t.restaurant.languages
     .map(
@@ -381,6 +424,7 @@ const tenantWithHost = tenantFileSchema.safeParse(tenant);
 if (!tenantWithHost.success) {
   fail(`El --host indicado no es válido:\n${z.prettifyError(tenantWithHost.error)}`);
 }
+assertOwnerEmailIsNotInternalSupport(tenant);
 
 const ids = {
   user: crypto.randomUUID(),
@@ -388,6 +432,10 @@ const ids = {
   restaurantUser: crypto.randomUUID(),
   branch: crypto.randomUUID(),
   subscription: crypto.randomUUID(),
+  support: INTERNAL_SUPPORT_ACCOUNTS.map(() => ({
+    user: crypto.randomUUID(),
+    restaurantUser: crypto.randomUUID(),
+  })),
 };
 
 const sql = buildSql(tenant, ids, options.force);

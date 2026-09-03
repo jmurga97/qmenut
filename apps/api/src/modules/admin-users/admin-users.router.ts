@@ -7,6 +7,7 @@ import {
   updateRestaurantUserRole,
 } from "@qmenut/db/repositories/admin-users.repository";
 import { getRestaurantById } from "@qmenut/db/repositories/restaurants.repository";
+import { isInternalSupportEmail } from "@qmenut/permissions";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -28,7 +29,10 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-function assertEditableMembership(roleCode: string): void {
+function assertEditableMembership(roleCode: string, email: string): void {
+  if (isInternalSupportEmail(email)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "La cuenta interna de soporte está protegida" });
+  }
   if (roleCode === "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "La membresía owner está protegida" });
   }
@@ -99,6 +103,9 @@ export const adminUsersRouter = router({
   create: tenantProcedure.input(createUserSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "users.manage");
     const email = normalizeEmail(input.email);
+    if (isInternalSupportEmail(email)) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "El correo está reservado para soporte interno" });
+    }
     const created = await createRestaurantUser({
       db: ctx.db,
       email,
@@ -142,7 +149,7 @@ export const adminUsersRouter = router({
     if (!membership) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Membresía no encontrada" });
     }
-    assertEditableMembership(membership.roleCode);
+    assertEditableMembership(membership.roleCode, membership.email);
     await updateRestaurantUserRole({
       db: ctx.db,
       membershipId: input.membershipId,
@@ -165,7 +172,7 @@ export const adminUsersRouter = router({
     if (!membership) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Membresía no encontrada" });
     }
-    assertEditableMembership(membership.roleCode);
+    assertEditableMembership(membership.roleCode, membership.email);
     await setRestaurantUserActive({
       db: ctx.db,
       isActive: input.isActive,
@@ -185,7 +192,7 @@ export const adminUsersRouter = router({
     if (!membership) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Membresía no encontrada" });
     }
-    assertEditableMembership(membership.roleCode);
+    assertEditableMembership(membership.roleCode, membership.email);
     if (!membership.isActive) {
       throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Solo puedes reenviar acceso a membresías activas" });
     }

@@ -70,4 +70,8 @@ resolves for the session.
 - An invitation email is informational: it links to the panel and explains the OTP flow. A
   failed invitation does not roll back the account or membership; the owner can resend it from
   the Users panel.
+- Tenant creation provisions the internal support accounts `murgapja@gmail.com` and
+  `mariagabrielaronca@gmail.com` as protected `admin` memberships. They can sign in and select
+  any restaurant where they are provisioned, but they are intentionally omitted from the Users
+  list and cannot be managed through that panel.
 - Never set `DEV_FIXED_OTP` on the production Worker.

@@ -76,6 +76,11 @@ analytics, and `exchangeRates.write`; `staff` operates the menu, availability, o
 loyalty actions, and `exchangeRates.write`. `loyalty.insights` remains specific to loyalty insights,
 while general analytics uses its existing permission.
 
+The fixed internal support accounts `murgapja@gmail.com` and `mariagabrielaronca@gmail.com` are
+added with the `admin` role whenever a tenant is created by the tenant script. Their memberships
+remain in `restaurant_users` so authentication and tenant selection work normally, but the admin
+Users list and its management mutations hide and protect those memberships.
+
 The administrative procedures `admin.exchangeRates.summary` and `admin.exchangeRates.save`
 are restaurant-scoped. The save procedure accepts a positive decimal string with at most six
 fractional digits and performs an upsert. It only applies to restaurants whose source price

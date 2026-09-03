@@ -62,6 +62,16 @@ del titular" de la página Sucursal. No publique el tenant sin completarlos y re
 - [ ] Nombre → `owner.name`
 - [ ] Email de acceso; el login es por código OTP, sin contraseña → `owner.email`
 
+## Soporte interno (automático)
+
+El script añade siempre estas dos cuentas internas como membresías `admin` activas:
+
+- `murgapja@gmail.com`
+- `mariagabrielaronca@gmail.com`
+
+No se incluyen en la ficha, no se muestran en la lista de Usuarios y no deben usarse como
+`owner.email`. El propietario del restaurante sigue siendo el único owner del tenant.
+
 ## 5. Tema visual
 
 - [ ] Plantilla: fine (alta cocina), her (herencia o clásico), fast (fast food), cafe
@@ -95,6 +105,10 @@ PDF o foto como referencia:
 El script publica automáticamente el tema normalizado y `menuVersion:{host}` en KV; no hay
 un paso manual de seed. Si D1 falla después de publicar, el script elimina ambas claves
 antes de salir.
+
+Las cuentas internas de soporte se crean o reutilizan de forma idempotente y no reciben una
+invitación desde el panel. En development utilizan el OTP fijo `000000`; en production
+utilizan el OTP normal por correo.
 
 No reutilice el mismo hostname entre ambientes. El hostname guardado en D1, la clave de KV
 y el custom domain de Cloudflare deben coincidir exactamente.

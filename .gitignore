@@ -30,6 +30,10 @@ e2e/playwright-report/
 # generated types
 worker-configuration.d.ts
 
+# TanStack Router generated route trees
+apps/admin/src/app/route-tree.gen.ts
+apps/web/src/app/route-tree.gen.ts
+
 # macOS-specific files
 .DS_Store
 

@@ -1,5 +1,18 @@
 export const ROLE_CODES = ["owner", "admin", "staff"] as const;
 
+export const INTERNAL_SUPPORT_ACCOUNTS = [
+  { email: "murgapja@gmail.com", name: "Soporte QMenut" },
+  { email: "mariagabrielaronca@gmail.com", name: "María Gabriela Ronca" },
+] as const;
+
+export const INTERNAL_SUPPORT_EMAILS = INTERNAL_SUPPORT_ACCOUNTS.map((account) => account.email);
+
+const internalSupportEmailSet = new Set<string>(INTERNAL_SUPPORT_EMAILS);
+
+export function isInternalSupportEmail(email: string): boolean {
+  return internalSupportEmailSet.has(email.trim().toLowerCase());
+}
+
 export type RestaurantRoleCode = (typeof ROLE_CODES)[number];
 
 export type Permission =
