@@ -198,7 +198,6 @@
     }
   },
   "scripts": {
-    "build": "tsc --noEmit",
     "check": "tsc --noEmit"
   },
   "dependencies": {

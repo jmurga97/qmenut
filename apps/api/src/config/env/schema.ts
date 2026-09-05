@@ -35,7 +35,6 @@ export interface ExchangeRateWorkerBinding {
   getLatestRates(input: { currencies?: Array<"USD" | "EUR"> }): Promise<unknown>;
 }
 
-const logLevelSchema = z.enum(["trace", "debug", "info", "warn", "error", "fatal"]);
 const nodeEnvSchema = z.enum(["development", "test", "production"]);
 
 function serviceWorkerBindingSchema(binding: string) {
@@ -108,7 +107,6 @@ export const envSchema = z.object({
   STRIPE_PRICE_BASIC: z.string().min(1),
   ADMIN_APP_URL: z.url(),
   SENTRY_DSN: z.string().trim().optional(),
-  LOG_LEVEL: logLevelSchema.default("info"),
   GOOGLE_PLACES_API_KEY: z.string().trim().min(1).optional(),
   NODE_ENV: nodeEnvSchema.default("development"),
   POSTHOG_API_HOST: z.url().default("https://eu.posthog.com"),
