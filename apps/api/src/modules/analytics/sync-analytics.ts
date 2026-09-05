@@ -1,7 +1,7 @@
 import { createDb } from "@qmenut/db/client";
-import { analyticsSyncState } from "@qmenut/db/schema";
+import { analyticsSyncState, branches, dishes, restaurants } from "@qmenut/db/schema";
 import * as Sentry from "@sentry/cloudflare";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { parseEnv } from "@/config/env";
 
@@ -88,20 +88,25 @@ function dayRange(fromDay: string, lastDay: string): string[] {
 }
 
 async function getTenantOwnership(db: DrizzleDb): Promise<TenantOwnership> {
-  const branchRows = await db.all<{ id: string; restaurantId: string }>(sql`
-    SELECT b.id, b.restaurant_id AS restaurant_id
-    FROM branches b
-    JOIN restaurants r ON r.id = b.restaurant_id
-    WHERE r.deleted_at IS NULL AND b.deleted_at IS NULL AND b.is_active = 1
-  `);
-  const dishRows = await db.all<{ id: string; branchId: string; restaurantId: string }>(sql`
-    SELECT d.id, d.branch_id AS branch_id, d.restaurant_id AS restaurant_id
-    FROM dishes d
-    JOIN branches b ON b.id = d.branch_id AND b.restaurant_id = d.restaurant_id
-    JOIN restaurants r ON r.id = d.restaurant_id
-    WHERE d.deleted_at IS NULL AND d.is_active = 1
-      AND b.deleted_at IS NULL AND b.is_active = 1 AND r.deleted_at IS NULL
-  `);
+  const branchRows = await db
+    .select({ id: branches.id, restaurantId: branches.restaurantId })
+    .from(branches)
+    .innerJoin(restaurants, eq(restaurants.id, branches.restaurantId))
+    .where(and(isNull(restaurants.deletedAt), isNull(branches.deletedAt), eq(branches.isActive, true)));
+  const dishRows = await db
+    .select({ id: dishes.id, branchId: dishes.branchId, restaurantId: dishes.restaurantId })
+    .from(dishes)
+    .innerJoin(branches, and(eq(branches.id, dishes.branchId), eq(branches.restaurantId, dishes.restaurantId)))
+    .innerJoin(restaurants, eq(restaurants.id, dishes.restaurantId))
+    .where(
+      and(
+        isNull(dishes.deletedAt),
+        eq(dishes.isActive, true),
+        isNull(branches.deletedAt),
+        eq(branches.isActive, true),
+        isNull(restaurants.deletedAt),
+      ),
+    );
 
   return {
     branches: new Map(branchRows.map((row) => [row.id, { restaurantId: row.restaurantId }])),
