@@ -1,19 +1,12 @@
 import { Button, Checkbox, InlineMessage, SearchField } from "@jmurga97/components";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 
 import { useLoyaltyInsightsController } from "~/features/loyalty/hooks/use-loyalty-insights-controller";
-import * as services from "~/features/loyalty/services";
-import { trpc } from "~/lib/trpc";
-import { getTenantQueryOptions } from "~/shared/api";
 import { StackedBarChart } from "~/shared/components/charts/stacked-bar-chart";
 import { VISIT_SERIES, toVisitChartPoints } from "~/shared/components/charts/visit-chart";
 import { SegmentedToggle } from "~/shared/components/controls/segmented-toggle";
-import { Metric } from "~/shared/components/metrics/metric";
 import { MetricSummary } from "~/shared/components/metrics/metric-summary";
 import { PageHeader } from "~/shared/components/page-header";
 import { formatDate, formatNumber, formatPercent } from "~/shared/services/format";
-import { formatMoney } from "~/shared/services/money";
 
 import type { CustomerSort } from "~/features/loyalty/types";
 
@@ -27,9 +20,8 @@ const COLUMNS: Array<{ key: CustomerSort; label: string }> = [
 ];
 
 export function LoyaltyInsightsPage() {
-  const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const loyalty = useLoyaltyInsightsController();
-  const { customers, loyaltyReturn, search, summary } = loyalty;
+  const { customers, search, summary } = loyalty;
   return (
     <div className="admin-page admin-loyalty-page">
       <PageHeader kicker="Insights" title="La salud del programa" />
@@ -68,33 +60,6 @@ export function LoyaltyInsightsPage() {
             {formatNumber(loyalty.visitsTotals.newVisits)} primeras visitas ·{" "}
             {formatNumber(loyalty.visitsTotals.returningVisits)} visitas recurrentes
           </p>
-        </section>
-        <section className="admin-card loyalty-return-card">
-          <h3>Retorno estimado por premio</h3>
-          {loyaltyReturn.ticketMedio === null ? (
-            <div className="loyalty-return-empty">
-              <p>Indica el ticket medio para calcular una estimación del retorno.</p>
-              <Link className="admin-link" to="/loyalty/program">
-                Configurar ticket medio →
-              </Link>
-            </div>
-          ) : (
-            <>
-              <div className="loyalty-return-headline">
-                <strong>{services.formatReturnRatio(loyalty.returnRatio)}</strong>
-              </div>
-              <div className="loyalty-return-totals">
-                <Metric
-                  label="Ingresos estimados"
-                  value={formatMoney(loyalty.returnTotals.estimatedRevenue, tenant.restaurant.sourceCurrency)}
-                />
-                <Metric
-                  label="Coste de premios"
-                  value={formatMoney(loyalty.returnTotals.rewardCost, tenant.restaurant.sourceCurrency)}
-                />
-              </div>
-            </>
-          )}
         </section>
       </div>
       <section className="admin-card loyalty-customers">

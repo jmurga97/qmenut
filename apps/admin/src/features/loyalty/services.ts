@@ -29,15 +29,6 @@ export function getUndoError(error: unknown): string {
   }
   return "No se pudo deshacer la validación. Puedes volver a intentarlo.";
 }
-export function sumReturn(points: Array<{ estimatedRevenue: number; rewardCost: number }>) {
-  return {
-    estimatedRevenue: points.reduce((sum, point) => sum + point.estimatedRevenue, 0),
-    rewardCost: points.reduce((sum, point) => sum + point.rewardCost, 0),
-  };
-}
-export function formatReturnRatio(ratio: number | null): string {
-  return ratio === null ? "—" : `${ratio.toLocaleString("es-ES", { maximumFractionDigits: 1 })}×`;
-}
 function escapeCsv(value: string | number): string {
   const text = String(value);
   return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;

@@ -15,7 +15,7 @@ import {
   visitsChartInputSchema,
 } from "./admin-loyalty-input.schema";
 import { getVenueCode } from "./get-venue-code";
-import { getInsightsVisitsChart, getLoyaltyInsightsSummary, getLoyaltyReturn, listInsightsCustomers } from "./insights";
+import { getInsightsVisitsChart, getLoyaltyInsightsSummary, listInsightsCustomers } from "./insights";
 import { pendingRedemptions } from "./pending-redemptions";
 import { rejectRedemption } from "./reject-redemption";
 import { createRewardSchema, rewardIdInputSchema, updateRewardSchema } from "./reward-input.schema";
@@ -55,11 +55,6 @@ const insightsRouter = router({
       from: input.from,
       to: input.to,
     });
-  }),
-  loyaltyReturn: tenantProcedure.query(({ ctx }) => {
-    requirePermission(ctx.tenant, "loyalty.insights");
-
-    return getLoyaltyReturn({ db: ctx.db, restaurantId: ctx.tenant.restaurantId });
   }),
 });
 

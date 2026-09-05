@@ -1,11 +1,9 @@
 import { and, asc, count, desc, eq, gte, isNull, or, sql } from "drizzle-orm";
 
 import { customerRestaurants, customerVisits, customers } from "../schema/customers";
-import { loyaltyRedemptions, loyaltyRewards, loyaltyTransactions } from "../schema/loyalty";
-import { dishes } from "../schema/menu";
+import { loyaltyRedemptions, loyaltyTransactions } from "../schema/loyalty";
 
 import type { DrizzleDb } from "../client";
-import type { LoyaltyRewardType } from "../models/loyalty";
 
 interface RestaurantInput {
   db: DrizzleDb;
@@ -227,38 +225,4 @@ export async function getVisitsSeries({
 
     return { day: row.day, total, newVisits, returningVisits: total - newVisits };
   });
-}
-
-export interface RedemptionReturnRow {
-  validatedAt: number;
-  cost: number;
-  type: LoyaltyRewardType;
-  percentage: number | null;
-  specialPrice: number | null;
-  dishPrice: number | null;
-}
-
-/** Raw rows behind the loyalty-return estimate — one per validated redemption, aggregated by the caller. */
-export async function listValidatedRedemptionsForReturn({
-  db,
-  restaurantId,
-}: RestaurantInput): Promise<RedemptionReturnRow[]> {
-  const rows = await db
-    .select({
-      validatedAt: loyaltyRedemptions.validatedAt,
-      cost: loyaltyRedemptions.cost,
-      type: loyaltyRewards.type,
-      percentage: loyaltyRewards.percentage,
-      specialPrice: loyaltyRewards.specialPrice,
-      dishPrice: dishes.price,
-    })
-    .from(loyaltyRedemptions)
-    .innerJoin(loyaltyRewards, eq(loyaltyRewards.id, loyaltyRedemptions.rewardId))
-    .leftJoin(dishes, eq(dishes.id, loyaltyRewards.freeDishId))
-    .where(and(eq(loyaltyRedemptions.restaurantId, restaurantId), eq(loyaltyRedemptions.status, "validated")))
-    .all();
-
-  return rows
-    .filter((row): row is typeof row & { validatedAt: number } => row.validatedAt !== null)
-    .map((row) => ({ ...row, dishPrice: row.dishPrice ?? null }));
 }

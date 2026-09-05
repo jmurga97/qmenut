@@ -19,7 +19,6 @@ export function useLoyaltyInsightsController() {
   const search = insightsRoute.useSearch();
   const range = getVisitsRange(search.period);
   const { data: summary } = useSuspenseQuery(api.getLoyaltySummaryQueryOptions({ trpc }));
-  const { data: loyaltyReturn } = useSuspenseQuery(api.getLoyaltyReturnQueryOptions({ trpc }));
   const { data: visits } = useSuspenseQuery(api.getLoyaltyVisitsQueryOptions({ ...range, trpc }));
   const { data: customers } = useSuspenseQuery(api.getLoyaltyCustomersQueryOptions({ search, trpc }));
   function updateSearch(patch: Partial<Loyalty.LoyaltyInsightsSearch>, replace = false) {
@@ -59,14 +58,10 @@ export function useLoyaltyInsightsController() {
   });
   const visitsPoints = resolveVisitPoints(search.period, visits);
   const visitsTotals = sumVisits(visitsPoints);
-  const returnTotals = services.sumReturn(loyaltyReturn.points);
   return {
     customers,
     exportError: exportMutation.error,
     exporting: exportMutation.isPending,
-    loyaltyReturn,
-    returnRatio: returnTotals.rewardCost > 0 ? returnTotals.estimatedRevenue / returnTotals.rewardCost : null,
-    returnTotals,
     search,
     summary,
     totalPages: Math.max(1, Math.ceil(customers.total / PAGE_SIZE)),

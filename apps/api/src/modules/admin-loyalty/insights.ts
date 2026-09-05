@@ -1,9 +1,7 @@
-import { getLoyaltyProgram } from "@qmenut/db/repositories/loyalty-admin.repository";
 import {
   getLoyaltySummary,
   getVisitsSeries,
   listLoyaltyCustomers,
-  listValidatedRedemptionsForReturn,
 } from "@qmenut/db/repositories/loyalty-insights.repository";
 import { TRPCError } from "@trpc/server";
 
@@ -12,7 +10,6 @@ import type {
   LoyaltyCustomerPage,
   LoyaltyCustomerSortBy,
   LoyaltySummary,
-  RedemptionReturnRow,
   SortDir,
   VisitsSeriesPoint,
 } from "@qmenut/db/repositories/loyalty-insights.repository";
@@ -76,61 +73,4 @@ export function getInsightsVisitsChart({
   }
 
   return getVisitsSeries({ db, restaurantId, from, to });
-}
-
-export interface LoyaltyReturnPoint {
-  month: string;
-  estimatedRevenue: number;
-  rewardCost: number;
-}
-
-export interface LoyaltyReturnResult {
-  ticketMedio: number | null;
-  points: LoyaltyReturnPoint[];
-}
-
-function rewardCostFor(row: RedemptionReturnRow, ticketMedio: number): number {
-  switch (row.type) {
-    case "free_dish":
-      return row.dishPrice ?? 0;
-    case "special_price":
-      return row.dishPrice !== null && row.specialPrice !== null ? row.dishPrice - row.specialPrice : 0;
-    case "percentage_discount":
-      return row.percentage === null ? 0 : (row.percentage / 100) * ticketMedio;
-  }
-}
-
-function monthKey(timestampMs: number): string {
-  const date = new Date(timestampMs);
-
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
-}
-
-/** Estimate only: stamps cost of the reward stands in for visits driven, times the owner-provided ticket medio. */
-export async function getLoyaltyReturn({ db, restaurantId }: RestaurantInput): Promise<LoyaltyReturnResult> {
-  const program = await getLoyaltyProgram({ db, restaurantId });
-  const ticketMedio = program?.ticketMedio ?? null;
-
-  if (ticketMedio === null) {
-    return { ticketMedio: null, points: [] };
-  }
-
-  const rows = await listValidatedRedemptionsForReturn({ db, restaurantId });
-  const byMonth = new Map<string, LoyaltyReturnPoint>();
-
-  for (const row of rows) {
-    const month = monthKey(row.validatedAt);
-    const bucket = byMonth.get(month) ?? { month, estimatedRevenue: 0, rewardCost: 0 };
-
-    bucket.estimatedRevenue += row.cost * ticketMedio;
-    bucket.rewardCost += rewardCostFor(row, ticketMedio);
-    byMonth.set(month, bucket);
-  }
-
-  const points = byMonth
-    .values()
-    .toArray()
-    .toSorted((a, b) => a.month.localeCompare(b.month));
-
-  return { ticketMedio, points };
 }

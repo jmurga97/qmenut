@@ -123,7 +123,6 @@ test("covers loyalty program, reward, operations, and insights procedures", asyn
       from: now - 30 * 24 * 60 * 60 * 1000,
       to: now,
     }),
-    callTrpcQuery(page, "admin.loyalty.insights.loyaltyReturn"),
   ]);
   for (const response of insights) expect(response, response.body).toMatchObject({ ok: true, status: 200 });
 

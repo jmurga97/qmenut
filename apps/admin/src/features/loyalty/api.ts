@@ -34,9 +34,6 @@ export function getLoyaltyCustomersQueryOptions({
 export function getLoyaltyVisitsQueryOptions({ from, to, trpc }: ApiContext & { from: number; to: number }) {
   return trpc.admin.loyalty.insights.visitsChart.queryOptions({ from, to });
 }
-export function getLoyaltyReturnQueryOptions({ trpc }: ApiContext) {
-  return trpc.admin.loyalty.insights.loyaltyReturn.queryOptions();
-}
 export function getLoyaltyMutationOptions({ queryClient, trpc }: MutationContext) {
   const options = { onSettled: () => queryClient.invalidateQueries({ queryKey: trpc.admin.loyalty.pathKey() }) };
   return {
