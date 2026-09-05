@@ -8,6 +8,13 @@
       "when": 1788338522062,
       "tag": "0000_squashed_baseline",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788609234911,
+      "tag": "0001_drop_future_product_tables",
+      "breakpoints": true
     }
   ]
 }

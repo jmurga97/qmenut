@@ -15,7 +15,7 @@ const temporaryOutputDirectory = relative(apiDirectory, temporaryDirectory);
 // against a schema that already has the change. Every filename below has been applied to a remote
 // database and is frozen. Append a name here once it has been applied remotely; never edit or
 // remove one.
-const REMOTELY_APPLIED_MIGRATIONS = ["0000_squashed_baseline.sql"];
+const REMOTELY_APPLIED_MIGRATIONS = ["0000_squashed_baseline.sql", "0001_drop_future_product_tables.sql"];
 
 async function checkAppliedMigrationsStillExist(): Promise<void> {
   const migrationFiles = new Set(await readdir(join(apiDirectory, "migrations")));
@@ -30,32 +30,62 @@ async function checkAppliedMigrationsStillExist(): Promise<void> {
   }
 }
 
+/**
+ * Dropping a parent table while a live child still references it makes D1's foreign-key
+ * cascades delete dependent rows. A drop is therefore only safe once every table that
+ * references it has already been dropped earlier in the same migration.
+ */
 async function checkForUnsafeParentTableRebuilds(): Promise<void> {
   const migrationsDirectory = join(apiDirectory, "migrations");
   const migrationFiles = (await readdir(migrationsDirectory)).filter((file) => file.endsWith(".sql"));
   const migrations = await Promise.all(
     migrationFiles.map(async (file) => ({
       file,
-      sql: await readFile(join(migrationsDirectory, file), "utf8"),
+      statements: (await readFile(join(migrationsDirectory, file), "utf8")).split("--> statement-breakpoint"),
     })),
   );
-  const allSql = migrations.map(({ sql }) => sql).join("\n");
-  const referencedTables = new Set(
-    [...allSql.matchAll(/REFERENCES\s+[`"]?([A-Za-z0-9_]+)[`"]?/gi)].map((match) => match[1]),
-  );
+  const referencingTables = new Map<string, Set<string>>();
 
-  for (const { file, sql } of migrations) {
-    const droppedTables = [...sql.matchAll(/DROP\s+TABLE(?:\s+IF\s+EXISTS)?\s+[`"]?([A-Za-z0-9_]+)[`"]?/gi)].map(
-      (match) => match[1],
-    );
-    const unsafeTables = droppedTables.filter((table) => referencedTables.has(table));
+  for (const { statements } of migrations) {
+    for (const statement of statements) {
+      const subjectMatch = statement.match(/(?:CREATE\s+TABLE|ALTER\s+TABLE)\s+[`"]?([A-Za-z0-9_]+)[`"]?/i);
 
-    if (unsafeTables.length > 0) {
-      throw new Error(
-        `${file} rebuilds referenced table(s) ${unsafeTables.join(", ")} with DROP TABLE. ` +
-          "D1 can keep foreign-key cascades active during migrations and delete dependent rows. " +
-          "Use additive ALTER TABLE statements or a migration strategy that preserves child rows.",
-      );
+      if (subjectMatch === null) continue;
+
+      const subject = subjectMatch[1];
+
+      for (const match of statement.matchAll(/REFERENCES\s+[`"]?([A-Za-z0-9_]+)[`"]?/gi)) {
+        const referenced = match[1];
+
+        if (referenced === subject) continue;
+
+        const tables = referencingTables.get(referenced) ?? new Set<string>();
+        tables.add(subject);
+        referencingTables.set(referenced, tables);
+      }
+    }
+  }
+
+  for (const { file, statements } of migrations) {
+    const dropped = new Set<string>();
+
+    for (const statement of statements) {
+      const dropMatch = statement.match(/DROP\s+TABLE(?:\s+IF\s+EXISTS)?\s+[`"]?([A-Za-z0-9_]+)[`"]?/i);
+
+      if (dropMatch === null) continue;
+
+      const table = dropMatch[1];
+      const unsafeTables = [...(referencingTables.get(table) ?? [])].filter((child) => !dropped.has(child));
+
+      if (unsafeTables.length > 0) {
+        throw new Error(
+          `${file} drops ${table} while ${unsafeTables.join(", ")} still reference(s) it. ` +
+            "D1 can keep foreign-key cascades active during migrations and delete dependent rows. " +
+            "Drop the referencing tables first or use additive ALTER TABLE statements.",
+        );
+      }
+
+      dropped.add(table);
     }
   }
 }

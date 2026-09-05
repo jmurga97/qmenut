@@ -168,10 +168,6 @@
       "types": "./src/schema/branches.ts",
       "import": "./src/schema/branches.ts"
     },
-    "./schema/campaigns": {
-      "types": "./src/schema/campaigns.ts",
-      "import": "./src/schema/campaigns.ts"
-    },
     "./schema/customers": {
       "types": "./src/schema/customers.ts",
       "import": "./src/schema/customers.ts"
@@ -187,14 +183,6 @@
     "./schema/menu": {
       "types": "./src/schema/menu.ts",
       "import": "./src/schema/menu.ts"
-    },
-    "./schema/operations": {
-      "types": "./src/schema/operations.ts",
-      "import": "./src/schema/operations.ts"
-    },
-    "./schema/ordering": {
-      "types": "./src/schema/ordering.ts",
-      "import": "./src/schema/ordering.ts"
     },
     "./schema/promotions": {
       "types": "./src/schema/promotions.ts",

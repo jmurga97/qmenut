@@ -37,11 +37,6 @@ const CRITICAL_TABLES = [
   "loyalty_rewards",
   "loyalty_transactions",
   "loyalty_redemptions",
-  "campaigns",
-  "campaign_sends",
-  "orders",
-  "order_items",
-  "payments",
 ] as const;
 type CriticalRowCounts = Map<string, number>;
 
