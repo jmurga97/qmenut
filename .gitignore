@@ -44,3 +44,6 @@ apps/web/src/app/route-tree.gen.ts
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# graphify analysis output (local artifact)
+graphify-out/
