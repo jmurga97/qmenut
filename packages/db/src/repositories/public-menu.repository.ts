@@ -217,12 +217,6 @@ async function getPublicBranchContext({ db, tenant }: TenantInput): Promise<{
   };
 }
 
-export async function getPublicBranch({ db, tenant }: TenantInput): Promise<PublicBranch | null> {
-  const context = await getPublicBranchContext({ db, tenant });
-
-  return context?.branch ?? null;
-}
-
 async function getCategoryRows({ db, tenant }: TenantInput): Promise<CategoryRow[]> {
   return db
     .select()

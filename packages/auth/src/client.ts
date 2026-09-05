@@ -2,7 +2,6 @@ import { emailOTPClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 export { createAuthClient };
-export const emailOtpClient = emailOTPClient;
 
 export interface CreateEmailOtpAuthClientOptions {
   baseURL: string;
