@@ -13,8 +13,11 @@ import type { FocusEvent, KeyboardEvent } from "react";
 const SEARCH_DELAY_MS = 350;
 const MIN_QUERY_LENGTH = 3;
 
+type SelectionStatus = "idle" | "resolving" | "failed";
+
 interface BranchAddressAutocompleteProps {
   branchId: string;
+  onResolveChange: (pending: boolean) => void;
 }
 
 interface AddressPrediction {
@@ -27,11 +30,10 @@ interface AddressResultsProps {
   attribution?: string;
   fetching: boolean;
   listboxId: string;
-  locationFailed: boolean;
   onSelect: (index: number) => void;
   rateLimited: boolean;
   requestFailed: boolean;
-  resolving: boolean;
+  selectionStatus: SelectionStatus;
   suggestions: AddressPrediction[];
 }
 
@@ -40,14 +42,15 @@ function AddressResults({
   attribution,
   fetching,
   listboxId,
-  locationFailed,
   onSelect,
   rateLimited,
   requestFailed,
-  resolving,
+  selectionStatus,
   suggestions,
 }: AddressResultsProps) {
-  const showSuggestions = !resolving && !locationFailed;
+  const showSuggestions = selectionStatus === "idle";
+  const resolving = selectionStatus === "resolving";
+  const locationFailed = selectionStatus === "failed";
 
   return (
     <div className="admin-address-results" id={listboxId} role="listbox">
@@ -67,7 +70,7 @@ function AddressResults({
           Has alcanzado el límite de búsquedas. Espera un minuto antes de continuar.
         </div>
       ) : null}
-      {requestFailed && !rateLimited && !resolving && !locationFailed ? (
+      {requestFailed && !rateLimited && showSuggestions ? (
         <div className="admin-address-state" role="status">
           No se pudo buscar ahora. Puedes guardar la dirección sin mapa.
         </div>
@@ -98,18 +101,18 @@ function AddressResults({
   );
 }
 
-export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocompleteProps) {
+export function BranchAddressAutocomplete({ branchId, onResolveChange }: BranchAddressAutocompleteProps) {
   const inputId = useId();
   const listboxId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const sessionTokenRef = useRef("");
+  const resolveSeqRef = useRef(0);
   if (!sessionTokenRef.current) sessionTokenRef.current = crypto.randomUUID();
   const queryClient = useQueryClient();
   const [activeIndex, setActiveIndex] = useState(-1);
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [resolving, setResolving] = useState(false);
-  const [locationFailed, setLocationFailed] = useState(false);
+  const [selectionStatus, setSelectionStatus] = useState<SelectionStatus>("idle");
   const { control, formState, getFieldState, setValue } = useFormContext<BranchFormValues>();
   const { field } = useController({ control, name: "address" });
   const [latitude, longitude] = useWatch({ control, name: ["latitude", "longitude"] });
@@ -140,8 +143,10 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
   function handleInput(value: string) {
     field.onChange(value);
     if (linked) clearCoordinates();
+    resolveSeqRef.current += 1;
     setActiveIndex(-1);
-    setLocationFailed(false);
+    setSelectionStatus("idle");
+    onResolveChange(false);
     setOpen(true);
     debounceSearch(value);
   }
@@ -150,10 +155,11 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
     const suggestion = suggestions[index];
     if (!suggestion) return;
 
+    const seq = ++resolveSeqRef.current;
     field.onChange(suggestion.label);
     setActiveIndex(-1);
-    setLocationFailed(false);
-    setResolving(true);
+    setSelectionStatus("resolving");
+    onResolveChange(true);
 
     try {
       const location = await queryClient.ensureQueryData(
@@ -164,20 +170,25 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
           trpc,
         }),
       );
+      if (resolveSeqRef.current !== seq) return;
       setValue("latitude", String(location.latitude), { shouldDirty: true, shouldValidate: true });
       setValue("longitude", String(location.longitude), { shouldDirty: true, shouldValidate: true });
       setDebouncedQuery("");
       setOpen(false);
+      setSelectionStatus("idle");
     } catch {
-      setLocationFailed(true);
+      if (resolveSeqRef.current !== seq) return;
+      setSelectionStatus("failed");
     } finally {
-      setResolving(false);
-      sessionTokenRef.current = crypto.randomUUID();
+      if (resolveSeqRef.current === seq) {
+        onResolveChange(false);
+        sessionTokenRef.current = crypto.randomUUID();
+      }
     }
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (!open || suggestions.length === 0) return;
+    if (!showResults || selectionStatus !== "idle" || suggestions.length === 0) return;
 
     switch (event.key) {
       case "ArrowDown":
@@ -209,7 +220,7 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
     setOpen(false);
   }
 
-  const showResults = open && (searchReady || resolving || locationFailed);
+  const showResults = open && (searchReady || selectionStatus !== "idle");
 
   return (
     <div className="admin-address-autocomplete" onBlur={handleBlur} ref={rootRef}>
@@ -239,11 +250,10 @@ export function BranchAddressAutocomplete({ branchId }: BranchAddressAutocomplet
           attribution={suggestionsQuery.data?.attribution}
           fetching={suggestionsQuery.isFetching}
           listboxId={listboxId}
-          locationFailed={locationFailed}
           onSelect={(index) => void selectSuggestion(index)}
           rateLimited={rateLimited}
           requestFailed={suggestionsQuery.isError}
-          resolving={resolving}
+          selectionStatus={selectionStatus}
           suggestions={suggestions}
         />
       ) : null}

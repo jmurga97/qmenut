@@ -14,11 +14,7 @@ const locationSchema = z.object({
   longitude: z.number().min(-180).max(180),
 });
 
-const detailsResponseSchema = z.object({
-  id: z.string().trim().min(1),
-  formattedAddress: z.string().trim().min(1),
-  location: locationSchema,
-});
+const detailsResponseSchema = z.object({ location: locationSchema });
 
 const ATTRIBUTION = "Con tecnología de Google";
 
@@ -33,8 +29,6 @@ export interface AddressPredictionsResult {
 }
 
 export interface PlaceLocation {
-  address: string;
-  id: string;
   latitude: number;
   longitude: number;
 }
@@ -61,7 +55,6 @@ export async function autocompleteAddresses({
   const response = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
     body: JSON.stringify({
       input: query,
-      includedPrimaryTypes: ["address"],
       languageCode: "es",
       locationBias,
       sessionToken,
@@ -101,11 +94,10 @@ export async function getPlaceLocation({
   sessionToken,
 }: GetPlaceLocationInput): Promise<PlaceLocation> {
   const url = new URL(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`);
-  url.searchParams.set("languageCode", "es");
   url.searchParams.set("sessionToken", sessionToken);
 
   const response = await fetch(url, {
-    headers: { "X-Goog-Api-Key": apiKey, "X-Goog-FieldMask": "id,location,formattedAddress" },
+    headers: { "X-Goog-Api-Key": apiKey, "X-Goog-FieldMask": "location" },
     signal: AbortSignal.timeout(5000),
   });
 
@@ -116,8 +108,6 @@ export async function getPlaceLocation({
   const place = detailsResponseSchema.parse(await response.json());
 
   return {
-    address: place.formattedAddress,
-    id: place.id,
     latitude: place.location.latitude,
     longitude: place.location.longitude,
   };

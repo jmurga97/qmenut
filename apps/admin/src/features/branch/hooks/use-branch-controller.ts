@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 
 import { trpc } from "~/lib/trpc";
@@ -17,6 +18,7 @@ import type { BranchFormValues } from "../types";
 
 export function useBranchController(branchId: string) {
   const queryClient = useQueryClient();
+  const [resolvePending, setResolvePending] = useState(false);
   const { data: settings } = useSuspenseQuery(getBranchQueryOptions({ branchId, trpc }));
   const form = useForm<BranchFormValues>({
     resolver: zodResolver(branchFormSchema),
@@ -65,8 +67,9 @@ export function useBranchController(branchId: string) {
     logo,
     schedules,
     settings,
+    setResolvePending,
     feedback: { ...feedback, error: imageSave.error ?? save.error },
-    pending: imageSave.pending || save.isPending || uploading,
+    pending: imageSave.pending || save.isPending || uploading || resolvePending,
     submit,
   };
 }

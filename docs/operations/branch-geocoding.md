@@ -17,18 +17,21 @@ The "Dirección" field on branch settings is a combobox backed by **Places API (
 
 1. As the administrator types (after three characters, 350 ms debounce), the API Worker
    calls `POST https://places.googleapis.com/v1/places:autocomplete` with
-   `includedPrimaryTypes: ["address"]`, `languageCode: "es"`, and a `locationBias` circle
-   around the branch's current coordinates when it already has them. It returns up to five
-   predictions (place id + display text). Autocomplete responses carry **no coordinates**.
+   `languageCode: "es"` and a `locationBias` circle around the branch's current
+   coordinates when it already has them. It returns up to five predictions (place id +
+   display text). Autocomplete responses carry **no coordinates**.
 2. When the administrator picks a prediction, the API Worker calls
-   `GET https://places.googleapis.com/v1/places/{placeId}` with
-   `X-Goog-FieldMask: id,location,formattedAddress`. The `location` is written to the
-   branch form as `latitude` / `longitude`. The address text keeps the prediction's own
-   text — it is not overwritten with `formattedAddress`.
+   `GET https://places.googleapis.com/v1/places/{placeId}` requesting coordinates only
+   via `X-Goog-FieldMask: location`. The `location` is written to the branch form as
+   `latitude` / `longitude`; the address text stays the prediction's own text.
 
 A single **session token** (a UUIDv4 generated in the admin) is sent on every autocomplete
-request and on the final Place Details request, then rotated after each selection. Google
-bills the autocomplete-plus-details pair as one session instead of per request.
+request and on the final Place Details request, then rotated after each selection. This is
+an Essentials lookup: Google still bills the first 12 autocomplete requests of a session
+individually, plus the terminating Place Details request (requests beyond the 12th in the
+same session go unbilled). The token is kept so the requests are grouped into a session
+for correct SKU classification, not as a per-session saving; abandoned sessions revert to
+plain per-request billing.
 
 ## Google Cloud setup
 
@@ -81,9 +84,15 @@ del mapa", clears both coordinates without removing the address.
 
 ## Compliance notes
 
-- Persisted coordinates become business data; `placeId` is exempt from the Google caching
-  restrictions, which is why predictions identify results by their place id.
-- For customers with a billing address in the European Economic Area, the EEA service
-  terms restrict using a Google-formatted address together with any non-Google map. The
-  stored address is the prediction text the administrator selected, not Place Details'
-  `formattedAddress`; administrators can retype it if stricter separation is required.
+- `placeId` values may be cached per Google's documentation, which is why predictions
+  identify results by their place id. Coordinates are different: the Google Maps Platform
+  Service Specific Terms only permit temporarily caching Places latitude/longitude values
+  for up to 30 consecutive calendar days, after which they must be deleted. Persisting
+  branch coordinates indefinitely is not covered by the current terms; resolve this
+  provider fit (for example by re-geocoding periodically or moving to a non-Google
+  geocoder) before adding any refresh automation.
+- For customers with a billing address in the European Economic Area, the EEA Service
+  Specific Terms restrict Places content other than latitude, longitude, and `placeId`
+  from being used with any map, and allow no caching beyond the 30-day coordinate window.
+  The stored address is the prediction text the administrator selected, but it is still
+  Google Maps Content and is not exempt from those restrictions.
