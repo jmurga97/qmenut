@@ -3,20 +3,24 @@ import { QmMenuList } from "@qmenut/ui/components/qm-menu-list/react";
 import { QmSectionHeader } from "@qmenut/ui/components/qm-section-header/react";
 
 import { menuSectionElementId } from "~/features/menu/components/menu-section-id";
-import { photoUrl } from "~/shared/lib/photo-url";
+import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
+import { getPhotoLayout } from "~/shared/lib/photo-layout";
+import { responsivePhotoSource } from "~/shared/lib/photo-url";
 
 import type { MenuSectionViewModel, SelectDishInput } from "~/features/menu/types/menu-view-model";
 
-const DISH_THUMB_WIDTH_PX = 60;
-
 interface MenuSectionProps {
   index: number;
+  onDishIntent: () => void;
   onSelectDish: (input: SelectDishInput) => void;
   section: MenuSectionViewModel;
   showDishPhotos: boolean;
 }
 
-export function MenuSection({ index, onSelectDish, section, showDishPhotos }: MenuSectionProps) {
+export function MenuSection({ index, onDishIntent, onSelectDish, section, showDishPhotos }: MenuSectionProps) {
+  const layout = usePublicRouteLayout();
+  const photoLayout = getPhotoLayout(layout).thumbnail;
+
   return (
     <section
       id={menuSectionElementId(index)}
@@ -24,7 +28,7 @@ export function MenuSection({ index, onSelectDish, section, showDishPhotos }: Me
       className="menu-section-frame"
       data-menu-section={section.id}
     >
-      <QmMenuList cascade cascadeIndex={index}>
+      <QmMenuList>
         <QmSectionHeader
           slot="section-header"
           num={section.num}
@@ -32,26 +36,40 @@ export function MenuSection({ index, onSelectDish, section, showDishPhotos }: Me
           sectionLabel={section.label}
           sectionCount={section.count}
         />
-        {section.dishes.map((dish) => (
-          <button
-            key={dish.rowKey}
-            type="button"
-            className="dish-trigger"
-            onClick={(event) => onSelectDish({ dish, source: "section", trigger: event.currentTarget })}
-          >
-            <QmDishRow
-              value={{
-                desc: dish.desc,
-                name: dish.name,
-                oldPrice: dish.oldPrice,
-                photo: showDishPhotos,
-                photoUrl: photoUrl(dish.photoUrl, DISH_THUMB_WIDTH_PX),
-                price: dish.price,
-                tag: dish.badge?.compactText,
-              }}
-            />
-          </button>
-        ))}
+        {section.dishes.map((dish) => {
+          const source = responsivePhotoSource({
+            canonicalUrl: dish.photoUrl,
+            ...photoLayout,
+            variants: dish.photoVariants,
+          });
+
+          return (
+            <button
+              key={dish.rowKey}
+              type="button"
+              className="dish-trigger"
+              onFocus={onDishIntent}
+              onPointerEnter={onDishIntent}
+              onTouchStart={onDishIntent}
+              onClick={(event) => onSelectDish({ dish, source: "section", trigger: event.currentTarget })}
+            >
+              <QmDishRow
+                value={{
+                  desc: dish.desc,
+                  name: dish.name,
+                  oldPrice: dish.oldPrice,
+                  photo: showDishPhotos,
+                  photoUrl: source?.src,
+                  photoFallbackUrl: dish.photoUrl,
+                  photoSrcSet: source?.srcSet,
+                  photoSizes: source?.sizes,
+                  price: dish.price,
+                  tag: dish.badge?.compactText,
+                }}
+              />
+            </button>
+          );
+        })}
       </QmMenuList>
     </section>
   );

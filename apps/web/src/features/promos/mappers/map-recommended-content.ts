@@ -30,6 +30,7 @@ export function mapRecommendedDish({
     name: base.name,
     oldPrice: base.oldPrice,
     photoUrl: base.photoUrl,
+    photoVariants: base.photoVariants,
     price: base.price,
     rowKey: base.rowKey,
   };

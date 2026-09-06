@@ -1,4 +1,5 @@
 import { listBranchPhotos, updateGoogleReviewsConnection } from "@qmenut/db/repositories/admin-branches.repository";
+import { upsertImageVariants } from "@qmenut/db/repositories/image-variants.repository";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -12,6 +13,7 @@ import {
   bumpPublicContentVersionForRestaurant,
 } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
+import { buildImageVariantCatalogEntries } from "../admin-images/image-variant-catalog";
 import { validateImageReference, validateImageReferences } from "../admin-images/validate-image-reference";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 import { requirePermission } from "../admin-tenant/require-permission";
@@ -178,7 +180,7 @@ export const adminBranchesRouter = router({
       branchId: input.branchId,
     });
     const existingPhotos = await listBranchPhotos({ db: ctx.db, branchId: input.branchId });
-    await Promise.all([
+    const [logoManifest, photoManifests] = await Promise.all([
       validateImageReference({
         worker: ctx.env.IMAGE_WORKER,
         restaurantId: ctx.tenant.restaurantId,
@@ -197,6 +199,10 @@ export const adminBranchesRouter = router({
         images: input.photos.map((photo) => ({ imageUrl: photo.url, uploadId: photo.uploadId })),
       }),
     ]);
+    await upsertImageVariants({
+      db: ctx.db,
+      variants: buildImageVariantCatalogEntries([...(logoManifest ? [logoManifest] : []), ...photoManifests]),
+    });
     await saveBranchSettings({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -207,6 +213,7 @@ export const adminBranchesRouter = router({
       schedules: input.schedules,
       photos: input.photos,
     });
+
     await bumpPublicContentVersionForRestaurant({
       db: ctx.db,
       env: ctx.env,

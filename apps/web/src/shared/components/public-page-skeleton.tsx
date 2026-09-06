@@ -1,4 +1,5 @@
 import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
+import { TEMPLATES } from "@qmenut/ui/theme/presets";
 import { useMemo } from "react";
 
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
@@ -6,6 +7,8 @@ import { useTenantContext } from "~/shared/hooks/use-tenant-context";
 export function PublicPageSkeleton() {
   const rowCount = 5;
   const { theme } = useTenantContext();
+  const useHeroHeader =
+    TEMPLATES[theme.template].photoMode === "hero" || TEMPLATES[theme.template].photoMode === "heroxl";
   const themeVars = useMemo(
     () =>
       buildQmThemeVars({
@@ -20,12 +23,21 @@ export function PublicPageSkeleton() {
   return (
     <div className="home-shell" data-template={theme.template} style={themeVars}>
       <div className="home-column">
-        <div className="hs-header">
-          <div className="hs-bar hs-bar--topbar" />
-          <div className="hs-bar hs-bar--title" />
-          <div className="hs-bar hs-bar--subtitle" />
-        </div>
+        {useHeroHeader ? (
+          <div className="hs-header">
+            <div className="hs-bar hs-bar--topbar" />
+            <div className="hs-bar hs-bar--title" />
+            <div className="hs-bar hs-bar--subtitle" />
+          </div>
+        ) : null}
         <div className="home-scroll">
+          {useHeroHeader ? null : (
+            <div className="hs-header">
+              <div className="hs-bar hs-bar--topbar" />
+              <div className="hs-bar hs-bar--title" />
+              <div className="hs-bar hs-bar--subtitle" />
+            </div>
+          )}
           <div className="hs-featured">
             <div className="hs-block hs-block--photo" />
             <div className="hs-bar hs-bar--name" />

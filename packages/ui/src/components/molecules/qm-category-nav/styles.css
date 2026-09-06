@@ -1,9 +1,7 @@
 :host {
   position: sticky;
   z-index: 2;
-  top: calc(
-    var(--scroll-sticky-header-offset, 0px) - var(--scroll-hide-header-height, 0px) - var(--qm-content-top, 16px)
-  );
+  top: var(--scroll-sticky-header-offset, 0px);
   margin: 0 calc(var(--qm-shell-pad-x, 18px) * -1) var(--qm-section-gap, 24px);
   padding: 10px var(--qm-shell-pad-x, 18px);
   background: color-mix(in oklab, var(--qm-bg, #fff) 92%, transparent);

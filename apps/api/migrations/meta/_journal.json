@@ -15,6 +15,13 @@
       "when": 1788609234911,
       "tag": "0001_drop_future_product_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788613330272,
+      "tag": "0002_add_image_variants_catalog",
+      "breakpoints": true
     }
   ]
 }

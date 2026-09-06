@@ -1,7 +1,7 @@
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
 import { I18nextProvider } from "react-i18next";
 
-import { FONT_CSS_URLS, getFontPreloadUrl, resolveTenantFontIds } from "~/app/fonts/font-css";
+import { getFontPreloadUrl, resolveTenantFontIds } from "~/app/fonts/font-css";
 import appCss from "~/app/styles.css?url";
 import { DEFAULT_LOCALE } from "~/lib/i18n/create-i18n";
 import { ROBOTS_META_CONTENT } from "~/lib/robots";
@@ -49,7 +49,6 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: ({ match }) => {
     const { theme } = match.context.tenant;
     const { heading, body } = resolveTenantFontIds(theme);
-    const familyIds = [...new Set([heading, body])];
     const preloadUrls = [...new Set([getFontPreloadUrl(heading, theme.headingWeight), getFontPreloadUrl(body, 400)])];
 
     return {
@@ -70,17 +69,17 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
         // tenant logo, or to the committed raster when the branch has none.
         { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
         { rel: "manifest", href: "/site.webmanifest" },
-        { rel: "preconnect", href: "https://images.unsplash.com", crossOrigin: "anonymous" },
-        ...familyIds.map((fontId) => ({ rel: "stylesheet", href: FONT_CSS_URLS[fontId] })),
         ...preloadUrls.map((href) => ({
           rel: "preload",
           href,
           as: "font",
           type: "font/woff2",
-          crossOrigin: "anonymous",
+          crossOrigin: "anonymous" as const,
         })),
         { rel: "stylesheet", href: appCss },
       ],
+      // Transport the active CSS with tenant context so client navigation keeps these styles.
+      styles: match.context.tenant.fontStyles,
     };
   },
   component: RootRouteComponent,

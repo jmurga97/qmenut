@@ -154,10 +154,10 @@ test("rejects invalid image upload requests before reaching the worker", async (
   expect(shortIdempotencyKey, shortIdempotencyKey.body).toMatchObject({ ok: false, status: 400 });
 });
 
-test("blocks staff from creating image uploads", async ({ staff }) => {
+test("blocks staff from creating branch image uploads", async ({ staff }) => {
   const forbidden = await callTrpcMutation(staff, "admin.images.createUpload", {
     branchId: "branch_tapas",
-    purpose: "dishImage",
+    purpose: "branchLogo",
     filename: "plato.png",
     contentType: "image/png",
     sizeBytes: 1024,

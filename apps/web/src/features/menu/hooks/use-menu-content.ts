@@ -11,7 +11,7 @@ import { useTenantContext } from "~/shared/hooks/use-tenant-context";
 
 import type { MenuContentViewModel } from "~/features/menu/types/menu-view-model";
 
-export function useMenuContent(): MenuContentViewModel | null {
+export function useMappedMenuContent({ enabled }: { enabled: boolean }): MenuContentViewModel | null {
   const trpc = useAppTrpc();
   const { host } = useTenantContext();
   const { effectiveLocale, locale } = useRouteContext({ from: "/{-$locale}" });
@@ -20,7 +20,7 @@ export function useMenuContent(): MenuContentViewModel | null {
   const { data } = useSuspenseQuery(getPublicMenuQueryOptions({ host, locale, trpc }));
 
   return useMemo(
-    () => (data ? mapPublicMenuContent({ data, displayCurrency, locale: effectiveLocale, t }) : null),
-    [data, displayCurrency, effectiveLocale, t],
+    () => (enabled && data ? mapPublicMenuContent({ data, displayCurrency, locale: effectiveLocale, t }) : null),
+    [data, displayCurrency, effectiveLocale, enabled, t],
   );
 }

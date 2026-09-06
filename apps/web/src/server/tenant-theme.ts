@@ -6,6 +6,7 @@ import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 export interface TenantContext {
   host: string;
   theme: QmTenantThemeConfig;
+  fontStyles: Array<{ children: string; id: string; type: "text/css" }>;
 }
 
 const clientTenantContextCache: { promise?: Promise<TenantContext> } = {};
@@ -36,7 +37,20 @@ export const getTenantContext = createServerFn({ method: "GET" }).handler(async 
   const fallbackTemplate =
     import.meta.env.DEV && host === DEV_DEFAULT_TENANT_HOST ? DEV_DEFAULT_TENANT_TEMPLATE : undefined;
 
-  return { host, theme: await readTenantTheme(host, fallbackTemplate) };
+  const theme = await readTenantTheme(host, fallbackTemplate);
+  const { FONT_CSS_TEXT } = await import("~/app/fonts/font-css-server");
+  const { resolveTenantFontIds } = await import("~/app/fonts/font-css");
+  const { heading, body } = resolveTenantFontIds(theme);
+
+  return {
+    host,
+    theme,
+    fontStyles: [...new Set([heading, body])].map((fontId) => ({
+      children: FONT_CSS_TEXT[fontId],
+      id: `qm-font-${fontId}`,
+      type: "text/css" as const,
+    })),
+  };
 });
 
 /** Reuses immutable tenant configuration for client navigations, never across SSR requests. */

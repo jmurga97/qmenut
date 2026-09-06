@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";
+import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import type { RefObject } from "react";
 import type { PublicCurrencyState } from "~/shared/hooks/use-public-currency";
 import type { PublicTenant } from "~/shared/types/public-tenant";
@@ -8,6 +9,7 @@ import type { PublicTenant } from "~/shared/types/public-tenant";
 export interface PublicRouteLayoutContextValue extends PublicCurrencyState {
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   template: QmTemplateName;
+  theme: QmTenantThemeConfig;
   tenant: PublicTenant;
 }
 

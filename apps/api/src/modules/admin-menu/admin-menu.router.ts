@@ -6,6 +6,7 @@ import {
   listIngredients,
   listTags,
 } from "@qmenut/db/repositories/admin-menu-taxonomy.repository";
+import { upsertImageVariants } from "@qmenut/db/repositories/image-variants.repository";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -25,6 +26,7 @@ import { saveDish } from "./save-dish";
 import { saveDishRelations } from "./save-dish-relations";
 import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
+import { buildImageVariantCatalogEntries } from "../admin-images/image-variant-catalog";
 import { validateImageReference } from "../admin-images/validate-image-reference";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 import { requirePermission } from "../admin-tenant/require-permission";
@@ -32,6 +34,7 @@ import { requirePermission } from "../admin-tenant/require-permission";
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { TenantContext } from "../../trpc/trpc";
 import type { ImagePurpose } from "../admin-images/image-input.schema";
+import type { VerifiedImageManifest } from "../admin-images/image-worker.client";
 
 const dishDetailInputSchema = z.object({ dishId: z.string().trim().min(1) });
 const categoryIdInputSchema = z.object({ categoryId: z.string().trim().min(1) });
@@ -60,7 +63,7 @@ function assertMenuImage({
   existingUrl,
   imageUrl,
   uploadId,
-}: AssertMenuImageInput): Promise<void> {
+}: AssertMenuImageInput): Promise<VerifiedImageManifest | null> {
   return validateImageReference({
     worker: env.IMAGE_WORKER,
     restaurantId: tenant.restaurantId,
@@ -88,7 +91,7 @@ const categoriesRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
-    await assertMenuImage({
+    const imageManifest = await assertMenuImage({
       env: ctx.env,
       tenant: ctx.tenant,
       branchId: input.branchId,
@@ -96,6 +99,10 @@ const categoriesRouter = router({
       existingUrl: null,
       imageUrl: input.data.imageUrl,
       uploadId: input.data.imageUploadId,
+    });
+    await upsertImageVariants({
+      db: ctx.db,
+      variants: imageManifest ? buildImageVariantCatalogEntries([imageManifest]) : [],
     });
     const result = await createMenuCategory({
       db: ctx.db,
@@ -121,7 +128,7 @@ const categoriesRouter = router({
     if (!categoryContext) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Categoría no encontrada" });
     }
-    await assertMenuImage({
+    const imageManifest = await assertMenuImage({
       env: ctx.env,
       tenant: ctx.tenant,
       branchId: categoryContext.branchId,
@@ -130,12 +137,17 @@ const categoriesRouter = router({
       imageUrl: input.data.imageUrl,
       uploadId: input.data.imageUploadId,
     });
+    await upsertImageVariants({
+      db: ctx.db,
+      variants: imageManifest ? buildImageVariantCatalogEntries([imageManifest]) : [],
+    });
     const result = await updateMenuCategory({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       categoryId: input.categoryId,
       data: input.data,
     });
+
     await bumpPublicContentVersionForBranch({
       db: ctx.db,
       env: ctx.env,
@@ -188,7 +200,7 @@ const dishesRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
-    await assertMenuImage({
+    const imageManifest = await assertMenuImage({
       env: ctx.env,
       tenant: ctx.tenant,
       branchId: input.branchId,
@@ -196,6 +208,10 @@ const dishesRouter = router({
       existingUrl: null,
       imageUrl: input.data.imageUrl,
       uploadId: input.data.imageUploadId,
+    });
+    await upsertImageVariants({
+      db: ctx.db,
+      variants: imageManifest ? buildImageVariantCatalogEntries([imageManifest]) : [],
     });
     const result = await saveDish({
       db: ctx.db,
@@ -221,7 +237,7 @@ const dishesRouter = router({
     if (!dishContext || dishContext.branchId !== input.branchId) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Plato no encontrado" });
     }
-    await assertMenuImage({
+    const imageManifest = await assertMenuImage({
       env: ctx.env,
       tenant: ctx.tenant,
       branchId: input.branchId,
@@ -229,6 +245,10 @@ const dishesRouter = router({
       existingUrl: dishContext.imageUrl,
       imageUrl: input.data.imageUrl,
       uploadId: input.data.imageUploadId,
+    });
+    await upsertImageVariants({
+      db: ctx.db,
+      variants: imageManifest ? buildImageVariantCatalogEntries([imageManifest]) : [],
     });
     const result = await saveDish({
       db: ctx.db,

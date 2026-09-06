@@ -13,7 +13,7 @@ export function ContactPage() {
   useTrackPageView("contact_view");
 
   return (
-    <div className="public-route-content-stage">
+    <div>
       <ContactPanel content={content} hostRef={contactPanelHostRef} />
 
       <InstallCard />

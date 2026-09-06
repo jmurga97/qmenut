@@ -2,6 +2,7 @@ import { useParams, useSearch } from "@tanstack/react-router";
 import { WifiOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import "~/features/offline/styles.css";
 import { track } from "~/lib/analytics/posthog";
 import { useTrackPageView } from "~/lib/analytics/use-analytics";
 
@@ -19,7 +20,7 @@ export function OfflinePage() {
   }
 
   return (
-    <div className="public-route-content-stage">
+    <div>
       <section className="offline-surface">
         {/* The route header already renders the page title as the h1. */}
         <WifiOff aria-hidden="true" className="offline-surface__icon" size={32} strokeWidth={1.5} />

@@ -1,11 +1,11 @@
 import { QmDishRow } from "@qmenut/ui/components/qm-dish-row/react";
 import { QmRecommendedList } from "@qmenut/ui/components/qm-recommended-list/react";
 
-import { photoUrl } from "~/shared/lib/photo-url";
+import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
+import { getPhotoLayout } from "~/shared/lib/photo-layout";
+import { responsivePhotoSource } from "~/shared/lib/photo-url";
 
 import type { RecommendedContentViewModel } from "~/features/promos/types/highlights-view-model";
-
-const DISH_THUMB_WIDTH_PX = 60;
 
 interface RecommendedListProps {
   content: RecommendedContentViewModel;
@@ -15,23 +15,37 @@ interface RecommendedListProps {
 export function RecommendedList({ content, showDishPhotos }: RecommendedListProps) {
   const emptyLabel = content.dishes.length === 0 ? content.emptyLabel : undefined;
 
+  const layout = usePublicRouteLayout();
+  const photoLayout = getPhotoLayout(layout).thumbnail;
+
   return (
     <QmRecommendedList value={{ emptyLabel }}>
-      {content.dishes.map((dish) => (
-        <QmDishRow
-          key={dish.rowKey}
-          value={{
-            desc: dish.desc,
-            featured: dish.featured,
-            name: dish.name,
-            oldPrice: dish.oldPrice,
-            photo: showDishPhotos,
-            photoUrl: photoUrl(dish.photoUrl, DISH_THUMB_WIDTH_PX),
-            price: dish.price,
-            tag: dish.badge?.compactText,
-          }}
-        />
-      ))}
+      {content.dishes.map((dish) => {
+        const source = responsivePhotoSource({
+          canonicalUrl: dish.photoUrl,
+          ...photoLayout,
+          variants: dish.photoVariants,
+        });
+
+        return (
+          <QmDishRow
+            key={dish.rowKey}
+            value={{
+              desc: dish.desc,
+              featured: dish.featured,
+              name: dish.name,
+              oldPrice: dish.oldPrice,
+              photo: showDishPhotos,
+              photoUrl: source?.src,
+              photoFallbackUrl: dish.photoUrl,
+              photoSrcSet: source?.srcSet,
+              photoSizes: source?.sizes,
+              price: dish.price,
+              tag: dish.badge?.compactText,
+            }}
+          />
+        );
+      })}
     </QmRecommendedList>
   );
 }

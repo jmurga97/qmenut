@@ -79,21 +79,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dish-trigger:active {
-    transform: none;
-  }
-
   .loyalty-loading {
     animation: none;
-  }
-
-  .hs-bar,
-  .hs-block {
-    animation: none;
-  }
-
-  .scroll-hide-header {
-    transition-duration: 1ms;
   }
 }
 

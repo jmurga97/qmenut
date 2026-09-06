@@ -6,8 +6,8 @@ import { useTranslation } from "react-i18next";
 import { MenuCategoryNav } from "~/features/menu/components/menu-content/menu-category-nav";
 import { MenuFeatured } from "~/features/menu/components/menu-content/menu-featured";
 import { MenuSection } from "~/features/menu/components/menu-content/menu-section";
-import { MenuDishModal } from "~/features/menu/components/menu-dish-modal";
-import { useMenuContent } from "~/features/menu/hooks/use-menu-content";
+import { MenuDishModal, preloadDishModal } from "~/features/menu/components/menu-dish-modal";
+import { useMenuContent } from "~/features/menu/hooks/menu-content-context";
 import { track } from "~/lib/analytics/posthog";
 import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
@@ -31,6 +31,7 @@ export function MenuPage() {
   }
 
   function handleSelectDish({ dish, source, trigger }: SelectDishInput) {
+    preloadDishModal();
     dishTriggerRef.current = trigger;
     track("dish_opened", { dish_id: dish.rowKey, dish_name: dish.name, source });
     setSelectedDish(dish);
@@ -47,7 +48,7 @@ export function MenuPage() {
   return (
     <>
       {content.sections.length === 0 ? (
-        <QmMenuList cascade emptyLabel={t("menu.emptyLabel")} />
+        <QmMenuList emptyLabel={t("menu.emptyLabel")} />
       ) : (
         <>
           <MenuFeatured
@@ -57,6 +58,7 @@ export function MenuPage() {
             featuredPromoId={content.featuredPromoId}
             showDishPhotos={tenant.showMenuPhotos}
             onSelectDish={handleSelectDish}
+            onDishIntent={preloadDishModal}
           />
           <MenuCategoryNav scrollContainerRef={scrollContainerRef} sections={content.sections} />
           {content.sections.map((section, index) => (
@@ -66,6 +68,7 @@ export function MenuPage() {
               section={section}
               showDishPhotos={tenant.showMenuPhotos}
               onSelectDish={handleSelectDish}
+              onDishIntent={preloadDishModal}
             />
           ))}
         </>

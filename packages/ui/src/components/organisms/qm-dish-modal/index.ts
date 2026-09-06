@@ -6,6 +6,7 @@ import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
 import { FocusTrap } from "../../../internal/focus-trap";
+import { restorePhotoFallback } from "../../../internal/photo-fallback";
 import { QmElement } from "../../../internal/qm-element";
 import { defineQmBadge } from "../../atoms/qm-badge";
 import { defineQmImage } from "../../atoms/qm-image";
@@ -49,6 +50,15 @@ export class QmDishModal extends QmElement {
 
   @property({ type: String, attribute: "photo-url" })
   photoUrl?: string;
+
+  @property({ type: String, attribute: "photo-fallback-url" })
+  photoFallbackUrl?: string;
+
+  @property({ type: String, attribute: "photo-srcset" })
+  photoSrcSet?: string;
+
+  @property({ type: String, attribute: "photo-sizes" })
+  photoSizes?: string;
 
   @property({ type: String, attribute: "photo-label" })
   photoLabel = "";
@@ -296,13 +306,23 @@ export class QmDishModal extends QmElement {
     this.postEvent({ name: "qm-close", detail: undefined });
   }
 
+  private readonly handlePhotoError = (event: Event) => {
+    restorePhotoFallback(event.currentTarget as HTMLImageElement, this.photoFallbackUrl);
+  };
+
   private renderPhoto(): unknown {
     if (!this.photoUrl) return nothing;
 
     return html`
       <div part="photo" class="photo">
         <qm-image part="image" class="image" label=${this.photoLabel}>
-          <img src=${this.photoUrl} alt="" />
+          <img
+            src=${this.photoUrl}
+            @error=${this.handlePhotoError}
+            srcset=${this.photoSrcSet ?? nothing}
+            sizes=${this.photoSizes ?? nothing}
+            alt=""
+          />
         </qm-image>
       </div>
     `;

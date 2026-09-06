@@ -5,11 +5,10 @@ import { useMemo } from "react";
 import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
+import { FALLBACK_HERO_PHOTO_URL } from "~/shared/lib/photo-layout";
 
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import type { PublicTenant } from "~/shared/types/public-tenant";
-
-const FALLBACK_HERO_PHOTO_URL = "https://picsum.photos/seed/qmenut-branch/800/600";
 
 interface PublicTenantState {
   isLoading: boolean;
@@ -35,6 +34,7 @@ export function usePublicTenant(themeOverride?: QmTenantThemeConfig): PublicTena
 
     return {
       heroPhotoUrl: data.branch.photos[0]?.url ?? FALLBACK_HERO_PHOTO_URL,
+      heroPhotoVariants: data.branch.photos[0]?.variants,
       primary: theme.primary,
       showDishPhoto: theme.showDishPhoto,
       showMenuPhotos: theme.showMenuPhotos,

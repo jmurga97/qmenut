@@ -20,6 +20,7 @@ export const Route = createFileRoute("/{-$locale}/")({
       loaderData,
       match,
       path: "/",
+      preloadLcpImage: true,
     }),
   headers: () => ({
     "Cache-Control": BROWSER_CACHE_CONTROL,

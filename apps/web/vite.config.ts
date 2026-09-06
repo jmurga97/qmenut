@@ -60,7 +60,12 @@ export default defineConfig({
         routesDirectory: "routes",
       },
     }),
-    react(),
+    react({
+      include: /\/apps\/web\/src\/.*\.[jt]sx?$/,
+      babel: {
+        plugins: process.env.QMENUT_REACT_COMPILER === "0" ? [] : [["babel-plugin-react-compiler", {}]],
+      },
+    }),
     ssrNodeConditions(),
   ],
   resolve: {
@@ -85,11 +90,14 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
+          const packagePath = id.slice(id.lastIndexOf("node_modules/") + "node_modules/".length);
+          const isPackage = (name: string) => packagePath === name || packagePath.startsWith(`${name}/`);
+
           if (
-            id.includes("react-dom") ||
-            id.includes("/react/") ||
-            id.includes("/scheduler/") ||
-            id.includes("use-sync-external-store")
+            isPackage("react") ||
+            isPackage("react-dom") ||
+            isPackage("scheduler") ||
+            isPackage("use-sync-external-store")
           ) {
             return "vendor-react";
           }

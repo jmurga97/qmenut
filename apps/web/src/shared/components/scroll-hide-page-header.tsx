@@ -30,21 +30,19 @@ export function ScrollHidePageHeader({ scrollContainerRef, ...pageHeaderProps }:
   }, [hidden]);
 
   useEffect(() => {
-    const container = scrollContainerRef.current;
     const header = headerRef.current;
-    if (!container || !header) return;
+    const container = scrollContainerRef.current;
+    if (!header || !container) return;
 
-    const updateHeaderHeight = () => {
-      container.style.setProperty("--scroll-hide-header-height", `${header.offsetHeight}px`);
+    const updateNavigationOffset = () => {
+      container.style.setProperty("--scroll-hide-header-height", `${header.getBoundingClientRect().height}px`);
     };
-
-    updateHeaderHeight();
-
-    const resizeObserver = new ResizeObserver(updateHeaderHeight);
-    resizeObserver.observe(header);
+    const observer = new ResizeObserver(updateNavigationOffset);
+    observer.observe(header);
+    updateNavigationOffset();
 
     return () => {
-      resizeObserver.disconnect();
+      observer.disconnect();
       container.style.removeProperty("--scroll-hide-header-height");
     };
   }, [scrollContainerRef]);

@@ -1,19 +1,21 @@
 import { QmFeatured } from "@qmenut/ui/components/qm-featured/react";
+import { TEMPLATES } from "@qmenut/ui/theme/presets";
 import { useNavigate, useRouter, useSearch } from "@tanstack/react-router";
 
 import { track } from "~/lib/analytics/posthog";
-import { photoUrl } from "~/shared/lib/photo-url";
+import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
+import { getPhotoLayout } from "~/shared/lib/photo-layout";
+import { responsivePhotoSource } from "~/shared/lib/photo-url";
 
 import type { QmFeaturedValue } from "@qmenut/ui/components/qm-featured/react";
 import type { MenuDishViewModel, SelectDishInput } from "~/features/menu/types/menu-view-model";
-
-const FEATURED_IMAGE_WIDTH_PX = 430;
 
 interface MenuFeaturedProps {
   featured: MenuDishViewModel | null;
   featuredLabel: string;
   featuredPromo: QmFeaturedValue | null;
   featuredPromoId: string | null;
+  onDishIntent: () => void;
   onSelectDish: (input: SelectDishInput) => void;
   showDishPhotos: boolean;
 }
@@ -23,9 +25,18 @@ export function MenuFeatured({
   featuredLabel,
   featuredPromo,
   featuredPromoId,
+  onDishIntent,
   onSelectDish,
   showDishPhotos,
 }: MenuFeaturedProps) {
+  const layout = usePublicRouteLayout();
+  const photoMode = TEMPLATES[layout.template].photoMode;
+  const hasHeroHeader = photoMode === "hero" || photoMode === "heroxl";
+  const source = responsivePhotoSource({
+    canonicalUrl: featured?.photoUrl,
+    ...getPhotoLayout(layout).featured,
+    variants: featured?.photoVariants,
+  });
   const navigate = useNavigate();
   const router = useRouter();
   const search = useSearch({ from: "/{-$locale}" });
@@ -48,7 +59,10 @@ export function MenuFeatured({
       {featured ? (
         <button
           type="button"
-          className="dish-trigger menu-featured-frame public-route-content-stage"
+          className="dish-trigger menu-featured-frame"
+          onFocus={onDishIntent}
+          onPointerEnter={onDishIntent}
+          onTouchStart={onDishIntent}
           onClick={(event) => onSelectDish({ dish: featured, source: "featured", trigger: event.currentTarget })}
         >
           <QmFeatured
@@ -57,7 +71,12 @@ export function MenuFeatured({
               name: featured.name,
               oldPrice: featured.oldPrice,
               photo: showDishPhotos,
-              photoUrl: photoUrl(featured.photoUrl, FEATURED_IMAGE_WIDTH_PX),
+              photoUrl: source?.src,
+              photoFallbackUrl: featured.photoUrl,
+              photoFetchPriority: hasHeroHeader || layout.template === "her" ? "auto" : "high",
+              photoLoading: hasHeroHeader ? "lazy" : "eager",
+              photoSrcSet: source?.srcSet,
+              photoSizes: source?.sizes,
               price: featured.price,
               secondaryTag: featured.featured ? featuredLabel : undefined,
               tag: featured.badge?.compactText,
@@ -68,7 +87,7 @@ export function MenuFeatured({
       {featuredPromo ? (
         <button
           type="button"
-          className="dish-trigger public-route-content-stage"
+          className="dish-trigger"
           onPointerEnter={preloadHighlights}
           onFocus={preloadHighlights}
           onTouchStart={preloadHighlights}

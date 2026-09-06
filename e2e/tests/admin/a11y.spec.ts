@@ -22,6 +22,7 @@ const ROUTES = [
 ];
 
 test("has no serious accessibility violations across core admin workflows", async ({ page }) => {
+  test.slow(); // This test runs a full accessibility scan on 17 separate routes.
   for (const route of ROUTES) {
     await page.goto(route, { waitUntil: "domcontentloaded" });
     await page.locator(".admin-page").waitFor();

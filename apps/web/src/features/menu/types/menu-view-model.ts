@@ -1,3 +1,4 @@
+import type { PublicImageVariant } from "@qmenut/db/models/image";
 import type { QmFeaturedValue } from "@qmenut/ui/components/qm-featured/react";
 import type { AllergenCode } from "~/features/menu/constants/allergens";
 
@@ -21,6 +22,7 @@ export interface MenuDishViewModel {
   name: string;
   oldPrice?: string;
   photoUrl?: string;
+  photoVariants?: PublicImageVariant[];
   price: string;
   rowKey: string;
 }

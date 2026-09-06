@@ -1,6 +1,7 @@
 import { Share, Smartphone, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import "~/features/install/styles.css";
 import { useInstallPrompt } from "~/features/install/use-install-prompt";
 
 const TITLE_ID = "install-card-title";

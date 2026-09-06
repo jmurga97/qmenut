@@ -3,18 +3,18 @@ import { QmHeading } from "@qmenut/ui/components/qm-heading/react";
 import { ChefHat, Sparkles, Tag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import "~/features/promos/styles.css";
 import { PromosList } from "~/features/promos/components/promos-list";
 import { RecommendedList } from "~/features/promos/components/recommended-list";
 import { useHighlightsContent } from "~/features/promos/hooks/use-highlights-content";
 import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
-import { photoUrl } from "~/shared/lib/photo-url";
-
-const FEATURED_IMAGE_WIDTH_PX = 430;
+import { getPhotoLayout } from "~/shared/lib/photo-layout";
+import { responsivePhotoSource } from "~/shared/lib/photo-url";
 
 export function HighlightsPage() {
   const content = useHighlightsContent();
-  const { template, tenant } = usePublicRouteLayout();
+  const { template, tenant, theme } = usePublicRouteLayout();
   const showDishPhotos = tenant.showMenuPhotos;
   const { t } = useTranslation();
 
@@ -22,10 +22,15 @@ export function HighlightsPage() {
 
   const hasRecommended = content.recommended.dishes.length > 0;
   const hasPromos = content.promos.promos.length > 0;
+  const featuredSource = responsivePhotoSource({
+    canonicalUrl: content.featured?.photoUrl,
+    ...getPhotoLayout({ template, theme }).featured,
+    variants: content.featured?.photoVariants,
+  });
 
   if (!content.featured && !hasRecommended && !hasPromos) {
     return (
-      <div className="highlights-empty public-route-content-stage">
+      <div className="highlights-empty">
         <span className="highlights-empty__icon" aria-hidden="true">
           <ChefHat size={26} strokeWidth={1.6} />
         </span>
@@ -36,7 +41,7 @@ export function HighlightsPage() {
   }
 
   return (
-    <div className="highlights-page public-route-content-stage">
+    <div className="highlights-page">
       {content.featured ? (
         <div className="highlights-featured-frame">
           <QmFeatured
@@ -45,7 +50,10 @@ export function HighlightsPage() {
               name: content.featured.name,
               oldPrice: content.featured.oldPrice,
               photo: showDishPhotos,
-              photoUrl: photoUrl(content.featured.photoUrl, FEATURED_IMAGE_WIDTH_PX),
+              photoUrl: featuredSource?.src,
+              photoFallbackUrl: content.featured.photoUrl,
+              photoSrcSet: featuredSource?.srcSet,
+              photoSizes: featuredSource?.sizes,
               price: content.featured.price,
               secondaryTag: t(`menu.featuredBadges.${template}`),
               tag: content.featured.badge?.compactText,

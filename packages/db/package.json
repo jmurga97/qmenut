@@ -68,6 +68,10 @@
       "types": "./src/repositories/public-menu.repository.ts",
       "import": "./src/repositories/public-menu.repository.ts"
     },
+    "./repositories/image-variants.repository": {
+      "types": "./src/repositories/image-variants.repository.ts",
+      "import": "./src/repositories/image-variants.repository.ts"
+    },
     "./repositories/restaurant-analytics.repository": {
       "types": "./src/repositories/restaurant-analytics.repository.ts",
       "import": "./src/repositories/restaurant-analytics.repository.ts"
@@ -131,6 +135,10 @@
     "./models/branch": {
       "types": "./src/models/branch.ts",
       "import": "./src/models/branch.ts"
+    },
+    "./models/image": {
+      "types": "./src/models/image.ts",
+      "import": "./src/models/image.ts"
     },
     "./models/loyalty": {
       "types": "./src/models/loyalty.ts",

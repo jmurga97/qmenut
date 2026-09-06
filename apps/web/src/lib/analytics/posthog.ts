@@ -25,10 +25,21 @@ const state: {
   superProps: Record<string, unknown> | null;
   tenantReady: boolean;
   timeZone: string | null;
-} = { instance: null, loading: null, superProps: null, tenantReady: false, timeZone: null };
+  scheduled: boolean;
+  loadAllowed: boolean;
+} = {
+  instance: null,
+  loading: null,
+  superProps: null,
+  tenantReady: false,
+  timeZone: null,
+  scheduled: false,
+  loadAllowed: false,
+};
 
 /** Cola única para conservar el orden hasta tener contexto de tenant y SDK. */
 const pendingEvents: PendingEvent[] = [];
+const MAX_PENDING_EVENTS = 100;
 
 function isEnabled(): boolean {
   if (typeof window === "undefined" || !import.meta.env.VITE_POSTHOG_KEY) return false;
@@ -55,7 +66,7 @@ interface CaptureInput {
 }
 
 function enqueue(bucket: PendingEvent[], event: PendingEvent): void {
-  bucket.push(event);
+  if (bucket.length < MAX_PENDING_EVENTS) bucket.push(event);
 }
 
 function capture({ event, occurredAt, props }: CaptureInput): void {
@@ -106,7 +117,7 @@ const load = createClientOnlyFn(async (): Promise<void> => {
 });
 
 async function ensureLoaded(): Promise<void> {
-  if (!isEnabled() || state.loading) {
+  if (!isEnabled() || state.loading || !state.loadAllowed) {
     return;
   }
 
@@ -154,6 +165,7 @@ export function track<E extends AnalyticsEventName>(event: E, ...args: TrackArgs
     enqueue(pendingEvents, { event, occurredAt, props });
 
     if (state.tenantReady) {
+      // Retry a failed download only after the original idle task has run.
       void ensureLoaded();
     }
 
@@ -165,13 +177,19 @@ export function track<E extends AnalyticsEventName>(event: E, ...args: TrackArgs
 
 /** Arranca la carga diferida cuando el hilo principal queda libre tras hidratar. */
 export function scheduleAnalyticsLoad(): void {
-  if (!isEnabled()) {
+  if (!isEnabled() || state.scheduled) {
     return;
   }
 
+  state.scheduled = true;
+  const startLoad = () => {
+    state.loadAllowed = true;
+    void ensureLoaded();
+  };
+
   if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(() => void ensureLoaded(), { timeout: 5000 });
+    window.requestIdleCallback(startLoad, { timeout: 5000 });
   } else {
-    setTimeout(() => void ensureLoaded(), 1500);
+    setTimeout(startLoad, 1500);
   }
 }

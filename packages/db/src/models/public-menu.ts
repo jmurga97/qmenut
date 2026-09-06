@@ -1,4 +1,5 @@
 import type { PublicBranch, PublicContactBranch } from "./branch";
+import type { PublicImageVariant } from "./image";
 import type { PublicDishPromotion, PublicPromotion } from "./promotion";
 
 export interface PublicDishAvailabilityWindow {
@@ -61,6 +62,7 @@ export interface PublicDish {
   price: number;
   promotion: PublicDishPromotion | null;
   tags: PublicTag[];
+  variants?: PublicImageVariant[];
   variantGroups: PublicDishVariantGroup[];
 }
 
@@ -71,6 +73,7 @@ export interface PublicCategory {
   imageUrl: string | null;
   name: string;
   position: number;
+  variants?: PublicImageVariant[];
 }
 
 export interface PublicMenuLanguageOption {

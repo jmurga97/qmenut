@@ -1,17 +1,16 @@
 import { TEMPLATES } from "@qmenut/ui/theme/presets";
 
-import { useMenuContent } from "~/features/menu/hooks/use-menu-content";
+import { useMenuContent } from "~/features/menu/hooks/menu-content-context";
 import { ScrollCompactHeroHeader } from "~/shared/components/scroll-compact-hero-header";
 import { ScrollHidePageHeader } from "~/shared/components/scroll-hide-page-header";
-import { photoUrl } from "~/shared/lib/photo-url";
+import { HERO_PHOTO_LAYOUT } from "~/shared/lib/photo-layout";
+import { responsivePhotoSource } from "~/shared/lib/photo-url";
 
 import type { QmLangOption } from "@qmenut/ui/components/qm-lang";
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 import type { RefObject } from "react";
 import type { useLocale } from "~/shared/hooks/use-locale";
 import type { PublicTenant } from "~/shared/types/public-tenant";
-
-const HERO_IMAGE_WIDTH_PX = 430;
 
 interface MenuRouteHeaderProps {
   locale: ReturnType<typeof useLocale>;
@@ -36,6 +35,11 @@ export function MenuRouteHeader({
 }: MenuRouteHeaderProps) {
   const content = useMenuContent();
   const useHeroHeader = TEMPLATES[template].photoMode === "hero" || TEMPLATES[template].photoMode === "heroxl";
+  const heroSource = responsivePhotoSource({
+    canonicalUrl: tenant.heroPhotoUrl,
+    ...HERO_PHOTO_LAYOUT,
+    variants: tenant.heroPhotoVariants,
+  });
 
   if (useHeroHeader) {
     return (
@@ -56,7 +60,15 @@ export function MenuRouteHeader({
       >
         <img
           slot="photo"
-          src={photoUrl(tenant.heroPhotoUrl, HERO_IMAGE_WIDTH_PX)}
+          src={heroSource?.src}
+          srcSet={heroSource?.srcSet}
+          sizes={heroSource?.sizes}
+          onError={(event) => {
+            const image = event.currentTarget;
+            if (image.getAttribute("src") === tenant.heroPhotoUrl && !image.hasAttribute("srcset")) return;
+            image.removeAttribute("srcset");
+            image.src = tenant.heroPhotoUrl;
+          }}
           alt=""
           fetchPriority="high"
           decoding="async"

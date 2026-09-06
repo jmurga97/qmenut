@@ -13,6 +13,8 @@ import { appRouter } from "@/trpc/router";
 
 import type { EnvBindings, RuntimeEnv } from "@/config/env/schema";
 
+export { ImageMaintenanceRpc } from "@/modules/admin-images/image-maintenance.rpc";
+
 const TRPC_ENDPOINT = "/trpc";
 const AUTH_PREFIX = "/api/auth";
 const STRIPE_WEBHOOK_PATH = "/webhooks/stripe";

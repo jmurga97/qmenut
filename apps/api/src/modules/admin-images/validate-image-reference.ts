@@ -1,8 +1,10 @@
 import { TRPCError } from "@trpc/server";
 
-import { assertCompletedImageUpload, isQmenutMediaUrl } from "./image-worker.client";
+import { assertCompletedImageUpload } from "./image-worker.client";
+import { isQmenutMediaUrl } from "./media-url";
 
 import type { ImagePurpose } from "./image-input.schema";
+import type { VerifiedImageManifest } from "./image-worker.client";
 import type { ImageWorkerBinding } from "../../config/env/schema";
 
 interface ValidateImageReferenceInput {
@@ -15,8 +17,10 @@ interface ValidateImageReferenceInput {
   uploadId?: string;
 }
 
-export async function validateImageReference(input: ValidateImageReferenceInput): Promise<void> {
-  if (input.imageUrl === input.existingUrl || input.imageUrl === null) return;
+export async function validateImageReference(
+  input: ValidateImageReferenceInput,
+): Promise<VerifiedImageManifest | null> {
+  if (input.imageUrl === input.existingUrl || input.imageUrl === null) return null;
 
   if (!input.uploadId || !isQmenutMediaUrl(input.imageUrl)) {
     throw new TRPCError({
@@ -25,7 +29,7 @@ export async function validateImageReference(input: ValidateImageReferenceInput)
     });
   }
 
-  await assertCompletedImageUpload({
+  return assertCompletedImageUpload({
     worker: input.worker,
     restaurantId: input.restaurantId,
     branchId: input.branchId,
@@ -49,7 +53,7 @@ interface ValidateImageReferencesInput {
   images: ImageReferenceRow[];
 }
 
-export async function validateImageReferences(input: ValidateImageReferencesInput): Promise<void> {
+export async function validateImageReferences(input: ValidateImageReferencesInput): Promise<VerifiedImageManifest[]> {
   const availableExistingUrls = new Map<string, number>();
   for (const url of input.existingUrls) {
     availableExistingUrls.set(url, (availableExistingUrls.get(url) ?? 0) + 1);
@@ -62,7 +66,7 @@ export async function validateImageReferences(input: ValidateImageReferencesInpu
     return false;
   });
 
-  await Promise.all(
+  const manifests = await Promise.all(
     changed.map((image) =>
       validateImageReference({
         worker: input.worker,
@@ -75,4 +79,6 @@ export async function validateImageReferences(input: ValidateImageReferencesInpu
       }),
     ),
   );
+
+  return manifests.filter((manifest): manifest is VerifiedImageManifest => manifest !== null);
 }

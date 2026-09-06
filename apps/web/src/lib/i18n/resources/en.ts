@@ -20,6 +20,9 @@ export default {
     allergensLabel: "Allergens",
     heroLabel: "Today's menu",
     photoLabel: "Dish photo",
+    modalLoading: "Loading dish details…",
+    modalLoadError: "Dish details could not be loaded.",
+    modalRetry: "Try again",
     recommended: "Recommended",
     featuredBadges: {
       fine: "Chef's recommendation",

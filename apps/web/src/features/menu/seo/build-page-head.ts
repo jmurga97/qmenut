@@ -1,5 +1,11 @@
-import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
+import { TEMPLATES } from "@qmenut/ui/theme/presets";
 
+import { pickFeaturedDish } from "~/features/menu/mappers/pick-featured-dish";
+import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
+import { FALLBACK_HERO_PHOTO_URL, HERO_PHOTO_LAYOUT, getPhotoLayout } from "~/shared/lib/photo-layout";
+import { responsivePhotoSource } from "~/shared/lib/photo-url";
+
+import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import type { i18n as I18nInstance } from "i18next";
 import type { PublicMenuData } from "~/features/menu/api/public-menu-types";
 import type { TenantContext } from "~/server/tenant-theme";
@@ -22,6 +28,7 @@ interface BuildPageHeadInput {
   match: PageHeadMatch;
   noIndex?: boolean;
   path: string;
+  preloadLcpImage?: boolean;
   titleKey?: string;
 }
 
@@ -49,6 +56,46 @@ function buildMenuDescription(data: PublicMenuData): string {
   return data.branch.address ? `${data.branch.name} – ${data.branch.address}` : `Carta de ${data.branch.name}`;
 }
 
+function getLcpPhotoSource({
+  data,
+  preload,
+  theme,
+}: {
+  data: PublicMenuData;
+  preload: boolean;
+  theme: QmTenantThemeConfig;
+}) {
+  if (!preload || theme.template === "her") return;
+
+  const headerMode = TEMPLATES[theme.template].photoMode;
+  if (headerMode === "hero" || headerMode === "heroxl") {
+    const photo = data.branch.photos[0];
+    return responsivePhotoSource({
+      canonicalUrl: photo?.url ?? FALLBACK_HERO_PHOTO_URL,
+      variants: photo?.variants,
+      ...HERO_PHOTO_LAYOUT,
+    });
+  }
+
+  if (!theme.showMenuPhotos) return;
+  const dish = pickFeaturedDish(data);
+  return responsivePhotoSource({
+    canonicalUrl: dish?.imageUrl ?? undefined,
+    variants: dish?.variants,
+    ...getPhotoLayout({ template: theme.template, theme }).featured,
+  });
+}
+
+function getPrimaryPhotoOrigin(photoUrl: string | undefined, origin: string): string | undefined {
+  if (!photoUrl) return undefined;
+
+  try {
+    return new URL(photoUrl, origin).origin;
+  } catch {
+    return undefined;
+  }
+}
+
 export function buildPageHead({
   allowedLocales,
   descriptionKey,
@@ -58,6 +105,7 @@ export function buildPageHead({
   match,
   noIndex = false,
   path,
+  preloadLcpImage = false,
   titleKey,
 }: BuildPageHeadInput) {
   const host = match.context.tenant.host;
@@ -82,6 +130,12 @@ export function buildPageHead({
     .map((option) => toOpenGraphLocale(option.code))
     .filter((locale) => locale !== ogLocale);
   const resolvedImage = new URL(image ?? loaderData.branch.photos[0]?.url ?? "/og-default.png", origin).href;
+  const lcpSource = getLcpPhotoSource({
+    data: loaderData,
+    preload: preloadLcpImage,
+    theme: match.context.tenant.theme,
+  });
+  const primaryPhotoOrigin = getPrimaryPhotoOrigin(lcpSource?.src, origin);
 
   return {
     meta: [
@@ -100,6 +154,21 @@ export function buildPageHead({
     ],
     links: [
       { rel: "canonical", href: canonicalUrl },
+      ...(primaryPhotoOrigin
+        ? [{ rel: "preconnect", href: primaryPhotoOrigin, crossOrigin: "anonymous" as const }]
+        : []),
+      ...(lcpSource
+        ? [
+            {
+              rel: "preload",
+              as: "image",
+              href: lcpSource.src,
+              imageSrcSet: lcpSource.srcSet,
+              imageSizes: lcpSource.sizes,
+              fetchPriority: "high" as const,
+            },
+          ]
+        : []),
       ...buildHreflangAlternates({
         allowedLocales,
         language: loaderData.language,

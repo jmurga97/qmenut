@@ -1,15 +1,9 @@
-import { QmAllergen } from "@qmenut/ui/components/qm-allergen/react";
-import { QmDishExtras } from "@qmenut/ui/components/qm-dish-extras/react";
-import { QmDishModal } from "@qmenut/ui/components/qm-dish-modal/react";
-import { X } from "lucide-react";
+import { Component, lazy, Suspense, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ALLERGEN_META } from "~/features/menu/constants/allergens";
-import { photoUrl } from "~/shared/lib/photo-url";
-
+import type { MenuDishModalContent } from "./menu-dish-modal-content";
+import type { ComponentProps, ErrorInfo, LazyExoticComponent } from "react";
 import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
-
-const MODAL_IMAGE_WIDTH_PX = 430;
 
 interface MenuDishModalProps {
   dish: MenuDishViewModel | null;
@@ -17,41 +11,95 @@ interface MenuDishModalProps {
   showDishPhoto: boolean;
 }
 
-export function MenuDishModal({ dish, onClose, showDishPhoto }: MenuDishModalProps) {
-  const { t } = useTranslation();
+type DishModalComponent = typeof MenuDishModalContent;
+type LoadedModalProps = ComponentProps<DishModalComponent>;
+const modalModule: { promise?: Promise<{ default: DishModalComponent }> } = {};
 
-  if (!dish) {
+async function importDishModal(): Promise<{ default: DishModalComponent }> {
+  try {
+    const { MenuDishModalContent } = await import("./menu-dish-modal-content");
+    return { default: MenuDishModalContent };
+  } catch (error) {
+    modalModule.promise = undefined;
+    throw error;
+  }
+}
+
+function loadDishModal(): Promise<{ default: DishModalComponent }> {
+  modalModule.promise ??= importDishModal();
+  return modalModule.promise;
+}
+
+/** Starts the modal download on pointer/focus intent, without loading it at page start. */
+export function preloadDishModal(): void {
+  // A speculative download may fail; opening the modal owns the visible error and retry.
+  void loadDishModal().catch(() => {});
+}
+
+function ModalStatus({ onClose, onRetry }: { onClose: () => void; onRetry?: () => void }) {
+  const { t } = useTranslation();
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <div className="dish-modal-loading" role={onRetry ? "alert" : "status"}>
+      <p>{t(onRetry ? "menu.modalLoadError" : "menu.modalLoading")}</p>
+      {onRetry ? (
+        <button onClick={onRetry} type="button">
+          {t("menu.modalRetry")}
+        </button>
+      ) : null}
+      <button onClick={onClose} type="button">
+        {t("menu.closeLabel")}
+      </button>
+    </div>
+  );
+}
+
+interface BoundaryState {
+  error: Error | null;
+  lazyComponent: LazyExoticComponent<DishModalComponent>;
+}
+
+class DishModalErrorBoundary extends Component<LoadedModalProps, BoundaryState> {
+  state: BoundaryState = { error: null, lazyComponent: lazy(loadDishModal) };
+
+  static getDerivedStateFromError(error: Error): Partial<BoundaryState> {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, _errorInfo: ErrorInfo): void {
+    console.error("No se pudo cargar el detalle del plato", error);
+  }
+
+  private readonly handleRetry = () => {
+    this.setState({ error: null, lazyComponent: lazy(loadDishModal) });
+  };
+
+  render() {
+    if (this.state.error) {
+      return <ModalStatus onClose={this.props.onClose} onRetry={this.handleRetry} />;
+    }
+
+    const LazyDishModal = this.state.lazyComponent;
+
+    return (
+      <Suspense fallback={<ModalStatus onClose={this.props.onClose} />}>
+        <LazyDishModal {...this.props} />
+      </Suspense>
+    );
+  }
+}
+
+export function MenuDishModal(props: MenuDishModalProps) {
+  if (!props.dish) {
     return null;
   }
 
-  return (
-    <QmDishModal
-      open
-      name={dish.name}
-      photoUrl={showDishPhoto ? photoUrl(dish.photoUrl, MODAL_IMAGE_WIDTH_PX) : undefined}
-      photoLabel={t("menu.photoLabel")}
-      closeLabel={t("menu.closeLabel")}
-      price={dish.price}
-      oldPrice={dish.oldPrice}
-      tag={dish.badge?.fullText}
-      allergensLabel={t("menu.allergensLabel")}
-      onQmClose={onClose}
-    >
-      <X slot="close-icon" size={20} strokeWidth={1.8} />
-      {/* Descriptions may contain sanitized rich-text HTML (bold/italic/lists) from the CRM. */}
-      {dish.descHtml ? <div dangerouslySetInnerHTML={{ __html: dish.descHtml }} /> : null}
-      {dish.extras && dish.extras.length > 0 ? (
-        <QmDishExtras slot="extras" label={t("menu.extrasLabel")} items={dish.extras} />
-      ) : null}
-      {dish.allergens?.map((code) => {
-        const { label, Icon } = ALLERGEN_META[code];
-
-        return (
-          <QmAllergen key={code} slot="allergens" label={label}>
-            <Icon slot="icon" size={13} strokeWidth={2} />
-          </QmAllergen>
-        );
-      })}
-    </QmDishModal>
-  );
+  return <DishModalErrorBoundary key={props.dish.rowKey} {...props} dish={props.dish} />;
 }

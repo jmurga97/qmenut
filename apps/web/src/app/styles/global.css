@@ -77,11 +77,11 @@ img {
 }
 
 .scroll-hide-header {
-  position: absolute;
+  position: sticky;
   z-index: 3;
   top: 0;
-  right: 0;
-  left: 0;
+  margin: calc(-1 * var(--qm-content-top, 16px)) calc(-1 * var(--qm-shell-pad-x, 18px)) 0;
+  padding: var(--qm-content-top, 16px) var(--qm-shell-pad-x, 18px) 0;
   background: color-mix(in oklab, var(--qm-bg, #ffffff) 94%, transparent);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
@@ -94,58 +94,21 @@ img {
   transform: translateY(calc(-100% - 8px));
 }
 
-.scroll-hide-header + .home-scroll {
-  --scroll-sticky-header-offset: var(--scroll-hide-header-height, 0px);
-}
-
-.scroll-hide-header[data-hidden="true"] + .home-scroll {
-  --scroll-sticky-header-offset: 0px;
-}
-
 .scroll-hide-header__inner {
   min-height: 0;
 }
 
+.home-scroll:has(> .scroll-hide-header) {
+  --scroll-sticky-header-offset: var(--scroll-hide-header-height, 0px);
+}
+
+.home-scroll:has(> .scroll-hide-header[data-hidden="true"]) {
+  --scroll-sticky-header-offset: 0px;
+}
+
 .public-route-header-stage {
   opacity: 1;
   transform: none;
-  transition:
-    opacity 300ms var(--qm-motion-ease-out),
-    transform 300ms var(--qm-motion-ease-out);
-}
-
-.public-route-content-stage {
-  opacity: 1;
-  transform: none;
-  transition:
-    opacity 300ms var(--qm-motion-ease-out) 50ms,
-    transform 300ms var(--qm-motion-ease-out) 50ms;
-}
-
-@starting-style {
-  .public-route-header-stage {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-}
-
-@starting-style {
-  .public-route-content-stage {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
-
-/* Temporary: keep the page header static while the route sheet transition is tuned. */
-.public-route-header-stage {
-  transition: none;
-}
-
-@starting-style {
-  .public-route-header-stage {
-    opacity: 1;
-    transform: none;
-  }
 }
 
 /* Temporary public route ViewTransition experiment. */
@@ -254,7 +217,7 @@ img {
 .home-scroll {
   flex: 1 1 auto;
   min-height: 0;
-  padding: calc(var(--scroll-hide-header-height, 0px) + var(--qm-content-top, 16px)) var(--qm-shell-pad-x, 18px)
+  padding: var(--qm-content-top, 16px) var(--qm-shell-pad-x, 18px)
     calc(var(--qm-content-bottom, 20px) + env(safe-area-inset-bottom));
   overflow-y: auto;
   overscroll-behavior-y: contain;
@@ -262,7 +225,7 @@ img {
   -webkit-overflow-scrolling: touch;
 }
 
-.home-scroll:has(.public-route-transition-surface--animated) {
+.public-route-transition-surface--animated {
   view-transition-name: qm-public-route;
 }
 
@@ -280,18 +243,16 @@ img {
 
 @media (prefers-reduced-motion: reduce) {
   .public-route-header-stage,
-  .public-route-content-stage {
+  .dish-trigger:active,
+  .hs-bar,
+  .hs-block {
     transform: none;
-    transition: opacity 150ms ease;
-    transition-delay: 0ms;
+    transition: none;
+    animation: none;
   }
 
-  @starting-style {
-    .public-route-header-stage,
-    .public-route-content-stage {
-      opacity: 0.7;
-      transform: none;
-    }
+  .scroll-hide-header {
+    transition: none;
   }
 }
 

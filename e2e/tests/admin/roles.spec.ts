@@ -1,7 +1,7 @@
 import { expect, test } from "../../fixtures/test";
 import { callTrpcMutation, callTrpcQuery } from "../../helpers/trpc";
 
-test("limits staff controls while allowing dish availability changes", async ({ staff }) => {
+test("allows staff menu edits and availability changes while restricting billing", async ({ staff }) => {
   await staff.goto("/", { waitUntil: "domcontentloaded" });
   await expect(staff.getByText("Facturación", { exact: true })).toBeHidden();
   await expect(staff.getByText("Usuarios", { exact: true })).toBeHidden();
@@ -22,8 +22,8 @@ test("limits staff controls while allowing dish availability changes", async ({ 
     await expect(availability.locator("..")).toContainText("Oculto");
 
     await staff.getByRole("link", { name: "Patatas bravas" }).click();
-    await expect(staff.getByLabel("Nombre", { exact: true })).toBeDisabled();
-    await expect(staff.getByText("Guardar", { exact: true })).toBeHidden();
+    await expect(staff.getByLabel("Nombre", { exact: true })).toBeEnabled();
+    await expect(staff.getByText("Guardar", { exact: true })).toBeVisible();
   } finally {
     await staff.goto("/menu", { waitUntil: "domcontentloaded" });
     const restoreAvailability = staff.getByRole("switch", { name: "Disponibilidad de Patatas bravas" });

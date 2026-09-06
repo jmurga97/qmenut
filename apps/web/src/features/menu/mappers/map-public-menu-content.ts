@@ -1,5 +1,6 @@
 import { ALLERGEN_META } from "~/features/menu/constants/allergens";
 import { createPublicPriceFormatter } from "~/features/menu/mappers/create-public-price-formatter";
+import { pickFeaturedDish } from "~/features/menu/mappers/pick-featured-dish";
 import { mapPromotionToFeatured } from "~/features/promos/mappers/map-promotion-to-featured";
 import { pickFeaturedPromo } from "~/features/promos/mappers/pick-featured-promo";
 import { formatDiscount } from "~/features/promos/mappers/promotion-formatting";
@@ -77,15 +78,10 @@ export function mapDish({
     name: dish.name,
     oldPrice: hasDiscount ? formatPrice(promotion.basePrice) : undefined,
     photoUrl: dish.imageUrl ?? undefined,
+    photoVariants: dish.variants,
     price: formatPrice(promotion?.effectiveUnitPrice ?? dish.price),
     rowKey: dish.id,
   };
-}
-
-function pickFeaturedDish(data: PublicMenuData): PublicMenuDish | null {
-  const dishes = data.categories.flatMap((category) => category.dishes);
-
-  return dishes.find((dish) => dish.isFeatured) ?? dishes.find((dish) => dish.isRecommended) ?? dishes[0] ?? null;
 }
 
 export function mapPublicMenuContent({

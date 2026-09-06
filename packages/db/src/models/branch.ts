@@ -1,6 +1,9 @@
+import type { PublicImageVariant } from "./image";
+
 export interface PublicBranchPhoto {
   id: string;
   position: number;
+  variants?: PublicImageVariant[];
   url: string;
 }
 

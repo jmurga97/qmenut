@@ -27,6 +27,12 @@ interface GetImageWorkerUploadInput {
 }
 
 export interface ImageWorkerBinding {
+  backfillVariants(input: {
+    productId: "qmenut";
+    presetId: "qmenut-menu-image" | "qmenut-branch-photo";
+    cursor: string | null;
+    limit: number;
+  }): Promise<unknown>;
   createUpload(input: CreateImageWorkerUploadInput): Promise<unknown>;
   getUpload(input: GetImageWorkerUploadInput): Promise<unknown>;
 }

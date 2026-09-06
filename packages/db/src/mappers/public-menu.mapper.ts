@@ -2,6 +2,7 @@ import { mapDishPromotion } from "./promotion.mapper";
 import { appendMapValue } from "../utils/append-map-value";
 
 import type { PromotionCandidateRow, PromotionRow } from "./promotion.mapper";
+import type { PublicImageVariant } from "../models/image";
 import type {
   PublicAllergen,
   PublicCategory,
@@ -25,6 +26,7 @@ import type {
 } from "../repositories/public-menu.repository";
 
 export type TranslationFieldMap = Map<string, Map<string, string>>;
+type ImageVariantsByCanonicalUrl = Map<string, PublicImageVariant[]>;
 
 export function createTranslationFieldMap(rows: PublicTranslation[]): TranslationFieldMap {
   const map: TranslationFieldMap = new Map();
@@ -182,6 +184,7 @@ export function mapPublicDishes({
   bestPromotionsByDish,
   dishRows,
   extraRows,
+  imageVariantsByCanonicalUrl,
   promotionsById,
   tagRows,
   translationsByEntity,
@@ -193,6 +196,7 @@ export function mapPublicDishes({
   bestPromotionsByDish: Map<string, PromotionCandidateRow>;
   dishRows: DishRow[];
   extraRows: ExtraRow[];
+  imageVariantsByCanonicalUrl: ImageVariantsByCanonicalUrl;
   promotionsById: Map<string, PromotionRow>;
   tagRows: TagRow[];
   translationsByEntity: TranslationFieldMap;
@@ -225,6 +229,10 @@ export function mapPublicDishes({
         }),
         price: row.price,
         imageUrl: row.imageUrl,
+        ...(row.imageUrl &&
+          imageVariantsByCanonicalUrl.get(row.imageUrl) && {
+            variants: imageVariantsByCanonicalUrl.get(row.imageUrl),
+          }),
         position: row.position,
         isRecommended: row.isRecommended,
         isFeatured: row.isFeatured,
@@ -244,10 +252,12 @@ export function mapPublicDishes({
 export function mapPublicCategories({
   categoryRows,
   dishesByCategory,
+  imageVariantsByCanonicalUrl,
   translationsByEntity,
 }: {
   categoryRows: CategoryRow[];
   dishesByCategory: Map<string, PublicDish[]>;
+  imageVariantsByCanonicalUrl: ImageVariantsByCanonicalUrl;
   translationsByEntity: TranslationFieldMap;
 }): PublicCategory[] {
   return categoryRows.map((row) => ({
@@ -260,6 +270,10 @@ export function mapPublicCategories({
       translationsByEntity,
     }),
     imageUrl: row.imageUrl,
+    ...(row.imageUrl &&
+      imageVariantsByCanonicalUrl.get(row.imageUrl) && {
+        variants: imageVariantsByCanonicalUrl.get(row.imageUrl),
+      }),
     position: row.position,
     dishes: dishesByCategory.get(row.id) ?? [],
   }));

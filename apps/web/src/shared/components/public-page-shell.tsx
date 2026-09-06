@@ -42,9 +42,11 @@ export function PublicPageShell({ children, template, tenant, theme }: PublicPag
     for (const fontId of fontIds) {
       const href = FONT_CSS_URLS[fontId];
       const absoluteHref = new URL(href, document.baseURI).href;
-      const alreadyLoaded = [...document.head.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')].some(
-        (link) => link.href === absoluteHref,
-      );
+      const alreadyLoaded =
+        document.querySelector(`#qm-font-${fontId}`) !== null ||
+        [...document.head.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')].some(
+          (link) => link.href === absoluteHref,
+        );
 
       if (alreadyLoaded) {
         continue;

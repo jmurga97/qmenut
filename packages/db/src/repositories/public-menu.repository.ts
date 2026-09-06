@@ -1,5 +1,6 @@
 import { and, asc, eq, getTableColumns, inArray, isNull, or } from "drizzle-orm";
 
+import { getImageVariantsByCanonicalUrl } from "./image-variants.repository";
 import { getPromotionCandidateRows, getPromotionRows } from "./promotions.repository";
 import { resolveTenantByHost } from "./tenant.repository";
 import { getTranslationRows } from "./translations.repository";
@@ -377,6 +378,23 @@ export async function getPublicMenu({
     getDishRows({ db, tenant }),
     getPromotionRows({ db, tenant }),
   ]);
+  const imageUrls = [
+    ...branch.photos.map((photo) => photo.url),
+    ...categoryRows.map((category) => category.imageUrl),
+    ...dishRows.map((dish) => dish.imageUrl),
+  ].filter((url): url is string => Boolean(url));
+  const imageVariantsByCanonicalUrl = await getImageVariantsByCanonicalUrl({
+    canonicalUrls: [...new Set(imageUrls)],
+    db,
+  });
+  const branchWithVariants: PublicBranch = {
+    ...branch,
+    photos: branch.photos.map((photo): PublicBranchPhoto => {
+      const variants = imageVariantsByCanonicalUrl.get(photo.url);
+
+      return { ...photo, ...(variants && { variants }) };
+    }),
+  };
   const categoryIds = categoryRows.map((row) => row.id);
   const dishIds = dishRows.map((row) => row.id);
   const [availabilityRows, variantGroupRows, tagRows, allergenRows, extraRows, promotionCandidateRows] =
@@ -420,6 +438,7 @@ export async function getPublicMenu({
     bestPromotionsByDish,
     dishRows,
     extraRows,
+    imageVariantsByCanonicalUrl,
     promotionsById,
     tagRows,
     translationsByEntity,
@@ -428,8 +447,13 @@ export async function getPublicMenu({
   });
 
   return {
-    branch,
-    categories: mapPublicCategories({ categoryRows, dishesByCategory, translationsByEntity }),
+    branch: branchWithVariants,
+    categories: mapPublicCategories({
+      categoryRows,
+      dishesByCategory,
+      imageVariantsByCanonicalUrl,
+      translationsByEntity,
+    }),
     contactBranches,
     countryCode,
     legal,

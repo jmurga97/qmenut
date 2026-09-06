@@ -1,11 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { isQmenutMediaUrl } from "./media-url";
+
 import type { ImagePurpose } from "./image-input.schema";
 import type { ImageWorkerBinding } from "../../config/env/schema";
 
 const QMENUT_PRODUCT_ID = "qmenut";
-const QMENUT_MEDIA_ORIGIN = "https://media.qmenut.app";
 
 const uploadStatusSchema = z.enum(["awaiting_upload", "queued", "processing", "succeeded", "failed"]);
 
@@ -39,8 +40,10 @@ const imageVariantSchema = z.object({
   name: z.string(),
   publicUrl: z.string().nullable(),
   contentType: z.string(),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
 });
-const uploadManifestSchema = z.object({
+export const uploadManifestSchema = z.object({
   variants: z.record(z.string(), imageVariantSchema),
 });
 const uploadResultDataSchema = z.object({
@@ -87,6 +90,8 @@ interface GetUploadInput extends OwnershipInput {
 interface VerifyUploadInput extends GetUploadInput {
   imageUrl: string;
 }
+
+export type VerifiedImageManifest = z.infer<typeof uploadManifestSchema>;
 
 function mapWorkerError(error: z.infer<typeof workerErrorSchema>["error"]): TRPCError {
   const code = (() => {
@@ -199,26 +204,20 @@ export async function getImageUpload(input: GetUploadInput) {
     uploadId: data.uploadId,
     status: data.status,
     imageUrl: data.status === "succeeded" ? readMainImageUrl(data) : null,
+    manifest: data.status === "succeeded" ? data.manifest : null,
     error: data.error,
   };
 }
 
-export async function assertCompletedImageUpload(input: VerifyUploadInput): Promise<void> {
+export async function assertCompletedImageUpload(input: VerifyUploadInput): Promise<VerifiedImageManifest> {
   const upload = await getImageUpload(input);
 
-  if (upload.status !== "succeeded" || upload.imageUrl !== input.imageUrl) {
+  if (upload.status !== "succeeded" || upload.imageUrl !== input.imageUrl || !upload.manifest) {
     throw new TRPCError({
       code: "PRECONDITION_FAILED",
       message: "La imagen no ha terminado de procesarse o no coincide con la subida",
     });
   }
-}
 
-export function isQmenutMediaUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return url.origin === QMENUT_MEDIA_ORIGIN && url.pathname.endsWith("/main.webp");
-  } catch {
-    return false;
-  }
+  return upload.manifest;
 }

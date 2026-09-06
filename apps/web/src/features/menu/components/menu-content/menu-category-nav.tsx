@@ -123,7 +123,7 @@ export function MenuCategoryNav({ scrollContainerRef, sections }: MenuCategoryNa
   if (sections.length < 2) return null;
 
   return (
-    <QmCategoryNav className="public-route-content-stage" aria-label={t("menu.categoryNavigationLabel")}>
+    <QmCategoryNav aria-label={t("menu.categoryNavigationLabel")}>
       {sections.map((section, index) => (
         <QmCategoryChip
           key={section.id}

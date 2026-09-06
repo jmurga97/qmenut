@@ -1,10 +1,4 @@
 @import "./styles/global.css";
 @import "../features/menu/styles.css";
-@import "../features/promos/styles.css";
-@import "../features/loyalty/styles.css";
 @import "../shared/styles/status.css";
 @import "../shared/styles/skeleton.css";
-@import "../shared/styles/dev.css";
-@import "../features/legal/styles.css";
-@import "../features/install/styles.css";
-@import "../features/offline/styles.css";

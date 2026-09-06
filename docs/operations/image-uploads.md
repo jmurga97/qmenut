@@ -8,10 +8,12 @@ uploads, processing jobs, transformations, and output manifests.
 
 The admin dashboard supports branch logos, a branch gallery of up to 20 photos, category images,
 and dish images. JPEG, PNG, and WebP files up to 25 MiB are uploaded directly from the browser to
-a private R2 staging bucket and converted asynchronously to a single public WebP variant.
+a private R2 staging bucket and converted asynchronously to public WebP variants.
 
-No qmenut database migration is required. The existing `logo_url`, `branch_photos.url`, and
-`image_url` columns continue to store URLs. qmenut does not duplicate the image Worker's job state.
+Migration `0002_add_image_variants_catalog.sql` adds the responsive-variant catalogue. The existing
+`logo_url`, `branch_photos.url`, and `image_url` columns retain canonical URLs. qmenut does not
+duplicate the image Worker's job state. Confirmed variants are recorded during domain saves;
+polling remains read-only.
 
 ## Responsibility boundary
 
@@ -217,7 +219,7 @@ Follow [Deployment](deployment.md) for the exact order. At minimum, verify:
 
 ## Limitations
 
-qmenut stores only URL references. Replacing an image or deleting its domain entity does not yet
+qmenut stores canonical URL references and a variant catalogue. Replacing an image or deleting its domain entity does not yet
 delete the old optimized object from `qmenut-media`. Output garbage collection requires a future
 reference-tracking or deletion capability and is intentionally outside this iteration.
 
@@ -230,3 +232,23 @@ operation is active. Existing external assets are migrated only when an owner re
 - [R2 event notifications](https://developers.cloudflare.com/r2/buckets/event-notifications/)
 - [R2 CORS for presigned URLs](https://developers.cloudflare.com/r2/buckets/cors/)
 - [R2 object lifecycle rules](https://developers.cloudflare.com/r2/buckets/object-lifecycles/)
+
+## Responsive variants
+
+Version 2 of `qmenut-menu-image` and `qmenut-branch-photo` adds WebP widths 160, 430,
+and 860 at quality 75. Existing `main` outputs, logo presets, other products, and cache
+policies are preserved. The frontend selects confirmed candidates from the catalogue,
+uses layout-specific `sizes`, and falls back to the canonical URL when a candidate fails.
+External images without a catalogue entry continue to use their existing URL.
+
+Deploy the sibling image worker first, apply the qmenut catalogue migration, and deploy
+the API. Start in development and verify representative tenants before repeating in
+production. Existing images are not automatically backfilled. The operator backfill
+script has been removed; the private maintenance RPC remains available in the source
+but requires an explicit service-binding call.
+
+Before promoting the public web deployment, compare five mobile runs per template against
+the baseline with the same device/network settings. Check LCP, CLS, image transfer size,
+initial JavaScript, and font requests, plus navigation, modal keyboard controls, locale,
+and reduced-motion behavior. `QMENUT_REACT_COMPILER=0` disables the compiler for a build
+comparison. Local E2E success alone does not establish production performance targets.

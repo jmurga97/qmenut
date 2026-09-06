@@ -4,6 +4,7 @@ import { property } from "lit/decorators.js";
 import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
+import { restorePhotoFallback } from "../../../internal/photo-fallback";
 import { defineQmBadge } from "../../atoms/qm-badge";
 import { defineQmPrice } from "../../atoms/qm-price";
 
@@ -29,7 +30,12 @@ export interface QmFeaturedValue {
   tag?: string;
   secondaryTag?: string;
   photo: boolean;
+  photoFetchPriority?: "auto" | "high" | "low";
+  photoLoading?: "eager" | "lazy";
   photoUrl?: string;
+  photoFallbackUrl?: string;
+  photoSrcSet?: string;
+  photoSizes?: string;
 }
 
 export class QmFeatured extends LitElement {
@@ -38,10 +44,28 @@ export class QmFeatured extends LitElement {
   @property({ attribute: false })
   value?: QmFeaturedValue;
 
+  private readonly handlePhotoError = (event: Event) => {
+    restorePhotoFallback(event.currentTarget as HTMLImageElement, this.value?.photoFallbackUrl);
+  };
+
+  private renderPhoto() {
+    if (!this.value?.photoUrl) return html``;
+    return html`
+      <img
+        src=${this.value.photoUrl}
+        @error=${this.handlePhotoError}
+        srcset=${this.value.photoSrcSet ?? nothing}
+        sizes=${this.value.photoSizes ?? nothing}
+        alt=""
+        loading=${this.value.photoLoading ?? "eager"}
+        fetchpriority=${this.value.photoFetchPriority ?? "auto"}
+        decoding="async"
+      />
+    `;
+  }
+
   render() {
-    const photoImage = this.value?.photoUrl
-      ? html`<img src=${this.value.photoUrl} alt="" loading="eager" decoding="async" />`
-      : nothing;
+    const photoImage = this.renderPhoto();
     const tags = this.renderTags();
 
     return html`

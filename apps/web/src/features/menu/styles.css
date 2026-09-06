@@ -41,3 +41,37 @@
 .menu-section-frame:last-child {
   margin-bottom: 0;
 }
+
+.dish-modal-loading {
+  position: fixed;
+  right: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  left: 18px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--qm-hairline, #d8d3c8);
+  border-radius: var(--qm-radius, 8px);
+  background: var(--qm-surface-bg, #fff);
+  color: var(--qm-ink, #1c1815);
+  box-shadow: 0 -8px 24px rgba(28, 24, 21, 0.12);
+  font-family: var(--qm-body, sans-serif);
+  font-size: var(--qm-text-sm, 13px);
+}
+
+.dish-modal-loading p {
+  margin: 0;
+}
+
+.dish-modal-loading button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid currentColor;
+  border-radius: var(--qm-radius, 6px);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}

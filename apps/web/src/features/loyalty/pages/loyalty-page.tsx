@@ -1,5 +1,6 @@
 import { useSearch } from "@tanstack/react-router";
 
+import "~/features/loyalty/styles.css";
 import { LoyaltyExperience } from "~/features/loyalty/components/loyalty-experience";
 import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
