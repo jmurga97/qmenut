@@ -15,11 +15,13 @@ export interface ImageDraft {
   idempotencyKey: string;
   status: ImageDraftStatus;
   error?: string;
+  changed?: boolean;
 }
 
 export interface PreparedImage {
   imageUrl: string | null;
   uploadId?: string;
+  imageChange: { kind: "keep" } | { kind: "remove" } | { kind: "upload"; uploadId: string };
 }
 
 export function createImageDraft({
@@ -60,7 +62,7 @@ export function replaceImageDraftFile({ draft, file }: { draft: ImageDraft; file
   if (validationError) return { ...draft, error: validationError };
 
   revokeImageDraftPreview(draft);
-  return createImageDraft({ file, id: draft.id, imageUrl: null });
+  return { ...createImageDraft({ file, id: draft.id, imageUrl: null }), changed: true };
 }
 
 export function retryImageDraft(draft: ImageDraft): ImageDraft {
@@ -71,6 +73,7 @@ export function retryImageDraft(draft: ImageDraft): ImageDraft {
     idempotencyKey: crypto.randomUUID(),
     status: draft.file ? "ready" : "idle",
     error: undefined,
+    changed: true,
   };
 }
 

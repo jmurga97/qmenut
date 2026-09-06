@@ -116,11 +116,16 @@ interface CreateDishInput {
   data: DishWriteData;
 }
 
-export async function createDish({ db, restaurantId, branchId, data }: CreateDishInput): Promise<string> {
-  const id = crypto.randomUUID();
+export function createDishStatement({
+  db,
+  restaurantId,
+  branchId,
+  data,
+  id,
+}: CreateDishInput & { id: string }): BatchItem<"sqlite"> {
   const now = Date.now();
 
-  await db.insert(dishes).values({
+  return db.insert(dishes).values({
     id,
     restaurantId,
     branchId,
@@ -136,7 +141,11 @@ export async function createDish({ db, restaurantId, branchId, data }: CreateDis
     createdAt: now,
     updatedAt: now,
   });
+}
 
+export async function createDish(input: CreateDishInput): Promise<string> {
+  const id = crypto.randomUUID();
+  await input.db.batch([createDishStatement({ ...input, id })]);
   return id;
 }
 
@@ -185,13 +194,20 @@ export async function getDishTranslatableFields({
 }
 
 interface UpdateDishInput {
+  preserveImage?: boolean;
   db: DrizzleDb;
   restaurantId: string;
   dishId: string;
   data: DishWriteData;
 }
 
-export function updateDishStatement({ db, restaurantId, dishId, data }: UpdateDishInput): BatchItem<"sqlite"> {
+export function updateDishStatement({
+  db,
+  restaurantId,
+  dishId,
+  data,
+  preserveImage,
+}: UpdateDishInput): BatchItem<"sqlite"> {
   return db
     .update(dishes)
     .set({
@@ -199,7 +215,7 @@ export function updateDishStatement({ db, restaurantId, dishId, data }: UpdateDi
       name: data.name,
       description: data.description,
       price: data.price,
-      imageUrl: data.imageUrl,
+      imageUrl: preserveImage ? undefined : data.imageUrl,
       position: data.position,
       isActive: data.isActive,
       isRecommended: data.isRecommended,

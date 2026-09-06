@@ -1,11 +1,13 @@
 import { createDb } from "@qmenut/db/client";
 import * as Sentry from "@sentry/cloudflare";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { z } from "zod";
 
 import { createAuth } from "@/auth/create-auth";
 import { parseEnv } from "@/config/env";
 import { applyCorsHeaders, createOptionsResponse } from "@/http/cors";
 import { jsonResponse } from "@/http/json";
+import { dispatchImageAssignments, finalizeImageAssignment } from "@/modules/admin-images/image-finalization";
 import { runAnalyticsDailyJob } from "@/modules/analytics/digest/run-analytics-daily-job";
 import { handleStripeWebhook } from "@/modules/billing/handle-stripe-webhook";
 import { createContext } from "@/trpc/context";
@@ -89,10 +91,28 @@ export default Sentry.withSentry(
 
       return applyCorsHeaders({ env, request, response });
     },
+    async queue(batch: MessageBatch<unknown>, rawEnv: EnvBindings): Promise<void> {
+      const env = parseEnv(rawEnv);
+      for (const message of batch.messages) {
+        const parsed = z.object({ id: z.uuid(), revision: z.uuid() }).safeParse(message.body);
+        if (!parsed.success) {
+          message.ack();
+          continue;
+        }
+        try {
+          await finalizeImageAssignment(env, parsed.data);
+          message.ack();
+        } catch (error) {
+          Sentry.captureException(error, { tags: { module: "image-finalization" } });
+          message.retry({ delaySeconds: 60 });
+        }
+      }
+    },
     // eslint-disable-next-line max-params -- Cloudflare ScheduledHandler contract.
-    scheduled(_controller: ScheduledController, rawEnv: EnvBindings, ctx: ExecutionContext): void {
+    scheduled(controller: ScheduledController, rawEnv: EnvBindings, ctx: ExecutionContext): void {
       // Cron diario de producción: sincroniza PostHog → D1 y despacha el digest quincenal.
-      ctx.waitUntil(handleScheduledAnalytics(rawEnv));
+      if (controller.cron === "45 4 * * *") ctx.waitUntil(handleScheduledAnalytics(rawEnv));
+      else ctx.waitUntil(dispatchImageAssignments(parseEnv(rawEnv)));
     },
   },
 );

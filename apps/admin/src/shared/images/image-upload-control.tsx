@@ -1,5 +1,7 @@
 import { useId, useRef } from "react";
 
+import { useImageTransfers } from "./image-transfers";
+
 import type { ImageDraft } from "./image-draft";
 
 const statusLabel = {
@@ -28,17 +30,20 @@ export function ImageUploadControl({
   onRetry,
   onSelect,
 }: ImageUploadControlProps) {
+  const transfer = useImageTransfers((state) => (draft.uploadId ? state.transfers[draft.uploadId] : undefined));
+  const status = transfer?.status === "ready" ? draft.status : (transfer?.status ?? draft.status);
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const busy = disabled || draft.status === "uploading" || draft.status === "optimizing";
+  const busy = disabled;
   return (
     <div className="admin-image-control">
       <div className="admin-image-control__header">
         <label className="admin-image-control__label" htmlFor={inputId}>
           {label}
         </label>
-        <span aria-live="polite" className={`admin-image-status admin-image-status--${draft.status}`}>
-          {statusLabel[draft.status]}
+        <span aria-live="polite" className={`admin-image-status admin-image-status--${status}`}>
+          <span aria-hidden="true" className="admin-image-status__dot" />
+          {statusLabel[status]}
         </span>
       </div>
       <button

@@ -98,6 +98,7 @@ export async function updateGoogleReviewsConnection({
 }
 
 interface UpdateBranchSettingsInput {
+  preserveLogo?: boolean;
   db: DrizzleDb;
   restaurantId: string;
   branchId: string;
@@ -109,6 +110,7 @@ export function updateBranchSettingsStatements({
   restaurantId,
   branchId,
   data,
+  preserveLogo,
 }: UpdateBranchSettingsInput): [BatchItem<"sqlite">] {
   return [
     db
@@ -121,7 +123,7 @@ export function updateBranchSettingsStatements({
         phone: data.phone,
         whatsapp: data.whatsapp,
         socialLinksJson: data.socialLinksJson,
-        logoUrl: data.logoUrl,
+        logoUrl: preserveLogo ? undefined : data.logoUrl,
         updatedAt: Date.now(),
       })
       .where(and(eq(branches.id, branchId), eq(branches.restaurantId, restaurantId), isNull(branches.deletedAt))),

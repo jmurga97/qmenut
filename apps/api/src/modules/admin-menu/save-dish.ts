@@ -1,6 +1,6 @@
 import {
   categoryBelongsToBranch,
-  createDish,
+  createDishStatement,
   getDishTranslatableFields,
   updateDishStatement,
 } from "@qmenut/db/repositories/admin-dishes.repository";
@@ -17,6 +17,9 @@ interface SaveDishInput {
   branchId: string;
   dishId?: string;
   data: DishWriteData;
+  entityId?: string;
+  statements?: BatchItem<"sqlite">[];
+  preserveImage?: boolean;
 }
 
 /**
@@ -24,7 +27,16 @@ interface SaveDishInput {
  * categoría destino pertenece a esa misma sucursal (la FK compuesta de la DB lo
  * exige; validamos antes para devolver un error claro).
  */
-export async function saveDish({ db, restaurantId, branchId, dishId, data }: SaveDishInput): Promise<{ id: string }> {
+export async function saveDish({
+  db,
+  restaurantId,
+  branchId,
+  dishId,
+  data,
+  entityId = crypto.randomUUID(),
+  statements: extraStatements = [],
+  preserveImage,
+}: SaveDishInput): Promise<{ id: string }> {
   // The menu router authorizes the branch or existing dish context before calling this writer.
   const categoryOk = await categoryBelongsToBranch({ db, branchId, categoryId: data.categoryId });
 
@@ -42,7 +54,7 @@ export async function saveDish({ db, restaurantId, branchId, dishId, data }: Sav
     );
 
     const statements: [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] = [
-      updateDishStatement({ db, restaurantId, dishId, data }),
+      updateDishStatement({ db, restaurantId, dishId, data, preserveImage }),
     ];
 
     if (changedFields.length > 0) {
@@ -57,11 +69,12 @@ export async function saveDish({ db, restaurantId, branchId, dishId, data }: Sav
       );
     }
 
+    statements.push(...extraStatements);
     await db.batch(statements);
 
     return { id: dishId };
   }
 
-  const id = await createDish({ db, restaurantId, branchId, data });
-  return { id };
+  await db.batch([createDishStatement({ db, restaurantId, branchId, data, id: entityId }), ...extraStatements]);
+  return { id: entityId };
 }

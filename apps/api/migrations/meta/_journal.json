@@ -22,6 +22,13 @@
       "when": 1788613330272,
       "tag": "0002_add_image_variants_catalog",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788694830245,
+      "tag": "0003_durable_image_assignments",
+      "breakpoints": true
     }
   ]
 }

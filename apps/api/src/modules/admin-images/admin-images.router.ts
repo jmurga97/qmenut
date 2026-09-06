@@ -1,3 +1,4 @@
+import { imageAssignmentsRouter } from "./image-assignment.router";
 import { createImageUploadSchema, getImageUploadSchema } from "./image-input.schema";
 import { createImageUpload, getImageUpload } from "./image-worker.client";
 import { router, tenantProcedure } from "../../trpc/trpc";
@@ -12,6 +13,7 @@ function requireImagePermission(tenant: TenantContext, purpose: ImagePurpose): v
 }
 
 export const adminImagesRouter = router({
+  assignments: imageAssignmentsRouter,
   createUpload: tenantProcedure.input(createImageUploadSchema).mutation(async ({ ctx, input }) => {
     requireImagePermission(ctx.tenant, input.purpose);
     await assertBranchAccess({

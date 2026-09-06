@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
-import { isDraftBusy } from "~/shared/images/image-draft";
 import { useImageDraft } from "~/shared/images/use-image-drafts";
 import { useImageSave } from "~/shared/images/use-image-save";
 import { usePrepareImageDrafts } from "~/shared/images/use-image-uploads";
@@ -58,7 +57,7 @@ export function useCategoryEditorController({ branchId, categoryId }: { branchId
   const create = useMutation(options.create);
   const update = useMutation(options.update);
   const image = useImageDraft(category?.imageUrl ?? null);
-  const { prepare } = usePrepareImageDrafts();
+  const { prepare, start } = usePrepareImageDrafts();
   const imageSave = useImageSave();
   const cancel = () => void navigate({ to: "/menu" });
   const submit = form.handleSubmit((values) =>
@@ -75,15 +74,18 @@ export function useCategoryEditorController({ branchId, categoryId }: { branchId
         description: values.description || undefined,
         imageUrl: prepared.imageUrl ?? undefined,
         imageUploadId: prepared.uploadId,
+        imageChange: prepared.imageChange,
         position: category?.position ?? categories.length,
       };
-      if (categoryId) await update.mutateAsync({ categoryId, data });
-      else await create.mutateAsync({ branchId, data });
+      const operationId = imageSave.operationIdFor({ categoryId, branchId, data });
+      if (categoryId) await update.mutateAsync({ categoryId, data, operationId });
+      else await create.mutateAsync({ branchId, data, operationId });
+      start([prepared]);
       cancel();
     }),
   );
   return {
-    busy: imageSave.pending || create.isPending || update.isPending || isDraftBusy(image.draft),
+    busy: imageSave.pending || create.isPending || update.isPending,
     cancel,
     category,
     error: imageSave.error ?? create.error ?? update.error,
@@ -111,7 +113,7 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
   const update = useMutation(options.update);
   const relations = useMutation(options.relations);
   const image = useImageDraft(dish?.imageUrl ?? null);
-  const { prepare } = usePrepareImageDrafts();
+  const { prepare, start } = usePrepareImageDrafts();
   const imageSave = useImageSave();
   const cancel = () => void navigate({ to: "/menu" });
   const addExtra = async ({ name, price }: { name: string; price: number }) => {
@@ -138,10 +140,13 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
         position: dish?.position ?? 0,
         values,
       });
+      const writeData = { ...data, imageChange: prepared.imageChange };
+      const operationId = imageSave.operationIdFor({ branchId, dishId: dishId.current, data: writeData });
       const saved = dishId.current
-        ? await update.mutateAsync({ branchId, data, dishId: dishId.current })
-        : await create.mutateAsync({ branchId, data });
+        ? await update.mutateAsync({ branchId, data: writeData, dishId: dishId.current, operationId })
+        : await create.mutateAsync({ branchId, data: writeData, operationId });
       dishId.current = saved.id;
+      start([prepared]);
       await relations.mutateAsync({
         allergenIds: values.allergenIds,
         dishId: saved.id,
@@ -155,12 +160,7 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
     allergenOptions: allergens.map(({ code, id }) => ({ id, label: toAllergenDisplayLabel(code) })),
     addExtra,
     busy:
-      imageSave.pending ||
-      create.isPending ||
-      createIngredient.isPending ||
-      update.isPending ||
-      relations.isPending ||
-      isDraftBusy(image.draft),
+      imageSave.pending || create.isPending || createIngredient.isPending || update.isPending || relations.isPending,
     cancel,
     categoryOptions: categories.map(({ id, name }) => ({ id, label: name })),
     error: imageSave.error ?? create.error ?? createIngredient.error ?? update.error ?? relations.error,

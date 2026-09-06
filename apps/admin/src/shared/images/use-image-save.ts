@@ -1,6 +1,13 @@
 import { useCallback, useRef, useState } from "react";
 
 export function useImageSave() {
+  const operationRef = useRef<{ fingerprint: string; id: string }>(undefined);
+  const operationIdFor = (input: unknown) => {
+    const fingerprint = JSON.stringify(input);
+    if (operationRef.current?.fingerprint !== fingerprint)
+      operationRef.current = { fingerprint, id: crypto.randomUUID() };
+    return operationRef.current.id;
+  };
   const inFlightRef = useRef(false);
   const [error, setError] = useState<unknown>();
   const [pending, setPending] = useState(false);
@@ -21,5 +28,5 @@ export function useImageSave() {
     }
   }, []);
 
-  return { error, pending, run };
+  return { error, pending, run, operationIdFor };
 }

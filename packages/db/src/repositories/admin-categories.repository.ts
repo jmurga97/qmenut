@@ -53,11 +53,16 @@ interface CreateCategoryInput {
   data: CategoryWriteData;
 }
 
-export async function createCategory({ db, restaurantId, branchId, data }: CreateCategoryInput): Promise<string> {
-  const id = crypto.randomUUID();
+export function createCategoryStatement({
+  db,
+  restaurantId,
+  branchId,
+  data,
+  id,
+}: CreateCategoryInput & { id: string }): BatchItem<"sqlite"> {
   const now = Date.now();
 
-  await db.insert(categories).values({
+  return db.insert(categories).values({
     id,
     restaurantId,
     branchId,
@@ -69,7 +74,11 @@ export async function createCategory({ db, restaurantId, branchId, data }: Creat
     createdAt: now,
     updatedAt: now,
   });
+}
 
+export async function createCategory(input: CreateCategoryInput): Promise<string> {
+  const id = crypto.randomUUID();
+  await input.db.batch([createCategoryStatement({ ...input, id })]);
   return id;
 }
 
@@ -118,6 +127,7 @@ export async function getCategoryTranslatableFields({
 }
 
 interface UpdateCategoryInput {
+  preserveImage?: boolean;
   db: DrizzleDb;
   restaurantId: string;
   categoryId: string;
@@ -129,13 +139,14 @@ export function updateCategoryStatement({
   restaurantId,
   categoryId,
   data,
+  preserveImage,
 }: UpdateCategoryInput): BatchItem<"sqlite"> {
   return db
     .update(categories)
     .set({
       name: data.name,
       description: data.description,
-      imageUrl: data.imageUrl,
+      imageUrl: preserveImage ? undefined : data.imageUrl,
       position: data.position,
       isActive: data.isActive,
       updatedAt: Date.now(),

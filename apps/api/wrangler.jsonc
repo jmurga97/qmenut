@@ -78,9 +78,34 @@
   },
   // Wrangler named environments do not inherit vars, D1, services, rate limits, or
   // observability. Keep name unchanged so service bindings continue to resolve qmenut-api.
+  "queues": {
+    "producers": [{ "binding": "IMAGE_FINALIZATION_QUEUE", "queue": "qmenut-image-finalization-local" }],
+    "consumers": [
+      {
+        "queue": "qmenut-image-finalization-local",
+        "max_batch_size": 5,
+        "max_batch_timeout": 1,
+        "max_retries": 3,
+        "retry_delay": 60,
+      },
+    ],
+  },
   "env": {
     "development": {
       "name": "qmenut-api-dev",
+      "queues": {
+        "producers": [{ "binding": "IMAGE_FINALIZATION_QUEUE", "queue": "qmenut-image-finalization-development" }],
+        "consumers": [
+          {
+            "queue": "qmenut-image-finalization-development",
+            "max_batch_size": 5,
+            "max_batch_timeout": 1,
+            "max_retries": 3,
+            "retry_delay": 60,
+          },
+        ],
+      },
+      "triggers": { "crons": ["* * * * *"] },
       "workers_dev": false,
       "routes": [
         {
@@ -161,6 +186,18 @@
     },
     "production": {
       "name": "qmenut-api",
+      "queues": {
+        "producers": [{ "binding": "IMAGE_FINALIZATION_QUEUE", "queue": "qmenut-image-finalization-production" }],
+        "consumers": [
+          {
+            "queue": "qmenut-image-finalization-production",
+            "max_batch_size": 5,
+            "max_batch_timeout": 1,
+            "max_retries": 3,
+            "retry_delay": 60,
+          },
+        ],
+      },
       "workers_dev": false,
       "routes": [
         {
@@ -168,10 +205,9 @@
           "custom_domain": true,
         },
       ],
-      // Único Cron Trigger de producción: sincroniza PostHog → D1 y envía el digest
-      // quincenal. Development no tiene cron.
+      // Daily analytics and independent image outbox recovery.
       "triggers": {
-        "crons": ["45 4 * * *"],
+        "crons": ["45 4 * * *", "* * * * *"],
       },
       "d1_databases": [
         {

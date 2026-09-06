@@ -5,7 +5,6 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 
 import { trpc } from "~/lib/trpc";
 import { useMutationFeedback } from "~/shared/hooks/use-mutation-feedback";
-import { isDraftBusy } from "~/shared/images/image-draft";
 import { useImageDraft, useImageGalleryDraft } from "~/shared/images/use-image-drafts";
 import { useImageSave } from "~/shared/images/use-image-save";
 import { usePrepareImageDrafts } from "~/shared/images/use-image-uploads";
@@ -29,7 +28,7 @@ export function useBranchController(branchId: string) {
   const save = useMutation(getSaveBranchMutationOptions({ branchId, queryClient, trpc }));
   const logo = useImageDraft(settings.logoUrl);
   const gallery = useImageGalleryDraft(settings.photos.map((photo) => photo.url));
-  const { prepare } = usePrepareImageDrafts();
+  const { prepare, start } = usePrepareImageDrafts();
   const imageSave = useImageSave();
   const submit = form.handleSubmit((values) =>
     imageSave.run(async () => {
@@ -47,18 +46,22 @@ export function useBranchController(branchId: string) {
         concurrency: 3,
       });
       if (!preparedLogo) throw new Error("No se pudo preparar el logo.");
-      await save.mutateAsync(
-        toBranchInput({
-          branchId,
-          settings,
-          values,
-          logo: preparedLogo,
-          photos: preparedPhotos,
-        }),
-      );
+      const data = toBranchInput({ branchId, settings, values, logo: preparedLogo, photos: preparedPhotos });
+      const imageChanges = {
+        logo: preparedLogo.imageChange,
+        gallery: gallery.changed
+          ? preparedPhotos.map((photo, position) =>
+              photo.uploadId ? { uploadId: photo.uploadId, position } : { url: photo.imageUrl ?? undefined, position },
+            )
+          : undefined,
+      };
+      const operationId = imageSave.operationIdFor({ ...data, imageChanges });
+      await save.mutateAsync({ ...data, imageChanges, operationId });
+      start([preparedLogo, ...preparedPhotos]);
+      logo.accept();
+      gallery.accept();
     }),
   );
-  const uploading = isDraftBusy(logo.draft) || gallery.drafts.some((draft) => isDraftBusy(draft));
   const feedback = useMutationFeedback(save, "Cambios guardados.");
   return {
     fields,
@@ -69,7 +72,7 @@ export function useBranchController(branchId: string) {
     settings,
     setResolvePending,
     feedback: { ...feedback, error: imageSave.error ?? save.error },
-    pending: imageSave.pending || save.isPending || uploading || resolvePending,
+    pending: imageSave.pending || save.isPending || resolvePending,
     submit,
   };
 }

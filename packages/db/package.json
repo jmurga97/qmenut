@@ -203,6 +203,10 @@
     "./schema/translations": {
       "types": "./src/schema/translations.ts",
       "import": "./src/schema/translations.ts"
+    },
+    "./schema/images": {
+      "types": "./src/schema/images.ts",
+      "import": "./src/schema/images.ts"
     }
   },
   "scripts": {

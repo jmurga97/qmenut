@@ -11,6 +11,8 @@ import { signOut } from "~/lib/auth-client";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
 import { buildPublicMenuUrl } from "~/shared/services/public-menu-url";
+import { ImageActivity } from "~/shared/images/image-activity";
+import "~/shared/images/styles.css";
 
 import { AdminSidebar } from "./admin-sidebar";
 
@@ -170,6 +172,7 @@ export function AdminShell() {
       open={isSidebarOpen}
     >
       <div className="admin-main-slot">
+        {selectedBranch ? <ImageActivity branchId={selectedBranch.id} /> : null}
         <Outlet />
       </div>
     </AppShell>
