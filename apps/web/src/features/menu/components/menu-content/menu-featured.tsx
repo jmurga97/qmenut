@@ -15,7 +15,6 @@ interface MenuFeaturedProps {
   featuredLabel: string;
   featuredPromo: QmFeaturedValue | null;
   featuredPromoId: string | null;
-  onDishIntent: () => void;
   onSelectDish: (input: SelectDishInput) => void;
   showDishPhotos: boolean;
 }
@@ -25,7 +24,6 @@ export function MenuFeatured({
   featuredLabel,
   featuredPromo,
   featuredPromoId,
-  onDishIntent,
   onSelectDish,
   showDishPhotos,
 }: MenuFeaturedProps) {
@@ -60,9 +58,6 @@ export function MenuFeatured({
         <button
           type="button"
           className="dish-trigger menu-featured-frame"
-          onFocus={onDishIntent}
-          onPointerEnter={onDishIntent}
-          onTouchStart={onDishIntent}
           onClick={(event) => onSelectDish({ dish: featured, source: "featured", trigger: event.currentTarget })}
         >
           <QmFeatured

@@ -11,13 +11,12 @@ import type { MenuSectionViewModel, SelectDishInput } from "~/features/menu/type
 
 interface MenuSectionProps {
   index: number;
-  onDishIntent: () => void;
   onSelectDish: (input: SelectDishInput) => void;
   section: MenuSectionViewModel;
   showDishPhotos: boolean;
 }
 
-export function MenuSection({ index, onDishIntent, onSelectDish, section, showDishPhotos }: MenuSectionProps) {
+export function MenuSection({ index, onSelectDish, section, showDishPhotos }: MenuSectionProps) {
   const layout = usePublicRouteLayout();
   const photoLayout = getPhotoLayout(layout).thumbnail;
 
@@ -48,9 +47,6 @@ export function MenuSection({ index, onDishIntent, onSelectDish, section, showDi
               key={dish.rowKey}
               type="button"
               className="dish-trigger"
-              onFocus={onDishIntent}
-              onPointerEnter={onDishIntent}
-              onTouchStart={onDishIntent}
               onClick={(event) => onSelectDish({ dish, source: "section", trigger: event.currentTarget })}
             >
               <QmDishRow

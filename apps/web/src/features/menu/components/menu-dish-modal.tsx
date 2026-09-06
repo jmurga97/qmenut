@@ -1,9 +1,40 @@
-import { Component, lazy, Suspense, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
 
 import type { MenuDishModalContent } from "./menu-dish-modal-content";
-import type { ComponentProps, ErrorInfo, LazyExoticComponent } from "react";
 import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
+
+type DishModalContent = typeof MenuDishModalContent;
+
+const modalModule: { promise?: Promise<DishModalContent> } = {};
+
+async function importDishModal(): Promise<DishModalContent> {
+  try {
+    const { MenuDishModalContent } = await import("./menu-dish-modal-content");
+    return MenuDishModalContent;
+  } catch (error) {
+    modalModule.promise = undefined;
+    throw error;
+  }
+}
+
+/** Downloads the dish sheet once, off the critical path, so opening a dish never waits on a request. */
+function loadDishModal(): Promise<DishModalContent> {
+  modalModule.promise ??= importDishModal();
+
+  return modalModule.promise;
+}
+
+function scheduleIdle(callback: () => void): () => void {
+  if (!("requestIdleCallback" in window)) {
+    const timer = setTimeout(callback, 200);
+
+    return () => clearTimeout(timer);
+  }
+
+  const handle = window.requestIdleCallback(callback, { timeout: 2000 });
+
+  return () => window.cancelIdleCallback(handle);
+}
 
 interface MenuDishModalProps {
   dish: MenuDishViewModel | null;
@@ -11,95 +42,44 @@ interface MenuDishModalProps {
   showDishPhoto: boolean;
 }
 
-type DishModalComponent = typeof MenuDishModalContent;
-type LoadedModalProps = ComponentProps<DishModalComponent>;
-const modalModule: { promise?: Promise<{ default: DishModalComponent }> } = {};
+export function MenuDishModal({ dish, onClose, showDishPhoto }: MenuDishModalProps) {
+  const [Content, setContent] = useState<DishModalContent | null>(null);
+  const isWaitingForOpen = dish !== null && Content === null;
 
-async function importDishModal(): Promise<{ default: DishModalComponent }> {
-  try {
-    const { MenuDishModalContent } = await import("./menu-dish-modal-content");
-    return { default: MenuDishModalContent };
-  } catch (error) {
-    modalModule.promise = undefined;
-    throw error;
-  }
-}
-
-function loadDishModal(): Promise<{ default: DishModalComponent }> {
-  modalModule.promise ??= importDishModal();
-  return modalModule.promise;
-}
-
-/** Starts the modal download on pointer/focus intent, without loading it at page start. */
-export function preloadDishModal(): void {
-  // A speculative download may fail; opening the modal owns the visible error and retry.
-  void loadDishModal().catch(() => {});
-}
-
-function ModalStatus({ onClose, onRetry }: { onClose: () => void; onRetry?: () => void }) {
-  const { t } = useTranslation();
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+    if (Content) return;
+
+    let active = true;
+
+    const load = async () => {
+      try {
+        const component = await loadDishModal();
+        if (active) setContent(() => component);
+      } catch {
+        // A failed download retries the next time a dish is opened.
+      }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
 
-  return (
-    <div className="dish-modal-loading" role={onRetry ? "alert" : "status"}>
-      <p>{t(onRetry ? "menu.modalLoadError" : "menu.modalLoading")}</p>
-      {onRetry ? (
-        <button onClick={onRetry} type="button">
-          {t("menu.modalRetry")}
-        </button>
-      ) : null}
-      <button onClick={onClose} type="button">
-        {t("menu.closeLabel")}
-      </button>
-    </div>
-  );
-}
+    // A tap that beats the idle warm-up starts the download right away.
+    if (isWaitingForOpen) {
+      void load();
 
-interface BoundaryState {
-  error: Error | null;
-  lazyComponent: LazyExoticComponent<DishModalComponent>;
-}
-
-class DishModalErrorBoundary extends Component<LoadedModalProps, BoundaryState> {
-  state: BoundaryState = { error: null, lazyComponent: lazy(loadDishModal) };
-
-  static getDerivedStateFromError(error: Error): Partial<BoundaryState> {
-    return { error };
-  }
-
-  componentDidCatch(error: Error, _errorInfo: ErrorInfo): void {
-    console.error("No se pudo cargar el detalle del plato", error);
-  }
-
-  private readonly handleRetry = () => {
-    this.setState({ error: null, lazyComponent: lazy(loadDishModal) });
-  };
-
-  render() {
-    if (this.state.error) {
-      return <ModalStatus onClose={this.props.onClose} onRetry={this.handleRetry} />;
+      return () => {
+        active = false;
+      };
     }
 
-    const LazyDishModal = this.state.lazyComponent;
+    const cancelIdle = scheduleIdle(() => void load());
 
-    return (
-      <Suspense fallback={<ModalStatus onClose={this.props.onClose} />}>
-        <LazyDishModal {...this.props} />
-      </Suspense>
-    );
-  }
-}
+    return () => {
+      active = false;
+      cancelIdle();
+    };
+  }, [Content, isWaitingForOpen]);
 
-export function MenuDishModal(props: MenuDishModalProps) {
-  if (!props.dish) {
+  if (!dish || !Content) {
     return null;
   }
 
-  return <DishModalErrorBoundary key={props.dish.rowKey} {...props} dish={props.dish} />;
+  return <Content dish={dish} showDishPhoto={showDishPhoto} onClose={onClose} />;
 }

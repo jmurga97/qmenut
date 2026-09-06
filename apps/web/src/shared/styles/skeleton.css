@@ -84,3 +84,8 @@
   height: 60px;
   border-top: 1px solid #ece8df;
 }
+
+/* Mirrors the real header: it sits in flow, so the scroller adds no extra top padding. */
+.home-scroll:has(> .hs-header) {
+  padding-top: 0;
+}

@@ -12,12 +12,11 @@ import type {
 
 interface RecommendedListProps {
   content: RecommendedContentViewModel;
-  onDishIntent: () => void;
   onSelectDish: (dish: RecommendedDishViewModel, trigger: HTMLButtonElement) => void;
   showDishPhotos: boolean;
 }
 
-export function RecommendedList({ content, onDishIntent, onSelectDish, showDishPhotos }: RecommendedListProps) {
+export function RecommendedList({ content, onSelectDish, showDishPhotos }: RecommendedListProps) {
   const emptyLabel = content.dishes.length === 0 ? content.emptyLabel : undefined;
 
   const layout = usePublicRouteLayout();
@@ -37,9 +36,6 @@ export function RecommendedList({ content, onDishIntent, onSelectDish, showDishP
             className="dish-trigger"
             key={dish.rowKey}
             onClick={(event) => onSelectDish(dish, event.currentTarget)}
-            onFocus={onDishIntent}
-            onPointerEnter={onDishIntent}
-            onTouchStart={onDishIntent}
             type="button"
           >
             <QmDishRow

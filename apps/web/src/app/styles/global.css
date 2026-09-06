@@ -80,9 +80,11 @@ img {
   position: sticky;
   z-index: 3;
   top: 0;
-  margin: calc(-1 * var(--qm-content-top, 16px)) calc(-1 * var(--qm-shell-pad-x, 18px)) 0;
-  padding: var(--qm-content-top, 16px) var(--qm-shell-pad-x, 18px) 0;
+  /* Bleeds over the scroll padding (qm-page-header brings its own) and keeps the gap below it. */
+  margin: 0 calc(-1 * var(--qm-shell-pad-x, 18px)) var(--qm-content-top, 16px);
   background: color-mix(in oklab, var(--qm-bg, #ffffff) 94%, transparent);
+  /* Captured on its own so the route slide below never drags the header along. */
+  view-transition-name: qm-public-route-header;
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -98,7 +100,9 @@ img {
   min-height: 0;
 }
 
+/* The header sits in flow, so it reserves its own space without a measured padding. */
 .home-scroll:has(> .scroll-hide-header) {
+  padding-top: 0;
   --scroll-sticky-header-offset: var(--scroll-hide-header-height, 0px);
 }
 
@@ -131,6 +135,12 @@ img {
 ::view-transition-new(qm-public-route) {
   animation: qm-public-route-slide-in-right 300ms var(--qm-motion-ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
   z-index: 1;
+}
+
+::view-transition-group(qm-public-route-header),
+::view-transition-old(qm-public-route-header),
+::view-transition-new(qm-public-route-header) {
+  animation: none;
 }
 
 ::view-transition-group(.qm-public-route-slide) {
@@ -225,7 +235,8 @@ img {
   -webkit-overflow-scrolling: touch;
 }
 
-.public-route-transition-surface--animated {
+/* Naming the scroller keeps the captured slide the size of the visible area. */
+.home-scroll:has(.public-route-transition-surface--animated) {
   view-transition-name: qm-public-route;
 }
 

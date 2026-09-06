@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import "~/features/promos/styles.css";
-import { MenuDishModal, preloadDishModal } from "~/features/menu/components/menu-dish-modal";
+import { MenuDishModal } from "~/features/menu/components/menu-dish-modal";
 import { PromosList } from "~/features/promos/components/promos-list";
 import { RecommendedList } from "~/features/promos/components/recommended-list";
 import { useHighlightsContent } from "~/features/promos/hooks/use-highlights-content";
@@ -28,7 +28,6 @@ export function HighlightsPage() {
   useTrackPageView("highlights_view");
 
   function handleSelectDish(dish: MenuDishViewModel, trigger: HTMLButtonElement) {
-    preloadDishModal();
     dishTriggerRef.current = trigger;
     track("dish_opened", { dish_id: dish.rowKey, dish_name: dish.name, source: "highlights" });
     setSelectedDish(dish);
@@ -90,7 +89,6 @@ export function HighlightsPage() {
           </QmHeading>
           <RecommendedList
             content={content.recommended}
-            onDishIntent={preloadDishModal}
             onSelectDish={handleSelectDish}
             showDishPhotos={showDishPhotos}
           />

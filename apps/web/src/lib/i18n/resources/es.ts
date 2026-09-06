@@ -20,9 +20,6 @@ export default {
     allergensLabel: "Alérgenos",
     heroLabel: "Menú del día",
     photoLabel: "Foto del plato",
-    modalLoading: "Cargando detalle…",
-    modalLoadError: "No se pudo cargar el detalle del plato.",
-    modalRetry: "Reintentar",
     recommended: "Recomendado",
     featuredBadges: {
       fine: "Recomendación del chef",
