@@ -1,24 +1,46 @@
 import { QmFeatured } from "@qmenut/ui/components/qm-featured/react";
 import { QmHeading } from "@qmenut/ui/components/qm-heading/react";
 import { ChefHat, Sparkles, Tag } from "lucide-react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import "~/features/promos/styles.css";
+import { MenuDishModal, preloadDishModal } from "~/features/menu/components/menu-dish-modal";
 import { PromosList } from "~/features/promos/components/promos-list";
 import { RecommendedList } from "~/features/promos/components/recommended-list";
 import { useHighlightsContent } from "~/features/promos/hooks/use-highlights-content";
+import { track } from "~/lib/analytics/posthog";
 import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
 import { getPhotoLayout } from "~/shared/lib/photo-layout";
 import { responsivePhotoSource } from "~/shared/lib/photo-url";
+
+import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
 
 export function HighlightsPage() {
   const content = useHighlightsContent();
   const { template, tenant, theme } = usePublicRouteLayout();
   const showDishPhotos = tenant.showMenuPhotos;
   const { t } = useTranslation();
+  const dishTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const [selectedDish, setSelectedDish] = useState<MenuDishViewModel | null>(null);
 
   useTrackPageView("highlights_view");
+
+  function handleSelectDish(dish: MenuDishViewModel, trigger: HTMLButtonElement) {
+    preloadDishModal();
+    dishTriggerRef.current = trigger;
+    track("dish_opened", { dish_id: dish.rowKey, dish_name: dish.name, source: "highlights" });
+    setSelectedDish(dish);
+  }
+
+  function handleCloseDish() {
+    const trigger = dishTriggerRef.current;
+    setSelectedDish(null);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => trigger?.focus({ preventScroll: true }));
+    });
+  }
 
   const hasRecommended = content.recommended.dishes.length > 0;
   const hasPromos = content.promos.promos.length > 0;
@@ -66,7 +88,12 @@ export function HighlightsPage() {
           <QmHeading text={t("destacados.page.recommendedTitle")} variant="secondary">
             <Sparkles slot="icon" aria-hidden="true" strokeWidth={2} />
           </QmHeading>
-          <RecommendedList content={content.recommended} showDishPhotos={showDishPhotos} />
+          <RecommendedList
+            content={content.recommended}
+            onDishIntent={preloadDishModal}
+            onSelectDish={handleSelectDish}
+            showDishPhotos={showDishPhotos}
+          />
         </section>
       ) : null}
       {hasPromos ? (
@@ -77,6 +104,7 @@ export function HighlightsPage() {
           <PromosList content={content.promos} />
         </section>
       ) : null}
+      <MenuDishModal dish={selectedDish} showDishPhoto={showDishPhotos} onClose={handleCloseDish} />
     </div>
   );
 }

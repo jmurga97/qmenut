@@ -1,18 +1,7 @@
-import type { PublicImageVariant } from "@qmenut/db/models/image";
-import type { MenuDishBadgeViewModel, MenuDishViewModel } from "~/features/menu/types/menu-view-model";
+import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
 import type { PromosContentViewModel } from "~/features/promos/types/promos-view-model";
 
-export interface RecommendedDishViewModel {
-  badge?: MenuDishBadgeViewModel;
-  desc: string;
-  featured: boolean;
-  name: string;
-  oldPrice?: string;
-  photoUrl?: string;
-  photoVariants?: PublicImageVariant[];
-  price: string;
-  rowKey: string;
-}
+export type RecommendedDishViewModel = MenuDishViewModel;
 
 export interface RecommendedContentViewModel {
   dishes: RecommendedDishViewModel[];

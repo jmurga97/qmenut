@@ -6,7 +6,6 @@ import type { ReactNode } from "react";
 
 export type AdminSidebarIconName =
   | "analytics"
-  | "billing"
   | "branch"
   | "languages"
   | "logout"
@@ -60,12 +59,6 @@ const ICONS: Record<AdminSidebarIconName, ReactNode> = {
   analytics: (
     <>
       <path d="M4 16.5V10M8 16.5V6M12 16.5V8.5M16 16.5V3.5" />
-    </>
-  ),
-  billing: (
-    <>
-      <path d="M5 3.5h10v13l-2-1.25L10 16.5l-3-1.25L5 16.5v-13Z" />
-      <path d="M7.5 7h5M7.5 10h5" />
     </>
   ),
   branch: (

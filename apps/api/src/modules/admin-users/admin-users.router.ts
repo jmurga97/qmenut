@@ -15,6 +15,8 @@ import { sendUserInviteEmail } from "./send-user-invite-email";
 import { router, tenantProcedure } from "../../trpc/trpc";
 import { requirePermission } from "../admin-tenant/require-permission";
 
+import type { UserInviteSendResult } from "./send-user-invite-email";
+
 const manageableRoleSchema = z.enum(["admin", "staff"]);
 const membershipIdSchema = z.object({ membershipId: z.string().trim().min(1) });
 const createUserSchema = z.object({
@@ -50,18 +52,25 @@ async function getRestaurantName(
   return restaurant.name;
 }
 
+function skipInviteEmailDelivery(recipientEmail: string): UserInviteSendResult {
+  console.log("Envío de invitación omitido fuera de producción", { recipientEmail });
+  return { errorCode: null };
+}
+
 async function sendAndPersistInvite({
   db,
   email,
+  emailDeliveryEnabled,
+  emailWorker,
   membershipId,
   panelUrl,
   restaurantId,
   restaurantName,
   userName,
-  emailWorker,
 }: {
   db: Parameters<typeof getRestaurantById>[0]["db"];
   email: string;
+  emailDeliveryEnabled: boolean;
   emailWorker: Parameters<typeof sendUserInviteEmail>[0]["emailWorker"];
   membershipId: string;
   panelUrl: string;
@@ -70,13 +79,15 @@ async function sendAndPersistInvite({
   userName: string;
 }) {
   const attemptAt = Date.now();
-  const result = await sendUserInviteEmail({
-    emailWorker,
-    panelUrl,
-    recipientEmail: email,
-    restaurantName,
-    userName,
-  });
+  const result = emailDeliveryEnabled
+    ? await sendUserInviteEmail({
+        emailWorker,
+        panelUrl,
+        recipientEmail: email,
+        restaurantName,
+        userName,
+      })
+    : skipInviteEmailDelivery(email);
   const persisted = await updateRestaurantUserInviteStatus({
     db,
     inviteLastAttemptAt: attemptAt,
@@ -122,6 +133,7 @@ export const adminUsersRouter = router({
     const invitation = await sendAndPersistInvite({
       db: ctx.db,
       email: created.user.email,
+      emailDeliveryEnabled: ctx.env.NODE_ENV === "production",
       emailWorker: ctx.env.EMAIL_WORKER,
       membershipId: created.user.membershipId,
       panelUrl: new URL("/login", ctx.env.ADMIN_APP_URL).href,
@@ -201,6 +213,7 @@ export const adminUsersRouter = router({
     const invitation = await sendAndPersistInvite({
       db: ctx.db,
       email: membership.email,
+      emailDeliveryEnabled: ctx.env.NODE_ENV === "production",
       emailWorker: ctx.env.EMAIL_WORKER,
       membershipId: membership.membershipId,
       panelUrl: new URL("/login", ctx.env.ADMIN_APP_URL).href,

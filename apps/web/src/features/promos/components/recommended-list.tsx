@@ -5,14 +5,19 @@ import { usePublicRouteLayout } from "~/shared/components/public-route-layout/pu
 import { getPhotoLayout } from "~/shared/lib/photo-layout";
 import { responsivePhotoSource } from "~/shared/lib/photo-url";
 
-import type { RecommendedContentViewModel } from "~/features/promos/types/highlights-view-model";
+import type {
+  RecommendedContentViewModel,
+  RecommendedDishViewModel,
+} from "~/features/promos/types/highlights-view-model";
 
 interface RecommendedListProps {
   content: RecommendedContentViewModel;
+  onDishIntent: () => void;
+  onSelectDish: (dish: RecommendedDishViewModel, trigger: HTMLButtonElement) => void;
   showDishPhotos: boolean;
 }
 
-export function RecommendedList({ content, showDishPhotos }: RecommendedListProps) {
+export function RecommendedList({ content, onDishIntent, onSelectDish, showDishPhotos }: RecommendedListProps) {
   const emptyLabel = content.dishes.length === 0 ? content.emptyLabel : undefined;
 
   const layout = usePublicRouteLayout();
@@ -28,22 +33,31 @@ export function RecommendedList({ content, showDishPhotos }: RecommendedListProp
         });
 
         return (
-          <QmDishRow
+          <button
+            className="dish-trigger"
             key={dish.rowKey}
-            value={{
-              desc: dish.desc,
-              featured: dish.featured,
-              name: dish.name,
-              oldPrice: dish.oldPrice,
-              photo: showDishPhotos,
-              photoUrl: source?.src,
-              photoFallbackUrl: dish.photoUrl,
-              photoSrcSet: source?.srcSet,
-              photoSizes: source?.sizes,
-              price: dish.price,
-              tag: dish.badge?.compactText,
-            }}
-          />
+            onClick={(event) => onSelectDish(dish, event.currentTarget)}
+            onFocus={onDishIntent}
+            onPointerEnter={onDishIntent}
+            onTouchStart={onDishIntent}
+            type="button"
+          >
+            <QmDishRow
+              value={{
+                desc: dish.desc,
+                featured: dish.featured,
+                name: dish.name,
+                oldPrice: dish.oldPrice,
+                photo: showDishPhotos,
+                photoUrl: source?.src,
+                photoFallbackUrl: dish.photoUrl,
+                photoSrcSet: source?.srcSet,
+                photoSizes: source?.sizes,
+                price: dish.price,
+                tag: dish.badge?.compactText,
+              }}
+            />
+          </button>
         );
       })}
     </QmRecommendedList>

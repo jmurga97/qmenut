@@ -21,17 +21,5 @@ export function mapRecommendedDish({
   formatPrice: (cents: number) => string;
   t: TFunction;
 }): RecommendedDishViewModel {
-  const base = mapDish({ dish, formatPrice, t });
-
-  return {
-    badge: base.badge,
-    desc: base.desc,
-    featured: dish.isFeatured,
-    name: base.name,
-    oldPrice: base.oldPrice,
-    photoUrl: base.photoUrl,
-    photoVariants: base.photoVariants,
-    price: base.price,
-    rowKey: base.rowKey,
-  };
+  return mapDish({ dish, formatPrice, t });
 }

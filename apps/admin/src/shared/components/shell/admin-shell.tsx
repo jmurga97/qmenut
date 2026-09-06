@@ -65,14 +65,6 @@ const SECTIONS = [
   { group: "business", icon: "branch", id: "branch", label: "Sucursal", path: "/branch" },
   {
     group: "business",
-    icon: "billing",
-    id: "billing",
-    label: "Facturación",
-    path: "/billing",
-    permission: "billing.manage",
-  },
-  {
-    group: "business",
     icon: "users",
     id: "users",
     label: "Usuarios",

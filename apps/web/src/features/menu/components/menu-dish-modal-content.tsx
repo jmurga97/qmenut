@@ -44,7 +44,7 @@ export function MenuDishModalContent({
       allergensLabel={t("menu.allergensLabel")}
       onQmClose={onClose}
     >
-      <X slot="close-icon" size={20} strokeWidth={1.8} />
+      <X slot="close-icon" size={16} strokeWidth={2} />
       {/* Descriptions may contain sanitized rich-text HTML (bold/italic/lists) from the CRM. */}
       {dish.descHtml ? <div dangerouslySetInnerHTML={{ __html: dish.descHtml }} /> : null}
       {dish.extras && dish.extras.length > 0 ? (

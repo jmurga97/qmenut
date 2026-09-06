@@ -9,6 +9,7 @@ interface FormActionsProps {
   onCancel?: () => void;
   onSubmit: () => void;
   submitLabel?: string;
+  submitType?: "button" | "submit";
 }
 export function FormActions({
   busy = false,
@@ -17,6 +18,7 @@ export function FormActions({
   onCancel,
   onSubmit,
   submitLabel = "Guardar",
+  submitType = "button",
 }: FormActionsProps) {
   return (
     <div className="admin-topbar-actions">
@@ -35,6 +37,7 @@ export function FormActions({
         key={busy ? "submit-busy" : "submit-idle"}
         disabled={busy || undefined}
         onClick={onSubmit}
+        type={submitType}
         variant="primary"
       >
         {busy ? busyLabel : submitLabel}

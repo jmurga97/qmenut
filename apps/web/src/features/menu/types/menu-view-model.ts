@@ -27,8 +27,8 @@ export interface MenuDishViewModel {
   rowKey: string;
 }
 
-/** Desde qué superficie de la carta se abrió un plato (descubrimiento destacado vs navegación). */
-export type DishOpenSource = "featured" | "section";
+/** Desde qué superficie de la carta se abrió un plato (destacado, recomendados o navegación). */
+export type DishOpenSource = "featured" | "highlights" | "section";
 
 export interface SelectDishInput {
   dish: MenuDishViewModel;

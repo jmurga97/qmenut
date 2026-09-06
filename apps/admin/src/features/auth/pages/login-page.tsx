@@ -8,6 +8,7 @@ import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { useLoginController } from "../hooks/use-login-controller";
 
 import type { LoginFormValues } from "../types";
+import type { SyntheticEvent } from "react";
 
 interface LoginCopyInput {
   developmentOtp: string;
@@ -50,6 +51,10 @@ export function LoginPage() {
     email,
     emailStep,
   });
+  function handleFormSubmit(event: SyntheticEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void controller.submit();
+  }
   return (
     <main className="admin-login-shell">
       <section className="admin-login-panel" aria-labelledby="login-title">
@@ -58,7 +63,7 @@ export function LoginPage() {
           <p>{instructions}</p>
         </div>
         <FormProvider {...controller.form}>
-          <div className="admin-login-form">
+          <form className="admin-login-form" noValidate onSubmit={handleFormSubmit}>
             {emailStep ? (
               <FormTextInput<LoginFormValues>
                 autocomplete="email"
@@ -73,14 +78,27 @@ export function LoginPage() {
               <FormOtpInput<LoginFormValues> disabled={controller.busy} label="Código OTP" length={6} name="otp" />
             )}
             <FormFeedback error={controller.error} />
+            {emailStep ? null : (
+              <div className="admin-login-resend">
+                <span>¿No te llegó el código?</span>
+                <button
+                  disabled={controller.resending || controller.resendCountdown > 0}
+                  onClick={controller.resendOtp}
+                  type="button"
+                >
+                  {controller.resendCountdown > 0 ? `Reenviar en ${controller.resendCountdown}s` : "Reenviar código"}
+                </button>
+              </div>
+            )}
             <FormActions
               busy={controller.busy}
               busyLabel={busyLabel}
               onCancel={emailStep ? undefined : controller.changeEmail}
               onSubmit={() => void controller.submit()}
               submitLabel={submitLabel}
+              submitType="submit"
             />
-          </div>
+          </form>
         </FormProvider>
       </section>
     </main>

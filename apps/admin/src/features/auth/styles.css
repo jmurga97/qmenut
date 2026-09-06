@@ -28,6 +28,38 @@
   gap: 1rem;
 }
 
+.admin-login-resend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-label);
+}
+
+.admin-login-resend button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--foreground);
+  font: inherit;
+  font-weight: 550;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.admin-login-resend button:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.admin-login-resend button:disabled {
+  opacity: 0.48;
+  cursor: default;
+  text-decoration: none;
+}
+
 .admin-select-restaurant-list {
   display: grid;
   gap: 0.625rem;

@@ -213,7 +213,7 @@ export async function fetchDishOpens({ env, fromDay, toDay }: FetchRangeInput): 
     restaurantId: String(row.restaurant_id),
     day: toDayString(row.day),
     languageCode: toDimension(row.language_code, "legacy"),
-    source: row.source === "featured" ? "featured" : "section",
+    source: row.source === "featured" || row.source === "highlights" ? "featured" : "section",
     opens: toFiniteNumber(row.opens),
     visitsWithOpen: toFiniteNumber(row.visits_with_open),
   }));

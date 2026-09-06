@@ -26,7 +26,26 @@
   scroll-padding-inline: 0;
   scroll-snap-type: inline mandatory;
   scrollbar-width: thin;
+  scrollbar-color: var(--qm-accent, currentColor) transparent;
   overscroll-behavior-inline: contain;
+}
+
+.google-reviews__rail::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.google-reviews__rail::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.google-reviews__rail::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--qm-accent, currentColor);
+}
+
+.google-reviews__rail::-webkit-scrollbar-thumb:hover {
+  background: var(--qm-accent-ink, var(--qm-accent, currentColor));
 }
 
 .google-reviews__rail:focus-visible {

@@ -1,5 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
-import { createRouter as createTanStackRouter } from "@tanstack/react-router";
+import { createRouter as createTanStackRouter, Link } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 
 import { routeTree } from "~/app/route-tree.gen";
@@ -27,6 +27,28 @@ function createQueryClient() {
   });
 }
 
+// Rendered whenever `notFound()` is thrown (unknown paths under `/{-$locale}`, missing
+// assets requested through the router, ...). Without it TanStack falls back to a bare
+// `<p>Not Found</p>` and logs a warning on every hit.
+function RouteNotFound() {
+  return (
+    <div className="home-shell">
+      <div className="home-column status-column">
+        <section className="public-status" aria-labelledby="route-not-found-title">
+          <span className="public-status__mark" aria-hidden="true">
+            ?
+          </span>
+          <h1 id="route-not-found-title">Página no encontrada</h1>
+          <p>La dirección solicitada no existe o ya no está disponible.</p>
+          <p>
+            <Link to="/{-$locale}">Volver al inicio</Link>
+          </p>
+        </section>
+      </div>
+    </div>
+  );
+}
+
 export function getRouter() {
   const queryClient = createQueryClient();
   const trpc = createTrpcOptionsProxy(queryClient);
@@ -44,6 +66,7 @@ export function getRouter() {
     routeTree,
     scrollRestoration: true,
     defaultPreload: "intent",
+    defaultNotFoundComponent: RouteNotFound,
     // TanStack Router owns the route store update, so its native wrapper is needed
     // for React's public-route ViewTransition boundary to capture the page swap.
     // Keep the temporary experiment limited to the four public content routes.

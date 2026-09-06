@@ -1,0 +1,27 @@
+.dish-trigger {
+  display: block;
+  width: 100%;
+  min-height: var(--qm-touch-min, 44px);
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transform: scale(1);
+  transition:
+    transform 100ms ease-out,
+    opacity 100ms ease-out;
+}
+
+.dish-trigger:active {
+  transform: scale(0.985);
+  opacity: 0.86;
+}
+
+.dish-trigger:focus-visible {
+  border-radius: var(--qm-row-radius, 0px);
+  outline: 2px solid var(--qm-accent-ink, var(--qm-ink, #1c1815));
+  outline-offset: 3px;
+}
