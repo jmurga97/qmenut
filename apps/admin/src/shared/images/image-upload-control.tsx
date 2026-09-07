@@ -7,7 +7,7 @@ const statusLabel = {
   ready: "Lista para guardar",
   uploading: "Subiendo",
   optimizing: "Optimizando",
-  succeeded: "Imagen preparada",
+  succeeded: "Archivo recibido",
   failed: "Error en la imagen",
 } as const;
 
@@ -16,29 +16,23 @@ interface ImageUploadControlProps {
   draft: ImageDraft;
   label: string;
   onRemove: () => void;
-  onRetry: () => void;
   onSelect?: (file: File) => void;
 }
 
-export function ImageUploadControl({
-  disabled = false,
-  draft,
-  label,
-  onRemove,
-  onRetry,
-  onSelect,
-}: ImageUploadControlProps) {
+export function ImageUploadControl({ disabled = false, draft, label, onRemove, onSelect }: ImageUploadControlProps) {
+  const status = draft.status;
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const busy = disabled || draft.status === "uploading" || draft.status === "optimizing";
+  const busy = disabled;
   return (
     <div className="admin-image-control">
       <div className="admin-image-control__header">
         <label className="admin-image-control__label" htmlFor={inputId}>
           {label}
         </label>
-        <span aria-live="polite" className={`admin-image-status admin-image-status--${draft.status}`}>
-          {statusLabel[draft.status]}
+        <span aria-live="polite" className={`admin-image-status admin-image-status--${status}`}>
+          <span aria-hidden="true" className="admin-image-status__dot" />
+          {statusLabel[status]}
         </span>
       </div>
       <button
@@ -83,11 +77,6 @@ export function ImageUploadControl({
         {draft.previewUrl ? (
           <button className="admin-image-action--remove" disabled={busy} onClick={onRemove} type="button">
             Quitar
-          </button>
-        ) : null}
-        {draft.status === "failed" && draft.file ? (
-          <button className="admin-image-action--retry" disabled={busy} onClick={onRetry} type="button">
-            Reintentar
           </button>
         ) : null}
       </div>

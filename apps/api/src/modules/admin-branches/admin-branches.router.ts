@@ -1,5 +1,4 @@
 import { listBranchPhotos, updateGoogleReviewsConnection } from "@qmenut/db/repositories/admin-branches.repository";
-import { upsertImageVariants } from "@qmenut/db/repositories/image-variants.repository";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -13,8 +12,8 @@ import {
   bumpPublicContentVersionForRestaurant,
 } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
-import { buildImageVariantCatalogEntries } from "../admin-images/image-variant-catalog";
-import { validateImageReference, validateImageReferences } from "../admin-images/validate-image-reference";
+import { imageSaveOperation } from "../admin-images/image-save-operation";
+import { prepareBranchImageSave } from "../admin-images/prepare-branch-image-save";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 import { requirePermission } from "../admin-tenant/require-permission";
 
@@ -180,45 +179,47 @@ export const adminBranchesRouter = router({
       branchId: input.branchId,
     });
     const existingPhotos = await listBranchPhotos({ db: ctx.db, branchId: input.branchId });
-    const [logoManifest, photoManifests] = await Promise.all([
-      validateImageReference({
-        worker: ctx.env.IMAGE_WORKER,
-        restaurantId: ctx.tenant.restaurantId,
-        branchId: input.branchId,
-        purpose: "branchLogo",
-        existingUrl: branch.logoUrl,
-        imageUrl: input.info.logoUrl,
-        uploadId: input.info.logoUploadId,
-      }),
-      validateImageReferences({
-        worker: ctx.env.IMAGE_WORKER,
-        restaurantId: ctx.tenant.restaurantId,
-        branchId: input.branchId,
-        purpose: "branchPhoto",
-        existingUrls: existingPhotos.map((photo) => photo.url),
-        images: input.photos.map((photo) => ({ imageUrl: photo.url, uploadId: photo.uploadId })),
-      }),
-    ]);
-    await upsertImageVariants({
-      db: ctx.db,
-      variants: buildImageVariantCatalogEntries([...(logoManifest ? [logoManifest] : []), ...photoManifests]),
-    });
-    await saveBranchSettings({
+    return imageSaveOperation({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
-      branchId: input.branchId,
-      timezone: input.timezone,
-      legal: input.legal,
-      info: input.info,
-      schedules: input.schedules,
-      photos: input.photos,
-    });
+      operationId: input.operationId,
+      entityId: input.branchId,
+      scope: "branches.save",
+      input,
+      save: async ({ statements }) => {
+        const images = await prepareBranchImageSave({
+          db: ctx.db,
+          env: ctx.env,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: input.branchId,
+          existingLogo: branch.logoUrl,
+          existingPhotos,
+          logoUrl: input.info.logoUrl,
+          logoUploadId: input.info.logoUploadId,
+          photos: input.photos,
+          changes: input.imageChanges,
+        });
+        await saveBranchSettings({
+          db: ctx.db,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: input.branchId,
+          timezone: input.timezone,
+          legal: input.legal,
+          info: { ...input.info, logoUrl: images.logoUrl },
+          preserveLogo: images.preserveLogo,
+          preservePhotos: images.preservePhotos,
+          statements: [...statements, ...images.statements],
+          schedules: input.schedules,
+          photos: images.photos,
+        });
 
-    await bumpPublicContentVersionForRestaurant({
-      db: ctx.db,
-      env: ctx.env,
-      restaurantId: ctx.tenant.restaurantId,
+        await bumpPublicContentVersionForRestaurant({
+          db: ctx.db,
+          env: ctx.env,
+          restaurantId: ctx.tenant.restaurantId,
+        });
+        return { id: input.branchId };
+      },
     });
-    return { id: input.branchId };
   }),
 });

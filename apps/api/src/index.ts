@@ -6,6 +6,7 @@ import { createAuth } from "@/auth/create-auth";
 import { parseEnv } from "@/config/env";
 import { applyCorsHeaders, createOptionsResponse } from "@/http/cors";
 import { jsonResponse } from "@/http/json";
+import { publishPendingImages } from "@/modules/admin-images/image-finalization";
 import { runAnalyticsDailyJob } from "@/modules/analytics/digest/run-analytics-daily-job";
 import { handleStripeWebhook } from "@/modules/billing/handle-stripe-webhook";
 import { createContext } from "@/trpc/context";
@@ -90,9 +91,10 @@ export default Sentry.withSentry(
       return applyCorsHeaders({ env, request, response });
     },
     // eslint-disable-next-line max-params -- Cloudflare ScheduledHandler contract.
-    scheduled(_controller: ScheduledController, rawEnv: EnvBindings, ctx: ExecutionContext): void {
+    scheduled(controller: ScheduledController, rawEnv: EnvBindings, ctx: ExecutionContext): void {
       // Cron diario de producción: sincroniza PostHog → D1 y despacha el digest quincenal.
-      ctx.waitUntil(handleScheduledAnalytics(rawEnv));
+      if (controller.cron === "45 4 * * *") ctx.waitUntil(handleScheduledAnalytics(rawEnv));
+      else ctx.waitUntil(publishPendingImages(parseEnv(rawEnv)));
     },
   },
 );

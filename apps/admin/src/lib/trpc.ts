@@ -24,13 +24,16 @@ function fetchWithCredentials(url: Parameters<typeof fetch>[0], options: Paramet
   return fetch(url, {
     ...options,
     credentials: "include",
+    signal: options?.signal
+      ? AbortSignal.any([options.signal, AbortSignal.timeout(20_000)])
+      : AbortSignal.timeout(20_000),
   });
 }
 const trpcLink = httpBatchLink({
   url: `${getApiBaseUrl()}/trpc`,
   fetch: fetchWithCredentials,
 });
-const trpcClient = createTRPCClient<AppRouter>({
+export const trpcClient = createTRPCClient<AppRouter>({
   links: [trpcLink],
 });
 export const trpc = createTRPCOptionsProxy<AppRouter>({ client: trpcClient, queryClient });

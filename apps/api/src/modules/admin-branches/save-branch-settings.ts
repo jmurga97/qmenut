@@ -7,8 +7,12 @@ import { updateRestaurantSettingsStatement } from "@qmenut/db/repositories/resta
 
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { BranchPhotoRow, BranchScheduleRow } from "@qmenut/db/repositories/admin-branches.repository";
+import type { BatchItem } from "drizzle-orm/batch";
 
 interface SaveBranchSettingsInput {
+  statements?: BatchItem<"sqlite">[];
+  preserveLogo?: boolean;
+  preservePhotos?: boolean;
   db: DrizzleDb;
   restaurantId: string;
   branchId: string;
@@ -42,13 +46,17 @@ export async function saveBranchSettings({
   info,
   schedules,
   photos,
+  statements = [],
+  preserveLogo,
+  preservePhotos,
 }: SaveBranchSettingsInput): Promise<void> {
   // The branch router authorizes this branch before validating image references and calling this writer.
   await db.batch([
     // Timezone is restaurant-wide even though it is edited from a branch settings page.
     updateRestaurantSettingsStatement({ db, legal, restaurantId, timezone }),
-    ...updateBranchSettingsStatements({ db, restaurantId, branchId, data: info }),
+    ...updateBranchSettingsStatements({ db, restaurantId, branchId, data: info, preserveLogo }),
     ...replaceBranchSchedulesStatements({ db, branchId, schedules }),
-    ...replaceBranchPhotosStatements({ db, branchId, photos }),
+    ...(preservePhotos ? [] : replaceBranchPhotosStatements({ db, branchId, photos })),
+    ...statements,
   ]);
 }

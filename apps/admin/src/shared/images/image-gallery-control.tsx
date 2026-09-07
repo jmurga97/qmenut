@@ -14,7 +14,6 @@ interface ImageGalleryControlProps {
   onMove: (id: string, direction: -1 | 1) => void;
   onRemove: (id: string) => void;
   onReplace: (id: string, file: File) => void;
-  onRetry: (id: string) => void;
 }
 
 export function ImageGalleryControl({
@@ -27,7 +26,6 @@ export function ImageGalleryControl({
   onMove,
   onRemove,
   onReplace,
-  onRetry,
 }: ImageGalleryControlProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,7 +51,6 @@ export function ImageGalleryControl({
                 label={`Foto ${index + 1}`}
                 onRemove={() => onRemove(draft.id)}
                 onSelect={(file) => onReplace(draft.id, file)}
-                onRetry={() => onRetry(draft.id)}
               />
               <div className="admin-photo-strip__order">
                 <button

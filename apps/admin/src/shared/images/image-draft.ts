@@ -12,14 +12,17 @@ export interface ImageDraft {
   previewUrl: string | null;
   imageUrl: string | null;
   uploadId?: string;
+  transferred?: boolean;
   idempotencyKey: string;
   status: ImageDraftStatus;
   error?: string;
+  changed?: boolean;
 }
 
 export interface PreparedImage {
   imageUrl: string | null;
   uploadId?: string;
+  imageChange: { kind: "keep" } | { kind: "remove" } | { kind: "upload"; uploadId: string };
 }
 
 export function createImageDraft({
@@ -49,6 +52,7 @@ export function validateImageFile(file: File): string | null {
   if (!isAcceptedImageType(file.type)) {
     return "Selecciona una imagen JPEG, PNG o WebP.";
   }
+  if (file.size === 0) return "El archivo está vacío. Selecciona otra imagen.";
   if (file.size > MAX_IMAGE_BYTES) {
     return "La imagen no puede superar 25 MiB.";
   }
@@ -60,24 +64,9 @@ export function replaceImageDraftFile({ draft, file }: { draft: ImageDraft; file
   if (validationError) return { ...draft, error: validationError };
 
   revokeImageDraftPreview(draft);
-  return createImageDraft({ file, id: draft.id, imageUrl: null });
-}
-
-export function retryImageDraft(draft: ImageDraft): ImageDraft {
-  return {
-    ...draft,
-    uploadId: undefined,
-    imageUrl: null,
-    idempotencyKey: crypto.randomUUID(),
-    status: draft.file ? "ready" : "idle",
-    error: undefined,
-  };
+  return { ...createImageDraft({ file, id: draft.id, imageUrl: null }), changed: true };
 }
 
 export function revokeImageDraftPreview(draft: ImageDraft): void {
   if (draft.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(draft.previewUrl);
-}
-
-export function isDraftBusy(draft: ImageDraft): boolean {
-  return draft.status === "uploading" || draft.status === "optimizing";
 }

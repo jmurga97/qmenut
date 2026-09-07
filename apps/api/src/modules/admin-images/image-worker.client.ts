@@ -6,6 +6,29 @@ import { isQmenutMediaUrl } from "./media-url";
 import type { ImagePurpose } from "./image-input.schema";
 import type { ImageWorkerBinding } from "../../config/env/schema";
 
+async function boundedRpc<T>(request: Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      request,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () =>
+            reject(
+              new TRPCError({
+                code: "TIMEOUT",
+                message: "El servicio de imágenes está tardando demasiado. Inténtalo de nuevo.",
+              }),
+            ),
+          20_000,
+        );
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 const QMENUT_PRODUCT_ID = "qmenut";
 
 const uploadStatusSchema = z.enum(["awaiting_upload", "queued", "processing", "succeeded", "failed"]);
@@ -148,18 +171,20 @@ function readMainImageUrl(data: z.infer<typeof uploadResultSchema>["data"]): str
 
 export async function createImageUpload(input: CreateUploadInput) {
   const externalId = await createOwnershipExternalId(input);
-  const body = await input.worker.createUpload({
-    productId: QMENUT_PRODUCT_ID,
-    idempotencyKey: input.idempotencyKey,
-    upload: {
-      presetId: presetByPurpose[input.purpose],
-      externalId,
-      filename: input.filename,
-      contentType: input.contentType,
-      sizeBytes: input.sizeBytes,
-      metadata: { source: "qmenut-admin" },
-    },
-  });
+  const body = await boundedRpc(
+    input.worker.createUpload({
+      productId: QMENUT_PRODUCT_ID,
+      idempotencyKey: input.idempotencyKey,
+      upload: {
+        presetId: presetByPurpose[input.purpose],
+        externalId,
+        filename: input.filename,
+        contentType: input.contentType,
+        sizeBytes: input.sizeBytes,
+        metadata: { source: "qmenut-admin" },
+      },
+    }),
+  );
   const error = workerErrorSchema.safeParse(body);
   if (error.success) throw mapWorkerError(error.data.error);
 
@@ -175,10 +200,12 @@ export async function createImageUpload(input: CreateUploadInput) {
 }
 
 export async function getImageUpload(input: GetUploadInput) {
-  const body = await input.worker.getUpload({
-    productId: QMENUT_PRODUCT_ID,
-    uploadId: input.uploadId,
-  });
+  const body = await boundedRpc(
+    input.worker.getUpload({
+      productId: QMENUT_PRODUCT_ID,
+      uploadId: input.uploadId,
+    }),
+  );
   const error = workerErrorSchema.safeParse(body);
   if (error.success) throw mapWorkerError(error.data.error);
 
@@ -193,6 +220,7 @@ export async function getImageUpload(input: GetUploadInput) {
   const data = parsed.data.data;
   const externalId = await createOwnershipExternalId(input);
   if (
+    data.uploadId !== input.uploadId ||
     data.productId !== QMENUT_PRODUCT_ID ||
     data.presetId !== presetByPurpose[input.purpose] ||
     data.externalId !== externalId
@@ -220,4 +248,13 @@ export async function assertCompletedImageUpload(input: VerifyUploadInput): Prom
   }
 
   return upload.manifest;
+}
+
+export async function retryImageUpload(input: GetUploadInput): Promise<void> {
+  await getImageUpload(input);
+  const body = await boundedRpc(input.worker.retryUpload({ productId: QMENUT_PRODUCT_ID, uploadId: input.uploadId }));
+  const error = workerErrorSchema.safeParse(body);
+  if (error.success) throw mapWorkerError(error.data.error);
+  if (!uploadResultSchema.safeParse(body).success)
+    throw new TRPCError({ code: "BAD_GATEWAY", message: "No se pudo reintentar la imagen" });
 }

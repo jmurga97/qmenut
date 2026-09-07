@@ -6,7 +6,6 @@ import {
   listIngredients,
   listTags,
 } from "@qmenut/db/repositories/admin-menu-taxonomy.repository";
-import { upsertImageVariants } from "@qmenut/db/repositories/image-variants.repository";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -26,15 +25,10 @@ import { saveDish } from "./save-dish";
 import { saveDishRelations } from "./save-dish-relations";
 import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
-import { buildImageVariantCatalogEntries } from "../admin-images/image-variant-catalog";
-import { validateImageReference } from "../admin-images/validate-image-reference";
+import { imageSaveOperation } from "../admin-images/image-save-operation";
+import { prepareMenuImageSave } from "../admin-images/prepare-menu-image-save";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 import { requirePermission } from "../admin-tenant/require-permission";
-
-import type { RuntimeEnv } from "../../config/env/schema";
-import type { TenantContext } from "../../trpc/trpc";
-import type { ImagePurpose } from "../admin-images/image-input.schema";
-import type { VerifiedImageManifest } from "../admin-images/image-worker.client";
 
 const dishDetailInputSchema = z.object({ dishId: z.string().trim().min(1) });
 const categoryIdInputSchema = z.object({ categoryId: z.string().trim().min(1) });
@@ -44,36 +38,6 @@ const setDishAvailabilityInputSchema = z.object({
   dishId: z.string().trim().min(1),
   isActive: z.boolean(),
 });
-
-interface AssertMenuImageInput {
-  env: RuntimeEnv;
-  tenant: TenantContext;
-  branchId: string;
-  purpose: ImagePurpose;
-  existingUrl: string | null;
-  imageUrl: string | null;
-  uploadId?: string;
-}
-
-function assertMenuImage({
-  env,
-  tenant,
-  branchId,
-  purpose,
-  existingUrl,
-  imageUrl,
-  uploadId,
-}: AssertMenuImageInput): Promise<VerifiedImageManifest | null> {
-  return validateImageReference({
-    worker: env.IMAGE_WORKER,
-    restaurantId: tenant.restaurantId,
-    branchId,
-    purpose,
-    existingUrl,
-    imageUrl,
-    uploadId,
-  });
-}
 
 const categoriesRouter = router({
   list: tenantProcedure.input(branchScopedSchema).query(async ({ ctx, input }) => {
@@ -91,32 +55,41 @@ const categoriesRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
-    const imageManifest = await assertMenuImage({
-      env: ctx.env,
-      tenant: ctx.tenant,
-      branchId: input.branchId,
-      purpose: "categoryImage",
-      existingUrl: null,
-      imageUrl: input.data.imageUrl,
-      uploadId: input.data.imageUploadId,
-    });
-    await upsertImageVariants({
-      db: ctx.db,
-      variants: imageManifest ? buildImageVariantCatalogEntries([imageManifest]) : [],
-    });
-    const result = await createMenuCategory({
+    return imageSaveOperation({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
-      branchId: input.branchId,
-      data: input.data,
+      operationId: input.operationId,
+      scope: "categoriesRouter.create",
+      input,
+      save: async ({ entityId, statements }) => {
+        const image = await prepareMenuImageSave({
+          db: ctx.db,
+          env: ctx.env,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: input.branchId,
+          entityId,
+          purpose: "categoryImage",
+          existingUrl: null,
+          data: input.data,
+        });
+        const result = await createMenuCategory({
+          db: ctx.db,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: input.branchId,
+          data: { ...input.data, imageUrl: image.imageUrl },
+          preserveImage: image.preserveImage,
+          entityId,
+          statements: [...statements, ...image.statements],
+        });
+        await bumpPublicContentVersionForBranch({
+          db: ctx.db,
+          env: ctx.env,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: input.branchId,
+        });
+        return result;
+      },
     });
-    await bumpPublicContentVersionForBranch({
-      db: ctx.db,
-      env: ctx.env,
-      restaurantId: ctx.tenant.restaurantId,
-      branchId: input.branchId,
-    });
-    return result;
   }),
   update: tenantProcedure.input(updateCategorySchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
@@ -128,34 +101,44 @@ const categoriesRouter = router({
     if (!categoryContext) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Categoría no encontrada" });
     }
-    const imageManifest = await assertMenuImage({
-      env: ctx.env,
-      tenant: ctx.tenant,
-      branchId: categoryContext.branchId,
-      purpose: "categoryImage",
-      existingUrl: categoryContext.imageUrl,
-      imageUrl: input.data.imageUrl,
-      uploadId: input.data.imageUploadId,
-    });
-    await upsertImageVariants({
-      db: ctx.db,
-      variants: imageManifest ? buildImageVariantCatalogEntries([imageManifest]) : [],
-    });
-    const result = await updateMenuCategory({
+    return imageSaveOperation({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
-      categoryId: input.categoryId,
-      data: input.data,
-    });
+      operationId: input.operationId,
+      scope: "categoriesRouter.update",
+      input,
+      entityId: input.categoryId,
+      save: async ({ entityId, statements }) => {
+        const image = await prepareMenuImageSave({
+          db: ctx.db,
+          env: ctx.env,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: categoryContext.branchId,
+          entityId,
+          purpose: "categoryImage",
+          existingUrl: categoryContext.imageUrl,
+          data: input.data,
+        });
+        const result = await updateMenuCategory({
+          db: ctx.db,
+          restaurantId: ctx.tenant.restaurantId,
+          categoryId: input.categoryId,
+          data: { ...input.data, imageUrl: image.imageUrl },
+          preserveImage: image.preserveImage,
+          entityId,
+          statements: [...statements, ...image.statements],
+        });
 
-    await bumpPublicContentVersionForBranch({
-      db: ctx.db,
-      env: ctx.env,
-      restaurantId: ctx.tenant.restaurantId,
-      branchId: categoryContext.branchId,
-    });
+        await bumpPublicContentVersionForBranch({
+          db: ctx.db,
+          env: ctx.env,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: categoryContext.branchId,
+        });
 
-    return result;
+        return result;
+      },
+    });
   }),
   remove: tenantProcedure.input(categoryIdInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
@@ -200,32 +183,41 @@ const dishesRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
-    const imageManifest = await assertMenuImage({
-      env: ctx.env,
-      tenant: ctx.tenant,
-      branchId: input.branchId,
-      purpose: "dishImage",
-      existingUrl: null,
-      imageUrl: input.data.imageUrl,
-      uploadId: input.data.imageUploadId,
-    });
-    await upsertImageVariants({
-      db: ctx.db,
-      variants: imageManifest ? buildImageVariantCatalogEntries([imageManifest]) : [],
-    });
-    const result = await saveDish({
+    return imageSaveOperation({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
-      branchId: input.branchId,
-      data: input.data,
+      operationId: input.operationId,
+      scope: "dishesRouter.create",
+      input,
+      save: async ({ entityId, statements }) => {
+        const image = await prepareMenuImageSave({
+          db: ctx.db,
+          env: ctx.env,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: input.branchId,
+          entityId,
+          purpose: "dishImage",
+          existingUrl: null,
+          data: input.data,
+        });
+        const result = await saveDish({
+          db: ctx.db,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: input.branchId,
+          data: { ...input.data, imageUrl: image.imageUrl },
+          preserveImage: image.preserveImage,
+          entityId,
+          statements: [...statements, ...image.statements],
+        });
+        await bumpPublicContentVersionForBranch({
+          db: ctx.db,
+          env: ctx.env,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: input.branchId,
+        });
+        return result;
+      },
     });
-    await bumpPublicContentVersionForBranch({
-      db: ctx.db,
-      env: ctx.env,
-      restaurantId: ctx.tenant.restaurantId,
-      branchId: input.branchId,
-    });
-    return result;
   }),
   update: tenantProcedure.input(updateDishSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
@@ -237,33 +229,43 @@ const dishesRouter = router({
     if (!dishContext || dishContext.branchId !== input.branchId) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Plato no encontrado" });
     }
-    const imageManifest = await assertMenuImage({
-      env: ctx.env,
-      tenant: ctx.tenant,
-      branchId: input.branchId,
-      purpose: "dishImage",
-      existingUrl: dishContext.imageUrl,
-      imageUrl: input.data.imageUrl,
-      uploadId: input.data.imageUploadId,
-    });
-    await upsertImageVariants({
-      db: ctx.db,
-      variants: imageManifest ? buildImageVariantCatalogEntries([imageManifest]) : [],
-    });
-    const result = await saveDish({
+    return imageSaveOperation({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
-      branchId: input.branchId,
-      dishId: input.dishId,
-      data: input.data,
+      operationId: input.operationId,
+      scope: "dishesRouter.update",
+      input,
+      entityId: input.dishId,
+      save: async ({ entityId, statements }) => {
+        const image = await prepareMenuImageSave({
+          db: ctx.db,
+          env: ctx.env,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: input.branchId,
+          entityId,
+          purpose: "dishImage",
+          existingUrl: dishContext.imageUrl,
+          data: input.data,
+        });
+        const result = await saveDish({
+          db: ctx.db,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: input.branchId,
+          dishId: input.dishId,
+          data: { ...input.data, imageUrl: image.imageUrl },
+          preserveImage: image.preserveImage,
+          entityId,
+          statements: [...statements, ...image.statements],
+        });
+        await bumpPublicContentVersionForBranch({
+          db: ctx.db,
+          env: ctx.env,
+          restaurantId: ctx.tenant.restaurantId,
+          branchId: input.branchId,
+        });
+        return result;
+      },
     });
-    await bumpPublicContentVersionForBranch({
-      db: ctx.db,
-      env: ctx.env,
-      restaurantId: ctx.tenant.restaurantId,
-      branchId: input.branchId,
-    });
-    return result;
   }),
   saveRelations: tenantProcedure.input(dishRelationsSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");

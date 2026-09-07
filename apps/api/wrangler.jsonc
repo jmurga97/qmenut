@@ -81,6 +81,7 @@
   "env": {
     "development": {
       "name": "qmenut-api-dev",
+      "triggers": { "crons": ["* * * * *"] },
       "workers_dev": false,
       "routes": [
         {
@@ -168,10 +169,9 @@
           "custom_domain": true,
         },
       ],
-      // Único Cron Trigger de producción: sincroniza PostHog → D1 y envía el digest
-      // quincenal. Development no tiene cron.
+      // Daily analytics and independent image outbox recovery.
       "triggers": {
-        "crons": ["45 4 * * *"],
+        "crons": ["45 4 * * *", "* * * * *"],
       },
       "d1_databases": [
         {

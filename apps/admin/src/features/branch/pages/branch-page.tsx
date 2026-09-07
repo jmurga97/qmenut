@@ -32,6 +32,7 @@ function BranchForm({ branchId }: { branchId: string }) {
       <PageHeader kicker="Sucursal" title={controller.settings.name} />
       <FormProvider {...controller.form}>
         <FormShell
+          operation={controller.operation}
           busy={controller.pending}
           error={controller.feedback.error}
           onSubmit={() => void controller.submit()}
@@ -60,7 +61,6 @@ function BranchForm({ branchId }: { branchId: string }) {
                 draft={controller.logo.draft}
                 label="Logo (icono de la app)"
                 onRemove={controller.logo.remove}
-                onRetry={controller.logo.retry}
                 onSelect={controller.logo.selectFile}
               />
               <ImageGalleryControl
@@ -72,7 +72,6 @@ function BranchForm({ branchId }: { branchId: string }) {
                 onMove={controller.gallery.move}
                 onRemove={controller.gallery.remove}
                 onReplace={controller.gallery.replace}
-                onRetry={controller.gallery.retry}
               />
             </div>
           </section>

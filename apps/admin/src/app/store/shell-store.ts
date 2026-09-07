@@ -5,6 +5,7 @@ import { MOBILE_MEDIA_QUERY } from "~/shared/hooks/media-queries";
 import { useMediaQuery } from "~/shared/hooks/use-media-query";
 
 interface ShellStore {
+  editorBusy: boolean;
   isSidebarOpenDesktop: boolean;
   isSidebarOpenMobile: boolean;
   setSidebarOpenDesktop: (isOpen: boolean) => void;
@@ -14,6 +15,7 @@ const SHELL_STORAGE_KEY = "qmenut-admin-shell";
 const useShellStore = create<ShellStore>()(
   persist(
     (set) => ({
+      editorBusy: false,
       isSidebarOpenDesktop: true,
       isSidebarOpenMobile: false,
       setSidebarOpenDesktop: (isSidebarOpenDesktop) => set({ isSidebarOpenDesktop }),
@@ -47,3 +49,10 @@ export function useShellActions() {
     },
   };
 }
+
+// Only a navigation lock is shared; files and transfer state belong to the editor.
+export const setEditorBusy = (editorBusy: boolean) => {
+  useShellStore.setState({ editorBusy });
+};
+export const useEditorBusy = () => useShellStore((state) => state.editorBusy);
+export const isEditorBusy = () => useShellStore.getState().editorBusy;

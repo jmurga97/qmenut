@@ -1,254 +1,200 @@
 # Image uploads
 
-qmenut uses `ming-image-worker` as a private, multi-product image upload and optimization
-service. qmenut owns product authorization and database writes; the image Worker owns temporary
-uploads, processing jobs, transformations, and output manifests.
+Qmenut owns image ownership and publication. The private `ming-image-worker` owns
+upload jobs, signed URLs, processing, attempts, failures, output variants and their
+canonical manifests in its own D1 database. It already serves multiple products;
+no new worker database or replacement RPC contract is needed for this iteration.
 
-## Status
+## Review of the interrupted plan
 
-The admin dashboard supports branch logos, a branch gallery of up to 20 photos, category images,
-and dish images. JPEG, PNG, and WebP files up to 25 MiB are uploaded directly from the browser to
-a private R2 staging bucket and converted asynchronously to public WebP variants.
+Commit `aec4430` introduced durable `image_assignments`, form-save idempotency,
+background publication through a second queue, and global browser transfers. The current editor flow removes that global
+coordinator and waits for transfer before saving, while optimization stays asynchronous.
 
-Migration `0002_add_image_variants_catalog.sql` adds the responsive-variant catalogue. The existing
-`logo_url`, `branch_photos.url`, and `image_url` columns retain canonical URLs. qmenut does not
-duplicate the image Worker's job state. Confirmed variants are recorded during domain saves;
-polling remains read-only.
+This iteration keeps the atomic saves and revision protection, adds local upload
+ownership, and removes Qmenut's publication queue and dispatch calls from form saves.
+A minute cron reads the existing D1 outbox directly. Ming's processing queue remains
+unchanged. This trades roughly one minute of publication latency for fewer moving
+parts; backlogs can take longer. Batch RPC, callbacks, worker contract renaming and
+historical upload tracking are deferred until needed. Ming also records accepted retries
+as queued and makes repeated retry requests idempotent; the processing-attempt check
+prevents a late acceptance write from overwriting a newer processing result.
 
-## Responsibility boundary
+## Durable records and responsibilities
 
-qmenut owns:
+| Owner  | Record                               | Responsibility                                                                                                    |
+| ------ | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Ming   | `image_upload_jobs` and its variants | Product-scoped processing lifecycle and manifest                                                                  |
+| Qmenut | `image_uploads`                      | `uploadId`, restaurant, branch, purpose and creation time; no processing state                                    |
+| Qmenut | `image_assignments`                  | Current publication intent for an entity/field, desired references, revision, publication result and next attempt |
+| Qmenut | `admin_save_operations`              | Idempotent form saves committed with domain changes                                                               |
+| Qmenut | `image_variants`                     | Public-menu read model copied from verified manifests                                                             |
 
-- Better Auth sessions, tenant membership, branch authorization, and write permissions;
-- the closed mapping from UI purpose to image-worker preset;
-- client draft state, direct browser upload, polling, and retry presentation;
-- verification that a successful upload belongs to the restaurant, branch, and purpose;
-- atomic domain writes after every changed image has been verified.
+`image_assignments` remains the table name to avoid a rename-only migration. Its
+states are `pending`, `applied`, `failed`, `superseded`; they describe publication,
+not Ming's `awaiting_upload`, `queued`, `processing`, `succeeded`, `failed` states.
+Applied references retain both the `uploadId` and resolved URL. A newer intent
+replaces the previous one; this is not an audit history.
 
-`ming-image-worker` owns:
+## Save and publication sequence
 
-- product, preset, transform, bucket, key, and retention policy;
-- idempotent upload jobs and 15-minute signed `PUT` URLs;
-- D1 processing leases, attempts, stable failures, and manifests;
-- R2 event consumption, Cloudflare Images transforms, output writes, and immediate staging cleanup;
-- immutable cache metadata on optimized output objects.
+1. The browser reserves uploads through `admin.images.createUpload`. The API checks
+   tenant permissions and branch ownership, calls Ming with a closed preset and
+   opaque `externalId`, and records ownership locally before returning the signed
+   URL. Repeating creation with the same key recovers a failed local write.
+2. The editor transfers files before saving, with at most three concurrent PUTs
+   across the whole form (including branch logo and gallery together). The editor
+   remains open until every PUT has received a successful HTTP acknowledgement.
+   Ming may already be processing received files; the editor does not wait for it.
+3. The form submits upload references. Qmenut verifies their ownership with one
+   local query and commits domain data, publication intent and the save-operation
+   record in the same D1 batch. This step does not depend on Ming being available.
+   Only after a successful save does the editor release its navigation lock.
+4. R2 notifications trigger Ming's existing processing queue. Ming writes optimized
+   outputs and its manifest. After the PUT, publication does not depend on a browser.
+5. Each minute Qmenut selects up to 20 due intents, ordered by deadline. It advances
+   their retry deadline and reads Ming through the private service binding. One
+   failing intent does not prevent the others from progressing. A crash or RPC
+   outage leaves the record eligible for another cron.
+6. When all images are ready, Qmenut verifies upload ID, product, ownership fingerprint,
+   preset and expected WebP variants, then checks the current revision and live entity
+   within the publication batch. It writes canonical URLs, gallery ordering, variant
+   catalogue and `applied` together. Old images remain visible until the batch succeeds.
+7. Public-cache invalidation runs after publication. `invalidated_at` is written only
+   after success, so a failure is retried without republishing the images.
 
-The browser never calls the image Worker. qmenut's API reaches it through the private
-`IMAGE_WORKER` service binding and its named `ImageRpc` entrypoint. The only browser-facing
-infrastructure URL is the scoped, short-lived R2 `PUT` URL.
+Removing/replacing an image supersedes the earlier intent. Deleted targets are not
+repopulated. Keeping an image during an unrelated edit preserves pending work.
+Gallery changes publish as one set; a partial failure preserves the whole old set.
+The public menu reads its local variant catalogue and never calls Ming at render time.
 
-## End-to-end sequence
+## Browser feedback and retries
 
-```mermaid
-sequenceDiagram
-    participant A as qmenut admin
-    participant API as qmenut API
-    participant IW as ming-image-worker
-    participant S as private staging R2
-    participant Q as processing Queue
-    participant M as public media R2
-    participant DB as qmenut D1
+Files, previews and transfer state belong to the open editor. There is no global
+file coordinator, browser upload queue or transfer retry from the activity panel.
+Saving validates the form and all selected files before any reservation. Save and
+Cancel are replaced by a shared progress component, and editing, navigation,
+branch/restaurant switching and logout are blocked during the operation. A native
+beforeunload warning covers reload/close; the browser can still be forcibly closed.
 
-    A->>API: admin.images.createUpload(purpose, file metadata, idempotency key)
-    API->>API: authenticate, authorize tenant and branch
-    API->>IW: RPC createUpload(productId, metadata, idempotency key)
-    IW-->>API: uploadId and signed PUT
-    API-->>A: uploadId and signed PUT
-    A->>S: PUT bytes with the signed Content-Type
-    S->>Q: object-create notification
-    Q->>IW: process job
-    IW->>IW: inspect actual bytes and transform to WebP
-    IW->>M: write main.webp with immutable caching
-    IW->>S: delete successful staged original
-    A->>API: admin.images.getUpload(uploadId, branchId, purpose)
-    API->>IW: RPC getUpload(productId, uploadId)
-    API->>API: verify ownership fingerprint, preset, and public URL
-    API-->>A: succeeded + main WebP URL
-    A->>API: existing domain save mutation with URL + uploadId
-    API->>IW: RPC getUpload and revalidate completed upload
-    API->>DB: write only after all changed images pass
-```
+The form displays “Preparando subida…”, then “Subiendo archivos… N %”. The single
+percentage is weighted by transferred bytes across all selected files, not the
+average of file percentages. XMLHttpRequest upload events supply actual progress.
+At 100% it displays “Confirmando recepción…” until all HTTP responses succeed,
+then “Guardando datos…”. Optimization has no invented percentage. Forms without
+new files retain their normal save feedback. The reusable file transport and form
+progress component can also serve future large-file uploads.
 
-The admin keeps newly selected files local until the normal Save action. Uploads run with a
-maximum concurrency of three. Status is polled every second for at most 90 seconds. A processed
-draft retains its `uploadId` and URL if a later upload or D1 save fails, so another Save does not
-upload it again.
+On a transfer failure, the editor stops starting new transfers and waits for active
+ones to settle before restoring controls. Save retries the operation. Confirmed
+files retain their upload ID and are not PUT again if the form save fails. Upload
+reservation retries retain the same idempotency key; queued, processing and completed
+Ming jobs skip PUT even when the original response was lost. Replacing a file starts
+a new selection and key. Control requests have a 20-second timeout; PUT has a
+five-minute timeout. Unmounting aborts outstanding editor transfers.
 
-## qmenut API contract
+After saving, the persistent panel shows “Datos guardados. Estamos preparando las
+imágenes.”, followed by “Imágenes actualizadas.” after publication. It reads only
+durable assignments, recovers after reload, refreshes the editor queries on publication
+and retains server processing/publication retries. If an older assignment lacks its
+source or Ming cannot retry it, the owner must select another file in the editor.
+A worker outage preserves pending publication. A stable processing/manifest error
+requires attention; an unfinished job after 24 hours since the last publication
+request or retry is also surfaced. This deadline does not cancel the Ming job.
 
-`admin.images.createUpload` accepts:
+Files are not persisted in browser storage. Closing before the save confirmation
+can lose the draft, but closing after it cannot interrupt transfers: they are already
+received. Optimized but unreferenced output cleanup and backfilling old external
+images remain outside this iteration.
 
-```ts
-{
-  branchId: string;
-  purpose: "branchLogo" | "branchPhoto" | "categoryImage" | "dishImage";
-  filename: string;
-  contentType: "image/jpeg" | "image/png" | "image/webp";
-  sizeBytes: number;
-  idempotencyKey: string;
-}
-```
+## Worker contract and authorization
 
-It returns the image Worker's `uploadId`, status, and signed upload details. Signed URLs must not
-be logged, persisted, or sent to monitoring tools.
+The API uses the existing generic `createUpload`, `getUpload`, and `retryUpload`
+RPC envelopes through the `IMAGE_WORKER` binding and `ImageRpc` entrypoint.
+Ming receives `productId: "qmenut"`, a preset, and an opaque ownership reference;
+it never interprets restaurant IDs, dish IDs, gallery ordering or Qmenut permissions.
+It enforces product-scoped job reads and retries. The caller is a trusted backend;
+browsers cannot call this private service or choose arbitrary storage/transforms.
 
-`admin.images.getUpload` accepts `branchId`, `purpose`, and `uploadId`. It returns:
+Qmenut additionally hashes restaurant, branch and purpose into `externalId` and
+verifies that fingerprint and the preset when reading the result. Local ownership
+records authorize new pending form references. Existing pending assignments from
+migration 0003 can still complete through their existing fingerprint verification;
+new reservations are recorded in `image_uploads`.
 
-```ts
-{
-  uploadId: string;
-  status: "awaiting_upload" | "queued" | "processing" | "succeeded" | "failed";
-  imageUrl: string | null;
-  error: { code: string; message: string; retryable: boolean } | null;
-}
-```
+The legacy completed-URL save inputs remain supported and are revalidated against
+Ming. Existing external URLs are accepted only when unchanged from the domain record.
+Signed URLs, credentials, source bytes, filenames and ownership fingerprints must
+not be logged or persisted in Qmenut.
 
-`imageUrl` is non-null only for a successful manifest whose `main` variant is WebP and whose URL
-has the `https://media.qmenut.app/.../main.webp` shape.
-
-## Worker presets
-
-The purpose mapping is closed in `apps/api`; browsers cannot send preset IDs or transforms.
-
-| qmenut purpose  | Worker preset         | Output                                          |
+| Purpose         | Preset                | Expected WebP outputs                           |
 | --------------- | --------------------- | ----------------------------------------------- |
-| `branchLogo`    | `qmenut-logo`         | `main.webp`, width 512, scale-down, quality 90  |
-| `branchPhoto`   | `qmenut-branch-photo` | `main.webp`, width 1600, scale-down, quality 84 |
-| `categoryImage` | `qmenut-menu-image`   | `main.webp`, width 1024, scale-down, quality 82 |
-| `dishImage`     | `qmenut-menu-image`   | `main.webp`, width 1024, scale-down, quality 82 |
+| Branch logo     | `qmenut-logo`         | `main` (512px maximum)                          |
+| Gallery         | `qmenut-branch-photo` | `main` (1600px maximum), `w160`, `w430`, `w860` |
+| Category / dish | `qmenut-menu-image`   | `main` (1024px maximum), `w160`, `w430`, `w860` |
 
-All presets accept JPEG, PNG, and WebP up to 25 MiB. The signed URL lifetime is 15 minutes and
-`retainOriginal` is false.
+JPEG, PNG and WebP inputs are limited to 25 MiB. Presets scale down; equal effective
+widths are deduplicated in Qmenut's catalogue. Outputs use `media.qmenut.app` and
+immutable cache headers. Ming deletes successful staged originals; abandoned staging
+objects have a one-day lifecycle fallback. Replaced optimized outputs are not deleted.
 
-## Tenant and save-time verification
+## Storage and deployment
 
-Before creating or polling an upload, the API verifies that the session's restaurant owns the
-requested branch. Branch images require `branch.write`; menu images require `menu.write`.
+The staging bucket is `qmenut-image-staging`; output is `qmenut-media`. Its
+`object-create` notification targets Ming's processing queue for the prefix
+`products/qmenut/uploads/`. Staging CORS allows PUT with Content-Type from:
 
-The API hashes restaurant ID, branch ID, and purpose into the image Worker's `externalId`. Polling
-and save-time validation recompute that fingerprint and also require the expected product and
-preset. This makes an upload ID from another tenant, branch, or purpose unusable without adding a
-qmenut upload table.
+- `https://admin.qmenut.app`
+- `https://admin.dev.qmenut.app`
+- `http://localhost:5174`
 
-Every changed non-null image field must carry its successful `uploadId`. Immediately before the
-domain write, the API re-fetches the worker job and requires the exact returned URL. Existing
-external URLs may survive unrelated edits only when they match the current database value. New
-entities and replacements cannot introduce arbitrary external URLs, including fabricated
-`media.qmenut.app` URLs.
+The policy must match `ming-image-worker/examples/qmenut-staging-cors.json`.
+Local and E2E configurations use the remote shared image binding, so regular upload
+E2E tests are not isolated. Use a fake binding for failure checks.
 
-For the branch gallery, the API first accounts for the existing URL multiset, then validates every
-new occurrence in parallel. Only after all validations succeed does the existing D1 batch replace
-branch settings, schedules, and photos. A partial upload failure therefore leaves branch domain
-data unchanged.
+Apply migrations through `0004_image_upload_ownership.sql` before deploying this API.
+The migration adds only the ownership table; 0002/0003 and their snapshots are unchanged.
+Development uses `* * * * *`; production keeps that cron alongside the existing
+`45 4 * * *` analytics schedule. No Qmenut image queue needs provisioning. Existing
+queue resources, if provisioned for the interrupted plan, are not deleted by this change.
+For local Wrangler, trigger the scheduled handler with `--test-scheduled` and
+`/__scheduled?cron=*+*+*+*+*`; local cron events do not run automatically.
 
-## Storage and delivery
+Verify the deployed Ming presets before the real development smoke. Then check all
+four purposes and three file types, PUT completion followed by closing the tab,
+public URLs, actual dimensions/MIME/cache headers, catalogue, responsive delivery
+and invalidation. Local validation alone does not establish that R2 notifications,
+CORS or the currently deployed shared worker are configured correctly.
 
-| Resource                               | Access               | Purpose                                    |
-| -------------------------------------- | -------------------- | ------------------------------------------ |
-| `qmenut-image-staging`                 | Private              | Temporary originals and R2 event source    |
-| `ming-image-processing-production`     | Private              | Shared processing and explicit retry Queue |
-| `ming-image-processing-dlq-production` | Private              | Exhausted queue deliveries                 |
-| `qmenut-media`                         | Public custom domain | Optimized WebP outputs                     |
-| `https://media.qmenut.app`             | Public               | Stable image delivery origin               |
+## Local verification, 2026-09-06
 
-Configure `object-create` notifications only for `products/qmenut/uploads/`. Queue delivery is at
-least once; worker leases, fenced completion, deterministic output keys, and idempotency keys make
-duplicate notifications and repeated Save attempts safe.
+With Bun 1.3.6, Qmenut type checks/build and the five migrations applied to isolated
+local D1 pass. Temporary SQLite checks through the actual publication/save functions
+cover ownership and purpose isolation, previous-image preservation, worker outage,
+gallery ordering, upload-reference retention, cache retries, stale revisions, deletion,
+save replay and transaction rollback. No new test suite is added to the repositories.
 
-This section is the canonical qmenut staging CORS policy. The staging bucket must allow browser
-`PUT` requests with `Content-Type` from exactly:
+Ming's existing ten RPC tests pass. A temporary service/repository check also covers
+cross-product reads/retries, queued retry acceptance, idempotent replay, enqueue failure
+and a newer processing attempt overtaking the acceptance write. Its type check and
+dry-run build pass. Repository-wide lint still has unrelated pre-existing findings;
+changed image files are checked separately.
 
-- `https://admin.qmenut.app`;
-- `https://admin.dev.qmenut.app`;
-- `http://localhost:5174`.
+Neither repository has been deployed in this iteration. Remote migration application,
+real R2/Images processing and browser/public-menu smoke checks remain the next development
+validation step. Deploy Ming's retry correction before the Qmenut API and admin.
 
-All qmenut API environments currently bind `IMAGE_WORKER` with `remote: true`, including local
-development and the E2E API. Uploading from localhost therefore uses the deployed shared worker,
-staging bucket, processing queue, and media bucket; it is not an isolated test path. Do not add
-upload E2E coverage until an isolated local worker or fake binding replaces that remote path.
+## Editor simplification verification, 2026-09-07
 
-Successful jobs delete originals immediately. A one-day lifecycle rule on the qmenut upload
-prefix is the fallback for abandoned signed uploads, invalid images, failed jobs, and cleanup
-failures. Cloudflare lifecycle deletion is asynchronous, so do not treat one day as an exact
-deletion timestamp.
+Bun 1.3.6 monorepo checks, the admin build, and lint/format checks for changed
+frontend files pass. Temporary Playwright checks exercise the actual category
+controller and shared upload code against a local HTTP receiver and simulated
+control RPCs: real byte progress, withheld PUT acknowledgement, double submission,
+route locking, save replay with the same operation ID, partial transfer failures,
+three concurrent logo/gallery uploads, queued-job recovery, timeout and abort.
+The persistent panel survives reload and switches from pending to applied. Mobile
+dark-mode layout and an axe check of the form also pass. No new test suite is added.
 
-Provisioning commands and the checked-in CORS policy live in the sibling `ming-image-worker`
-repository. Its `examples/qmenut-staging-cors.json` must match the canonical origins above; see the
-sibling repository's `README.md` for the apply command.
-
-## Error handling
-
-The API parses both success and error envelopes and maps stable worker failures to tRPC errors.
-Declared and actual media type/size are checked independently: a JPEG filename containing invalid
-or unsupported bytes fails during processing and cannot reach a domain save.
-
-The UI keeps each draft in one of these visible, live-announced states: ready, uploading,
-optimizing, prepared, or failed. A timeout does not cancel the worker job; another Save uses the
-same idempotency key and polls the existing job. A permanently failed job can be restarted from
-the draft without losing the selected file.
-
-Do not log signed URLs, source bytes, filenames, upload metadata values, or ownership fingerprints.
-
-## Onboarding another product
-
-1. Add a closed product policy and versioned presets in
-   `ming-image-worker/src/config/image-policy.json`.
-2. Add product-specific staging and output R2 bindings and runtime variables to the worker.
-3. Add a storage-registry entry; never accept bucket names or transforms from the consumer.
-4. Configure staging CORS, a prefix-filtered `object-create` notification, and lifecycle cleanup.
-5. Connect a public custom domain if the consumer needs public manifest URLs.
-6. Add a same-account service binding from the product backend to `ming-image-worker`.
-7. Keep product authentication, ownership, polling, and database writes in that product.
-8. Deploy the image Worker before the new caller and smoke-test the complete queue path.
-
-## Deployment and smoke checks
-
-Follow [Deployment](deployment.md) for the exact order. At minimum, verify:
-
-1. JPEG, PNG, and WebP sources work for logo, gallery, category, and dish purposes.
-2. Every saved URL is a public `main.webp` URL under `media.qmenut.app`.
-3. Invalid bytes, unsupported formats, oversize files, expired signatures, queue failures,
-   polling timeouts, and partial galleries leave qmenut domain data unchanged.
-4. Cross-tenant IDs and fabricated qmenut media URLs are rejected.
-5. Existing external URLs survive unrelated edits but cannot be introduced or changed manually.
-6. Successful staging objects are deleted; abandoned objects show one-day lifecycle expiration.
-7. Output objects have `Content-Type: image/webp` and
-   `Cache-Control: public, max-age=31536000, immutable`.
-8. Gallery ordering, keyboard controls, replacement, removal, mobile layout, and screen-reader
-   status announcements work in the admin.
-
-## Limitations
-
-qmenut stores canonical URL references and a variant catalogue. Replacing an image or deleting its domain entity does not yet
-delete the old optimized object from `qmenut-media`. Output garbage collection requires a future
-reference-tracking or deletion capability and is intentionally outside this iteration.
-
-There is no callback and no qmenut background upload table. The browser must poll while the Save
-operation is active. Existing external assets are migrated only when an owner replaces them.
-
-## Primary Cloudflare references
-
-- [Service bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/)
-- [R2 event notifications](https://developers.cloudflare.com/r2/buckets/event-notifications/)
-- [R2 CORS for presigned URLs](https://developers.cloudflare.com/r2/buckets/cors/)
-- [R2 object lifecycle rules](https://developers.cloudflare.com/r2/buckets/object-lifecycles/)
-
-## Responsive variants
-
-Version 2 of `qmenut-menu-image` and `qmenut-branch-photo` adds WebP widths 160, 430,
-and 860 at quality 75. Existing `main` outputs, logo presets, other products, and cache
-policies are preserved. The frontend selects confirmed candidates from the catalogue,
-uses layout-specific `sizes`, and falls back to the canonical URL when a candidate fails.
-External images without a catalogue entry continue to use their existing URL.
-
-Deploy the sibling image worker first, apply the qmenut catalogue migration, and deploy
-the API. Start in development and verify representative tenants before repeating in
-production. Existing images are not automatically backfilled. The operator backfill
-script has been removed; the private maintenance RPC remains available in the source
-but requires an explicit service-binding call.
-
-Before promoting the public web deployment, compare five mobile runs per template against
-the baseline with the same device/network settings. Check LCP, CLS, image transfer size,
-initial JavaScript, and font requests, plus navigation, modal keyboard controls, locale,
-and reduced-motion behavior. `QMENUT_REACT_COMPILER=0` disables the compiler for a build
-comparison. Local E2E success alone does not establish production performance targets.
+These checks do not upload to Ming or establish the deployed staging CORS policy,
+R2 notifications, or remote processing/publication health. A real development smoke
+remains necessary when deploying this change.

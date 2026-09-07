@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { imageChangeSchema, pendingPhotoSchema } from "../admin-images/image-assignment";
+
 const nullableText = z
   .string()
   .trim()
@@ -61,6 +63,10 @@ export const photoRowSchema = z.object({
 });
 
 export const saveBranchSettingsSchema = z.object({
+  operationId: z.uuid().optional(),
+  imageChanges: z
+    .object({ logo: imageChangeSchema, gallery: z.array(pendingPhotoSchema).max(20).optional() })
+    .optional(),
   branchId: z.string().trim().min(1),
   timezone: z
     .string()

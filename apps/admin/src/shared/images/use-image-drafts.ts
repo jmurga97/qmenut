@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  createImageDraft,
-  replaceImageDraftFile,
-  retryImageDraft,
-  revokeImageDraftPreview,
-  validateImageFile,
-} from "./image-draft";
+import { createImageDraft, replaceImageDraftFile, revokeImageDraftPreview, validateImageFile } from "./image-draft";
 
 import type { ImageDraft } from "./image-draft";
 
@@ -39,44 +33,70 @@ function useImageDraftCollection(createInitialDrafts: () => ImageDraft[]) {
       current.map((draft) => {
         if (draft.id !== id) return draft;
         revokeImageDraftPreview(draft);
-        return createImageDraft({ imageUrl: null });
+        return { ...createImageDraft({ imageUrl: null }), changed: true };
       }),
     );
-  }, []);
-
-  const retry = useCallback((id: string) => {
-    setDrafts((current) => current.map((draft) => (draft.id === id ? retryImageDraft(draft) : draft)));
   }, []);
 
   const update = useCallback((id: string, patch: Partial<ImageDraft>) => {
     setDrafts((current) => current.map((draft) => (draft.id === id ? { ...draft, ...patch } : draft)));
   }, []);
 
-  return { drafts, draftsRef, remove, replace, reset, retry, setDrafts, update };
+  return { drafts, draftsRef, remove, replace, reset, setDrafts, update };
 }
 
 export function useImageDraft(initialUrl: string | null) {
-  const {
-    drafts,
-    replace,
-    reset,
-    retry: retryDraft,
-    update,
-  } = useImageDraftCollection(() => [createImageDraft({ imageUrl: initialUrl })]);
+  const { drafts, replace, reset, update, setDrafts } = useImageDraftCollection(() => [
+    createImageDraft({ imageUrl: initialUrl }),
+  ]);
+  useEffect(() => {
+    setDrafts((current) =>
+      current.map((item) => {
+        if (item.changed || item.file || item.imageUrl === initialUrl) return item;
+        revokeImageDraftPreview(item);
+        return createImageDraft({ imageUrl: initialUrl, id: item.id });
+      }),
+    );
+  }, [initialUrl, setDrafts]);
+  const accept = useCallback(
+    () =>
+      setDrafts((current) =>
+        current.map((item) => ({ ...item, file: null, changed: false, status: item.uploadId ? "optimizing" : "idle" })),
+      ),
+    [setDrafts],
+  );
   const draft = drafts[0];
   if (!draft) throw new Error("No se pudo inicializar el borrador de imagen.");
 
   const remove = useCallback(() => reset(draft.id), [draft.id, reset]);
-  const retry = useCallback(() => retryDraft(draft.id), [draft.id, retryDraft]);
   const selectFile = useCallback((file: File) => replace(draft.id, file), [draft.id, replace]);
 
-  return { draft, remove, retry, selectFile, update };
+  return { draft, remove, selectFile, update, accept };
 }
 
 export function useImageGalleryDraft(initialUrls: string[], maximum = 20) {
-  const { drafts, draftsRef, remove, replace, retry, setDrafts, update } = useImageDraftCollection(() =>
+  const { drafts, draftsRef, remove, replace, setDrafts, update } = useImageDraftCollection(() =>
     initialUrls.map((imageUrl) => createImageDraft({ imageUrl })),
   );
+  const [changed, setChanged] = useState(false);
+  const canonicalKey = JSON.stringify(initialUrls);
+  const sourceKey = useRef(canonicalKey);
+  useEffect(() => {
+    const different = sourceKey.current !== canonicalKey;
+    sourceKey.current = canonicalKey;
+    if (!different || changed) return;
+    setDrafts((current) => {
+      for (const item of current) revokeImageDraftPreview(item);
+      const urls = JSON.parse(canonicalKey) as string[];
+      return urls.map((imageUrl) => createImageDraft({ imageUrl }));
+    });
+  }, [canonicalKey, changed, setDrafts]);
+  const accept = useCallback(() => {
+    setChanged(false);
+    setDrafts((current) =>
+      current.map((item) => ({ ...item, file: null, changed: false, status: item.uploadId ? "optimizing" : "idle" })),
+    );
+  }, [setDrafts]);
   const [error, setError] = useState<string>();
 
   const addFiles = useCallback(
@@ -92,6 +112,7 @@ export function useImageGalleryDraft(initialUrls: string[], maximum = 20) {
         return;
       }
       setError(undefined);
+      setChanged(true);
       setDrafts((current) => [...current, ...files.map((file) => createImageDraft({ file, imageUrl: null }))]);
     },
     [draftsRef, maximum, setDrafts],
@@ -99,6 +120,7 @@ export function useImageGalleryDraft(initialUrls: string[], maximum = 20) {
 
   const move = useCallback(
     (id: string, direction: -1 | 1) => {
+      setChanged(true);
       setDrafts((current) => {
         const index = current.findIndex((draft) => draft.id === id);
         const target = index + direction;
@@ -115,12 +137,19 @@ export function useImageGalleryDraft(initialUrls: string[], maximum = 20) {
 
   return {
     addFiles,
+    accept,
+    changed,
     drafts,
     error,
     move,
-    remove,
-    replace,
-    retry,
+    remove: (id: string) => {
+      setChanged(true);
+      remove(id);
+    },
+    replace: (id: string, file: File) => {
+      setChanged(true);
+      replace(id, file);
+    },
     update,
   };
 }

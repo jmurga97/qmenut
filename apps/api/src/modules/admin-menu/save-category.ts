@@ -1,5 +1,5 @@
 import {
-  createCategory,
+  createCategoryStatement,
   getCategoryTranslatableFields,
   updateCategoryStatement,
 } from "@qmenut/db/repositories/admin-categories.repository";
@@ -10,10 +10,13 @@ import type { CategoryWriteData } from "@qmenut/db/repositories/admin-categories
 import type { BatchItem } from "drizzle-orm/batch";
 
 interface CreateCategoryInput {
+  entityId?: string;
   db: DrizzleDb;
   restaurantId: string;
   branchId: string;
   data: CategoryWriteData;
+  statements?: BatchItem<"sqlite">[];
+  preserveImage?: boolean;
 }
 
 export async function createMenuCategory({
@@ -21,17 +24,22 @@ export async function createMenuCategory({
   restaurantId,
   branchId,
   data,
+  entityId = crypto.randomUUID(),
+  statements = [],
 }: CreateCategoryInput): Promise<{ id: string }> {
   // The menu router authorizes the branch before calling this writer.
-  const id = await createCategory({ db, restaurantId, branchId, data });
-  return { id };
+  await db.batch([createCategoryStatement({ db, restaurantId, branchId, data, id: entityId }), ...statements]);
+  return { id: entityId };
 }
 
 interface UpdateCategoryInput {
+  entityId?: string;
   db: DrizzleDb;
   restaurantId: string;
   categoryId: string;
   data: CategoryWriteData;
+  statements?: BatchItem<"sqlite">[];
+  preserveImage?: boolean;
 }
 
 export async function updateMenuCategory({
@@ -39,6 +47,8 @@ export async function updateMenuCategory({
   restaurantId,
   categoryId,
   data,
+  statements: extraStatements = [],
+  preserveImage,
 }: UpdateCategoryInput): Promise<{ id: string }> {
   const previous = await getCategoryTranslatableFields({ categoryId, db, restaurantId });
 
@@ -49,7 +59,7 @@ export async function updateMenuCategory({
   );
 
   const statements: [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] = [
-    updateCategoryStatement({ db, restaurantId, categoryId, data }),
+    updateCategoryStatement({ db, restaurantId, categoryId, data, preserveImage }),
   ];
 
   if (changedFields.length > 0) {
@@ -64,6 +74,7 @@ export async function updateMenuCategory({
     );
   }
 
+  statements.push(...extraStatements);
   await db.batch(statements);
 
   return { id: categoryId };

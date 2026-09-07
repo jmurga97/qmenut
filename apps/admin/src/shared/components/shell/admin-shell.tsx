@@ -4,13 +4,15 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate, useRouter } from "@tanstack/react-router";
 
 import { resolveSelectedBranch, useBranchStore } from "~/app/store/branch-store";
-import { useShellActions, useShellMobile, useSidebarOpen } from "~/app/store/shell-store";
+import { isEditorBusy, useEditorBusy, useShellActions, useShellMobile, useSidebarOpen } from "~/app/store/shell-store";
 import { getListRestaurantsQueryOptions } from "~/features/auth/api";
 import { useSelectRestaurant } from "~/features/auth/hooks/use-select-restaurant";
 import { signOut } from "~/lib/auth-client";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
+import { ImageActivity } from "~/shared/images/image-activity";
 import { buildPublicMenuUrl } from "~/shared/services/public-menu-url";
+import "~/shared/images/styles.css";
 
 import { AdminSidebar } from "./admin-sidebar";
 
@@ -109,6 +111,7 @@ export function AdminShell() {
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const { data: memberships } = useSuspenseQuery(getListRestaurantsQueryOptions({ trpc }));
   const selectRestaurant = useSelectRestaurant();
+  const editorBusy = useEditorBusy();
   const isMobile = useShellMobile();
   const isSidebarOpen = useSidebarOpen();
   const { closeSidebar, setSidebarOpen } = useShellActions();
@@ -122,6 +125,7 @@ export function AdminShell() {
     if (isMobile) closeSidebar();
   }
   async function logout() {
+    if (isEditorBusy()) return;
     await signOut();
     queryClient.clear();
     await navigate({ to: "/login" });
@@ -140,16 +144,20 @@ export function AdminShell() {
       }
       navigation={
         <AdminSidebar
+          disabled={editorBusy}
           activeRestaurantId={tenant.restaurant.id}
           branches={tenant.branches}
           groups={getNavigationGroups(location.pathname, tenant.roleCode)}
           onBranchChange={(branchId) => {
+            if (isEditorBusy()) return;
             setSelectedBranchId(branchId);
             void router.invalidate();
           }}
           onNavigate={(selectedId) => void selectNavigation(selectedId)}
           onLogout={() => void logout()}
-          onRestaurantChange={(restaurantId) => selectRestaurant.mutate({ restaurantId })}
+          onRestaurantChange={(restaurantId) => {
+            if (!isEditorBusy()) selectRestaurant.mutate({ restaurantId });
+          }}
           publicMenuUrl={selectedBranch?.customDomain ? buildPublicMenuUrl(selectedBranch.customDomain) : null}
           restaurantName={tenant.restaurant.name}
           restaurants={memberships.map((membership) => ({ id: membership.restaurantId, label: membership.name }))}
@@ -162,6 +170,7 @@ export function AdminShell() {
       open={isSidebarOpen}
     >
       <div className="admin-main-slot">
+        {selectedBranch ? <ImageActivity branchId={selectedBranch.id} /> : null}
         <Outlet />
       </div>
     </AppShell>

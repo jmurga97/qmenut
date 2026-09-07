@@ -173,3 +173,13 @@ _Avoid_: Managed service, 24/7 support, menu editing service
 A capability Qmenut intends to build but does not currently sell or promise as available.
 Delivery is presently a roadmap feature.
 _Avoid_: Coming feature, included soon
+
+**Image publication intent**:
+The restaurant's requested image selection for a logo, gallery, category, or dish,
+which becomes visible once its images are ready. A newer selection replaces the earlier intent.
+_Avoid_: Image processing job, upload status
+
+**Image upload ownership**:
+The relationship between an uploaded image and the restaurant, branch, and purpose
+that may use it in Qmenut.
+_Avoid_: Processing lifecycle, image publication
