@@ -12,7 +12,6 @@ import {
   bumpPublicContentVersionForRestaurant,
 } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
-import { dispatchImageAssignments } from "../admin-images/image-finalization";
 import { imageSaveOperation } from "../admin-images/image-save-operation";
 import { prepareBranchImageSave } from "../admin-images/prepare-branch-image-save";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
@@ -219,7 +218,6 @@ export const adminBranchesRouter = router({
           env: ctx.env,
           restaurantId: ctx.tenant.restaurantId,
         });
-        await dispatchImageAssignments(ctx.env);
         return { id: input.branchId };
       },
     });

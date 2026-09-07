@@ -1,3 +1,5 @@
+import { imageUploads } from "@qmenut/db/schema/images";
+
 import { imageAssignmentsRouter } from "./image-assignment.router";
 import { createImageUploadSchema, getImageUploadSchema } from "./image-input.schema";
 import { createImageUpload, getImageUpload } from "./image-worker.client";
@@ -22,11 +24,23 @@ export const adminImagesRouter = router({
       branchId: input.branchId,
     });
 
-    return createImageUpload({
+    const upload = await createImageUpload({
       worker: ctx.env.IMAGE_WORKER,
       restaurantId: ctx.tenant.restaurantId,
       ...input,
     });
+    // Repeating createUpload recovers a worker success followed by a failed local write.
+    await ctx.db
+      .insert(imageUploads)
+      .values({
+        uploadId: upload.uploadId,
+        restaurantId: ctx.tenant.restaurantId,
+        branchId: input.branchId,
+        purpose: input.purpose,
+        createdAt: Date.now(),
+      })
+      .onConflictDoNothing();
+    return upload;
   }),
   getUpload: tenantProcedure.input(getImageUploadSchema).query(async ({ ctx, input }) => {
     requireImagePermission(ctx.tenant, input.purpose);

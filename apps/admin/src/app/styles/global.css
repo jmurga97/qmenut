@@ -303,6 +303,10 @@ button {
   padding: 0;
   border: 0;
 }
+.admin-editor-fields {
+  display: grid;
+  gap: 1.5rem;
+}
 .admin-editor-section,
 .admin-form-grid {
   display: grid;

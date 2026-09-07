@@ -100,7 +100,6 @@ export const envSchema = z.object({
   }),
   EMAIL_WORKER: serviceWorkerBindingSchema("EMAIL_WORKER"),
   IMAGE_WORKER: imageWorkerBindingSchema,
-  IMAGE_FINALIZATION_QUEUE: z.custom<Queue<{ id: string; revision: string }>>().optional(),
   EXCHANGE_RATE_WORKER: exchangeRateWorkerBindingSchema.optional(),
   THEME_WORKER: serviceWorkerBindingSchema("THEME_WORKER"),
   THEME_WORKER_TOKEN: z.string().min(1),

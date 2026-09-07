@@ -1,8 +1,12 @@
 import { Button } from "@jmurga97/components";
 
+import { FileOperationProgress } from "./file-operation-progress";
+
+import type { FileOperation } from "./file-operation-progress";
 import type { ReactNode } from "react";
 
 interface FormActionsProps {
+  operation?: FileOperation;
   busy?: boolean;
   busyLabel?: string;
   children?: ReactNode;
@@ -11,6 +15,7 @@ interface FormActionsProps {
   submitLabel?: string;
 }
 export function FormActions({
+  operation,
   busy = false,
   busyLabel = "Guardando…",
   children,
@@ -18,6 +23,12 @@ export function FormActions({
   onSubmit,
   submitLabel = "Guardar",
 }: FormActionsProps) {
+  if (operation)
+    return (
+      <div className="admin-topbar-actions">
+        <FileOperationProgress operation={operation} />
+      </div>
+    );
   return (
     <div className="admin-topbar-actions">
       {children}

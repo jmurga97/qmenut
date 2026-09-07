@@ -261,3 +261,65 @@
     grid-auto-columns: minmax(11rem, 78vw);
   }
 }
+
+.admin-file-operation {
+  display: grid;
+  gap: 0.5rem;
+  width: min(100%, 24rem);
+  font-size: var(--admin-text-body-sm);
+  font-variant-numeric: tabular-nums;
+}
+.admin-file-operation progress {
+  display: block;
+  width: 100%;
+  height: 0.5rem;
+  accent-color: var(--ring);
+}
+.admin-file-operation small {
+  color: var(--muted-foreground);
+}
+
+.admin-file-operation progress[value] {
+  appearance: none;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0.25rem;
+  background: var(--secondary);
+}
+.admin-file-operation progress[value]::-webkit-progress-bar {
+  background: var(--secondary);
+  border-radius: 0.25rem;
+}
+.admin-file-operation progress[value]::-webkit-progress-value {
+  background: var(--ring);
+  border-radius: 0.25rem;
+}
+.admin-file-operation progress[value]::-moz-progress-bar {
+  background: var(--ring);
+  border-radius: 0.25rem;
+}
+
+.admin-file-operation__label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.admin-file-operation__loader {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  border: 2px solid var(--secondary);
+  border-top-color: var(--ring);
+  border-radius: 50%;
+  animation: admin-file-operation-spin 0.8s linear infinite;
+}
+@keyframes admin-file-operation-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-file-operation__loader {
+    animation: none;
+  }
+}

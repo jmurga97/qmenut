@@ -3,7 +3,6 @@ import { TRPCError } from "@trpc/server";
 import { and, desc, eq, gte, inArray, or } from "drizzle-orm";
 import { z } from "zod";
 
-import { dispatchImageAssignments } from "./image-finalization";
 import { getImageUpload, retryImageUpload } from "./image-worker.client";
 import { router, tenantProcedure } from "../../trpc/trpc";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
@@ -42,6 +41,7 @@ export const imageAssignmentsRouter = router({
       row.purpose === "branchLogo" || row.purpose === "branchPhoto" ? "branch.write" : "menu.write",
     );
     if (row.status === "applied") return { needsFile: false };
+    let needsFile = false;
     for (const image of row.images) {
       if (!image.uploadId) continue;
       const ownership = {
@@ -52,16 +52,24 @@ export const imageAssignmentsRouter = router({
         worker: ctx.env.IMAGE_WORKER,
       };
       const upload = await getImageUpload(ownership);
-      if (upload.status === "awaiting_upload") return { needsFile: true };
+      if (upload.status === "awaiting_upload") needsFile = true;
       if (upload.status !== "failed") continue;
-      if (!upload.error?.retryable) return { needsFile: true };
+      if (!upload.error?.retryable) {
+        needsFile = true;
+        continue;
+      }
       await retryImageUpload(ownership);
     }
     await ctx.db
       .update(imageAssignments)
-      .set({ status: "pending", error: null, nextAttemptAt: Date.now(), createdAt: Date.now(), updatedAt: Date.now() })
+      .set({
+        status: "pending",
+        revision: crypto.randomUUID(),
+        error: null,
+        nextAttemptAt: Date.now() + 60_000,
+        updatedAt: Date.now(),
+      })
       .where(and(filter, inArray(imageAssignments.status, ["pending", "failed"])));
-    await dispatchImageAssignments(ctx.env);
-    return { needsFile: false };
+    return { needsFile };
   }),
 });

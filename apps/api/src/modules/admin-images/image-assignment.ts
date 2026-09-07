@@ -1,11 +1,9 @@
-import { imageAssignments } from "@qmenut/db/schema/images";
-import { and, eq } from "drizzle-orm";
+import { imageAssignments, imageUploads } from "@qmenut/db/schema/images";
+import { TRPCError } from "@trpc/server";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 
-import { getImageUpload } from "./image-worker.client";
-
 import type { ImagePurpose } from "./image-input.schema";
-import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { PendingImageReference } from "@qmenut/db/schema/images";
 import type { BatchItem } from "drizzle-orm/batch";
@@ -51,21 +49,25 @@ export function supersedeAssignmentStatement(input: AssignmentTarget): BatchItem
 }
 
 export async function pendingAssignmentStatement(
-  input: AssignmentTarget & { env: RuntimeEnv; images: PendingImageReference[] },
+  input: AssignmentTarget & { images: PendingImageReference[] },
 ): Promise<{ statement: BatchItem<"sqlite"> }> {
-  await Promise.all(
-    input.images
-      .filter((image) => image.uploadId)
-      .map((image) =>
-        getImageUpload({
-          worker: input.env.IMAGE_WORKER,
-          restaurantId: input.restaurantId,
-          branchId: input.branchId,
-          purpose: input.purpose,
-          uploadId: image.uploadId!,
-        }),
-      ),
-  );
+  const uploadIds = [...new Set(input.images.flatMap((image) => (image.uploadId ? [image.uploadId] : [])))];
+  if (uploadIds.length > 0) {
+    const owned = await input.db
+      .select({ id: imageUploads.uploadId })
+      .from(imageUploads)
+      .where(
+        and(
+          inArray(imageUploads.uploadId, uploadIds),
+          eq(imageUploads.restaurantId, input.restaurantId),
+          eq(imageUploads.branchId, input.branchId),
+          eq(imageUploads.purpose, input.purpose),
+        ),
+      );
+    if (owned.length !== uploadIds.length) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "La subida no pertenece a esta sucursal o propósito" });
+    }
+  }
   const now = Date.now();
   const values = {
     restaurantId: input.restaurantId,
@@ -93,7 +95,7 @@ export async function pendingAssignmentStatement(
 }
 
 export async function imageChangeStatements(
-  input: AssignmentTarget & { env: RuntimeEnv; change?: ImageChange },
+  input: AssignmentTarget & { change?: ImageChange },
 ): Promise<BatchItem<"sqlite">[]> {
   if (input.change?.kind === "keep") return [];
   if (input.change?.kind !== "upload") return [supersedeAssignmentStatement(input)];

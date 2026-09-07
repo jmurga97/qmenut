@@ -25,7 +25,6 @@ import { saveDish } from "./save-dish";
 import { saveDishRelations } from "./save-dish-relations";
 import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
-import { dispatchImageAssignments } from "../admin-images/image-finalization";
 import { imageSaveOperation } from "../admin-images/image-save-operation";
 import { prepareMenuImageSave } from "../admin-images/prepare-menu-image-save";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
@@ -88,7 +87,6 @@ const categoriesRouter = router({
           restaurantId: ctx.tenant.restaurantId,
           branchId: input.branchId,
         });
-        await dispatchImageAssignments(ctx.env);
         return result;
       },
     });
@@ -138,7 +136,6 @@ const categoriesRouter = router({
           branchId: categoryContext.branchId,
         });
 
-        await dispatchImageAssignments(ctx.env);
         return result;
       },
     });
@@ -218,7 +215,6 @@ const dishesRouter = router({
           restaurantId: ctx.tenant.restaurantId,
           branchId: input.branchId,
         });
-        await dispatchImageAssignments(ctx.env);
         return result;
       },
     });
@@ -267,7 +263,6 @@ const dishesRouter = router({
           restaurantId: ctx.tenant.restaurantId,
           branchId: input.branchId,
         });
-        await dispatchImageAssignments(ctx.env);
         return result;
       },
     });

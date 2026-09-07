@@ -9,7 +9,16 @@ export interface PendingImageReference {
   position: number;
 }
 
-/** One current intent per image field; revision fences late queue deliveries. */
+/** Product ownership only. Ming owns the job's processing state and manifest. */
+export const imageUploads = sqliteTable("image_uploads", {
+  uploadId: text("upload_id").primaryKey(),
+  restaurantId: text("restaurant_id").notNull(),
+  branchId: text("branch_id").notNull(),
+  purpose: text("purpose", { enum: ["branchLogo", "branchPhoto", "categoryImage", "dishImage"] }).notNull(),
+  createdAt: integer("created_at").notNull(),
+});
+
+/** One current intent per image field; revision fences late publications. */
 export const imageAssignments = sqliteTable(
   "image_assignments",
   {

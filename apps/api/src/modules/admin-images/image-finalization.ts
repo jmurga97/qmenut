@@ -3,18 +3,19 @@ import { upsertImageVariantsStatements } from "@qmenut/db/repositories/image-var
 import { branchPhotos, branches } from "@qmenut/db/schema/branches";
 import { imageAssignments } from "@qmenut/db/schema/images";
 import { categories, dishes } from "@qmenut/db/schema/menu";
+import * as Sentry from "@sentry/cloudflare";
 import { and, eq, exists, isNull, lte, not, or, sql } from "drizzle-orm";
 
 import { buildImageVariantCatalogEntries } from "./image-variant-catalog";
 import { getImageUpload } from "./image-worker.client";
-import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
+import { bumpPublicContentVersion } from "../../lib/theme/theme-worker-client";
 
 import type { VerifiedImageManifest } from "./image-worker.client";
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { BatchItem } from "drizzle-orm/batch";
 
-export interface ImageFinalizationMessage {
+interface ImageFinalizationMessage {
   id: string;
   revision: string;
 }
@@ -85,25 +86,32 @@ function publicationStatements(input: {
 
 async function resolveImages(env: RuntimeEnv, assignment: Assignment) {
   const manifests: VerifiedImageManifest[] = [];
-  const photos: { url: string; position: number }[] = [];
+  const photos: { url: string; uploadId?: string; position: number }[] = [];
   for (const image of assignment.images) {
     if (image.url) photos.push({ url: image.url, position: image.position });
     if (!image.uploadId) continue;
     const upload = await getImageUpload({ worker: env.IMAGE_WORKER, ...assignment, uploadId: image.uploadId });
     if (upload.status === "failed")
       throw new ImagePreparationError("No se pudo preparar la imagen. Reintenta o selecciona otra imagen.");
-    if (upload.status === "awaiting_upload" && Date.now() - assignment.createdAt > 15 * 60_000) {
-      throw new ImagePreparationError("No se recibió el archivo. Abre el editor y selecciónalo de nuevo.");
-    }
     if (upload.status !== "succeeded" || !upload.imageUrl || !upload.manifest) return null;
     const expected = assignment.purpose === "branchLogo" ? ["main"] : ["main", "w160", "w430", "w860"];
-    if (expected.some((name) => !upload.manifest?.variants[name]?.publicUrl)) {
+    const baseUrl = upload.imageUrl.slice(0, -"main.webp".length);
+    if (
+      expected.some((name) => {
+        const variant = upload.manifest?.variants[name];
+        return (
+          variant?.name !== name ||
+          variant.contentType !== "image/webp" ||
+          variant.publicUrl !== `${baseUrl}${name}.webp`
+        );
+      })
+    ) {
       throw new ImagePreparationError(
         "La imagen no contiene todas las variantes. Selecciona otra imagen o contacta con soporte.",
       );
     }
     manifests.push(upload.manifest);
-    photos.push({ url: upload.imageUrl, position: image.position });
+    photos.push({ url: upload.imageUrl, uploadId: image.uploadId, position: image.position });
   }
   return { manifests, photos };
 }
@@ -117,11 +125,17 @@ async function invalidateApplied(env: RuntimeEnv, message: ImageFinalizationMess
   );
   const row = await db.select().from(imageAssignments).where(filter).get();
   if (!row) return;
-  await bumpPublicContentVersionForBranch({ db, env, restaurantId: row.restaurantId, branchId: row.branchId });
+  const branch = await db
+    .select({ host: branches.customDomain })
+    .from(branches)
+    .where(and(eq(branches.id, row.branchId), eq(branches.restaurantId, row.restaurantId), isNull(branches.deletedAt)))
+    .get();
+  // Let failures reach the scheduler: applied rows remain due until cache invalidation succeeds.
+  if (branch?.host) await bumpPublicContentVersion(env, branch.host);
   await db.update(imageAssignments).set({ invalidatedAt: Date.now() }).where(revisionFilter(message));
 }
 
-export async function finalizeImageAssignment(env: RuntimeEnv, message: ImageFinalizationMessage): Promise<void> {
+async function finalizeImageAssignment(env: RuntimeEnv, message: ImageFinalizationMessage): Promise<void> {
   const db = createDb(env.DB);
   const assignment = await db.select().from(imageAssignments).where(revisionFilter(message)).get();
   if (!assignment || assignment.status === "superseded" || assignment.status === "failed") return;
@@ -134,11 +148,11 @@ export async function finalizeImageAssignment(env: RuntimeEnv, message: ImageFin
   let resolved;
   try {
     resolved = await resolveImages(env, assignment);
-    if (Date.now() - assignment.createdAt > 24 * 60 * 60 * 1000 && !resolved) {
+    if (Date.now() - assignment.updatedAt > 24 * 60 * 60 * 1000 && !resolved) {
       throw new ImagePreparationError("La imagen no se ha recibido o preparado. Selecciona el archivo de nuevo.");
     }
   } catch (error) {
-    // Only stable processing failures are terminal; RPC/network errors are retried by the queue.
+    // Only stable processing failures are terminal; RPC/network errors are retried by the next cron.
     if (!(error instanceof ImagePreparationError)) throw error;
     await db
       .update(imageAssignments)
@@ -146,14 +160,7 @@ export async function finalizeImageAssignment(env: RuntimeEnv, message: ImageFin
       .where(fence);
     return;
   }
-  if (!resolved) {
-    await db
-      .update(imageAssignments)
-      .set({ nextAttemptAt: Date.now() + 15_000 })
-      .where(fence);
-    await env.IMAGE_FINALIZATION_QUEUE?.send(message, { delaySeconds: 15 });
-    return;
-  }
+  if (!resolved) return;
   const [first, ...remaining] = publicationStatements({ db, assignment, photos: resolved.photos });
   if (!first) return;
   const publicationFilter = and(fence, targetExists(db, assignment));
@@ -169,31 +176,32 @@ export async function finalizeImageAssignment(env: RuntimeEnv, message: ImageFin
   await invalidateApplied(env, message);
 }
 
-/** D1 is the outbox. A missed send is recovered by the next scheduled dispatch. */
-export async function dispatchImageAssignments(env: RuntimeEnv): Promise<void> {
-  if (!env.IMAGE_FINALIZATION_QUEUE) return;
+/** D1 is the durable publication outbox; no product-side queue is needed. */
+export async function publishPendingImages(env: RuntimeEnv): Promise<void> {
   const db = createDb(env.DB);
   const now = Date.now();
   const needsInvalidation = and(eq(imageAssignments.status, "applied"), isNull(imageAssignments.invalidatedAt));
   const eligible = or(eq(imageAssignments.status, "pending"), needsInvalidation);
-  const dueFilter = and(lte(imageAssignments.nextAttemptAt, now), eligible);
   const due = await db
     .select({ id: imageAssignments.id, revision: imageAssignments.revision })
     .from(imageAssignments)
-    .where(dueFilter)
+    .where(and(lte(imageAssignments.nextAttemptAt, now), eligible))
+    .orderBy(imageAssignments.nextAttemptAt)
     .limit(20);
 
-  for (const message of due) {
-    const claimed = await db
-      .update(imageAssignments)
-      .set({ nextAttemptAt: now + 60_000 })
-      .where(and(revisionFilter(message), lte(imageAssignments.nextAttemptAt, now)))
-      .returning({ id: imageAssignments.id });
-    if (claimed.length === 0) continue;
-    try {
-      await env.IMAGE_FINALIZATION_QUEUE.send(message);
-    } catch {
-      /* The persisted deadline makes this eligible on the next cron. */
+  const results = await Promise.allSettled(
+    due.map(async (message) => {
+      const claimed = await db
+        .update(imageAssignments)
+        .set({ nextAttemptAt: now + 60_000 })
+        .where(and(revisionFilter(message), lte(imageAssignments.nextAttemptAt, now), eligible))
+        .returning({ id: imageAssignments.id });
+      if (claimed.length > 0) await finalizeImageAssignment(env, message);
+    }),
+  );
+  for (const result of results) {
+    if (result.status === "rejected") {
+      Sentry.captureException(result.reason, { tags: { module: "image-publication" } });
     }
   }
 }

@@ -125,6 +125,7 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
       />
       <FormProvider {...controller.form}>
         <FormShell
+          operation={controller.operation}
           busy={controller.busy}
           error={controller.error}
           onCancel={controller.cancel}
@@ -139,7 +140,6 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
               draft={controller.image.draft}
               label="Imagen de categoría"
               onRemove={controller.image.remove}
-              onRetry={controller.image.retry}
               onSelect={controller.image.selectFile}
             />
             <FormCheckbox<CategoryFormValues> label="Categoría activa" name="isActive" />
@@ -170,6 +170,7 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
       <PageHeader kicker={dish ? "Editar plato" : "Nuevo plato"} title={dish?.name ?? "Plato"} />
       <FormProvider {...controller.form}>
         <FormShell
+          operation={controller.operation}
           busy={controller.busy}
           error={controller.error}
           onCancel={controller.cancel}
@@ -185,7 +186,6 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
               draft={controller.image.draft}
               label="Imagen del plato"
               onRemove={controller.image.remove}
-              onRetry={controller.image.retry}
               onSelect={controller.image.selectFile}
             />
             <FormTextarea<DishFormValues> label="Descripción" name="description" rows={3} />

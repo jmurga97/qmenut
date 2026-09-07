@@ -1,49 +1,21 @@
-import { trpcClient } from "~/lib/trpc";
+import { useEffect, useRef, useState } from "react";
 
-import { isAcceptedImageType } from "./image-draft";
-import { reserveImageTransfer, startImageTransfers } from "./image-transfers";
+import { transferImageDrafts } from "./transfer-image-drafts";
 
-import type { ImageDraft, ImagePurpose, PreparedImage } from "./image-draft";
+import type { ImageDraftGroup } from "./transfer-image-drafts";
+import type { FileOperation } from "../components/forms/file-operation-progress";
 
-interface PrepareDraftsInput {
-  branchId: string;
-  purpose: ImagePurpose;
-  drafts: ImageDraft[];
-  updateDraft: (id: string, patch: Partial<ImageDraft>) => void;
-  concurrency?: number;
-}
-
-async function prepareOne(input: PrepareDraftsInput, draft: ImageDraft): Promise<PreparedImage> {
-  if (!draft.file) return { imageUrl: draft.imageUrl, imageChange: { kind: draft.changed ? "remove" : "keep" } };
-  if (!isAcceptedImageType(draft.file.type)) throw new Error("Selecciona una imagen JPEG, PNG o WebP.");
-  const metadata = {
-    branchId: input.branchId,
-    purpose: input.purpose,
-    filename: draft.file.name,
-    contentType: draft.file.type,
-    sizeBytes: draft.file.size,
-    idempotencyKey: draft.idempotencyKey,
+export function useImageUploads() {
+  const [operation, setOperation] = useState<FileOperation>();
+  const controller = useRef<AbortController | null>(null);
+  useEffect(() => () => controller.current?.abort(), []);
+  const transfer = (input: { branchId: string; groups: ImageDraftGroup[] }) => {
+    controller.current = new AbortController();
+    return transferImageDrafts({ ...input, signal: controller.current.signal, onProgress: setOperation });
   };
-  try {
-    const upload = await trpcClient.admin.images.createUpload.mutate(metadata);
-    reserveImageTransfer({ input: metadata, file: draft.file, uploadId: upload.uploadId });
-    input.updateDraft(draft.id, { uploadId: upload.uploadId, error: undefined });
-    return { imageUrl: null, uploadId: upload.uploadId, imageChange: { kind: "upload", uploadId: upload.uploadId } };
-  } catch (error) {
-    input.updateDraft(draft.id, { status: "failed", error: "No se pudo iniciar la subida. Inténtalo de nuevo." });
-    throw error;
-  }
-}
-
-const prepare = async (input: PrepareDraftsInput): Promise<PreparedImage[]> => {
-  const results: PreparedImage[] = [];
-  for (let index = 0; index < input.drafts.length; index += 3) {
-    results.push(...(await Promise.all(input.drafts.slice(index, index + 3).map((draft) => prepareOne(input, draft)))));
-  }
-  return results;
-};
-const start = (images: PreparedImage[]) =>
-  startImageTransfers(images.flatMap((image) => (image.uploadId ? [image.uploadId] : [])));
-export function usePrepareImageDrafts() {
-  return { prepare, start };
+  const clear = () => {
+    controller.current = null;
+    setOperation(undefined);
+  };
+  return { transfer, operation, clear };
 }

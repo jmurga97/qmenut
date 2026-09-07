@@ -4,10 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { trpc } from "~/lib/trpc";
 
-import { releaseImageTransfer, startImageTransfers, useImageTransfers } from "./image-transfers";
-
 import type { ImagePurpose } from "./image-draft";
-import type { ImageTransfer } from "./image-transfers";
 import type { AppRouter } from "@qmenut/api/router";
 import type { inferRouterOutputs } from "@trpc/server";
 
@@ -25,38 +22,26 @@ const paths = {
   dishImage: "/menu/dishes/$dishId",
 } as const;
 
-function summaryState({ failed, uploading, pending }: { failed: boolean; uploading: boolean; pending: boolean }) {
+function summaryState({ failed, pending }: { failed: boolean; pending: boolean }) {
   if (failed) return { status: "failed", label: "Una imagen necesita atención" };
-  if (uploading) return { status: "optimizing", label: "Subiendo imágenes" };
-  if (pending) return { status: "optimizing", label: "Preparando imágenes" };
+  if (pending) return { status: "optimizing", label: "Datos guardados. Estamos preparando las imágenes." };
   return { status: "succeeded", label: "Imágenes actualizadas" };
 }
 
-function assignmentLabel(row: Assignment, transfers: ImageTransfer[]) {
-  if (row.status === "failed" || transfers.some((task) => task.status === "failed")) return "Necesita atención";
-  if (transfers.some((task) => task.status === "uploading")) return "Subiendo imagen";
+function assignmentLabel(row: Assignment) {
+  if (row.status === "failed") return "Necesita atención";
   return row.status === "applied" ? "Imagen actualizada" : "Preparando imagen";
 }
 
-function ImageActivityRow({
-  row,
-  transfers,
-  retrying,
-  onRetry,
-}: {
-  row: Assignment;
-  transfers: ImageTransfer[];
-  retrying: boolean;
-  onRetry: () => void;
-}) {
-  const isFailed = row.status === "failed" || transfers.some((task) => task.status === "failed");
-  const preview = transfers[0]?.previewUrl ?? row.images[0]?.url;
+function ImageActivityRow({ row, retrying, onRetry }: { row: Assignment; retrying: boolean; onRetry: () => void }) {
+  const isFailed = row.status === "failed";
+  const preview = row.images[0]?.url;
   return (
     <li>
       {preview ? <img alt="" src={preview} /> : null}
       <div>
         <strong>{labels[row.purpose]}</strong>
-        <small>{assignmentLabel(row, transfers)}</small>
+        <small>{assignmentLabel(row)}</small>
         {row.error ? <small>{row.error}</small> : null}
       </div>
       {isFailed ? (
@@ -71,21 +56,13 @@ function ImageActivityRow({
   );
 }
 
-function preventInterruptedUpload(event: BeforeUnloadEvent) {
-  const tasks = Object.values(useImageTransfers.getState().transfers);
-  if (tasks.every((task) => !task.started || !["ready", "uploading", "failed"].includes(task.status))) return;
-  event.preventDefault();
-}
-
 export function ImageActivity({ branchId }: { branchId: string }) {
   const queryClient = useQueryClient();
-  const transfers = useImageTransfers((state) => state.transfers);
-  const active = Object.values(transfers).filter((task) => task.input.branchId === branchId && task.started);
   const query = useQuery(
     trpc.admin.images.assignments.list.queryOptions(
       { branchId },
       {
-        refetchInterval: (state) => (active.length > 0 || (state.state.data?.length ?? 0) > 0 ? 2000 : false),
+        refetchInterval: (state) => ((state.state.data?.length ?? 0) > 0 || state.state.error ? 5000 : 30_000),
         refetchOnWindowFocus: true,
       },
     ),
@@ -102,32 +79,10 @@ export function ImageActivity({ branchId }: { branchId: string }) {
     void queryClient.invalidateQueries({ queryKey: trpc.admin.branches.pathKey() });
   }, [query.data, queryClient]);
 
-  useEffect(() => {
-    if (!query.data) return;
-    const pendingIds = new Set(
-      query.data.flatMap((row) => row.images.flatMap((image) => (image.uploadId ? [image.uploadId] : []))),
-    );
-    const completed = Object.values(useImageTransfers.getState().transfers).filter(
-      (task) => task.input.branchId === branchId && task.status === "optimizing" && !pendingIds.has(task.uploadId),
-    );
-    for (const task of completed) releaseImageTransfer(task.uploadId);
-  }, [query.data, branchId]);
-
-  useEffect(() => {
-    window.addEventListener("beforeunload", preventInterruptedUpload);
-    return () => window.removeEventListener("beforeunload", preventInterruptedUpload);
-  }, []);
+  if (rows.length === 0 && !query.error) return null;
 
   const retryRow = (row: Assignment) => {
     setNotice(undefined);
-    const failed = row.images.flatMap((image) => {
-      const task = image.uploadId ? transfers[image.uploadId] : undefined;
-      return task?.status === "failed" ? [task.uploadId] : [];
-    });
-    if (failed.length > 0) {
-      startImageTransfers(failed);
-      return;
-    }
     retry.mutate(
       { branchId, id: row.id, revision: row.revision },
       {
@@ -140,13 +95,12 @@ export function ImageActivity({ branchId }: { branchId: string }) {
       },
     );
   };
-  if (rows.length === 0 && active.length === 0) return null;
-  const uploading = active.some((task) => task.status === "uploading" || task.status === "ready");
-  const summary = summaryState({
-    uploading,
-    failed: rows.some((row) => row.status === "failed") || active.some((task) => task.status === "failed"),
-    pending: rows.some((row) => row.status === "pending"),
-  });
+  const summary = query.error
+    ? { status: "failed", label: "No se pudo consultar el estado de las imágenes" }
+    : summaryState({
+        failed: rows.some((row) => row.status === "failed"),
+        pending: rows.some((row) => row.status === "pending"),
+      });
   return (
     <aside className="admin-image-activity" aria-label="Estado de las imágenes">
       <details>
@@ -155,24 +109,17 @@ export function ImageActivity({ branchId }: { branchId: string }) {
           <span role="status">{summary.label}</span>
           <span className="admin-image-activity__detail">Ver detalles</span>
         </summary>
-        <p>
-          Datos guardados.{" "}
-          {uploading
-            ? "Mantén esta pestaña abierta mientras se transfieren los archivos. Puedes seguir trabajando."
-            : "La preparación continúa aunque cierres esta pestaña."}
-        </p>
+        {rows.length > 0 ? (
+          <p>
+            {rows.some((row) => row.status === "pending")
+              ? "Las imágenes se publicarán automáticamente. Puedes cerrar esta pestaña."
+              : "Los datos están guardados. Puedes cerrar esta pestaña."}
+          </p>
+        ) : null}
         {query.error ? <p role="alert">No se pudo consultar el estado. Volveremos a intentarlo.</p> : null}
         <ul>
           {rows.map((row) => (
-            <ImageActivityRow
-              key={row.id}
-              row={row}
-              transfers={row.images.flatMap((image) =>
-                image.uploadId && transfers[image.uploadId] ? [transfers[image.uploadId]] : [],
-              )}
-              retrying={retry.isPending}
-              onRetry={() => retryRow(row)}
-            />
+            <ImageActivityRow key={row.id} row={row} retrying={retry.isPending} onRetry={() => retryRow(row)} />
           ))}
         </ul>
         {notice ? <p role="status">{notice}</p> : null}

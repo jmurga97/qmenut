@@ -220,6 +220,7 @@ export async function getImageUpload(input: GetUploadInput) {
   const data = parsed.data.data;
   const externalId = await createOwnershipExternalId(input);
   if (
+    data.uploadId !== input.uploadId ||
     data.productId !== QMENUT_PRODUCT_ID ||
     data.presetId !== presetByPurpose[input.purpose] ||
     data.externalId !== externalId

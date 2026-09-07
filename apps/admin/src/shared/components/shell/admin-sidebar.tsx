@@ -41,6 +41,7 @@ export interface AdminSidebarRestaurant {
 }
 
 interface AdminSidebarProps {
+  disabled?: boolean;
   activeRestaurantId?: string | null;
   branches: AdminSidebarBranch[];
   groups: AdminSidebarGroup[];
@@ -149,6 +150,7 @@ function AdminSidebarIcon({ name }: { name: AdminSidebarIconName }) {
 }
 
 export function AdminSidebar({
+  disabled = false,
   activeRestaurantId,
   branches,
   groups,
@@ -166,7 +168,7 @@ export function AdminSidebar({
   const domainStatus = selectedBranch?.customDomain ?? "Sin dominio público";
   const canSwitchRestaurant = Boolean(onRestaurantChange) && (restaurants?.length ?? 0) > 1;
   return (
-    <nav aria-label="Navegación del panel" className="admin-sidebar" ref={setSelectPortalContainer}>
+    <nav aria-label="Navegación del panel" className="admin-sidebar" inert={disabled} ref={setSelectPortalContainer}>
       <header className="admin-sidebar-identity">
         <div className="admin-sidebar-kicker">QMenut</div>
         {canSwitchRestaurant && restaurants ? (

@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  createImageDraft,
-  replaceImageDraftFile,
-  retryImageDraft,
-  revokeImageDraftPreview,
-  validateImageFile,
-} from "./image-draft";
+import { createImageDraft, replaceImageDraftFile, revokeImageDraftPreview, validateImageFile } from "./image-draft";
 
 import type { ImageDraft } from "./image-draft";
 
@@ -44,46 +38,44 @@ function useImageDraftCollection(createInitialDrafts: () => ImageDraft[]) {
     );
   }, []);
 
-  const retry = useCallback((id: string) => {
-    setDrafts((current) => current.map((draft) => (draft.id === id ? retryImageDraft(draft) : draft)));
-  }, []);
-
   const update = useCallback((id: string, patch: Partial<ImageDraft>) => {
     setDrafts((current) => current.map((draft) => (draft.id === id ? { ...draft, ...patch } : draft)));
   }, []);
 
-  return { drafts, draftsRef, remove, replace, reset, retry, setDrafts, update };
+  return { drafts, draftsRef, remove, replace, reset, setDrafts, update };
 }
 
 export function useImageDraft(initialUrl: string | null) {
-  const {
-    drafts,
-    replace,
-    reset,
-    retry: retryDraft,
-    update,
-    setDrafts,
-  } = useImageDraftCollection(() => [createImageDraft({ imageUrl: initialUrl })]);
+  const { drafts, replace, reset, update, setDrafts } = useImageDraftCollection(() => [
+    createImageDraft({ imageUrl: initialUrl }),
+  ]);
   useEffect(() => {
-    setDrafts((current) => current.map((item) => {
-      if (item.changed || item.file || item.imageUrl === initialUrl) return item;
-      revokeImageDraftPreview(item);
-      return createImageDraft({ imageUrl: initialUrl, id: item.id });
-    }));
+    setDrafts((current) =>
+      current.map((item) => {
+        if (item.changed || item.file || item.imageUrl === initialUrl) return item;
+        revokeImageDraftPreview(item);
+        return createImageDraft({ imageUrl: initialUrl, id: item.id });
+      }),
+    );
   }, [initialUrl, setDrafts]);
-  const accept = useCallback(() => setDrafts((current) => current.map((item) => ({ ...item, file: null, changed: false, status: item.uploadId ? "optimizing" : "idle" }))), [setDrafts]);
+  const accept = useCallback(
+    () =>
+      setDrafts((current) =>
+        current.map((item) => ({ ...item, file: null, changed: false, status: item.uploadId ? "optimizing" : "idle" })),
+      ),
+    [setDrafts],
+  );
   const draft = drafts[0];
   if (!draft) throw new Error("No se pudo inicializar el borrador de imagen.");
 
   const remove = useCallback(() => reset(draft.id), [draft.id, reset]);
-  const retry = useCallback(() => retryDraft(draft.id), [draft.id, retryDraft]);
   const selectFile = useCallback((file: File) => replace(draft.id, file), [draft.id, replace]);
 
-  return { draft, remove, retry, selectFile, update, accept };
+  return { draft, remove, selectFile, update, accept };
 }
 
 export function useImageGalleryDraft(initialUrls: string[], maximum = 20) {
-  const { drafts, draftsRef, remove, replace, retry, setDrafts, update } = useImageDraftCollection(() =>
+  const { drafts, draftsRef, remove, replace, setDrafts, update } = useImageDraftCollection(() =>
     initialUrls.map((imageUrl) => createImageDraft({ imageUrl })),
   );
   const [changed, setChanged] = useState(false);
@@ -95,13 +87,15 @@ export function useImageGalleryDraft(initialUrls: string[], maximum = 20) {
     if (!different || changed) return;
     setDrafts((current) => {
       for (const item of current) revokeImageDraftPreview(item);
-      const urls: string[] = JSON.parse(canonicalKey);
+      const urls = JSON.parse(canonicalKey) as string[];
       return urls.map((imageUrl) => createImageDraft({ imageUrl }));
     });
   }, [canonicalKey, changed, setDrafts]);
   const accept = useCallback(() => {
     setChanged(false);
-    setDrafts((current) => current.map((item) => ({ ...item, file: null, changed: false, status: item.uploadId ? "optimizing" : "idle" })));
+    setDrafts((current) =>
+      current.map((item) => ({ ...item, file: null, changed: false, status: item.uploadId ? "optimizing" : "idle" })),
+    );
   }, [setDrafts]);
   const [error, setError] = useState<string>();
 
@@ -148,9 +142,14 @@ export function useImageGalleryDraft(initialUrls: string[], maximum = 20) {
     drafts,
     error,
     move,
-    remove: (id: string) => { setChanged(true); remove(id); },
-    replace: (id: string, file: File) => { setChanged(true); replace(id, file); },
-    retry,
+    remove: (id: string) => {
+      setChanged(true);
+      remove(id);
+    },
+    replace: (id: string, file: File) => {
+      setChanged(true);
+      replace(id, file);
+    },
     update,
   };
 }
