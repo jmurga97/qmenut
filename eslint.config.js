@@ -104,14 +104,13 @@ const qualityTypeScriptRules = {
   "unicorn/consistent-boolean-name": "off",
   "unicorn/consistent-class-member-order": "off",
   "unicorn/name-replacements": "off",
-  "unicorn/no-for-loop": "off",
   "unicorn/no-non-function-verb-prefix": "off",
   "unicorn/no-null": "off",
   "unicorn/no-top-level-side-effects": "off",
-  "unicorn/prefer-export-from": "off",
+  // Only when the local binding is a pure pass-through: re-exporting a name the file also
+  // uses would duplicate the module specifier instead of removing a line.
+  "unicorn/prefer-export-from": ["error", { checkUsedVariables: false }],
   "unicorn/prefer-global-this": "off",
-  "unicorn/prefer-ternary": "off",
-  "unicorn/prefer-top-level-await": "off",
   "unicorn/switch-case-braces": "off",
 };
 
@@ -182,6 +181,9 @@ const reactRules = {
   ...pluginReact.configs.flat["jsx-runtime"].rules,
   ...jsxA11y.configs.recommended.rules,
   ...mergeFlatRules(pluginQuery.configs["flat/recommended"]),
+  // Full set, not just rules-of-hooks/exhaustive-deps: these encode the invariants the React
+  // Compiler relies on, so a violation is also a silent bail-out in apps/web's compiled build.
+  ...reactHooks.configs.recommended.rules,
   "max-lines-per-function": [
     "warn",
     {
@@ -192,8 +194,6 @@ const reactRules = {
   ],
   "react/jsx-no-constructed-context-values": "error",
   "react/prop-types": "off",
-  "react-hooks/exhaustive-deps": "warn",
-  "react-hooks/rules-of-hooks": "error",
 };
 
 export default defineConfig(
@@ -262,6 +262,15 @@ export default defineConfig(
     rules: {
       ...mergeFlatRules(pluginRouter.configs["flat/recommended"]),
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true, allowExportNames: ["Route"] }],
+    },
+  },
+  {
+    // react-hook-form's `field` and any controller object that exposes a ref are ref-shaped, so
+    // `refs` flags every property read off them. apps/admin is not compiled by React Compiler, so
+    // demote it there rather than sprinkle suppressions; it stays an error in apps/web.
+    files: ["apps/admin/src/**/*.{ts,tsx}"],
+    rules: {
+      "react-hooks/refs": "warn",
     },
   },
   {

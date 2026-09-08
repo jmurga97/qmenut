@@ -31,3 +31,6 @@ DELETE FROM restaurant_users WHERE user_id = 'user_invite_e2e';
 DELETE FROM users WHERE id = 'user_invite_e2e';
 DELETE FROM verifications WHERE identifier LIKE '%e2e@test.local%';
 DELETE FROM verifications WHERE identifier = 'owner.fine@test.local';
+
+DELETE FROM sessions WHERE user_id IN ('user_multi_e2e', 'user_journey_e2e');
+DELETE FROM restaurant_users WHERE user_id = 'user_journey_e2e';

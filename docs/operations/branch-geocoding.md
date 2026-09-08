@@ -74,7 +74,7 @@ bunx wrangler secret put GOOGLE_PLACES_API_KEY --env production --cwd apps/api
 Deploy in this order:
 
 1. Apply the D1 migrations with
-   `bun run --cwd apps/api db:migrate -- --confirm-production`.
+   `bun run --cwd apps/api db:migrate -- production --confirm-production`.
 2. Deploy the API, so that coordinates and address autocomplete are available.
 3. Deploy admin and web.
 

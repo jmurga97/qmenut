@@ -8,12 +8,14 @@ import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 
 export const Route = createFileRoute("/{-$locale}/puntos")({
   loader: async ({ context, params }) => {
-    const menu = await context.queryClient.ensureQueryData(
-      getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
-    );
-    await context.queryClient.ensureQueryData(
-      getLoyaltyProgramQueryOptions({ host: context.tenant.host, trpc: context.trpc }),
-    );
+    const menu = await context.queryClient.query({
+      ...getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
+      staleTime: "static",
+    });
+    await context.queryClient.query({
+      ...getLoyaltyProgramQueryOptions({ host: context.tenant.host, trpc: context.trpc }),
+      staleTime: "static",
+    });
     return menu;
   },
   head: ({ loaderData, match }) =>

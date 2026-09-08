@@ -13,8 +13,8 @@ bun tenant:create --file tenants/<nombre>.json --remote --env production
 
 Para development use `--env development` y un hostname exclusivo de ese ambiente, por
 ejemplo `cliente.dev.qmenut.app`. Puede reutilizar la misma ficha sin editarla mediante
-`--host cliente.dev.qmenut.app`. Ejecute `bun tenant:environments` para consultar los
-recursos y Workers seleccionados por cada ambiente.
+`--host cliente.dev.qmenut.app`. Ejecute `bun apps/api/scripts/list-tenant-environments.ts`
+para consultar los recursos y Workers seleccionados por cada ambiente.
 
 ## 1. Datos del restaurante
 

@@ -9,7 +9,10 @@ export const Route = createFileRoute("/_auth/theme")({
   loader: async ({ context }) => {
     const branch = await getSelectedBranch(context);
     if (branch?.customDomain) {
-      await context.queryClient.ensureQueryData(getThemeQueryOptions({ branchId: branch.id, trpc: context.trpc }));
+      await context.queryClient.query({
+        ...getThemeQueryOptions({ branchId: branch.id, trpc: context.trpc }),
+        staleTime: "static",
+      });
     }
   },
 });

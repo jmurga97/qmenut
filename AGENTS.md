@@ -8,8 +8,9 @@ This is a Bun monorepo orchestrated with Turbo. Application code lives under `ap
 - `apps/api`: Cloudflare Worker backend with native fetch dispatch, tRPC at `/trpc`, Better Auth at `/api/auth/*`, and Drizzle over D1. Source is in `apps/api/src`, Wrangler config in `apps/api/wrangler.jsonc`, and database migrations live in `apps/api/migrations`.
 - `apps/admin`: React 19 + Vite owner dashboard SPA, deployed as a static-asset Worker.
 - `apps/tenant-config`: Cloudflare Worker that owns writes to the shared tenant-theme KV namespace.
-- `apps/landing`: Astro 5 SSR marketing site with its own deploy script.
+- `apps/landing`: Astro 5 SSR marketing site.
 - `packages`: shared workspace packages used by multiple apps, including `auth`, `db`, `permissions`, and `ui`. The API dispatches requests natively from `apps/api/src/index.ts`.
+- `scripts/deploy.ts`: root deploy orchestrator. Per-environment build-time variables live in its environment map.
 
 Generated output such as `apps/web/dist`, `.wrangler`, `.turbo`, and `node_modules` should stay out of source changes.
 
@@ -21,19 +22,22 @@ Use Bun `1.3.6` as declared in `package.json`.
 - `bun run dev`: run Turbo development tasks for all apps.
 - `bun run build`: build all workspaces; web uses Vite, the Workers generate Wrangler types and type-check.
 - `bun run check`: run TypeScript `tsc --noEmit` checks through Turbo.
+- `bun run test`: run unit tests (`bun test packages/ui`: the UI package — theme engine and the public-web list elements).
+- `bun run test:e2e`: run the Playwright E2E suite.
 - `bun run lint`: run Prettier checks and ESLint.
-- `bun run lint:fix` or `bun run format`: apply formatting and safe lint fixes.
+- `bun run format`: apply formatting and safe lint fixes.
+- `bun run deploy --development` or `bun run deploy --production`: full pipeline — preflight, unit and E2E tests, build, D1 migrations, and deploy of every Worker (landing only in production). The environment flag is mandatory; production migrations are auto-confirmed. Rare operations run their script directly, e.g. `bun apps/api/scripts/rebuild-database.ts development` or `bun apps/api/scripts/list-tenant-environments.ts`.
 
 For app-specific work, run commands in the package, for example `bun run --cwd apps/web dev` or `bun run --cwd apps/api dev`.
 
 ## Database Migration Workflow
 
 The TypeScript schema in `packages/db/src/schema/` is the source of truth for D1. After
-changing it, run `bun run --cwd apps/api db:generate -- --name <change_name>` and commit
+changing it, run `bun run db:generate -- --name <change_name>` and commit
 the generated SQL plus `apps/api/migrations/meta/` together. Use
 `db:generate:custom` only for data migrations or DDL that Drizzle Kit cannot generate.
 
-Wrangler remains the migration executor (`db:migrate:local` / `db:migrate`). Do not use
+Wrangler remains the migration executor (`db:migrate:local` / `db:migrate <environment>`; production additionally takes `--confirm-production`). Do not use
 `drizzle-kit push`, `wrangler d1 migrations create`, hand-author normal DDL migrations,
 or edit a migration after it has been applied. `bun run check` verifies that the schema
 matches the latest committed Drizzle snapshot. Drizzle Kit reads only the barrel

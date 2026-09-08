@@ -40,7 +40,7 @@ export function useLoyaltyInsightsController() {
       let page = 1;
       let total: number;
       do {
-        const result = await queryClient.fetchQuery(
+        const result = await queryClient.query(
           api.getLoyaltyCustomersQueryOptions({
             search,
             page,

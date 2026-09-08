@@ -8,6 +8,6 @@ rm -rf "$ROOT_DIR/.wrangler-shared/state"
 rm -f "$ROOT_DIR/e2e/.auth/admin.json"
 
 CI=true bun run --cwd "$ROOT_DIR/apps/api" db:migrate:local
-bun run --cwd "$ROOT_DIR/apps/api" db:seed:local
-bun run --cwd "$ROOT_DIR/apps/api" db:seed:e2e
+bun run --cwd "$ROOT_DIR/apps/api" db:seed seed/seed-public-menu.sql
+bun run --cwd "$ROOT_DIR/apps/api" db:seed seed/seed-e2e.sql
 bun run --cwd "$ROOT_DIR/apps/tenant-config" seed:local

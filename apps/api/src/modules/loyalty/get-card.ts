@@ -68,17 +68,15 @@ export async function getCard({ db, env, request, host, cardToken }: GetCardInpu
     unlocked: card.stampsBalance >= reward.cost,
   }));
 
-  let pendingRedemption: PendingRedemptionForClient | null = null;
-
-  if (pending) {
-    pendingRedemption = {
-      id: pending.id,
-      rewardId: pending.rewardId,
-      rewardName: pending.rewardName,
-      cost: pending.cost,
-      expiresAt: pending.createdAt + REDEMPTION_TTL_MS,
-    };
-  }
+  const pendingRedemption: PendingRedemptionForClient | null = pending
+    ? {
+        id: pending.id,
+        rewardId: pending.rewardId,
+        rewardName: pending.rewardName,
+        cost: pending.cost,
+        expiresAt: pending.createdAt + REDEMPTION_TTL_MS,
+      }
+    : null;
 
   return {
     card: consentSatisfied ? card : { ...card, email: maskEmail(card.email) },

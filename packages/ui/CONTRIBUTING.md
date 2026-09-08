@@ -18,7 +18,7 @@ This package exports a collection of Web Components built with **Lit 3**. Unlike
 - **`src/internal/component-styles.ts`** (`createComponentStyles()`) + **`src/internal/base-styles.ts`** (`qmHostResetStyles`) — every component composes `static styles = [qmHostResetStyles, componentStyles]`, where `componentStyles` comes from the component's own co-located `styles.css` (imported with the `?inline` Vite suffix).
 - Icons are not a separate package — compose them via slots (see `qm-button`'s `icon-start`/`icon-end` slots) so any icon source the consumer already has works.
 
-This package has no bundler or preview tooling of its own — `bun run check`/`build` is just `tsc --noEmit`; the `?inline` CSS import suffix is resolved by whichever Vite-based app consumes the component (e.g. `apps/web`). This package does not currently ship automated component tests — do not add a test suite unless explicitly requested.
+This package has no bundler or preview tooling of its own — `bun run check`/`build` is just `tsc --noEmit`; the `?inline` CSS import suffix is resolved by whichever Vite-based app consumes the component (e.g. `apps/web`). Unit tests are intentionally limited to `bun test packages/ui` (theme engine + the public-web list elements); do not grow the suite beyond what `bun run test` enforces unless explicitly requested. Tests run under `bun test` with happy-dom and a `?inline`-CSS preload registered in the root `bunfig.toml`.
 
 Key internal utilities every contributor must know (all under `src/internal/`):
 

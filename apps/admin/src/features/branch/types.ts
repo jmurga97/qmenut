@@ -25,6 +25,10 @@ export const TIMEZONE_OPTIONS = [
   { id: "UTC", label: "UTC" },
 ];
 const time = z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Hora no válida");
+const socialUrl = z
+  .string()
+  .trim()
+  .refine((value) => !value || z.url().safeParse(value).success, "URL no válida");
 const coordinateText = ({ min, max, label }: { min: number; max: number; label: string }) =>
   z
     .string()
@@ -54,7 +58,7 @@ export const branchFormSchema = z
       ),
     legalName: z.string().trim(),
     taxId: z.string().trim(),
-    legalAddress: z.string().trim(),
+    socials: z.array(z.object({ url: socialUrl })).max(10, "Máximo 10 redes sociales"),
     dataProtectionEmail: z
       .string()
       .trim()

@@ -9,7 +9,7 @@ import type { AdminRouterContext } from "~/lib/trpc";
 
 async function ensureTenantContext(context: AdminRouterContext) {
   try {
-    return await context.queryClient.ensureQueryData(getTenantQueryOptions({ trpc: context.trpc }));
+    return await context.queryClient.query({ ...getTenantQueryOptions({ trpc: context.trpc }), staleTime: "static" });
   } catch (error) {
     if (isForbiddenError(error)) {
       redirect({ to: "/select-restaurant", throw: true });

@@ -1,15 +1,44 @@
 # Cloudflare deployment runbook
 
 This page describes how to take qmenut from an empty Cloudflare account to a live
-deployment. Deployments are manual and target a named Wrangler environment. The top-level
-configuration remains for local development; remote deployments must select either the
-named `development` or `production` environment.
+deployment. The fast path is the root deploy orchestrator; the rest of the page documents
+each step it automates, plus the first-deployment setup it assumes.
+
+Run commands from the repository root unless the command includes `--cwd`.
+
+## One-command deploy
+
+```bash
+bun run deploy --development
+bun run deploy --production
+```
+
+The environment flag is mandatory. The orchestrator stops at the first failing step and runs,
+in order:
+
+1. **Preflight**: validates that no placeholder Stripe price, KV ID, or fixed-OTP flag remains
+   in the Wrangler configurations for the selected environment.
+2. **Unit tests**: `bun test packages/ui`.
+3. **E2E tests**: the full Playwright suite against the local stack.
+4. **Build and type check**: `turbo build` and `turbo check`.
+5. **D1 migrations**: `apply-db-migrations.ts <environment>` with its Time Travel bookmark and
+   row-count safety checks. Production is auto-confirmed: typing `--production` is the explicit
+   acknowledgement. `--allow-data-loss` and `--auto-rollback` are forwarded to the wrapper.
+6. **Deploy in dependency order**: tenant-config, API, web, admin, and — for production only —
+   landing. The per-environment build-time variables (`VITE_ADMIN_ORIGIN`, `VITE_API_BASE_URL`,
+   `VITE_DEV_FIXED_OTP`) live in the single map at the top of `scripts/deploy.ts`.
+
+For an already-provisioned account, this single command replaces the whole manual sequence.
+
+## Topology
 
 The production topology uses the `qmenut.app` zone: the API at `api.qmenut.app`, the admin
 dashboard at `admin.qmenut.app`, the marketing site at `qmenut.app` and `www.qmenut.app`,
 and one `qmenut-web` Worker attached to each tenant's own custom domain.
 
-Run commands from the repository root unless the command includes `--cwd`.
+Deployments target a named Wrangler environment. The top-level
+configuration remains for local development; remote deployments must select either the
+named `development` or `production` environment.
 
 ## Remote development environment
 
@@ -78,21 +107,17 @@ and are intentionally unset by default.
 
 ### Deploy and seed development
 
-First run the repository preflight. It intentionally fails while the development Stripe
-price remains a placeholder:
+First run the preflight. It intentionally fails while the development Stripe price remains a
+placeholder:
 
 ```bash
-bun run --cwd apps/api preflight:development
+bun apps/api/scripts/check-deployment-config.ts development
 ```
 
-After configuring the missing external values, run the following in order:
+After configuring the missing external values, deploy everything with:
 
 ```bash
-bun run --cwd apps/tenant-config deploy:development
-bun run --cwd apps/api db:migrate:development
-bun run --cwd apps/api deploy:development
-bun run --cwd apps/web deploy:development
-bun run --cwd apps/admin deploy:development
+bun run deploy --development
 ```
 
 Before seeding, replace the placeholder owner email in
@@ -100,11 +125,11 @@ Before seeding, replace the placeholder owner email in
 tenant and reuse the existing tapas content fixture under the development hostname:
 
 ```bash
-bun run --cwd apps/api tenant:create:development -- --file tenants/development.tenant.json
+bun run --cwd apps/api tenant:create -- --file tenants/development.tenant.json --remote --env development
 ```
 
 ```bash
-bun run --cwd apps/api tenant:content:development -- --file demo-tenants/tapas.content.json --host dev.qmenut.app
+bun apps/api/scripts/load-tenant-content.ts --file demo-tenants/tapas.content.json --host dev.qmenut.app --remote --env development
 ```
 
 The web, API, and admin custom-domain routes are declared in their development Wrangler
@@ -149,14 +174,18 @@ token with only the `read:packages` scope. Rotate it in each build configuration
 no account-wide build variable.
 
 Use the repository's pinned Wrangler rather than `npx wrangler`, which downloads the latest
-release on every build and can drift from the `compatibility_date` in the configuration. The
-package scripts also run the deployment preflight:
+release on every build and can drift from the `compatibility_date` in the configuration.
+Workers Builds deploys a single Worker per build, so it invokes Wrangler directly instead of
+the root orchestrator:
 
-| Worker                 | Root directory       | Build command   | Deploy command               |
-| ---------------------- | -------------------- | --------------- | ---------------------------- |
-| `qmenut-api-dev`       | `apps/api`           | `bun run build` | `bun run deploy:development` |
-| `qmenut-api`           | `apps/api`           | `bun run build` | `bun run deploy:production`  |
-| `qmenut-tenant-config` | `apps/tenant-config` | `bun run build` | `bun run deploy:development` |
+| Worker                 | Root directory       | Build command   | Deploy command                           |
+| ---------------------- | -------------------- | --------------- | ---------------------------------------- |
+| `qmenut-api-dev`       | `apps/api`           | `bun run build` | `bunx wrangler deploy --env development` |
+| `qmenut-api`           | `apps/api`           | `bun run build` | `bunx wrangler deploy --env production`  |
+| `qmenut-tenant-config` | `apps/tenant-config` | `bun run build` | `bunx wrangler deploy --env development` |
+
+The root orchestrator's preflight does not run in Workers Builds; the placeholder checks in
+`apps/api/scripts/check-deployment-config.ts` protect manual deploys instead.
 
 The web Worker cannot use a plain deploy command: `CLOUDFLARE_ENV` must be set for the build
 so `@cloudflare/vite-plugin` writes the redirected configuration, and the deploy then takes
@@ -316,7 +345,7 @@ Generate migrations only from the Drizzle schema, then apply the committed forwa
 migrations from `apps/api`:
 
 ```bash
-bun run --cwd apps/api db:migrate -- --confirm-production
+bun run --cwd apps/api db:migrate -- production --confirm-production
 ```
 
 The initial sequence contains `0000_baseline.sql`. Later files are generated with

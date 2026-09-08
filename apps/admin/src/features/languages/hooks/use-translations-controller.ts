@@ -47,7 +47,7 @@ export function useTranslationsController(branchId: string, languageCode: string
       { languageCode, onlyMissing: true },
       {
         onSuccess: () => {
-          void queryClient.fetchQuery(queryOptions).then((fresh) => {
+          void queryClient.query(queryOptions).then((fresh) => {
             form.reset(toTranslationsFormValues(fresh));
           });
         },

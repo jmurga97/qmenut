@@ -15,6 +15,7 @@ export function useTrackPageView<E extends AnalyticsEventName>(event: E, ...args
 
     fired.current = true;
     track(event, ...args);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al montar
-  }, []);
+    // The ref guard, not an empty dep array, is what keeps this to one emission: suppressing
+    // exhaustive-deps here made React Compiler skip optimizing the whole hook.
+  }, [event, args]);
 }

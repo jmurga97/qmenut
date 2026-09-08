@@ -12,9 +12,12 @@ export const Route = createFileRoute("/_auth/promotions")({
   loader: async ({ context: { promotionsBranchId, queryClient, trpc } }) => {
     if (!promotionsBranchId) return;
     await Promise.all([
-      queryClient.ensureQueryData(getPromotionsQueryOptions({ branchId: promotionsBranchId, trpc })),
-      queryClient.ensureQueryData(getMenuCategoriesQueryOptions({ branchId: promotionsBranchId, trpc })),
-      queryClient.ensureQueryData(getMenuDishesQueryOptions({ branchId: promotionsBranchId, trpc })),
+      queryClient.query({ ...getPromotionsQueryOptions({ branchId: promotionsBranchId, trpc }), staleTime: "static" }),
+      queryClient.query({
+        ...getMenuCategoriesQueryOptions({ branchId: promotionsBranchId, trpc }),
+        staleTime: "static",
+      }),
+      queryClient.query({ ...getMenuDishesQueryOptions({ branchId: promotionsBranchId, trpc }), staleTime: "static" }),
     ]);
   },
   component: () => <Outlet />,

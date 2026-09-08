@@ -90,14 +90,14 @@ There are no triggers left in the database.
 database fails loudly on the first `CREATE TABLE`, which is intentional.
 
 ```bash
-bun run --cwd apps/api db:rebuild:development
+bun apps/api/scripts/rebuild-database.ts development
 ```
 
 The script exports the source database, reshapes the rows locally against the baseline, drops
 the legacy columns, verifies that no row was lost and that the foreign keys still resolve, and
 writes an import file. It never writes to a remote database; it prints the commands to create
 the new database, apply the baseline and import the data. Run it for `development` first,
-smoke-test, then repeat with `db:rebuild:production`.
+smoke-test, then repeat with `production` as the argument.
 
 The import file clears every table before it inserts, so it is safe to re-run, and it is ordered
 parents first so the foreign keys hold as it streams.
@@ -189,7 +189,7 @@ Use this workflow for every structural change.
 8. Seed and check:
 
    ```bash
-   bun run --cwd apps/api db:seed:local
+   bun run --cwd apps/api db:seed seed/seed-public-menu.sql
    ```
 
 9. Commit the three parts together: the TypeScript schema, the generated `.sql` file, and
@@ -199,13 +199,13 @@ Use this workflow for every structural change.
     [Production migrations](#production-migrations):
 
     ```bash
-    bun run --cwd apps/api db:migrate -- --confirm-production
+    bun run --cwd apps/api db:migrate -- production --confirm-production
     ```
 
-`db:migrate` selects the production Wrangler environment and requires the explicit
-`--confirm-production` acknowledgement. This is required because a named Wrangler
+`db:migrate` takes the target environment as its first argument and requires the explicit
+`--confirm-production` acknowledgement for production. This is required because a named Wrangler
 environment does not inherit the D1 binding, and because production must never be the
-implicit target.
+implicit target. `bun run deploy --production` passes the acknowledgement automatically.
 
 An applied migration is immutable. Do not edit, rename, reorder, or delete a migration
 after D1 has applied it.
@@ -279,11 +279,11 @@ bun run --cwd apps/api db:migrate:local
 ```
 
 ```bash
-bun run --cwd apps/api db:seed:local
+bun run --cwd apps/api db:seed seed/seed-public-menu.sql
 ```
 
 ```bash
-bun run --cwd apps/api db:seed:e2e
+bun run --cwd apps/api db:seed seed/seed-e2e.sql
 ```
 
 ```bash
@@ -310,7 +310,7 @@ Perform these eleven steps around every production migration:
 3. List the pending migrations:
 
    ```bash
-   bun run --cwd apps/api db:migrations:list
+   bunx wrangler d1 migrations list DB --remote --env production --cwd apps/api
    ```
 
 4. Query the affected production tables and confirm that your assumptions about the
@@ -323,7 +323,7 @@ Perform these eleven steps around every production migration:
 6. Apply the migration with Wrangler and the production environment:
 
    ```bash
-   bun run --cwd apps/api db:migrate -- --confirm-production
+   bun run --cwd apps/api db:migrate -- production --confirm-production
    ```
 
 7. Check the `d1_migrations` table.
@@ -371,20 +371,17 @@ Write the TypeScript yourself. Do not copy a finished migration. After each exer
 
 ## Command reference
 
-| Command                                                      | Description                                   |
-| ------------------------------------------------------------ | --------------------------------------------- |
-| `bun run --cwd apps/api db:generate -- --name <name>`        | Generates a normal DDL migration.             |
-| `bun run --cwd apps/api db:generate:custom -- --name <name>` | Generates an empty custom migration for data. |
-| `bun run --cwd apps/api db:check`                            | Validates the metadata and the snapshot.      |
-| `bun run --cwd apps/api db:migrate:local`                    | Applies the migrations to local D1.           |
-| `bun run --cwd apps/api db:rebuild:development`              | Rebuilds development D1 onto the baseline.    |
-| `bun run --cwd apps/api db:rebuild:production`               | Rebuilds production D1 onto the baseline.     |
-| `bun run --cwd apps/api db:migrate -- --confirm-production`  | Safely applies migrations to production D1.   |
-| `bun run --cwd apps/api db:migrate:development`              | Safely applies migrations to development D1.  |
-| `bun run --cwd apps/api db:migrations:list`                  | Lists the pending production migrations.      |
-| `bun run --cwd apps/api db:seed:local`                       | Seeds the public-menu rows.                   |
-| `bun run --cwd apps/api db:seed:e2e`                         | Seeds the end-to-end rows.                    |
-| `bun run --cwd e2e reset`                                    | Rebuilds the full local test state.           |
+| Command                                                                           | Description                                                                         |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `bun run db:generate -- --name <name>`                                            | Generates a normal DDL migration.                                                   |
+| `bun run --cwd apps/api db:generate:custom -- --name <name>`                      | Generates an empty custom migration for data.                                       |
+| `bun run --cwd apps/api db:check`                                                 | Validates the metadata and the snapshot.                                            |
+| `bun run --cwd apps/api db:migrate:local`                                         | Applies the migrations to local D1.                                                 |
+| `bun apps/api/scripts/rebuild-database.ts <environment>`                          | Rebuilds a remote D1 onto the baseline.                                             |
+| `bun run --cwd apps/api db:migrate -- <environment> ...`                          | Safely applies migrations to remote D1. Pass `--confirm-production` for production. |
+| `bunx wrangler d1 migrations list DB --remote --env <environment> --cwd apps/api` | Lists the pending remote migrations.                                                |
+| `bun run --cwd apps/api db:seed <file.sql>`                                       | Seeds local D1 with the given SQL file.                                             |
+| `bun run --cwd e2e reset`                                                         | Rebuilds the full local test state.                                                 |
 
 ## Key files
 

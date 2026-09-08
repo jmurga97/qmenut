@@ -39,6 +39,8 @@ type RoleFixtures = {
   adminRole: Page;
   fineOwner: Page;
   staff: Page;
+  diner: Page;
+  cleanup: Array<() => Promise<void>>;
 };
 
 function authenticatedFixture(email: string) {
@@ -48,6 +50,34 @@ function authenticatedFixture(email: string) {
 
 /** Keeps browser navigation independent from the remote placeholder-image service. */
 export const test = base.extend<RoleFixtures>({
+  cleanup: async ({ page: _page }, use) => {
+    const actions: Array<() => Promise<void>> = [];
+    await use(actions);
+    const failures: unknown[] = [];
+    for (const action of actions.reverse()) {
+      try {
+        await action();
+      } catch (error) {
+        failures.push(error);
+      }
+    }
+    expect(failures, "test data cleanup must succeed").toEqual([]);
+  },
+  diner: async ({ browser }, use, testInfo) => {
+    const context = await browser.newContext({
+      ...testInfo.project.use,
+      baseURL: "http://tapas.localhost:4011",
+      locale: "es-ES",
+      storageState: { cookies: [], origins: [] },
+    });
+    const page = await context.newPage();
+    await blockPlaceholderImages(page);
+    try {
+      await use(page);
+    } finally {
+      await context.close();
+    }
+  },
   page: async ({ page }, use) => {
     await blockPlaceholderImages(page);
     await use(page);

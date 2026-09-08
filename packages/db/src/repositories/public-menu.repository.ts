@@ -2,7 +2,6 @@ import { and, asc, eq, getTableColumns, inArray, isNull, or } from "drizzle-orm"
 
 import { getImageVariantsByCanonicalUrl } from "./image-variants.repository";
 import { getPromotionCandidateRows, getPromotionRows } from "./promotions.repository";
-import { resolveTenantByHost } from "./tenant.repository";
 import { getTranslationRows } from "./translations.repository";
 import { isUsableRestaurantExchangeRate } from "../domain/exchange-rates";
 import { createBestPromotionMap, isPromotionLikeActiveNow } from "../domain/promotions";
@@ -48,7 +47,7 @@ export type {
 } from "../models/public-menu";
 export type { PublicDishPromotion, PublicPromotion } from "../models/promotion";
 export type { PublicTranslation } from "../models/translation";
-export { resolveTenantByHost };
+export { resolveTenantByHost } from "./tenant.repository";
 
 export type CategoryRow = typeof categories.$inferSelect;
 export type DishRow = typeof dishes.$inferSelect;

@@ -56,6 +56,10 @@ function isColor(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function colorOrDefault(value: unknown, fallback: string): string {
+  return isColor(value) ? value : fallback;
+}
+
 export function buildDefaultTenantThemeConfig(template: QmTemplateName = DEFAULT_TEMPLATE): QmTenantThemeConfig {
   const preset = TEMPLATES[template];
   const showPresetPhotos = preset.photoMode !== "none";
@@ -102,25 +106,13 @@ export function resolveTenantThemeConfig(
       ? { ...base.layout, ...candidate.layout }
       : base.layout;
 
-  let primary: string = DEFAULT_TENANT_COLORS.primary;
-
-  if (isColor(candidate.primary)) {
-    primary = candidate.primary;
-  }
-
-  let secondary: string = DEFAULT_TENANT_COLORS.secondary;
-
-  if (isColor(candidate.secondary)) {
-    secondary = candidate.secondary;
-  }
-
   return {
     ...base,
     ...candidate,
     layout,
     template: candidate.template,
-    primary,
-    secondary,
+    primary: colorOrDefault(candidate.primary, DEFAULT_TENANT_COLORS.primary),
+    secondary: colorOrDefault(candidate.secondary, DEFAULT_TENANT_COLORS.secondary),
     tagline: typeof candidate.tagline === "string" ? candidate.tagline : undefined,
     showMenuPhotos: typeof candidate.showMenuPhotos === "boolean" ? candidate.showMenuPhotos : showPresetPhotos,
     showDishPhoto: typeof candidate.showDishPhoto === "boolean" ? candidate.showDishPhoto : showPresetPhotos,

@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_auth/languages/")({
   component: LanguagesPage,
   loader: ({ context }) =>
     Promise.all([
-      context.queryClient.ensureQueryData(getLanguagesQueryOptions({ trpc: context.trpc })),
-      context.queryClient.ensureQueryData(getLanguageCatalogQueryOptions({ trpc: context.trpc })),
+      context.queryClient.query({ ...getLanguagesQueryOptions({ trpc: context.trpc }), staleTime: "static" }),
+      context.queryClient.query({ ...getLanguageCatalogQueryOptions({ trpc: context.trpc }), staleTime: "static" }),
     ]),
 });

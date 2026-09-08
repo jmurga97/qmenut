@@ -15,6 +15,7 @@ for (const template of ["tapas", "fine", "cafe", "her", "fast"]) {
     const trigger = page.locator("button.dish-trigger").first();
     await trigger.click();
     await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.getByRole("dialog").getByRole("button", { name: /Cerrar|Close/ })).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(trigger).toBeFocused();

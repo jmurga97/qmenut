@@ -9,5 +9,6 @@ export const Route = createFileRoute("/_auth/billing")({
   beforeLoad: ({ context }) => {
     if (!can(context.roleCode, "billing.manage")) redirect({ to: "/", throw: true });
   },
-  loader: ({ context }) => context.queryClient.ensureQueryData(getBillingOverviewQueryOptions({ trpc: context.trpc })),
+  loader: ({ context }) =>
+    context.queryClient.query({ ...getBillingOverviewQueryOptions({ trpc: context.trpc }), staleTime: "static" }),
 });

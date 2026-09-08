@@ -7,7 +7,9 @@ import type { ImageDraft } from "./image-draft";
 function useImageDraftCollection(createInitialDrafts: () => ImageDraft[]) {
   const [drafts, setDrafts] = useState(createInitialDrafts);
   const draftsRef = useRef(drafts);
-  draftsRef.current = drafts;
+  useEffect(() => {
+    draftsRef.current = drafts;
+  });
 
   useEffect(
     () => () => {

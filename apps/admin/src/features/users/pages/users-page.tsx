@@ -10,6 +10,7 @@ import {
   ResourceTable,
 } from "@jmurga97/components";
 import { buttonVariants } from "@jmurga97/components/button";
+import { useState } from "react";
 import { FormProvider } from "react-hook-form";
 
 import { useUsersController } from "~/features/users/hooks/use-users-controller";
@@ -83,13 +84,14 @@ function UserRowActions({ controller, user }: { controller: ReturnType<typeof us
 }
 
 function CreateUserDialog({ controller }: { controller: ReturnType<typeof useUsersController> }) {
+  const [selectPortalContainer, setSelectPortalContainer] = useState<HTMLElement | null>(null);
   return (
     <Dialog.Root open={controller.createOpen} onOpenChange={controller.handleCreateOpenChange}>
       <Dialog.Trigger className={buttonVariants({ size: "md", variant: "primary" })}>+ Agregar usuario</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Backdrop className="admin-users-dialog-backdrop" />
         <Dialog.Viewport className="admin-users-dialog-viewport">
-          <Dialog.Popup className="admin-users-dialog-popup">
+          <Dialog.Popup className="admin-users-dialog-popup" ref={setSelectPortalContainer}>
             <Dialog.Title>Agregar usuario</Dialog.Title>
             <Dialog.Description>
               Crea la cuenta y su acceso a este restaurante. La persona entrará solicitando un OTP, sin contraseña.
@@ -110,7 +112,12 @@ function CreateUserDialog({ controller }: { controller: ReturnType<typeof useUse
                   maxLength={320}
                   type="email"
                 />
-                <FormSelect<CreateUserFormValues> label="Rol" name="roleCode" options={[...manageableRoleOptions]} />
+                <FormSelect<CreateUserFormValues>
+                  label="Rol"
+                  name="roleCode"
+                  options={[...manageableRoleOptions]}
+                  portalContainer={selectPortalContainer}
+                />
                 <Field label="Acceso">
                   <Input readOnly value="Código de un solo uso por correo" />
                 </Field>

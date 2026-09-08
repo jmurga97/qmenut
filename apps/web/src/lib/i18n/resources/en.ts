@@ -185,6 +185,7 @@ export default {
       redeemedFooter: "balance {{balance}}/{{total}} · your next visit already counts",
     },
     code: {
+      networkError: "Could not connect. Check your connection and enter the code again.",
       title: "Enter the code",
       hint: "Ask a staff member for the code",
       inputLabel: "Four-digit venue code",

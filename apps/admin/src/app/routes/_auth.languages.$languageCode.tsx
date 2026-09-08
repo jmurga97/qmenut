@@ -10,10 +10,11 @@ export const Route = createFileRoute("/_auth/languages/$languageCode")({
   },
   loader: async ({ context, params }) => {
     const branch = await getSelectedBranch(context);
-    await context.queryClient.ensureQueryData(getLanguageCatalogQueryOptions({ trpc: context.trpc }));
+    await context.queryClient.query({ ...getLanguageCatalogQueryOptions({ trpc: context.trpc }), staleTime: "static" });
     if (!branch) return;
-    await context.queryClient.ensureQueryData(
-      getTranslationsQueryOptions({ branchId: branch.id, languageCode: params.languageCode, trpc: context.trpc }),
-    );
+    await context.queryClient.query({
+      ...getTranslationsQueryOptions({ branchId: branch.id, languageCode: params.languageCode, trpc: context.trpc }),
+      staleTime: "static",
+    });
   },
 });

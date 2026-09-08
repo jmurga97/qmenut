@@ -112,13 +112,7 @@ class QmColorEngine {
   /** Governed derivation: a template + 2 tenant colors → the full color group. */
   derive(cfg: QmThemeConfig): QmDerivedColors {
     const template = TEMPLATES[cfg.template];
-    let cap: number | null;
-
-    if (cfg.saturationCap === undefined) {
-      cap = template.saturationCap;
-    } else {
-      cap = cfg.saturationCap;
-    }
+    const { saturationCap: cap = template.saturationCap } = cfg;
 
     const rawPrimary = cfg.primary || this.config.defaultPrimary;
     const rawSecondary = cfg.secondary || this.config.defaultSecondary;

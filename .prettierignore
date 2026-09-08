@@ -10,3 +10,4 @@ apps/*/src/app/routeTree.gen.ts
 graphify-out/
 worker-configuration.d.ts
 bun.lock
+docs/sales/*.html

@@ -17,11 +17,11 @@ export const Route = createFileRoute("/_auth/menu")({
   loader: async ({ context: { menuBranchId, queryClient, trpc } }) => {
     if (!menuBranchId) return;
     await Promise.all([
-      queryClient.ensureQueryData(getMenuCategoriesQueryOptions({ branchId: menuBranchId, trpc })),
-      queryClient.ensureQueryData(getMenuDishesQueryOptions({ branchId: menuBranchId, trpc })),
-      queryClient.ensureQueryData(getMenuTagsQueryOptions({ trpc })),
-      queryClient.ensureQueryData(getMenuAllergensQueryOptions({ trpc })),
-      queryClient.ensureQueryData(getMenuIngredientsQueryOptions({ trpc })),
+      queryClient.query({ ...getMenuCategoriesQueryOptions({ branchId: menuBranchId, trpc }), staleTime: "static" }),
+      queryClient.query({ ...getMenuDishesQueryOptions({ branchId: menuBranchId, trpc }), staleTime: "static" }),
+      queryClient.query({ ...getMenuTagsQueryOptions({ trpc }), staleTime: "static" }),
+      queryClient.query({ ...getMenuAllergensQueryOptions({ trpc }), staleTime: "static" }),
+      queryClient.query({ ...getMenuIngredientsQueryOptions({ trpc }), staleTime: "static" }),
     ]);
   },
   component: () => <Outlet />,

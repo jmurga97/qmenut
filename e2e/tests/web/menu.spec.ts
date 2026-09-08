@@ -49,5 +49,5 @@ test("loads the highlights page and leaves the old promotions route unavailable"
 
   const oldRouteResponse = await page.goto("/es/promos", { waitUntil: "domcontentloaded" });
   expect(oldRouteResponse?.status()).toBe(404);
-  await expect(page.getByText("Not Found", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Página no encontrada", exact: true })).toBeVisible();
 });

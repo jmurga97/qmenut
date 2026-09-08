@@ -15,9 +15,10 @@ export const Route = createFileRoute("/{-$locale}/aviso-legal")({
     }
   },
   loader: async ({ context, params }) => {
-    const data = await context.queryClient.ensureQueryData(
-      getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
-    );
+    const data = await context.queryClient.query({
+      ...getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
+      staleTime: "static",
+    });
 
     // Los países sin plantilla legal degradan a 404 en el loader (no en render):
     // el guardia de create-tenant.ts vive fuera del camino de render.

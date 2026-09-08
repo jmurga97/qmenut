@@ -9,9 +9,10 @@ import { PublicPageSkeleton } from "~/shared/components/public-page-skeleton";
 
 export const Route = createFileRoute("/{-$locale}/")({
   loader: async ({ context, params }) =>
-    context.queryClient.ensureQueryData(
-      getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
-    ),
+    context.queryClient.query({
+      ...getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
+      staleTime: "static",
+    }),
   head: ({ loaderData, match }) =>
     buildPageHead({
       jsonLd: loaderData

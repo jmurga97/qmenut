@@ -6,7 +6,10 @@ import { DishEditorPage } from "~/features/menu/pages/menu-pages";
 export const Route = createFileRoute("/_auth/menu/dishes/$dishId")({
   loader: async ({ context, params }) => {
     if (!context.menuBranchId) return;
-    await context.queryClient.ensureQueryData(getDishDetailQueryOptions({ dishId: params.dishId, trpc: context.trpc }));
+    await context.queryClient.query({
+      ...getDishDetailQueryOptions({ dishId: params.dishId, trpc: context.trpc }),
+      staleTime: "static",
+    });
   },
   component: function DishRoute() {
     return <DishEditorPage dishId={Route.useParams().dishId} />;

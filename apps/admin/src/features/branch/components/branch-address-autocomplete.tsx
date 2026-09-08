@@ -105,9 +105,8 @@ export function BranchAddressAutocomplete({ branchId, onResolveChange }: BranchA
   const inputId = useId();
   const listboxId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
-  const sessionTokenRef = useRef("");
   const resolveSeqRef = useRef(0);
-  if (!sessionTokenRef.current) sessionTokenRef.current = crypto.randomUUID();
+  const [sessionToken, setSessionToken] = useState(() => crypto.randomUUID());
   const queryClient = useQueryClient();
   const [activeIndex, setActiveIndex] = useState(-1);
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -124,7 +123,7 @@ export function BranchAddressAutocomplete({ branchId, onResolveChange }: BranchA
     ...getAddressSuggestionsQueryOptions({
       branchId,
       query: normalizedQuery,
-      sessionToken: sessionTokenRef.current,
+      sessionToken,
       trpc,
     }),
     enabled: normalizedQuery.length >= MIN_QUERY_LENGTH,
@@ -162,14 +161,15 @@ export function BranchAddressAutocomplete({ branchId, onResolveChange }: BranchA
     onResolveChange(true);
 
     try {
-      const location = await queryClient.ensureQueryData(
-        getAddressLocationQueryOptions({
+      const location = await queryClient.query({
+        ...getAddressLocationQueryOptions({
           branchId,
           placeId: suggestion.id,
-          sessionToken: sessionTokenRef.current,
+          sessionToken,
           trpc,
         }),
-      );
+        staleTime: "static",
+      });
       if (resolveSeqRef.current !== seq) return;
       setValue("latitude", String(location.latitude), { shouldDirty: true, shouldValidate: true });
       setValue("longitude", String(location.longitude), { shouldDirty: true, shouldValidate: true });
@@ -182,7 +182,7 @@ export function BranchAddressAutocomplete({ branchId, onResolveChange }: BranchA
     } finally {
       if (resolveSeqRef.current === seq) {
         onResolveChange(false);
-        sessionTokenRef.current = crypto.randomUUID();
+        setSessionToken(crypto.randomUUID());
       }
     }
   }

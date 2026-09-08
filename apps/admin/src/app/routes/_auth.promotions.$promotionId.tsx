@@ -6,9 +6,10 @@ import { PromotionEditorPage } from "~/features/promotions/pages/promotion-pages
 export const Route = createFileRoute("/_auth/promotions/$promotionId")({
   loader: async ({ context, params }) => {
     if (!context.promotionsBranchId) return;
-    await context.queryClient.ensureQueryData(
-      getPromotionQueryOptions({ promotionId: params.promotionId, trpc: context.trpc }),
-    );
+    await context.queryClient.query({
+      ...getPromotionQueryOptions({ promotionId: params.promotionId, trpc: context.trpc }),
+      staleTime: "static",
+    });
   },
   component: function PromotionRoute() {
     return <PromotionEditorPage promotionId={Route.useParams().promotionId} />;

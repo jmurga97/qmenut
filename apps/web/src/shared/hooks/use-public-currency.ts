@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 
 import { isUsableVesExchangeRate } from "~/shared/lib/price-formatter";
@@ -6,6 +6,25 @@ import { isUsableVesExchangeRate } from "~/shared/lib/price-formatter";
 import type { QmLangOption } from "@qmenut/ui/components/qm-lang";
 
 const CHOICE_STORAGE_KEY = "qm-currency-choice";
+
+// The stored choice is the only real state; the displayed currency is derived from it, so it lives
+// in localStorage and is read through useSyncExternalStore: no hydration mismatch (the server
+// snapshot is null) and no setState-in-effect cascade when the tenant turns VES prices off.
+const choiceListeners = new Set<() => void>();
+
+function subscribeChoice(onChange: () => void): () => void {
+  choiceListeners.add(onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    choiceListeners.delete(onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
+function storeChoice(value: string): void {
+  window.localStorage.setItem(CHOICE_STORAGE_KEY, value);
+  for (const onChange of choiceListeners) onChange();
+}
 
 interface UsePublicCurrencyInput {
   sourceCurrency: string;
@@ -27,7 +46,12 @@ export function usePublicCurrency({
 }: UsePublicCurrencyInput): PublicCurrencyState {
   const { t } = useTranslation();
   const canDisplayVes = sourceCurrency === "USD" && vesPricesEnabled && isUsableVesExchangeRate(vesExchangeRate);
-  const [displayCurrency, setDisplayCurrency] = useState(sourceCurrency);
+  const storedChoice = useSyncExternalStore(
+    subscribeChoice,
+    () => window.localStorage.getItem(CHOICE_STORAGE_KEY),
+    () => null,
+  );
+  const displayCurrency = canDisplayVes && storedChoice === "VES" ? "VES" : sourceCurrency;
   const currencyOptions = useMemo(
     () =>
       canDisplayVes
@@ -39,22 +63,9 @@ export function usePublicCurrency({
     [canDisplayVes, sourceCurrency],
   );
 
-  useEffect(() => {
-    const stored = window.localStorage.getItem(CHOICE_STORAGE_KEY);
-    setDisplayCurrency(canDisplayVes && stored === "VES" ? "VES" : sourceCurrency);
-  }, [canDisplayVes, sourceCurrency]);
-
-  useEffect(() => {
-    if (!canDisplayVes && displayCurrency !== sourceCurrency) {
-      setDisplayCurrency(sourceCurrency);
-    }
-  }, [canDisplayVes, displayCurrency, sourceCurrency]);
-
   const handleCurrencyChange = useCallback(
     (event: CustomEvent<{ value: string }>) => {
-      const value = event.detail.value === "VES" && canDisplayVes ? "VES" : sourceCurrency;
-      setDisplayCurrency(value);
-      window.localStorage.setItem(CHOICE_STORAGE_KEY, value);
+      storeChoice(event.detail.value === "VES" && canDisplayVes ? "VES" : sourceCurrency);
     },
     [canDisplayVes, sourceCurrency],
   );

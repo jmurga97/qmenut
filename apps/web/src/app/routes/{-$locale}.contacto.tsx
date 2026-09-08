@@ -8,9 +8,10 @@ import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 
 export const Route = createFileRoute("/{-$locale}/contacto")({
   loader: async ({ context, params }) =>
-    context.queryClient.ensureQueryData(
-      getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
-    ),
+    context.queryClient.query({
+      ...getPublicMenuQueryOptions({ host: context.tenant.host, locale: params.locale, trpc: context.trpc }),
+      staleTime: "static",
+    }),
   head: ({ loaderData, match }) =>
     buildPageHead({
       descriptionKey: "contact.seoDescription",

@@ -6,6 +6,6 @@ export function getTenantQueryOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
   return trpc.admin.tenant.me.queryOptions();
 }
 export async function getSelectedBranch({ queryClient, trpc }: AdminRouterContext) {
-  const tenant = await queryClient.ensureQueryData(getTenantQueryOptions({ trpc }));
+  const tenant = await queryClient.query({ ...getTenantQueryOptions({ trpc }), staleTime: "static" });
   return resolveSelectedBranch(tenant.branches, useBranchStore.getState().selectedBranchId);
 }

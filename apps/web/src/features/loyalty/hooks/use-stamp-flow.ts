@@ -102,6 +102,7 @@ export function useStampFlow({ host, refreshCard, target, token, trpc }: StampFl
     animatedIndex: state.animatedIndex,
     code: state.code,
     open: state.open,
+    networkError: state.feedback === "error" && mutation.isError && !getTrpcErrorCode(mutation.error),
     status: mutation.isPending ? ("submitting" as const) : state.feedback,
     changeCode: (code: string) => dispatch({ type: "changed", code }),
     openPanel: () => dispatch({ type: "opened" }),

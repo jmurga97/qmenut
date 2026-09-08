@@ -12,7 +12,10 @@ export const Route = createFileRoute("/_auth/analytics")({
     if (!can(context.roleCode, "analytics.read")) redirect({ to: "/", throw: true });
   },
   loader: async ({ context: { queryClient, trpc }, deps }) => {
-    await queryClient.ensureQueryData(analyticsApi.getAnalyticsSnapshotQueryOptions({ period: deps.period, trpc }));
+    await queryClient.query({
+      ...analyticsApi.getAnalyticsSnapshotQueryOptions({ period: deps.period, trpc }),
+      staleTime: "static",
+    });
   },
   component: AnalyticsPage,
 });

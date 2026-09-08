@@ -185,6 +185,7 @@ export default {
       redeemedFooter: "saldo {{balance}}/{{total}} · tu próxima visita ya suma",
     },
     code: {
+      networkError: "No se pudo conectar. Comprueba tu conexión y vuelve a introducir el código.",
       title: "Introduce el código",
       hint: "Pídele el código al personal",
       inputLabel: "Código de sala de cuatro dígitos",

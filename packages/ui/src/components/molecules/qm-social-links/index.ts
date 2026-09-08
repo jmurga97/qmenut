@@ -1,36 +1,20 @@
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 
+import { socialIcon } from "./detect";
 import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
 
+import type { QmSocialLink, SocialIcon } from "./detect";
 import type { TemplateResult } from "lit";
 
 export const QM_SOCIAL_LINKS_TAG_NAME = "qm-social-links";
 
+export { socialIcon } from "./detect";
+export type { QmSocialLink, SocialIcon } from "./detect";
+
 const componentStyles = createComponentStyles(componentStylesText);
-
-export interface QmSocialLink {
-  href: string;
-  label: string;
-}
-
-type SocialIcon = "facebook" | "instagram" | "linkedin" | "pinterest" | "tiktok" | "x" | "youtube" | "generic";
-
-function socialIcon({ href, label }: QmSocialLink): SocialIcon {
-  const value = `${label} ${href}`.toLowerCase();
-
-  if (value.includes("instagram")) return "instagram";
-  if (value.includes("facebook") || value.includes("fb.com")) return "facebook";
-  if (value.includes("linkedin")) return "linkedin";
-  if (value.includes("pinterest")) return "pinterest";
-  if (value.includes("tiktok")) return "tiktok";
-  if (value.includes("youtube") || value.includes("youtu.be")) return "youtube";
-  if (value.includes("twitter") || value.includes("x.com")) return "x";
-
-  return "generic";
-}
 
 function renderIcon(icon: SocialIcon): TemplateResult {
   switch (icon) {

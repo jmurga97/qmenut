@@ -68,7 +68,12 @@ test("publishes an admin dish rename through versioned SSR cache invalidation", 
     await page.goto("/menu", { waitUntil: "domcontentloaded" });
     const updatedLink = page.getByRole("link", { name: updatedName });
 
-    if (await updatedLink.isVisible()) {
+    // The dish list renders after tRPC resolves, so an instant visibility check skips the restore.
+    const canRestore = await updatedLink.waitFor({ state: "visible", timeout: 5_000 }).then(
+      () => true,
+      () => false,
+    );
+    if (canRestore) {
       await updatedLink.click();
       await page.getByRole("textbox").nth(0).fill(originalName);
       await page.getByText("Guardar", { exact: true }).click();

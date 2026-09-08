@@ -15,15 +15,16 @@ function ensureTranslationsForActiveLanguages({
   trpc,
 }: AdminRouterContext & { branchId: string }) {
   async function run() {
-    const languages = await queryClient.ensureQueryData(api.getLanguagesQueryOptions({ trpc }));
+    const languages = await queryClient.query({ ...api.getLanguagesQueryOptions({ trpc }), staleTime: "static" });
     const targets = languages.languages.filter(
       (language) => language.isActive && language.languageCode !== languages.defaultLanguageCode,
     );
     await Promise.all(
       targets.map((language) =>
-        queryClient.ensureQueryData(
-          api.getTranslationsQueryOptions({ branchId, languageCode: language.languageCode, trpc }),
-        ),
+        queryClient.query({
+          ...api.getTranslationsQueryOptions({ branchId, languageCode: language.languageCode, trpc }),
+          staleTime: "static",
+        }),
       ),
     );
   }
@@ -39,37 +40,37 @@ export const Route = createFileRoute("/_auth/")({
     if (can(roleCode, "analytics.read")) {
       const range = getVisitsRange(deps.period);
       jobs.push(
-        queryClient.ensureQueryData(api.getAnalyticsSnapshotQueryOptions({ period: "15d", trpc })),
-        queryClient.ensureQueryData(api.getLoyaltySummaryQueryOptions({ trpc })),
-        queryClient.ensureQueryData(api.getLoyaltyVisitsQueryOptions({ ...range, trpc })),
+        queryClient.query({ ...api.getAnalyticsSnapshotQueryOptions({ period: "15d", trpc }), staleTime: "static" }),
+        queryClient.query({ ...api.getLoyaltySummaryQueryOptions({ trpc }), staleTime: "static" }),
+        queryClient.query({ ...api.getLoyaltyVisitsQueryOptions({ ...range, trpc }), staleTime: "static" }),
       );
     }
     const branch = await getSelectedBranch(context);
-    const tenant = await queryClient.ensureQueryData(trpc.admin.tenant.me.queryOptions());
+    const tenant = await queryClient.query({ ...trpc.admin.tenant.me.queryOptions(), staleTime: "static" });
     if (tenant.restaurant.sourceCurrency === "USD" && can(roleCode, "exchangeRates.write")) {
-      jobs.push(queryClient.ensureQueryData(api.getExchangeRatesSummaryQueryOptions({ trpc })));
+      jobs.push(queryClient.query({ ...api.getExchangeRatesSummaryQueryOptions({ trpc }), staleTime: "static" }));
     }
     if (branch && can(roleCode, "loyalty.operate")) {
       jobs.push(
-        queryClient.ensureQueryData(api.getPendingRedemptionsQueryOptions({ trpc })),
-        queryClient.ensureQueryData(api.getVenueCodeQueryOptions({ branchId: branch.id, trpc })),
+        queryClient.query({ ...api.getPendingRedemptionsQueryOptions({ trpc }), staleTime: "static" }),
+        queryClient.query({ ...api.getVenueCodeQueryOptions({ branchId: branch.id, trpc }), staleTime: "static" }),
       );
     }
     if (branch) {
       jobs.push(
-        queryClient.ensureQueryData(api.getMenuCategoriesQueryOptions({ branchId: branch.id, trpc })),
-        queryClient.ensureQueryData(api.getMenuDishesQueryOptions({ branchId: branch.id, trpc })),
+        queryClient.query({ ...api.getMenuCategoriesQueryOptions({ branchId: branch.id, trpc }), staleTime: "static" }),
+        queryClient.query({ ...api.getMenuDishesQueryOptions({ branchId: branch.id, trpc }), staleTime: "static" }),
       );
     }
     if (can(roleCode, "branch.write")) {
       jobs.push(
-        queryClient.ensureQueryData(api.getLanguagesQueryOptions({ trpc })),
-        queryClient.ensureQueryData(api.getLanguageCatalogQueryOptions({ trpc })),
+        queryClient.query({ ...api.getLanguagesQueryOptions({ trpc }), staleTime: "static" }),
+        queryClient.query({ ...api.getLanguageCatalogQueryOptions({ trpc }), staleTime: "static" }),
       );
       if (branch) jobs.push(ensureTranslationsForActiveLanguages({ ...context, branchId: branch.id }));
     }
     if (can(roleCode, "billing.manage")) {
-      jobs.push(queryClient.ensureQueryData(api.getBillingOverviewQueryOptions({ trpc })));
+      jobs.push(queryClient.query({ ...api.getBillingOverviewQueryOptions({ trpc }), staleTime: "static" }));
     }
     await Promise.all(jobs);
   },

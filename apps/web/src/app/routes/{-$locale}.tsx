@@ -62,7 +62,7 @@ export const Route = createFileRoute("/{-$locale}")({
       locale: requested,
       trpc: context.trpc,
     });
-    const data = await context.queryClient.ensureQueryData(publicMenuOptions);
+    const data = await context.queryClient.query({ ...publicMenuOptions, staleTime: "static" });
     const language = data?.language;
 
     // Prefix doesn't map to an active language for this tenant — fall back to the

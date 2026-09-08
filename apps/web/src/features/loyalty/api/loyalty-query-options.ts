@@ -30,12 +30,13 @@ export function getRedemptionStatusQueryOptions({
   return trpc.loyalty.redemptionStatus.queryOptions({ host, cardToken, redemptionId });
 }
 
+// Fail offline writes immediately so reconnecting cannot silently submit an old request.
 export function getLoyaltyMutationOptions(trpc: TrpcOptionsProxy) {
   return {
-    acceptConsent: trpc.loyalty.acceptConsent.mutationOptions(),
-    cancelRedemption: trpc.loyalty.cancelRedemption.mutationOptions(),
-    createCard: trpc.loyalty.createCard.mutationOptions(),
-    earnStamp: trpc.loyalty.earnStamp.mutationOptions(),
-    requestRedemption: trpc.loyalty.requestRedemption.mutationOptions(),
+    acceptConsent: trpc.loyalty.acceptConsent.mutationOptions({ networkMode: "always" }),
+    cancelRedemption: trpc.loyalty.cancelRedemption.mutationOptions({ networkMode: "always" }),
+    createCard: trpc.loyalty.createCard.mutationOptions({ networkMode: "always" }),
+    earnStamp: trpc.loyalty.earnStamp.mutationOptions({ networkMode: "always" }),
+    requestRedemption: trpc.loyalty.requestRedemption.mutationOptions({ networkMode: "always" }),
   };
 }

@@ -6,9 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "check": "astro check",
-    "preview": "astro preview",
-    "deploy": "astro build && wrangler deploy --env production"
+    "check": "astro check"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

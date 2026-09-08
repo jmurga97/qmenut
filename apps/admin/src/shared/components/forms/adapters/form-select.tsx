@@ -13,8 +13,15 @@ type FormSelectProps<TValues extends FieldValues> = {
   label: string;
   name: FieldPath<TValues>;
   options: SelectOption[];
+  portalContainer?: HTMLElement | null;
 };
-export function FormSelect<TValues extends FieldValues>({ disabled, label, name, options }: FormSelectProps<TValues>) {
+export function FormSelect<TValues extends FieldValues>({
+  disabled,
+  label,
+  name,
+  options,
+  portalContainer,
+}: FormSelectProps<TValues>) {
   const { control, formState, getFieldState } = useFormContext<TValues>();
   const { field } = useController({ control, name });
   const error = getFieldState(name, formState).error?.message;
@@ -25,6 +32,7 @@ export function FormSelect<TValues extends FieldValues>({ disabled, label, name,
         name={field.name}
         onValueChange={(value) => field.onChange(value ?? "")}
         options={options}
+        portalContainer={portalContainer}
         placeholder="Selecciona…"
         value={field.value ? String(field.value) : null}
       />

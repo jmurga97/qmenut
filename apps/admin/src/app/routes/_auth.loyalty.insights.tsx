@@ -15,9 +15,9 @@ export const Route = createFileRoute("/_auth/loyalty/insights")({
   loader: async ({ context: { queryClient, trpc }, deps }) => {
     const range = getVisitsRange(deps.period);
     await Promise.all([
-      queryClient.ensureQueryData(loyaltyApi.getLoyaltySummaryQueryOptions({ trpc })),
-      queryClient.ensureQueryData(loyaltyApi.getLoyaltyVisitsQueryOptions({ ...range, trpc })),
-      queryClient.ensureQueryData(loyaltyApi.getLoyaltyCustomersQueryOptions({ search: deps, trpc })),
+      queryClient.query({ ...loyaltyApi.getLoyaltySummaryQueryOptions({ trpc }), staleTime: "static" }),
+      queryClient.query({ ...loyaltyApi.getLoyaltyVisitsQueryOptions({ ...range, trpc }), staleTime: "static" }),
+      queryClient.query({ ...loyaltyApi.getLoyaltyCustomersQueryOptions({ search: deps, trpc }), staleTime: "static" }),
     ]);
   },
   component: LoyaltyInsightsPage,

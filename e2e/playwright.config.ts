@@ -41,7 +41,7 @@ export default defineConfig({
     },
     {
       command:
-        "VITE_ADMIN_ORIGIN=http://localhost:5174 bun run --cwd ../apps/web build && bun run --cwd ../apps/web serve",
+        "VITE_ADMIN_ORIGIN=http://localhost:5174 bun run --cwd ../apps/web build && bunx wrangler dev --config ../apps/web/dist/server/wrangler.json --port 4011 --persist-to ../.wrangler-shared/state",
       url: "http://tapas.localhost:4011/robots.txt",
       reuseExistingServer,
       timeout: 180_000,
@@ -97,5 +97,20 @@ export default defineConfig({
         storageState: ".auth/admin.json",
       },
     },
+    ...[
+      { name: "critical-webkit", device: "iPhone 13" },
+      { name: "critical-firefox", device: "Desktop Firefox" },
+    ].map(({ name, device }) => ({
+      name,
+      testMatch: /tests\/.*\.spec\.ts/,
+      grep: /@critical/,
+      dependencies: ["setup"],
+      use: {
+        ...devices[device],
+        baseURL: "http://localhost:5174",
+        storageState: ".auth/admin.json",
+        locale: "es-ES",
+      },
+    })),
   ],
 });

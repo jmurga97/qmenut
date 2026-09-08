@@ -71,7 +71,7 @@ export function useLoyaltyController() {
   const stamp = {
     animatedIndex: stampFlow.animatedIndex,
     code: stampFlow.code,
-    message: getCodeMessage(stampFlow.status, t),
+    message: stampFlow.networkError ? t("loyalty.code.networkError") : getCodeMessage(stampFlow.status, t),
     open: stampFlow.open,
     status: stampFlow.status,
     changeCode: stampFlow.changeCode,

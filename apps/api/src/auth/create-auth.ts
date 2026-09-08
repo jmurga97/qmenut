@@ -3,7 +3,6 @@ import { OTP_EXPIRES_IN_LABEL } from "@qmenut/auth/store";
 import * as schema from "@qmenut/db/schema";
 
 import type { RuntimeEnv } from "../config/env/schema";
-import type { Auth } from "@qmenut/auth";
 import type { DrizzleDb } from "@qmenut/db/client";
 
 interface CreateAuthInput {
@@ -32,4 +31,4 @@ export function createAuth({ db, env }: CreateAuthInput) {
   });
 }
 
-export type { Auth };
+export type { Auth } from "@qmenut/auth";

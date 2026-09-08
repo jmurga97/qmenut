@@ -27,7 +27,7 @@ The repository is a Bun `1.3.6` workspace run by Turbo (`turbo.json`). The root
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/db`          | Drizzle ORM: the schema (split by domain), models, mappers, domain logic, and the repository layer that performs all data access. |
 | `packages/auth`        | Better Auth setup for email OTP over Drizzle. Exports a server entry point and `./client`.                                        |
-| `packages/permissions` | Role and permission logic (`ROLE_CODES` and permission checks), with no dependencies. Unit-tested with `bun test`.                |
+| `packages/permissions` | Role and permission logic (`ROLE_CODES` and permission checks), with no dependencies.                                             |
 | `packages/ui`          | Shared UI: Lit web components, React wrappers, and the theme system in `theme/`. Used by web, admin, api, and tenant-config.      |
 
 ## The Workers

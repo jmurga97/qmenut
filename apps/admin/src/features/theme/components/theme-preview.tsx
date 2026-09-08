@@ -35,7 +35,9 @@ export function ThemePreview({ draft, host }: ThemePreviewProps) {
     return { origin: url.origin, url: url.href };
   }, [host]);
 
-  draftRef.current = draft;
+  useEffect(() => {
+    draftRef.current = draft;
+  });
 
   useLayoutEffect(() => {
     let animationFrame = 0;
@@ -83,9 +85,6 @@ export function ThemePreview({ draft, host }: ThemePreviewProps) {
   }, []);
 
   useEffect(() => {
-    readyRef.current = false;
-    setStatus("loading");
-
     function postDraft() {
       const frameWindow = iframeRef.current?.contentWindow;
       const currentDraft = draftRef.current;

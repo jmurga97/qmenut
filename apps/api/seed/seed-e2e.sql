@@ -77,3 +77,13 @@ VALUES ('customer_legacy_consent', 'legacy-consent.e2e@test.local', unixepoch() 
 INSERT INTO customer_restaurants
   (customer_id, restaurant_id, points_balance, stamps_balance, created_at, updated_at)
 VALUES ('customer_legacy_consent', 'rest_tapas', 0, 0, unixepoch() * 1000, unixepoch() * 1000);
+
+-- Independent accounts for selector and UI provisioning journeys.
+DELETE FROM restaurant_users WHERE user_id IN ('user_multi_e2e', 'user_journey_e2e');
+DELETE FROM users WHERE id IN ('user_multi_e2e', 'user_journey_e2e');
+INSERT INTO users (id, name, email, email_verified, created_at, updated_at) VALUES
+  ('user_multi_e2e', 'E2E Multi', 'multi.e2e@test.local', 1, unixepoch() * 1000, unixepoch() * 1000),
+  ('user_journey_e2e', 'E2E Journey', 'journey.staff.e2e@test.local', 1, unixepoch() * 1000, unixepoch() * 1000);
+INSERT INTO restaurant_users (id, restaurant_id, user_id, role_code) VALUES
+  ('ru_multi_tapas_e2e', 'rest_tapas', 'user_multi_e2e', 'admin'),
+  ('ru_multi_fine_e2e', 'rest_fine', 'user_multi_e2e', 'admin');
