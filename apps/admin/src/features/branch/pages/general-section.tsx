@@ -19,7 +19,6 @@ export function GeneralSection() {
         <div className="admin-kicker">Identidad y contacto</div>
         <div className="admin-form-grid admin-form-grid--two">
           <FormTextInput<BranchFormValues> label="Nombre" name="name" />
-          <BranchAddressAutocomplete branchId={branchId} onResolveChange={controller.setResolvePending} />
           <FormTextInput<BranchFormValues> label="Teléfono" name="phone" />
           <FormTextInput<BranchFormValues> label="WhatsApp" name="whatsapp" />
           <FormSelect<BranchFormValues>
@@ -27,6 +26,7 @@ export function GeneralSection() {
             name="timezone"
             options={TIMEZONE_OPTIONS}
           />
+          <BranchAddressAutocomplete branchId={branchId} onResolveChange={controller.setResolvePending} />
         </div>
       </section>
       <SocialLinksEditor />

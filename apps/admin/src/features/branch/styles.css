@@ -5,6 +5,10 @@
   min-width: 0;
 }
 
+.admin-form-grid--two > .admin-address-autocomplete {
+  grid-column: 1 / -1;
+}
+
 .admin-address-results {
   position: absolute;
   z-index: 20;
