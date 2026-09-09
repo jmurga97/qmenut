@@ -378,6 +378,7 @@ export async function getPublicMenu({
     getPromotionRows({ db, tenant }),
   ]);
   const imageUrls = [
+    branch.logoUrl,
     ...branch.photos.map((photo) => photo.url),
     ...categoryRows.map((category) => category.imageUrl),
     ...dishRows.map((dish) => dish.imageUrl),
@@ -386,8 +387,13 @@ export async function getPublicMenu({
     canonicalUrls: [...new Set(imageUrls)],
     db,
   });
+  const faviconUrl = branch.logoUrl
+    ? (imageVariantsByCanonicalUrl.get(branch.logoUrl)?.find((variant) => variant.format === "image/x-icon")?.url ??
+      null)
+    : null;
   const branchWithVariants: PublicBranch = {
     ...branch,
+    faviconUrl,
     photos: branch.photos.map((photo): PublicBranchPhoto => {
       const variants = imageVariantsByCanonicalUrl.get(photo.url);
 

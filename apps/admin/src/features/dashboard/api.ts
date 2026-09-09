@@ -7,11 +7,6 @@ export { getBillingOverviewQueryOptions } from "~/features/billing/api";
 export { getExchangeRatesSummaryQueryOptions } from "~/features/exchange-rates/api";
 export { getAnalyticsSnapshotQueryOptions } from "~/features/analytics/api";
 export {
-  getLanguageCatalogQueryOptions,
-  getLanguagesQueryOptions,
-  getTranslationsQueryOptions,
-} from "~/features/languages/api";
-export {
   getLoyaltySummaryQueryOptions,
   getLoyaltyVisitsQueryOptions,
   getPendingRedemptionsQueryOptions,

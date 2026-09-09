@@ -6,7 +6,6 @@ import type { DrizzleDb } from "../client";
 import type { BatchItem } from "drizzle-orm/batch";
 
 export interface RestaurantLanguage {
-  isActive: boolean;
   isDefault: boolean;
   languageCode: string;
 }
@@ -23,10 +22,6 @@ interface RestaurantInput {
 
 interface LanguageCodeInput extends RestaurantInput {
   languageCode: string;
-}
-
-interface SetLanguageActiveInput extends LanguageCodeInput {
-  isActive: boolean;
 }
 
 export async function getRestaurantLanguageInfo({
@@ -46,8 +41,6 @@ export async function getRestaurantLanguageInfo({
   const languages = await db
     .select({
       languageCode: restaurantLanguages.languageCode,
-      isDefault: restaurantLanguages.isDefault,
-      isActive: restaurantLanguages.isActive,
     })
     .from(restaurantLanguages)
     .where(eq(restaurantLanguages.restaurantId, restaurantId))
@@ -56,7 +49,12 @@ export async function getRestaurantLanguageInfo({
 
   return {
     defaultLanguageCode: restaurant.defaultLanguageCode,
-    languages,
+    languages: [
+      { languageCode: restaurant.defaultLanguageCode, isDefault: true },
+      ...languages
+        .filter((language) => language.languageCode !== restaurant.defaultLanguageCode)
+        .map((language) => ({ ...language, isDefault: false })),
+    ],
   };
 }
 
@@ -66,32 +64,9 @@ export async function addRestaurantLanguage({ db, languageCode, restaurantId }: 
     .values({
       restaurantId,
       languageCode,
-      isDefault: false,
-      isActive: true,
       createdAt: Date.now(),
     })
-    .onConflictDoUpdate({
-      target: [restaurantLanguages.restaurantId, restaurantLanguages.languageCode],
-      set: { isActive: true },
-    });
-}
-
-export async function setRestaurantLanguageActive({
-  db,
-  isActive,
-  languageCode,
-  restaurantId,
-}: SetLanguageActiveInput): Promise<void> {
-  await db
-    .update(restaurantLanguages)
-    .set({ isActive })
-    .where(
-      and(
-        eq(restaurantLanguages.restaurantId, restaurantId),
-        eq(restaurantLanguages.languageCode, languageCode),
-        eq(restaurantLanguages.isDefault, false),
-      ),
-    );
+    .onConflictDoNothing();
 }
 
 export function removeRestaurantLanguageStatement({
@@ -101,11 +76,5 @@ export function removeRestaurantLanguageStatement({
 }: LanguageCodeInput): BatchItem<"sqlite"> {
   return db
     .delete(restaurantLanguages)
-    .where(
-      and(
-        eq(restaurantLanguages.restaurantId, restaurantId),
-        eq(restaurantLanguages.languageCode, languageCode),
-        eq(restaurantLanguages.isDefault, false),
-      ),
-    );
+    .where(and(eq(restaurantLanguages.restaurantId, restaurantId), eq(restaurantLanguages.languageCode, languageCode)));
 }

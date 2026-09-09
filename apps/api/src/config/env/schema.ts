@@ -30,7 +30,7 @@ export interface ImageWorkerBinding {
   retryUpload(input: GetImageWorkerUploadInput): Promise<unknown>;
   backfillVariants(input: {
     productId: "qmenut";
-    presetId: "qmenut-menu-image" | "qmenut-branch-photo";
+    presetId: "qmenut-menu-image" | "qmenut-branch-photo" | "qmenut-logo";
     cursor: string | null;
     limit: number;
   }): Promise<unknown>;

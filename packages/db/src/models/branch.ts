@@ -17,6 +17,8 @@ export interface PublicBranchSchedule {
 export interface PublicBranch {
   address: string | null;
   customDomain: string | null;
+  /** Variante image/x-icon del logo para el favicon por sucursal; ausente hasta el backfill del logo. */
+  faviconUrl?: string | null;
   googleReviewsEnabled: boolean;
   id: string;
   latitude: number | null;

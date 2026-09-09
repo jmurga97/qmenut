@@ -36,6 +36,20 @@
       "when": 1788710323855,
       "tag": "0004_image_upload_ownership",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1788973716743,
+      "tag": "0005_integral_translations",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1788974131259,
+      "tag": "0006_simplify_restaurant_languages",
+      "breakpoints": true
     }
   ]
 }

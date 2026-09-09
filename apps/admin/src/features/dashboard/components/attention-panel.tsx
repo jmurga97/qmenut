@@ -9,7 +9,6 @@ import {
   getBranchAttentionItems,
   getMenuAttentionItems,
   getSubscriptionAttentionItems,
-  getTranslationCoverageItems,
   sortAttentionItems,
 } from "~/features/dashboard/services";
 import { trpc } from "~/lib/trpc";
@@ -30,45 +29,12 @@ function AttentionContent() {
   const branch = resolveSelectedBranch(tenant.branches, selectedBranchId);
   const canBilling = useCan("billing.manage");
   const branchId = branch?.id ?? null;
-  const [categoriesQuery, dishesQuery, languagesQuery, catalogQuery, billingQuery] = useQueries({
+  const [categoriesQuery, dishesQuery, billingQuery] = useQueries({
     queries: [
       { ...api.getMenuCategoriesQueryOptions({ branchId: branchId ?? "", trpc }), enabled: branchId !== null },
       { ...api.getMenuDishesQueryOptions({ branchId: branchId ?? "", trpc }), enabled: branchId !== null },
-      api.getLanguagesQueryOptions({ trpc }),
-      api.getLanguageCatalogQueryOptions({ trpc }),
       { ...api.getBillingOverviewQueryOptions({ trpc }), enabled: canBilling },
     ],
-  });
-  const languages = languagesQuery.data;
-  const labelByCode = useMemo(
-    () => new Map((catalogQuery.data ?? []).map((entry) => [entry.code, entry.label])),
-    [catalogQuery.data],
-  );
-  const translationTargets = useMemo(() => {
-    if (!languages) return [];
-    return languages.languages.filter(
-      (language) => language.isActive && language.languageCode !== languages.defaultLanguageCode,
-    );
-  }, [languages]);
-  const translations = useQueries({
-    queries: translationTargets.map((language) => ({
-      ...api.getTranslationsQueryOptions({ branchId: branchId ?? "", languageCode: language.languageCode, trpc }),
-      enabled: branchId !== null,
-    })),
-    combine: (results) => ({
-      isPending: results.some((result) => result.isPending),
-      coverages: results
-        .map((result, index) => {
-          const target = translationTargets[index];
-          if (!target || !result.data || branchId === null) return null;
-          return {
-            languageCode: target.languageCode,
-            label: labelByCode.get(target.languageCode) ?? target.languageCode.toUpperCase(),
-            ...result.data.stats,
-          };
-        })
-        .filter((coverage) => coverage !== null),
-    }),
   });
   const items = useMemo(() => {
     const list: ReturnType<typeof getBranchAttentionItems> = [...getBranchAttentionItems(tenant.branches)];
@@ -76,11 +42,9 @@ function AttentionContent() {
     if (categoriesQuery.data && dishesQuery.data) {
       list.push(...getMenuAttentionItems(categoriesQuery.data, dishesQuery.data));
     }
-    list.push(...getTranslationCoverageItems(translations.coverages));
     return sortAttentionItems(list);
-  }, [tenant.branches, billingQuery.data, categoriesQuery.data, dishesQuery.data, translations.coverages]);
-  const isPending =
-    categoriesQuery.isPending || dishesQuery.isPending || languagesQuery.isPending || translations.isPending;
+  }, [tenant.branches, billingQuery.data, categoriesQuery.data, dishesQuery.data]);
+  const isPending = categoriesQuery.isPending || dishesQuery.isPending;
   return (
     <section aria-labelledby="admin-attention-title" className="admin-card admin-attention">
       <div className="admin-toolbar">

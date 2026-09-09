@@ -15,7 +15,16 @@ const temporaryOutputDirectory = relative(apiDirectory, temporaryDirectory);
 // against a schema that already has the change. Every filename below has been applied to a remote
 // database and is frozen. Append a name here once it has been applied remotely; never edit or
 // remove one.
-const REMOTELY_APPLIED_MIGRATIONS = ["0000_squashed_baseline.sql", "0001_drop_future_product_tables.sql"];
+const REMOTELY_APPLIED_MIGRATIONS = [
+  "0000_squashed_baseline.sql",
+  "0001_drop_future_product_tables.sql",
+  "0002_add_image_variants_catalog.sql",
+  "0003_durable_image_assignments.sql",
+  "0004_image_upload_ownership.sql",
+  // Recorded on the read-only pre-squash rollback database qmenut-db-v2; regenerated with the
+  // final translations schema before any active database applied it.
+  "0005_integral_translations.sql",
+];
 
 async function checkAppliedMigrationsStillExist(): Promise<void> {
   const migrationFiles = new Set(await readdir(join(apiDirectory, "migrations")));

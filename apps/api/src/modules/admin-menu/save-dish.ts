@@ -1,10 +1,8 @@
 import {
   categoryBelongsToBranch,
   createDishStatement,
-  getDishTranslatableFields,
   updateDishStatement,
 } from "@qmenut/db/repositories/admin-dishes.repository";
-import { markTranslationsPendingUpdateStatement } from "@qmenut/db/repositories/translations.repository";
 import { TRPCError } from "@trpc/server";
 
 import type { DrizzleDb } from "@qmenut/db/client";
@@ -45,32 +43,7 @@ export async function saveDish({
   }
 
   if (dishId) {
-    const previous = await getDishTranslatableFields({ db, dishId, restaurantId });
-
-    const changedFields = ["name", "description"].filter(
-      (field) =>
-        (field === "name" && previous?.name !== data.name) ||
-        (field === "description" && previous?.description !== data.description),
-    );
-
-    const statements: [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] = [
-      updateDishStatement({ db, restaurantId, dishId, data, preserveImage }),
-    ];
-
-    if (changedFields.length > 0) {
-      statements.push(
-        markTranslationsPendingUpdateStatement({
-          db,
-          entityId: dishId,
-          entityType: "dish",
-          fields: changedFields,
-          restaurantId,
-        }),
-      );
-    }
-
-    statements.push(...extraStatements);
-    await db.batch(statements);
+    await db.batch([updateDishStatement({ db, restaurantId, dishId, data, preserveImage }), ...extraStatements]);
 
     return { id: dishId };
   }

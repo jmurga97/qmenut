@@ -7,30 +7,6 @@ import { dashboardSearchSchema } from "~/features/dashboard/types";
 import { getSelectedBranch } from "~/shared/api";
 import { getVisitsRange } from "~/shared/services/visit-series";
 
-import type { AdminRouterContext } from "~/lib/trpc";
-
-function ensureTranslationsForActiveLanguages({
-  branchId,
-  queryClient,
-  trpc,
-}: AdminRouterContext & { branchId: string }) {
-  async function run() {
-    const languages = await queryClient.query({ ...api.getLanguagesQueryOptions({ trpc }), staleTime: "static" });
-    const targets = languages.languages.filter(
-      (language) => language.isActive && language.languageCode !== languages.defaultLanguageCode,
-    );
-    await Promise.all(
-      targets.map((language) =>
-        queryClient.query({
-          ...api.getTranslationsQueryOptions({ branchId, languageCode: language.languageCode, trpc }),
-          staleTime: "static",
-        }),
-      ),
-    );
-  }
-  return run();
-}
-
 export const Route = createFileRoute("/_auth/")({
   validateSearch: dashboardSearchSchema,
   loaderDeps: ({ search }) => search,
@@ -61,13 +37,6 @@ export const Route = createFileRoute("/_auth/")({
         queryClient.query({ ...api.getMenuCategoriesQueryOptions({ branchId: branch.id, trpc }), staleTime: "static" }),
         queryClient.query({ ...api.getMenuDishesQueryOptions({ branchId: branch.id, trpc }), staleTime: "static" }),
       );
-    }
-    if (can(roleCode, "branch.write")) {
-      jobs.push(
-        queryClient.query({ ...api.getLanguagesQueryOptions({ trpc }), staleTime: "static" }),
-        queryClient.query({ ...api.getLanguageCatalogQueryOptions({ trpc }), staleTime: "static" }),
-      );
-      if (branch) jobs.push(ensureTranslationsForActiveLanguages({ ...context, branchId: branch.id }));
     }
     if (can(roleCode, "billing.manage")) {
       jobs.push(queryClient.query({ ...api.getBillingOverviewQueryOptions({ trpc }), staleTime: "static" }));

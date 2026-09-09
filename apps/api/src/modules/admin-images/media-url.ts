@@ -12,7 +12,7 @@ export function isQmenutMediaUrl(value: string): boolean {
 export function isQmenutMediaVariantUrl(value: string): boolean {
   try {
     const url = new URL(value);
-    return url.origin === QMENUT_MEDIA_ORIGIN && url.pathname.endsWith(".webp");
+    return url.origin === QMENUT_MEDIA_ORIGIN && (url.pathname.endsWith(".webp") || url.pathname.endsWith(".ico"));
   } catch {
     return false;
   }

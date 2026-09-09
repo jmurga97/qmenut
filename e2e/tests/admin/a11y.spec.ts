@@ -15,7 +15,6 @@ const ROUTES = [
   "/loyalty/insights",
   "/theme",
   "/languages",
-  "/languages/en",
   "/qr",
   "/branch",
   "/billing",

@@ -211,14 +211,7 @@ export const restaurantLanguages = sqliteTable(
       .notNull()
       .references(() => restaurants.id, { onDelete: "cascade" }),
     languageCode: text("language_code").notNull(),
-    isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
-    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
     createdAt: integer("created_at").notNull().default(epochMilliseconds),
   },
-  (table) => [
-    primaryKey({ columns: [table.restaurantId, table.languageCode] }),
-    uniqueIndex("ux_restaurant_languages_default")
-      .on(table.restaurantId)
-      .where(sql`${table.isDefault} = 1`),
-  ],
+  (table) => [primaryKey({ columns: [table.restaurantId, table.languageCode] })],
 );

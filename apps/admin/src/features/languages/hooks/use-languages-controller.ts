@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -10,24 +9,22 @@ import {
 } from "~/features/languages/api";
 import { addLanguageSchema } from "~/features/languages/types";
 import { trpc } from "~/lib/trpc";
+import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 
 import type { AddLanguageFormValues } from "~/features/languages/types";
 
 export function useLanguagesController() {
-  const [addOutcome, setAddOutcome] = useState<"failed" | "ok" | "skipped" | "unavailable" | "unsupported" | null>(
-    null,
-  );
+  const branch = useSelectedBranch();
   const queryClient = useQueryClient();
   const context = { queryClient, trpc };
   const { data: languages } = useSuspenseQuery(getLanguagesQueryOptions({ trpc }));
   const { data: catalog } = useSuspenseQuery(getLanguageCatalogQueryOptions({ trpc }));
   const mutations = getLanguageMutationOptions(context);
   const addMutation = useMutation(mutations.add);
-  const activeMutation = useMutation(mutations.active);
   const removeMutation = useMutation(mutations.remove);
   const translateMutation = useMutation(mutations.translate);
   const form = useForm<AddLanguageFormValues>({
-    defaultValues: { autoTranslate: true, languageCode: "" },
+    defaultValues: { languageCode: "" },
     resolver: zodResolver(addLanguageSchema),
   });
   const existingCodes = new Set(languages.languages.map((language) => language.languageCode));
@@ -38,25 +35,19 @@ export function useLanguagesController() {
       label: entry.label,
     }));
   let pendingCode: string | null = null;
-  if (activeMutation.isPending) pendingCode = activeMutation.variables.languageCode;
-  else if (removeMutation.isPending) pendingCode = removeMutation.variables.languageCode;
+  if (removeMutation.isPending) pendingCode = removeMutation.variables.languageCode;
   else if (translateMutation.isPending) pendingCode = translateMutation.variables.languageCode;
   function add(values: AddLanguageFormValues) {
-    setAddOutcome(null);
     addMutation.mutate(values, {
-      onSuccess: (data) => {
-        form.reset();
-        setAddOutcome(data.translation);
-      },
+      onSuccess: () => form.reset(),
     });
   }
-  function act({ languageCode, isActive }: { languageCode: string; isActive: boolean }, action: string) {
-    const actions: Record<string, () => void> = {
-      remove: () => removeMutation.mutate({ deleteTranslations: true, languageCode }),
-      toggle: () => activeMutation.mutate({ isActive: !isActive, languageCode }),
-      translate: () => translateMutation.mutate({ languageCode, onlyMissing: true }),
-    };
-    actions[action]?.();
+  function act(languageCode: string, action: "remove" | "translate") {
+    if (action === "remove") {
+      removeMutation.mutate({ languageCode });
+      return;
+    }
+    if (branch) translateMutation.mutate({ branchId: branch.id, languageCode });
   }
   return {
     act,
@@ -65,9 +56,9 @@ export function useLanguagesController() {
     languages: languages.languages,
     options,
     add,
-    addOutcome,
+    branch,
     addBusy: addMutation.isPending,
-    error: addMutation.error ?? activeMutation.error ?? removeMutation.error ?? translateMutation.error,
+    error: addMutation.error ?? removeMutation.error ?? translateMutation.error,
     pendingCode,
   };
 }

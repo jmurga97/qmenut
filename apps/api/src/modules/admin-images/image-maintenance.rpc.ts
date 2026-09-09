@@ -14,7 +14,7 @@ const inputSchema = z
   .object({
     cursor: z.string().max(200).nullable().default(null),
     limit: z.number().int().min(1).max(20).default(10),
-    presetId: z.enum(["qmenut-menu-image", "qmenut-branch-photo"]),
+    presetId: z.enum(["qmenut-menu-image", "qmenut-branch-photo", "qmenut-logo"]),
   })
   .strict();
 

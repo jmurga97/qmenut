@@ -127,11 +127,17 @@ Ming. Existing external URLs are accepted only when unchanged from the domain re
 Signed URLs, credentials, source bytes, filenames and ownership fingerprints must
 not be logged or persisted in Qmenut.
 
-| Purpose         | Preset                | Expected WebP outputs                           |
-| --------------- | --------------------- | ----------------------------------------------- |
-| Branch logo     | `qmenut-logo`         | `main` (512px maximum)                          |
-| Gallery         | `qmenut-branch-photo` | `main` (1600px maximum), `w160`, `w430`, `w860` |
-| Category / dish | `qmenut-menu-image`   | `main` (1024px maximum), `w160`, `w430`, `w860` |
+| Purpose         | Preset                | Expected outputs                                                    |
+| --------------- | --------------------- | ------------------------------------------------------------------- |
+| Branch logo     | `qmenut-logo`         | `main` (512px maximum WebP), `favicon` (48×48 ICO wrapped from PNG) |
+| Gallery         | `qmenut-branch-photo` | `main` (1600px maximum), `w160`, `w430`, `w860`                     |
+| Category / dish | `qmenut-menu-image`   | `main` (1024px maximum), `w160`, `w430`, `w860`                     |
+
+The logo `favicon` variant is served per branch through `/favicon.ico` on the public
+menu, which redirects to it via the branch's `faviconUrl` (the `image/x-icon`
+`image_variants` row) and falls back to the committed default icon. Logos uploaded
+before the variant existed are filled in by the variant backfill with `presetId:
+"qmenut-logo"`.
 
 JPEG, PNG and WebP inputs are limited to 25 MiB. Presets scale down; equal effective
 widths are deduplicated in Qmenut's catalogue. Outputs use `media.qmenut.app` and

@@ -81,36 +81,16 @@ for (const state of ["empty category", "hidden dishes", "empty menu"]) {
   });
 }
 
-test("falls back for missing translations and removes a disabled language", async ({ page, diner, cleanup }) => {
-  cleanup.push(async () => {
-    expect(
-      await callTrpcMutation(page, "admin.languages.remove", { languageCode: "fr", deleteTranslations: true }),
-    ).toMatchObject({ ok: true });
-  });
-  expect(
-    await callTrpcMutation(page, "admin.languages.add", { languageCode: "fr", autoTranslate: false }),
-  ).toMatchObject({ ok: true });
-  expect(
-    await callTrpcMutation(page, "admin.languages.setActive", { languageCode: "fr", isActive: true }),
-  ).toMatchObject({ ok: true });
-  expect(
-    await callTrpcMutation(page, "admin.translations.update", {
-      entityType: "dish",
-      entityId: "dish_tapas_croquetas",
-      languageCode: "fr",
-      field: "name",
-      value: "Croquettes de jambon",
-    }),
-  ).toMatchObject({ ok: true });
-  await diner.goto("/es/");
-  await diner.locator("qm-lang select").selectOption("fr");
-  await expect(diner.getByText("Croquettes de jambon", { exact: true }).first()).toBeVisible();
-  await expect(diner.getByText("Patatas bravas", { exact: true }).first()).toBeVisible();
-  await diner.getByText("Croquettes de jambon", { exact: true }).first().click();
-  await expect(diner.getByRole("dialog")).toContainText("Croquettes de jambon");
-  expect(
-    await callTrpcMutation(page, "admin.languages.setActive", { languageCode: "fr", isActive: false }),
-  ).toMatchObject({ ok: true });
+test("falls back for missing translations and removes a language", async ({ page, diner }) => {
+  expect(await callTrpcMutation(page, "admin.languages.add", { languageCode: "fr" })).toMatchObject({ ok: true });
+  try {
+    await diner.goto("/es/");
+    await diner.locator("qm-lang select").selectOption("fr");
+    await expect(diner.getByText("Croquetas de jamón", { exact: true }).first()).toBeVisible();
+    await expect(diner.getByText("Patatas bravas", { exact: true }).first()).toBeVisible();
+  } finally {
+    expect(await callTrpcMutation(page, "admin.languages.remove", { languageCode: "fr" })).toMatchObject({ ok: true });
+  }
   await diner.goto("/es/");
   await expect(diner.locator('qm-lang option[value="fr"]')).toHaveCount(0);
 });

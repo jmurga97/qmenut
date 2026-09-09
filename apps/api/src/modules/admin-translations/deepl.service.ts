@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 interface DeeplTranslateInput {
   apiKey: string;
@@ -7,10 +8,6 @@ interface DeeplTranslateInput {
   tagHandling?: "html";
   targetLang: string;
   texts: string[];
-}
-
-interface DeeplResponseBody {
-  translations: { detected_source_language: string; text: string }[];
 }
 
 /** DeepL REST v2. Caller is responsible for chunking (DeepL accepts up to 50 texts/request). */
@@ -29,6 +26,7 @@ export async function deeplTranslate({
   const baseUrl = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
   const response = await fetch(`${baseUrl}/v2/translate`, {
     method: "POST",
+    signal: AbortSignal.timeout(15_000),
     headers: {
       Authorization: `DeepL-Auth-Key ${apiKey}`,
       "Content-Type": "application/json",
@@ -55,14 +53,12 @@ export async function deeplTranslate({
     });
   }
 
-  const body = await response.json<DeeplResponseBody>();
-
-  if (body.translations.length !== texts.length) {
-    throw new TRPCError({
-      code: "BAD_GATEWAY",
-      message: `DeepL devolvió ${body.translations.length} traducciones para ${texts.length} textos`,
-    });
+  const translationSchema = z.object({ text: z.string() });
+  const body = z
+    .object({ translations: z.array(translationSchema).length(texts.length) })
+    .safeParse(await response.json());
+  if (!body.success) {
+    throw new TRPCError({ code: "BAD_GATEWAY", message: "DeepL devolvió una respuesta de traducción no válida" });
   }
-
-  return body.translations.map((translation) => translation.text);
+  return body.data.translations.map((translation) => translation.text);
 }

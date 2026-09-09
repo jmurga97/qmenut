@@ -149,43 +149,20 @@ export async function createDish(input: CreateDishInput): Promise<string> {
   return id;
 }
 
-export interface DishTranslatableFields {
-  description: string | null;
-  name: string;
-}
-
 export interface DishContext {
   branchId: string;
   imageUrl: string | null;
 }
 
-export async function getDishContext({
-  db,
-  dishId,
-  restaurantId,
-}: GetDishTranslatableFieldsInput): Promise<DishContext | null> {
-  const row = await db
-    .select({ branchId: dishes.branchId, imageUrl: dishes.imageUrl })
-    .from(dishes)
-    .where(and(eq(dishes.id, dishId), eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt)))
-    .get();
-
-  return row ?? null;
-}
-
-interface GetDishTranslatableFieldsInput {
+interface GetDishContextInput {
   db: DrizzleDb;
   dishId: string;
   restaurantId: string;
 }
 
-export async function getDishTranslatableFields({
-  db,
-  dishId,
-  restaurantId,
-}: GetDishTranslatableFieldsInput): Promise<DishTranslatableFields | null> {
+export async function getDishContext({ db, dishId, restaurantId }: GetDishContextInput): Promise<DishContext | null> {
   const row = await db
-    .select({ name: dishes.name, description: dishes.description })
+    .select({ branchId: dishes.branchId, imageUrl: dishes.imageUrl })
     .from(dishes)
     .where(and(eq(dishes.id, dishId), eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt)))
     .get();

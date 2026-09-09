@@ -12,7 +12,6 @@ const ADMIN_ROUTES = [
   "/loyalty/insights",
   "/theme",
   "/languages",
-  "/languages/en",
   "/qr",
   "/branch",
   "/billing",

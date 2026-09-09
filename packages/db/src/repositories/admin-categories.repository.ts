@@ -82,43 +82,24 @@ export async function createCategory(input: CreateCategoryInput): Promise<string
   return id;
 }
 
-export interface CategoryTranslatableFields {
-  description: string | null;
-  name: string;
-}
-
 export interface CategoryContext {
   branchId: string;
   imageUrl: string | null;
+}
+
+interface GetCategoryContextInput {
+  categoryId: string;
+  db: DrizzleDb;
+  restaurantId: string;
 }
 
 export async function getCategoryContext({
   categoryId,
   db,
   restaurantId,
-}: GetCategoryTranslatableFieldsInput): Promise<CategoryContext | null> {
+}: GetCategoryContextInput): Promise<CategoryContext | null> {
   const row = await db
     .select({ branchId: categories.branchId, imageUrl: categories.imageUrl })
-    .from(categories)
-    .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId), isNull(categories.deletedAt)))
-    .get();
-
-  return row ?? null;
-}
-
-interface GetCategoryTranslatableFieldsInput {
-  categoryId: string;
-  db: DrizzleDb;
-  restaurantId: string;
-}
-
-export async function getCategoryTranslatableFields({
-  categoryId,
-  db,
-  restaurantId,
-}: GetCategoryTranslatableFieldsInput): Promise<CategoryTranslatableFields | null> {
-  const row = await db
-    .select({ name: categories.name, description: categories.description })
     .from(categories)
     .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId), isNull(categories.deletedAt)))
     .get();

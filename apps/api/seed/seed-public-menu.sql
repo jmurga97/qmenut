@@ -22,9 +22,9 @@ VALUES ('rest_tapas', 'Bar La Tasca', 'ESP', 'es', 'EUR', 'La Tasca Hostelería 
 INSERT INTO restaurant_users (id, restaurant_id, user_id, role_code)
 VALUES ('ru_tapas_owner', 'rest_tapas', 'user_seed_owner', 'owner');
 
-INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALUES
-    ('rest_tapas', 'es', 1),
-    ('rest_tapas', 'en', 0);
+INSERT INTO restaurant_languages (restaurant_id, language_code) VALUES
+    ('rest_tapas', 'es'),
+    ('rest_tapas', 'en');
 
 INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain)
 VALUES ('branch_tapas', 'rest_tapas', 'Bar La Tasca', 'Calle del Laurel 12, Logroño', '+34941222333', 'tapas.localhost');
@@ -90,9 +90,9 @@ INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_co
 INSERT INTO restaurants (id, name, country_code, default_language_code, source_currency, legal_name, tax_id, legal_address, data_protection_email)
 VALUES ('rest_fine', 'Aurum', 'ESP', 'es', 'EUR', 'Aurum Gastronomía S.L.', 'B87654321', 'Paseo de Gracia 88, Barcelona', 'privacidad@aurum.example');
 
-INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALUES
-    ('rest_fine', 'es', 1),
-    ('rest_fine', 'en', 0);
+INSERT INTO restaurant_languages (restaurant_id, language_code) VALUES
+    ('rest_fine', 'es'),
+    ('rest_fine', 'en');
 
 INSERT INTO branches (
     id,
@@ -264,9 +264,9 @@ INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_co
 INSERT INTO restaurants (id, name, country_code, default_language_code, source_currency)
 VALUES ('rest_cafe', 'Café Brote', 'ESP', 'es', 'EUR');
 
-INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALUES
-    ('rest_cafe', 'es', 1),
-    ('rest_cafe', 'en', 0);
+INSERT INTO restaurant_languages (restaurant_id, language_code) VALUES
+    ('rest_cafe', 'es'),
+    ('rest_cafe', 'en');
 
 INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain)
 VALUES ('branch_cafe', 'rest_cafe', 'Café Brote', 'Calle Fuencarral 45, Madrid', '+34915666777', 'cafe.localhost');
@@ -332,9 +332,9 @@ INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_co
 INSERT INTO restaurants (id, name, country_code, default_language_code, source_currency, legal_name, tax_id, legal_address, data_protection_email)
 VALUES ('rest_ven', 'Sazón Caracas', 'VEN', 'es', 'USD', 'Sazón Caracas C.A.', 'J-12345678-9', 'Av. Francisco de Miranda 100, Caracas', 'privacidad@sazon.example');
 
-INSERT INTO restaurant_languages (restaurant_id, language_code, is_default) VALUES
-    ('rest_ven', 'es', 1),
-    ('rest_ven', 'en', 0);
+INSERT INTO restaurant_languages (restaurant_id, language_code) VALUES
+    ('rest_ven', 'es'),
+    ('rest_ven', 'en');
 
 INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain)
 VALUES ('branch_ven', 'rest_ven', 'Sazón Caracas', 'Av. Francisco de Miranda 100, Caracas', '+582129990000', 'ven.localhost');

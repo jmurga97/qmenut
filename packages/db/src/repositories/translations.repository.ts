@@ -11,18 +11,6 @@ export const TRANSLATION_ENTITY_TYPES = translations.entityType.enumValues;
 export type TranslationEntityType = (typeof TRANSLATION_ENTITY_TYPES)[number];
 export type TranslationField = "description" | "name";
 
-/** Which fields each entity actually has a column for. `translations.field` is free text —
- * this is the only guard against writing a row no editor will ever show. */
-export const TRANSLATABLE_FIELDS = {
-  category: ["name", "description"],
-  dish: ["name", "description"],
-  ingredient: ["name"],
-  variant_group: ["name"],
-  variant_option: ["name"],
-} as const satisfies Record<TranslationEntityType, readonly TranslationField[]>;
-export type TranslationSource = (typeof translations.source.enumValues)[number];
-export type TranslationStatus = (typeof translations.status.enumValues)[number];
-
 interface TenantLanguageIdsInput {
   db: DrizzleDb;
   ids: string[];
@@ -61,49 +49,11 @@ export async function getTranslationRows({
     .all();
 }
 
-export interface TranslationRow {
-  entityId: string;
-  entityType: TranslationEntityType;
-  field: string;
-  languageCode: string;
-  source: TranslationSource;
-  status: TranslationStatus;
-  value: string;
-}
-
-interface ListTranslationsForLanguageInput {
-  db: DrizzleDb;
-  languageCode: string;
-  restaurantId: string;
-}
-
-export async function listTranslationsForLanguage({
-  db,
-  languageCode,
-  restaurantId,
-}: ListTranslationsForLanguageInput): Promise<TranslationRow[]> {
-  return db
-    .select({
-      entityType: translations.entityType,
-      entityId: translations.entityId,
-      languageCode: translations.languageCode,
-      field: translations.field,
-      value: translations.value,
-      status: translations.status,
-      source: translations.source,
-    })
-    .from(translations)
-    .where(and(eq(translations.restaurantId, restaurantId), eq(translations.languageCode, languageCode)))
-    .orderBy(asc(translations.entityType), asc(translations.entityId), asc(translations.field))
-    .all();
-}
-
 export interface TranslationUpsert {
   entityId: string;
   entityType: TranslationEntityType;
   field: string;
   languageCode: string;
-  source: TranslationSource;
   value: string;
 }
 
@@ -113,7 +63,7 @@ interface UpsertTranslationsInput {
   rows: TranslationUpsert[];
 }
 
-// D1 caps bound parameters per statement; 10 columns per row → keep chunks small.
+// D1 caps bound parameters per statement; 9 columns per row → keep chunks small.
 const UPSERT_CHUNK_SIZE = 8;
 
 export async function upsertTranslations({ db, restaurantId, rows }: UpsertTranslationsInput): Promise<void> {
@@ -143,8 +93,6 @@ export async function upsertTranslations({ db, restaurantId, rows }: UpsertTrans
           languageCode: row.languageCode,
           field: row.field,
           value: row.value,
-          status: "ok" as const,
-          source: row.source,
           createdAt: now,
           updatedAt: now,
         })),
@@ -153,41 +101,11 @@ export async function upsertTranslations({ db, restaurantId, rows }: UpsertTrans
         target: [translations.entityType, translations.entityId, translations.languageCode, translations.field],
         set: {
           value: sql`excluded.value`,
-          source: sql`excluded.source`,
-          status: sql`excluded.status`,
           updatedAt: sql`excluded.updated_at`,
         },
       });
 
   await db.batch([statementFor(firstChunk), ...remainingChunks.map((chunk) => statementFor(chunk))]);
-}
-
-interface MarkTranslationsPendingUpdateInput {
-  db: DrizzleDb;
-  entityId: string;
-  entityType: TranslationEntityType;
-  fields: string[];
-  restaurantId: string;
-}
-
-export function markTranslationsPendingUpdateStatement({
-  db,
-  entityId,
-  entityType,
-  fields,
-  restaurantId,
-}: MarkTranslationsPendingUpdateInput): BatchItem<"sqlite"> {
-  return db
-    .update(translations)
-    .set({ status: "pending_update", updatedAt: Date.now() })
-    .where(
-      and(
-        eq(translations.restaurantId, restaurantId),
-        eq(translations.entityType, entityType),
-        eq(translations.entityId, entityId),
-        inArray(translations.field, fields),
-      ),
-    );
 }
 
 interface DeleteTranslationsForLanguageInput {

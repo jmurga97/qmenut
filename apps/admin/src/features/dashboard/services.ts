@@ -7,7 +7,6 @@ import type {
   DashboardCategory,
   DashboardDish,
   DashboardTenant,
-  TranslationCoverage,
 } from "~/features/dashboard/types";
 
 const SEVERITY_WEIGHT: Record<AttentionSeverity, number> = { error: 0, warning: 1, info: 2 };
@@ -133,25 +132,6 @@ export function getMenuAttentionItems(categories: DashboardCategory[], dishes: D
       label: `${imagelessCategories} ${imagelessCategories === 1 ? "categoría sin foto" : "categorías sin foto"}`,
       linkTo: "/menu",
       severity: "info",
-    });
-  }
-  return items;
-}
-
-export function getTranslationCoverageItems(coverages: TranslationCoverage[]): AttentionItem[] {
-  const items: AttentionItem[] = [];
-  for (const coverage of coverages) {
-    const untranslated = coverage.total - coverage.translated;
-    if (coverage.total === 0 || untranslated <= 0) continue;
-    const percent = Math.round((coverage.translated / coverage.total) * 100);
-    const pendingNote = coverage.pending > 0 ? ` · ${coverage.pending} pendientes de revisión` : "";
-    items.push({
-      detail: `${untranslated} ${untranslated === 1 ? "texto sin traducir" : "textos sin traducir"}${pendingNote}.`,
-      id: `translations-${coverage.languageCode}`,
-      label: `Traducción al ${coverage.label} al ${percent}%`,
-      linkParams: { languageCode: coverage.languageCode },
-      linkTo: "/languages/$languageCode",
-      severity: percent < 50 ? "warning" : "info",
     });
   }
   return items;

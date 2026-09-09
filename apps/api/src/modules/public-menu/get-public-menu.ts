@@ -42,7 +42,7 @@ export async function getPublicMenu({
 }: GetPublicMenuInput): Promise<PublicMenuPayload | null> {
   const info = await getRestaurantLanguageInfo({ db, restaurantId: tenant.restaurantId });
   const defaultLanguage = info?.defaultLanguageCode ?? FALLBACK_LANGUAGE_CODE;
-  const activeLanguages = (info?.languages ?? []).filter((language) => language.isActive);
+  const activeLanguages = info?.languages ?? [{ languageCode: defaultLanguage, isDefault: true }];
   const requested = locale?.toLowerCase() ?? null;
   const effective =
     requested !== null && activeLanguages.some((language) => language.languageCode === requested)

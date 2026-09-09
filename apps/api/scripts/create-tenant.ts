@@ -279,14 +279,11 @@ function buildSql(t: TenantFile, ids: TenantIds, force: boolean): string {
   });
 
   const languageValues = t.restaurant.languages
-    .map(
-      (code) =>
-        `    (${esc(ids.restaurant)}, ${esc(code)}, ${code === t.restaurant.defaultLanguageCode ? 1 : 0}, 1, ${now})`,
-    )
+    .map((code) => `    (${esc(ids.restaurant)}, ${esc(code)}, ${now})`)
     .join(",\n");
 
   lines.push(
-    "INSERT INTO restaurant_languages (restaurant_id, language_code, is_default, is_active, created_at) VALUES",
+    "INSERT INTO restaurant_languages (restaurant_id, language_code, created_at) VALUES",
     `${languageValues};`,
     "",
     `INSERT INTO branches (id, restaurant_id, name, address, latitude, longitude, phone, whatsapp, social_links_json, logo_url, custom_domain, plan_code, is_active, created_at, updated_at)`,

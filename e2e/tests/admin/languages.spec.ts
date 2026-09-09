@@ -1,70 +1,56 @@
 import { expect, test } from "../../fixtures/test";
 import { callTrpcMutation, callTrpcQuery, getTrpcData } from "../../helpers/trpc";
 
-test("manages a manual language and publishes its translation", async ({ page, request }) => {
-  const added = await callTrpcMutation(page, "admin.languages.add", {
-    languageCode: "fr",
-    autoTranslate: false,
-  });
-  expect(getTrpcData<{ added: boolean; translation: string }>(added)).toMatchObject({
-    added: true,
-    translation: "skipped",
-  });
-
-  const activated = await callTrpcMutation(page, "admin.languages.setActive", {
-    languageCode: "fr",
-    isActive: true,
-  });
-  expect(activated, activated.body).toMatchObject({ ok: true, status: 200 });
-
+test("adds and removes languages, protecting Spanish and scoping retranslation", async ({ page, request }) => {
+  const added = await callTrpcMutation(page, "admin.languages.add", { languageCode: "fr" });
+  expect(getTrpcData<{ added: boolean }>(added)).toEqual({ added: true });
   try {
     const languages = await callTrpcQuery(page, "admin.languages.list");
+    expect(languages.body).toContain('"defaultLanguageCode":"es"');
     expect(languages.body).toContain('"languageCode":"fr"');
-
-    const catalog = await callTrpcQuery(page, "admin.languages.catalog");
-    expect(catalog.body).toContain("Français");
-
-    const translations = await callTrpcQuery(page, "admin.translations.list", {
+    for (const procedure of ["admin.languages.remove", "admin.translations.translateAll"]) {
+      const result = await callTrpcMutation(page, procedure, { branchId: "branch_tapas", languageCode: "es" });
+      expect(result, result.body).toMatchObject({ ok: false, status: 400 });
+    }
+    const unavailable = await callTrpcMutation(page, "admin.translations.translateAll", {
       branchId: "branch_tapas",
       languageCode: "fr",
     });
-    expect(translations, translations.body).toMatchObject({ ok: true, status: 200 });
-
-    const editedName = `Croquettes E2E ${Date.now()}`;
-    const updated = await callTrpcMutation(page, "admin.translations.update", {
-      entityType: "dish",
-      entityId: "dish_tapas_croquetas",
-      languageCode: "fr",
-      field: "name",
-      value: editedName,
-    });
-    expect(updated, updated.body).toMatchObject({ ok: true, status: 200 });
-
-    const publicMenu = await request.get(`http://tapas.localhost:4011/fr/?language=${Date.now()}`);
-    const body = await publicMenu.text();
-    expect(publicMenu.ok(), body).toBe(true);
-    expect(body).toContain(editedName);
-
-    const unavailable = await callTrpcMutation(page, "admin.translations.translateAll", {
-      languageCode: "fr",
-      onlyMissing: true,
-    });
     expect(unavailable, unavailable.body).toMatchObject({ ok: false, status: 412 });
-
-    const autoAdd = await callTrpcMutation(page, "admin.languages.add", {
-      languageCode: "de",
-      autoTranslate: true,
+    const otherBranch = await callTrpcMutation(page, "admin.translations.translateAll", {
+      branchId: "branch_fine",
+      languageCode: "fr",
     });
-    expect(getTrpcData<{ translation: string }>(autoAdd).translation).toBe("unavailable");
-    await callTrpcMutation(page, "admin.languages.remove", {
-      languageCode: "de",
-      deleteTranslations: true,
+    expect(otherBranch.ok).toBe(false);
+    expect(otherBranch.status).not.toBe(412);
+    const publicMenu = await request.get("http://tapas.localhost:4011/en/");
+    const body = await publicMenu.text();
+    expect(body).toContain("Ham croquettes");
+    expect(body).not.toContain("[EN-GB]");
+    await page.goto("/languages");
+    await expect(page.getByRole("button", { name: "Acciones para Français" })).toBeVisible();
+    await page.screenshot({
+      path: test.info().outputPath("languages-desktop.png"),
+      fullPage: true,
+      animations: "disabled",
+    });
+    await page.getByRole("button", { name: "Acciones para Français" }).click();
+    await expect(page.getByRole("menuitem", { name: "Retraducir contenido" })).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: "Eliminar" })).toBeVisible();
+    await expect(page.getByRole("menuitem")).toHaveCount(2);
+    await page.getByRole("menuitem", { name: "Retraducir contenido" }).click();
+    await expect(page.getByRole("alertdialog")).toBeVisible();
+    await page.getByRole("button", { name: "Cancelar", exact: true }).click();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.reload();
+    await expect(page.getByRole("button", { name: "Acciones para Français" })).toBeVisible();
+    await page.screenshot({
+      path: test.info().outputPath("languages-mobile.png"),
+      fullPage: true,
+      animations: "disabled",
     });
   } finally {
-    const removed = await callTrpcMutation(page, "admin.languages.remove", {
-      languageCode: "fr",
-      deleteTranslations: true,
-    });
+    const removed = await callTrpcMutation(page, "admin.languages.remove", { languageCode: "fr" });
     expect(removed, removed.body).toMatchObject({ ok: true, status: 200 });
   }
 });

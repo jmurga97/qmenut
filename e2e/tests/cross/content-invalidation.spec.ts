@@ -84,7 +84,7 @@ async function branchWrite(page: Page) {
   };
 }
 
-test("invalidates versioned public caches for theme, promotion, branch, and translation writes", async ({
+test("invalidates versioned public caches for theme, promotion, branch, and language writes", async ({
   page,
   request,
 }) => {
@@ -147,24 +147,11 @@ test("invalidates versioned public caches for theme, promotion, branch, and tran
   await expectInvalidation({
     host: "tapas.localhost",
     request,
-    url: `http://tapas.localhost:4011/en/?invalidate-translation=${stamp}`,
-    mutate: () =>
-      callTrpcMutation(page, "admin.translations.update", {
-        entityType: "dish",
-        entityId: "dish_tapas_croquetas",
-        languageCode: "en",
-        field: "name",
-        value: `Ham croquettes E2E ${stamp}`,
-      }),
+    url: `http://tapas.localhost:4011/en/?invalidate-language=${stamp}`,
+    mutate: () => callTrpcMutation(page, "admin.languages.add", { languageCode: "fr" }),
   });
-  const restored = await callTrpcMutation(page, "admin.translations.update", {
-    entityType: "dish",
-    entityId: "dish_tapas_croquetas",
-    languageCode: "en",
-    field: "name",
-    value: "Ham croquettes",
-  });
-  expect(restored, restored.body).toMatchObject({ ok: true, status: 200 });
+  const removed = await callTrpcMutation(page, "admin.languages.remove", { languageCode: "fr" });
+  expect(removed, removed.body).toMatchObject({ ok: true, status: 200 });
 });
 
 test("derives loyalty availability and invalidates public SEO when the program is disabled", async ({
