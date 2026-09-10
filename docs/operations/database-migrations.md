@@ -385,13 +385,13 @@ Write the TypeScript yourself. Do not copy a finished migration. After each exer
 
 ## Key files
 
-| Concern                     | Path                                           |
-| --------------------------- | ---------------------------------------------- |
-| Schema, the source of truth | `packages/db/src/schema/`                      |
-| Schema barrel               | `packages/db/src/schema/index.ts`              |
-| Drizzle Kit configuration   | `apps/api/drizzle.config.ts`                   |
-| Migrations                  | `apps/api/migrations/`                         |
-| Snapshot and journal        | `apps/api/migrations/meta/`                    |
-| Validation script           | `apps/api/scripts/check-db-migrations.ts`      |
-| D1 bindings                 | `apps/api/wrangler.jsonc`                      |
-| Scripts                     | `apps/api/package.json`                        |
+| Concern                     | Path                                      |
+| --------------------------- | ----------------------------------------- |
+| Schema, the source of truth | `packages/db/src/schema/`                 |
+| Schema barrel               | `packages/db/src/schema/index.ts`         |
+| Drizzle Kit configuration   | `apps/api/drizzle.config.ts`              |
+| Migrations                  | `apps/api/migrations/`                    |
+| Snapshot and journal        | `apps/api/migrations/meta/`               |
+| Validation script           | `apps/api/scripts/check-db-migrations.ts` |
+| D1 bindings                 | `apps/api/wrangler.jsonc`                 |
+| Scripts                     | `apps/api/package.json`                   |

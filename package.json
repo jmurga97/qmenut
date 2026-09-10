@@ -15,7 +15,8 @@
     "test:e2e": "bun run --cwd e2e test",
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write . && eslint . --fix",
-    "db:generate": "bun run --cwd apps/api db:generate --"
+    "db:generate": "bun run --cwd apps/api db:generate --",
+    "prepare": "husky"
   },
   "packageManager": "bun@1.4.0",
   "devDependencies": {
@@ -37,6 +38,7 @@
     "eslint-plugin-unicorn": "^71.1.0",
     "eslint-plugin-wc": "^3.1.0",
     "globals": "^17.7.0",
+    "husky": "^9.1.7",
     "prettier": "^3.9.5",
     "turbo": "^2.10.5",
     "typescript-eslint": "^8.64.0"
