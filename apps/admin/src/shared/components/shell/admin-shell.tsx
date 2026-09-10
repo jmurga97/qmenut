@@ -1,12 +1,15 @@
-import { AppShell } from "@jmurga97/components";
+import { AppShell, Select } from "@jmurga97/components";
 import { can } from "@qmenut/permissions";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate, useRouter } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { resolveSelectedBranch, useBranchStore } from "~/app/store/branch-store";
+import { useLanguageStore } from "~/app/store/language-store";
 import { isEditorBusy, useEditorBusy, useShellActions, useShellMobile, useSidebarOpen } from "~/app/store/shell-store";
 import { getListRestaurantsQueryOptions } from "~/features/auth/api";
 import { useSelectRestaurant } from "~/features/auth/hooks/use-select-restaurant";
+import { getLanguageCatalogQueryOptions, getLanguagesQueryOptions } from "~/features/languages/api";
 import { signOut } from "~/lib/auth-client";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
@@ -108,8 +111,21 @@ export function AdminShell() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const location = useLocation();
+  const [topbarElement, setTopbarElement] = useState<HTMLElement | null>(null);
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const { data: memberships } = useSuspenseQuery(getListRestaurantsQueryOptions({ trpc }));
+  const { data: languageCatalog } = useSuspenseQuery(getLanguageCatalogQueryOptions({ trpc }));
+  const { data: restaurantLanguages } = useSuspenseQuery(getLanguagesQueryOptions({ trpc }));
+  const selectedLanguageCode = useLanguageStore((state) => state.selectedLanguageCode);
+  const setSelectedLanguageCode = useLanguageStore((state) => state.setSelectedLanguageCode);
+  const currentLanguage =
+    restaurantLanguages.languages.find(({ languageCode }) => languageCode === selectedLanguageCode) ??
+    restaurantLanguages.languages[0] ??
+    null;
+  const languageOptions = restaurantLanguages.languages.map(({ isDefault, languageCode }) => ({
+    id: languageCode,
+    label: `${languageCatalog.find((entry) => entry.code === languageCode)?.label ?? languageCode.toUpperCase()}${isDefault ? " (base)" : ""}`,
+  }));
   const selectRestaurant = useSelectRestaurant();
   const editorBusy = useEditorBusy();
   const isMobile = useShellMobile();
@@ -135,11 +151,24 @@ export function AdminShell() {
     <AppShell
       className="admin-app-shell"
       header={
-        <header className="admin-topbar">
+        <header className="admin-topbar" ref={setTopbarElement}>
           <div className="admin-topbar-copy">
             {selectedBranch ? <div className="admin-topbar-context">{selectedBranch.name}</div> : null}
             <h1>{sectionLabel}</h1>
           </div>
+          {languageOptions.length > 1 ? (
+            <div className="admin-topbar-actions">
+              <Select
+                ariaLabel="Idioma del contenido"
+                onValueChange={(languageCode) => {
+                  if (languageCode) setSelectedLanguageCode(languageCode);
+                }}
+                options={languageOptions}
+                portalContainer={topbarElement}
+                value={currentLanguage?.languageCode ?? null}
+              />
+            </div>
+          ) : null}
         </header>
       }
       navigation={

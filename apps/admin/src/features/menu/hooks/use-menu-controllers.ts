@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
 
+import { useSelectedLanguage } from "~/features/languages/hooks/use-selected-language";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
 import { useImageDraft } from "~/shared/images/use-image-drafts";
@@ -28,9 +29,10 @@ import type { CategoryFormValues, DishDetail, DishFormValues } from "../types";
 
 export function useMenuListController(branchId: string) {
   const queryClient = useQueryClient();
-  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, trpc })).data;
-  const dishes = useSuspenseQuery(getMenuDishesQueryOptions({ branchId, trpc })).data;
-  const availability = useMutation(getDishAvailabilityMutationOptions({ branchId, queryClient, trpc }));
+  const { languageCode } = useSelectedLanguage();
+  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, languageCode, trpc })).data;
+  const dishes = useSuspenseQuery(getMenuDishesQueryOptions({ branchId, languageCode, trpc })).data;
+  const availability = useMutation(getDishAvailabilityMutationOptions({ branchId, languageCode, queryClient, trpc }));
   return {
     availabilityError: availability.error,
     availabilityPendingDishId: availability.isPending ? availability.variables?.dishId : undefined,
@@ -42,7 +44,8 @@ export function useMenuListController(branchId: string) {
 export function useCategoryEditorController({ branchId, categoryId }: { branchId: string; categoryId?: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, trpc })).data;
+  const { languageCode } = useSelectedLanguage();
+  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, languageCode, trpc })).data;
   const category = categoryId ? categories.find(({ id }) => id === categoryId) : undefined;
   const form = useForm<CategoryFormValues>({
     defaultValues: {
@@ -52,7 +55,7 @@ export function useCategoryEditorController({ branchId, categoryId }: { branchId
     },
     resolver: zodResolver(categoryFormSchema),
   });
-  const mutationInput = { branchId, queryClient, trpc };
+  const mutationInput = { branchId, languageCode, queryClient, trpc };
   const options = getCategoryMutationOptions(mutationInput);
   const create = useMutation(options.create);
   const update = useMutation(options.update);
@@ -102,17 +105,18 @@ export function useCategoryEditorController({ branchId, categoryId }: { branchId
 export function useDishEditorController({ branchId, dish }: { branchId: string; dish: DishDetail | null }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { languageCode } = useSelectedLanguage();
   const dishId = useRef(dish?.id);
-  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, trpc })).data;
+  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, languageCode, trpc })).data;
   const tenant = useSuspenseQuery(getTenantQueryOptions({ trpc })).data;
   const tags = useSuspenseQuery(getMenuTagsQueryOptions({ trpc })).data;
   const allergens = useSuspenseQuery(getMenuAllergensQueryOptions({ trpc })).data;
-  const ingredients = useSuspenseQuery(getMenuIngredientsQueryOptions({ trpc })).data;
+  const ingredients = useSuspenseQuery(getMenuIngredientsQueryOptions({ languageCode, trpc })).data;
   const form = useForm<DishFormValues>({
     defaultValues: toDishFormValues(dish),
     resolver: zodResolver(dishFormSchema),
   });
-  const options = getDishMutationOptions({ branchId, queryClient, trpc });
+  const options = getDishMutationOptions({ branchId, languageCode, queryClient, trpc });
   const create = useMutation(options.create);
   const createIngredient = useMutation(options.createIngredient);
   const update = useMutation(options.update);

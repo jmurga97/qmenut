@@ -3,23 +3,25 @@ import type { TrpcOptionsProxy } from "~/lib/trpc";
 
 interface BranchQueryInput {
   branchId: string;
+  languageCode?: string | null;
   trpc: TrpcOptionsProxy;
 }
 interface DetailQueryInput {
   dishId: string;
+  languageCode?: string | null;
   trpc: TrpcOptionsProxy;
 }
 interface MenuMutationInput extends BranchQueryInput {
   queryClient: QueryClient;
 }
-export function getMenuCategoriesQueryOptions({ branchId, trpc }: BranchQueryInput) {
-  return trpc.admin.menu.categories.list.queryOptions({ branchId });
+export function getMenuCategoriesQueryOptions({ branchId, languageCode, trpc }: BranchQueryInput) {
+  return trpc.admin.menu.categories.list.queryOptions({ branchId, languageCode: languageCode ?? undefined });
 }
-export function getMenuDishesQueryOptions({ branchId, trpc }: BranchQueryInput) {
-  return trpc.admin.menu.dishes.list.queryOptions({ branchId });
+export function getMenuDishesQueryOptions({ branchId, languageCode, trpc }: BranchQueryInput) {
+  return trpc.admin.menu.dishes.list.queryOptions({ branchId, languageCode: languageCode ?? undefined });
 }
-export function getDishDetailQueryOptions({ dishId, trpc }: DetailQueryInput) {
-  return trpc.admin.menu.dishes.detail.queryOptions({ dishId });
+export function getDishDetailQueryOptions({ dishId, languageCode, trpc }: DetailQueryInput) {
+  return trpc.admin.menu.dishes.detail.queryOptions({ dishId, languageCode: languageCode ?? undefined });
 }
 export function getMenuTagsQueryOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
   return trpc.admin.menu.taxonomy.tags.queryOptions();
@@ -27,13 +29,23 @@ export function getMenuTagsQueryOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
 export function getMenuAllergensQueryOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
   return trpc.admin.menu.taxonomy.allergens.queryOptions();
 }
-export function getMenuIngredientsQueryOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
-  return trpc.admin.menu.taxonomy.ingredients.queryOptions();
+export function getMenuIngredientsQueryOptions({
+  languageCode,
+  trpc,
+}: {
+  languageCode?: string | null;
+  trpc: TrpcOptionsProxy;
+}) {
+  return trpc.admin.menu.taxonomy.ingredients.queryOptions({ languageCode: languageCode ?? undefined });
 }
-function invalidateMenu({ branchId, queryClient, trpc }: MenuMutationInput) {
+function invalidateMenu({ branchId, languageCode, queryClient, trpc }: MenuMutationInput) {
   return Promise.all([
-    queryClient.invalidateQueries({ queryKey: getMenuCategoriesQueryOptions({ branchId, trpc }).queryKey }),
-    queryClient.invalidateQueries({ queryKey: getMenuDishesQueryOptions({ branchId, trpc }).queryKey }),
+    queryClient.invalidateQueries({
+      queryKey: getMenuCategoriesQueryOptions({ branchId, languageCode, trpc }).queryKey,
+    }),
+    queryClient.invalidateQueries({
+      queryKey: getMenuDishesQueryOptions({ branchId, languageCode, trpc }).queryKey,
+    }),
   ]);
 }
 export function getCategoryMutationOptions(input: MenuMutationInput) {

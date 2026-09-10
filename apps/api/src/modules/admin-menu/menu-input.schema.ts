@@ -4,6 +4,7 @@ import { imageChangeSchema } from "../admin-images/image-assignment";
 
 export const branchScopedSchema = z.object({
   branchId: z.string().trim().min(1),
+  languageCode: z.string().trim().min(1).optional(),
 });
 
 const nullableText = z

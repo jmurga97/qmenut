@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { FormProvider } from "react-hook-form";
 
+import { useSelectedLanguage } from "~/features/languages/hooks/use-selected-language";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
 import { EntityListCard } from "~/shared/components/entity-list-card";
@@ -115,11 +116,18 @@ export function CategoryEditorPage({ categoryId }: { categoryId?: string }) {
 }
 function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?: string }) {
   const canWrite = useCan("menu.write");
+  const { isDefault } = useSelectedLanguage();
+  const viewingTranslation = !isDefault;
   const controller = useCategoryEditorController({ branchId, categoryId });
   if (categoryId && !controller.category) return <NotFoundState />;
   return (
     <div className="admin-page admin-editor-page">
       <PageHeader
+        description={
+          viewingTranslation
+            ? "Estás viendo la traducción. Cambia al idioma base en la barra superior para editar los textos."
+            : undefined
+        }
         kicker={categoryId ? "Editar categoría" : "Nueva categoría"}
         title={controller.category?.name ?? "Categoría"}
       />
@@ -130,7 +138,7 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
           error={controller.error}
           onCancel={controller.cancel}
           onSubmit={() => void controller.submit()}
-          readOnly={!canWrite}
+          readOnly={!canWrite || viewingTranslation}
         >
           <div className="admin-form-grid">
             <FormTextInput<CategoryFormValues> label="Nombre" name="name" />
@@ -159,15 +167,26 @@ export function DishEditorPage({ dishId }: { dishId?: string }) {
   );
 }
 function ExistingDish({ branchId, dishId }: { branchId: string; dishId: string }) {
-  const dish = useSuspenseQuery(getDishDetailQueryOptions({ dishId, trpc })).data;
+  const { languageCode } = useSelectedLanguage();
+  const dish = useSuspenseQuery(getDishDetailQueryOptions({ dishId, languageCode, trpc })).data;
   return <DishForm branchId={branchId} dish={dish} />;
 }
 function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | null }) {
   const canWrite = useCan("menu.write");
+  const { isDefault } = useSelectedLanguage();
+  const viewingTranslation = !isDefault;
   const controller = useDishEditorController({ branchId, dish });
   return (
     <div className="admin-page admin-editor-page">
-      <PageHeader kicker={dish ? "Editar plato" : "Nuevo plato"} title={dish?.name ?? "Plato"} />
+      <PageHeader
+        description={
+          viewingTranslation
+            ? "Estás viendo la traducción. Cambia al idioma base en la barra superior para editar los textos."
+            : undefined
+        }
+        kicker={dish ? "Editar plato" : "Nuevo plato"}
+        title={dish?.name ?? "Plato"}
+      />
       <FormProvider {...controller.form}>
         <FormShell
           operation={controller.operation}
@@ -175,7 +194,7 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
           error={controller.error}
           onCancel={controller.cancel}
           onSubmit={() => void controller.submit()}
-          readOnly={!canWrite}
+          readOnly={!canWrite || viewingTranslation}
         >
           <div className="admin-form-grid">
             <FormTextInput<DishFormValues> label="Nombre" name="name" />
