@@ -187,7 +187,7 @@ describe("interactive atoms", () => {
       { value: "es", label: "Español" },
       { value: "en", label: "English" },
     ];
-    lang.value = "es";
+    lang.value = "en";
     lang.options = options;
     lang.label = "Idioma";
     lang.selectId = "language";
@@ -196,15 +196,15 @@ describe("interactive atoms", () => {
     const select = shadowQuery<HTMLSelectElement>(lang, "select");
     expect(shadowQuery<HTMLLabelElement>(lang, "label").htmlFor).toBe("language");
     expect(select.options).toHaveLength(2);
-    expect(select.value).toBe("es");
-    select.value = "en";
+    expect(select.value).toBe("en");
+    select.value = "es";
     const eventPromise = new Promise<CustomEvent<{ value: string }>>((resolve) => {
       lang.addEventListener("qm-change", (event) => resolve(event as CustomEvent<{ value: string }>), { once: true });
     });
     select.dispatchEvent(new Event("change", { bubbles: true }));
     const changeEvent = await eventPromise;
-    expect(changeEvent.detail).toEqual({ value: "en" });
-    expect(lang.value).toBe("en");
+    expect(changeEvent.detail).toEqual({ value: "es" });
+    expect(lang.value).toBe("es");
   });
 
   test("uses aria-label when a language label is absent and emits tab selection", async () => {

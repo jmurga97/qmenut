@@ -144,6 +144,7 @@ button {
   height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
+  view-transition-name: admin-content;
 }
 .admin-page {
   display: grid;
@@ -155,26 +156,29 @@ button {
   margin-inline: auto;
   padding: 1.5rem 1.25rem 3rem;
 }
-.admin-page > * {
-  animation: admin-enter 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+/* Keep the navigation shell still; only the scrollable content cross-fades. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
 }
-.admin-page > :nth-child(2) {
-  animation-delay: 70ms;
+
+::view-transition-group(admin-content) {
+  animation: none;
+  overflow: clip;
 }
-.admin-page > :nth-child(3) {
-  animation-delay: 140ms;
+
+::view-transition-old(admin-content),
+::view-transition-new(admin-content),
+::view-transition-old(.admin-panel-fade),
+::view-transition-new(.admin-panel-fade) {
+  animation-duration: 160ms;
 }
-.admin-page > :nth-child(4) {
-  animation-delay: 210ms;
-}
-@keyframes admin-enter {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
   }
 }
 
@@ -752,9 +756,6 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .admin-page > * {
-    animation: none;
-  }
   .admin-card,
   .admin-link,
   .admin-sidebar .ming-nav-list__item,

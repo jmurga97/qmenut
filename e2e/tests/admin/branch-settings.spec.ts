@@ -99,3 +99,53 @@ test("saves complete branch settings and invalidates every hosted branch", async
     expect(restored, restored.body).toMatchObject({ ok: true, status: 200 });
   }
 });
+
+test("keeps the Google place search mounted when reconnecting a branch", async ({ page, cleanup }) => {
+  const current = getTrpcData<{ googlePlaceId: string | null; googleReviewsEnabled: boolean }>(
+    await callTrpcQuery(page, "admin.branches.get", { branchId: "branch_tapas" }),
+  );
+  cleanup.push(async () => {
+    const restored = await callTrpcMutation(page, "admin.branches.setGoogleReviewsConnection", {
+      branchId: "branch_tapas",
+      placeId: current.googlePlaceId,
+      enabled: current.googleReviewsEnabled,
+    });
+    expect(restored, restored.body).toMatchObject({ ok: true });
+  });
+  await page.route("**/trpc/admin.branches.searchGooglePlaces?*", (route) =>
+    route.fulfill({
+      json: [
+        {
+          result: {
+            data: {
+              attribution: "Google Maps",
+              candidates: [
+                {
+                  id: "react-activity-test",
+                  name: "La Tasca",
+                  address: "Logroño",
+                  rating: null,
+                  ratingCount: 0,
+                  attributions: [],
+                },
+              ],
+            },
+          },
+        },
+      ],
+    }),
+  );
+  await page.goto("/branch");
+  if (current.googlePlaceId) await page.getByRole("button", { name: "Cambiar", exact: true }).click();
+  const search = page.getByRole("searchbox", { name: "Buscar negocio o ficha" });
+  await search.fill("La Tasca Logroño");
+  const form = page.locator(".admin-google-reviews__search");
+  const originalForm = await form.elementHandle();
+  await page.getByRole("button", { name: "Buscar", exact: true }).click();
+  await page.getByRole("button", { name: "Conectar esta ficha" }).click();
+  await expect(form).toBeHidden();
+  expect(await originalForm?.evaluate((element) => element.isConnected)).toBe(true);
+  await page.getByRole("button", { name: "Cambiar", exact: true }).click();
+  await expect(search).toHaveValue("La Tasca Logroño");
+  await expect(form.getByText("La Tasca", { exact: true })).toBeVisible();
+});

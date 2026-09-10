@@ -76,7 +76,10 @@ export class QmLang extends QmElement {
         .value=${this.value}
         @change=${this.handleChange}
       >
-        ${this.options.map((option) => html`<option value=${option.value}>${option.label}</option>`)}
+        ${this.options.map(
+          (option) =>
+            html`<option value=${option.value} ?selected=${option.value === this.value}>${option.label}</option>`,
+        )}
       </select>
     `;
   }

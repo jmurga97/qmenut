@@ -1,7 +1,4 @@
-/// <reference types="react/canary" />
-
 import { Outlet, useRouterState } from "@tanstack/react-router";
-import { ViewTransition } from "react";
 
 const PUBLIC_TRANSITION_ROUTE_IDS = new Set([
   "/{-$locale}/",
@@ -25,10 +22,8 @@ export function PublicRouteContentTransition() {
 
   // Keep the surface stable through SSR hydration; non-target routes opt out of animation.
   return (
-    <ViewTransition default="none" update={isTransitionableRoute ? "qm-public-route-slide" : "none"}>
-      <div className={surfaceClassName}>
-        <Outlet />
-      </div>
-    </ViewTransition>
+    <div className={surfaceClassName}>
+      <Outlet />
+    </div>
   );
 }

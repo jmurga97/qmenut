@@ -1,22 +1,23 @@
 import { QmContactPanel } from "@qmenut/ui/components/qm-contact-panel/react";
 import { QmLocation } from "@qmenut/ui/components/qm-location/react";
+import { Fragment, useRef } from "react";
 
 import { GoogleReviewsLazy } from "~/features/contact/components/google-reviews-lazy";
 import { useContactActionTracking } from "~/features/contact/hooks/use-contact-action-tracking";
 
-import type { RefObject } from "react";
+import type { FragmentInstance } from "react";
 import type { ContactContentViewModel } from "~/features/contact/types/contact-view-model";
 
 interface ContactPanelProps {
   content: ContactContentViewModel;
-  hostRef: RefObject<HTMLDivElement | null>;
 }
 
-export function ContactPanel({ content, hostRef }: ContactPanelProps) {
+export function ContactPanel({ content }: ContactPanelProps) {
+  const hostRef = useRef<FragmentInstance>(null);
   useContactActionTracking(hostRef);
 
   return (
-    <div ref={hostRef}>
+    <Fragment ref={hostRef}>
       <QmContactPanel
         value={{
           map: content.map,
@@ -35,6 +36,6 @@ export function ContactPanel({ content, hostRef }: ContactPanelProps) {
           </div>
         ) : null}
       </QmContactPanel>
-    </div>
+    </Fragment>
   );
 }

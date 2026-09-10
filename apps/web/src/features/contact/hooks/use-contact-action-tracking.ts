@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import { track } from "~/lib/analytics/posthog";
 
-import type { RefObject } from "react";
+import type { FragmentInstance, RefObject } from "react";
 
 type ContactActionChannel = "map" | "phone" | "social" | "whatsapp";
 
@@ -64,7 +64,7 @@ function contactChannel(href: string): ContactActionChannel | null {
  * `qm-location`, `qm-map` y `qm-social-links`; la delegación con `composedPath()` captura
  * sus clicks sin acoplar el paquete de UI a la analítica.
  */
-export function useContactActionTracking(hostRef: RefObject<HTMLElement | null>): void {
+export function useContactActionTracking(hostRef: RefObject<FragmentInstance | null>): void {
   useEffect(() => {
     const host = hostRef.current;
 
@@ -72,7 +72,7 @@ export function useContactActionTracking(hostRef: RefObject<HTMLElement | null>)
       return;
     }
 
-    function handleClick(event: MouseEvent) {
+    function handleClick(event: Event) {
       const anchor = event.composedPath().find((node) => node instanceof HTMLAnchorElement);
 
       if (!(anchor instanceof HTMLAnchorElement)) {

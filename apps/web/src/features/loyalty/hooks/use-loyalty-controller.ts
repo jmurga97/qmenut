@@ -99,7 +99,7 @@ export function useLoyaltyController() {
     return { ...models, phase: "unavailable" as const };
   }
 
-  if (!session.hydrated || session.loading) {
+  if (session.loading) {
     return { ...models, phase: "loading" as const };
   }
 

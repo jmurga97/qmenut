@@ -1,6 +1,6 @@
 import { Button, Checkbox, Field, InlineMessage, Input } from "@jmurga97/components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { Activity, startTransition, useState, ViewTransition } from "react";
 
 import { trpc } from "~/lib/trpc";
 
@@ -48,12 +48,12 @@ export function GoogleReviewsSettings({ address, branchId, branchName, enabled, 
 
   async function selectCandidate(candidateId: string) {
     await saveConnection(candidateId, false);
-    setSearchVisible(false);
+    startTransition(() => setSearchVisible(false));
   }
 
   async function disconnect() {
     await saveConnection(null, false);
-    setSearchVisible(true);
+    startTransition(() => setSearchVisible(true));
   }
 
   return (
@@ -76,7 +76,7 @@ export function GoogleReviewsSettings({ address, branchId, branchName, enabled, 
             <a className="admin-link" href={googleMapsHref(placeId)} rel="noreferrer" target="_blank">
               Abrir en Google Maps ↗
             </a>
-            <Button disabled={busy} onClick={() => setSearchVisible(true)} variant="secondary">
+            <Button disabled={busy} onClick={() => startTransition(() => setSearchVisible(true))} variant="secondary">
               Cambiar
             </Button>
             <Button
@@ -91,67 +91,69 @@ export function GoogleReviewsSettings({ address, branchId, branchName, enabled, 
         </div>
       ) : null}
 
-      {searchVisible ? (
-        <form
-          className="admin-google-reviews__search"
-          onSubmit={(event) => {
-            event.preventDefault();
-            search();
-          }}
-        >
-          <Field label="Buscar negocio o ficha">
-            <div className="admin-google-reviews__search-row">
-              <Input
-                disabled={busy}
-                onValueChange={setQuery}
-                placeholder="Nombre y dirección de la sucursal"
-                type="search"
-                value={query}
-              />
-              <Button disabled={busy || normalizedQuery.length < 3} type="submit" variant="primary">
-                {candidatesQuery.isFetching ? "Buscando…" : "Buscar"}
-              </Button>
-            </div>
-          </Field>
+      <Activity mode={searchVisible ? "visible" : "hidden"}>
+        <ViewTransition default="none" enter="admin-panel-fade" exit="admin-panel-fade">
+          <form
+            className="admin-google-reviews__search"
+            onSubmit={(event) => {
+              event.preventDefault();
+              search();
+            }}
+          >
+            <Field label="Buscar negocio o ficha">
+              <div className="admin-google-reviews__search-row">
+                <Input
+                  disabled={busy}
+                  onValueChange={setQuery}
+                  placeholder="Nombre y dirección de la sucursal"
+                  type="search"
+                  value={query}
+                />
+                <Button disabled={busy || normalizedQuery.length < 3} type="submit" variant="primary">
+                  {candidatesQuery.isFetching ? "Buscando…" : "Buscar"}
+                </Button>
+              </div>
+            </Field>
 
-          {candidatesQuery.isError ? (
-            <InlineMessage
-              message="No se pudieron buscar fichas en este momento. Revisa la consulta e inténtalo de nuevo."
-              tone="error"
-            />
-          ) : null}
-          {candidatesQuery.isSuccess && candidates.length === 0 ? (
-            <p className="admin-google-reviews__status" role="status">
-              No se encontraron fichas para esta búsqueda.
-            </p>
-          ) : null}
-          {candidates.length > 0 ? (
-            <div className="admin-google-reviews__candidates">
-              {candidates.map((candidate) => (
-                <article className="admin-google-reviews__candidate" key={candidate.id}>
-                  <div>
-                    <h3>{candidate.name}</h3>
-                    <p>{candidate.address}</p>
-                    <p className="admin-google-reviews__rating">
-                      {candidate.rating === null ? "Sin valoración" : `${candidate.rating.toFixed(1)} ★`}
-                      {` · ${candidate.ratingCount} reseñas`}
-                    </p>
-                    <small>
-                      <span className="admin-google-reviews__google-attribution" translate="no">
-                        {candidatesQuery.data?.attribution}
-                      </span>
-                      {candidate.attributions.map((attribution) => ` · ${attribution.provider}`).join("")}
-                    </small>
-                  </div>
-                  <Button disabled={busy} onClick={() => void selectCandidate(candidate.id)} variant="primary">
-                    Conectar esta ficha
-                  </Button>
-                </article>
-              ))}
-            </div>
-          ) : null}
-        </form>
-      ) : null}
+            {candidatesQuery.isError ? (
+              <InlineMessage
+                message="No se pudieron buscar fichas en este momento. Revisa la consulta e inténtalo de nuevo."
+                tone="error"
+              />
+            ) : null}
+            {candidatesQuery.isSuccess && candidates.length === 0 ? (
+              <p className="admin-google-reviews__status" role="status">
+                No se encontraron fichas para esta búsqueda.
+              </p>
+            ) : null}
+            {candidates.length > 0 ? (
+              <div className="admin-google-reviews__candidates">
+                {candidates.map((candidate) => (
+                  <article className="admin-google-reviews__candidate" key={candidate.id}>
+                    <div>
+                      <h3>{candidate.name}</h3>
+                      <p>{candidate.address}</p>
+                      <p className="admin-google-reviews__rating">
+                        {candidate.rating === null ? "Sin valoración" : `${candidate.rating.toFixed(1)} ★`}
+                        {` · ${candidate.ratingCount} reseñas`}
+                      </p>
+                      <small>
+                        <span className="admin-google-reviews__google-attribution" translate="no">
+                          {candidatesQuery.data?.attribution}
+                        </span>
+                        {candidate.attributions.map((attribution) => ` · ${attribution.provider}`).join("")}
+                      </small>
+                    </div>
+                    <Button disabled={busy} onClick={() => void selectCandidate(candidate.id)} variant="primary">
+                      Conectar esta ficha
+                    </Button>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+          </form>
+        </ViewTransition>
+      </Activity>
 
       <div className="admin-google-reviews__toggle">
         <Checkbox

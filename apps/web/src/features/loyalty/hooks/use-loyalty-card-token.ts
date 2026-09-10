@@ -1,4 +1,5 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { use, useCallback, useSyncExternalStore } from "react";
+import { browser } from "react-dom";
 
 const TOKEN_CHANGE_EVENT = "qm-loyalty-card-token-change";
 const tokenSnapshots = new Map<string, string | null>();
@@ -39,12 +40,12 @@ function writeToken(key: string, token: string | null): void {
 
 interface LoyaltyCardTokenState {
   clearToken: () => void;
-  hydrated: boolean;
   setToken: (token: string) => void;
-  token: string | null | undefined;
+  token: string | null;
 }
 
 export function useLoyaltyCardToken(host: string): LoyaltyCardTokenState {
+  use(browser("The loyalty card token is stored in this browser."));
   const key = storageKey(host);
   const subscribe = useCallback(
     (listener: () => void) => {
@@ -68,13 +69,11 @@ export function useLoyaltyCardToken(host: string): LoyaltyCardTokenState {
     },
     [key],
   );
-  const getSnapshot = useCallback((): string | null | undefined => readToken(key), [key]);
-  const getServerSnapshot = useCallback((): string | null | undefined => undefined, []);
-  const token = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const getSnapshot = useCallback((): string | null => readToken(key), [key]);
+  const token = useSyncExternalStore(subscribe, getSnapshot);
 
   return {
     clearToken: useCallback(() => writeToken(key, null), [key]),
-    hydrated: token !== undefined,
     setToken: useCallback((nextToken: string) => writeToken(key, nextToken), [key]),
     token,
   };

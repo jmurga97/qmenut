@@ -47,6 +47,14 @@ const router = createRouter({
   defaultPendingComponent: () => <LoadingState />,
   defaultPendingMinMs: 200,
   defaultPendingMs: 120,
+  defaultViewTransition: {
+    types: ({ fromLocation, toLocation }) =>
+      fromLocation &&
+      fromLocation.pathname !== toLocation.pathname &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? ["admin-navigation"]
+        : false,
+  },
 });
 declare module "@tanstack/react-router" {
   interface Register {

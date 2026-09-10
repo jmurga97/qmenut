@@ -30,3 +30,28 @@ test("navigates categories, dish details, highlights and languages @critical", a
   await expect(page.getByRole("combobox", { name: "Language" })).toHaveValue("en");
   await expectNoSeriousA11yViolations(page);
 });
+
+test("captures one route transition and respects reduced motion", async ({ page }) => {
+  let captures = 0;
+  await page.exposeFunction("recordRouteTransition", () => {
+    captures += 1;
+  });
+  await page.addInitScript(() => {
+    const start = document.startViewTransition.bind(document);
+    document.startViewTransition = (...args) => {
+      void (window as typeof window & { recordRouteTransition: () => Promise<void> }).recordRouteTransition();
+      return start(...args);
+    };
+  });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/en/");
+  await page.getByRole("tab", { name: "Highlights", exact: true }).click();
+  await expect(page).toHaveURL(/\/en\/destacados/);
+  await expect(page.locator("qm-recommended-list")).toBeVisible();
+  await expect.poll(() => captures).toBe(1);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.getByRole("tab", { name: "Menu", exact: true }).click();
+  await expect(page.getByRole("combobox", { name: "Language" })).toHaveValue("en");
+  expect(captures).toBe(1);
+});

@@ -20,7 +20,7 @@ export function useLoyaltyCardSession({ host, trpc }: LoyaltyCardSessionInput) {
   const cardOptions = getLoyaltyCardQueryOptions({ host, trpc, cardToken: tokenState.token ?? "" });
   const cardQuery = useQuery({
     ...cardOptions,
-    enabled: tokenState.hydrated && tokenState.token !== null,
+    enabled: tokenState.token !== null,
     retry: false,
   });
   const invalidSession = getTrpcErrorCode(cardQuery.error) === "UNAUTHORIZED";
@@ -51,7 +51,6 @@ export function useLoyaltyCardSession({ host, trpc }: LoyaltyCardSessionInput) {
     card,
     consentRequired,
     error: cardQuery.error && !invalidSession,
-    hydrated: tokenState.hydrated,
     loading: tokenState.token !== null && cardQuery.isLoading,
     target,
     token: tokenState.token,
