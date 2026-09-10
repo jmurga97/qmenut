@@ -17,11 +17,9 @@
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
     "db:generate:custom": "drizzle-kit generate --config drizzle.config.ts --custom",
     "db:check": "drizzle-kit check --config drizzle.config.ts && bun scripts/check-db-migrations.ts",
-    "db:migrate": "bun scripts/apply-db-migrations.ts",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:seed": "wrangler d1 execute DB --local --file",
-    "db:cleanup:e2e": "wrangler d1 execute DB --local --file ../../e2e/seed/cleanup-e2e.sql",
-    "tenant:create": "bun scripts/create-tenant.ts"
+    "db:cleanup:e2e": "wrangler d1 execute DB --local --file ../../e2e/seed/cleanup-e2e.sql"
   },
   "dependencies": {
     "@qmenut/auth": "workspace:*",

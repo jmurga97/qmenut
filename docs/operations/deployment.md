@@ -4,13 +4,13 @@ This page describes how to take qmenut from an empty Cloudflare account to a liv
 deployment. The fast path is the root deploy orchestrator; the rest of the page documents
 each step it automates, plus the first-deployment setup it assumes.
 
-Run commands from the repository root unless the command includes `--cwd`.
+Run product commands from QMenut and operational commands from its sibling `../qmenut-ops`.
 
 ## One-command deploy
 
 ```bash
-bun run deploy --development
-bun run deploy --production
+bun run --cwd ../qmenut-ops deploy -- --development
+bun run --cwd ../qmenut-ops deploy -- --production
 ```
 
 The environment flag is mandatory. The orchestrator stops at the first failing step and runs,
@@ -26,7 +26,7 @@ in order:
    acknowledgement. `--allow-data-loss` and `--auto-rollback` are forwarded to the wrapper.
 6. **Deploy in dependency order**: tenant-config, API, web, admin, and — for production only —
    landing. The per-environment build-time variables (`VITE_ADMIN_ORIGIN`, `VITE_API_BASE_URL`,
-   `VITE_DEV_FIXED_OTP`) live in the single map at the top of `scripts/deploy.ts`.
+   `VITE_DEV_FIXED_OTP`) live in the single map at the top of `../qmenut-ops/scripts/deploy.ts`.
 
 For an already-provisioned account, this single command replaces the whole manual sequence.
 
@@ -111,25 +111,25 @@ First run the preflight. It intentionally fails while the development Stripe pri
 placeholder:
 
 ```bash
-bun apps/api/scripts/check-deployment-config.ts development
+bun run --cwd ../qmenut-ops preflight -- development
 ```
 
 After configuring the missing external values, deploy everything with:
 
 ```bash
-bun run deploy --development
+bun run --cwd ../qmenut-ops deploy -- --development
 ```
 
 Before seeding, replace the placeholder owner email in
-`apps/api/tenants/development.tenant.json` with a real development inbox. Then create the
+`../qmenut-ops/tenants/development.tenant.json` with a real development inbox. Then create the
 tenant and reuse the existing tapas content fixture under the development hostname:
 
 ```bash
-bun run --cwd apps/api tenant:create -- --file tenants/development.tenant.json --remote --env development
+bun run --cwd ../qmenut-ops tenant:create -- --file tenants/development.tenant.json --remote --env development
 ```
 
 ```bash
-bun apps/api/scripts/load-tenant-content.ts --file demo-tenants/tapas.content.json --host dev.qmenut.app --remote --env development
+bun run --cwd ../qmenut-ops tenant:load-content -- --file demo-tenants/tapas.content.json --host dev.qmenut.app --remote --env development
 ```
 
 The web, API, and admin custom-domain routes are declared in their development Wrangler
@@ -185,7 +185,7 @@ the root orchestrator:
 | `qmenut-tenant-config` | `apps/tenant-config` | `bun run build` | `bunx wrangler deploy --env development` |
 
 The root orchestrator's preflight does not run in Workers Builds; the placeholder checks in
-`apps/api/scripts/check-deployment-config.ts` protect manual deploys instead.
+`../qmenut-ops/scripts/check-deployment-config.ts` protect manual deploys instead.
 
 The web Worker cannot use a plain deploy command: `CLOUDFLARE_ENV` must be set for the build
 so `@cloudflare/vite-plugin` writes the redirected configuration, and the deploy then takes
@@ -345,7 +345,7 @@ Generate migrations only from the Drizzle schema, then apply the committed forwa
 migrations from `apps/api`:
 
 ```bash
-bun run --cwd apps/api db:migrate -- production --confirm-production
+bun run --cwd ../qmenut-ops db:migrate -- production --confirm-production
 ```
 
 The initial sequence contains `0000_baseline.sql`. Later files are generated with
@@ -393,7 +393,7 @@ From `../ming-image-worker`, apply its D1 migration and deploy before qmenut sta
 product policy:
 
 ```bash
-bun run deploy
+bun run --cwd ../qmenut-ops deploy -- --production
 ```
 
 ```bash
@@ -499,7 +499,7 @@ mapping: the `Host` header is the only selector, so the attached hostname and
 Create the D1 and KV tenant data after the domain is known:
 
 ```bash
-bun run --cwd apps/api tenant:create -- --file tenants/CUSTOMER.tenant.json --remote --env production
+bun run --cwd ../qmenut-ops tenant:create -- --file tenants/CUSTOMER.tenant.json --remote --env production
 ```
 
 The script publishes to KV first, inserts the D1 rows, verifies both, and prints the

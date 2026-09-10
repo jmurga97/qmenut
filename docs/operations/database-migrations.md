@@ -90,7 +90,7 @@ There are no triggers left in the database.
 database fails loudly on the first `CREATE TABLE`, which is intentional.
 
 ```bash
-bun apps/api/scripts/rebuild-database.ts development
+bun run --cwd ../qmenut-ops db:rebuild -- development
 ```
 
 The script exports the source database, reshapes the rows locally against the baseline, drops
@@ -199,13 +199,13 @@ Use this workflow for every structural change.
     [Production migrations](#production-migrations):
 
     ```bash
-    bun run --cwd apps/api db:migrate -- production --confirm-production
+    bun run --cwd ../qmenut-ops db:migrate -- production --confirm-production
     ```
 
 `db:migrate` takes the target environment as its first argument and requires the explicit
 `--confirm-production` acknowledgement for production. This is required because a named Wrangler
 environment does not inherit the D1 binding, and because production must never be the
-implicit target. `bun run deploy --production` passes the acknowledgement automatically.
+implicit target. `bun run --cwd ../qmenut-ops deploy -- --production` passes the acknowledgement automatically.
 
 An applied migration is immutable. Do not edit, rename, reorder, or delete a migration
 after D1 has applied it.
@@ -323,7 +323,7 @@ Perform these eleven steps around every production migration:
 6. Apply the migration with Wrangler and the production environment:
 
    ```bash
-   bun run --cwd apps/api db:migrate -- production --confirm-production
+   bun run --cwd ../qmenut-ops db:migrate -- production --confirm-production
    ```
 
 7. Check the `d1_migrations` table.
@@ -377,21 +377,21 @@ Write the TypeScript yourself. Do not copy a finished migration. After each exer
 | `bun run --cwd apps/api db:generate:custom -- --name <name>`                      | Generates an empty custom migration for data.                                       |
 | `bun run --cwd apps/api db:check`                                                 | Validates the metadata and the snapshot.                                            |
 | `bun run --cwd apps/api db:migrate:local`                                         | Applies the migrations to local D1.                                                 |
-| `bun apps/api/scripts/rebuild-database.ts <environment>`                          | Rebuilds a remote D1 onto the baseline.                                             |
-| `bun run --cwd apps/api db:migrate -- <environment> ...`                          | Safely applies migrations to remote D1. Pass `--confirm-production` for production. |
+| `bun run --cwd ../qmenut-ops db:rebuild -- <environment>`                         | Rebuilds a remote D1 onto the baseline.                                             |
+| `bun run --cwd ../qmenut-ops db:migrate -- <environment> ...`                     | Safely applies migrations to remote D1. Pass `--confirm-production` for production. |
 | `bunx wrangler d1 migrations list DB --remote --env <environment> --cwd apps/api` | Lists the pending remote migrations.                                                |
 | `bun run --cwd apps/api db:seed <file.sql>`                                       | Seeds local D1 with the given SQL file.                                             |
 | `bun run --cwd e2e reset`                                                         | Rebuilds the full local test state.                                                 |
 
 ## Key files
 
-| Concern                     | Path                                      |
-| --------------------------- | ----------------------------------------- |
-| Schema, the source of truth | `packages/db/src/schema/`                 |
-| Schema barrel               | `packages/db/src/schema/index.ts`         |
-| Drizzle Kit configuration   | `apps/api/drizzle.config.ts`              |
-| Migrations                  | `apps/api/migrations/`                    |
-| Snapshot and journal        | `apps/api/migrations/meta/`               |
-| Validation script           | `apps/api/scripts/check-db-migrations.ts` |
-| D1 bindings                 | `apps/api/wrangler.jsonc`                 |
-| Scripts                     | `apps/api/package.json`                   |
+| Concern                     | Path                                           |
+| --------------------------- | ---------------------------------------------- |
+| Schema, the source of truth | `packages/db/src/schema/`                      |
+| Schema barrel               | `packages/db/src/schema/index.ts`              |
+| Drizzle Kit configuration   | `apps/api/drizzle.config.ts`                   |
+| Migrations                  | `apps/api/migrations/`                         |
+| Snapshot and journal        | `apps/api/migrations/meta/`                    |
+| Validation script           | `apps/api/scripts/check-db-migrations.ts`      |
+| D1 bindings                 | `apps/api/wrangler.jsonc`                      |
+| Scripts                     | `apps/api/package.json`                        |

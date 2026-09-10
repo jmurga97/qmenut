@@ -1,19 +1,19 @@
 # Ficha de alta de restaurante
 
 Lista de datos que hay que pedir a un restaurante antes de darlo de alta. Cada sección se
-corresponde con un bloque del JSON de `apps/api/tenants/`; véase `example.tenant.json`.
+corresponde con un bloque del JSON de `../qmenut-ops/tenants/`; véase `example.tenant.json`.
 La lista puede convertirse tal cual en un formulario.
 
 Cuando la ficha esté completa, cree el JSON y seleccione explícitamente el ambiente. Las
 operaciones remotas no tienen un ambiente por defecto:
 
 ```bash
-bun tenant:create --file tenants/<nombre>.json --remote --env production
+bun run --cwd ../qmenut-ops tenant:create -- --file tenants/<nombre>.json --remote --env production
 ```
 
 Para development use `--env development` y un hostname exclusivo de ese ambiente, por
 ejemplo `cliente.dev.qmenut.app`. Puede reutilizar la misma ficha sin editarla mediante
-`--host cliente.dev.qmenut.app`. Ejecute `bun apps/api/scripts/list-tenant-environments.ts`
+`--host cliente.dev.qmenut.app`. Ejecute `bun run --cwd ../qmenut-ops tenant:environments`
 para consultar los recursos y Workers seleccionados por cada ambiente.
 
 ## 1. Datos del restaurante

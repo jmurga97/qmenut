@@ -10,7 +10,7 @@ This is a Bun monorepo orchestrated with Turbo. Application code lives under `ap
 - `apps/tenant-config`: Cloudflare Worker that owns writes to the shared tenant-theme KV namespace.
 - `apps/landing`: Astro 5 SSR marketing site.
 - `packages`: shared workspace packages used by multiple apps, including `auth`, `db`, `permissions`, and `ui`. The API dispatches requests natively from `apps/api/src/index.ts`.
-- `scripts/deploy.ts`: root deploy orchestrator. Per-environment build-time variables live in its environment map.
+- Deployment and tenant-onboarding tooling lives in the separate `qmenut-ops` repository; QMenut does not import it.
 
 Generated output such as `apps/web/dist`, `.wrangler`, `.turbo`, and `node_modules` should stay out of source changes.
 
@@ -26,7 +26,7 @@ Use Bun `1.3.6` as declared in `package.json`.
 - `bun run test:e2e`: run the Playwright E2E suite.
 - `bun run lint`: run Prettier checks and ESLint.
 - `bun run format`: apply formatting and safe lint fixes.
-- `bun run deploy --development` or `bun run deploy --production`: full pipeline — preflight, unit and E2E tests, build, D1 migrations, and deploy of every Worker (landing only in production). The environment flag is mandatory; production migrations are auto-confirmed. Rare operations run their script directly, e.g. `bun apps/api/scripts/rebuild-database.ts development` or `bun apps/api/scripts/list-tenant-environments.ts`.
+- Deployment, tenant lifecycle, remote migrations, and database rebuilds run from the separate `qmenut-ops` repository. The environment flag is mandatory for those operations; production migrations are auto-confirmed there.
 
 For app-specific work, run commands in the package, for example `bun run --cwd apps/web dev` or `bun run --cwd apps/api dev`.
 
@@ -37,7 +37,7 @@ changing it, run `bun run db:generate -- --name <change_name>` and commit
 the generated SQL plus `apps/api/migrations/meta/` together. Use
 `db:generate:custom` only for data migrations or DDL that Drizzle Kit cannot generate.
 
-Wrangler remains the migration executor (`db:migrate:local` / `db:migrate <environment>`; production additionally takes `--confirm-production`). Do not use
+Wrangler remains the migration executor (`db:migrate:local` locally; the remote migration wrapper lives in `qmenut-ops` and production additionally takes `--confirm-production`). Do not use
 `drizzle-kit push`, `wrangler d1 migrations create`, hand-author normal DDL migrations,
 or edit a migration after it has been applied. `bun run check` verifies that the schema
 matches the latest committed Drizzle snapshot. Drizzle Kit reads only the barrel
