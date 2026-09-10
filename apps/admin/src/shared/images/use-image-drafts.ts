@@ -103,12 +103,14 @@ export function useImageGalleryDraft(initialUrls: string[], maximum = 20) {
 
   const addFiles = useCallback(
     (files: File[]) => {
+      if (files.length === 0) return;
       const remaining = maximum - draftsRef.current.length;
       if (files.length > remaining) {
         setError(`La galería admite hasta ${maximum} imágenes.`);
         return;
       }
-      const validationError = files.map((file) => validateImageFile(file)).find(Boolean);
+      const invalidFile = files.find((file) => validateImageFile(file));
+      const validationError = invalidFile ? `${invalidFile.name}: ${validateImageFile(invalidFile)}` : null;
       if (validationError) {
         setError(validationError);
         return;
@@ -121,12 +123,12 @@ export function useImageGalleryDraft(initialUrls: string[], maximum = 20) {
   );
 
   const move = useCallback(
-    (id: string, direction: -1 | 1) => {
+    (id: string, target: number) => {
       setChanged(true);
       setDrafts((current) => {
         const index = current.findIndex((draft) => draft.id === id);
-        const target = index + direction;
-        if (index === -1 || target < 0 || target >= current.length) return current;
+        if (index === -1 || !Number.isSafeInteger(target) || target < 0 || target >= current.length || index === target)
+          return current;
         const next = [...current];
         const [draft] = next.splice(index, 1);
         if (!draft) return current;

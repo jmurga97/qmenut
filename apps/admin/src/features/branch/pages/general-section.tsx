@@ -37,6 +37,7 @@ export function GeneralSection() {
             disabled={controller.pending}
             draft={controller.logo.draft}
             label="Logo (icono de la app)"
+            logo
             onRemove={controller.logo.remove}
             onSelect={controller.logo.selectFile}
           />

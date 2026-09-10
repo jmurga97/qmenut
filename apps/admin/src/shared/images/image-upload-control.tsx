@@ -1,86 +1,75 @@
-import { useId, useRef } from "react";
+import { Button } from "@jmurga97/components";
+
+import { ImageFilePicker } from "./image-file-picker";
 
 import type { ImageDraft } from "./image-draft";
 
 const statusLabel = {
   idle: "",
-  ready: "Lista para guardar",
+  ready: "Pendiente de guardar",
   uploading: "Subiendo",
-  optimizing: "Optimizando",
+  optimizing: "Procesando imagen",
   succeeded: "Archivo recibido",
   failed: "Error en la imagen",
 } as const;
 
 interface ImageUploadControlProps {
+  compact?: boolean;
   disabled?: boolean;
   draft: ImageDraft;
   label: string;
+  logo?: boolean;
   onRemove: () => void;
   onSelect?: (file: File) => void;
 }
 
-export function ImageUploadControl({ disabled = false, draft, label, onRemove, onSelect }: ImageUploadControlProps) {
-  const status = draft.status;
-  const inputId = useId();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const busy = disabled;
+export function ImageUploadControl({
+  compact = false,
+  disabled = false,
+  draft,
+  label,
+  logo = false,
+  onRemove,
+  onSelect,
+}: ImageUploadControlProps) {
   return (
-    <div className="admin-image-control">
+    <div className={`admin-image-control${logo ? " admin-image-control--logo" : ""}`}>
       <div className="admin-image-control__header">
-        <label className="admin-image-control__label" htmlFor={inputId}>
-          {label}
-        </label>
-        <span aria-live="polite" className={`admin-image-status admin-image-status--${status}`}>
-          <span aria-hidden="true" className="admin-image-status__dot" />
-          {statusLabel[status]}
+        <span className="admin-image-control__label">{label}</span>
+        <span aria-live="polite" className={`admin-image-status admin-image-status--${draft.status}`}>
+          {statusLabel[draft.status] || (draft.changed ? "Pendiente de guardar" : "")}
         </span>
       </div>
-      <button
-        className="admin-image-preview"
-        disabled={busy || !onSelect}
-        onClick={() => onSelect && inputRef.current?.click()}
-        type="button"
+      <ImageFilePicker
+        action={draft.previewUrl ? "Reemplazar" : "Seleccionar imagen"}
+        actions={
+          draft.previewUrl ? (
+            <Button
+              variant="secondary"
+              aria-label={`Quitar: ${label}`}
+              disabled={disabled}
+              onClick={onRemove}
+              type="button"
+            >
+              Quitar
+            </Button>
+          ) : null
+        }
+        compact={compact}
+        disabled={disabled || !onSelect}
+        error={draft.error}
+        label={label}
+        onSelect={(files) => {
+          if (files[0]) onSelect?.(files[0]);
+        }}
       >
         {draft.previewUrl ? (
-          <img alt="Vista previa de la imagen seleccionada" src={draft.previewUrl} />
-        ) : (
-          <span>
-            <b>Elegir imagen</b>
-            JPEG, PNG o WebP · máximo 25 MiB
-          </span>
-        )}
-      </button>
-      <input
-        accept="image/jpeg,image/png,image/webp"
-        className="admin-visually-hidden"
-        disabled={busy || !onSelect}
-        id={inputId}
-        onChange={(event) => {
-          const file = event.currentTarget.files?.[0];
-          if (file) onSelect?.(file);
-          event.currentTarget.value = "";
-        }}
-        ref={inputRef}
-        type="file"
-      />
-      <div className="admin-image-actions">
-        {draft.previewUrl && onSelect ? (
-          <button
-            className="admin-image-action--replace"
-            disabled={busy}
-            onClick={() => inputRef.current?.click()}
-            type="button"
-          >
-            Reemplazar
-          </button>
+          <div className="admin-image-preview">
+            <img alt={label} draggable={false} src={draft.previewUrl} />
+          </div>
         ) : null}
-        {draft.previewUrl ? (
-          <button className="admin-image-action--remove" disabled={busy} onClick={onRemove} type="button">
-            Quitar
-          </button>
-        ) : null}
-      </div>
-      {draft.error ? <small className="admin-image-error">{draft.error}</small> : null}
+      </ImageFilePicker>
+      {compact ? null : <small className="admin-image-help">Los cambios se aplican al guardar.</small>}
     </div>
   );
 }

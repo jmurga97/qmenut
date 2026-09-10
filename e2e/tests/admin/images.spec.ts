@@ -299,50 +299,62 @@ test("renders logo and gallery controls on the branch page", async ({ page }) =>
   await page.goto("/branch");
   await expect(page.getByText("Logo (icono de la app)")).toBeVisible();
   await expect(page.getByText("Galería de la sucursal")).toBeVisible();
-  await expect(page.getByText("1/20")).toBeVisible();
-  await expect(page.getByText("Foto 1")).toBeVisible();
-  await expect(page.getByRole("button", { name: "+ Añadir fotos" })).toBeVisible();
-  await expect(page.getByLabel("Mover foto 1 hacia la izquierda")).toBeDisabled();
-  await expect(page.getByLabel("Mover foto 1 hacia la derecha")).toBeDisabled();
+  await expect(page.getByText("1 de 20")).toBeVisible();
+  await expect(page.getByText("Portada", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Seleccionar fotos: Galería de la sucursal" })).toBeVisible();
+  await expect(page.getByLabel("Mover foto 1 antes")).toBeDisabled();
+  await expect(page.getByLabel("Mover foto 1 después")).toBeDisabled();
 });
 
 test("manages gallery drafts locally without uploading", async ({ page }) => {
   await page.goto("/branch");
-  await expect(page.getByText("1/20")).toBeVisible();
+  await expect(page.getByText("1 de 20")).toBeVisible();
 
-  const addInput = page.getByLabel("Añadir fotos a la galería");
+  const addInput = page.locator("input[multiple]");
   await addInput.setInputFiles([
     { name: "galeria-1.png", mimeType: "image/png", buffer: ONE_PIXEL_PNG },
     { name: "galeria-2.png", mimeType: "image/png", buffer: ONE_PIXEL_PNG },
   ]);
-  await expect(page.getByText("3/20")).toBeVisible();
-  await expect(page.getByText("Lista para guardar")).toHaveCount(2);
-  await expect(page.getByLabel("Mover foto 1 hacia la derecha")).toBeEnabled();
+  await expect(page.getByText("3 de 20")).toBeVisible();
+  await expect(page.getByText("Pendiente de guardar")).toHaveCount(2);
+  await expect(page.getByLabel("Mover foto 1 después")).toBeEnabled();
 
-  await page.locator("li", { hasText: "Foto 2" }).getByRole("button", { name: "Quitar" }).click();
-  await expect(page.getByText("2/20")).toBeVisible();
-  await expect(page.getByText("Foto 3")).toHaveCount(0);
+  const photos = page.locator(".admin-photo-grid > li");
+  const original = await photos.first().locator("img").getAttribute("src");
+  const selected = await photos.nth(2).locator("img").getAttribute("src");
+  await page.getByRole("button", { name: "Usar foto 3 como portada", exact: true }).click();
+  await expect(photos.first().locator("img")).toHaveAttribute("src", selected!);
+  await expect(photos.nth(1).locator("img")).toHaveAttribute("src", original!);
+  await page.getByRole("button", { name: "Mover foto 1 después", exact: true }).click();
+  await expect(photos.first().locator("img")).toHaveAttribute("src", original!);
+  await page
+    .getByRole("button", { name: "Arrastrar foto 3 para reordenar" })
+    .dragTo(photos.first(), { targetPosition: { x: 20, y: 20 } });
+  await expect(photos.nth(1).locator("img")).toHaveAttribute("src", original!);
+  await page.getByRole("button", { name: "Quitar: Foto 2", exact: true }).click();
+  await expect(page.getByText("2 de 20")).toBeVisible();
+  await expect(photos).toHaveCount(2);
 });
 
 test("validates category image drafts locally before any upload", async ({ page }) => {
   await page.goto("/menu/categories/new");
   await expect(page.getByText("Imagen de categoría")).toBeVisible();
 
-  const input = page.getByLabel("Imagen de categoría");
+  const input = page.getByLabel("Imagen de categoría", { exact: true });
   await input.setInputFiles({ name: "nota.txt", mimeType: "text/plain", buffer: Buffer.from("not an image") });
   await expect(page.getByText("Selecciona una imagen JPEG, PNG o WebP.")).toBeVisible();
 
   await input.setInputFiles({ name: "pixel.png", mimeType: "image/png", buffer: ONE_PIXEL_PNG });
-  await expect(page.getByText("Lista para guardar")).toBeVisible();
+  await expect(page.getByText("Pendiente de guardar")).toBeVisible();
   await expect(page.getByText("Selecciona una imagen JPEG, PNG o WebP.")).toBeHidden();
 
   await page.getByRole("button", { name: "Quitar" }).click();
-  await expect(page.getByText("Elegir imagen")).toBeVisible();
-  await expect(page.getByText("Lista para guardar")).toBeHidden();
+  await expect(page.getByRole("button", { name: "Seleccionar imagen", exact: false })).toBeVisible();
+  await expect(page.getByText("Pendiente de guardar")).toBeVisible();
 });
 
 test("renders the dish image control in the dish editor", async ({ page }) => {
   await page.goto("/menu/dishes/new");
   await expect(page.getByText("Imagen del plato")).toBeVisible();
-  await expect(page.getByText("Elegir imagen").first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Seleccionar imagen", exact: false }).first()).toBeVisible();
 });
