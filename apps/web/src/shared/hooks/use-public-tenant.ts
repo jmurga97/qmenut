@@ -35,6 +35,7 @@ export function usePublicTenant(themeOverride?: QmTenantThemeConfig): PublicTena
     return {
       heroPhotoUrl: data.branch.photos[0]?.url ?? FALLBACK_HERO_PHOTO_URL,
       heroPhotoVariants: data.branch.photos[0]?.variants,
+      logoUrl: data.branch.logoUrl,
       primary: theme.primary,
       showDishPhoto: theme.showDishPhoto,
       showMenuPhotos: theme.showMenuPhotos,

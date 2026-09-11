@@ -4,6 +4,7 @@ import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 export interface PublicTenant {
   heroPhotoUrl: string;
   heroPhotoVariants?: PublicImageVariant[];
+  logoUrl: string | null;
   primary: string;
   showDishPhoto: boolean;
   showMenuPhotos: boolean;

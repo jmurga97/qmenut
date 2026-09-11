@@ -58,6 +58,7 @@ export function MenuRouteHeader({
         currencyValue={currencyValue}
         onQmCurrencyChange={onQmCurrencyChange}
       >
+        {tenant.logoUrl ? <img slot="logo" src={tenant.logoUrl} alt="" decoding="async" /> : null}
         <img
           slot="photo"
           src={heroSource?.src}
