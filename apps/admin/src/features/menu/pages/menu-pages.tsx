@@ -21,7 +21,7 @@ import { NotFoundState } from "~/shared/components/state/not-found-state";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
-import { ImageUploadControl } from "~/shared/images/image-upload-control";
+import { SingleImageUploadControl } from "~/shared/images/single-image-upload-control";
 import { formatMoney, parseMoneyInput } from "~/shared/services/money";
 
 import { getDishDetailQueryOptions } from "../api";
@@ -144,7 +144,7 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
           <div className="admin-form-grid">
             <FormTextInput<CategoryFormValues> label="Nombre" name="name" />
             <FormTextarea<CategoryFormValues> label="Descripción" name="description" rows={3} />
-            <ImageUploadControl
+            <SingleImageUploadControl
               disabled={controller.busy}
               draft={controller.image.draft}
               label="Imagen de categoría"
@@ -201,7 +201,7 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
             <FormTextInput<DishFormValues> label="Nombre" name="name" />
             <FormSelect<DishFormValues> label="Categoría" name="categoryId" options={controller.categoryOptions} />
             <FormTextInput<DishFormValues> inputMode="decimal" label="Precio" name="price" />
-            <ImageUploadControl
+            <SingleImageUploadControl
               disabled={controller.busy}
               draft={controller.image.draft}
               label="Imagen del plato"

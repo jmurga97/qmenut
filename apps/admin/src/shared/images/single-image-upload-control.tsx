@@ -2,21 +2,12 @@ import { Button } from "@jmurga97/components";
 
 import { Icon } from "~/shared/components/icon";
 
+import { imageStatusLabel } from "./image-draft";
 import { ImageFilePicker } from "./image-file-picker";
 
 import type { ImageDraft } from "./image-draft";
 
-const statusLabel = {
-  idle: "",
-  ready: "Pendiente de guardar",
-  uploading: "Subiendo",
-  optimizing: "Procesando imagen",
-  succeeded: "Archivo recibido",
-  failed: "Error en la imagen",
-} as const;
-
-interface ImageUploadControlProps {
-  compact?: boolean;
+interface SingleImageUploadControlProps {
   disabled?: boolean;
   draft: ImageDraft;
   label: string;
@@ -25,21 +16,20 @@ interface ImageUploadControlProps {
   onSelect?: (file: File) => void;
 }
 
-export function ImageUploadControl({
-  compact = false,
+export function SingleImageUploadControl({
   disabled = false,
   draft,
   label,
   logo = false,
   onRemove,
   onSelect,
-}: ImageUploadControlProps) {
+}: SingleImageUploadControlProps) {
   return (
     <div className={`admin-image-control${logo ? " admin-image-control--logo" : ""}`}>
       <div className="admin-image-control__header">
         <span className="admin-image-control__label">{label}</span>
         <span aria-live="polite" className={`admin-image-status admin-image-status--${draft.status}`}>
-          {statusLabel[draft.status] || (draft.changed ? "Pendiente de guardar" : "")}
+          {imageStatusLabel[draft.status] || (draft.changed ? "Pendiente de guardar" : "")}
         </span>
       </div>
       <ImageFilePicker
@@ -57,7 +47,6 @@ export function ImageUploadControl({
             </Button>
           ) : null
         }
-        compact={compact}
         disabled={disabled || !onSelect}
         error={draft.error}
         label={label}
@@ -71,7 +60,7 @@ export function ImageUploadControl({
           </div>
         ) : null}
       </ImageFilePicker>
-      {compact ? null : <small className="admin-image-help">Los cambios se aplican al guardar.</small>}
+      <small className="admin-image-help">Los cambios se aplican al guardar.</small>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { FormPhoneInput } from "~/shared/components/forms/adapters/form-phone-input";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
-import { ImageUploadControl } from "~/shared/images/image-upload-control";
+import { SingleImageUploadControl } from "~/shared/images/single-image-upload-control";
 
 import { useBranchForm } from "../branch-form-context-value";
 import { BranchAddressAutocomplete } from "../components/branch-address-autocomplete";
@@ -20,7 +20,7 @@ export function GeneralSection() {
         <div className="admin-form-grid admin-form-grid--two">
           <FormTextInput<BranchFormValues> label="Nombre" name="name" />
           <FormPhoneInput<BranchFormValues> label="Teléfono" name="phone" />
-          <FormTextInput<BranchFormValues> label="WhatsApp" name="whatsapp" />
+          <FormPhoneInput<BranchFormValues> label="WhatsApp" name="whatsapp" />
           <FormSelect<BranchFormValues>
             label="Zona horaria del restaurante"
             name="timezone"
@@ -33,7 +33,7 @@ export function GeneralSection() {
       <section className="admin-editor-section">
         <div className="admin-kicker">Imágenes públicas</div>
         <div className="admin-branch-media-grid">
-          <ImageUploadControl
+          <SingleImageUploadControl
             disabled={controller.pending}
             draft={controller.logo.draft}
             label="Logo (icono de la app)"

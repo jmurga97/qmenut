@@ -6,6 +6,15 @@ export type AcceptedImageType = (typeof ACCEPTED_IMAGE_TYPES)[number];
 export type ImageDraftStatus = "idle" | "ready" | "uploading" | "optimizing" | "succeeded" | "failed";
 export type ImagePurpose = "branchLogo" | "branchPhoto" | "categoryImage" | "dishImage";
 
+export const imageStatusLabel: Record<ImageDraftStatus, string> = {
+  idle: "",
+  ready: "Pendiente de guardar",
+  uploading: "Subiendo",
+  optimizing: "Procesando imagen",
+  succeeded: "Archivo recibido",
+  failed: "Error en la imagen",
+};
+
 export interface ImageDraft {
   id: string;
   file: File | null;

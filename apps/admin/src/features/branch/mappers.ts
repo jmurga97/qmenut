@@ -1,5 +1,7 @@
 import { socialIcon } from "@qmenut/ui/components/qm-social-links";
 
+import { formatPhone } from "~/shared/lib/phone-formatter";
+
 import { hhmmToMinutes, minutesToHHMM } from "./services";
 import { DAYS } from "./types";
 
@@ -50,8 +52,8 @@ export function toBranchFormValues(settings: BranchSettings): BranchFormValues {
     address: settings.address ?? "",
     latitude: settings.latitude === null ? "" : String(settings.latitude),
     longitude: settings.longitude === null ? "" : String(settings.longitude),
-    phone: settings.phone ?? "",
-    whatsapp: settings.whatsapp ?? "",
+    phone: formatPhone(settings.phone ?? ""),
+    whatsapp: formatPhone(settings.whatsapp ?? ""),
     socials: parseSocialLinksRows(settings.socialLinksJson),
     logoUrl: settings.logoUrl ?? "",
     legalName: settings.legalName ?? "",

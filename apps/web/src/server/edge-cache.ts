@@ -115,7 +115,11 @@ interface CacheStatusResponseInput {
 }
 
 function withCacheStatus({ browserCacheControl, cacheStatus, noStore, response }: CacheStatusResponseInput): Response {
-  const browserResponse = new Response(response.body, response);
+  const browserResponse = new Response(response.body, {
+    headers: response.headers,
+    status: response.status,
+    statusText: response.statusText,
+  });
 
   if (noStore) {
     browserResponse.headers.set("Cache-Control", "no-store");
@@ -130,7 +134,11 @@ function withCacheStatus({ browserCacheControl, cacheStatus, noStore, response }
 }
 
 function withEdgeCacheControl(response: Response, edgeTtlSeconds: number): Response {
-  const edgeResponse = new Response(response.body, response);
+  const edgeResponse = new Response(response.body, {
+    headers: response.headers,
+    status: response.status,
+    statusText: response.statusText,
+  });
 
   edgeResponse.headers.set(
     "Cache-Control",

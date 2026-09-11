@@ -1,6 +1,7 @@
 import { Field, Input } from "@jmurga97/components";
-import { AsYouType } from "libphonenumber-js";
 import { useFormContext } from "react-hook-form";
+
+import { formatPhone } from "~/shared/lib/phone-formatter";
 
 import type { CountryCode } from "libphonenumber-js";
 import type { FieldPath, FieldValues } from "react-hook-form";
@@ -31,7 +32,7 @@ export function FormPhoneInput<TValues extends FieldValues>({
         disabled={disabled}
         inputMode="tel"
         onChange={(event) => {
-          event.target.value = new AsYouType(country).input(event.target.value);
+          event.target.value = formatPhone(event.target.value, country);
           void onChange(event);
         }}
         placeholder={placeholder}

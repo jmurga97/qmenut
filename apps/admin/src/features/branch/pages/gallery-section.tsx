@@ -6,7 +6,7 @@ export function GallerySection() {
   const { controller } = useBranchForm();
   return (
     <section className="admin-editor-section">
-      <div className="admin-kicker">Imágenes públicas</div>
+      <div className="admin-kicker">Galería de la sucursal</div>
       <div className="admin-branch-media-grid">
         <ImageGalleryControl
           disabled={controller.pending}

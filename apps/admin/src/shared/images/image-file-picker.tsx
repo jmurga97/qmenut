@@ -1,13 +1,10 @@
 import { Button } from "@jmurga97/components";
 import { useId, useRef, useState } from "react";
 
-import { Icon } from "~/shared/components/icon";
-
 import type { ReactNode } from "react";
 
 interface ImageFilePickerProps {
   children?: ReactNode;
-  compact?: boolean;
   disabled?: boolean;
   error?: string;
   label: string;
@@ -19,7 +16,6 @@ interface ImageFilePickerProps {
 
 export function ImageFilePicker({
   children,
-  compact = false,
   disabled = false,
   error,
   label,
@@ -46,7 +42,7 @@ export function ImageFilePicker({
   };
   return (
     <div
-      className={`admin-image-picker${over && !disabled ? " admin-image-picker--over" : ""}${compact ? " admin-image-picker--compact" : ""}`}
+      className={`admin-image-picker${over && !disabled ? " admin-image-picker--over" : ""}`}
       onDragOver={(event) => {
         if (!event.dataTransfer.types.includes("Files")) return;
         event.preventDefault();
@@ -67,6 +63,10 @@ export function ImageFilePicker({
     >
       {children}
       <div className="admin-image-picker__selection">
+        <small id={`${id}-help`}>
+          <strong>{multiple ? "Arrastra tus fotos aquí" : "Arrastra aquí una imagen"}</strong>
+          JPEG, PNG o WebP · máximo 25 MiB por imagen
+        </small>
         <div className="admin-image-actions">
           <Button
             variant="secondary"
@@ -76,15 +76,10 @@ export function ImageFilePicker({
             onClick={() => input.current?.click()}
             type="button"
           >
-            <Icon name="image" /> {action}
+            {action}
           </Button>
           {actions}
         </div>
-        <small id={`${id}-help`} className={compact ? "admin-visually-hidden" : undefined}>
-          {multiple ? "O arrastra aquí tus fotos." : "O arrastra aquí una imagen."}
-          <br />
-          JPEG, PNG o WebP · máximo 25 MiB por imagen
-        </small>
       </div>
       <input
         accept="image/jpeg,image/png,image/webp"
