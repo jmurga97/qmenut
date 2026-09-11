@@ -30,7 +30,7 @@
       "dependencies": {
         "@base-ui/react": "^1.7.0",
         "@hookform/resolvers": "^5.2.2",
-        "@jmurga97/components": "^1.0.6",
+        "@jmurga97/components": "^1.0.8",
         "@qmenut/api": "workspace:*",
         "@qmenut/auth": "workspace:*",
         "@qmenut/permissions": "workspace:*",
@@ -511,7 +511,7 @@
 
     "@img/sharp-win32-x64": ["@img/sharp-win32-x64@0.34.5", "", { "os": "win32", "cpu": "x64" }, "sha512-+29YMsqY2/9eFEiW93eqWnuLcWcufowXewwSNIT6UwZdUUCrM3oFjMWH/Z6/TMmb4hlFenmfAVbpWeup2jryCw=="],
 
-    "@jmurga97/components": ["@jmurga97/components@1.0.6", "https://npm.pkg.github.com/download/@jmurga97/components/1.0.6/7be1f6f14c9be7bbb0d6e395226da02a0fb75105", { "dependencies": { "@base-ui/react": "^1.7.0", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "tailwind-merge": "^3.6.0" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }, "sha512-6b5zAmjv/SPDaPY83vl+kxtsuNlDt/pc+5jgxSnxPKzNYwO3j5L/Bt+6vpvlTx4FTrPt+Nq5cgKLo4ZcnU6wIw=="],
+    "@jmurga97/components": ["@jmurga97/components@1.0.8", "https://npm.pkg.github.com/download/@jmurga97/components/1.0.8/0a3196ed0a2a7b3cccf56f48d30fa6012d78fd09", { "dependencies": { "@base-ui/react": "^1.7.0", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "tailwind-merge": "^3.6.0" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }, "sha512-caNuzQGG/xyq5jFS+dDEkw0nIDh4eriTYNEW82ikKiElUoVFZZ4raigGhEvyQM2p2H/9yGeTL1c8kS0TDgT5rw=="],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 
