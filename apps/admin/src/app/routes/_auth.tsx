@@ -1,9 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
+import { AdminShell } from "~/app/shell/admin-shell";
 import { authClient } from "~/lib/auth-client";
 import { isForbiddenError } from "~/lib/errors";
 import { getTenantQueryOptions } from "~/shared/api";
-import { AdminShell } from "~/shared/components/shell/admin-shell";
 
 import type { AdminRouterContext } from "~/lib/trpc";
 

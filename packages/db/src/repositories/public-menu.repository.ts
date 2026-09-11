@@ -25,7 +25,8 @@ import {
 } from "../schema/menu";
 import { restaurants } from "../schema/restaurants";
 
-import type { IdsInput, TenantIdsInput, TenantInput } from "../domain/tenant";
+import type { DrizzleDb } from "../client";
+import type { IdsInput, ResolvedTenant, TenantIdsInput, TenantInput } from "../domain/tenant";
 import type { PublicBranch, PublicBranchPhoto, PublicBranchSchedule, PublicContactBranch } from "../models/branch";
 import type { PublicPromotion } from "../models/promotion";
 import type { PublicLegalEntity, PublicMenuData } from "../models/public-menu";
@@ -357,49 +358,23 @@ async function getExtraRows({ db, ids, tenant }: TenantIdsInput): Promise<ExtraR
     .all();
 }
 
-export async function getPublicMenu({
+async function loadPublicMenuRows({
   db,
   isDefaultLocale,
   locale,
-  nowMs,
   tenant,
-}: GetPublicMenuInput): Promise<PublicMenuData | null> {
-  const branchContext = await getPublicBranchContext({ db, tenant });
-
-  if (!branchContext) {
-    return null;
-  }
-
-  const { branch, countryCode, legal, sourceCurrency, timeZone, vesExchangeRate, vesPricesEnabled } = branchContext;
+}: {
+  db: DrizzleDb;
+  isDefaultLocale: boolean;
+  locale: string;
+  tenant: ResolvedTenant;
+}) {
   const [categoryRows, contactBranches, dishRows, promotionRows] = await Promise.all([
     getCategoryRows({ db, tenant }),
     getPublicContactBranches({ db, tenant }),
     getDishRows({ db, tenant }),
     getPromotionRows({ db, tenant }),
   ]);
-  const imageUrls = [
-    branch.logoUrl,
-    ...branch.photos.map((photo) => photo.url),
-    ...categoryRows.map((category) => category.imageUrl),
-    ...dishRows.map((dish) => dish.imageUrl),
-  ].filter((url): url is string => Boolean(url));
-  const imageVariantsByCanonicalUrl = await getImageVariantsByCanonicalUrl({
-    canonicalUrls: [...new Set(imageUrls)],
-    db,
-  });
-  const faviconUrl = branch.logoUrl
-    ? (imageVariantsByCanonicalUrl.get(branch.logoUrl)?.find((variant) => variant.format === "image/x-icon")?.url ??
-      null)
-    : null;
-  const branchWithVariants: PublicBranch = {
-    ...branch,
-    faviconUrl,
-    photos: branch.photos.map((photo): PublicBranchPhoto => {
-      const variants = imageVariantsByCanonicalUrl.get(photo.url);
-
-      return { ...photo, ...(variants && { variants }) };
-    }),
-  };
   const categoryIds = categoryRows.map((row) => row.id);
   const dishIds = dishRows.map((row) => row.id);
   const [availabilityRows, variantGroupRows, tagRows, allergenRows, extraRows, promotionCandidateRows] =
@@ -429,37 +404,114 @@ export async function getPublicMenu({
           ...variantOptionRows.map((row) => row.id),
         ],
       });
-  const translationsByEntity = createTranslationFieldMap(translationRows);
-  const activePromotions = promotionRows.filter((row) => isPromotionLikeActiveNow({ promotion: row, nowMs, timeZone }));
+
+  return {
+    allergenRows,
+    availabilityRows,
+    categoryRows,
+    contactBranches,
+    dishRows,
+    extraRows,
+    promotionCandidateRows,
+    promotionRows,
+    tagRows,
+    translationsByEntity: createTranslationFieldMap(translationRows),
+    variantGroupRows,
+    variantOptionRows,
+  };
+}
+
+async function loadPublicMenuImageVariants({
+  branch,
+  categoryRows,
+  db,
+  dishRows,
+}: {
+  branch: PublicBranch;
+  categoryRows: Awaited<ReturnType<typeof getCategoryRows>>;
+  db: DrizzleDb;
+  dishRows: Awaited<ReturnType<typeof getDishRows>>;
+}) {
+  const imageUrls = [
+    branch.logoUrl,
+    ...branch.photos.map((photo) => photo.url),
+    ...categoryRows.map((category) => category.imageUrl),
+    ...dishRows.map((dish) => dish.imageUrl),
+  ].filter((url): url is string => Boolean(url));
+  const imageVariantsByCanonicalUrl = await getImageVariantsByCanonicalUrl({
+    canonicalUrls: [...new Set(imageUrls)],
+    db,
+  });
+  const faviconUrl = branch.logoUrl
+    ? (imageVariantsByCanonicalUrl.get(branch.logoUrl)?.find((variant) => variant.format === "image/x-icon")?.url ??
+      null)
+    : null;
+  const branchWithVariants: PublicBranch = {
+    ...branch,
+    faviconUrl,
+    photos: branch.photos.map((photo): PublicBranchPhoto => {
+      const variants = imageVariantsByCanonicalUrl.get(photo.url);
+
+      return { ...photo, ...(variants && { variants }) };
+    }),
+  };
+
+  return { branchWithVariants, imageVariantsByCanonicalUrl };
+}
+
+export async function getPublicMenu({
+  db,
+  isDefaultLocale,
+  locale,
+  nowMs,
+  tenant,
+}: GetPublicMenuInput): Promise<PublicMenuData | null> {
+  const branchContext = await getPublicBranchContext({ db, tenant });
+
+  if (!branchContext) {
+    return null;
+  }
+
+  const { branch, countryCode, legal, sourceCurrency, timeZone, vesExchangeRate, vesPricesEnabled } = branchContext;
+  const rows = await loadPublicMenuRows({ db, isDefaultLocale, locale, tenant });
+  const { branchWithVariants, imageVariantsByCanonicalUrl } = await loadPublicMenuImageVariants({
+    branch,
+    categoryRows: rows.categoryRows,
+    db,
+    dishRows: rows.dishRows,
+  });
+  const activePromotions = rows.promotionRows.filter((row) =>
+    isPromotionLikeActiveNow({ promotion: row, nowMs, timeZone }),
+  );
   const promotionsById = new Map(activePromotions.map((row) => [row.id, row]));
   const bestPromotionsByDish = createBestPromotionMap({
-    candidates: promotionCandidateRows,
+    candidates: rows.promotionCandidateRows,
     nowMs,
     timeZone,
   });
   const dishesByCategory = mapPublicDishes({
-    allergenRows,
-    availabilityRows,
+    allergenRows: rows.allergenRows,
+    availabilityRows: rows.availabilityRows,
     bestPromotionsByDish,
-    dishRows,
-    extraRows,
+    dishRows: rows.dishRows,
+    extraRows: rows.extraRows,
     imageVariantsByCanonicalUrl,
     promotionsById,
-    tagRows,
-    translationsByEntity,
-    variantGroupRows,
-    variantOptionRows,
+    tagRows: rows.tagRows,
+    translationsByEntity: rows.translationsByEntity,
+    variantGroupRows: rows.variantGroupRows,
+    variantOptionRows: rows.variantOptionRows,
   });
 
   return {
     branch: branchWithVariants,
     categories: mapPublicCategories({
-      categoryRows,
+      categoryRows: rows.categoryRows,
       dishesByCategory,
       imageVariantsByCanonicalUrl,
-      translationsByEntity,
+      translationsByEntity: rows.translationsByEntity,
     }),
-    contactBranches,
+    contactBranches: rows.contactBranches,
     countryCode,
     legal,
     promotions: activePromotions.map((row): PublicPromotion => mapPromotion(row)),

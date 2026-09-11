@@ -6,13 +6,13 @@ import { useTranslation } from "react-i18next";
 import { MenuCategoryNav } from "~/features/menu/components/menu-content/menu-category-nav";
 import { MenuFeatured } from "~/features/menu/components/menu-content/menu-featured";
 import { MenuSection } from "~/features/menu/components/menu-content/menu-section";
-import { MenuDishModal } from "~/features/menu/components/menu-dish-modal";
-import { useMenuContent } from "~/features/menu/hooks/menu-content-context";
 import { track } from "~/lib/analytics/posthog";
 import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
+import { useMenuContent } from "~/shared/public-menu/menu-content-context";
+import { MenuDishModal } from "~/shared/public-menu/menu-dish-modal";
 
-import type { MenuDishViewModel, SelectDishInput } from "~/features/menu/types/menu-view-model";
+import type { MenuDishViewModel, SelectDishInput } from "~/shared/public-menu/menu-view-model";
 
 export function MenuPage() {
   const { t } = useTranslation();

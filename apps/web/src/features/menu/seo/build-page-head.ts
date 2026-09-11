@@ -7,8 +7,8 @@ import { responsivePhotoSource } from "~/shared/lib/photo-url";
 
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import type { i18n as I18nInstance } from "i18next";
-import type { PublicMenuData } from "~/features/menu/api/public-menu-types";
-import type { TenantContext } from "~/server/tenant-theme";
+import type { PublicMenuData } from "~/shared/public-menu/public-menu-types";
+import type { TenantContext } from "~/shared/tenant/tenant-context";
 
 interface PageHeadMatch {
   context: {

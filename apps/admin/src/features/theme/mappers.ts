@@ -3,11 +3,10 @@ import { DEFAULT_TEMPLATE } from "@qmenut/ui/theme/tenant-theme-config";
 import { defaultThemeFormValues, THEME_TEMPLATE_FONT_ID, themeFormSchema } from "./types";
 
 import type { ThemeFormValues } from "./types";
-import type { AppRouter } from "@qmenut/api/router";
 import type { QmTenantThemeEditableConfig } from "@qmenut/ui/theme/tenant-theme-config";
-import type { inferRouterOutputs } from "@trpc/server";
+import type { RouterOutputs } from "~/lib/trpc";
 
-type ThemeConfig = inferRouterOutputs<AppRouter>["admin"]["theme"]["get"];
+type ThemeConfig = RouterOutputs["admin"]["theme"]["get"];
 export function toThemeFormValues(theme: ThemeConfig): ThemeFormValues {
   const parsed = themeFormSchema.safeParse({
     ...theme,

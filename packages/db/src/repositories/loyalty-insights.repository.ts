@@ -75,7 +75,12 @@ export async function getLoyaltySummary({
 }
 
 export type LoyaltyCustomerSortBy =
-  "email" | "firstVisitAt" | "lastVisitAt" | "rewardsRedeemed" | "stampsBalance" | "totalVisits";
+  | "email"
+  | "firstVisitAt"
+  | "lastVisitAt"
+  | "rewardsRedeemed"
+  | "stampsBalance"
+  | "totalVisits";
 export type SortDir = "asc" | "desc";
 
 export interface LoyaltyCustomerRow {
@@ -140,8 +145,8 @@ export async function listLoyaltyCustomers({
     const escapeCharacter = String.fromCodePoint(92);
     const escaped = search
       .replaceAll(escapeCharacter, () => escapeCharacter.repeat(2))
-      .replaceAll("%", () => escapeCharacter.concat("%"))
-      .replaceAll("_", () => escapeCharacter.concat("_"));
+      .replaceAll("%", () => escapeCharacter + "%")
+      .replaceAll("_", () => escapeCharacter + "_");
     const pattern = `%${escaped}%`;
     conditions.push(sql`${customers.email} LIKE ${pattern} ESCAPE ${escapeCharacter}`);
   }

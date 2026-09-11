@@ -1,6 +1,8 @@
 import { Button } from "@jmurga97/components";
 import { useId, useRef, useState } from "react";
 
+import { Icon } from "~/shared/components/icon";
+
 import type { ReactNode } from "react";
 
 interface ImageFilePickerProps {
@@ -74,7 +76,7 @@ export function ImageFilePicker({
             onClick={() => input.current?.click()}
             type="button"
           >
-            {action}
+            <Icon name="image" /> {action}
           </Button>
           {actions}
         </div>

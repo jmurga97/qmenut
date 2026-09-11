@@ -1,3 +1,5 @@
+import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions } from "~/shared/api";
+
 import type { QueryClient } from "@tanstack/react-query";
 import type { TrpcOptionsProxy } from "~/lib/trpc";
 
@@ -13,12 +15,6 @@ interface DetailQueryInput {
 }
 interface MenuMutationInput extends BranchQueryInput {
   queryClient: QueryClient;
-}
-export function getMenuCategoriesQueryOptions({ branchId, languageCode, trpc }: BranchQueryInput) {
-  return trpc.admin.menu.categories.list.queryOptions({ branchId, languageCode: languageCode ?? undefined });
-}
-export function getMenuDishesQueryOptions({ branchId, languageCode, trpc }: BranchQueryInput) {
-  return trpc.admin.menu.dishes.list.queryOptions({ branchId, languageCode: languageCode ?? undefined });
 }
 export function getDishDetailQueryOptions({ dishId, languageCode, trpc }: DetailQueryInput) {
   return trpc.admin.menu.dishes.detail.queryOptions({ dishId, languageCode: languageCode ?? undefined });

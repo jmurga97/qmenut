@@ -1,9 +1,9 @@
 import { can } from "@qmenut/permissions";
 import { createFileRoute } from "@tanstack/react-router";
 
-import * as api from "~/features/dashboard/api";
-import { DashboardPage } from "~/features/dashboard/pages/dashboard-page";
-import { dashboardSearchSchema } from "~/features/dashboard/types";
+import * as api from "~/app/dashboard/api";
+import { DashboardPage } from "~/app/dashboard/pages/dashboard-page";
+import { dashboardSearchSchema } from "~/app/dashboard/types";
 import { getSelectedBranch } from "~/shared/api";
 import { getVisitsRange } from "~/shared/services/visit-series";
 

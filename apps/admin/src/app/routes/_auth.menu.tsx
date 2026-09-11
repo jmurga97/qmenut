@@ -2,12 +2,10 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import {
   getMenuAllergensQueryOptions,
-  getMenuCategoriesQueryOptions,
-  getMenuDishesQueryOptions,
   getMenuIngredientsQueryOptions,
   getMenuTagsQueryOptions,
 } from "~/features/menu/api";
-import { getSelectedBranch } from "~/shared/api";
+import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions, getSelectedBranch } from "~/shared/api";
 
 export const Route = createFileRoute("/_auth/menu")({
   beforeLoad: async ({ context }) => {

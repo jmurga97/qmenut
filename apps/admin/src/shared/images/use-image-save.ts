@@ -1,9 +1,10 @@
 import { useBlocker } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { setEditorBusy } from "~/app/store/shell-store";
+import { setEditorBusy } from "~/shared/stores/shell-store";
 
 export function useImageSave() {
+  // oxlint-disable-next-line unicorn/no-useless-undefined -- React 19 useRef requires an explicit initial value.
   const operationRef = useRef<{ fingerprint: string; id: string }>(undefined);
   const operationIdFor = (input: unknown) => {
     const fingerprint = JSON.stringify(input);

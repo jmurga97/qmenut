@@ -1,14 +1,14 @@
 import { qmColorEngine } from "./color-engine";
 
-import type { QmDerivedColors, QmThemeConfig } from "./color-engine";
+import type { QmColorMix, QmDerivedColors, QmThemeConfig } from "./color-engine";
 
-export type { QmColorEngineConfig } from "./color-engine";
+export type { QmColorEngineConfig, QmColorMix } from "./color-engine";
 export type { QmDerivedColors, QmThemeConfig };
 export { qmColorEngine };
 
 /** Builds a `color-mix(in oklab, ...)` CSS string — used across the whole theme engine. */
-export function mix(a: string, percent: number, b: string): string {
-  return qmColorEngine.mix(a, percent, b);
+export function mix({ from, percent, to }: QmColorMix): string {
+  return qmColorEngine.mix({ from, percent, to });
 }
 
 /**

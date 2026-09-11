@@ -3,7 +3,6 @@
   "compilerOptions": {
     "types": ["./worker-configuration.d.ts", "@types/bun"],
     "lib": ["esnext"],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

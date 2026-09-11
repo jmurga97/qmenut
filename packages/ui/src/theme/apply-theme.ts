@@ -144,7 +144,7 @@ function buildBadgeTokens({ shape, colors, radius }: BuildBadgeTokensArgs): Reco
     },
     pill: {
       "--qm-badge-bg": colors.tint,
-      "--qm-badge-color": mix(colors.secondary, 78, colors.ink),
+      "--qm-badge-color": mix({ from: colors.secondary, percent: 78, to: colors.ink }),
       "--qm-badge-bd": "none",
       "--qm-badge-radius": "20px",
       "--qm-badge-weight": "700",
@@ -160,8 +160,9 @@ function buildBadgeTokens({ shape, colors, radius }: BuildBadgeTokensArgs): Reco
         }
       : {
           "--qm-tag-bg": colors.tint,
-          "--qm-tag-color": mix(colors.secondary, 80, colors.ink),
-          "--qm-tag-bd": shape === "outline" ? `1px solid ${mix(colors.secondary, 55, colors.bg)}` : "none",
+          "--qm-tag-color": mix({ from: colors.secondary, percent: 80, to: colors.ink }),
+          "--qm-tag-bd":
+            shape === "outline" ? `1px solid ${mix({ from: colors.secondary, percent: 55, to: colors.bg })}` : "none",
         };
 
   return { ...badgeByShape[shape], ...tagTokens };
@@ -192,11 +193,11 @@ function buildNavTokens({ navStyle, colors, rule }: BuildNavTokensArgs): Record<
     floating: {
       "--qm-nav-m": "12px",
       "--qm-nav-radius": "22px",
-      "--qm-nav-bg": mix(colors.card, 78, "transparent"),
-      "--qm-nav-bt": `1px solid ${mix("#FFFFFF", 55, "transparent")}`,
+      "--qm-nav-bg": mix({ from: colors.card, percent: 78, to: "transparent" }),
+      "--qm-nav-bt": `1px solid ${mix({ from: "#FFFFFF", percent: 55, to: "transparent" })}`,
       "--qm-nav-shadow": "0 14px 32px rgba(40,30,20,.20)",
       "--qm-nav-backdrop": "blur(20px) saturate(180%)",
-      "--qm-nav-active-bg": mix(colors.accent, 16, "#FFFFFF"),
+      "--qm-nav-active-bg": mix({ from: colors.accent, percent: 16, to: "#FFFFFF" }),
       "--qm-nav-active-color": colors.accentInk,
       "--qm-nav-active-bd": "none",
       "--qm-nav-active-radius": "15px",
@@ -215,7 +216,7 @@ function buildNavTokens({ navStyle, colors, rule }: BuildNavTokensArgs): Record<
       "--qm-nav-active-bd": `2px solid ${colors.onPrimary}`,
       "--qm-nav-active-radius": "0px",
       "--qm-nav-active-pad": "6px 12px",
-      "--qm-nav-muted": mix(colors.onPrimary, 72, colors.primary),
+      "--qm-nav-muted": mix({ from: colors.onPrimary, percent: 72, to: colors.primary }),
     },
   };
   return navByStyle[navStyle];
@@ -317,7 +318,7 @@ export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
     "--qm-on-secondary": colors.onSecondary,
     "--qm-tint": colors.tint,
     "--qm-price": colors.price,
-    "--qm-fill": mix(colors.ink, 12, "#FFFFFF"),
+    "--qm-fill": mix({ from: colors.ink, percent: 12, to: "#FFFFFF" }),
 
     "--qm-heading": resolved.heading,
     "--qm-body": resolved.body,
@@ -340,7 +341,7 @@ export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
     // Compact default row rhythm for the mobile-first menu; templates can still override.
     "--qm-row-pad": `${resolved.rowPad ?? 11}px`,
     "--qm-card-shadow": resolved.cardShadow ?? "none",
-    "--qm-ph": `repeating-linear-gradient(45deg,${mix(colors.primary, 9, colors.paper)} 0 9px,${mix(colors.primary, 4, colors.paper)} 9px 18px)`,
+    "--qm-ph": `repeating-linear-gradient(45deg,${mix({ from: colors.primary, percent: 9, to: colors.paper })} 0 9px,${mix({ from: colors.primary, percent: 4, to: colors.paper })} 9px 18px)`,
     "--qm-divider": hasDivider ? `1px solid ${colors.hairline}` : "none",
     "--qm-divider2": `1px solid ${colors.hairline}`,
 

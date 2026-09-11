@@ -4,11 +4,10 @@ import { hhmmToMinutes, minutesToHHMM } from "./services";
 import { DAYS } from "./types";
 
 import type { BranchFormValues } from "./types";
-import type { AppRouter } from "@qmenut/api/router";
-import type { inferRouterOutputs } from "@trpc/server";
+import type { RouterOutputs } from "~/lib/trpc";
 import type { PreparedImage } from "~/shared/images/image-draft";
 
-type BranchSettings = inferRouterOutputs<AppRouter>["admin"]["branches"]["get"];
+type BranchSettings = RouterOutputs["admin"]["branches"]["get"];
 function parseSocialLinksRows(socialLinksJson: string | null): { url: string }[] {
   if (!socialLinksJson) return [];
 

@@ -13,6 +13,7 @@ import { useBranchController } from "../hooks/use-branch-controller";
 
 const TABS = [
   { label: "General", path: "/branch" },
+  { label: "Galería", path: "/branch/galeria" },
   { label: "Horario", path: "/branch/horario" },
   { label: "Legal", path: "/branch/legal" },
 ] as const;

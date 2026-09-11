@@ -7,7 +7,7 @@ import { usePublicRouteLayout } from "~/shared/components/public-route-layout/pu
 import { getPhotoLayout } from "~/shared/lib/photo-layout";
 import { responsivePhotoSource } from "~/shared/lib/photo-url";
 
-import type { MenuSectionViewModel, SelectDishInput } from "~/features/menu/types/menu-view-model";
+import type { MenuSectionViewModel, SelectDishInput } from "~/shared/public-menu/menu-view-model";
 
 interface MenuSectionProps {
   index: number;

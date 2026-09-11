@@ -2,10 +2,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouteContext, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 
-import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { registerTenantProperties, scheduleAnalyticsLoad, track } from "~/lib/analytics/posthog";
 import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
+import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
 /**
  * Registra las dimensiones de tenant (restaurant_id, branch_id, host, zona horaria) como

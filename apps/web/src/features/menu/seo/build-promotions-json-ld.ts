@@ -1,4 +1,4 @@
-import type { PublicMenuData } from "~/features/menu/api/public-menu-types";
+import type { PublicMenuData } from "~/shared/public-menu/public-menu-types";
 
 export function buildPromotionsJsonLd(data: PublicMenuData): Record<string, unknown> {
   return {

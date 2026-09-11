@@ -1,6 +1,8 @@
 import { Button } from "@jmurga97/components";
 import { useId, useRef, useState } from "react";
 
+import { Icon } from "~/shared/components/icon";
+
 import { ImageFilePicker } from "./image-file-picker";
 import { ImageUploadControl } from "./image-upload-control";
 
@@ -131,7 +133,7 @@ export function ImageGalleryControl({
                 tabIndex={-1}
                 type="button"
               >
-                ⠿
+                <Icon name="drag" />
               </Button>
             </div>
             <ImageUploadControl
@@ -150,7 +152,7 @@ export function ImageGalleryControl({
                 onClick={() => move(draft.id, index - 1)}
                 type="button"
               >
-                ← Antes
+                <Icon name="arrow-left" /> Antes
               </Button>
               <Button
                 variant="secondary"
@@ -159,7 +161,7 @@ export function ImageGalleryControl({
                 onClick={() => move(draft.id, index + 1)}
                 type="button"
               >
-                Después →
+                Después <Icon name="arrow-right" />
               </Button>
               <Button
                 variant="secondary"
@@ -168,7 +170,7 @@ export function ImageGalleryControl({
                 onClick={() => move(draft.id, 0)}
                 type="button"
               >
-                Usar como portada
+                <Icon name="star" /> Usar como portada
               </Button>
             </div>
           </li>

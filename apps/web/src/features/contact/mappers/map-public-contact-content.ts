@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
 import type { ContactContentViewModel } from "~/features/contact/types/contact-view-model";
-import type { PublicMenuData } from "~/features/menu/api/public-menu-types";
+import type { PublicMenuData } from "~/shared/public-menu/public-menu-types";
 
 type ContactBranch = PublicMenuData["contactBranches"][number];
 

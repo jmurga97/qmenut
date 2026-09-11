@@ -5,9 +5,12 @@ import { getEnvString } from "./env";
 
 import type { AppRouter } from "@qmenut/api/router";
 import type { QueryClient } from "@tanstack/react-query";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type { i18n as I18nInstance } from "i18next";
 
+export type RouterInputs = inferRouterInputs<AppRouter>;
+export type RouterOutputs = inferRouterOutputs<AppRouter>;
 export type TrpcOptionsProxy = TRPCOptionsProxy<AppRouter>;
 
 export interface RouterAppContext {

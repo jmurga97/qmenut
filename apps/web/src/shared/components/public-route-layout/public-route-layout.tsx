@@ -2,7 +2,6 @@ import { TEMPLATES } from "@qmenut/ui/theme/presets";
 import { useRouterState } from "@tanstack/react-router";
 import { useMemo, useRef } from "react";
 
-import { MenuContentProvider } from "~/features/menu/hooks/menu-content-context";
 import { PublicPageShell } from "~/shared/components/public-page-shell";
 import { PublicRouteContentTransition } from "~/shared/components/public-route-layout/public-route-content-transition";
 import { PublicRouteHeader } from "~/shared/components/public-route-layout/public-route-header";
@@ -14,7 +13,13 @@ import { useTemplateSelection } from "~/shared/hooks/use-template-selection";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
 import { useThemePreview } from "~/shared/hooks/use-theme-preview";
 
-export function PublicRouteLayout() {
+import type { ComponentType, ReactNode } from "react";
+
+export function PublicRouteLayout({
+  contentProvider: ContentProvider,
+}: {
+  contentProvider: ComponentType<{ children: ReactNode }>;
+}) {
   const { theme: persistedTheme } = useTenantContext();
   const theme = useThemePreview(persistedTheme);
   const { tenant } = usePublicTenant(theme);
@@ -54,7 +59,7 @@ export function PublicRouteLayout() {
 
   return (
     <PublicRouteLayoutContext.Provider value={layoutContextValue}>
-      <MenuContentProvider>{layout}</MenuContentProvider>
+      <ContentProvider>{layout}</ContentProvider>
     </PublicRouteLayoutContext.Provider>
   );
 }

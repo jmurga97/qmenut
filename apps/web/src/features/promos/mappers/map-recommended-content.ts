@@ -1,8 +1,8 @@
-import { mapDish } from "~/features/menu/mappers/map-public-menu-content";
+import { mapDish } from "~/shared/public-menu/map-dish";
 
 import type { TFunction } from "i18next";
-import type { PublicMenuData, PublicMenuDish } from "~/features/menu/api/public-menu-types";
 import type { RecommendedDishViewModel } from "~/features/promos/types/highlights-view-model";
+import type { PublicMenuData, PublicMenuDish } from "~/shared/public-menu/public-menu-types";
 
 export function pickFeaturedDish(data: PublicMenuData): PublicMenuDish | null {
   return data.categories.flatMap((category) => category.dishes).find((dish) => dish.isFeatured) ?? null;

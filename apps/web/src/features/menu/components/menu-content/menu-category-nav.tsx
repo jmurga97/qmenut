@@ -7,7 +7,7 @@ import { menuSectionElementId } from "~/features/menu/components/menu-section-id
 import { track } from "~/lib/analytics/posthog";
 
 import type { RefObject } from "react";
-import type { MenuSectionViewModel } from "~/features/menu/types/menu-view-model";
+import type { MenuSectionViewModel } from "~/shared/public-menu/menu-view-model";
 
 const BOTTOM_SCROLL_TOLERANCE_PX = 2;
 

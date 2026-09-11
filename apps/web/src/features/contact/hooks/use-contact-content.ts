@@ -3,9 +3,9 @@ import { useRouteContext } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { mapPublicContactContent } from "~/features/contact/mappers/map-public-contact-content";
-import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
+import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
 export function useContactContent() {
   const trpc = useAppTrpc();

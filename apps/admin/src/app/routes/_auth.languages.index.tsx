@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { getLanguageCatalogQueryOptions, getLanguagesQueryOptions } from "~/features/languages/api";
+import { getLanguageCatalogQueryOptions } from "~/features/languages/api";
 import { LanguagesPage } from "~/features/languages/pages/languages-page";
+import { getLanguagesQueryOptions } from "~/shared/api";
 
 export const Route = createFileRoute("/_auth/languages/")({
   component: LanguagesPage,

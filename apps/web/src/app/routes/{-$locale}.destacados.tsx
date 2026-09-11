@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { buildPageHead } from "~/features/menu/seo/build-page-head";
 import { buildPromotionsJsonLd } from "~/features/menu/seo/build-promotions-json-ld";
 import { HighlightsPage } from "~/features/promos/pages/highlights-page";
 import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
+import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
 export const Route = createFileRoute("/{-$locale}/destacados")({
   loader: async ({ context, params }) =>

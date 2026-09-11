@@ -5,10 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { trpc } from "~/lib/trpc";
 
 import type { ImagePurpose } from "./image-draft";
-import type { AppRouter } from "@qmenut/api/router";
-import type { inferRouterOutputs } from "@trpc/server";
+import type { RouterOutputs } from "~/lib/trpc";
 
-type Assignment = inferRouterOutputs<AppRouter>["admin"]["images"]["assignments"]["list"][number];
+type Assignment = RouterOutputs["admin"]["images"]["assignments"]["list"][number];
 const labels: Record<ImagePurpose, string> = {
   branchLogo: "Logo de la sucursal",
   branchPhoto: "Galería de la sucursal",

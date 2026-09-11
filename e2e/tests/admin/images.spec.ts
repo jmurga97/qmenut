@@ -298,6 +298,8 @@ test("keeps existing external image urls through unrelated edits", async ({ page
 test("renders logo and gallery controls on the branch page", async ({ page }) => {
   await page.goto("/branch");
   await expect(page.getByText("Logo (icono de la app)")).toBeVisible();
+
+  await page.goto("/branch/galeria");
   await expect(page.getByText("Galería de la sucursal")).toBeVisible();
   await expect(page.getByText("1 de 20")).toBeVisible();
   await expect(page.getByText("Portada", { exact: true })).toBeVisible();
@@ -307,7 +309,7 @@ test("renders logo and gallery controls on the branch page", async ({ page }) =>
 });
 
 test("manages gallery drafts locally without uploading", async ({ page }) => {
-  await page.goto("/branch");
+  await page.goto("/branch/galeria");
   await expect(page.getByText("1 de 20")).toBeVisible();
 
   const addInput = page.locator("input[multiple]");

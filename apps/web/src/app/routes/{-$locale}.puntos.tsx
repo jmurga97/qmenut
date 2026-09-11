@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { getLoyaltyProgramQueryOptions } from "~/features/loyalty/api/loyalty-query-options";
 import { LoyaltyPage } from "~/features/loyalty/pages/loyalty-page";
-import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { buildPageHead } from "~/features/menu/seo/build-page-head";
 import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
+import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
 export const Route = createFileRoute("/{-$locale}/puntos")({
   loader: async ({ context, params }) => {

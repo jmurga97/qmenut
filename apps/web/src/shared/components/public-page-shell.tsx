@@ -1,8 +1,8 @@
 import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
 import { useEffect, useMemo } from "react";
 
-import { FONT_CSS_URLS, resolveTenantFontIds } from "~/app/fonts/font-css";
 import { PublicBottomNav } from "~/shared/components/public-bottom-nav";
+import { FONT_CSS_URLS, resolveTenantFontIds } from "~/shared/fonts/font-css";
 
 import type { QmFontId } from "@qmenut/ui/theme/font-catalog";
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";

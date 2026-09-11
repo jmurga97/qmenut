@@ -144,7 +144,6 @@ button {
   height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
-  view-transition-name: admin-content;
 }
 .admin-page {
   display: grid;
@@ -155,31 +154,6 @@ button {
   min-height: 100%;
   margin-inline: auto;
   padding: 1.5rem 1.25rem 3rem;
-}
-/* Keep the navigation shell still; only the scrollable content cross-fades. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-}
-
-::view-transition-group(admin-content) {
-  animation: none;
-  overflow: clip;
-}
-
-::view-transition-old(admin-content),
-::view-transition-new(admin-content),
-::view-transition-old(.admin-panel-fade),
-::view-transition-new(.admin-panel-fade) {
-  animation-duration: 160ms;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none;
-  }
 }
 
 .admin-page-header {

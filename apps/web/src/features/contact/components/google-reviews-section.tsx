@@ -8,10 +8,9 @@ import { track } from "~/lib/analytics/posthog";
 import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
 
-import type { AppRouter } from "@qmenut/api/router";
-import type { inferRouterOutputs } from "@trpc/server";
+import type { RouterOutputs } from "~/lib/trpc-client";
 
-type GoogleReviews = NonNullable<inferRouterOutputs<AppRouter>["menu"]["googleReviews"]>;
+type GoogleReviews = NonNullable<RouterOutputs["menu"]["googleReviews"]>;
 type GoogleReview = GoogleReviews["reviews"][number];
 
 function StarRating({ label, value }: { label: string; value: number }) {
@@ -169,6 +168,7 @@ export function GoogleReviewsSection() {
       <h2 className="google-reviews__heading" id="google-reviews-heading">
         {t("contact.reviews.heading")}
       </h2>
+      {/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- intentionally focusable horizontal review rail. */}
       <div className="google-reviews__rail" tabIndex={data.reviews.length > 0 ? 0 : undefined}>
         <GoogleRatingSummary data={data} />
         {data.reviews.map((review) => (

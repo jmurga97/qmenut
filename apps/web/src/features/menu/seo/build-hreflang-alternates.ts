@@ -1,4 +1,4 @@
-import type { PublicMenuLanguage } from "~/features/menu/api/public-menu-types";
+import type { PublicMenuLanguage } from "~/shared/public-menu/public-menu-types";
 
 export interface HreflangAlternate {
   hreflang: string;

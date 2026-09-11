@@ -1,8 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions } from "~/features/menu/api";
 import { getPromotionsQueryOptions } from "~/features/promotions/api";
-import { getSelectedBranch } from "~/shared/api";
+import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions, getSelectedBranch } from "~/shared/api";
 
 export const Route = createFileRoute("/_auth/promotions")({
   beforeLoad: async ({ context }) => {

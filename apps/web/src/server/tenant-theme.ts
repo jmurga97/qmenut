@@ -2,12 +2,9 @@ import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import { createServerFn } from "@tanstack/react-start";
 
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
+import type { TenantContext } from "~/shared/tenant/tenant-context";
 
-export interface TenantContext {
-  host: string;
-  theme: QmTenantThemeConfig;
-  fontStyles: Array<{ children: string; id: string; type: "text/css" }>;
-}
+export type { TenantContext };
 
 const clientTenantContextCache: { promise?: Promise<TenantContext> } = {};
 
@@ -38,8 +35,8 @@ export const getTenantContext = createServerFn({ method: "GET" }).handler(async 
     import.meta.env.DEV && host === DEV_DEFAULT_TENANT_HOST ? DEV_DEFAULT_TENANT_TEMPLATE : undefined;
 
   const theme = await readTenantTheme(host, fallbackTemplate);
-  const { FONT_CSS_TEXT } = await import("~/app/fonts/font-css-server");
-  const { resolveTenantFontIds } = await import("~/app/fonts/font-css");
+  const { FONT_CSS_TEXT } = await import("~/shared/fonts/font-css-server");
+  const { resolveTenantFontIds } = await import("~/shared/fonts/font-css");
   const { heading, body } = resolveTenantFontIds(theme);
 
   return {

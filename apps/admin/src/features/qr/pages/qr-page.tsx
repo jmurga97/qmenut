@@ -3,6 +3,7 @@ import { FormProvider } from "react-hook-form";
 
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormShell } from "~/shared/components/forms/form-shell";
+import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { NoDomainState } from "~/shared/components/state/no-domain-state";
@@ -33,16 +34,20 @@ function QrPanel({ host }: { host: string }) {
           actions={
             <>
               <Button onClick={() => void controller.download("svg")} variant="secondary">
-                Descargar SVG
+                <Icon name="download" /> Descargar SVG
               </Button>
               <Button onClick={() => void controller.copy()} variant="secondary">
-                Copiar URL
+                <Icon name="copy" /> Copiar URL
               </Button>
             </>
           }
           error={controller.error}
           onSubmit={() => void controller.download("png")}
-          submitLabel="Descargar PNG"
+          submitLabel={
+            <>
+              <Icon name="download" /> Descargar PNG
+            </>
+          }
           success={controller.success}
         >
           <div className="admin-qr-workspace">

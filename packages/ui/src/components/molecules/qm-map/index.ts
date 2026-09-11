@@ -137,6 +137,7 @@ export class QmMap extends LitElement {
     const container = this.renderRoot.querySelector<HTMLElement>(".map");
     if (!container) return;
 
+    // oxlint-disable-next-line unicorn/no-array-callback-reference, unicorn/no-array-method-this-argument -- Leaflet's map factory, not an array method; oxlint misreads `.map(a, b)` as iteration.
     const map = leaflet.map(container, {
       attributionControl: true,
       boxZoom: false,

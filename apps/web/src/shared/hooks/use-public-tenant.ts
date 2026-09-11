@@ -2,10 +2,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouteContext } from "@tanstack/react-router";
 import { useMemo } from "react";
 
-import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
 import { FALLBACK_HERO_PHOTO_URL } from "~/shared/lib/photo-layout";
+import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import type { PublicTenant } from "~/shared/types/public-tenant";

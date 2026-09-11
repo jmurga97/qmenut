@@ -2,10 +2,8 @@ import { z } from "zod";
 
 import { moneyInputSchema } from "~/shared/services/money";
 
-import type { AppRouter } from "@qmenut/api/router";
-import type { inferRouterOutputs } from "@trpc/server";
+import type { RouterOutputs } from "~/lib/trpc";
 
-type RouterOutputs = inferRouterOutputs<AppRouter>;
 export type DishDetail = RouterOutputs["admin"]["menu"]["dishes"]["detail"];
 export const categoryFormSchema = z.object({
   description: z.string().trim(),

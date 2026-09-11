@@ -3,13 +3,13 @@ import { useRouteContext } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { mapPublicMenuContent } from "~/features/menu/mappers/map-public-menu-content";
 import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
 import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
+import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
-import type { MenuContentViewModel } from "~/features/menu/types/menu-view-model";
+import type { MenuContentViewModel } from "~/shared/public-menu/menu-view-model";
 
 export function useMappedMenuContent({ enabled }: { enabled: boolean }): MenuContentViewModel | null {
   const trpc = useAppTrpc();

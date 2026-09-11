@@ -20,7 +20,7 @@ import "../shared/images/styles.css";
 import "../features/auth/styles.css";
 import "../features/analytics/styles.css";
 import "../features/branch/styles.css";
-import "../features/dashboard/styles.css";
+import "./dashboard/styles.css";
 import "../features/languages/styles.css";
 import "../features/loyalty/styles.css";
 import "../features/qr/styles.css";
@@ -47,14 +47,6 @@ const router = createRouter({
   defaultPendingComponent: () => <LoadingState />,
   defaultPendingMinMs: 200,
   defaultPendingMs: 120,
-  defaultViewTransition: {
-    types: ({ fromLocation, toLocation }) =>
-      fromLocation &&
-      fromLocation.pathname !== toLocation.pathname &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? ["admin-navigation"]
-        : false,
-  },
 });
 declare module "@tanstack/react-router" {
   interface Register {

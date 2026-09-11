@@ -64,7 +64,9 @@ interface StampFlowInput {
 export function useStampFlow({ host, refreshCard, target, token, trpc }: StampFlowInput) {
   const [state, dispatch] = useReducer(stampReducer, INITIAL_STATE);
   const mutation = useMutation(getLoyaltyMutationOptions(trpc).earnStamp);
+  // oxlint-disable-next-line unicorn/no-useless-undefined -- React 19 useRef requires an explicit initial value.
   const animationTimer = useRef<number | undefined>(undefined);
+  // oxlint-disable-next-line unicorn/no-useless-undefined -- React 19 useRef requires an explicit initial value.
   const throttleTimer = useRef<number | undefined>(undefined);
 
   useEffect(

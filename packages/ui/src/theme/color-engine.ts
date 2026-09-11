@@ -16,6 +16,12 @@ export interface QmColorEngineConfig {
   emphInkMix: number;
 }
 
+export interface QmColorMix {
+  from: string;
+  percent: number;
+  to: string;
+}
+
 export interface QmThemeConfig {
   template: QmTemplateName;
   /** Tenant's first brand color. Falls back to a neutral dark if omitted. */
@@ -90,8 +96,8 @@ class QmColorEngine {
   }
 
   /** Builds a `color-mix(in oklab, ...)` CSS string — used across the whole theme engine. */
-  mix(a: string, percent: number, b: string): string {
-    return `color-mix(in oklab, ${a} ${percent}%, ${b})`;
+  mix({ from, percent, to }: QmColorMix): string {
+    return `color-mix(in oklab, ${from} ${percent}%, ${to})`;
   }
 
   /** Clamps a tenant hex color's OKLCH chroma to `cap` and re-serializes as `oklch(...)`. */
@@ -121,17 +127,17 @@ class QmColorEngine {
     const paper = cfg.paper || template.paper;
     const tone = { ...template.tone, ...cfg.tone };
 
-    const bg = this.mix(primary, tone.bgMix, paper);
+    const bg = this.mix({ from: primary, percent: tone.bgMix, to: paper });
     const card = this.config.white;
-    const ink = this.mix(primary, tone.inkMix, this.config.darkInk);
+    const ink = this.mix({ from: primary, percent: tone.inkMix, to: this.config.darkInk });
     // Muted copy is frequently small; preserve a WCAG-AA contrast floor against the page tone.
-    const muted = this.mix(ink, Math.max(tone.mutedMix, 65), bg);
-    const hairline = this.mix(ink, tone.hairMix, bg);
-    const tint = this.mix(secondary, tone.tintMix, this.config.white);
+    const muted = this.mix({ from: ink, percent: Math.max(tone.mutedMix, 65), to: bg });
+    const hairline = this.mix({ from: ink, percent: tone.hairMix, to: bg });
+    const tint = this.mix({ from: secondary, percent: tone.tintMix, to: this.config.white });
     const emph = secondary;
-    const emphInk = this.mix(secondary, this.config.emphInkMix, ink);
+    const emphInk = this.mix({ from: secondary, percent: this.config.emphInkMix, to: ink });
     const accent = primary;
-    const accentInk = this.mix(primary, this.config.emphInkMix, ink);
+    const accentInk = this.mix({ from: primary, percent: this.config.emphInkMix, to: ink });
 
     return {
       primary,

@@ -1,8 +1,5 @@
-import type { AppRouter } from "@qmenut/api/router";
 import type { QmRedeemWaitStatus } from "@qmenut/ui/components/qm-redeem-wait";
-import type { inferRouterOutputs } from "@trpc/server";
-
-type RouterOutputs = inferRouterOutputs<AppRouter>;
+import type { RouterOutputs } from "~/lib/trpc-client";
 
 export type LoyaltyProgram = NonNullable<RouterOutputs["loyalty"]["program"]>;
 export type LoyaltyCard = RouterOutputs["loyalty"]["getCard"];

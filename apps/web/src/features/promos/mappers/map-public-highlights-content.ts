@@ -1,15 +1,15 @@
-import { createPublicPriceFormatter } from "~/features/menu/mappers/create-public-price-formatter";
-import { mapDish } from "~/features/menu/mappers/map-public-menu-content";
 import { mapPublicPromosContent } from "~/features/promos/mappers/map-public-promos-content";
 import {
   mapRecommendedDish,
   pickFeaturedDish,
   pickRecommendedDishes,
 } from "~/features/promos/mappers/map-recommended-content";
+import { mapDish } from "~/shared/public-menu/map-dish";
+import { createPublicPriceFormatter } from "~/shared/public-menu/price-formatter";
 
 import type { TFunction } from "i18next";
-import type { PublicMenuData } from "~/features/menu/api/public-menu-types";
 import type { HighlightsContentViewModel } from "~/features/promos/types/highlights-view-model";
+import type { PublicMenuData } from "~/shared/public-menu/public-menu-types";
 
 interface MapPublicHighlightsContentInput {
   data: PublicMenuData | null;

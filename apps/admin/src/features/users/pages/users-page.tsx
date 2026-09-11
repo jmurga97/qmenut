@@ -1,14 +1,5 @@
 import { Dialog } from "@base-ui/react/dialog";
-import {
-  Badge,
-  Button,
-  ConfirmAction,
-  DropdownMenu,
-  Field,
-  InlineMessage,
-  Input,
-  ResourceTable,
-} from "@jmurga97/components";
+import { Badge, Button, ConfirmAction, DropdownMenu, InlineMessage, ResourceTable } from "@jmurga97/components";
 import { buttonVariants } from "@jmurga97/components/button";
 import { useState } from "react";
 import { FormProvider } from "react-hook-form";
@@ -18,6 +9,7 @@ import { manageableRoleOptions } from "~/features/users/types";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
 import { FormFeedback } from "~/shared/components/forms/form-feedback";
+import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
 
 import type { ResourceTableColumn } from "@jmurga97/components";
@@ -59,7 +51,12 @@ function UserRowActions({ controller, user }: { controller: ReturnType<typeof us
           ? [
               {
                 id: "deactivate",
-                label: "Desactivar",
+                label: (
+                  <>
+                    <Icon name="trash" /> Desactivar
+                  </>
+                ),
+                textValue: "Desactivar",
                 onSelect: () => controller.askToDeactivate(user),
                 separatorBefore: true,
                 tone: "destructive" as const,
@@ -87,7 +84,9 @@ function CreateUserDialog({ controller }: { controller: ReturnType<typeof useUse
   const [selectPortalContainer, setSelectPortalContainer] = useState<HTMLElement | null>(null);
   return (
     <Dialog.Root open={controller.createOpen} onOpenChange={controller.handleCreateOpenChange}>
-      <Dialog.Trigger className={buttonVariants({ size: "md", variant: "primary" })}>+ Agregar usuario</Dialog.Trigger>
+      <Dialog.Trigger className={buttonVariants({ size: "md", variant: "primary" })}>
+        <Icon name="plus" /> Agregar usuario
+      </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Backdrop className="admin-users-dialog-backdrop" />
         <Dialog.Viewport className="admin-users-dialog-viewport">
@@ -118,9 +117,7 @@ function CreateUserDialog({ controller }: { controller: ReturnType<typeof useUse
                   options={[...manageableRoleOptions]}
                   portalContainer={selectPortalContainer}
                 />
-                <Field label="Acceso">
-                  <Input readOnly value="Código de un solo uso por correo" />
-                </Field>
+                <InlineMessage message="Se enviará un correo con el acceso para iniciar sesión." tone="info" />
                 <FormFeedback error={controller.createError} />
                 <div className="admin-users-dialog-actions">
                   <Dialog.Close className={buttonVariants({ size: "md", variant: "secondary" })}>Cancelar</Dialog.Close>

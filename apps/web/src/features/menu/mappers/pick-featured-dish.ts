@@ -1,4 +1,4 @@
-import type { PublicMenuData, PublicMenuDish } from "~/features/menu/api/public-menu-types";
+import type { PublicMenuData, PublicMenuDish } from "~/shared/public-menu/public-menu-types";
 
 export function pickFeaturedDish(data: PublicMenuData): PublicMenuDish | null {
   const dishes = data.categories.flatMap((category) => category.dishes);

@@ -3,10 +3,8 @@ import { z } from "zod";
 import { moneyInputSchema } from "~/shared/services/money";
 import { VISIT_PERIODS } from "~/shared/services/visit-series";
 
-import type { AppRouter } from "@qmenut/api/router";
-import type { inferRouterOutputs } from "@trpc/server";
+import type { RouterOutputs } from "~/lib/trpc";
 
-type RouterOutputs = inferRouterOutputs<AppRouter>;
 const rewardTypeSchema = z.enum(["free_dish", "percentage_discount", "special_price"]);
 const customerSortSchema = z.enum([
   "email",

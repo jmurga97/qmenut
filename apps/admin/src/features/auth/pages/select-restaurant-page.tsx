@@ -2,10 +2,10 @@ import { Button } from "@jmurga97/components";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 
-import { useBranchStore } from "~/app/store/branch-store";
 import { signOut } from "~/lib/auth-client";
 import { trpc } from "~/lib/trpc";
 import { FormFeedback } from "~/shared/components/forms/form-feedback";
+import { useBranchStore } from "~/shared/stores/branch-store";
 
 import { getListRestaurantsQueryOptions } from "../api";
 import { useSelectRestaurant } from "../hooks/use-select-restaurant";

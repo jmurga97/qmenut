@@ -4,9 +4,10 @@ import { useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { trpc } from "~/lib/trpc";
+import { getThemeQueryOptions } from "~/shared/api";
 import { useMutationFeedback } from "~/shared/hooks/use-mutation-feedback";
 
-import { getSaveThemeMutationOptions, getThemeQueryOptions } from "../api";
+import { getSaveThemeMutationOptions } from "../api";
 import { toThemeDraft, toThemeFormValues, toThemeInput } from "../mappers";
 import { themeFormSchema } from "../types";
 

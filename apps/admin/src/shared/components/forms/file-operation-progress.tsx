@@ -1,5 +1,6 @@
 export type FileOperation =
-  { phase: "preparing" | "saving" } | { phase: "uploading"; loadedBytes: number; totalBytes: number };
+  | { phase: "preparing" | "saving" }
+  | { phase: "uploading"; loadedBytes: number; totalBytes: number };
 
 export function FileOperationProgress({ operation }: { operation: FileOperation }) {
   const percentage =

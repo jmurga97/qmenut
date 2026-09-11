@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-import type { AppRouter } from "@qmenut/api/router";
-import type { inferRouterOutputs } from "@trpc/server";
-
-type RouterOutputs = inferRouterOutputs<AppRouter>;
+import type { RouterOutputs } from "~/lib/trpc";
 
 const analyticsPeriodSchema = z.enum(["15d", "30d", "90d"]);
 

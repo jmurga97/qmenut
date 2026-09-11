@@ -1,5 +1,5 @@
-import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
 import type { PromosContentViewModel } from "~/features/promos/types/promos-view-model";
+import type { MenuDishViewModel } from "~/shared/public-menu/menu-view-model";
 
 export type RecommendedDishViewModel = MenuDishViewModel;
 

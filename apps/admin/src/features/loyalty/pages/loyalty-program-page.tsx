@@ -13,6 +13,7 @@ import { FormTextInput } from "~/shared/components/forms/adapters/form-text-inpu
 import { FormTextarea } from "~/shared/components/forms/adapters/form-textarea";
 import { FormActions } from "~/shared/components/forms/form-actions";
 import { FormFeedback } from "~/shared/components/forms/form-feedback";
+import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
@@ -60,7 +61,7 @@ function LoyaltyProgramContent({ branchId }: { branchId: string }) {
                   onClick={loyalty.newReward}
                   variant="primary"
                 >
-                  + Nuevo premio
+                  <Icon name="plus" /> Nuevo premio
                 </Button>
               }
               count={loyalty.rewards.fields.length}
@@ -134,7 +135,16 @@ function RewardRow({ index, loyalty }: { index: number; loyalty: ProgramControll
           className={buttonVariants({ size: "sm", variant: "secondary" })}
           disabled={loyalty.rewardBusy}
           items={[
-            { id: "edit", label: "Editar", onSelect: () => loyalty.rewardAction(index, "edit") },
+            {
+              id: "edit",
+              label: (
+                <>
+                  <Icon name="edit" /> Editar
+                </>
+              ),
+              onSelect: () => loyalty.rewardAction(index, "edit"),
+              textValue: "Editar",
+            },
             {
               id: "toggle",
               label: reward.isActive ? "Desactivar" : "Activar",
@@ -142,7 +152,12 @@ function RewardRow({ index, loyalty }: { index: number; loyalty: ProgramControll
             },
             {
               id: "delete",
-              label: "Eliminar",
+              label: (
+                <>
+                  <Icon name="trash" /> Eliminar
+                </>
+              ),
+              textValue: "Eliminar",
               onSelect: () => loyalty.rewardAction(index, "delete"),
               separatorBefore: true,
               tone: "destructive",

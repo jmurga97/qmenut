@@ -1,7 +1,7 @@
 import { SHORT_NAME_MAX_LENGTH, truncateLabel } from "~/lib/app-label";
 
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
-import type { PublicMenuData } from "~/features/menu/api/public-menu-types";
+import type { PublicMenuData } from "~/shared/public-menu/public-menu-types";
 
 interface ManifestIcon {
   purpose?: string;

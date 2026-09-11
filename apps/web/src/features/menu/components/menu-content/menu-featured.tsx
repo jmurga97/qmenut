@@ -8,7 +8,7 @@ import { getPhotoLayout } from "~/shared/lib/photo-layout";
 import { responsivePhotoSource } from "~/shared/lib/photo-url";
 
 import type { QmFeaturedValue } from "@qmenut/ui/components/qm-featured/react";
-import type { MenuDishViewModel, SelectDishInput } from "~/features/menu/types/menu-view-model";
+import type { MenuDishViewModel, SelectDishInput } from "~/shared/public-menu/menu-view-model";
 
 interface MenuFeaturedProps {
   featured: MenuDishViewModel | null;

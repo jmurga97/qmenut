@@ -1,33 +1,18 @@
-import { ALLERGEN_META } from "~/features/menu/constants/allergens";
-import { createPublicPriceFormatter } from "~/features/menu/mappers/create-public-price-formatter";
 import { pickFeaturedDish } from "~/features/menu/mappers/pick-featured-dish";
-import { mapPromotionToFeatured } from "~/features/promos/mappers/map-promotion-to-featured";
-import { pickFeaturedPromo } from "~/features/promos/mappers/pick-featured-promo";
-import { formatDiscount } from "~/features/promos/mappers/promotion-formatting";
+import { mapDish, stripHtml } from "~/shared/public-menu/map-dish";
+import { mapPromotionToFeatured } from "~/shared/public-menu/map-promotion-to-featured";
+import { pickFeaturedPromo } from "~/shared/public-menu/pick-featured-promo";
+import { createPublicPriceFormatter } from "~/shared/public-menu/price-formatter";
 
 import type { TFunction } from "i18next";
-import type { PublicMenuData, PublicMenuDish } from "~/features/menu/api/public-menu-types";
-import type { AllergenCode } from "~/features/menu/constants/allergens";
-import type {
-  MenuContentViewModel,
-  MenuDishBadgeViewModel,
-  MenuDishViewModel,
-  MenuSectionViewModel,
-} from "~/features/menu/types/menu-view-model";
+import type { MenuContentViewModel, MenuSectionViewModel } from "~/shared/public-menu/menu-view-model";
+import type { PublicMenuData } from "~/shared/public-menu/public-menu-types";
 
 interface MapPublicMenuContentInput {
   data: PublicMenuData;
   displayCurrency: string;
   locale: string;
   t: TFunction;
-}
-
-function isAllergenCode(code: string): code is AllergenCode {
-  return Object.hasOwn(ALLERGEN_META, code);
-}
-
-function stripHtml(html: string): string {
-  return html.replaceAll(/<[^<>]*>/g, "");
 }
 
 function buildLogoLabel(name: string): string {
@@ -38,50 +23,6 @@ function buildLogoLabel(name: string): string {
     .map((word) => word[0]?.toUpperCase() ?? "");
 
   return initials.join("") || "QM";
-}
-
-export function mapDish({
-  dish,
-  formatPrice,
-  t,
-}: {
-  dish: PublicMenuDish;
-  formatPrice: (cents: number) => string;
-  t: TFunction;
-}): MenuDishViewModel {
-  const promotion = dish.promotion;
-  const hasDiscount = promotion !== null && promotion.effectiveUnitPrice < promotion.basePrice;
-  const allergens = dish.allergens.map((allergen) => allergen.code).filter(isAllergenCode);
-  const descHtml = dish.description ?? "";
-  const extras = dish.extras
-    .toSorted((a, b) => a.position - b.position)
-    .map((extra) => ({
-      name: extra.name,
-      price: `+${formatPrice(extra.price)}`,
-    }));
-  let badge: MenuDishBadgeViewModel | undefined;
-
-  if (promotion) {
-    badge = { compactText: formatDiscount(promotion, t), fullText: promotion.name };
-  } else if (dish.isRecommended) {
-    const recommendedText = t("menu.recommended");
-    badge = { compactText: recommendedText, fullText: recommendedText };
-  }
-
-  return {
-    allergens: allergens.length > 0 ? allergens : undefined,
-    badge,
-    desc: stripHtml(descHtml),
-    descHtml,
-    extras: extras.length > 0 ? extras : undefined,
-    featured: dish.isFeatured,
-    name: dish.name,
-    oldPrice: hasDiscount ? formatPrice(promotion.basePrice) : undefined,
-    photoUrl: dish.imageUrl ?? undefined,
-    photoVariants: dish.variants,
-    price: formatPrice(promotion?.effectiveUnitPrice ?? dish.price),
-    rowKey: dish.id,
-  };
 }
 
 export function mapPublicMenuContent({

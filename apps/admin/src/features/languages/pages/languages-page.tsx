@@ -8,6 +8,7 @@ import { EntityListCard } from "~/shared/components/entity-list-card";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormActions } from "~/shared/components/forms/form-actions";
 import { FormFeedback } from "~/shared/components/forms/form-feedback";
+import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
 import { useCan } from "~/shared/hooks/use-can";
 
@@ -53,14 +54,24 @@ export function LanguagesPage() {
                         ? [
                             {
                               id: "translate",
-                              label: "Retraducir contenido",
+                              label: (
+                                <>
+                                  <Icon name="refresh" /> Retraducir contenido
+                                </>
+                              ),
+                              textValue: "Retraducir contenido",
                               onSelect: () => setRetranslating(language.languageCode),
                             },
                           ]
                         : []),
                       {
                         id: "remove",
-                        label: "Eliminar",
+                        label: (
+                          <>
+                            <Icon name="trash" /> Eliminar
+                          </>
+                        ),
+                        textValue: "Eliminar",
                         onSelect: () => controller.act(language.languageCode, "remove"),
                         separatorBefore: true,
                         tone: "destructive",
@@ -84,7 +95,11 @@ export function LanguagesPage() {
                 busy={controller.addBusy}
                 busyLabel="Añadiendo…"
                 onSubmit={() => void controller.form.handleSubmit(controller.add)()}
-                submitLabel="Añadir idioma"
+                submitLabel={
+                  <>
+                    <Icon name="plus" /> Añadir idioma
+                  </>
+                }
               />
             </FormProvider>
           </section>

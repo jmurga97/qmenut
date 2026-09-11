@@ -335,10 +335,8 @@ function mountScrollWorld(container, config) {
       const before = y < seg.start,
         after = y > seg.end;
       let cop;
-      if (i === 0)
-        cop = after ? 0 : smooth(1 - pr / 0.62); // greets on landing
-      else if (i === N - 1)
-        cop = before ? 0 : smooth(pr / 0.4); // holds CTA at the end
+      if (i === 0) cop = after ? 0 : smooth(1 - pr / 0.62); // greets on landing
+      else if (i === N - 1) cop = before ? 0 : smooth(pr / 0.4); // holds CTA at the end
       else cop = before || after ? 0 : smooth(1 - Math.abs(pr - 0.5) / 0.5);
       const c = copies[i];
       c.style.opacity = cop;

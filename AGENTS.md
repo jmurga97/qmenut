@@ -16,7 +16,7 @@ Generated output such as `apps/web/dist`, `.wrangler`, `.turbo`, and `node_modul
 
 ## Build, Test, and Development Commands
 
-Use Bun `1.3.6` as declared in `package.json`.
+Use Bun `1.4.0` as declared in `package.json`.
 
 - `bun install`: install workspace dependencies from `bun.lock`.
 - `bun run dev`: run Turbo development tasks for all apps.
@@ -24,8 +24,9 @@ Use Bun `1.3.6` as declared in `package.json`.
 - `bun run check`: run TypeScript `tsc --noEmit` checks through Turbo.
 - `bun run test`: run unit tests (`bun test packages/ui`: the UI package — theme engine and the public-web list elements).
 - `bun run test:e2e`: run the Playwright E2E suite.
-- `bun run lint`: run Prettier checks and ESLint.
-- `bun run format`: apply formatting and safe lint fixes.
+- `bun run lint`: Oxfmt format check, Prettier for `apps/landing/**/*.astro`, and Oxlint (type-aware, `--deny-warnings`). Architecture boundary violations are errors — see [docs/operations/lint-migration.md](docs/operations/lint-migration.md).
+- `bun run lint:fixtures`: negative fixtures; oxlint must flag each with the expected rule.
+- `bun run format`: apply formatting (Oxfmt + scoped Prettier).
 - Deployment, tenant lifecycle, remote migrations, and database rebuilds run from the separate `qmenut-ops` repository. The environment flag is mandatory for those operations; production migrations are auto-confirmed there.
 
 For app-specific work, run commands in the package, for example `bun run --cwd apps/web dev` or `bun run --cwd apps/api dev`.
@@ -47,14 +48,14 @@ The full workflow, the SQLite gotchas, and the production preflight are in
 
 ## Coding Style & Naming Conventions
 
-Write TypeScript as ES modules. Prettier enforces 2-space indentation, semicolons, double quotes, trailing commas, and a 100-character line width. ESLint requires type-only imports, ordered imports, exhaustive switch checks, strict equality, and no unused variables except names prefixed with `_`.
+Write TypeScript as ES modules. Oxfmt enforces 2-space indentation, semicolons, double quotes, trailing commas, and a 120-character line width (`.oxfmtrc.jsonc`; Prettier covers only `apps/landing/**/*.astro`). Oxlint (`.oxlintrc.jsonc`) requires type-only imports, ordered imports, exhaustive switch checks, strict equality, and no unused variables except names prefixed with `_`. Architecture boundaries (app/features/shared/lib/packages) are enforced as errors by Oxlint's boundaries plugin — run `bun run lint` after moving code between layers.
 
 Use `PascalCase` for React components, `camelCase` for functions and variables, and route filenames that match TanStack Router conventions.
 
 The files are created using snake case (util-types.ts)
-Do not rewrite eslint rules if im not asking for it
+Do not rewrite lint rules in `.oxlintrc.jsonc` if im not asking for it
 If lint indicates an error in max-params, prefer passing an object instead more params
-Prefer early return pattern to avoid issues with max-depth eslint rule
+Prefer early return pattern to avoid issues with max-depth
 Avoid barrel imports for everything. Just one barrel for a whole module or package
 
 ## Testing Guidelines

@@ -60,7 +60,7 @@ export async function translateAll({
   let batches = 0;
   let translated = 0;
 
-  async function translateBatches(items: TranslatableText[], tagHandling: "html" | undefined) {
+  async function translateBatches(items: TranslatableText[], tagHandling?: "html") {
     for (let index = 0; index < items.length; index += DEEPL_BATCH_SIZE) {
       const batchItems = items.slice(index, index + DEEPL_BATCH_SIZE);
       const outputs = await deeplTranslate({
@@ -104,7 +104,7 @@ export async function translateAll({
         value: "",
       })),
   });
-  await translateBatches(nameItems, undefined);
+  await translateBatches(nameItems);
   await translateBatches(descriptionItems, "html");
 
   return { batches, translated };

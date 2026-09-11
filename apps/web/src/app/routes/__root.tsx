@@ -1,11 +1,11 @@
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
 import { I18nextProvider } from "react-i18next";
 
-import { getFontPreloadUrl, resolveTenantFontIds } from "~/app/fonts/font-css";
 import appCss from "~/app/styles.css?url";
 import { DEFAULT_LOCALE } from "~/lib/i18n/create-i18n";
 import { ROBOTS_META_CONTENT } from "~/lib/robots";
 import { getCachedTenantContext } from "~/server/tenant-theme";
+import { getFontPreloadUrl, resolveTenantFontIds } from "~/shared/fonts/font-css";
 
 import type { ReactNode } from "react";
 import type { RouterAppContext } from "~/lib/trpc-client";

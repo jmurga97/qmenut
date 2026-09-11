@@ -5,7 +5,6 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import "~/features/promos/styles.css";
-import { MenuDishModal } from "~/features/menu/components/menu-dish-modal";
 import { PromosList } from "~/features/promos/components/promos-list";
 import { RecommendedList } from "~/features/promos/components/recommended-list";
 import { useHighlightsContent } from "~/features/promos/hooks/use-highlights-content";
@@ -14,8 +13,9 @@ import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
 import { getPhotoLayout } from "~/shared/lib/photo-layout";
 import { responsivePhotoSource } from "~/shared/lib/photo-url";
+import { MenuDishModal } from "~/shared/public-menu/menu-dish-modal";
 
-import type { MenuDishViewModel } from "~/features/menu/types/menu-view-model";
+import type { MenuDishViewModel } from "~/shared/public-menu/menu-view-model";
 
 export function HighlightsPage() {
   const content = useHighlightsContent();

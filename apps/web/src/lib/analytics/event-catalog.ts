@@ -1,10 +1,13 @@
-import type { InstallMode } from "~/features/install/use-install-prompt";
-import type { DishOpenSource } from "~/features/menu/types/menu-view-model";
-
 /** Canal de una acción de contacto, clasificado desde el href del enlace. */
 export type ContactActionChannel = "map" | "phone" | "social" | "whatsapp";
 
 export type DisplayMode = "browser" | "standalone";
+
+/** Desde qué superficie de la carta se abrió un plato (destacado, recomendados o navegación). */
+export type DishOpenSource = "featured" | "highlights" | "section";
+
+/** Cómo se presentó el prompt de instalación de la PWA al visitante. */
+export type InstallMode = "hidden" | "ios-instructions" | "prompt";
 
 /**
  * Catálogo cerrado de eventos anónimos de la carta. `track()` solo acepta nombres de este

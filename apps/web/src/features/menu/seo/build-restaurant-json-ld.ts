@@ -1,4 +1,4 @@
-import type { PublicMenuData } from "~/features/menu/api/public-menu-types";
+import type { PublicMenuData } from "~/shared/public-menu/public-menu-types";
 
 const SCHEMA_DAY_NAMES: Record<number, string> = {
   1: "https://schema.org/Monday",

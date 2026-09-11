@@ -25,7 +25,7 @@ test("saves tags, allergens, and a newly created extra through the public dish m
   });
   const ingredientId = getTrpcData<{ id: string }>(created).id;
 
-  const ingredientsResponse = await callTrpcQuery(page, "admin.menu.taxonomy.ingredients");
+  const ingredientsResponse = await callTrpcQuery(page, "admin.menu.taxonomy.ingredients", {});
   expect(getTrpcData<TaxonomyItem<string>[]>(ingredientsResponse)).toContainEqual(
     expect.objectContaining({ id: ingredientId, name: ingredientName }),
   );

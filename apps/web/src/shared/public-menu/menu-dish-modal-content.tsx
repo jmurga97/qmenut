@@ -1,0 +1,64 @@
+import { QmAllergen } from "@qmenut/ui/components/qm-allergen/react";
+import { QmDishExtras } from "@qmenut/ui/components/qm-dish-extras/react";
+import { QmDishModal } from "@qmenut/ui/components/qm-dish-modal/react";
+import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
+import { responsivePhotoSource } from "~/shared/lib/photo-url";
+import { ALLERGEN_META } from "~/shared/public-menu/allergens";
+
+import type { MenuDishViewModel } from "~/shared/public-menu/menu-view-model";
+
+const MODAL_IMAGE_WIDTH_PX = 430;
+
+export function MenuDishModalContent({
+  dish,
+  onClose,
+  showDishPhoto,
+}: {
+  dish: MenuDishViewModel;
+  onClose: () => void;
+  showDishPhoto: boolean;
+}) {
+  const { t } = useTranslation();
+  const photoSource = responsivePhotoSource({
+    canonicalUrl: dish.photoUrl,
+    cssWidth: MODAL_IMAGE_WIDTH_PX,
+    sizes: "(min-width: 431px) 430px, 100vw",
+    variants: dish.photoVariants,
+  });
+
+  return (
+    <QmDishModal
+      open
+      name={dish.name}
+      photoUrl={showDishPhoto ? photoSource?.src : undefined}
+      photoSrcSet={showDishPhoto ? photoSource?.srcSet : undefined}
+      photoSizes={showDishPhoto ? photoSource?.sizes : undefined}
+      photoFallbackUrl={showDishPhoto ? dish.photoUrl : undefined}
+      photoLabel={t("menu.photoLabel")}
+      closeLabel={t("menu.closeLabel")}
+      price={dish.price}
+      oldPrice={dish.oldPrice}
+      tag={dish.badge?.fullText}
+      allergensLabel={t("menu.allergensLabel")}
+      onQmClose={onClose}
+    >
+      <X slot="close-icon" size={16} strokeWidth={2} />
+      {/* Descriptions may contain sanitized rich-text HTML (bold/italic/lists) from the CRM. */}
+      {dish.descHtml ? <div dangerouslySetInnerHTML={{ __html: dish.descHtml }} /> : null}
+      {dish.extras && dish.extras.length > 0 ? (
+        <QmDishExtras slot="extras" label={t("menu.extrasLabel")} items={dish.extras} />
+      ) : null}
+      {dish.allergens?.map((code) => {
+        const { label, Icon } = ALLERGEN_META[code];
+
+        return (
+          <QmAllergen key={code} slot="allergens" label={label}>
+            <Icon slot="icon" size={13} strokeWidth={2} />
+          </QmAllergen>
+        );
+      })}
+    </QmDishModal>
+  );
+}

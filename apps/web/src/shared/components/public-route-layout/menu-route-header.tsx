@@ -1,10 +1,10 @@
 import { TEMPLATES } from "@qmenut/ui/theme/presets";
 
-import { useMenuContent } from "~/features/menu/hooks/menu-content-context";
 import { ScrollCompactHeroHeader } from "~/shared/components/scroll-compact-hero-header";
 import { ScrollHidePageHeader } from "~/shared/components/scroll-hide-page-header";
 import { HERO_PHOTO_LAYOUT } from "~/shared/lib/photo-layout";
 import { responsivePhotoSource } from "~/shared/lib/photo-url";
+import { useMenuContent } from "~/shared/public-menu/menu-content-context";
 
 import type { QmLangOption } from "@qmenut/ui/components/qm-lang";
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";

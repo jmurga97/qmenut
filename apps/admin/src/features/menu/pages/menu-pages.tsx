@@ -4,7 +4,6 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { FormProvider } from "react-hook-form";
 
-import { useSelectedLanguage } from "~/features/languages/hooks/use-selected-language";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
 import { EntityListCard } from "~/shared/components/entity-list-card";
@@ -15,11 +14,13 @@ import { FormTextarea } from "~/shared/components/forms/adapters/form-textarea";
 import { FormChipGroup } from "~/shared/components/forms/form-chip-group";
 import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { FormShell } from "~/shared/components/forms/form-shell";
+import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { NotFoundState } from "~/shared/components/state/not-found-state";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
+import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
 import { ImageUploadControl } from "~/shared/images/image-upload-control";
 import { formatMoney, parseMoneyInput } from "~/shared/services/money";
 
@@ -50,7 +51,7 @@ function MenuList({ branchId }: { branchId: string }) {
         action={
           canWrite ? (
             <Link className="admin-link" to="/menu/categories/new">
-              + Nueva categoría
+              <Icon name="plus" /> Nueva categoría
             </Link>
           ) : null
         }
@@ -75,7 +76,7 @@ function MenuList({ branchId }: { branchId: string }) {
         action={
           canWrite ? (
             <Link className="admin-link" to="/menu/dishes/new">
-              + Nuevo plato
+              <Icon name="plus" /> Nuevo plato
             </Link>
           ) : null
         }
@@ -255,7 +256,7 @@ function ExtraIngredientCreator({
         <Input inputMode="decimal" onValueChange={setPrice} value={price} />
       </Field>
       <Button className="admin-inline-button" disabled={!canAdd || busy} onClick={add} variant="secondary">
-        + Añadir extra
+        <Icon name="plus" /> Añadir extra
       </Button>
     </div>
   );

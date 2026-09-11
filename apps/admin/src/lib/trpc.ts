@@ -5,8 +5,11 @@ import { queryClient } from "./query-client";
 
 import type { AppRouter } from "@qmenut/api/router";
 import type { QueryClient } from "@tanstack/react-query";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 
+export type RouterInputs = inferRouterInputs<AppRouter>;
+export type RouterOutputs = inferRouterOutputs<AppRouter>;
 export type TrpcOptionsProxy = TRPCOptionsProxy<AppRouter>;
 export interface AdminRouterContext {
   queryClient: QueryClient;

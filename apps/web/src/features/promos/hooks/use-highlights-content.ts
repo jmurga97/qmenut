@@ -2,11 +2,11 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouteContext } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { mapPublicHighlightsContent } from "~/features/promos/mappers/map-public-highlights-content";
 import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
 import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
+import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
 export function useHighlightsContent() {
   const trpc = useAppTrpc();

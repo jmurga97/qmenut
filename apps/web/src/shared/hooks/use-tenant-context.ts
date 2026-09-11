@@ -1,6 +1,6 @@
 import { useRouteContext } from "@tanstack/react-router";
 
-import type { TenantContext } from "~/server/tenant-theme";
+import type { TenantContext } from "~/shared/tenant/tenant-context";
 
 export function useTenantContext(): TenantContext {
   return useRouteContext({

@@ -4,8 +4,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
-import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions } from "~/features/menu/api";
 import { trpc } from "~/lib/trpc";
+import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions } from "~/shared/api";
 
 import { getPromotionMutationOptions, getPromotionsQueryOptions } from "../api";
 import { toPromotionFormValues, toPromotionInput } from "../mappers";

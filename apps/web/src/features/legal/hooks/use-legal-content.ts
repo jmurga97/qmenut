@@ -1,11 +1,11 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouteContext } from "@tanstack/react-router";
 
-import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
+import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
-import type { PublicMenuData } from "~/features/menu/api/public-menu-types";
+import type { PublicMenuData } from "~/shared/public-menu/public-menu-types";
 
 /**
  * Legal content from the shared `menu.publicData` cache entry used by the public pages.

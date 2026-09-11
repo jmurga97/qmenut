@@ -6,10 +6,8 @@ import { useFieldArray, useForm } from "react-hook-form";
 import * as api from "~/features/loyalty/api";
 import * as mappers from "~/features/loyalty/mappers";
 import { loyaltyProgramFormSchema } from "~/features/loyalty/types";
-import { getMenuDishesQueryOptions } from "~/features/menu/api";
-import { getThemeQueryOptions } from "~/features/theme/api";
 import { trpc } from "~/lib/trpc";
-import { getTenantQueryOptions } from "~/shared/api";
+import { getMenuDishesQueryOptions, getThemeQueryOptions, getTenantQueryOptions } from "~/shared/api";
 
 export function useLoyaltyProgramController(selectedBranchId: string) {
   const queryClient = useQueryClient();

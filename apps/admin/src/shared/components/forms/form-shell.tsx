@@ -14,7 +14,7 @@ interface FormShellProps {
   onCancel?: () => void;
   onSubmit: () => void;
   readOnly?: boolean;
-  submitLabel?: string;
+  submitLabel?: ReactNode;
   success?: string | null;
 }
 export function FormShell({ actions, children, error, readOnly = false, success, ...formActions }: FormShellProps) {

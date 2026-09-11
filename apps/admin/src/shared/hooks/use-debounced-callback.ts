@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 
 export function useDebouncedCallback<TValue>(callback: (value: TValue) => void, delay: number) {
   const callbackRef = useRef(callback);
+  // oxlint-disable-next-line unicorn/no-useless-undefined -- React 19 useRef requires an explicit initial value.
   const timeoutRef = useRef<number | undefined>(undefined);
   useEffect(() => {
     callbackRef.current = callback;

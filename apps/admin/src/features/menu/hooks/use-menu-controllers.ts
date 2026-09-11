@@ -4,9 +4,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
 
-import { useSelectedLanguage } from "~/features/languages/hooks/use-selected-language";
 import { trpc } from "~/lib/trpc";
-import { getTenantQueryOptions } from "~/shared/api";
+import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions, getTenantQueryOptions } from "~/shared/api";
+import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
 import { useImageDraft } from "~/shared/images/use-image-drafts";
 import { useImageSave } from "~/shared/images/use-image-save";
 import { useImageUploads } from "~/shared/images/use-image-uploads";
@@ -17,8 +17,6 @@ import {
   getDishAvailabilityMutationOptions,
   getDishMutationOptions,
   getMenuAllergensQueryOptions,
-  getMenuCategoriesQueryOptions,
-  getMenuDishesQueryOptions,
   getMenuIngredientsQueryOptions,
   getMenuTagsQueryOptions,
 } from "../api";
@@ -85,8 +83,9 @@ export function useCategoryEditorController({ branchId, categoryId }: { branchId
         position: category?.position ?? categories.length,
       };
       const operationId = imageSave.operationIdFor({ categoryId, branchId, data });
-      if (categoryId) await update.mutateAsync({ categoryId, data, operationId });
-      else await create.mutateAsync({ branchId, data, operationId });
+      await (categoryId
+        ? update.mutateAsync({ categoryId, data, operationId })
+        : create.mutateAsync({ branchId, data, operationId }));
       void queryClient.invalidateQueries({ queryKey: trpc.admin.images.assignments.pathKey() });
     }, uploads.clear);
     if (succeeded) cancel();

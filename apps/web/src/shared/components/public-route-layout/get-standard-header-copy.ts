@@ -14,6 +14,7 @@ export function getStandardHeaderCopy(routeId: string | undefined, t: TFunction)
       return { subtitle: t("legal.privacy.subtitle"), title: t("legal.privacy.title") };
     case "/{-$locale}/offline":
       return { subtitle: "", title: t("offline.title") };
+    // oxlint-disable-next-line unicorn/no-useless-switch-case -- keeps `undefined` visible for switch-exhaustiveness-check.
     case undefined:
     default:
       return { subtitle: "", title: t("common.navigation.menu") };

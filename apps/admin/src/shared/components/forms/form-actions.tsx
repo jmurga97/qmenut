@@ -12,7 +12,7 @@ interface FormActionsProps {
   children?: ReactNode;
   onCancel?: () => void;
   onSubmit: () => void;
-  submitLabel?: string;
+  submitLabel?: ReactNode;
   submitType?: "button" | "submit";
 }
 export function FormActions({

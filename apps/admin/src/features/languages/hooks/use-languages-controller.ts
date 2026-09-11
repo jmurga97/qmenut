@@ -2,13 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 
-import {
-  getLanguageCatalogQueryOptions,
-  getLanguageMutationOptions,
-  getLanguagesQueryOptions,
-} from "~/features/languages/api";
+import { getLanguageCatalogQueryOptions, getLanguageMutationOptions } from "~/features/languages/api";
 import { addLanguageSchema } from "~/features/languages/types";
 import { trpc } from "~/lib/trpc";
+import { getLanguagesQueryOptions } from "~/shared/api";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 
 import type { AddLanguageFormValues } from "~/features/languages/types";

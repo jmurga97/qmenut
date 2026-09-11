@@ -1,0 +1,25 @@
+import { z } from "zod";
+
+import { VISIT_PERIODS } from "~/shared/services/visit-series";
+
+import type { RouterOutputs } from "~/lib/trpc";
+
+export const dashboardSearchSchema = z.object({
+  period: z.enum(VISIT_PERIODS).default("30d"),
+});
+export type DashboardSearch = z.infer<typeof dashboardSearchSchema>;
+export type DashboardTenant = RouterOutputs["admin"]["tenant"]["me"];
+export type DashboardCategory = RouterOutputs["admin"]["menu"]["categories"]["list"][number];
+export type DashboardDish = RouterOutputs["admin"]["menu"]["dishes"]["list"][number];
+export type DashboardBillingOverview = RouterOutputs["admin"]["billing"]["overview"];
+
+export type AttentionSeverity = "error" | "info" | "warning";
+
+export interface AttentionItem {
+  detail?: string;
+  id: string;
+  label: string;
+  linkParams?: Record<string, string>;
+  linkTo?: string;
+  severity: AttentionSeverity;
+}

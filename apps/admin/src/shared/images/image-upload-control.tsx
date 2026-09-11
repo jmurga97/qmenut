@@ -1,5 +1,7 @@
 import { Button } from "@jmurga97/components";
 
+import { Icon } from "~/shared/components/icon";
+
 import { ImageFilePicker } from "./image-file-picker";
 
 import type { ImageDraft } from "./image-draft";
@@ -51,7 +53,7 @@ export function ImageUploadControl({
               onClick={onRemove}
               type="button"
             >
-              Quitar
+              <Icon name="trash" /> Quitar
             </Button>
           ) : null
         }

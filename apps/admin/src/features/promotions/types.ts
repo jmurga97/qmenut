@@ -2,10 +2,8 @@ import { z } from "zod";
 
 import { moneyInputSchema } from "~/shared/services/money";
 
-import type { AppRouter } from "@qmenut/api/router";
-import type { inferRouterOutputs } from "@trpc/server";
+import type { RouterOutputs } from "~/lib/trpc";
 
-type RouterOutputs = inferRouterOutputs<AppRouter>;
 export type PromotionDetail = RouterOutputs["admin"]["promotions"]["get"];
 export const promotionTypes = ["percentage_discount", "special_price", "two_for_one"] as const;
 export const promotionScopes = ["category", "dish"] as const;

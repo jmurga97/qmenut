@@ -123,11 +123,7 @@ export async function createRestaurantUser({
     })
     .onConflictDoNothing({ target: [restaurantUsers.restaurantId, restaurantUsers.userId] });
 
-  if (existingUser) {
-    await db.batch([membershipInsert]);
-  } else {
-    await db.batch([userInsert, membershipInsert]);
-  }
+  await db.batch(existingUser ? [membershipInsert] : [userInsert, membershipInsert]);
 
   const user = await db
     .select({ id: users.id })

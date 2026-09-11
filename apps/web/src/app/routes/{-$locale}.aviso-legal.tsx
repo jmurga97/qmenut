@@ -2,9 +2,9 @@ import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 
 import { isLegalCountryCode } from "~/features/legal/legal-content";
 import { LegalNoticePage } from "~/features/legal/pages/legal-notice-page";
-import { getPublicMenuQueryOptions } from "~/features/menu/api/public-menu-query-options";
 import { buildPageHead } from "~/features/menu/seo/build-page-head";
 import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
+import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
 export const Route = createFileRoute("/{-$locale}/aviso-legal")({
   beforeLoad: ({ params }) => {

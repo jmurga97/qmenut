@@ -2,6 +2,10 @@ import { useCallback, useEffect, useSyncExternalStore } from "react";
 
 import { track } from "~/lib/analytics/posthog";
 
+import type { InstallMode } from "~/lib/analytics/event-catalog";
+
+export type { InstallMode };
+
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
@@ -17,8 +21,6 @@ interface InstallEnvironment {
   ios: boolean;
   standalone: boolean;
 }
-
-export type InstallMode = "hidden" | "ios-instructions" | "prompt";
 
 const DISMISSED_STORAGE_KEY = "qm-install-dismissed";
 const SERVER_SNAPSHOT: InstallPromptSnapshot = { canPrompt: false, installed: false };

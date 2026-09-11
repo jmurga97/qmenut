@@ -1,9 +1,9 @@
-import { createPublicPriceFormatter } from "~/features/menu/mappers/create-public-price-formatter";
-import { formatDiscount, formatValidity, resolvePromotionPrice } from "~/features/promos/mappers/promotion-formatting";
+import { createPublicPriceFormatter } from "~/shared/public-menu/price-formatter";
+import { formatDiscount, formatValidity, resolvePromotionPrice } from "~/shared/public-menu/promotion-formatting";
 
 import type { TFunction } from "i18next";
-import type { PublicMenuData, PublicMenuPromotion } from "~/features/menu/api/public-menu-types";
 import type { PromoViewModel, PromosContentViewModel } from "~/features/promos/types/promos-view-model";
+import type { PublicMenuData, PublicMenuPromotion } from "~/shared/public-menu/public-menu-types";
 
 interface MapPublicPromosContentInput {
   data: PublicMenuData | null;

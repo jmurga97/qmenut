@@ -9,6 +9,7 @@ import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
 import { FormChipGroup } from "~/shared/components/forms/form-chip-group";
 import { FormShell } from "~/shared/components/forms/form-shell";
+import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { useCan } from "~/shared/hooks/use-can";
@@ -55,7 +56,7 @@ function PromotionsList({ branchId }: { branchId: string }) {
         action={
           canWrite ? (
             <Link className="admin-link" to="/promotions/new">
-              + Nueva promoción
+              <Icon name="plus" /> Nueva promoción
             </Link>
           ) : null
         }

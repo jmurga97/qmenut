@@ -1,9 +1,9 @@
+import { FormPhoneInput } from "~/shared/components/forms/adapters/form-phone-input";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
-import { ImageGalleryControl } from "~/shared/images/image-gallery-control";
 import { ImageUploadControl } from "~/shared/images/image-upload-control";
 
-import { useBranchForm } from "../branch-form-context";
+import { useBranchForm } from "../branch-form-context-value";
 import { BranchAddressAutocomplete } from "../components/branch-address-autocomplete";
 import { GoogleReviewsSettings } from "../components/google-reviews-settings";
 import { SocialLinksEditor } from "../components/social-links-editor";
@@ -19,7 +19,7 @@ export function GeneralSection() {
         <div className="admin-kicker">Identidad y contacto</div>
         <div className="admin-form-grid admin-form-grid--two">
           <FormTextInput<BranchFormValues> label="Nombre" name="name" />
-          <FormTextInput<BranchFormValues> label="Teléfono" name="phone" />
+          <FormPhoneInput<BranchFormValues> label="Teléfono" name="phone" />
           <FormTextInput<BranchFormValues> label="WhatsApp" name="whatsapp" />
           <FormSelect<BranchFormValues>
             label="Zona horaria del restaurante"
@@ -40,16 +40,6 @@ export function GeneralSection() {
             logo
             onRemove={controller.logo.remove}
             onSelect={controller.logo.selectFile}
-          />
-          <ImageGalleryControl
-            disabled={controller.pending}
-            drafts={controller.gallery.drafts}
-            error={controller.gallery.error}
-            label="Galería de la sucursal"
-            onAdd={controller.gallery.addFiles}
-            onMove={controller.gallery.move}
-            onRemove={controller.gallery.remove}
-            onReplace={controller.gallery.replace}
           />
         </div>
       </section>

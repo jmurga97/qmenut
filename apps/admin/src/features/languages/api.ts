@@ -1,12 +1,11 @@
+import { getLanguagesQueryOptions } from "~/shared/api";
+
 import type { QueryClient } from "@tanstack/react-query";
 import type { TrpcOptionsProxy } from "~/lib/trpc";
 
 interface ApiContext {
   queryClient: QueryClient;
   trpc: TrpcOptionsProxy;
-}
-export function getLanguagesQueryOptions({ trpc }: Pick<ApiContext, "trpc">) {
-  return trpc.admin.languages.list.queryOptions();
 }
 export function getLanguageCatalogQueryOptions({ trpc }: Pick<ApiContext, "trpc">) {
   return trpc.admin.languages.catalog.queryOptions();

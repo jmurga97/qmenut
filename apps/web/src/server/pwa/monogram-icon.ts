@@ -45,13 +45,7 @@ function linearize(channel: number): number {
 
 function readableInk(background: string): string {
   const value = background.trim().replace(/^#/, "");
-  const expanded =
-    value.length === 3
-      ? value
-          .split("")
-          .map((channel) => channel + channel)
-          .join("")
-      : value;
+  const expanded = value.length === 3 ? [...value].map((channel) => channel + channel).join("") : value;
 
   if (!/^[\da-f]{6}$/i.test(expanded)) {
     return LIGHT_INK;
