@@ -1,4 +1,4 @@
-import { Button, Checkbox, Field, InlineMessage, Input } from "@jmurga97/components";
+import { Button, Checkbox, Field, Input } from "@jmurga97/components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Activity, startTransition, useState } from "react";
 
@@ -115,12 +115,6 @@ export function GoogleReviewsSettings({ address, branchId, branchName, enabled, 
             </div>
           </Field>
 
-          {candidatesQuery.isError ? (
-            <InlineMessage
-              message="No se pudieron buscar fichas en este momento. Revisa la consulta e inténtalo de nuevo."
-              tone="error"
-            />
-          ) : null}
           {candidatesQuery.isSuccess && candidates.length === 0 ? (
             <p className="admin-google-reviews__status" role="status">
               No se encontraron fichas para esta búsqueda.
@@ -163,9 +157,6 @@ export function GoogleReviewsSettings({ address, branchId, branchName, enabled, 
         />
       </div>
       {placeId ? null : <p className="admin-field-hint">Conecta una ficha antes de activar las reseñas.</p>}
-      {connection.error ? (
-        <InlineMessage message="No se pudo actualizar la conexión. Inténtalo de nuevo." tone="error" />
-      ) : null}
     </section>
   );
 }

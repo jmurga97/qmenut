@@ -3,7 +3,6 @@ import { FormProvider } from "react-hook-form";
 import { FormOtpInput } from "~/shared/components/forms/adapters/form-otp-input";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
 import { FormActions } from "~/shared/components/forms/form-actions";
-import { FormFeedback } from "~/shared/components/forms/form-feedback";
 
 import { useLoginController } from "../hooks/use-login-controller";
 
@@ -77,7 +76,6 @@ export function LoginPage() {
             ) : (
               <FormOtpInput<LoginFormValues> disabled={controller.busy} label="Código OTP" length={6} name="otp" />
             )}
-            <FormFeedback error={controller.error} />
             {emailStep ? null : (
               <div className="admin-login-resend">
                 <span>¿No te llegó el código?</span>

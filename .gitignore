@@ -47,3 +47,4 @@ pnpm-lock.yaml
 
 # graphify analysis output (local artifact)
 graphify-out/
+apps/landing/.astro/types.d.ts

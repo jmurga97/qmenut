@@ -12,7 +12,6 @@ import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
 import { FormTextarea } from "~/shared/components/forms/adapters/form-textarea";
 import { FormActions } from "~/shared/components/forms/form-actions";
-import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
@@ -72,7 +71,6 @@ function LoyaltyProgramContent({ branchId }: { branchId: string }) {
                 <RewardRow index={index} key={field.id} loyalty={loyalty} />
               ))}
             </EntityListCard>
-            <FormFeedback error={loyalty.error} success={loyalty.success} />
           </div>
           <aside className="loyalty-preview-column loyalty-card-preview" style={themeVars}>
             <div className="admin-kicker">Vista del cliente · {loyalty.selectedBranch?.name}</div>

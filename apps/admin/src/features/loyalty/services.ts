@@ -1,4 +1,3 @@
-import { getErrorMessage } from "~/lib/errors";
 import { formatDate } from "~/shared/services/format";
 
 import type { LoyaltyCustomer } from "~/features/loyalty/types";
@@ -12,22 +11,6 @@ export function formatRelativeAge(createdAt: number, now: number): string {
 export function formatCountdown(remainingMs: number): string {
   const seconds = Math.ceil(remainingMs / 1000);
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
-}
-export function getValidationError(error: unknown): string {
-  const message = getErrorMessage(error);
-  return message.toLowerCase().includes("already validated")
-    ? "La solicitud ya cambió en otro dispositivo. La lista se ha actualizado."
-    : message;
-}
-export function getUndoError(error: unknown): string {
-  const message = getErrorMessage(error).toLowerCase();
-  if (message.includes("already undone")) {
-    return "Esta validación ya se había deshecho. La información está actualizada.";
-  }
-  if (message.includes("balance would go negative")) {
-    return "No se puede deshacer: el cliente ya ha utilizado parte de esos sellos.";
-  }
-  return "No se pudo deshacer la validación. Puedes volver a intentarlo.";
 }
 function escapeCsv(value: string | number): string {
   const text = String(value);

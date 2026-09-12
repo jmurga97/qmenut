@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { getLanguageCatalogQueryOptions, getLanguageMutationOptions } from "~/features/languages/api";
 import { addLanguageSchema } from "~/features/languages/types";
@@ -36,15 +37,23 @@ export function useLanguagesController() {
   else if (translateMutation.isPending) pendingCode = translateMutation.variables.languageCode;
   function add(values: AddLanguageFormValues) {
     addMutation.mutate(values, {
-      onSuccess: () => form.reset(),
+      onSuccess: () => {
+        form.reset();
+        toast.success("Idioma añadido.");
+      },
     });
   }
   function act(languageCode: string, action: "remove" | "translate") {
     if (action === "remove") {
-      removeMutation.mutate({ languageCode });
+      removeMutation.mutate({ languageCode }, { onSuccess: () => toast.success("Idioma eliminado.") });
       return;
     }
-    if (branch) translateMutation.mutate({ branchId: branch.id, languageCode });
+    if (branch) {
+      translateMutation.mutate(
+        { branchId: branch.id, languageCode },
+        { onSuccess: () => toast.success("Traducción actualizada.") },
+      );
+    }
   }
   return {
     act,
@@ -55,7 +64,6 @@ export function useLanguagesController() {
     add,
     branch,
     addBusy: addMutation.isPending,
-    error: addMutation.error ?? removeMutation.error ?? translateMutation.error,
     pendingCode,
   };
 }

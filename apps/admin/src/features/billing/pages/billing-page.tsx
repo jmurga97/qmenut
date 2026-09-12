@@ -1,6 +1,5 @@
 import { Button } from "@jmurga97/components";
 
-import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { PageHeader } from "~/shared/components/page-header";
 
 import { useBillingController } from "../hooks/use-billing-controller";
@@ -18,7 +17,6 @@ export function BillingPage() {
   return (
     <div className="admin-page">
       <PageHeader kicker="Facturación" title="Suscripción" />
-      <FormFeedback error={controller.error} />
       <div className="admin-page-grid">
         {controller.overview.branches.map((branch) => {
           const active = branch.status === "active" || branch.status === "trialing";

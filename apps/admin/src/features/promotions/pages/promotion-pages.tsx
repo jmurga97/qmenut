@@ -119,7 +119,6 @@ function PromotionForm({ branchId, promotion }: { branchId: string; promotion: E
       <FormProvider {...controller.form}>
         <FormShell
           busy={controller.busy}
-          error={controller.error}
           onCancel={controller.cancel}
           onSubmit={() => void controller.submit()}
           readOnly={!canWrite}

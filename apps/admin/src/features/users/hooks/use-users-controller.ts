@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { getUserMutationOptions, getUsersQueryOptions } from "~/features/users/api";
 import { createUserFormSchema } from "~/features/users/types";
@@ -21,8 +22,6 @@ export function useUsersController() {
   const roleMutation = useMutation(mutationOptions.updateRole);
   const [createOpen, setCreateOpen] = useState(false);
   const [deactivationTarget, setDeactivationTarget] = useState<AdminUser | null>(null);
-  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
-  const [inviteFailure, setInviteFailure] = useState<string | null>(null);
   const form = useForm<CreateUserFormValues>({
     defaultValues: { email: "", name: "", roleCode: "staff" },
     resolver: zodResolver(createUserFormSchema),
@@ -34,42 +33,38 @@ export function useUsersController() {
   }
 
   function create(values: CreateUserFormValues) {
-    setActionSuccess(null);
-    setInviteFailure(null);
     createMutation.mutate(values, {
       onSuccess: (result) => {
         form.reset();
         setCreateOpen(false);
         if (!result.created) {
-          setInviteFailure(
+          toast.warning(
             "La cuenta ya existía en este restaurante, así que no se envió un acceso nuevo. Puedes reenviarlo desde Acciones.",
           );
           return;
         }
         if (result.invitation.status === "failed") {
-          setInviteFailure(
+          toast.warning(
             "La cuenta y la membresía se crearon, pero no se pudo enviar el acceso. Puedes reenviarlo desde Acciones.",
           );
         } else {
-          setActionSuccess("Usuario añadido y acceso enviado.");
+          toast.success("Usuario añadido y acceso enviado.");
         }
       },
     });
   }
 
   function changeRole(user: AdminUser) {
-    setActionSuccess(null);
     roleMutation.mutate(
       { membershipId: user.membershipId, roleCode: user.roleCode === "admin" ? "staff" : "admin" },
-      { onSuccess: () => setActionSuccess("Rol actualizado.") },
+      { onSuccess: () => toast.success("Rol actualizado.") },
     );
   }
 
   function activate(user: AdminUser) {
-    setActionSuccess(null);
     activeMutation.mutate(
       { isActive: true, membershipId: user.membershipId },
-      { onSuccess: () => setActionSuccess("Membresía reactivada.") },
+      { onSuccess: () => toast.success("Membresía reactivada.") },
     );
   }
 
@@ -79,12 +74,11 @@ export function useUsersController() {
 
   function confirmDeactivate() {
     if (!deactivationTarget) return;
-    setActionSuccess(null);
     activeMutation.mutate(
       { isActive: false, membershipId: deactivationTarget.membershipId },
       {
         onSuccess: () => {
-          setActionSuccess("Membresía desactivada.");
+          toast.success("Membresía desactivada.");
           setDeactivationTarget(null);
         },
       },
@@ -92,17 +86,15 @@ export function useUsersController() {
   }
 
   function resendInvite(user: AdminUser) {
-    setActionSuccess(null);
-    setInviteFailure(null);
     resendMutation.mutate(
       { membershipId: user.membershipId },
       {
         onSuccess: (result) => {
           if (result.invitation.status === "failed") {
-            setInviteFailure("No se pudo enviar el acceso. El último error ha quedado registrado para reintentar.");
+            toast.warning("No se pudo enviar el acceso. El último error ha quedado registrado para reintentar.");
             return;
           }
-          setActionSuccess("Acceso reenviado.");
+          toast.success("Acceso reenviado.");
         },
       },
     );
@@ -117,23 +109,18 @@ export function useUsersController() {
   }
 
   return {
-    actionError: createMutation.error ?? roleMutation.error ?? activeMutation.error ?? resendMutation.error,
-    actionSuccess,
     activate,
     askToDeactivate,
     confirmDeactivate,
     create,
-    createError: createMutation.error,
     createBusy: createMutation.isPending,
     createOpen,
     deactivationTarget,
     form,
     handleCreateOpenChange,
-    inviteFailure,
     isPending,
     isLoading: query.isLoading,
     isRefetching: query.isRefetching,
-    queryError: query.error,
     resendInvite,
     rows: (query.data ?? []) as AdminUser[],
     tenant,

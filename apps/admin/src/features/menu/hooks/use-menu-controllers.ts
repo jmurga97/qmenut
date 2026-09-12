@@ -32,7 +32,6 @@ export function useMenuListController(branchId: string) {
   const dishes = useSuspenseQuery(getMenuDishesQueryOptions({ branchId, languageCode, trpc })).data;
   const availability = useMutation(getDishAvailabilityMutationOptions({ branchId, languageCode, queryClient, trpc }));
   return {
-    availabilityError: availability.error,
     availabilityPendingDishId: availability.isPending ? availability.variables?.dishId : undefined,
     categories,
     dishes,
@@ -95,7 +94,6 @@ export function useCategoryEditorController({ branchId, categoryId }: { branchId
     busy: imageSave.pending || create.isPending || update.isPending,
     cancel,
     category,
-    error: imageSave.error ?? create.error ?? update.error,
     form,
     image,
     submit,
@@ -176,7 +174,6 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
       imageSave.pending || create.isPending || createIngredient.isPending || update.isPending || relations.isPending,
     cancel,
     categoryOptions: categories.map(({ id, name }) => ({ id, label: name })),
-    error: imageSave.error ?? create.error ?? createIngredient.error ?? update.error ?? relations.error,
     extraOptions: ingredients.map(({ id, name, price }) => ({
       id,
       label: price > 0 ? `${name} +${formatMoney(price, tenant.restaurant.sourceCurrency)}` : name,

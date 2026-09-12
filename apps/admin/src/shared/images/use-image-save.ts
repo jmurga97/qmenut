@@ -1,6 +1,7 @@
 import { useBlocker } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { notifyError } from "~/lib/notifications";
 import { setEditorBusy } from "~/shared/stores/shell-store";
 
 export function useImageSave() {
@@ -15,21 +16,19 @@ export function useImageSave() {
   const inFlightRef = useRef(false);
   useBlocker({ shouldBlockFn: () => inFlightRef.current, enableBeforeUnload: () => inFlightRef.current });
   useEffect(() => () => setEditorBusy(false), []);
-  const [error, setError] = useState<unknown>();
   const [pending, setPending] = useState(false);
 
   const run = useCallback(async (task: () => Promise<void>, onSettled: () => void) => {
     if (inFlightRef.current) return false;
 
     inFlightRef.current = true;
-    setError(undefined);
     setPending(true);
     setEditorBusy(true);
     try {
       await task();
       return true;
     } catch (taskError) {
-      setError(taskError);
+      notifyError(taskError);
       return false;
     } finally {
       onSettled();
@@ -39,5 +38,5 @@ export function useImageSave() {
     }
   }, []);
 
-  return { error, pending, run, operationIdFor };
+  return { pending, run, operationIdFor };
 }

@@ -3,7 +3,6 @@ import { socialIcon } from "@qmenut/ui/components/qm-social-links";
 import { formatPhone } from "~/shared/lib/phone-formatter";
 
 import { hhmmToMinutes, minutesToHHMM } from "./services";
-import { DAYS } from "./types";
 
 import type { BranchFormValues } from "./types";
 import type { RouterOutputs } from "~/lib/trpc";
@@ -60,16 +59,11 @@ export function toBranchFormValues(settings: BranchSettings): BranchFormValues {
     taxId: settings.taxId ?? "",
     dataProtectionEmail: settings.dataProtectionEmail ?? "",
     timezone: settings.timezone,
-    schedules: DAYS.map((_, index) => {
-      const dayOfWeek = index + 1;
-      const current = settings.schedules.find((row) => row.dayOfWeek === dayOfWeek);
-      return {
-        dayOfWeek,
-        enabled: Boolean(current),
-        open: current ? minutesToHHMM(current.openMinute) : "12:00",
-        close: current ? minutesToHHMM(current.closeMinute) : "23:00",
-      };
-    }),
+    schedules: settings.schedules.map((row) => ({
+      dayOfWeek: row.dayOfWeek,
+      open: minutesToHHMM(row.openMinute),
+      close: minutesToHHMM(row.closeMinute),
+    })),
   };
 }
 type BranchMapperInput = {
@@ -103,13 +97,11 @@ export function toBranchInput({ branchId, settings, values, logo, photos }: Bran
       legalAddress: values.address.trim() ? values.address : (settings.legalAddress ?? undefined),
       dataProtectionEmail: values.dataProtectionEmail,
     },
-    schedules: values.schedules
-      .filter((row) => row.enabled)
-      .map((row) => ({
-        dayOfWeek: row.dayOfWeek,
-        openMinute: hhmmToMinutes(row.open),
-        closeMinute: hhmmToMinutes(row.close),
-      })),
+    schedules: values.schedules.map((row) => ({
+      dayOfWeek: row.dayOfWeek,
+      openMinute: hhmmToMinutes(row.open),
+      closeMinute: hhmmToMinutes(row.close),
+    })),
     photos: photos.flatMap((photo, position) =>
       photo.imageUrl ? [{ url: photo.imageUrl, uploadId: photo.uploadId, position }] : [],
     ),

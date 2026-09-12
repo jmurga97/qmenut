@@ -60,7 +60,6 @@ export function useLoyaltyInsightsController() {
   const visitsTotals = sumVisits(visitsPoints);
   return {
     customers,
-    exportError: exportMutation.error,
     exporting: exportMutation.isPending,
     search,
     summary,

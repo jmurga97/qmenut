@@ -1,4 +1,4 @@
-import { Button, Checkbox, InlineMessage, SearchField } from "@jmurga97/components";
+import { Button, Checkbox, SearchField } from "@jmurga97/components";
 
 import { useLoyaltyInsightsController } from "~/features/loyalty/hooks/use-loyalty-insights-controller";
 import { StackedBarChart } from "~/shared/components/charts/stacked-bar-chart";
@@ -85,7 +85,6 @@ export function LoyaltyInsightsPage() {
             />
           </div>
         </div>
-        {loyalty.exportError ? <InlineMessage message="No se pudo exportar el CSV." tone="error" /> : null}
         {customers.rows.length === 0 ? (
           <p className="loyalty-empty-list">No hay clientes que coincidan con estos filtros.</p>
         ) : (

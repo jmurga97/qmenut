@@ -4,7 +4,6 @@ import { useNavigate, useRouter } from "@tanstack/react-router";
 
 import { signOut } from "~/lib/auth-client";
 import { trpc } from "~/lib/trpc";
-import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { useBranchStore } from "~/shared/stores/branch-store";
 
 import { getListRestaurantsQueryOptions } from "../api";
@@ -61,7 +60,6 @@ export function SelectRestaurantPage() {
           </div>
         ) : null}
         <div className="admin-select-restaurant-footer">
-          <FormFeedback error={select.error ?? signOutMutation.error} />
           <Button
             disabled={select.isPending || signOutMutation.isPending || undefined}
             onClick={() => signOutMutation.mutate()}

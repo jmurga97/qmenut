@@ -190,34 +190,6 @@
   text-align: center;
 }
 
-.loyalty-toast {
-  position: fixed;
-  z-index: 20;
-  right: 1rem;
-  bottom: 1rem;
-  left: 1rem;
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  border: 1px solid var(--ming-success);
-  border-radius: 0.5rem;
-  background: var(--card);
-  box-shadow: 0 0.5rem 2rem rgb(20 22 18 / 5%);
-}
-
-.loyalty-toast strong {
-  color: var(--foreground);
-}
-
-.loyalty-toast p {
-  margin: 0.2rem 0 0;
-  color: var(--muted-foreground);
-  font-size: var(--admin-text-body-sm);
-}
-
-.loyalty-toast button,
 .loyalty-pagination button,
 .loyalty-customer-table button {
   border: 0;
@@ -238,7 +210,6 @@
   height: 0.875rem;
 }
 
-.loyalty-toast button:disabled,
 .loyalty-pagination button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
@@ -383,11 +354,5 @@
   .loyalty-preview-column {
     position: sticky;
     top: 5rem;
-  }
-
-  .loyalty-toast {
-    right: 2rem;
-    left: auto;
-    width: min(30rem, calc(100vw - 4rem));
   }
 }

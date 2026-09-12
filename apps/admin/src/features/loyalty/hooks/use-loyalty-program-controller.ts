@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import * as api from "~/features/loyalty/api";
 import * as mappers from "~/features/loyalty/mappers";
@@ -34,24 +35,19 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
   const createRewardMutation = useMutation(options.createReward);
   const updateRewardMutation = useMutation(options.updateReward);
   const deleteRewardMutation = useMutation(options.deleteReward);
-  function resetFeedback() {
-    saveProgramMutation.reset();
-    createRewardMutation.reset();
-    updateRewardMutation.reset();
-    deleteRewardMutation.reset();
-  }
   async function saveProgram() {
     if (!(await form.trigger(["isActive", "averageTicket"]))) return;
-    resetFeedback();
-    saveProgramMutation.mutate(mappers.toLoyaltyProgramInput(form.getValues()));
+    saveProgramMutation.mutate(mappers.toLoyaltyProgramInput(form.getValues()), {
+      onSuccess: () => toast.success("Programa guardado."),
+    });
   }
   async function saveReward(index: number) {
     if (!(await form.trigger(`rewards.${index}`))) return;
-    resetFeedback();
     const reward = form.getValues(`rewards.${index}`);
     const onSuccess = (result: { id: string }) => {
       form.setValue(`rewards.${index}.rewardId`, result.id);
       setEditingIndex(null);
+      toast.success(reward.rewardId ? "Premio actualizado." : "Premio creado.");
     };
     if (reward.rewardId) {
       updateRewardMutation.mutate({ rewardId: reward.rewardId, data: mappers.toRewardInput(reward) }, { onSuccess });
@@ -70,28 +66,37 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
   function toggleReward(index: number) {
     const reward = form.getValues(`rewards.${index}`);
     if (!reward.rewardId) return;
-    resetFeedback();
     const isActive = !reward.isActive;
     updateRewardMutation.mutate(
       { rewardId: reward.rewardId, data: mappers.toRewardInput({ ...reward, isActive }) },
-      { onSuccess: () => form.setValue(`rewards.${index}.isActive`, isActive) },
+      {
+        onSuccess: () => {
+          form.setValue(`rewards.${index}.isActive`, isActive);
+          toast.success("Premio actualizado.");
+        },
+      },
     );
   }
   function deleteReward(index: number) {
     const reward = form.getValues(`rewards.${index}`);
     if (!reward.rewardId) return;
-    resetFeedback();
-    deleteRewardMutation.mutate({ rewardId: reward.rewardId }, { onSuccess: () => rewards.remove(index) });
+    deleteRewardMutation.mutate(
+      { rewardId: reward.rewardId },
+      {
+        onSuccess: () => {
+          rewards.remove(index);
+          toast.success("Premio eliminado.");
+        },
+      },
+    );
     setDeletingIndex(null);
   }
   function rewardAction(index: number, action: string) {
     const actions: Record<string, () => void> = {
       delete: () => {
-        resetFeedback();
         setDeletingIndex(index);
       },
       edit: () => {
-        resetFeedback();
         setEditingIndex(index);
       },
       toggle: () => toggleReward(index),
@@ -101,11 +106,6 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
   const rewardBusy = createRewardMutation.isPending || updateRewardMutation.isPending || deleteRewardMutation.isPending;
   const activeRewards = data.rewards.filter((reward) => reward.isActive);
   const target = activeRewards[0]?.cost ?? 8;
-  let success: string | null = null;
-  if (saveProgramMutation.isSuccess) success = "Programa guardado.";
-  else if (createRewardMutation.isSuccess) success = "Premio creado.";
-  else if (updateRewardMutation.isSuccess) success = "Premio actualizado.";
-  else if (deleteRewardMutation.isSuccess) success = "Premio eliminado.";
   return {
     activeRewards,
     cancelDeleteReward: () => setDeletingIndex(null),
@@ -116,11 +116,6 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
     deletingRewardName: deletingIndex === null ? null : form.getValues(`rewards.${deletingIndex}.name`),
     dishes: mappers.toDishOptions({ branches: tenant.branches, dishLists: dishQueries.map((query) => query.data) }),
     editingIndex,
-    error:
-      saveProgramMutation.error ??
-      createRewardMutation.error ??
-      updateRewardMutation.error ??
-      deleteRewardMutation.error,
     form,
     previewBalance: Math.min(3, target),
     restaurantName: tenant.restaurant.name,
@@ -128,12 +123,10 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
     rewards,
     saveProgramBusy: saveProgramMutation.isPending,
     selectedBranch,
-    success,
     target,
     theme: themeQuery.data,
     cancelReward,
     newReward: () => {
-      resetFeedback();
       rewards.append(mappers.createEmptyRewardFormValues());
       setEditingIndex(rewards.fields.length);
     },

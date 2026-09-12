@@ -1,19 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import * as api from "~/features/loyalty/api";
 import * as services from "~/features/loyalty/services";
-import { getErrorMessage } from "~/lib/errors";
 import { trpc } from "~/lib/trpc";
 import { useNowTicker } from "~/shared/hooks/use-now-ticker";
 
 import type { PendingRedemption } from "~/features/loyalty/types";
-
-export interface UndoNotice {
-  error: string | null;
-  message: string;
-  transactionId: number;
-}
 
 const UNDO_NOTICE_MS = 8000;
 
@@ -22,7 +16,7 @@ export type RedemptionQueueState = ReturnType<typeof useRedemptionQueue>;
 export function useRedemptionQueue(branchId: string) {
   const queryClient = useQueryClient();
   const now = useNowTicker();
-  const [undoNotice, setUndoNotice] = useState<UndoNotice | null>(null);
+  const [undoNotice, setUndoNotice] = useState<{ transactionId: number } | null>(null);
   const pendingQuery = useQuery({
     ...api.getPendingRedemptionsQueryOptions({ trpc }),
     refetchInterval: () => (document.visibilityState === "visible" ? services.LOYALTY_POLL_INTERVAL_MS : false),
@@ -43,10 +37,10 @@ export function useRedemptionQueue(branchId: string) {
       { redemptionId: redemption.id, branchId },
       {
         onSuccess: (result) => {
-          setUndoNotice({
-            transactionId: result.transactionId,
-            message: `${redemption.rewardName} validado para ${redemption.email}.`,
-            error: null,
+          setUndoNotice({ transactionId: result.transactionId });
+          toast.success(`${redemption.rewardName} validado para ${redemption.email}.`, {
+            action: { label: "Deshacer", onClick: () => undo(result.transactionId) },
+            duration: UNDO_NOTICE_MS,
           });
         },
       },
@@ -56,28 +50,20 @@ export function useRedemptionQueue(branchId: string) {
     validateMutation.reset();
     rejectMutation.mutate({ redemptionId });
   }
-  function undo() {
-    if (!undoNotice) return;
+  function undo(transactionId: number) {
+    if (!undoNotice || undoNotice.transactionId !== transactionId || undoMutation.isPending) return;
     undoMutation.mutate(
-      { transactionId: undoNotice.transactionId, branchId },
+      { transactionId, branchId },
       {
-        onSuccess: () => setUndoNotice(null),
-        onError: (error) => {
-          setUndoNotice((current) => (current ? { ...current, error: services.getUndoError(error) } : null));
-        },
+        onSuccess: () => setUndoNotice((current) => (current?.transactionId === transactionId ? null : current)),
+        onError: () => setUndoNotice((current) => (current?.transactionId === transactionId ? null : current)),
       },
     );
   }
-  let rowError: string | null = null;
-  if (validateMutation.error) rowError = services.getValidationError(validateMutation.error);
-  else if (rejectMutation.error) rowError = getErrorMessage(rejectMutation.error);
   return {
     actionBusy: validateMutation.isPending || rejectMutation.isPending,
     now,
     pendingQuery,
-    rowError,
-    undoBusy: undoMutation.isPending,
-    undoNotice,
     reject,
     undo,
     validate,

@@ -12,7 +12,6 @@ import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
 import { FormTextarea } from "~/shared/components/forms/adapters/form-textarea";
 import { FormChipGroup } from "~/shared/components/forms/form-chip-group";
-import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { FormShell } from "~/shared/components/forms/form-shell";
 import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
@@ -42,8 +41,7 @@ function MenuList({ branchId }: { branchId: string }) {
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const canToggleAvailability = useCan("menu.toggleDishAvailability");
   const canWrite = useCan("menu.write");
-  const { availabilityError, availabilityPendingDishId, categories, dishes, setAvailability } =
-    useMenuListController(branchId);
+  const { availabilityPendingDishId, categories, dishes, setAvailability } = useMenuListController(branchId);
   return (
     <div className="admin-page">
       <PageHeader description="Gestiona las categorías y los platos de esta sucursal." kicker="Carta" title="Menú" />
@@ -106,7 +104,6 @@ function MenuList({ branchId }: { branchId: string }) {
           </li>
         ))}
       </EntityListCard>
-      <FormFeedback error={availabilityError} />
     </div>
   );
 }
@@ -136,7 +133,6 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
         <FormShell
           operation={controller.operation}
           busy={controller.busy}
-          error={controller.error}
           onCancel={controller.cancel}
           onSubmit={() => void controller.submit()}
           readOnly={!canWrite || viewingTranslation}
@@ -192,7 +188,6 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
         <FormShell
           operation={controller.operation}
           busy={controller.busy}
-          error={controller.error}
           onCancel={controller.cancel}
           onSubmit={() => void controller.submit()}
           readOnly={!canWrite || viewingTranslation}

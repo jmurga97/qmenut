@@ -2,9 +2,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 
 import { trpc } from "~/lib/trpc";
-import { useMutationFeedback } from "~/shared/hooks/use-mutation-feedback";
 import { useImageDraft, useImageGalleryDraft } from "~/shared/images/use-image-drafts";
 import { useImageSave } from "~/shared/images/use-image-save";
 import { useImageUploads } from "~/shared/images/use-image-uploads";
@@ -23,7 +23,8 @@ export function useBranchController(branchId: string) {
     resolver: zodResolver(branchFormSchema),
     defaultValues: toBranchFormValues(settings),
   });
-  const fields = useFieldArray({ control: form.control, name: "schedules" }).fields;
+  const scheduleFieldArray = useFieldArray({ control: form.control, name: "schedules" });
+  const { fields } = scheduleFieldArray;
   const schedules = useWatch({ control: form.control, name: "schedules" });
   const save = useMutation(getSaveBranchMutationOptions({ branchId, queryClient, trpc }));
   const logo = useImageDraft(settings.logoUrl);
@@ -31,7 +32,7 @@ export function useBranchController(branchId: string) {
   const uploads = useImageUploads();
   const imageSave = useImageSave();
   const submit = form.handleSubmit(async (values) => {
-    await imageSave.run(async () => {
+    const succeeded = await imageSave.run(async () => {
       const [preparedLogo, ...preparedPhotos] = await uploads.transfer({
         branchId,
         groups: [
@@ -55,9 +56,30 @@ export function useBranchController(branchId: string) {
       logo.accept();
       gallery.accept();
     }, uploads.clear);
+    if (succeeded) toast.success("Datos guardados.");
   });
-  const feedback = useMutationFeedback(save, "Datos guardados.");
+  function setScheduleEnabled(dayOfWeek: number, enabled: boolean) {
+    const indexes = schedules
+      .map((row, index) => (row.dayOfWeek === dayOfWeek ? index : -1))
+      .filter((index) => index >= 0);
+    if (enabled) {
+      if (indexes.length === 0 && fields.length < 21) {
+        scheduleFieldArray.append({ dayOfWeek, open: "12:00", close: "23:00" });
+      }
+      return;
+    }
+    scheduleFieldArray.remove(indexes.toReversed());
+  }
+  function addSchedule(dayOfWeek: number) {
+    if (fields.length >= 21) return;
+    let lastIndex = -1;
+    for (const [index, row] of schedules.entries()) {
+      if (row.dayOfWeek === dayOfWeek) lastIndex = index;
+    }
+    scheduleFieldArray.insert(lastIndex + 1, { dayOfWeek, open: "12:00", close: "23:00" });
+  }
   return {
+    addSchedule,
     fields,
     form,
     gallery,
@@ -65,9 +87,10 @@ export function useBranchController(branchId: string) {
     schedules,
     settings,
     setResolvePending,
-    feedback: { ...feedback, error: imageSave.error ?? save.error },
     operation: uploads.operation,
     pending: imageSave.pending || save.isPending || resolvePending,
+    removeSchedule: scheduleFieldArray.remove,
+    setScheduleEnabled,
     submit,
   };
 }

@@ -57,7 +57,6 @@ export function usePromotionEditorController({
   return {
     busy: createMutation.isPending || updateMutation.isPending,
     cancel,
-    error: createMutation.error ?? updateMutation.error,
     form,
     scope,
     submit,

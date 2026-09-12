@@ -8,7 +8,6 @@ import { useUsersController } from "~/features/users/hooks/use-users-controller"
 import { manageableRoleOptions } from "~/features/users/types";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
-import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
 
@@ -118,7 +117,6 @@ function CreateUserDialog({ controller }: { controller: ReturnType<typeof useUse
                   portalContainer={selectPortalContainer}
                 />
                 <InlineMessage message="Se enviará un correo con el acceso para iniciar sesión." tone="info" />
-                <FormFeedback error={controller.createError} />
                 <div className="admin-users-dialog-actions">
                   <Dialog.Close className={buttonVariants({ size: "md", variant: "secondary" })}>Cancelar</Dialog.Close>
                   <Button disabled={controller.createBusy} type="submit">
@@ -163,10 +161,6 @@ export function UsersPage() {
         />
         <CreateUserDialog controller={controller} />
       </div>
-      <FormFeedback error={controller.actionError} success={controller.actionSuccess} />
-      {controller.inviteFailure ? (
-        <InlineMessage message={controller.inviteFailure} title="La membresía se conserva" tone="warning" />
-      ) : null}
       <section aria-labelledby="admin-users-list-title" className="admin-users-table-card">
         <div className="admin-toolbar">
           <div>
@@ -186,9 +180,6 @@ export function UsersPage() {
               <h3>Aún no hay usuarios gestionables</h3>
               <p>Agrega una cuenta admin o staff para compartir el acceso al panel.</p>
             </div>
-          }
-          error={
-            controller.queryError ? <InlineMessage message="No se pudo cargar el equipo." tone="error" /> : undefined
           }
           getRowId={(user) => user.membershipId}
           loading={controller.isLoading}

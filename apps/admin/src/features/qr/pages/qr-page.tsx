@@ -41,14 +41,12 @@ function QrPanel({ host }: { host: string }) {
               </Button>
             </>
           }
-          error={controller.error}
           onSubmit={() => void controller.download("png")}
           submitLabel={
             <>
               <Icon name="download" /> Descargar PNG
             </>
           }
-          success={controller.success}
         >
           <div className="admin-qr-workspace">
             <div className="admin-qr-preview">

@@ -49,10 +49,8 @@ function BranchLayoutForm({ branchId, canWrite, pathname }: { branchId: string; 
           <FormShell
             operation={controller.operation}
             busy={controller.pending}
-            error={controller.feedback.error}
             onSubmit={() => void controller.submit()}
             readOnly={!canWrite}
-            success={controller.feedback.success}
           >
             <Outlet />
           </FormShell>

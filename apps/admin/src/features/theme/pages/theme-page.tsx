@@ -34,11 +34,9 @@ function ThemeForm({ branchId, host }: { branchId: string; host: string }) {
         <div className="admin-theme-workspace">
           <FormShell
             busy={controller.pending}
-            error={controller.feedback.error}
             onSubmit={() => void controller.submit()}
             readOnly={!canWrite}
             submitLabel="Guardar tema"
-            success={controller.feedback.success}
           >
             <div className="admin-theme-controls">
               <section className="admin-theme-section" aria-labelledby="theme-identity-heading">

@@ -18,14 +18,40 @@ function formatSchedule({ branch, locale, t }: { branch: ContactBranch; locale: 
   const { schedules } = branch;
   if (schedules.length === 0) return t("contact.page.scheduleUnavailable");
 
-  const days = [...new Set(schedules.map((schedule) => schedule.dayOfWeek))].toSorted((a, b) => a - b);
-  const earliestOpen = Math.min(...schedules.map((schedule) => schedule.openMinute));
-  const latestClose = Math.max(...schedules.map((schedule) => schedule.closeMinute));
   const dayFormatter = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
-  const dayLabels = days.map((day) => dayFormatter.format(new Date(Date.UTC(2024, 0, day))));
-  const dayRange = dayLabels.length === 1 ? dayLabels[0] : `${dayLabels[0]}–${dayLabels.at(-1)}`;
+  const daySchedules = [...Map.groupBy(schedules, (schedule) => schedule.dayOfWeek).entries()]
+    .toSorted(([dayA], [dayB]) => dayA - dayB)
+    .map(([day, rows]) => ({
+      day,
+      intervals: rows
+        .toSorted((a, b) => a.openMinute - b.openMinute)
+        .map((row) => `${formatMinute(row.openMinute)}–${formatMinute(row.closeMinute)}`),
+    }));
+  const groups: { days: number[]; intervals: string[] }[] = [];
+  for (const current of daySchedules) {
+    const previous = groups.at(-1);
+    const previousDay = previous?.days.at(-1);
+    if (
+      previous &&
+      previousDay !== undefined &&
+      current.day === previousDay + 1 &&
+      current.intervals.join("|") === previous.intervals.join("|")
+    ) {
+      previous.days.push(current.day);
+    } else {
+      groups.push({ days: [current.day], intervals: current.intervals });
+    }
+  }
 
-  return `${dayRange} · ${formatMinute(earliestOpen)}–${formatMinute(latestClose)}`;
+  const formatDay = (day: number) => dayFormatter.format(new Date(Date.UTC(2024, 0, day)));
+  return groups
+    .map(({ days, intervals }) => {
+      const first = formatDay(days[0]);
+      const last = formatDay(days.at(-1)!);
+      const dayLabel = days.length === 1 ? first : `${first}–${last}`;
+      return `${dayLabel} · ${intervals.join(", ")}`;
+    })
+    .join(" · ");
 }
 
 function normalizePhone(value: string | null): string | undefined {

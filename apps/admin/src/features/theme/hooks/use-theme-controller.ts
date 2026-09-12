@@ -2,10 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 
 import { trpc } from "~/lib/trpc";
 import { getThemeQueryOptions } from "~/shared/api";
-import { useMutationFeedback } from "~/shared/hooks/use-mutation-feedback";
 
 import { getSaveThemeMutationOptions } from "../api";
 import { toThemeDraft, toThemeFormValues, toThemeInput } from "../mappers";
@@ -42,9 +42,12 @@ export function useThemeController(branchId: string) {
   }, [bodyFont, current, headingFont, primary, secondary, showDishPhoto, showMenuPhotos, tagline, template]);
   return {
     form,
-    feedback: useMutationFeedback(save, "Tema guardado."),
     pending: save.isPending,
     preview,
-    submit: form.handleSubmit((values) => save.mutate(toThemeInput({ branchId, current, values }))),
+    submit: form.handleSubmit((values) =>
+      save.mutate(toThemeInput({ branchId, current, values }), {
+        onSuccess: () => toast.success("Tema guardado."),
+      }),
+    ),
   };
 }

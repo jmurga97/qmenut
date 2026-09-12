@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 import { trpc } from "~/lib/trpc";
 
@@ -68,7 +69,6 @@ export function ImageActivity({ branchId }: { branchId: string }) {
   );
   const seen = useRef(new Set<string>());
   const retry = useMutation(trpc.admin.images.assignments.retry.mutationOptions());
-  const [notice, setNotice] = useState<string>();
   const rows = query.data ?? [];
   useEffect(() => {
     const applied = (query.data ?? []).filter((row) => row.status === "applied" && !seen.current.has(row.revision));
@@ -81,16 +81,17 @@ export function ImageActivity({ branchId }: { branchId: string }) {
   if (rows.length === 0 && !query.error) return null;
 
   const retryRow = (row: Assignment) => {
-    setNotice(undefined);
     retry.mutate(
       { branchId, id: row.id, revision: row.revision },
       {
         onSuccess: (result) => {
-          if (result.needsFile)
-            setNotice("Abre el editor y selecciona el archivo de nuevo. Los demás cambios están guardados.");
+          if (result.needsFile) {
+            toast.warning("Abre el editor y selecciona el archivo de nuevo. Los demás cambios están guardados.");
+          } else {
+            toast.success("Reintento de imagen iniciado.");
+          }
           void query.refetch();
         },
-        onError: () => setNotice("No se pudo reintentar. Abre el editor para seleccionar otra imagen."),
       },
     );
   };
@@ -121,7 +122,6 @@ export function ImageActivity({ branchId }: { branchId: string }) {
             <ImageActivityRow key={row.id} row={row} retrying={retry.isPending} onRetry={() => retryRow(row)} />
           ))}
         </ul>
-        {notice ? <p role="status">{notice}</p> : null}
       </details>
     </aside>
   );

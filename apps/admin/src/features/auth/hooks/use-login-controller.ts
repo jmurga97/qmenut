@@ -58,7 +58,7 @@ export function useLoginController() {
       await signIn.mutateAsync(values);
       await navigate({ to: "/" });
     } catch {
-      // useMutation conserva el error para FormFeedback.
+      // MutationCache already reports the error through Sonner.
     }
   }
   function resendOtp() {
@@ -83,11 +83,9 @@ export function useLoginController() {
   }
   const activeMutation = step === "email" ? requestOtp : signIn;
   const busy = activeMutation.isPending;
-  const error = activeMutation.error ?? resendOtpMutation.error;
   return {
     busy,
     developmentOtp,
-    error,
     form,
     resendCountdown,
     resending: resendOtpMutation.isPending,

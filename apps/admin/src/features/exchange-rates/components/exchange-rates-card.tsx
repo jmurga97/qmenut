@@ -3,12 +3,12 @@ import { Button, Switch } from "@jmurga97/components";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import * as api from "~/features/exchange-rates/api";
 import { exchangeRateFormSchema } from "~/features/exchange-rates/types";
 import { trpc } from "~/lib/trpc";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
-import { FormFeedback } from "~/shared/components/forms/form-feedback";
 
 import type { ExchangeRateFormValues } from "~/features/exchange-rates/types";
 
@@ -53,7 +53,10 @@ export function ExchangeRatesCard() {
 
   function submit(values: ExchangeRateFormValues) {
     save.mutate(values, {
-      onSuccess: () => form.reset(values),
+      onSuccess: () => {
+        form.reset(values);
+        toast.success("Tasa VES guardada.");
+      },
     });
   }
 
@@ -110,7 +113,6 @@ export function ExchangeRatesCard() {
         <p className="admin-exchange-rates-note">
           La referencia de Ming es informativa. Los precios públicos usan la tasa elegida por el restaurante.
         </p>
-        <FormFeedback error={save.error} success={save.isSuccess ? "Tasa VES guardada." : null} />
       </section>
     </FormProvider>
   );

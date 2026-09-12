@@ -36,8 +36,8 @@ const coordinateText = ({ min, max, label }: { min: number; max: number; label: 
     .refine((value) => !value || Number.isFinite(Number(value)), `${label} no válida`)
     .refine((value) => !value || (Number(value) >= min && Number(value) <= max), `${label} fuera de rango`);
 const scheduleSchema = z
-  .object({ dayOfWeek: z.number().int().min(1).max(7), enabled: z.boolean(), open: time, close: time })
-  .refine((row) => !row.enabled || hhmmToMinutes(row.close) >= hhmmToMinutes(row.open), {
+  .object({ dayOfWeek: z.number().int().min(1).max(7), open: time, close: time })
+  .refine((row) => hhmmToMinutes(row.close) >= hhmmToMinutes(row.open), {
     path: ["close"],
     message: "El cierre debe ser posterior a la apertura",
   });
@@ -64,7 +64,7 @@ export const branchFormSchema = z
       .trim()
       .refine((value) => !value || z.email().safeParse(value).success, "Email no válido"),
     timezone: z.string().trim().min(1, "La zona horaria es obligatoria"),
-    schedules: z.array(scheduleSchema).length(7),
+    schedules: z.array(scheduleSchema).max(21),
   })
   .superRefine((value, context) => {
     if (Boolean(value.latitude) === Boolean(value.longitude)) return;

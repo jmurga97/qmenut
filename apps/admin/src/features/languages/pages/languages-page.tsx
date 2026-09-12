@@ -7,7 +7,6 @@ import { useLanguagesController } from "~/features/languages/hooks/use-languages
 import { EntityListCard } from "~/shared/components/entity-list-card";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormActions } from "~/shared/components/forms/form-actions";
-import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
 import { useCan } from "~/shared/hooks/use-can";
@@ -105,7 +104,6 @@ export function LanguagesPage() {
           </section>
         ) : null}
       </div>
-      <FormFeedback error={controller.error} />
       {retranslating ? (
         <ConfirmAction
           cancelLabel="Cancelar"

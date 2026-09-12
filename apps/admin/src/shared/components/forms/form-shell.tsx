@@ -1,5 +1,4 @@
 import { FormActions } from "./form-actions";
-import { FormFeedback } from "./form-feedback";
 
 import type { FileOperation } from "./file-operation-progress";
 import type { ReactNode } from "react";
@@ -10,14 +9,12 @@ interface FormShellProps {
   busy?: boolean;
   busyLabel?: string;
   children: ReactNode;
-  error?: unknown;
   onCancel?: () => void;
   onSubmit: () => void;
   readOnly?: boolean;
   submitLabel?: ReactNode;
-  success?: string | null;
 }
-export function FormShell({ actions, children, error, readOnly = false, success, ...formActions }: FormShellProps) {
+export function FormShell({ actions, children, readOnly = false, ...formActions }: FormShellProps) {
   return (
     <div className="admin-editor-shell">
       <fieldset
@@ -27,7 +24,6 @@ export function FormShell({ actions, children, error, readOnly = false, success,
       >
         {children}
       </fieldset>
-      <FormFeedback error={formActions.busy ? undefined : error} success={formActions.busy ? null : success} />
       {readOnly ? null : <FormActions {...formActions}>{actions}</FormActions>}
     </div>
   );

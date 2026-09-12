@@ -7,7 +7,6 @@ import * as api from "~/app/dashboard/api";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
 import { EntityListCard } from "~/shared/components/entity-list-card";
-import { FormFeedback } from "~/shared/components/forms/form-feedback";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 import { formatMoney } from "~/shared/services/money";
 
@@ -30,7 +29,6 @@ function AvailabilityList({ branchId }: { branchId: string }) {
   const sortedDishes = useMemo(() => dishes.toSorted((a, b) => Number(a.isActive) - Number(b.isActive)), [dishes]);
   return (
     <div className="admin-dashboard-scroll">
-      <FormFeedback error={availability.error} />
       <EntityListCard
         action={
           <Link className="admin-link" to="/menu">
