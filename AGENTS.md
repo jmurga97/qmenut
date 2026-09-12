@@ -9,8 +9,9 @@ This is a Bun monorepo orchestrated with Turbo. Application code lives under `ap
 - `apps/admin`: React 19 + Vite owner dashboard SPA, deployed as a static-asset Worker.
 - `apps/tenant-config`: Cloudflare Worker that owns writes to the shared tenant-theme KV namespace.
 - `apps/landing`: Astro 5 SSR marketing site.
+- `scripts/deploy.ts`: root deploy orchestrator. Per-environment build-time variables live in its environment map.
 - `packages`: shared workspace packages used by multiple apps, including `auth`, `db`, `permissions`, and `ui`. The API dispatches requests natively from `apps/api/src/index.ts`.
-- Deployment and tenant-onboarding tooling lives in the separate `qmenut-ops` repository; QMenut does not import it.
+- Tenant-onboarding, remote migrations, and database rebuild tooling lives in the separate `qmenut-ops` repository; QMenut does not import it.
 
 Generated output such as `apps/web/dist`, `.wrangler`, `.turbo`, and `node_modules` should stay out of source changes.
 
@@ -27,7 +28,7 @@ Use Bun `1.4.0` as declared in `package.json`.
 - `bun run lint`: Oxfmt format check, Prettier for `apps/landing/**/*.astro`, and Oxlint (type-aware, `--deny-warnings`). Architecture boundary violations are errors — see [docs/operations/lint-migration.md](docs/operations/lint-migration.md).
 - `bun run lint:fixtures`: negative fixtures; oxlint must flag each with the expected rule.
 - `bun run format`: apply formatting (Oxfmt + scoped Prettier).
-- Deployment, tenant lifecycle, remote migrations, and database rebuilds run from the separate `qmenut-ops` repository. The environment flag is mandatory for those operations; production migrations are auto-confirmed there.
+- `bun run deploy --development` or `bun run deploy --production`: full pipeline — preflight, unit and E2E tests, build, D1 migrations, and deploy of every Worker (landing only in production). The environment flag is mandatory; production migrations are auto-confirmed. Tenant lifecycle, remote migration, and database rebuild commands still run from `qmenut-ops`.
 
 For app-specific work, run commands in the package, for example `bun run --cwd apps/web dev` or `bun run --cwd apps/api dev`.
 

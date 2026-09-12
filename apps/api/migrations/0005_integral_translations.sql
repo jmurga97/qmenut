@@ -10,7 +10,7 @@ CREATE TABLE `__new_translations` (
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON UPDATE no action ON DELETE cascade,
-	CONSTRAINT "translations_entity_type" CHECK("__new_translations"."entity_type" IN ('dish', 'category', 'variant_group', 'variant_option', 'ingredient'))
+	CONSTRAINT "translations_entity_type" CHECK("entity_type" IN ('dish', 'category', 'variant_group', 'variant_option', 'ingredient'))
 );
 --> statement-breakpoint
 INSERT INTO `__new_translations`("id", "restaurant_id", "entity_type", "entity_id", "language_code", "field", "value", "created_at", "updated_at") SELECT "id", "restaurant_id", "entity_type", "entity_id", "language_code", "field", "value", "created_at", "updated_at" FROM `translations`;--> statement-breakpoint

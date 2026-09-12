@@ -17,6 +17,7 @@
     "lint:fixtures": "bun scripts/lint-fixtures.ts",
     "format": "oxfmt && prettier --write \"apps/landing/**/*.astro\"",
     "format:check": "oxfmt --check . && prettier --check \"apps/landing/**/*.astro\"",
+    "deploy": "bun scripts/deploy.ts",
     "db:generate": "bun run --cwd apps/api db:generate --",
     "prepare": "husky"
   },

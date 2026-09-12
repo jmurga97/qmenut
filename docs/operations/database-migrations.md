@@ -205,7 +205,7 @@ Use this workflow for every structural change.
 `db:migrate` takes the target environment as its first argument and requires the explicit
 `--confirm-production` acknowledgement for production. This is required because a named Wrangler
 environment does not inherit the D1 binding, and because production must never be the
-implicit target. `bun run --cwd ../qmenut-ops deploy -- --production` passes the acknowledgement automatically.
+implicit target. `bun run deploy --production` passes the acknowledgement automatically.
 
 An applied migration is immutable. Do not edit, rename, reorder, or delete a migration
 after D1 has applied it.

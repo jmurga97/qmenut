@@ -9,8 +9,8 @@ Run product commands from QMenut and operational commands from its sibling `../q
 ## One-command deploy
 
 ```bash
-bun run --cwd ../qmenut-ops deploy -- --development
-bun run --cwd ../qmenut-ops deploy -- --production
+bun run deploy --development
+bun run deploy --production
 ```
 
 The environment flag is mandatory. The orchestrator stops at the first failing step and runs,
@@ -26,7 +26,7 @@ in order:
    acknowledgement. `--allow-data-loss` and `--auto-rollback` are forwarded to the wrapper.
 6. **Deploy in dependency order**: tenant-config, API, web, admin, and — for production only —
    landing. The per-environment build-time variables (`VITE_ADMIN_ORIGIN`, `VITE_API_BASE_URL`,
-   `VITE_DEV_FIXED_OTP`) live in the single map at the top of `../qmenut-ops/scripts/deploy.ts`.
+   `VITE_DEV_FIXED_OTP`) live in the single map at the top of `scripts/deploy.ts`.
 
 For an already-provisioned account, this single command replaces the whole manual sequence.
 
@@ -117,7 +117,7 @@ bun run --cwd ../qmenut-ops preflight -- development
 After configuring the missing external values, deploy everything with:
 
 ```bash
-bun run --cwd ../qmenut-ops deploy -- --development
+bun run deploy --development
 ```
 
 Before seeding, replace the placeholder owner email in
@@ -393,7 +393,7 @@ From `../ming-image-worker`, apply its D1 migration and deploy before qmenut sta
 product policy:
 
 ```bash
-bun run --cwd ../qmenut-ops deploy -- --production
+bun run deploy --production
 ```
 
 ```bash
