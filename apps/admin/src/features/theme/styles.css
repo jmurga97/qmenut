@@ -143,8 +143,7 @@
 .admin-theme-device {
   position: relative;
   width: min(100%, 24.375rem);
-  height: min(52.75rem, calc(100dvh - 3rem));
-  min-height: 38rem;
+  height: 65vh;
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   background: var(--card);
@@ -195,22 +194,10 @@
     position: sticky;
     top: 1.5rem;
   }
-
-  .admin-theme-device {
-    height: var(--admin-theme-device-height, calc(100dvh - 3rem));
-    min-height: 0;
-  }
 }
 
 @media (min-width: 60rem) {
   .admin-theme-workspace::after {
     height: 4.5rem;
-  }
-}
-
-@media (max-width: 40rem) {
-  .admin-theme-device {
-    height: min(48rem, 78dvh);
-    min-height: 34rem;
   }
 }

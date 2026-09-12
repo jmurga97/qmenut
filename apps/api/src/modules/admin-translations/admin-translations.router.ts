@@ -20,14 +20,11 @@ const languageCodeSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .regex(/^[a-z]{2,3}(-[a-z]{2,4})?$/i);
+  .regex(/^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/i);
 
-const catalogLanguageCodeSchema = languageCodeSchema.refine(
-  (code) => Boolean(getLanguageCatalogEntry(code)?.deeplTarget),
-  {
-    message: "Código de idioma no compatible",
-  },
-);
+const catalogLanguageCodeSchema = languageCodeSchema.refine((code) => Boolean(getLanguageCatalogEntry(code)), {
+  message: "Código de idioma no compatible",
+});
 
 const addLanguageInputSchema = z.object({
   languageCode: catalogLanguageCodeSchema,
@@ -72,6 +69,7 @@ const languagesRouter = router({
     LANGUAGE_CATALOG.map((entry) => ({
       code: entry.code,
       label: entry.label,
+      translatable: Boolean(entry.deeplTarget),
     })),
   ),
   list: tenantProcedure.query(async ({ ctx }) => {

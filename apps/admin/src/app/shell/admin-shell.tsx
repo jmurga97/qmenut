@@ -163,8 +163,22 @@ export function AdminShell() {
             {selectedBranch ? <div className="admin-topbar-context">{selectedBranch.name}</div> : null}
             <h1>{sectionLabel}</h1>
           </div>
-          {languageOptions.length > 1 ? (
+          {memberships.length > 1 || languageOptions.length > 1 ? (
             <div className="admin-topbar-actions">
+              {memberships.length > 1 ? (
+                <Select
+                  ariaLabel="Restaurante activo"
+                  disabled={selectRestaurant.isPending}
+                  onValueChange={(restaurantId) => {
+                    if (restaurantId && restaurantId !== tenant.restaurant.id && !isEditorBusy()) {
+                      selectRestaurant.mutate({ restaurantId });
+                    }
+                  }}
+                  options={memberships.map((membership) => ({ id: membership.restaurantId, label: membership.name }))}
+                  portalContainer={topbarElement}
+                  value={tenant.restaurant.id}
+                />
+              ) : null}
               <Select
                 ariaLabel="Idioma del contenido"
                 onValueChange={(languageCode) => {
@@ -181,7 +195,6 @@ export function AdminShell() {
       navigation={
         <AdminSidebar
           disabled={editorBusy}
-          activeRestaurantId={tenant.restaurant.id}
           branches={tenant.branches}
           groups={getNavigationGroups(location.pathname, tenant.roleCode)}
           onBranchChange={(branchId) => {
@@ -191,13 +204,8 @@ export function AdminShell() {
           }}
           onNavigate={(selectedId) => void selectNavigation(selectedId)}
           onLogout={() => void logout()}
-          onRestaurantChange={(restaurantId) => {
-            if (!isEditorBusy()) selectRestaurant.mutate({ restaurantId });
-          }}
           publicMenuUrl={selectedBranch?.customDomain ? buildPublicMenuUrl(selectedBranch.customDomain) : null}
           restaurantName={tenant.restaurant.name}
-          restaurants={memberships.map((membership) => ({ id: membership.restaurantId, label: membership.name }))}
-          restaurantSwitching={selectRestaurant.isPending}
           selectedBranch={selectedBranch}
         />
       }

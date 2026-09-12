@@ -22,67 +22,36 @@ interface AdminSidebarBranch {
   name: string;
 }
 
-export interface AdminSidebarRestaurant {
-  id: string;
-  label: string;
-}
-
 interface AdminSidebarProps {
   disabled?: boolean;
-  activeRestaurantId?: string | null;
   branches: AdminSidebarBranch[];
   groups: AdminSidebarGroup[];
   onBranchChange: (branchId: string) => void;
   /** Navigates to a section id from `groups`; session actions use `onLogout`. */
   onNavigate: (selectedId: string) => void;
   onLogout: () => void;
-  onRestaurantChange?: (restaurantId: string) => void;
   publicMenuUrl: string | null;
   restaurantName: string;
-  restaurants?: AdminSidebarRestaurant[];
-  restaurantSwitching?: boolean;
   selectedBranch: AdminSidebarBranch | null;
 }
 
 export function AdminSidebar({
   disabled = false,
-  activeRestaurantId,
   branches,
   groups,
   onBranchChange,
   onNavigate,
   onLogout,
-  onRestaurantChange,
   publicMenuUrl,
   restaurantName,
-  restaurants,
-  restaurantSwitching = false,
   selectedBranch,
 }: AdminSidebarProps) {
   const [selectPortalContainer, setSelectPortalContainer] = useState<HTMLElement | null>(null);
   const domainStatus = selectedBranch?.customDomain ?? "Sin dominio público";
-  const canSwitchRestaurant = Boolean(onRestaurantChange) && (restaurants?.length ?? 0) > 1;
   return (
     <nav aria-label="Navegación del panel" className="admin-sidebar" inert={disabled} ref={setSelectPortalContainer}>
       <header className="admin-sidebar-identity">
         <div className="admin-sidebar-kicker">QMenut</div>
-        {canSwitchRestaurant && restaurants ? (
-          <div className="admin-restaurant-select">
-            <span>Restaurante</span>
-            <Select
-              ariaLabel="Restaurante activo"
-              disabled={restaurantSwitching}
-              onValueChange={(restaurantId) => {
-                if (restaurantId && restaurantId !== activeRestaurantId) {
-                  onRestaurantChange?.(restaurantId);
-                }
-              }}
-              options={restaurants}
-              portalContainer={selectPortalContainer}
-              value={activeRestaurantId ?? null}
-            />
-          </div>
-        ) : null}
         <div className="admin-sidebar-title" title={restaurantName}>
           {restaurantName}
         </div>

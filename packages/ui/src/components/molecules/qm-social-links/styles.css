@@ -46,6 +46,11 @@ svg {
   stroke-width: 1.8;
 }
 
+svg.brand-icon {
+  fill: currentColor;
+  stroke: none;
+}
+
 .fill {
   fill: currentColor;
   stroke: none;

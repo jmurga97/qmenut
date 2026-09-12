@@ -10,7 +10,7 @@ import { publicProcedure, router } from "../../trpc/trpc";
 const localeSchema = z
   .string()
   .trim()
-  .regex(/^[a-zA-Z]{2,3}(-[a-zA-Z]{2,4})?$/);
+  .regex(/^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$/);
 
 const publicMenuInputSchema = z
   .object({

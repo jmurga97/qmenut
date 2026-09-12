@@ -1,3 +1,4 @@
+import type { QmLocationScheduleGroup } from "@qmenut/ui/components/qm-location/react";
 import type { TFunction } from "i18next";
 import type { ContactContentViewModel } from "~/features/contact/types/contact-view-model";
 import type { PublicMenuData } from "~/shared/public-menu/public-menu-types";
@@ -14,9 +15,9 @@ function formatMinute(minute: number): string {
   return `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
 }
 
-function formatSchedule({ branch, locale, t }: { branch: ContactBranch; locale: string; t: TFunction }): string {
+function formatSchedule({ branch, locale }: { branch: ContactBranch; locale: string }): QmLocationScheduleGroup[] {
   const { schedules } = branch;
-  if (schedules.length === 0) return t("contact.page.scheduleUnavailable");
+  if (schedules.length === 0) return [];
 
   const dayFormatter = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
   const daySchedules = [...Map.groupBy(schedules, (schedule) => schedule.dayOfWeek).entries()]
@@ -44,14 +45,12 @@ function formatSchedule({ branch, locale, t }: { branch: ContactBranch; locale: 
   }
 
   const formatDay = (day: number) => dayFormatter.format(new Date(Date.UTC(2024, 0, day)));
-  return groups
-    .map(({ days, intervals }) => {
-      const first = formatDay(days[0]);
-      const last = formatDay(days.at(-1)!);
-      const dayLabel = days.length === 1 ? first : `${first}–${last}`;
-      return `${dayLabel} · ${intervals.join(", ")}`;
-    })
-    .join(" · ");
+  return groups.map(({ days, intervals }) => {
+    const first = formatDay(days[0]);
+    const last = formatDay(days.at(-1)!);
+    const dayLabel = days.length === 1 ? first : `${first}–${last}`;
+    return { dayLabel, intervals };
+  });
 }
 
 function normalizePhone(value: string | null): string | undefined {
@@ -136,6 +135,7 @@ export function mapPublicContactContent({ data, locale, t }: MapPublicContactCon
       const phone = normalizePhone(branch.phone);
       const whatsapp = normalizePhone(branch.whatsapp);
       const isCurrent = branch.id === data?.branch.id;
+      const schedule = formatSchedule({ branch, locale });
 
       return {
         actionsLabel: t("contact.page.actionsLabel", { name: branch.name }),
@@ -149,7 +149,8 @@ export function mapPublicContactContent({ data, locale, t }: MapPublicContactCon
         phone,
         phoneHref: phone ? `tel:${phone}` : undefined,
         phoneLabel: t("contact.page.callLabel"),
-        status: formatSchedule({ branch, locale, t }),
+        schedule,
+        status: t("contact.page.scheduleUnavailable"),
         whatsappHref: whatsapp ? `https://wa.me/${whatsapp.replace("+", "")}` : undefined,
         whatsappLabel: t("contact.page.whatsappLabel"),
       };

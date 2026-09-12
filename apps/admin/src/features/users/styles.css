@@ -36,6 +36,10 @@
   font-variant-numeric: tabular-nums;
 }
 
+.admin-users-table-card .admin-empty-state {
+  border: 0;
+}
+
 .admin-users-identity {
   display: grid;
   gap: 0.15rem;

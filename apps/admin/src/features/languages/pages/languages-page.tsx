@@ -49,7 +49,7 @@ export function LanguagesPage() {
                     className={buttonVariants({ size: "sm", variant: "secondary" })}
                     disabled={busy}
                     items={[
-                      ...(entry && controller.branch
+                      ...(entry?.translatable && controller.branch
                         ? [
                             {
                               id: "translate",

@@ -168,6 +168,11 @@
   stroke-width: 1.8;
 }
 
+.admin-social-icon svg.brand-icon {
+  fill: currentColor;
+  stroke: none;
+}
+
 .admin-social-icon .fill {
   fill: currentColor;
   stroke: none;
@@ -223,6 +228,10 @@
   background: var(--card);
   color: var(--foreground);
   padding: 0.375rem 0.625rem;
+}
+
+.admin-schedule-interval input[type="time"]::-webkit-calendar-picker-indicator {
+  pointer-events: none;
 }
 
 .admin-google-reviews__intro,

@@ -32,7 +32,58 @@
 .addr {
   font-size: var(--qm-text-sm, 12px);
   color: var(--qm-muted, #8c857b);
-  margin-bottom: 9px;
+}
+
+.legacy-status {
+  margin-top: 8px;
+}
+
+/* Opening hours read as a shop-window sign: the times are set in the template's display face
+   one step above the body copy, the day range stays a quiet eyebrow beside them. The emphasis
+   is typographic, so the block needs no container of its own inside the card. */
+.schedule {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 9px 16px;
+  margin-top: 12px;
+}
+
+.schedule--empty {
+  display: block;
+  color: var(--qm-muted, #8c857b);
+  font-size: var(--qm-text-sm, 12px);
+  line-height: 1.45;
+}
+
+/* Groups dissolve into the parent grid so every day label shares one column and the times
+   line up in a single ragged-free column, however many groups the branch has. */
+.schedule-group {
+  display: contents;
+}
+
+.schedule-day {
+  color: var(--qm-muted, #8c857b);
+  font-size: var(--qm-text-2xs, 10px);
+  font-weight: 700;
+  letter-spacing: var(--qm-eyebrow-ls, 1.5px);
+  text-transform: var(--qm-eyebrow-tt, uppercase);
+  white-space: nowrap;
+}
+
+.schedule-intervals {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.schedule-interval {
+  font-family: var(--qm-heading, serif);
+  font-size: var(--qm-text-lg, 15px);
+  line-height: 1.35;
+  color: var(--qm-ink, #1c1815);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .phone {

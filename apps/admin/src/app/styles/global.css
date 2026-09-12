@@ -347,24 +347,6 @@ button {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.admin-restaurant-select {
-  display: grid;
-  min-width: 0;
-  gap: 0.3125rem;
-}
-.admin-restaurant-select > span:first-child {
-  color: var(--muted-foreground);
-  font-size: var(--admin-text-label);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-.admin-restaurant-select .ming-select__trigger {
-  min-height: 2.375rem;
-  border-radius: 0.375rem;
-  padding-inline: 0.625rem;
-  font-size: var(--admin-text-body-sm);
-  font-weight: 550;
-}
 .admin-branch-select {
   display: grid;
   min-width: 0;
@@ -406,6 +388,7 @@ button {
   inset-inline-start: 0.625rem;
 }
 .admin-sidebar .ming-select__item > :last-child {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -609,6 +592,7 @@ button {
   inset-inline-start: 0.625rem;
 }
 .admin-topbar .ming-select__item > :last-child {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;

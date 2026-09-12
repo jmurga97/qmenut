@@ -29,6 +29,9 @@
   ],
   "vars": {
     "ALLOW_INDEXING": "false",
+    // Local `vite dev` uses this top-level env; the 24h HTML edge cache persists to
+    // .wrangler-shared/state and would otherwise hide every UI edit until it expires.
+    "DISABLE_EDGE_CACHE": "true",
     "SENTRY_DSN": "",
   },
   "observability": {

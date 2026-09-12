@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { defineQmLocation, QM_LOCATION_TAG_NAME, QmLocation as QmLocationElement } from "./index";
 
-export type { QmLocationValue } from "./index";
+export type { QmLocationScheduleGroup, QmLocationValue } from "./index";
 
 defineQmLocation();
 
