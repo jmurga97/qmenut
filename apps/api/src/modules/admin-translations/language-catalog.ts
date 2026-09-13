@@ -4,7 +4,7 @@ export interface LanguageCatalogEntry {
   label: string;
 }
 
-// A null target keeps a language available in the admin catalog when DeepL has no target for it.
+// Valencian uses DeepL's Catalan target; its regional wording can be corrected in the editor.
 export const LANGUAGE_CATALOG: LanguageCatalogEntry[] = [
   { code: "es", label: "Español", deeplTarget: "ES" },
   { code: "en", label: "English", deeplTarget: "EN-GB" },
@@ -14,9 +14,9 @@ export const LANGUAGE_CATALOG: LanguageCatalogEntry[] = [
   { code: "pt", label: "Português", deeplTarget: "PT-PT" },
   { code: "nl", label: "Nederlands", deeplTarget: "NL" },
   { code: "pl", label: "Polski", deeplTarget: "PL" },
-  { code: "ca", label: "Català", deeplTarget: null },
-  { code: "ca-valencia", label: "Valencià", deeplTarget: null },
-  { code: "gl", label: "Galego", deeplTarget: null },
+  { code: "ca", label: "Català", deeplTarget: "CA" },
+  { code: "ca-valencia", label: "Valencià", deeplTarget: "CA" },
+  { code: "gl", label: "Galego", deeplTarget: "GL" },
   { code: "zh", label: "中文（普通话）", deeplTarget: "ZH" },
   { code: "ru", label: "Русский", deeplTarget: "RU" },
   { code: "uk", label: "Українська", deeplTarget: "UK" },

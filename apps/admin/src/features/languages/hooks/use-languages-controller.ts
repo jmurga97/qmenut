@@ -37,23 +37,22 @@ export function useLanguagesController() {
   else if (translateMutation.isPending) pendingCode = translateMutation.variables.languageCode;
   function add(values: AddLanguageFormValues) {
     addMutation.mutate(values, {
-      onSuccess: () => {
+      onSuccess: (result) => {
         form.reset();
-        toast.success("Idioma añadido.");
+        if (result.preparationError) toast.error(`Idioma añadido, pendiente de traducción: ${result.preparationError}`);
+        else toast.success("Idioma añadido y traducido.");
       },
     });
   }
-  function act(languageCode: string, action: "remove" | "translate") {
+  function act(languageCode: string, action: "remove" | "translate" | "complete") {
     if (action === "remove") {
       removeMutation.mutate({ languageCode }, { onSuccess: () => toast.success("Idioma eliminado.") });
       return;
     }
-    if (branch) {
-      translateMutation.mutate(
-        { branchId: branch.id, languageCode },
-        { onSuccess: () => toast.success("Traducción actualizada.") },
-      );
-    }
+    translateMutation.mutate(
+      { languageCode, overwrite: action === "translate" },
+      { onSuccess: () => toast.success("Traducción actualizada.") },
+    );
   }
   return {
     act,

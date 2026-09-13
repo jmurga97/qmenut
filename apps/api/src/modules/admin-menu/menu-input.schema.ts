@@ -73,3 +73,8 @@ export const createIngredientSchema = z.object({
   price: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
 });
+
+export const updateIngredientSchema = z.object({
+  ingredientId: z.string().trim().min(1),
+  data: createIngredientSchema,
+});

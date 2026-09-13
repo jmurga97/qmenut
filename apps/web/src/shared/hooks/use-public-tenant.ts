@@ -43,12 +43,12 @@ export function usePublicTenant(themeOverride?: QmTenantThemeConfig): PublicTena
       secondary: theme.secondary,
       template: theme.template,
       tenantName: data.branch.name,
-      tenantTagline: theme.tagline ?? "",
+      tenantTagline: theme.tagline === persistedTheme.tagline ? data.tagline : (theme.tagline ?? ""),
       sourceCurrency: data.sourceCurrency,
       vesExchangeRate: data.vesExchangeRate,
       vesPricesEnabled: data.vesPricesEnabled,
     };
-  }, [data, theme]);
+  }, [data, theme, persistedTheme.tagline]);
 
   return {
     isLoading: false,

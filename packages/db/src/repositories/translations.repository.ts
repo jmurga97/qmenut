@@ -9,7 +9,7 @@ import type { BatchItem } from "drizzle-orm/batch";
 
 export const TRANSLATION_ENTITY_TYPES = translations.entityType.enumValues;
 export type TranslationEntityType = (typeof TRANSLATION_ENTITY_TYPES)[number];
-export type TranslationField = "description" | "name";
+export type TranslationField = "description" | "name" | "tagline";
 
 interface TenantLanguageIdsInput {
   db: DrizzleDb;
@@ -55,18 +55,26 @@ export interface TranslationUpsert {
   field: string;
   languageCode: string;
   value: string;
+  sourceText?: string | null;
+  isManual?: boolean;
 }
 
 interface UpsertTranslationsInput {
   db: DrizzleDb;
   restaurantId: string;
   rows: TranslationUpsert[];
+  preserveManual?: boolean;
 }
 
 // D1 caps bound parameters per statement; 9 columns per row → keep chunks small.
 const UPSERT_CHUNK_SIZE = 8;
 
-export async function upsertTranslations({ db, restaurantId, rows }: UpsertTranslationsInput): Promise<void> {
+export async function upsertTranslations({
+  db,
+  restaurantId,
+  rows,
+  preserveManual = false,
+}: UpsertTranslationsInput): Promise<void> {
   if (rows.length === 0) {
     return;
   }
@@ -93,14 +101,19 @@ export async function upsertTranslations({ db, restaurantId, rows }: UpsertTrans
           languageCode: row.languageCode,
           field: row.field,
           value: row.value,
+          sourceText: row.sourceText,
+          isManual: row.isManual ?? false,
           createdAt: now,
           updatedAt: now,
         })),
       )
       .onConflictDoUpdate({
         target: [translations.entityType, translations.entityId, translations.languageCode, translations.field],
+        setWhere: preserveManual ? eq(translations.isManual, false) : undefined,
         set: {
           value: sql`excluded.value`,
+          sourceText: sql`excluded.source_text`,
+          isManual: sql`excluded.is_manual`,
           updatedAt: sql`excluded.updated_at`,
         },
       });

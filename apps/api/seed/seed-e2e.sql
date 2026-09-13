@@ -87,3 +87,48 @@ INSERT INTO users (id, name, email, email_verified, created_at, updated_at) VALU
 INSERT INTO restaurant_users (id, restaurant_id, user_id, role_code) VALUES
   ('ru_multi_tapas_e2e', 'rest_tapas', 'user_multi_e2e', 'admin'),
   ('ru_multi_fine_e2e', 'rest_fine', 'user_multi_e2e', 'admin');
+
+-- Complete English content across the restaurant: partial locales are not public.
+WITH english(entity_type, entity_id, field, source_text, value) AS (VALUES
+  ('category', 'cat_tapas_tapas', 'name', 'Tapas', 'Tapas'),
+  ('category', 'cat_tapas_tapas', 'description', 'Para picar en la barra', 'Bar bites'),
+  ('category', 'cat_tapas_raciones', 'name', 'Raciones', 'Sharing plates'),
+  ('category', 'cat_tapas_raciones', 'description', 'Para compartir', 'To share'),
+  ('dish', 'dish_tapas_bravas', 'name', 'Patatas bravas', 'Spicy potatoes'),
+  ('dish', 'dish_tapas_bravas', 'description', 'Salsa brava casera y alioli', 'House brava sauce and aioli'),
+  ('dish', 'dish_tapas_croquetas', 'name', 'Croquetas de jamón', 'Ham croquettes'),
+  ('dish', 'dish_tapas_croquetas', 'description', 'Cremosas, de jamón ibérico', 'Creamy Iberian ham croquettes'),
+  ('dish', 'dish_tapas_tortilla', 'name', 'Tortilla de patatas', 'Spanish omelette'),
+  ('dish', 'dish_tapas_tortilla', 'description', 'Jugosa, con cebolla', 'Soft and juicy, with onion'),
+  ('dish', 'dish_tapas_gambas', 'name', 'Gambas al ajillo', 'Garlic prawns'),
+  ('dish', 'dish_tapas_gambas', 'description', 'Con guindilla y aceite de oliva', 'With chilli and olive oil'),
+  ('dish', 'dish_tapas_calamares', 'name', 'Calamares a la romana', 'Battered squid'),
+  ('dish', 'dish_tapas_calamares', 'description', 'Rebozado fino, limón', 'Light batter and lemon'),
+  ('ingredient', 'ing_tapas_pan', 'name', 'Pan con tomate', 'Bread with tomato'),
+  ('ingredient', 'ing_tapas_alioli', 'name', 'Alioli extra', 'Extra aioli'),
+  ('promotion', 'promo_tapas_bravas', 'name', 'Happy tapa -20%', 'Happy tapa -20%'),
+  ('category', 'cat_her_guisos', 'name', 'Guisos de la casa', 'House stews'),
+  ('category', 'cat_her_guisos', 'description', 'Recetas de siempre', 'Traditional recipes'),
+  ('category', 'cat_fast_favoritos', 'name', 'Favoritos rápidos', 'Quick favourites'),
+  ('category', 'cat_fast_favoritos', 'description', 'Listos para recoger', 'Ready to collect'),
+  ('dish', 'dish_her_callos', 'name', 'Callos a la riojana', 'Rioja-style tripe'),
+  ('dish', 'dish_her_callos', 'description', 'Guiso lento y picante', 'Slow-cooked spicy stew'),
+  ('dish', 'dish_her_pochas', 'name', 'Pochas con verduras', 'White beans with vegetables'),
+  ('dish', 'dish_her_pochas', 'description', 'Producto de temporada', 'Seasonal produce'),
+  ('dish', 'dish_fast_bocata', 'name', 'Bocata de calamares', 'Squid sandwich'),
+  ('dish', 'dish_fast_bocata', 'description', 'Pan crujiente y limón', 'Crusty bread and lemon'),
+  ('dish', 'dish_fast_burger', 'name', 'Burger Tasca', 'Tasca burger'),
+  ('dish', 'dish_fast_burger', 'description', 'Ternera, queso y salsa brava', 'Beef, cheese and brava sauce'),
+  ('reward', 'reward_tapas_discount', 'name', 'Descuento del 10%', '10% discount'),
+  ('reward', 'reward_tapas_discount', 'description', 'Descuento en tu próxima visita', 'A discount on your next visit'),
+  ('reward', 'reward_tapas_croquetas', 'name', 'Croquetas gratis', 'Free croquettes'),
+  ('reward', 'reward_tapas_croquetas', 'description', 'Una ración de croquetas', 'A portion of croquettes'),
+  ('branch', 'branch_tapas', 'tagline', 'Tapas de barrio desde 1987', 'Neighbourhood tapas since 1987'),
+  ('branch', 'branch_her', 'tagline', 'Recetas con historia', 'Recipes with history'),
+  ('branch', 'branch_fast', 'tagline', 'Sabor de barrio, sin esperas', 'Neighbourhood flavours, without the wait')
+)
+INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_code, field, source_text, value)
+SELECT 'e2e_en_' || entity_id || '_' || field, 'rest_tapas', entity_type, entity_id, 'en', field, source_text, value
+FROM english WHERE true
+ON CONFLICT (restaurant_id, entity_type, entity_id, language_code, field)
+DO UPDATE SET source_text = excluded.source_text, value = excluded.value, is_manual = 0;

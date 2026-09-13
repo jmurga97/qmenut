@@ -90,9 +90,7 @@ export class QmHeroHeader extends LitElement {
   render() {
     return html`
       <div part="frame" class="frame">
-        <qm-image part="photo" class="photo" label="foto · local" aria-hidden="true"
-          ><slot name="photo"></slot
-        ></qm-image>
+        <qm-image part="photo" class="photo" label="" aria-hidden="true"><slot name="photo"></slot></qm-image>
         <div part="scrim" class="scrim"></div>
         ${this.heroLabel ? html`<span part="hero-label" class="hero-label">${this.heroLabel}</span>` : ""}
         <div part="lang-wrap" class="lang-wrap">

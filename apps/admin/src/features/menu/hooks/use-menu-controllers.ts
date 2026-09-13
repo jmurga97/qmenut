@@ -38,10 +38,19 @@ export function useMenuListController(branchId: string) {
     setAvailability: (dishId: string, isActive: boolean) => availability.mutate({ branchId, dishId, isActive }),
   };
 }
-export function useCategoryEditorController({ branchId, categoryId }: { branchId: string; categoryId?: string }) {
+export function useCategoryEditorController({
+  branchId,
+  categoryId,
+  languageCodeOverride,
+}: {
+  branchId: string;
+  categoryId?: string;
+  languageCodeOverride?: string | null;
+}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { languageCode } = useSelectedLanguage();
+  const selectedLanguage = useSelectedLanguage();
+  const languageCode = languageCodeOverride === null ? null : (languageCodeOverride ?? selectedLanguage.languageCode);
   const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, languageCode, trpc })).data;
   const category = categoryId ? categories.find(({ id }) => id === categoryId) : undefined;
   const form = useForm<CategoryFormValues>({
@@ -99,10 +108,19 @@ export function useCategoryEditorController({ branchId, categoryId }: { branchId
     submit,
   };
 }
-export function useDishEditorController({ branchId, dish }: { branchId: string; dish: DishDetail | null }) {
+export function useDishEditorController({
+  branchId,
+  dish,
+  languageCodeOverride,
+}: {
+  branchId: string;
+  dish: DishDetail | null;
+  languageCodeOverride?: string | null;
+}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { languageCode } = useSelectedLanguage();
+  const selectedLanguage = useSelectedLanguage();
+  const languageCode = languageCodeOverride === null ? null : (languageCodeOverride ?? selectedLanguage.languageCode);
   const dishId = useRef(dish?.id);
   const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, languageCode, trpc })).data;
   const tenant = useSuspenseQuery(getTenantQueryOptions({ trpc })).data;
@@ -115,21 +133,12 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
   });
   const options = getDishMutationOptions({ branchId, languageCode, queryClient, trpc });
   const create = useMutation(options.create);
-  const createIngredient = useMutation(options.createIngredient);
   const update = useMutation(options.update);
   const relations = useMutation(options.relations);
   const image = useImageDraft(dish?.imageUrl ?? null);
   const uploads = useImageUploads();
   const imageSave = useImageSave();
   const cancel = () => void navigate({ to: "/menu" });
-  const addExtra = async ({ name, price }: { name: string; price: number }) => {
-    const { id } = await createIngredient.mutateAsync({ isActive: true, name, price });
-    const extraIngredientIds = form.getValues("extraIngredientIds");
-    form.setValue("extraIngredientIds", [...extraIngredientIds, id], {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-  };
   const submit = form.handleSubmit(async (values) => {
     const succeeded = await imageSave.run(async () => {
       relations.reset();
@@ -168,10 +177,8 @@ export function useDishEditorController({ branchId, dish }: { branchId: string; 
   });
   return {
     allergenOptions: allergens.map(({ code, id }) => ({ id, label: toAllergenDisplayLabel(code) })),
-    addExtra,
     operation: uploads.operation,
-    busy:
-      imageSave.pending || create.isPending || createIngredient.isPending || update.isPending || relations.isPending,
+    busy: imageSave.pending || create.isPending || update.isPending || relations.isPending,
     cancel,
     categoryOptions: categories.map(({ id, name }) => ({ id, label: name })),
     extraOptions: ingredients.map(({ id, name, price }) => ({

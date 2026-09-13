@@ -14,11 +14,17 @@ function SelectedChipIcon() {
 }
 
 interface FormChipGroupProps<TValues extends FieldValues> {
+  disabled?: boolean;
   label: string;
   name: FieldPath<TValues>;
   options: { id: ChipId; label: string }[];
 }
-export function FormChipGroup<TValues extends FieldValues>({ label, name, options }: FormChipGroupProps<TValues>) {
+export function FormChipGroup<TValues extends FieldValues>({
+  disabled,
+  label,
+  name,
+  options,
+}: FormChipGroupProps<TValues>) {
   const { control } = useFormContext<TValues>();
   const { field, fieldState } = useController({ control, name });
   const selected = Array.isArray(field.value) ? (field.value as ChipId[]) : [];
@@ -35,6 +41,7 @@ export function FormChipGroup<TValues extends FieldValues>({ label, name, option
             <button
               aria-pressed={active}
               className={active ? "admin-chip admin-chip--active" : "admin-chip"}
+              disabled={disabled}
               key={option.id}
               onClick={() => toggle(option.id)}
               type="button"

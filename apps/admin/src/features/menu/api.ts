@@ -54,12 +54,22 @@ export function getCategoryMutationOptions(input: MenuMutationInput) {
 export function getDishMutationOptions(input: MenuMutationInput) {
   return {
     create: input.trpc.admin.menu.dishes.create.mutationOptions(),
-    createIngredient: input.trpc.admin.menu.taxonomy.createIngredient.mutationOptions({
-      onSuccess: () =>
-        input.queryClient.invalidateQueries({ queryKey: getMenuIngredientsQueryOptions(input).queryKey }),
-    }),
     relations: input.trpc.admin.menu.dishes.saveRelations.mutationOptions({ onSuccess: () => invalidateMenu(input) }),
     update: input.trpc.admin.menu.dishes.update.mutationOptions(),
+  };
+}
+export function getIngredientMutationOptions({
+  queryClient,
+  trpc,
+}: {
+  queryClient: QueryClient;
+  trpc: TrpcOptionsProxy;
+}) {
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: trpc.admin.menu.taxonomy.ingredients.pathKey() });
+  return {
+    create: trpc.admin.menu.taxonomy.createIngredient.mutationOptions({ onSuccess: invalidate }),
+    remove: trpc.admin.menu.taxonomy.removeIngredient.mutationOptions({ onSuccess: invalidate }),
+    update: trpc.admin.menu.taxonomy.updateIngredient.mutationOptions({ onSuccess: invalidate }),
   };
 }
 export function getDishAvailabilityMutationOptions(input: MenuMutationInput) {

@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { hhmmToMinutes } from "./services";
-
 export const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 export const TIMEZONE_OPTIONS = [
   { id: "Europe/Madrid", label: "España peninsular — Madrid" },
@@ -35,12 +33,8 @@ const coordinateText = ({ min, max, label }: { min: number; max: number; label: 
     .trim()
     .refine((value) => !value || Number.isFinite(Number(value)), `${label} no válida`)
     .refine((value) => !value || (Number(value) >= min && Number(value) <= max), `${label} fuera de rango`);
-const scheduleSchema = z
-  .object({ dayOfWeek: z.number().int().min(1).max(7), open: time, close: time })
-  .refine((row) => hhmmToMinutes(row.close) >= hhmmToMinutes(row.open), {
-    path: ["close"],
-    message: "El cierre debe ser posterior a la apertura",
-  });
+// Un cierre anterior a la apertura cruza la medianoche (18:00 → 00:00), como las ventanas de promociones.
+const scheduleSchema = z.object({ dayOfWeek: z.number().int().min(1).max(7), open: time, close: time });
 export const branchFormSchema = z
   .object({
     name: z.string().trim().min(1, "El nombre es obligatorio"),

@@ -31,7 +31,7 @@ export const publicMenuRouter = router({
       return null;
     }
 
-    return getPublicMenu({ db: ctx.db, tenant, locale: input?.locale });
+    return getPublicMenu({ db: ctx.db, env: ctx.env, tenant, locale: input?.locale });
   }),
   googleReviews: publicProcedure.input(publicMenuInputSchema).query(async ({ ctx, input }) => {
     const tenant = await resolvePublicTenant({

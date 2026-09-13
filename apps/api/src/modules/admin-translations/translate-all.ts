@@ -1,19 +1,53 @@
-import { collectTranslatableTexts } from "@qmenut/db/repositories/admin-translations.repository";
 import { getRestaurantLanguageInfo } from "@qmenut/db/repositories/restaurant-languages.repository";
 import { upsertTranslations } from "@qmenut/db/repositories/translations.repository";
 import { TRPCError } from "@trpc/server";
 
 import { deeplTranslate } from "./deepl.service";
 import { getLanguageCatalogEntry } from "./language-catalog";
+import { getTranslationContent, languageTexts } from "./translation-content";
 import { sanitizeDescription } from "../public-menu/sanitize-description";
 
+import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { TranslatableText } from "@qmenut/db/repositories/admin-translations.repository";
 
 const DEEPL_BATCH_SIZE = 50;
 
+function* translationBatches(items: TranslatableText[]) {
+  let batch: TranslatableText[] = [];
+  let bytes = 0;
+  for (const item of items) {
+    const size = new TextEncoder().encode(JSON.stringify(item.text)).length + 1;
+    // Leave space for request metadata inside DeepL's 128 KiB body limit.
+    if (batch.length === DEEPL_BATCH_SIZE || bytes + size > 120_000) {
+      yield batch;
+      batch = [];
+      bytes = 0;
+    }
+    batch.push(item);
+    bytes += size;
+  }
+  if (batch.length > 0) yield batch;
+}
+
+function translatedRow({ item, languageCode, value }: { item: TranslatableText; languageCode: string; value: string }) {
+  const clean = item.field === "description" ? sanitizeDescription(value) : value.trim();
+  if (item.text.trim() && !clean.trim())
+    throw new TRPCError({ code: "BAD_GATEWAY", message: "El proveedor devolvió una traducción vacía" });
+  return {
+    entityId: item.entityId,
+    entityType: item.entityType,
+    field: item.field,
+    languageCode,
+    sourceText: item.text,
+    value: clean,
+  };
+}
+
 interface TranslateAllInput {
-  branchId: string;
+  branchId?: string;
+  env?: RuntimeEnv;
+  overwrite?: boolean;
   db: DrizzleDb;
   deeplApiKey: string | undefined;
   deeplApiUrl: string;
@@ -33,7 +67,16 @@ export async function translateAll({
   deeplApiUrl,
   languageCode,
   restaurantId,
+  env,
+  overwrite = true,
 }: TranslateAllInput): Promise<TranslateAllResult> {
+  const content = await getTranslationContent({ branchId, db, env, restaurantId });
+  const texts = overwrite
+    ? content.texts
+    : languageTexts(content, languageCode).filter(
+        (item) => !item.isManual && (!item.complete || item.sourceText !== item.text),
+      );
+  if (texts.length === 0) return { batches: 0, translated: 0 };
   if (!deeplApiKey) {
     throw new TRPCError({ code: "PRECONDITION_FAILED", message: "La clave de API de DeepL no está configurada" });
   }
@@ -52,17 +95,13 @@ export async function translateAll({
   const apiKey = deeplApiKey;
   const targetLang = catalogEntry.deeplTarget;
 
-  const texts = await collectTranslatableTexts({ branchId, db, restaurantId });
   const info = await getRestaurantLanguageInfo({ db, restaurantId });
   const sourceLang = (info?.defaultLanguageCode ?? "es").split("-", 1)[0].toUpperCase();
-  const nameItems = texts.filter((item) => item.field === "name" && item.text.trim());
-  const descriptionItems = texts.filter((item) => item.field === "description" && item.text.trim());
   let batches = 0;
   let translated = 0;
 
   async function translateBatches(items: TranslatableText[], tagHandling?: "html") {
-    for (let index = 0; index < items.length; index += DEEPL_BATCH_SIZE) {
-      const batchItems = items.slice(index, index + DEEPL_BATCH_SIZE);
+    for (const batchItems of translationBatches(items)) {
       const outputs = await deeplTranslate({
         apiKey,
         apiUrl: deeplApiUrl,
@@ -79,13 +118,8 @@ export async function translateAll({
       await upsertTranslations({
         db,
         restaurantId,
-        rows: batchItems.map((item, index) => ({
-          entityId: item.entityId,
-          entityType: item.entityType,
-          field: item.field,
-          languageCode,
-          value: item.field === "description" ? sanitizeDescription(outputs[index]) : outputs[index],
-        })),
+        preserveManual: !overwrite,
+        rows: batchItems.map((item, index) => translatedRow({ item, languageCode, value: outputs[index] })),
       });
       translated += batchItems.length;
     }
@@ -94,18 +128,14 @@ export async function translateAll({
   await upsertTranslations({
     db,
     restaurantId,
-    rows: texts
-      .filter((item) => !item.text.trim())
-      .map((item) => ({
-        entityId: item.entityId,
-        entityType: item.entityType,
-        field: item.field,
-        languageCode,
-        value: "",
-      })),
+    preserveManual: !overwrite,
+    rows: texts.filter((item) => !item.text.trim()).map((item) => translatedRow({ item, languageCode, value: "" })),
   });
-  await translateBatches(nameItems);
-  await translateBatches(descriptionItems, "html");
+  await translateBatches(texts.filter((item) => item.field !== "description" && item.text.trim()));
+  await translateBatches(
+    texts.filter((item) => item.field === "description" && item.text.trim()),
+    "html",
+  );
 
   return { batches, translated };
 }

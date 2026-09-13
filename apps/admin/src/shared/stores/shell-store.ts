@@ -6,6 +6,8 @@ import { useMediaQuery } from "~/shared/hooks/use-media-query";
 
 interface ShellStore {
   editorBusy: boolean;
+  editorDirty: boolean;
+  editorPending: boolean;
   isSidebarOpenDesktop: boolean;
   isSidebarOpenMobile: boolean;
   setSidebarOpenDesktop: (isOpen: boolean) => void;
@@ -16,6 +18,8 @@ const useShellStore = create<ShellStore>()(
   persist(
     (set) => ({
       editorBusy: false,
+      editorDirty: false,
+      editorPending: false,
       isSidebarOpenDesktop: true,
       isSidebarOpenMobile: false,
       setSidebarOpenDesktop: (isSidebarOpenDesktop) => set({ isSidebarOpenDesktop }),
@@ -54,5 +58,16 @@ export function useShellActions() {
 export const setEditorBusy = (editorBusy: boolean) => {
   useShellStore.setState({ editorBusy });
 };
-export const useEditorBusy = () => useShellStore((state) => state.editorBusy);
-export const isEditorBusy = () => useShellStore.getState().editorBusy;
+export const setEditorDirty = (editorDirty: boolean) => {
+  useShellStore.setState({ editorDirty });
+};
+export const setEditorPending = (editorPending: boolean) => {
+  useShellStore.setState({ editorPending });
+};
+export const useEditorBusy = () => useShellStore((state) => state.editorBusy || state.editorPending);
+export const isEditorBusy = () => {
+  const state = useShellStore.getState();
+  return state.editorBusy || state.editorPending;
+};
+export const useEditorDirty = () => useShellStore((state) => state.editorDirty);
+export const isEditorDirty = () => useShellStore.getState().editorDirty;

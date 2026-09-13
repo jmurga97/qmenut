@@ -7,8 +7,8 @@ const FALLBACK_ICON_PATH = "/icons/favicon-default.ico";
 
 /**
  * Legacy clients and crawlers request /favicon.ico directly, so the href in __root stays
- * constant while this route redirects to the tenant logo's ICO variant, or to the committed
- * default icon when the branch has no logo yet.
+ * constant while this route redirects to the tenant logo's ICO variant, or to the tenant
+ * monogram when the branch has no logo yet.
  */
 export const Route = createFileRoute("/favicon.ico")({
   server: {
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/favicon.ico")({
         const data = await trpc.menu.publicData.query({ host });
         const faviconUrl = data?.branch.faviconUrl;
 
-        return Response.redirect(faviconUrl ?? new URL(FALLBACK_ICON_PATH, request.url).href, 302);
+        return Response.redirect(faviconUrl ?? new URL("/icon.svg", request.url).href, 302);
       },
     },
   },

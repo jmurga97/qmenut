@@ -261,6 +261,83 @@ button {
 .admin-inline-button {
   inline-size: fit-content;
 }
+.admin-tabs {
+  display: flex;
+  gap: 1.25rem;
+  border-block-end: 1px solid var(--border);
+}
+.admin-tabs a {
+  padding-block: 0.25rem 0.75rem;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  border-block-end: 2px solid transparent;
+}
+.admin-tabs a:hover,
+.admin-tabs a.active {
+  color: var(--foreground);
+  border-block-end-color: var(--ming-service);
+}
+.admin-table-card {
+  max-inline-size: 72rem;
+}
+.admin-table-scroll {
+  overflow-x: auto;
+}
+.admin-table {
+  inline-size: 100%;
+  min-inline-size: 42rem;
+  border-collapse: collapse;
+  text-align: start;
+}
+.admin-table th,
+.admin-table td {
+  padding: 0.75rem;
+  border-block-end: 1px solid var(--border);
+  text-align: start;
+  vertical-align: middle;
+}
+.admin-table th {
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-label);
+  font-weight: 600;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+.admin-table tbody tr:last-child td {
+  border-block-end: 0;
+}
+.admin-table-primary {
+  font-weight: 500;
+}
+.admin-table td:first-child {
+  inline-size: 48%;
+}
+.admin-table td:nth-child(2) {
+  white-space: nowrap;
+}
+.admin-table-create-row {
+  background: var(--secondary);
+}
+.admin-table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+.admin-status {
+  color: var(--muted-foreground);
+}
+.admin-status--active {
+  color: var(--ming-success);
+}
+.admin-sr-only {
+  position: absolute;
+  overflow: hidden;
+  inline-size: 1px;
+  block-size: 1px;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 
 .admin-editor-shell {
   display: grid;

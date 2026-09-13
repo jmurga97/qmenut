@@ -13,12 +13,14 @@ export const translations = sqliteTable(
       .notNull()
       .references(() => restaurants.id, { onDelete: "cascade" }),
     entityType: text("entity_type", {
-      enum: ["dish", "category", "variant_group", "variant_option", "ingredient"],
+      enum: ["dish", "category", "variant_group", "variant_option", "ingredient", "promotion", "branch", "reward"],
     }).notNull(),
     entityId: text("entity_id").notNull(),
     languageCode: text("language_code").notNull(),
     field: text("field").notNull(),
     value: text("value").notNull(),
+    sourceText: text("source_text"),
+    isManual: integer("is_manual", { mode: "boolean" }).notNull().default(false),
     createdAt: integer("created_at").notNull().default(epochMilliseconds),
     updatedAt: integer("updated_at").notNull().default(epochMilliseconds),
   },
@@ -27,7 +29,7 @@ export const translations = sqliteTable(
     index("idx_translations_lookup").on(table.entityType, table.entityId, table.languageCode),
     check(
       "translations_entity_type",
-      sql`${table.entityType} IN ('dish', 'category', 'variant_group', 'variant_option', 'ingredient')`,
+      sql`${table.entityType} IN ('dish', 'category', 'variant_group', 'variant_option', 'ingredient', 'promotion', 'branch', 'reward')`,
     ),
   ],
 );

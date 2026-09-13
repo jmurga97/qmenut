@@ -2,6 +2,22 @@ import en from "./en";
 
 export default {
   ...en,
+  allergens: {
+    gluten: "Glute",
+    crustaceans: "Crustáceos",
+    eggs: "Ovos",
+    fish: "Peixe",
+    peanuts: "Cacahuetes",
+    soybeans: "Soia",
+    milk: "Leite",
+    nuts: "Froitos de casca",
+    celery: "Apio",
+    mustard: "Mostaza",
+    sesame: "Sésamo",
+    sulphites: "Sulfitos",
+    lupin: "Chochos",
+    molluscs: "Moluscos",
+  },
   common: {
     ...en.common,
     currencyLabel: "Moeda",
@@ -167,13 +183,15 @@ export default {
     intro: {
       ...en.loyalty.intro,
       title: "Visítanos e gaña puntos",
-      body: "Cada visita suma un selo. Con {{count}} selos obtés {{reward}}.",
+      body_one: "Cada visita suma un selo. Con {{count}} selo obtés {{reward}}.",
+      body_other: "Cada visita suma un selo. Con {{count}} selos obtés {{reward}}.",
       hint: "Escanea o código QR da mesa para activar a tarxeta e trocar os premios.",
       menuLink: "Ver o menú",
     },
     signup: {
       ...en.loyalty.signup,
-      pitch: "Unha visita, un selo. Con {{count}} selos obtés {{reward}}.",
+      pitch_one: "Unha visita, un selo. Con {{count}} selo obtés {{reward}}.",
+      pitch_other: "Unha visita, un selo. Con {{count}} selos obtés {{reward}}.",
       explainer: "Crea a túa tarxeta co teu correo electrónico e recupéraa desde calquera dispositivo.",
       emailLabel: "Correo electrónico",
       emailPlaceholder: "ti@exemplo.com",
@@ -200,7 +218,8 @@ export default {
     card: {
       ...en.loyalty.card,
       progress: "Os teus selos",
-      gridLabel: "{{filled}} de {{total}} selos",
+      gridLabel_one: "{{filled}} de {{total}} selo",
+      gridLabel_other: "{{filled}} de {{total}} selos",
       requestStamp: "Pedir o meu selo",
       redeemed: "Premio trocado",
       redeemedFooter: "saldo {{balance}}/{{total}} · a túa próxima visita xa conta",
@@ -218,7 +237,8 @@ export default {
     },
     reward: {
       ...en.loyalty.reward,
-      stamps: "selos",
+      stamps_one: "selo",
+      stamps_other: "selos",
       remaining_one: "falta {{count}}",
       remaining_other: "faltan {{count}}",
       redeem: "Trocar",

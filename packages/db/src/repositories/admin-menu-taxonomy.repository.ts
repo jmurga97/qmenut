@@ -90,3 +90,47 @@ export async function createIngredient({ db, restaurantId, data }: CreateIngredi
 
   return id;
 }
+
+interface UpdateIngredientInput extends CreateIngredientInput {
+  ingredientId: string;
+}
+
+export async function updateIngredient({
+  db,
+  restaurantId,
+  ingredientId,
+  data,
+}: UpdateIngredientInput): Promise<boolean> {
+  const result = await db
+    .update(ingredients)
+    .set({ name: data.name, price: data.price, isActive: data.isActive, updatedAt: Date.now() })
+    .where(
+      and(eq(ingredients.id, ingredientId), eq(ingredients.restaurantId, restaurantId), isNull(ingredients.deletedAt)),
+    )
+    .run();
+
+  return result.meta.changes === 1;
+}
+
+interface SoftDeleteIngredientInput {
+  db: DrizzleDb;
+  restaurantId: string;
+  ingredientId: string;
+}
+
+export async function softDeleteIngredient({
+  db,
+  restaurantId,
+  ingredientId,
+}: SoftDeleteIngredientInput): Promise<boolean> {
+  const now = Date.now();
+  const result = await db
+    .update(ingredients)
+    .set({ deletedAt: now, isActive: false, updatedAt: now })
+    .where(
+      and(eq(ingredients.id, ingredientId), eq(ingredients.restaurantId, restaurantId), isNull(ingredients.deletedAt)),
+    )
+    .run();
+
+  return result.meta.changes === 1;
+}

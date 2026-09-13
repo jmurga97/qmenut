@@ -77,6 +77,11 @@
   font-size: var(--qm-text-sm, 12px);
   line-height: 1.4;
   color: var(--qm-muted, #8c857b);
+  display: -webkit-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 qm-price {

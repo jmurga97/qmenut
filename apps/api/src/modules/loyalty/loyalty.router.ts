@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { acceptConsent } from "./accept-consent";
 import { cancelRedemption } from "./cancel-redemption";
 import { createCard } from "./create-card";
@@ -17,10 +19,16 @@ import {
 import { requestRedemption } from "./request-redemption";
 import { publicProcedure, router } from "../../trpc/trpc";
 
+const programInputSchema = hostInputSchema
+  .extend({ locale: z.string().trim().toLowerCase().max(30).optional() })
+  .optional();
+
 export const loyaltyRouter = router({
   program: publicProcedure
-    .input(hostInputSchema.optional())
-    .query(({ ctx, input }) => getLoyaltyProgramForClient({ db: ctx.db, request: ctx.request, host: input?.host })),
+    .input(programInputSchema)
+    .query(({ ctx, input }) =>
+      getLoyaltyProgramForClient({ db: ctx.db, request: ctx.request, host: input?.host, locale: input?.locale }),
+    ),
   createCard: publicProcedure.input(createCardInputSchema).mutation(({ ctx, input }) =>
     createCard({
       consentAccepted: input.consentAccepted,

@@ -3,7 +3,7 @@ import { callTrpcMutation, callTrpcQuery, getTrpcData } from "../../helpers/trpc
 
 test("adds and removes languages, protecting Spanish and scoping retranslation", async ({ page, request }) => {
   const added = await callTrpcMutation(page, "admin.languages.add", { languageCode: "fr" });
-  expect(getTrpcData<{ added: boolean }>(added)).toEqual({ added: true });
+  expect(getTrpcData<{ added: boolean }>(added)).toMatchObject({ added: true });
   try {
     const languages = await callTrpcQuery(page, "admin.languages.list");
     expect(languages.body).toContain('"defaultLanguageCode":"es"');
@@ -37,7 +37,9 @@ test("adds and removes languages, protecting Spanish and scoping retranslation",
     await page.getByRole("button", { name: "Acciones para Français" }).click();
     await expect(page.getByRole("menuitem", { name: "Retraducir contenido" })).toBeVisible();
     await expect(page.getByRole("menuitem", { name: "Eliminar" })).toBeVisible();
-    await expect(page.getByRole("menuitem")).toHaveCount(2);
+    await expect(page.getByRole("menuitem", { name: "Editar traducciones" })).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: "Completar traducciones" })).toBeVisible();
+    await expect(page.getByRole("menuitem")).toHaveCount(4);
     await page.getByRole("menuitem", { name: "Retraducir contenido" }).click();
     await expect(page.getByRole("alertdialog")).toBeVisible();
     await page.getByRole("button", { name: "Cancelar", exact: true }).click();

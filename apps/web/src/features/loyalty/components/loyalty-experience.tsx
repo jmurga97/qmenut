@@ -150,7 +150,7 @@ function ConsentState({ loyalty, restaurantName }: { loyalty: ConsentController;
         email={card.card.email}
         balance={card.card.stampsBalance}
         target={loyalty.card.target}
-        gridLabel={t("loyalty.card.gridLabel", { filled, total: loyalty.card.target })}
+        gridLabel={t("loyalty.card.gridLabel", { count: loyalty.card.target, filled, total: loyalty.card.target })}
         progressLabel={t("loyalty.card.progress")}
         locked
       />
@@ -237,7 +237,7 @@ function CardState({ loyalty, restaurantName }: { loyalty: CardController; resta
       target={loyalty.card.target}
       animatedIndex={loyalty.stamp.animatedIndex}
       progressLabel={t("loyalty.card.progress")}
-      gridLabel={t("loyalty.card.gridLabel", { filled, total: loyalty.card.target })}
+      gridLabel={t("loyalty.card.gridLabel", { count: loyalty.card.target, filled, total: loyalty.card.target })}
       stampLabel={t("loyalty.card.requestStamp")}
       stampOpen={loyalty.stamp.open}
       redeemed={loyalty.card.redeemedReward !== null}
@@ -302,7 +302,7 @@ function RewardRow({
       remaining={remaining}
       unlocked={reward.unlocked}
       disabled={!canRedeem}
-      stampsLabel={t("loyalty.reward.stamps")}
+      stampsLabel={t("loyalty.reward.stamps", { count: reward.cost })}
       remainingLabel={t("loyalty.reward.remaining", { count: remaining })}
       redeemLabel={t(canRedeem ? "loyalty.reward.redeem" : "loyalty.reward.locked")}
       busyLabel={t("loyalty.reward.redeeming")}

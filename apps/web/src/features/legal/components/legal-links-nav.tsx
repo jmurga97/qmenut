@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
+import "~/features/legal/styles.css";
+
 export function LegalLinksNav() {
   const { t } = useTranslation();
 

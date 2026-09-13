@@ -24,12 +24,12 @@ export function getApiBaseUrl(): string {
   return "http://localhost:8787";
 }
 function fetchWithCredentials(url: Parameters<typeof fetch>[0], options: Parameters<typeof fetch>[1]) {
+  // Translation preparation may span several provider batches before publishing the language.
+  const timeout = AbortSignal.timeout(options?.method === "POST" ? 180_000 : 20_000);
   return fetch(url, {
     ...options,
     credentials: "include",
-    signal: options?.signal
-      ? AbortSignal.any([options.signal, AbortSignal.timeout(20_000)])
-      : AbortSignal.timeout(20_000),
+    signal: options?.signal ? AbortSignal.any([options.signal, timeout]) : timeout,
   });
 }
 const trpcLink = httpBatchLink({

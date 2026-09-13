@@ -3,7 +3,6 @@
  * sibling features. Everything the dashboard renders is assembled from existing
  * query/mutation factories so cache keys stay shared with their owning features.
  */
-export { getBillingOverviewQueryOptions } from "~/features/billing/api";
 export { getExchangeRatesSummaryQueryOptions } from "~/features/exchange-rates/api";
 export { getAnalyticsSnapshotQueryOptions } from "~/features/analytics/api";
 export {

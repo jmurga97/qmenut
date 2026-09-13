@@ -3,6 +3,7 @@ import type { TrpcOptionsProxy } from "~/lib/trpc-client";
 interface LoyaltyProgramQueryOptionsInput {
   host: string;
   trpc: TrpcOptionsProxy;
+  locale?: string;
 }
 
 interface LoyaltyCardQueryOptionsInput extends LoyaltyProgramQueryOptionsInput {
@@ -13,8 +14,8 @@ interface RedemptionStatusQueryOptionsInput extends LoyaltyCardQueryOptionsInput
   redemptionId: string;
 }
 
-export function getLoyaltyProgramQueryOptions({ host, trpc }: LoyaltyProgramQueryOptionsInput) {
-  return trpc.loyalty.program.queryOptions({ host });
+export function getLoyaltyProgramQueryOptions({ host, trpc, locale }: LoyaltyProgramQueryOptionsInput) {
+  return trpc.loyalty.program.queryOptions({ host, locale });
 }
 
 export function getLoyaltyCardQueryOptions({ cardToken, host, trpc }: LoyaltyCardQueryOptionsInput) {

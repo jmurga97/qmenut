@@ -20,6 +20,7 @@ const quantity = z
 export const promotionFormSchema = z
   .object({
     buyQuantity: quantity,
+    description: z.string().trim().max(2000),
     name: z.string().trim().min(1, { message: "El nombre es obligatorio" }),
     paidQuantity: quantity,
     percentage,

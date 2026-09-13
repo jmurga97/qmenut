@@ -2,8 +2,11 @@ import { getPublicMenu as findPublicMenu } from "@qmenut/db/repositories/public-
 import { getRestaurantLanguageInfo } from "@qmenut/db/repositories/restaurant-languages.repository";
 
 import { sanitizeNullableDescription } from "./sanitize-description";
+import { getLanguageCatalogEntry } from "../admin-translations/language-catalog";
+import { getTranslationContent, languageTexts, publicTranslationMap } from "../admin-translations/translation-content";
 import { getPublicLoyaltyFeatures } from "../loyalty/get-loyalty-program";
 
+import type { RuntimeEnv } from "../../config/env/schema";
 import type { PublicLoyaltyFeatures } from "../loyalty/get-loyalty-program";
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { ResolvedTenant } from "@qmenut/db/domain/tenant";
@@ -16,11 +19,13 @@ interface GetPublicMenuInput {
   locale?: string;
   nowMs?: number;
   tenant: ResolvedTenant;
+  env?: RuntimeEnv;
 }
 
 export type PublicMenuPayload = PublicMenuData & {
   language: PublicMenuLanguage;
   publicFeatures: PublicLoyaltyFeatures;
+  tagline: string;
 };
 
 function sanitizeCategories(categories: PublicCategory[]): PublicCategory[] {
@@ -39,15 +44,24 @@ export async function getPublicMenu({
   locale,
   nowMs = Date.now(),
   tenant,
+  env,
 }: GetPublicMenuInput): Promise<PublicMenuPayload | null> {
   const info = await getRestaurantLanguageInfo({ db, restaurantId: tenant.restaurantId });
   const defaultLanguage = info?.defaultLanguageCode ?? FALLBACK_LANGUAGE_CODE;
-  const activeLanguages = info?.languages ?? [{ languageCode: defaultLanguage, isDefault: true }];
+  const content = await getTranslationContent({ db, env, restaurantId: tenant.restaurantId });
+  const activeLanguages = (info?.languages ?? [{ languageCode: defaultLanguage, isDefault: true }]).filter(
+    (language) =>
+      language.isDefault ||
+      (Boolean(getLanguageCatalogEntry(language.languageCode)) &&
+        languageTexts(content, language.languageCode).every((item) => item.complete)),
+  );
   const requested = locale?.toLowerCase() ?? null;
   const effective =
     requested !== null && activeLanguages.some((language) => language.languageCode === requested)
       ? requested
       : defaultLanguage;
+  const translatedTexts =
+    effective === defaultLanguage ? undefined : publicTranslationMap(languageTexts(content, effective));
   const [data, publicFeatures] = await Promise.all([
     findPublicMenu({
       db,
@@ -55,6 +69,7 @@ export async function getPublicMenu({
       tenant,
       locale: effective,
       isDefaultLocale: effective === defaultLanguage,
+      translatedTexts,
     }),
     getPublicLoyaltyFeatures({ db, restaurantId: tenant.restaurantId }),
   ]);
@@ -65,6 +80,12 @@ export async function getPublicMenu({
 
   return {
     ...data,
+    tagline:
+      effective === defaultLanguage
+        ? (content.texts.find((item) => item.entityId === tenant.branchId && item.field === "tagline")?.text ?? "")
+        : (languageTexts(content, effective).find(
+            (item) => item.entityId === tenant.branchId && item.field === "tagline",
+          )?.value ?? ""),
     categories: sanitizeCategories(data.categories),
     language: {
       available: activeLanguages.map((language) => ({

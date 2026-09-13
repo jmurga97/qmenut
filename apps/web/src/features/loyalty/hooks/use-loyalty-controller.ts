@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useSearch } from "@tanstack/react-router";
+import { useRouteContext, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { getLoyaltyProgramQueryOptions } from "~/features/loyalty/api/loyalty-query-options";
@@ -25,7 +25,8 @@ export function useLoyaltyController() {
   const { host } = useTenantContext();
   const { t } = useTranslation();
   const fromQr = useSearch({ from: "/{-$locale}", select: (search) => search.utm_source === "qr" });
-  const { data: program } = useSuspenseQuery(getLoyaltyProgramQueryOptions({ host, trpc }));
+  const { effectiveLocale: locale } = useRouteContext({ from: "/{-$locale}" });
+  const { data: program } = useSuspenseQuery(getLoyaltyProgramQueryOptions({ host, trpc, locale }));
   const session = useLoyaltyCardSession({ host, trpc });
   const signupFlow = useLoyaltySignup({ host, trpc, setToken: session.setToken });
   const consentFlow = useLoyaltyConsent({

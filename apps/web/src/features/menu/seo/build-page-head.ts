@@ -53,7 +53,7 @@ function buildMenuDescription(data: PublicMenuData): string {
     return firstDescription.slice(0, 155);
   }
 
-  return data.branch.address ? `${data.branch.name} – ${data.branch.address}` : `Carta de ${data.branch.name}`;
+  return data.branch.address ? `${data.branch.name} – ${data.branch.address}` : data.branch.name;
 }
 
 function getLcpPhotoSource({
@@ -129,7 +129,10 @@ export function buildPageHead({
   const alternateLocales = loaderData.language.available
     .map((option) => toOpenGraphLocale(option.code))
     .filter((locale) => locale !== ogLocale);
-  const resolvedImage = new URL(image ?? loaderData.branch.photos[0]?.url ?? "/og-default.png", origin).href;
+  const resolvedImage = new URL(
+    image ?? loaderData.branch.photos[0]?.url ?? loaderData.branch.logoUrl ?? "/og-default.png",
+    origin,
+  ).href;
   const lcpSource = getLcpPhotoSource({
     data: loaderData,
     preload: preloadLcpImage,

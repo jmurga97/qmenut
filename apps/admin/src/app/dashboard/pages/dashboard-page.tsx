@@ -9,7 +9,6 @@ import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 
 import { AnalyticsPulseCard } from "../components/analytics-pulse-card";
-import { AttentionPanel } from "../components/attention-panel";
 import { AvailabilityCard } from "../components/availability-card";
 import { PendingRedemptionsCard } from "../components/pending-redemptions-card";
 import { ServiceMetrics } from "../components/service-metrics";
@@ -21,9 +20,7 @@ export function DashboardPage() {
   const canInsights = useCan("analytics.read");
   const canOperate = useCan("loyalty.operate");
   const canToggleAvailability = useCan("menu.toggleDishAvailability");
-  const canSeeAttention = useCan("branch.write");
   const canExchangeRates = useCan("exchangeRates.write");
-  const showServiceZone = canInsights || canSeeAttention;
   return (
     <div className="admin-page admin-dashboard">
       <PageHeader
@@ -31,12 +28,7 @@ export function DashboardPage() {
         kicker={branch ? `Panel diario · ${branch.name}` : "Panel diario"}
         title={tenant.restaurant.name}
       />
-      {showServiceZone ? (
-        <div className="admin-dashboard-top">
-          {canInsights ? <ServiceMetrics /> : null}
-          <AttentionPanel />
-        </div>
-      ) : null}
+      {canInsights ? <ServiceMetrics /> : null}
       {canInsights ? <AnalyticsPulseCard /> : null}
       {canExchangeRates && tenant.restaurant.sourceCurrency === "USD" ? <ExchangeRatesCard /> : null}
       {canInsights || canOperate ? (

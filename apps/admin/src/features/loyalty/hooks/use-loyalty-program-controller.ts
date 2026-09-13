@@ -125,6 +125,7 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
     selectedBranch,
     target,
     theme: themeQuery.data,
+    data,
     cancelReward,
     newReward: () => {
       rewards.append(mappers.createEmptyRewardFormValues());

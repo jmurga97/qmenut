@@ -51,10 +51,10 @@ export function MenuDishModalContent({
         <QmDishExtras slot="extras" label={t("menu.extrasLabel")} items={dish.extras} />
       ) : null}
       {dish.allergens?.map((code) => {
-        const { label, Icon } = ALLERGEN_META[code];
+        const { Icon } = ALLERGEN_META[code];
 
         return (
-          <QmAllergen key={code} slot="allergens" label={label}>
+          <QmAllergen key={code} slot="allergens" label={t(`allergens.${code}`)}>
             <Icon slot="icon" size={13} strokeWidth={2} />
           </QmAllergen>
         );

@@ -1,6 +1,8 @@
 import { useNavigate, useRouteContext } from "@tanstack/react-router";
 import { useEffect } from "react";
 
+import { matchSupportedLocale } from "~/lib/i18n/locale-matcher";
+
 const CHOICE_STORAGE_KEY = "qm-locale-choice";
 const DETECTED_SESSION_KEY = "qm-locale-detected";
 
@@ -29,11 +31,10 @@ export function LocaleDetector() {
 
     window.sessionStorage.setItem(DETECTED_SESSION_KEY, "1");
 
-    const activeCodes = new Set(availableLanguages.map((language) => language.code));
-    const browserLocales = navigator.languages.map((browserLocale) => browserLocale.toLowerCase());
-    const match =
-      browserLocales.find((code) => activeCodes.has(code)) ??
-      browserLocales.map((browserLocale) => browserLocale.split("-", 1)[0]).find((code) => activeCodes.has(code));
+    const match = matchSupportedLocale(
+      navigator.languages,
+      availableLanguages.map((language) => language.code),
+    );
 
     if (match && match !== defaultLanguage) {
       void navigate({

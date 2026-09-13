@@ -83,6 +83,7 @@ interface GetPublicMenuInput extends TenantInput {
   isDefaultLocale: boolean;
   locale: string;
   nowMs: number;
+  translatedTexts?: Map<string, Map<string, string>>;
 }
 
 async function getBranchRow({ db, tenant }: TenantInput) {
@@ -465,6 +466,7 @@ export async function getPublicMenu({
   locale,
   nowMs,
   tenant,
+  translatedTexts,
 }: GetPublicMenuInput): Promise<PublicMenuData | null> {
   const branchContext = await getPublicBranchContext({ db, tenant });
 
@@ -473,16 +475,26 @@ export async function getPublicMenu({
   }
 
   const { branch, countryCode, legal, sourceCurrency, timeZone, vesExchangeRate, vesPricesEnabled } = branchContext;
-  const rows = await loadPublicMenuRows({ db, isDefaultLocale, locale, tenant });
+  const rows = await loadPublicMenuRows({
+    db,
+    isDefaultLocale: isDefaultLocale || Boolean(translatedTexts),
+    locale,
+    tenant,
+  });
+  if (translatedTexts) rows.translationsByEntity = translatedTexts;
   const { branchWithVariants, imageVariantsByCanonicalUrl } = await loadPublicMenuImageVariants({
     branch,
     categoryRows: rows.categoryRows,
     db,
     dishRows: rows.dishRows,
   });
-  const activePromotions = rows.promotionRows.filter((row) =>
-    isPromotionLikeActiveNow({ promotion: row, nowMs, timeZone }),
-  );
+  const activePromotions = rows.promotionRows
+    .filter((row) => isPromotionLikeActiveNow({ promotion: row, nowMs, timeZone }))
+    .map((row) => ({
+      ...row,
+      name: rows.translationsByEntity.get(row.id)?.get("name") ?? row.name,
+      description: rows.translationsByEntity.get(row.id)?.get("description") ?? row.description,
+    }));
   const promotionsById = new Map(activePromotions.map((row) => [row.id, row]));
   const bestPromotionsByDish = createBestPromotionMap({
     candidates: rows.promotionCandidateRows,

@@ -5,6 +5,8 @@ import {
   listAllergens,
   listIngredients,
   listTags,
+  softDeleteIngredient,
+  updateIngredient,
 } from "@qmenut/db/repositories/admin-menu-taxonomy.repository";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -19,12 +21,16 @@ import {
   dishRelationsSchema,
   updateCategorySchema,
   updateDishSchema,
+  updateIngredientSchema,
 } from "./menu-input.schema";
 import { createMenuCategory, updateMenuCategory } from "./save-category";
 import { saveDish } from "./save-dish";
 import { saveDishRelations } from "./save-dish-relations";
 import { getTranslationTexts, translateText } from "./translation-overlay";
-import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
+import {
+  bumpPublicContentVersionForBranch,
+  bumpPublicContentVersionForRestaurant,
+} from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
 import { imageSaveOperation } from "../admin-images/image-save-operation";
 import { prepareMenuImageSave } from "../admin-images/prepare-menu-image-save";
@@ -37,6 +43,7 @@ const dishDetailInputSchema = z.object({
 });
 const categoryIdInputSchema = z.object({ categoryId: z.string().trim().min(1) });
 const dishIdInputSchema = z.object({ dishId: z.string().trim().min(1) });
+const ingredientIdInputSchema = z.object({ ingredientId: z.string().trim().min(1) });
 const ingredientListInputSchema = z.object({ languageCode: z.string().trim().min(1).optional() });
 const setDishAvailabilityInputSchema = z.object({
   branchId: z.string().trim().min(1),
@@ -371,7 +378,43 @@ const taxonomyRouter = router({
   createIngredient: tenantProcedure.input(createIngredientSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
     const id = await createIngredient({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, data: input });
+    await bumpPublicContentVersionForRestaurant({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+    });
     return { id };
+  }),
+  updateIngredient: tenantProcedure.input(updateIngredientSchema).mutation(async ({ ctx, input }) => {
+    requirePermission(ctx.tenant, "menu.write");
+    const updated = await updateIngredient({
+      db: ctx.db,
+      ingredientId: input.ingredientId,
+      restaurantId: ctx.tenant.restaurantId,
+      data: input.data,
+    });
+    if (!updated) throw new TRPCError({ code: "NOT_FOUND", message: "Extra no encontrado" });
+    await bumpPublicContentVersionForRestaurant({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+    });
+    return { id: input.ingredientId };
+  }),
+  removeIngredient: tenantProcedure.input(ingredientIdInputSchema).mutation(async ({ ctx, input }) => {
+    requirePermission(ctx.tenant, "menu.write");
+    const removed = await softDeleteIngredient({
+      db: ctx.db,
+      ingredientId: input.ingredientId,
+      restaurantId: ctx.tenant.restaurantId,
+    });
+    if (!removed) throw new TRPCError({ code: "NOT_FOUND", message: "Extra no encontrado" });
+    await bumpPublicContentVersionForRestaurant({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+    });
+    return { id: input.ingredientId };
   }),
 });
 

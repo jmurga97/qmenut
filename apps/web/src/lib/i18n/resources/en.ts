@@ -1,4 +1,20 @@
 export default {
+  allergens: {
+    gluten: "Gluten",
+    crustaceans: "Crustaceans",
+    eggs: "Eggs",
+    fish: "Fish",
+    peanuts: "Peanuts",
+    soybeans: "Soybeans",
+    milk: "Milk",
+    nuts: "Tree nuts",
+    celery: "Celery",
+    mustard: "Mustard",
+    sesame: "Sesame",
+    sulphites: "Sulphites",
+    lupin: "Lupin",
+    molluscs: "Molluscs",
+  },
   common: {
     currencyLabel: "Currency",
     languageLabel: "Language",
@@ -149,12 +165,14 @@ export default {
     },
     intro: {
       title: "Visit us and earn points",
-      body: "Every visit adds a stamp. {{count}} stamps earns {{reward}}.",
+      body_one: "Every visit adds a stamp. {{count}} stamp earns {{reward}}.",
+      body_other: "Every visit adds a stamp. {{count}} stamps earn {{reward}}.",
       hint: "Scan the QR code at your table in the venue to activate your card and redeem rewards.",
       menuLink: "View the menu",
     },
     signup: {
-      pitch: "One visit, one stamp. {{count}} stamps earns {{reward}}.",
+      pitch_one: "One visit, one stamp. {{count}} stamp earns {{reward}}.",
+      pitch_other: "One visit, one stamp. {{count}} stamps earn {{reward}}.",
       explainer: "Create your card with your email and recover it on any device.",
       emailLabel: "Email",
       emailPlaceholder: "you@email.com",
@@ -179,7 +197,8 @@ export default {
     },
     card: {
       progress: "Your stamps",
-      gridLabel: "{{filled}} of {{total}} stamps",
+      gridLabel_one: "{{filled}} of {{total}} stamp",
+      gridLabel_other: "{{filled}} of {{total}} stamps",
       requestStamp: "Request my stamp",
       redeemed: "Reward redeemed",
       redeemedFooter: "balance {{balance}}/{{total}} · your next visit already counts",
@@ -195,7 +214,8 @@ export default {
       already: "You already have the stamp for this visit",
     },
     reward: {
-      stamps: "stamps",
+      stamps_one: "stamp",
+      stamps_other: "stamps",
       remaining_one: "{{count}} to go",
       remaining_other: "{{count}} to go",
       redeem: "Redeem",

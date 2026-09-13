@@ -15,6 +15,7 @@ function preservedData(promotion: PromotionDetail | null) {
 export function toPromotionFormValues(promotion: EditablePromotion | null): PromotionFormValues {
   return {
     buyQuantity: String(promotion?.buyQuantity ?? ""),
+    description: promotion?.description ?? "",
     name: promotion?.name ?? "",
     paidQuantity: String(promotion?.paidQuantity ?? ""),
     percentage: String(promotion?.percentage ?? ""),
@@ -36,7 +37,7 @@ export function toPromotionInput({
     data: {
       ...preservedData(promotion),
       buyQuantity: values.type === "two_for_one" ? optionalNumber(values.buyQuantity) : null,
-      description: promotion?.description ?? undefined,
+      description: values.description.trim() || undefined,
       name: values.name,
       paidQuantity: values.type === "two_for_one" ? optionalNumber(values.paidQuantity) : null,
       percentage: values.type === "percentage_discount" ? optionalNumber(values.percentage) : null,

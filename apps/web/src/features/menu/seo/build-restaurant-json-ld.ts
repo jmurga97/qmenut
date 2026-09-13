@@ -46,7 +46,8 @@ export function buildRestaurantJsonLd({
         "@type": "OpeningHoursSpecification",
         dayOfWeek: SCHEMA_DAY_NAMES[schedule.dayOfWeek],
         opens: minutesToTime(schedule.openMinute),
-        closes: minutesToTime(schedule.closeMinute),
+        // schema.org lee un cierre a las 00:00 como ventana de longitud cero; 23:59 es el fin de día.
+        closes: minutesToTime(schedule.closeMinute === 0 ? 1439 : schedule.closeMinute),
       })),
     }),
     ...(includeMenu && {

@@ -81,11 +81,13 @@ for (const state of ["empty category", "hidden dishes", "empty menu"]) {
   });
 }
 
-test("falls back for missing translations and removes a language", async ({ page, diner }) => {
+test("keeps incomplete languages unpublished and removes a language", async ({ page, diner }) => {
   expect(await callTrpcMutation(page, "admin.languages.add", { languageCode: "fr" })).toMatchObject({ ok: true });
   try {
     await diner.goto("/es/");
-    await diner.locator("qm-lang select").selectOption("fr");
+    await expect(diner.locator('qm-lang option[value="fr"]')).toHaveCount(0);
+    await diner.goto("/fr/");
+    await expect(diner).toHaveURL(/\/es\/?$/);
     await expect(diner.getByText("Croquetas de jamón", { exact: true }).first()).toBeVisible();
     await expect(diner.getByText("Patatas bravas", { exact: true }).first()).toBeVisible();
   } finally {

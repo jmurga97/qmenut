@@ -1,6 +1,8 @@
 import { resolveActiveMembership } from "@qmenut/db/repositories/restaurant-users.repository";
 import { initTRPC, TRPCError } from "@trpc/server";
 
+import { syncTranslationsAfterSave } from "../modules/admin-translations/sync-translations";
+
 import type { TrpcContext } from "./context";
 import type { RestaurantRoleCode } from "@qmenut/db/repositories/restaurant-users.repository";
 
@@ -31,7 +33,7 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   });
 });
 
-export const tenantProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+export const tenantProcedure = protectedProcedure.use(async ({ ctx, next, path, type }) => {
   const membership = await resolveActiveMembership({
     activeRestaurantId: ctx.session.session.activeRestaurantId ?? null,
     db: ctx.db,
@@ -48,10 +50,14 @@ export const tenantProcedure = protectedProcedure.use(async ({ ctx, next }) => {
     roleCode: membership.roleCode,
   };
 
-  return next({
+  const result = await next({
     ctx: {
       ...ctx,
       tenant,
     },
   });
+  if (result.ok && type === "mutation") {
+    await syncTranslationsAfterSave({ path, db: ctx.db, env: ctx.env, restaurantId: tenant.restaurantId });
+  }
+  return result;
 });

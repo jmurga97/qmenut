@@ -2,6 +2,22 @@ import en from "./en";
 
 export default {
   ...en,
+  allergens: {
+    gluten: "Gluten",
+    crustaceans: "Krebstiere",
+    eggs: "Eier",
+    fish: "Fisch",
+    peanuts: "Erdnüsse",
+    soybeans: "Soja",
+    milk: "Milch",
+    nuts: "Schalenfrüchte",
+    celery: "Sellerie",
+    mustard: "Senf",
+    sesame: "Sesam",
+    sulphites: "Sulfite",
+    lupin: "Lupinen",
+    molluscs: "Weichtiere",
+  },
   common: {
     ...en.common,
     currencyLabel: "Währung",
@@ -167,13 +183,15 @@ export default {
     intro: {
       ...en.loyalty.intro,
       title: "Besuchen Sie uns und sammeln Sie Punkte",
-      body: "Jeder Besuch bringt einen Stempel. {{count}} Stempel bringen {{reward}}.",
+      body_one: "Jeder Besuch bringt einen Stempel. Mit {{count}} Stempel gibt es {{reward}}.",
+      body_other: "Jeder Besuch bringt einen Stempel. Mit {{count}} Stempeln gibt es {{reward}}.",
       hint: "Scannen Sie den QR-Code auf Ihrem Tisch, um Ihre Karte zu aktivieren und Prämien einzulösen.",
       menuLink: "Speisekarte ansehen",
     },
     signup: {
       ...en.loyalty.signup,
-      pitch: "Ein Besuch, ein Stempel. {{count}} Stempel bringen {{reward}}.",
+      pitch_one: "Ein Besuch, ein Stempel. Mit {{count}} Stempel gibt es {{reward}}.",
+      pitch_other: "Ein Besuch, ein Stempel. Mit {{count}} Stempeln gibt es {{reward}}.",
       explainer: "Erstellen Sie Ihre Karte mit Ihrer E-Mail-Adresse und rufen Sie sie auf jedem Gerät ab.",
       emailLabel: "E-Mail",
       emailPlaceholder: "sie@beispiel.de",
@@ -201,7 +219,8 @@ export default {
     card: {
       ...en.loyalty.card,
       progress: "Ihre Stempel",
-      gridLabel: "{{filled}} von {{total}} Stempeln",
+      gridLabel_one: "{{filled}} von {{total}} Stempel",
+      gridLabel_other: "{{filled}} von {{total}} Stempeln",
       requestStamp: "Meinen Stempel anfordern",
       redeemed: "Prämie eingelöst",
       redeemedFooter: "Stand {{balance}}/{{total}} · Ihr nächster Besuch zählt bereits",
@@ -219,7 +238,8 @@ export default {
     },
     reward: {
       ...en.loyalty.reward,
-      stamps: "Stempel",
+      stamps_one: "Stempel",
+      stamps_other: "Stempel",
       remaining_one: "noch {{count}}",
       remaining_other: "noch {{count}}",
       redeem: "Einlösen",

@@ -19,8 +19,8 @@ export function FormShell({ actions, children, readOnly = false, ...formActions 
     <div className="admin-editor-shell">
       <fieldset
         className="admin-editor-fields"
-        disabled={readOnly || Boolean(formActions.operation)}
-        inert={readOnly || Boolean(formActions.operation)}
+        disabled={readOnly || Boolean(formActions.operation) || formActions.busy}
+        inert={readOnly || Boolean(formActions.operation) || formActions.busy}
       >
         {children}
       </fieldset>

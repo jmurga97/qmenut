@@ -46,7 +46,10 @@ export function useThemeController(branchId: string) {
     preview,
     submit: form.handleSubmit((values) =>
       save.mutate(toThemeInput({ branchId, current, values }), {
-        onSuccess: () => toast.success("Tema guardado."),
+        onSuccess: () => {
+          form.reset(values);
+          toast.success("Tema guardado.");
+        },
       }),
     ),
   };

@@ -10,12 +10,13 @@ import { getLanguageCatalogQueryOptions } from "~/features/languages/api";
 import { signOut } from "~/lib/auth-client";
 import { trpc } from "~/lib/trpc";
 import { getLanguagesQueryOptions, getTenantQueryOptions } from "~/shared/api";
-import { ImageActivity } from "~/shared/images/image-activity";
+import { ImageActivityToasts } from "~/shared/images/image-activity";
 import { buildPublicMenuUrl } from "~/shared/services/public-menu-url";
 import { resolveSelectedBranch, useBranchStore } from "~/shared/stores/branch-store";
 import { useLanguageStore } from "~/shared/stores/language-store";
 import {
   isEditorBusy,
+  isEditorDirty,
   useEditorBusy,
   useShellActions,
   useShellMobile,
@@ -181,8 +182,12 @@ export function AdminShell() {
               ) : null}
               <Select
                 ariaLabel="Idioma del contenido"
+                disabled={editorBusy}
                 onValueChange={(languageCode) => {
-                  if (languageCode) setSelectedLanguageCode(languageCode);
+                  if (!languageCode || languageCode === currentLanguage?.languageCode || isEditorBusy()) return;
+                  if (isEditorDirty() && !window.confirm("Hay cambios sin guardar. ¿Cambiar de idioma y descartarlos?"))
+                    return;
+                  setSelectedLanguageCode(languageCode);
                 }}
                 options={languageOptions}
                 portalContainer={topbarElement}
@@ -214,7 +219,7 @@ export function AdminShell() {
       open={isSidebarOpen}
     >
       <div className="admin-main-slot">
-        {selectedBranch ? <ImageActivity branchId={selectedBranch.id} /> : null}
+        {selectedBranch ? <ImageActivityToasts branchId={selectedBranch.id} /> : null}
         <Outlet />
       </div>
     </AppShell>

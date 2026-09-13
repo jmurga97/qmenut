@@ -16,6 +16,13 @@ export function getLanguageMutationOptions(context: ApiContext) {
   return {
     add: context.trpc.admin.languages.add.mutationOptions({ onSuccess }),
     remove: context.trpc.admin.languages.remove.mutationOptions({ onSuccess }),
-    translate: context.trpc.admin.translations.translateAll.mutationOptions(),
+    translate: context.trpc.admin.translations.translateAll.mutationOptions({
+      onSettled: () =>
+        Promise.all([
+          onSuccess(),
+          context.queryClient.invalidateQueries({ queryKey: context.trpc.admin.translations.pathKey() }),
+          context.queryClient.invalidateQueries({ queryKey: context.trpc.admin.menu.pathKey() }),
+        ]),
+    }),
   };
 }

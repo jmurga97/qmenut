@@ -57,3 +57,10 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* El reset global deja `a { color: inherit }`: sin esto los enlaces del texto legal no se distinguen. */
+.legal-prose a {
+  color: var(--qm-accent, inherit);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

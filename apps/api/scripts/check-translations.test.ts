@@ -3,8 +3,11 @@ import { readdirSync, readFileSync } from "node:fs";
 import { Database } from "bun:sqlite";
 import { expect, test } from "bun:test";
 import { drizzle } from "drizzle-orm/bun-sqlite";
+import { upsertTranslations } from "@qmenut/db/repositories/translations.repository";
 
 import { translateAll } from "../src/modules/admin-translations/translate-all";
+import { getTranslationContent, languageTexts } from "../src/modules/admin-translations/translation-content";
+import { getPublicMenu } from "../src/modules/public-menu/get-public-menu";
 
 import type { DrizzleDb } from "@qmenut/db/client";
 
@@ -72,6 +75,66 @@ test("retranslates only branch content, clears removed descriptions, and sends S
         )
         .get(),
     ).toEqual({ value: "Translated Croquetas de jamón" });
+    const menuInput = { db, tenant: { restaurantId: "rest_tapas", branchId: "branch_tapas" }, locale: "en" };
+    expect((await getPublicMenu(menuInput))?.language.effective).toBe("es");
+    const translationInput = {
+      db,
+      deeplApiKey: "test",
+      deeplApiUrl: "https://translator.invalid",
+      languageCode: "en",
+      restaurantId: "rest_tapas",
+      overwrite: false,
+    };
+    await translateAll(translationInput);
+    const englishMenu = await getPublicMenu(menuInput);
+    expect(englishMenu?.language.effective).toBe("en");
+    expect(englishMenu?.promotions[0].name).toBe("Translated Happy tapa -20%");
+    const manualRow = {
+      entityId: "dish_tapas_croquetas",
+      entityType: "dish" as const,
+      field: "name",
+      languageCode: "en",
+      value: "Our ham croquettes",
+      sourceText: "Croquetas de jamón",
+      isManual: true,
+    };
+    await upsertTranslations({ db, restaurantId: "rest_tapas", rows: [manualRow] });
+    sqlite.run(
+      "UPDATE dishes SET name = 'Croquetas ibéricas', description = 'Receta nueva' WHERE id = 'dish_tapas_croquetas'",
+    );
+    await translateAll(translationInput);
+    const texts = languageTexts(await getTranslationContent({ db, restaurantId: "rest_tapas" }), "en");
+    expect(texts.find((item) => item.entityId === manualRow.entityId && item.field === "name")).toMatchObject({
+      value: "Our ham croquettes",
+      isManual: true,
+      complete: false,
+    });
+    expect(texts.find((item) => item.entityId === manualRow.entityId && item.field === "description")).toMatchObject({
+      value: "Translated Receta nueva",
+      complete: true,
+    });
+    expect((await getPublicMenu(menuInput))?.language.effective).toBe("es");
+    await upsertTranslations({
+      db,
+      restaurantId: "rest_tapas",
+      rows: [{ ...manualRow, sourceText: "Croquetas ibéricas" }],
+    });
+    expect((await getPublicMenu(menuInput))?.language.effective).toBe("en");
+    const requestCount = requests.length;
+    await translateAll(translationInput);
+    expect(requests).toHaveLength(requestCount);
+    // A failed description batch must not publish a partly translated language.
+    globalThis.fetch = (async (_url, init) => {
+      const body = JSON.parse(String(init?.body));
+      if (body.tag_handling) return new Response("Unavailable", { status: 503 });
+      return Response.json({ translations: body.text.map((text: string) => ({ text: `Translated ${text}` })) });
+    }) as typeof fetch;
+    sqlite.run("INSERT INTO restaurant_languages (restaurant_id, language_code) VALUES ('rest_tapas', 'fr')");
+    await expect(translateAll({ ...translationInput, languageCode: "fr" })).rejects.toThrow();
+    expect((await getPublicMenu({ ...menuInput, locale: "fr" }))?.language.effective).toBe("es");
+    expect(sqlite.query("SELECT count(*) AS n FROM translations WHERE language_code = 'fr'").get()).toMatchObject({
+      n: expect.any(Number),
+    });
   } finally {
     globalThis.fetch = originalFetch;
     sqlite.close();

@@ -46,15 +46,12 @@ const branchInfoSchema = z
     });
   });
 
-export const scheduleRowSchema = z
-  .object({
-    dayOfWeek: z.number().int().min(1).max(7),
-    openMinute: minuteSchema,
-    closeMinute: minuteSchema,
-  })
-  .refine((row) => row.closeMinute >= row.openMinute, {
-    message: "La hora de cierre debe ser posterior a la de apertura",
-  });
+// Un cierre anterior a la apertura cruza la medianoche (18:00 → 00:00), como las ventanas de promociones.
+export const scheduleRowSchema = z.object({
+  dayOfWeek: z.number().int().min(1).max(7),
+  openMinute: minuteSchema,
+  closeMinute: minuteSchema,
+});
 
 export const photoRowSchema = z.object({
   url: z.url().trim(),

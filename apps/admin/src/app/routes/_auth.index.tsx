@@ -38,9 +38,6 @@ export const Route = createFileRoute("/_auth/")({
         queryClient.query({ ...api.getMenuDishesQueryOptions({ branchId: branch.id, trpc }), staleTime: "static" }),
       );
     }
-    if (can(roleCode, "billing.manage")) {
-      jobs.push(queryClient.query({ ...api.getBillingOverviewQueryOptions({ trpc }), staleTime: "static" }));
-    }
     await Promise.all(jobs);
   },
   component: DashboardPage,

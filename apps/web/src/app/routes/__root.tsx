@@ -64,7 +64,6 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
       ],
       links: [
         { rel: "icon", href: "/favicon.ico", sizes: "any" },
-        { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
         // iOS ignores manifest icons for Add to Home Screen; this route redirects to the
         // tenant logo, or to the committed raster when the branch has none.
         { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },

@@ -50,6 +50,20 @@
       "when": 1788974131259,
       "tag": "0006_simplify_restaurant_languages",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1789227884557,
+      "tag": "0007_translation_source_tracking",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1789227884956,
+      "tag": "0008_complete_menu_translations",
+      "breakpoints": true
     }
   ]
 }
