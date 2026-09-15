@@ -62,6 +62,7 @@ export function MenuFeatured({
         >
           <QmFeatured
             value={{
+              comboLabel: featured.comboLabel,
               desc: featured.desc,
               name: featured.name,
               oldPrice: featured.oldPrice,

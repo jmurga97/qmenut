@@ -47,6 +47,15 @@ export function MenuDishModalContent({
       <X slot="close-icon" size={16} strokeWidth={2} />
       {/* Descriptions may contain sanitized rich-text HTML (bold/italic/lists) from the CRM. */}
       {dish.descHtml ? <div dangerouslySetInnerHTML={{ __html: dish.descHtml }} /> : null}
+      {dish.comboLabel && dish.comboDescription && dish.comboPrice ? (
+        <div className="dish-combo-detail">
+          <p className="dish-combo-detail__label">{dish.comboLabel}</p>
+          <p className="dish-combo-detail__description">{dish.comboDescription}</p>
+          <p className="dish-combo-detail__price">
+            <span>{t("menu.comboPriceLabel")}:</span> {dish.comboPrice}
+          </p>
+        </div>
+      ) : null}
       {dish.extras && dish.extras.length > 0 ? (
         <QmDishExtras slot="extras" label={t("menu.extrasLabel")} items={dish.extras} />
       ) : null}

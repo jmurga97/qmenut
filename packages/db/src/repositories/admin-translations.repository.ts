@@ -48,7 +48,12 @@ async function loadTranslationRows({ branchId, db, restaurantId }: BranchInput) 
         .where(categoryFilter)
         .all(),
       db
-        .select({ id: dishes.id, name: dishes.name, description: dishes.description })
+        .select({
+          id: dishes.id,
+          name: dishes.name,
+          description: dishes.description,
+          comboDescription: dishes.comboDescription,
+        })
         .from(dishes)
         .where(dishFilter)
         .all(),
@@ -106,6 +111,7 @@ export async function collectTranslatableTexts(input: BranchInput): Promise<Tran
     ...dishRows.flatMap((row): TranslatableText[] => [
       { entityId: row.id, entityType: "dish", field: "name", text: row.name },
       { entityId: row.id, entityType: "dish", field: "description", text: row.description ?? "" },
+      { entityId: row.id, entityType: "dish", field: "comboDescription", text: row.comboDescription ?? "" },
     ]),
     ...variantGroupRows.map((row): TranslatableText => ({
       dishId: row.dishId,

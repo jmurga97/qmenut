@@ -34,6 +34,8 @@ function translatedRow({ item, languageCode, value }: { item: TranslatableText; 
   const clean = item.field === "description" ? sanitizeDescription(value) : value.trim();
   if (item.text.trim() && !clean.trim())
     throw new TRPCError({ code: "BAD_GATEWAY", message: "El proveedor devolvió una traducción vacía" });
+  if (item.field === "comboDescription" && clean.length > 2000)
+    throw new TRPCError({ code: "BAD_GATEWAY", message: "El proveedor devolvió una descripción demasiado larga" });
   return {
     entityId: item.entityId,
     entityType: item.entityType,

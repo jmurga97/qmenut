@@ -31,6 +31,8 @@ export default {
     allergensLabel: "Allergenen",
     heroLabel: "Menu van vandaag",
     photoLabel: "Foto van het gerecht",
+    comboAvailable: "Beschikbaar als combo",
+    comboPriceLabel: "Totale comboprijs",
     recommended: "Aanbevolen",
     featuredBadges: {
       fine: "Aanbeveling van de chef",

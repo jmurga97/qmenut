@@ -28,6 +28,7 @@ export function mapDish({
   // oxlint-disable-next-line unicorn/no-array-callback-reference -- isAllergenCode is a single-param type guard; passing it directly keeps the narrowing.
   const allergens = dish.allergens.map((allergen) => allergen.code).filter(isAllergenCode);
   const descHtml = dish.description ?? "";
+  const comboEnabled = dish.comboEnabled && dish.comboPrice !== null && Boolean(dish.comboDescription?.trim());
   const extras = dish.extras
     .toSorted((a, b) => a.position - b.position)
     .map((extra) => ({
@@ -46,6 +47,9 @@ export function mapDish({
   return {
     allergens: allergens.length > 0 ? allergens : undefined,
     badge,
+    comboDescription: comboEnabled ? stripHtml(dish.comboDescription ?? "") : undefined,
+    comboLabel: comboEnabled ? t("menu.comboAvailable") : undefined,
+    comboPrice: comboEnabled ? formatPrice(dish.comboPrice ?? 0) : undefined,
     desc: stripHtml(descHtml),
     descHtml,
     extras: extras.length > 0 ? extras : undefined,

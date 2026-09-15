@@ -53,6 +53,9 @@ export const dishes = sqliteTable(
     name: text("name").notNull(),
     description: text("description"),
     price: integer("price").notNull(),
+    comboEnabled: integer("combo_enabled", { mode: "boolean" }).notNull().default(false),
+    comboPrice: integer("combo_price"),
+    comboDescription: text("combo_description"),
     imageUrl: text("image_url"),
     position: integer("position").notNull().default(0),
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
@@ -78,6 +81,15 @@ export const dishes = sqliteTable(
       .on(table.branchId)
       .where(sql`${table.deletedAt} IS NULL`),
     check("dishes_price", sql`${table.price} >= 0`),
+    check("dishes_combo_price", sql`${table.comboPrice} IS NULL OR ${table.comboPrice} >= 0`),
+    check(
+      "dishes_combo_description",
+      sql`${table.comboDescription} IS NULL OR length(${table.comboDescription}) <= 2000`,
+    ),
+    check(
+      "dishes_combo_required_values",
+      sql`${table.comboEnabled} = 0 OR (${table.comboPrice} IS NOT NULL AND ${table.comboDescription} IS NOT NULL AND length(trim(${table.comboDescription})) > 0)`,
+    ),
   ],
 );
 

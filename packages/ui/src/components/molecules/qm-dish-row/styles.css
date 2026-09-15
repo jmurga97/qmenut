@@ -56,14 +56,15 @@
 
 .tag {
   flex: none;
-  width: max-content;
+  width: fit-content;
+  max-width: 100%;
   --qm-badge-font-size: var(--qm-text-2xs, 10px);
   --qm-badge-letter-spacing: 0.5px;
   --qm-badge-max-width: none;
   --qm-badge-overflow-wrap: normal;
   --qm-badge-padding: 2px 6px;
   --qm-badge-text-transform: uppercase;
-  --qm-badge-white-space: nowrap;
+  --qm-badge-white-space: normal;
 }
 
 .tag--featured {

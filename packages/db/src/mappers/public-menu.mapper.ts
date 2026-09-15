@@ -56,7 +56,8 @@ function translateField<Fallback extends string | null>({
   field: string;
   translationsByEntity: TranslationFieldMap;
 }): string | Fallback {
-  return translationsByEntity.get(entityId)?.get(field) ?? fallback;
+  const translated = translationsByEntity.get(entityId)?.get(field);
+  return translated?.trim() ? translated : fallback;
 }
 
 function createAvailabilityByDish(rows: AvailabilityRow[]): Map<string, PublicDishAvailabilityWindow[]> {
@@ -220,6 +221,14 @@ export function mapPublicDishes({
       value: {
         id: row.id,
         categoryId: row.categoryId,
+        comboDescription: translateField({
+          entityId: row.id,
+          fallback: row.comboDescription,
+          field: "comboDescription",
+          translationsByEntity,
+        }),
+        comboEnabled: row.comboEnabled,
+        comboPrice: row.comboPrice,
         name: translateField({ entityId: row.id, fallback: row.name, field: "name", translationsByEntity }),
         description: translateField({
           entityId: row.id,

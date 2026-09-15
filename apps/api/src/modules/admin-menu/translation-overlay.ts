@@ -63,5 +63,6 @@ export function translateText<Fallback extends string | null>({
   field: string;
   texts: TranslationFieldMap | null;
 }): string | Fallback {
-  return texts?.get(entityId)?.get(field) ?? fallback;
+  const translated = texts?.get(entityId)?.get(field);
+  return translated?.trim() ? translated : fallback;
 }

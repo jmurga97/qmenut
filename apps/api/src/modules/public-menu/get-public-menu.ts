@@ -34,6 +34,7 @@ function sanitizeCategories(categories: PublicCategory[]): PublicCategory[] {
     description: sanitizeNullableDescription(category.description),
     dishes: category.dishes.map((dish) => ({
       ...dish,
+      comboDescription: sanitizeNullableDescription(dish.comboDescription),
       description: sanitizeNullableDescription(dish.description),
     })),
   }));

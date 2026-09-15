@@ -9,7 +9,7 @@ import type { BatchItem } from "drizzle-orm/batch";
 
 export const TRANSLATION_ENTITY_TYPES = translations.entityType.enumValues;
 export type TranslationEntityType = (typeof TRANSLATION_ENTITY_TYPES)[number];
-export type TranslationField = "description" | "name" | "tagline";
+export type TranslationField = "comboDescription" | "description" | "name" | "tagline";
 
 interface TenantLanguageIdsInput {
   db: DrizzleDb;

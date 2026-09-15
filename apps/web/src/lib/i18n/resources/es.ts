@@ -37,6 +37,8 @@ export default {
     allergensLabel: "Alérgenos",
     heroLabel: "Menú del día",
     photoLabel: "Foto del plato",
+    comboAvailable: "Disponible en combo",
+    comboPriceLabel: "Precio total del combo",
     recommended: "Recomendado",
     featuredBadges: {
       fine: "Recomendación del chef",

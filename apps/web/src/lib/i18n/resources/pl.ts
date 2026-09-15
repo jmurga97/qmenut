@@ -33,6 +33,8 @@ export default {
     allergensLabel: "Alergeny",
     heroLabel: "Dzisiejsze menu",
     photoLabel: "Zdjęcie dania",
+    comboAvailable: "Dostępne w zestawie",
+    comboPriceLabel: "Łączna cena zestawu",
     recommended: "Polecane",
     featuredBadges: {
       fine: "Poleca szef kuchni",

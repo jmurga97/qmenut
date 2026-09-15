@@ -64,6 +64,13 @@
       "when": 1789227884956,
       "tag": "0008_complete_menu_translations",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1789477940960,
+      "tag": "0009_add_dish_combo",
+      "breakpoints": true
     }
   ]
 }

@@ -53,7 +53,7 @@ const translationListSchema = z.object({
 const translationRowSchema = z.object({
   entityType: z.enum(TRANSLATION_ENTITY_TYPES),
   entityId: z.string().min(1),
-  field: z.enum(["name", "description", "tagline"]),
+  field: z.enum(["name", "description", "comboDescription", "tagline"]),
   sourceText: z.string().max(10_000),
   value: z.string().trim().max(10_000),
 });
@@ -220,7 +220,11 @@ const translationsRouter = router({
       const value = row.field === "description" ? sanitizeDescription(row.value) : row.value;
       if (source.text.trim() && !value.trim())
         throw new TRPCError({ code: "BAD_REQUEST", message: "La traducción no puede estar vacía" });
-      if ((row.field === "name" && value.length > 200) || (row.field === "tagline" && value.length > 120))
+      if (
+        (row.field === "name" && value.length > 200) ||
+        (row.field === "comboDescription" && value.length > 2000) ||
+        (row.field === "tagline" && value.length > 120)
+      )
         throw new TRPCError({ code: "BAD_REQUEST", message: "La traducción supera la longitud permitida" });
       return { ...row, value, languageCode: input.languageCode, isManual: true };
     });

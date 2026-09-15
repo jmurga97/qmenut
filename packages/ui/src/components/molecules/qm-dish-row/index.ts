@@ -25,6 +25,7 @@ export interface QmDishRowValue {
   desc: string;
   price: string;
   oldPrice?: string;
+  comboLabel?: string;
   tag?: string;
   featured?: boolean;
   photo: boolean;
@@ -72,9 +73,10 @@ export class QmDishRow extends LitElement {
         <div class="body">
           <div class="name-line">
             <span part="name" class="name">${this.value?.name ?? ""}</span>
+            ${this.value?.tag ? html`<qm-badge part="tag" class=${tagClass} .text=${this.value.tag}></qm-badge>` : nothing}
             ${
-              this.value?.tag
-                ? html`<qm-badge part="tag" class=${tagClass} .text=${this.value.tag}></qm-badge>`
+              this.value?.comboLabel
+                ? html`<qm-badge part="combo-label" class="tag" .text=${this.value.comboLabel}></qm-badge>`
                 : nothing
             }
           </div>

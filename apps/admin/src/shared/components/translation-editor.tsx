@@ -27,7 +27,12 @@ const ENTITY_LABELS: Record<string, string> = {
   branch: "Sucursal",
   reward: "Recompensa",
 };
-const FIELD_LABELS: Record<string, string> = { name: "Nombre", description: "Descripción", tagline: "Eslogan" };
+const FIELD_LABELS: Record<string, string> = {
+  comboDescription: "Descripción del combo",
+  description: "Descripción",
+  name: "Nombre",
+  tagline: "Eslogan",
+};
 
 export function TranslationEditor({ branchId, languageCode, entityId, entityType }: TranslationEditorProps) {
   const { data: rows } = useSuspenseQuery(trpc.admin.translations.list.queryOptions({ branchId, languageCode }));
@@ -128,7 +133,7 @@ function TranslationGroup({
               <Field label={`${FIELD_LABELS[item.field]} (${languageCode.toUpperCase()})`}>
                 <Textarea
                   disabled={save.isPending || !item.text.trim()}
-                  rows={item.field === "description" ? 4 : 2}
+                  rows={item.field === "description" || item.field === "comboDescription" ? 4 : 2}
                   value={values[index]}
                   onChange={(event) => changeValue(index, event.target.value)}
                 />

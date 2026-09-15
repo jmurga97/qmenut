@@ -36,6 +36,8 @@ export default {
     allergensLabel: "过敏原",
     heroLabel: "今日菜单",
     photoLabel: "菜品照片",
+    comboAvailable: "可选套餐",
+    comboPriceLabel: "套餐总价",
     recommended: "推荐",
     featuredBadges: {
       ...en.menu.featuredBadges,

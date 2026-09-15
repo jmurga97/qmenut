@@ -76,6 +76,37 @@ img {
   flex: 0 0 auto;
 }
 
+.dish-combo-detail {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--qm-hairline, #e5e0d8);
+}
+
+.dish-combo-detail__label,
+.dish-combo-detail__description,
+.dish-combo-detail__price {
+  margin: 0;
+}
+
+.dish-combo-detail__label {
+  margin-bottom: 0.4rem;
+  color: var(--qm-ink, #1c1815);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dish-combo-detail__description {
+  white-space: pre-wrap;
+}
+
+.dish-combo-detail__price {
+  margin-top: 0.5rem;
+  color: var(--qm-ink, #1c1815);
+  font-weight: 700;
+}
+
 .scroll-hide-header {
   position: sticky;
   z-index: 3;

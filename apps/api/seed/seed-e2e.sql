@@ -130,5 +130,5 @@ WITH english(entity_type, entity_id, field, source_text, value) AS (VALUES
 INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_code, field, source_text, value)
 SELECT 'e2e_en_' || entity_id || '_' || field, 'rest_tapas', entity_type, entity_id, 'en', field, source_text, value
 FROM english WHERE true
-ON CONFLICT (restaurant_id, entity_type, entity_id, language_code, field)
+ON CONFLICT (entity_type, entity_id, language_code, field)
 DO UPDATE SET source_text = excluded.source_text, value = excluded.value, is_manual = 0;

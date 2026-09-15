@@ -18,6 +18,9 @@ export interface MenuDishBadgeViewModel {
 export interface MenuDishViewModel {
   allergens?: AllergenCode[];
   badge?: MenuDishBadgeViewModel;
+  comboDescription?: string;
+  comboLabel?: string;
+  comboPrice?: string;
   desc: string;
   descHtml: string;
   extras?: MenuDishExtraViewModel[];

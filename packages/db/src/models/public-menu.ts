@@ -51,6 +51,9 @@ export interface PublicDish {
   allergens: PublicAllergen[];
   availabilityWindows: PublicDishAvailabilityWindow[];
   categoryId: string;
+  comboDescription: string | null;
+  comboEnabled: boolean;
+  comboPrice: number | null;
   description: string | null;
   extras: PublicDishExtra[];
   id: string;

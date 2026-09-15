@@ -2,7 +2,7 @@ import { Button, Field, Input, Switch } from "@jmurga97/components";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { FormProvider } from "react-hook-form";
+import { FormProvider, useController, useFormContext, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { notifyError } from "~/lib/notifications";
@@ -325,6 +325,44 @@ function ExistingDish({ branchId, dishId }: { branchId: string; dishId: string }
   const dish = useSuspenseQuery(getDishDetailQueryOptions({ dishId, languageCode, trpc })).data;
   return <DishForm branchId={branchId} dish={dish} />;
 }
+function DishComboFields({
+  canTranslate = true,
+  translation = false,
+}: {
+  canTranslate?: boolean;
+  translation?: boolean;
+}) {
+  const { control } = useFormContext<DishFormValues>();
+  const comboEnabled = useWatch({ control, name: "comboEnabled" });
+  const comboSwitch = useController({ control, name: "comboEnabled" });
+  return (
+    <div className="admin-combo-fields">
+      <Switch
+        checked={Boolean(comboSwitch.field.value)}
+        disabled={translation || !canTranslate}
+        label={translation ? "Disponible en combo (idioma base)" : "Disponible en combo"}
+        onCheckedChange={comboSwitch.field.onChange}
+      />
+      {comboEnabled ? (
+        <div className="admin-form-grid">
+          <FormTextInput<DishFormValues>
+            disabled={translation || !canTranslate}
+            inputMode="decimal"
+            label={translation ? "Precio total del combo (idioma base)" : "Precio total del combo"}
+            name="comboPrice"
+          />
+          <FormTextarea<DishFormValues>
+            disabled={!canTranslate}
+            label="Descripción del combo"
+            maxLength={2000}
+            name="comboDescription"
+            rows={3}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
 function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | null }) {
   const canWrite = useCan("menu.write");
   const controller = useDishEditorController({ branchId, dish });
@@ -355,6 +393,7 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
               onSelect={controller.image.selectFile}
             />
             <FormTextarea<DishFormValues> label="Descripción" name="description" rows={3} />
+            <DishComboFields />
             <div className="admin-choice-grid">
               <FormCheckbox<DishFormValues> label="Activo" name="isActive" />
               <FormCheckbox<DishFormValues> label="Recomendado" name="isRecommended" />
@@ -396,6 +435,12 @@ function TranslatedDishForm({
         field: "description",
         fallback: dish.description ?? "",
       }),
+      comboDescription: translation.value({
+        entityType: "dish",
+        entityId: dishId,
+        field: "comboDescription",
+        fallback: dish.comboDescription ?? "",
+      }),
       name: translation.value({ entityType: "dish", entityId: dishId, field: "name", fallback: dish.name }),
     }),
     [dish, dishId, translation],
@@ -408,9 +453,9 @@ function TranslatedDishForm({
     pending: translation.pending,
   });
   const submit = async () => {
-    if (!canTranslate || !(await controller.form.trigger(["name", "description"]))) return;
+    if (!canTranslate || !(await controller.form.trigger(["name", "description", "comboDescription"]))) return;
     const values = controller.form.getValues();
-    const ownRows = (["name", "description"] as const).map((field) =>
+    const ownRows = (["name", "description", "comboDescription"] as const).map((field) =>
       translation.saveRow({ entityType: "dish", entityId: dishId, field, value: values[field] }),
     );
     const rows = [
@@ -464,6 +509,7 @@ function TranslatedDishForm({
               onSelect={controller.image.selectFile}
             />
             <FormTextarea<DishFormValues> disabled={!canTranslate} label="Descripción" name="description" rows={3} />
+            <DishComboFields canTranslate={canTranslate} translation />
             <div className="admin-choice-grid">
               <FormCheckbox<DishFormValues> disabled label="Activo (idioma base)" name="isActive" />
               <FormCheckbox<DishFormValues> disabled label="Recomendado (idioma base)" name="isRecommended" />

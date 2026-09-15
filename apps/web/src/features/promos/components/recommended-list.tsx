@@ -40,6 +40,7 @@ export function RecommendedList({ content, onSelectDish, showDishPhotos }: Recom
           >
             <QmDishRow
               value={{
+                comboLabel: dish.comboLabel,
                 desc: dish.desc,
                 featured: dish.featured,
                 name: dish.name,

@@ -32,6 +32,12 @@ export async function getDishDetail({
   const texts = await getTranslationTexts({ db, ids: [dish.id], languageCode, restaurantId });
   return {
     ...dish,
+    comboDescription: translateText({
+      entityId: dish.id,
+      fallback: dish.comboDescription,
+      field: "comboDescription",
+      texts,
+    }),
     description: translateText({ entityId: dish.id, fallback: dish.description, field: "description", texts }),
     name: translateText({ entityId: dish.id, fallback: dish.name, field: "name", texts }),
   };

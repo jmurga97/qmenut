@@ -27,6 +27,7 @@ export interface QmFeaturedValue {
   desc: string;
   price: string;
   oldPrice?: string;
+  comboLabel?: string;
   tag?: string;
   secondaryTag?: string;
   photo: boolean;
@@ -82,16 +83,17 @@ export class QmFeatured extends LitElement {
   }
 
   private renderTags() {
-    if (!this.value?.tag && !this.value?.secondaryTag) return html``;
+    if (!this.value?.tag && !this.value?.comboLabel && !this.value?.secondaryTag) return html``;
 
     const primaryTag = this.renderTag({ className: "tag", part: "tag", text: this.value?.tag });
+    const comboTag = this.renderTag({ className: "tag", part: "combo-label", text: this.value?.comboLabel });
     const secondaryTag = this.renderTag({
       className: "tag tag--secondary",
       part: "secondary-tag",
       text: this.value?.secondaryTag,
     });
 
-    return html` <div part="tags" class="tags">${primaryTag} ${secondaryTag}</div> `;
+    return html` <div part="tags" class="tags">${primaryTag} ${comboTag} ${secondaryTag}</div> `;
   }
 
   private renderTag({ className, part, text }: { className: string; part: string; text?: string }) {

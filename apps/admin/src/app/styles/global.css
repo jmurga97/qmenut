@@ -386,6 +386,10 @@ button {
   grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
   gap: 0.5rem;
 }
+.admin-combo-fields {
+  display: grid;
+  gap: 1rem;
+}
 .admin-choice-grid .admin-form-checkbox {
   padding-inline: 0.75rem;
   border: 1px solid var(--border);

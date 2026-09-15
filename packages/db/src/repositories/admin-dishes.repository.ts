@@ -8,6 +8,9 @@ import type { BatchItem } from "drizzle-orm/batch";
 export interface AdminDishListItem {
   id: string;
   categoryId: string;
+  comboDescription: string | null;
+  comboEnabled: boolean;
+  comboPrice: number | null;
   name: string;
   price: number;
   position: number;
@@ -26,6 +29,9 @@ export interface AdminDishDetail extends AdminDishListItem {
 
 export interface DishWriteData {
   categoryId: string;
+  comboDescription: string | null;
+  comboEnabled: boolean;
+  comboPrice: number | null;
   name: string;
   description: string | null;
   price: number;
@@ -47,6 +53,9 @@ export async function listDishes({ db, restaurantId, branchId }: ListDishesInput
     .select({
       id: dishes.id,
       categoryId: dishes.categoryId,
+      comboDescription: dishes.comboDescription,
+      comboEnabled: dishes.comboEnabled,
+      comboPrice: dishes.comboPrice,
       name: dishes.name,
       price: dishes.price,
       position: dishes.position,
@@ -95,6 +104,9 @@ export async function getDishDetail({ db, restaurantId, dishId }: GetDishDetailI
   return {
     id: dish.id,
     categoryId: dish.categoryId,
+    comboDescription: dish.comboDescription,
+    comboEnabled: dish.comboEnabled,
+    comboPrice: dish.comboPrice,
     name: dish.name,
     description: dish.description,
     price: dish.price,
@@ -133,6 +145,9 @@ export function createDishStatement({
     name: data.name,
     description: data.description,
     price: data.price,
+    comboEnabled: data.comboEnabled,
+    comboPrice: data.comboPrice,
+    comboDescription: data.comboDescription,
     imageUrl: data.imageUrl,
     position: data.position,
     isActive: data.isActive,
@@ -192,6 +207,9 @@ export function updateDishStatement({
       name: data.name,
       description: data.description,
       price: data.price,
+      comboEnabled: data.comboEnabled,
+      comboPrice: data.comboPrice,
+      comboDescription: data.comboDescription,
       imageUrl: preserveImage ? undefined : data.imageUrl,
       position: data.position,
       isActive: data.isActive,

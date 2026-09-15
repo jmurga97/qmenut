@@ -35,19 +35,37 @@ export const updateCategorySchema = z.object({
   data: categoryWriteSchema,
 });
 
-export const dishWriteSchema = z.object({
-  categoryId: z.string().trim().min(1),
-  name: z.string().trim().min(1).max(200),
-  description: nullableText,
-  price: z.number().int().min(0),
-  imageUrl: nullableText,
-  imageUploadId: z.uuid().optional(),
-  imageChange: imageChangeSchema.optional(),
-  position: z.number().int().min(0).default(0),
-  isActive: z.boolean().default(true),
-  isRecommended: z.boolean().default(false),
-  isFeatured: z.boolean().default(false),
-});
+export const dishWriteSchema = z
+  .object({
+    categoryId: z.string().trim().min(1),
+    comboDescription: nullableText.default(null),
+    comboEnabled: z.boolean().default(false),
+    comboPrice: z.number().int().min(0).nullable().default(null),
+    name: z.string().trim().min(1).max(200),
+    description: nullableText,
+    price: z.number().int().min(0),
+    imageUrl: nullableText,
+    imageUploadId: z.uuid().optional(),
+    imageChange: imageChangeSchema.optional(),
+    position: z.number().int().min(0).default(0),
+    isActive: z.boolean().default(true),
+    isRecommended: z.boolean().default(false),
+    isFeatured: z.boolean().default(false),
+  })
+  .superRefine((data, context) => {
+    if (!data.comboEnabled) return;
+
+    if (data.comboPrice === null) {
+      context.addIssue({ code: "custom", message: "El precio del combo es obligatorio", path: ["comboPrice"] });
+    }
+    if (!data.comboDescription) {
+      context.addIssue({
+        code: "custom",
+        message: "La descripción del combo es obligatoria",
+        path: ["comboDescription"],
+      });
+    }
+  });
 
 export const createDishSchema = branchScopedSchema.extend({
   operationId: z.uuid().optional(),
