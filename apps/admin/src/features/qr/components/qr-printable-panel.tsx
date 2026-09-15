@@ -23,7 +23,7 @@ export function QrPrintablePanel({
   url: string | null;
 }) {
   const [layout, setLayout] = useState<PrintLayout>("branded");
-  const { qrSvg, logoState, fontState, printReady, print } = useQrPrint({
+  const { qrSvg, logoState, fontState, printReady, print, printableRef } = useQrPrint({
     url,
     logoUrl: branch.logoUrl,
     theme,
@@ -60,7 +60,11 @@ export function QrPrintablePanel({
           </button>
         ))}
       </div>
-      <div className={`admin-qr-printable admin-qr-printable--${layout}`} style={buildQmThemeVars(theme)}>
+      <div
+        ref={printableRef}
+        className={`admin-qr-printable admin-qr-printable--${layout}`}
+        style={buildQmThemeVars(theme)}
+      >
         <div className="admin-qr-printable__brand">
           {branch.logoUrl && logoState === "ready" ? <img alt="" src={branch.logoUrl} /> : null}
           <span>{branch.name}</span>

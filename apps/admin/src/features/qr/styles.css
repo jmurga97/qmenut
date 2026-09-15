@@ -259,26 +259,26 @@
   }
 }
 
+.admin-qr-print-output {
+  display: none;
+}
+
 @media print {
   body.admin-qr-printing {
     overflow: visible;
     background: #fff;
   }
 
-  body.admin-qr-printing * {
-    visibility: hidden;
+  body.admin-qr-printing > :not(.admin-qr-print-output) {
+    display: none !important;
   }
 
-  body.admin-qr-printing .admin-qr-printable,
-  body.admin-qr-printing .admin-qr-printable * {
-    visibility: visible;
-  }
-
-  body.admin-qr-printing .admin-qr-printable {
-    position: absolute;
-    inset: 0;
+  body.admin-qr-printing .admin-qr-print-output {
+    display: grid;
     width: 100%;
-    height: 100%;
+    height: 148mm;
+    min-height: 0;
+    box-sizing: border-box;
     max-width: none;
     border: 0;
     border-radius: 0;
@@ -286,6 +286,7 @@
   }
 
   body.admin-qr-printing .admin-qr-printable--poster {
+    height: 297mm;
     gap: 8mm;
     padding: 16mm;
   }

@@ -1,5 +1,5 @@
 import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { notifyError } from "~/lib/notifications";
 
@@ -91,23 +91,39 @@ export function useQrPrint({
   layout: PrintLayout;
 }) {
   const qrSvg = useQrSvg(url);
+  const printableRef = useRef<HTMLDivElement>(null);
+  const cleanupRef = useRef<(() => void) | null>(null);
+  useEffect(() => () => cleanupRef.current?.(), []);
   const logoState = useLogoState(logoUrl);
   const fontState = usePrintFonts(theme);
   const printReady = Boolean(qrSvg) && logoState !== "loading" && fontState === "ready";
 
   function print() {
-    if (!printReady) return;
+    if (!printReady || !printableRef.current) return;
+    cleanupRef.current?.();
+    const output = printableRef.current.cloneNode(true) as HTMLDivElement;
+    output.classList.add("admin-qr-print-output");
+    (document.body as ParentNode).append(output);
     const printStyle = document.createElement("style");
     printStyle.dataset.qrPrint = "true";
-    printStyle.textContent = `@page { size: ${layout === "poster" ? "A4" : "A6"} portrait; margin: 0; }`;
+    printStyle.textContent = `@page { size: ${layout === "poster" ? "210mm 297mm" : "105mm 148mm"}; margin: 0; }`;
     (document.head as ParentNode).append(printStyle);
     document.body.classList.add("admin-qr-printing");
-    try {
-      window.print();
-    } finally {
+    const cleanup = () => {
+      window.removeEventListener("afterprint", cleanup);
       document.body.classList.remove("admin-qr-printing");
       printStyle.remove();
+      output.remove();
+      cleanupRef.current = null;
+    };
+    cleanupRef.current = cleanup;
+    window.addEventListener("afterprint", cleanup, { once: true });
+    try {
+      window.print();
+    } catch (error) {
+      cleanup();
+      notifyError(error);
     }
   }
-  return { qrSvg, logoState, fontState, printReady, print };
+  return { qrSvg, logoState, fontState, printReady, print, printableRef };
 }
