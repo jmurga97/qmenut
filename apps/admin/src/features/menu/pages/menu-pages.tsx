@@ -340,7 +340,7 @@ function DishComboFields({
       <Switch
         checked={Boolean(comboSwitch.field.value)}
         disabled={translation || !canTranslate}
-        label={translation ? "Disponible en combo (idioma base)" : "Disponible en combo"}
+        label={translation ? "Combo (idioma base)" : "Combo"}
         onCheckedChange={comboSwitch.field.onChange}
       />
       {comboEnabled ? (

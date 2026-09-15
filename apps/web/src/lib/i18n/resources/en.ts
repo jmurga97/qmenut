@@ -36,7 +36,7 @@ export default {
     allergensLabel: "Allergens",
     heroLabel: "Today's menu",
     photoLabel: "Dish photo",
-    comboAvailable: "Available as a combo",
+    comboAvailable: "Combo",
     comboPriceLabel: "Total combo price",
     recommended: "Recommended",
     featuredBadges: {

@@ -43,7 +43,7 @@ export default {
     allergensLabel: "Al·lèrgens",
     heroLabel: "Menú del dia",
     photoLabel: "Foto del plat",
-    comboAvailable: "Disponible en combo",
+    comboAvailable: "Combo",
     comboPriceLabel: "Preu total del combo",
     recommended: "Recomanat",
     featuredBadges: {

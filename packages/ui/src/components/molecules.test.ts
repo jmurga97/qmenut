@@ -40,7 +40,7 @@ const dishValue: QmDishRowValue = {
   desc: "Leche de tigre y camote",
   price: "12 €",
   oldPrice: "15 €",
-  comboLabel: "Disponible en combo",
+  comboLabel: "Combo",
   tag: "Picante",
   featured: true,
   photo: true,
@@ -55,7 +55,7 @@ const featuredValue: QmFeaturedValue = {
   desc: "Ají amarillo y lima",
   price: "14 €",
   oldPrice: "17 €",
-  comboLabel: "Disponible en combo",
+  comboLabel: "Combo",
   tag: "Nuevo",
   secondaryTag: "Favorito",
   photo: true,
@@ -73,7 +73,7 @@ describe("menu molecules", () => {
     expect(shadowQuery(row, '[part="desc"]').textContent).toContain("Leche de tigre");
     expect(shadowQuery<QmBadge>(row, "qm-badge").text).toBe("Picante");
     expect(shadowQuery<QmBadge>(row, "qm-badge").className).toContain("tag--featured");
-    expect(shadowQuery<QmBadge>(row, '[part="combo-label"]').text).toBe("Disponible en combo");
+    expect(shadowQuery<QmBadge>(row, '[part="combo-label"]').text).toBe("Combo");
     expect(shadowQuery<QmPrice>(row, "qm-price").value).toBe("12 €");
 
     const image = shadowQuery<HTMLImageElement>(row, "img");
@@ -96,7 +96,7 @@ describe("menu molecules", () => {
 
     expect(featured.renderRoot.querySelectorAll("qm-badge")).toHaveLength(3);
     expect(shadowQuery<QmBadge>(featured, '[part="tag"]').text).toBe("Nuevo");
-    expect(shadowQuery<QmBadge>(featured, '[part="combo-label"]').text).toBe("Disponible en combo");
+    expect(shadowQuery<QmBadge>(featured, '[part="combo-label"]').text).toBe("Combo");
     expect(shadowQuery<QmBadge>(featured, '[part="secondary-tag"]').text).toBe("Favorito");
     expect(shadowQuery<QmPrice>(featured, "qm-price").oldValue).toBe("17 €");
 
