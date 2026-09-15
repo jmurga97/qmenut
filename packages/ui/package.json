@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./fonts/*": "./src/fonts/*",
     "./theme/tokens": {
       "types": "./src/theme/tokens.ts",
       "import": "./src/theme/tokens.ts"

@@ -1,18 +1,17 @@
+import antonCss from "@qmenut/ui/fonts/anton.css?url";
+import barlowCss from "@qmenut/ui/fonts/barlow.css?url";
+import bebasNeueCss from "@qmenut/ui/fonts/bebas-neue.css?url";
+import cormorantGaramondCss from "@qmenut/ui/fonts/cormorant-garamond.css?url";
+import dmSansCss from "@qmenut/ui/fonts/dm-sans.css?url";
+import jostCss from "@qmenut/ui/fonts/jost.css?url";
+import nunitoSansCss from "@qmenut/ui/fonts/nunito-sans.css?url";
+import playfairDisplayCss from "@qmenut/ui/fonts/playfair-display.css?url";
+import quicksandCss from "@qmenut/ui/fonts/quicksand.css?url";
+import spectralCss from "@qmenut/ui/fonts/spectral.css?url";
+import workSansCss from "@qmenut/ui/fonts/work-sans.css?url";
+import yesevaOneCss from "@qmenut/ui/fonts/yeseva-one.css?url";
 import { QM_FONT_CATALOG, QM_FONT_IDS } from "@qmenut/ui/theme/font-catalog";
 import { TEMPLATES } from "@qmenut/ui/theme/presets";
-
-import antonCss from "./anton.css?url";
-import barlowCss from "./barlow.css?url";
-import bebasNeueCss from "./bebas-neue.css?url";
-import cormorantGaramondCss from "./cormorant-garamond.css?url";
-import dmSansCss from "./dm-sans.css?url";
-import jostCss from "./jost.css?url";
-import nunitoSansCss from "./nunito-sans.css?url";
-import playfairDisplayCss from "./playfair-display.css?url";
-import quicksandCss from "./quicksand.css?url";
-import spectralCss from "./spectral.css?url";
-import workSansCss from "./work-sans.css?url";
-import yesevaOneCss from "./yeseva-one.css?url";
 
 import type { QmFontId } from "@qmenut/ui/theme/font-catalog";
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";
@@ -32,7 +31,7 @@ export const FONT_CSS_URLS: Record<QmFontId, string> = {
   "dm-sans": dmSansCss,
 };
 
-const FONT_ASSET_URLS = import.meta.glob<string>("../../assets/fonts/*-latin-*-normal.woff2", {
+const FONT_ASSET_URLS = import.meta.glob<string>("../../../../../packages/ui/src/fonts/*-latin-*-normal.woff2", {
   eager: true,
   import: "default",
   query: "?url",
@@ -41,7 +40,7 @@ const FONT_ASSET_URLS = import.meta.glob<string>("../../assets/fonts/*-latin-*-n
 type FontPreloadUrls = Record<QmFontId, Record<number, string>>;
 
 function getFontAssetUrl(fontId: QmFontId, weight: number): string {
-  const key = `../../assets/fonts/${fontId}-latin-${weight}-normal.woff2`;
+  const key = `../../../../../packages/ui/src/fonts/${fontId}-latin-${weight}-normal.woff2`;
   const url = FONT_ASSET_URLS[key];
 
   if (!url) {

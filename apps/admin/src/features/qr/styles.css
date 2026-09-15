@@ -80,7 +80,7 @@
   letter-spacing: -0.025em;
 }
 
-.admin-qr-print-section p {
+.admin-qr-print-section__heading p {
   margin: 0;
   color: var(--muted-foreground);
 }
@@ -88,7 +88,7 @@
 .admin-qr-print-layouts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.625rem;
+  gap: 0.75rem;
 }
 
 .admin-qr-print-layout {
@@ -114,32 +114,59 @@
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 18%, transparent);
 }
 
+.admin-qr-print-layout:hover {
+  background: var(--secondary);
+}
+
+.admin-qr-print-layout:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
 .admin-qr-printable {
   display: grid;
   justify-items: center;
   align-content: center;
-  gap: 0.85rem;
+  gap: 1rem;
+  justify-self: center;
   width: min(100%, 25rem);
   aspect-ratio: 105 / 148;
+  min-height: min-content;
   padding: 2rem 1.5rem;
-  overflow: hidden;
   border: 1px solid var(--qm-hairline, var(--border));
   border-radius: var(--qm-radius, 0.75rem);
   background: var(--qm-bg, #fff);
   color: var(--qm-ink, #23241f);
   font-family: var(--qm-body, var(--font-sans));
+  font-weight: 400;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
   text-align: center;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.admin-qr-printable p {
+  margin: 0;
+}
+
+.admin-qr-printable__brand,
+.admin-qr-printable__instruction,
+.admin-qr-printable__tagline {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .admin-qr-printable__brand {
   display: grid;
   justify-items: center;
   gap: 0.5rem;
-  color: var(--qm-primary, var(--foreground));
+  color: var(--qm-ink, var(--foreground));
   font-family: var(--qm-heading, var(--font-display));
-  font-size: clamp(1.25rem, 4vw, 2rem);
+  font-size: var(--qm-text-display);
   font-weight: var(--qm-hw, 700);
-  line-height: 1.05;
+  letter-spacing: var(--qm-name-ls);
+  line-height: 1.15;
 }
 
 .admin-qr-printable__brand img {
@@ -150,19 +177,19 @@
 }
 
 .admin-qr-printable__target {
-  color: var(--qm-muted, var(--muted-foreground)) !important;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  color: var(--qm-muted);
+  font-size: var(--qm-text-sm);
+  font-weight: 400;
+  letter-spacing: var(--qm-eyebrow-ls);
+  text-transform: var(--qm-eyebrow-tt);
 }
 
 .admin-qr-printable__code {
   display: grid;
   place-items: center;
-  width: min(72%, 13rem);
+  width: min(100%, 14rem);
   aspect-ratio: 1;
-  padding: 0.75rem;
+  padding: 0;
   background: #fff;
 }
 
@@ -178,16 +205,18 @@
 
 .admin-qr-printable__instruction {
   max-width: 20ch;
-  color: var(--qm-primary, var(--foreground)) !important;
+  color: var(--qm-ink);
   font-family: var(--qm-heading, var(--font-display));
-  font-size: clamp(1rem, 3vw, 1.35rem);
+  font-size: var(--qm-text-2xl);
   font-weight: var(--qm-hw, 600);
-  line-height: 1.15;
+  line-height: 1.3;
 }
 
 .admin-qr-printable__tagline {
   max-width: 28ch;
-  font-size: 0.8rem;
+  color: var(--qm-muted);
+  font-size: var(--qm-text-md);
+  line-height: 1.5;
 }
 
 .admin-qr-printable--minimal {
@@ -196,8 +225,14 @@
   color: #111;
 }
 
-.admin-qr-printable--minimal .admin-qr-printable__brand {
+.admin-qr-printable--minimal .admin-qr-printable__brand,
+.admin-qr-printable--minimal .admin-qr-printable__instruction {
   color: #111;
+}
+
+.admin-qr-printable--minimal .admin-qr-printable__target,
+.admin-qr-printable--minimal .admin-qr-printable__tagline {
+  color: #555;
 }
 
 .admin-qr-printable--poster {
@@ -211,6 +246,10 @@
 }
 
 @media (max-width: 40rem) {
+  .admin-qr-printable {
+    aspect-ratio: auto;
+  }
+
   .admin-qr-print-section__heading {
     display: grid;
   }
@@ -244,6 +283,23 @@
     border: 0;
     border-radius: 0;
     box-shadow: none;
+  }
+
+  body.admin-qr-printing .admin-qr-printable--poster {
+    gap: 8mm;
+    padding: 16mm;
+  }
+
+  body.admin-qr-printing .admin-qr-printable--poster .admin-qr-printable__brand {
+    font-size: calc(var(--qm-text-display) * 2);
+  }
+
+  body.admin-qr-printing .admin-qr-printable--poster .admin-qr-printable__instruction {
+    font-size: calc(var(--qm-text-2xl) * 1.5);
+  }
+
+  body.admin-qr-printing .admin-qr-printable--poster .admin-qr-printable__code {
+    width: 90mm;
   }
 }
 

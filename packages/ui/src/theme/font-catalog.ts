@@ -1,11 +1,11 @@
 /**
- * Curated catalog of the font families QMenut self-hosts (see `apps/web/src/app/fonts/`). A
+ * Curated catalog of the font families QMenut self-hosts (see `packages/ui/src/fonts/`). A
  * tenant may pick a `headingFont` and/or a
  * `bodyFont` by catalog id; the theme engine resolves the id to its CSS `stack` and feeds it
  * into `--qm-heading` / `--qm-body` (see `theme/apply-theme.ts`). Anything not chosen falls
  * back to the template preset's own `heading` / `body` string.
  *
- * Keep this list in sync with the vendored family CSS files in `apps/web/src/app/fonts/`: every
+ * Keep this list in sync with the vendored family CSS files in `packages/ui/src/fonts/`: every
  * catalog `stack` must have its faces loaded there, and each entry's `weights` must match the
  * weights declared there (so callers never request a weight that renders as faux-bold).
  */

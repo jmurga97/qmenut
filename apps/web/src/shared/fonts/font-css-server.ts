@@ -1,15 +1,15 @@
-import antonCss from "./anton.css?inline";
-import barlowCss from "./barlow.css?inline";
-import bebasNeueCss from "./bebas-neue.css?inline";
-import cormorantGaramondCss from "./cormorant-garamond.css?inline";
-import dmSansCss from "./dm-sans.css?inline";
-import jostCss from "./jost.css?inline";
-import nunitoSansCss from "./nunito-sans.css?inline";
-import playfairDisplayCss from "./playfair-display.css?inline";
-import quicksandCss from "./quicksand.css?inline";
-import spectralCss from "./spectral.css?inline";
-import workSansCss from "./work-sans.css?inline";
-import yesevaOneCss from "./yeseva-one.css?inline";
+import antonCss from "@qmenut/ui/fonts/anton.css?inline";
+import barlowCss from "@qmenut/ui/fonts/barlow.css?inline";
+import bebasNeueCss from "@qmenut/ui/fonts/bebas-neue.css?inline";
+import cormorantGaramondCss from "@qmenut/ui/fonts/cormorant-garamond.css?inline";
+import dmSansCss from "@qmenut/ui/fonts/dm-sans.css?inline";
+import jostCss from "@qmenut/ui/fonts/jost.css?inline";
+import nunitoSansCss from "@qmenut/ui/fonts/nunito-sans.css?inline";
+import playfairDisplayCss from "@qmenut/ui/fonts/playfair-display.css?inline";
+import quicksandCss from "@qmenut/ui/fonts/quicksand.css?inline";
+import spectralCss from "@qmenut/ui/fonts/spectral.css?inline";
+import workSansCss from "@qmenut/ui/fonts/work-sans.css?inline";
+import yesevaOneCss from "@qmenut/ui/fonts/yeseva-one.css?inline";
 
 import type { QmFontId } from "@qmenut/ui/theme/font-catalog";
 
