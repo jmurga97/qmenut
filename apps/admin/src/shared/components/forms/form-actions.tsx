@@ -12,6 +12,7 @@ interface FormActionsProps {
   children?: ReactNode;
   onCancel?: () => void;
   onSubmit: () => void;
+  submitDisabled?: boolean;
   submitLabel?: ReactNode;
   submitType?: "button" | "submit";
 }
@@ -22,6 +23,7 @@ export function FormActions({
   children,
   onCancel,
   onSubmit,
+  submitDisabled = false,
   submitLabel = "Guardar",
   submitType = "button",
 }: FormActionsProps) {
@@ -46,7 +48,7 @@ export function FormActions({
       ) : null}
       <Button
         key={busy ? "submit-busy" : "submit-idle"}
-        disabled={busy || undefined}
+        disabled={busy || submitDisabled || undefined}
         onClick={onSubmit}
         type={submitType}
         variant="primary"

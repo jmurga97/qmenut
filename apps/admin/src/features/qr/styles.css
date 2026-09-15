@@ -31,6 +31,222 @@
   background: var(--card);
 }
 
+.admin-qr-setup-hint {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-body-sm);
+}
+
+.admin-qr-setup-hint a {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.admin-qr-theme-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 56rem;
+}
+
+.admin-qr-theme-state p {
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+.admin-qr-print-section {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 56rem;
+}
+
+.admin-qr-print-section__heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-qr-print-section__heading > div {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.admin-qr-print-section h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--admin-text-heading);
+  letter-spacing: -0.025em;
+}
+
+.admin-qr-print-section p {
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+.admin-qr-print-layouts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+.admin-qr-print-layout {
+  display: grid;
+  gap: 0.125rem;
+  justify-items: start;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+  text-align: start;
+}
+
+.admin-qr-print-layout span {
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-body-sm);
+}
+
+.admin-qr-print-layout--selected {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 18%, transparent);
+}
+
+.admin-qr-printable {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.85rem;
+  width: min(100%, 25rem);
+  aspect-ratio: 105 / 148;
+  padding: 2rem 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--qm-hairline, var(--border));
+  border-radius: var(--qm-radius, 0.75rem);
+  background: var(--qm-bg, #fff);
+  color: var(--qm-ink, #23241f);
+  font-family: var(--qm-body, var(--font-sans));
+  text-align: center;
+}
+
+.admin-qr-printable__brand {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  color: var(--qm-primary, var(--foreground));
+  font-family: var(--qm-heading, var(--font-display));
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  font-weight: var(--qm-hw, 700);
+  line-height: 1.05;
+}
+
+.admin-qr-printable__brand img {
+  width: 3.75rem;
+  height: 3.75rem;
+  object-fit: contain;
+  border-radius: var(--qm-hero-logo-radius, 0.5rem);
+}
+
+.admin-qr-printable__target {
+  color: var(--qm-muted, var(--muted-foreground)) !important;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-qr-printable__code {
+  display: grid;
+  place-items: center;
+  width: min(72%, 13rem);
+  aspect-ratio: 1;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+.admin-qr-printable__code svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.admin-qr-printable__code--empty {
+  background: color-mix(in srgb, var(--qm-muted, #777) 10%, #fff);
+}
+
+.admin-qr-printable__instruction {
+  max-width: 20ch;
+  color: var(--qm-primary, var(--foreground)) !important;
+  font-family: var(--qm-heading, var(--font-display));
+  font-size: clamp(1rem, 3vw, 1.35rem);
+  font-weight: var(--qm-hw, 600);
+  line-height: 1.15;
+}
+
+.admin-qr-printable__tagline {
+  max-width: 28ch;
+  font-size: 0.8rem;
+}
+
+.admin-qr-printable--minimal {
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+}
+
+.admin-qr-printable--minimal .admin-qr-printable__brand {
+  color: #111;
+}
+
+.admin-qr-printable--poster {
+  width: min(100%, 30rem);
+  aspect-ratio: 210 / 297;
+  padding: 3rem 2rem;
+}
+
+.admin-qr-printable--poster .admin-qr-printable__code {
+  width: min(78%, 18rem);
+}
+
+@media (max-width: 40rem) {
+  .admin-qr-print-section__heading {
+    display: grid;
+  }
+
+  .admin-qr-print-layouts {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  body.admin-qr-printing {
+    overflow: visible;
+    background: #fff;
+  }
+
+  body.admin-qr-printing * {
+    visibility: hidden;
+  }
+
+  body.admin-qr-printing .admin-qr-printable,
+  body.admin-qr-printing .admin-qr-printable * {
+    visibility: visible;
+  }
+
+  body.admin-qr-printing .admin-qr-printable {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
 @media (min-width: 48rem) {
   .admin-qr-page .admin-editor-shell {
     max-width: 56rem;
