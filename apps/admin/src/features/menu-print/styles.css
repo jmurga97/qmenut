@@ -1,0 +1,423 @@
+.admin-print-tabs {
+  display: flex;
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-print-tabs button {
+  padding: 0.75rem 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-body-sm);
+  cursor: pointer;
+}
+
+.admin-print-tabs button[aria-selected="true"] {
+  border-bottom-color: var(--foreground);
+  color: var(--foreground);
+}
+
+.admin-print-tabs button:focus-visible,
+.menu-print-controls input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+
+.menu-print-editor {
+  display: grid;
+  grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr);
+  align-items: start;
+  gap: 2rem;
+}
+
+.menu-print-controls {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+.menu-print-controls h2 {
+  margin: 0.3rem 0 0.5rem;
+  font-size: var(--admin-text-heading);
+}
+
+.menu-print-controls p {
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-body-sm);
+  line-height: 1.6;
+}
+
+.menu-print-controls fieldset {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.menu-print-controls legend {
+  margin-bottom: 0.65rem;
+  font-size: var(--admin-text-body-sm);
+  font-weight: 600;
+}
+
+.menu-print-controls input {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--primary);
+}
+
+.menu-print-formats label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.menu-print-formats label:has(:checked) {
+  background: var(--secondary);
+  border-color: var(--ring);
+}
+
+.menu-print-formats strong,
+.menu-print-formats small {
+  display: block;
+  font-size: var(--admin-text-body-sm);
+}
+
+.menu-print-formats small {
+  margin-top: 0.2rem;
+  font-size: var(--admin-text-caption);
+  color: var(--muted-foreground);
+}
+
+.menu-print-categories label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0;
+  cursor: pointer;
+  font-size: var(--admin-text-body-sm);
+}
+
+.menu-print-categories span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.menu-print-categories small {
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.menu-print-controls .menu-print-status {
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  background: var(--secondary);
+  color: var(--foreground);
+}
+
+.menu-print-controls .menu-print-status--overflow {
+  background: var(--ming-warning-surface);
+  color: var(--ming-warning);
+}
+
+.menu-print-document {
+  --print-width: 210mm;
+  --print-height: 297mm;
+  --print-column-width: 89mm;
+  position: relative;
+  min-width: 0;
+  color-scheme: light;
+}
+
+.menu-print-document--folded {
+  --print-width: 297mm;
+  --print-height: 210mm;
+  --print-column-width: 128.5mm;
+}
+
+.menu-print-preview {
+  display: grid;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.menu-print-side__label {
+  margin: 0 0 0.75rem;
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-caption);
+}
+
+.menu-print-sheet-frame {
+  position: relative;
+  width: 100%;
+  max-width: var(--print-width);
+  aspect-ratio: 210 / 297;
+  box-shadow: 0 2px 12px #0000000d;
+}
+
+.menu-print-document--folded .menu-print-sheet-frame {
+  aspect-ratio: 297 / 210;
+}
+
+.menu-print-sheet,
+.menu-print-measurements {
+  font-family: var(--qm-body);
+  font-size: max(10pt, calc(10pt * var(--qm-fs)));
+  line-height: 1.4;
+  color: var(--qm-ink);
+  background: var(--qm-bg);
+  overflow-wrap: anywhere;
+}
+
+.menu-print-sheet {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  width: var(--print-width);
+  height: var(--print-height);
+  padding: 12mm;
+  box-sizing: border-box;
+  transform: scale(var(--print-preview-scale, 1));
+  transform-origin: top left;
+}
+
+.menu-print-document--folded .menu-print-sheet {
+  padding: 0;
+}
+
+.menu-print-sheet__panels {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8mm;
+}
+
+.menu-print-document--folded .menu-print-sheet__panels {
+  gap: 0;
+}
+
+.menu-print-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.menu-print-document--folded .menu-print-slot {
+  padding: 10mm;
+}
+
+.menu-print-slot.menu-print-slot--qr {
+  padding-bottom: 34mm;
+}
+
+.menu-print-document--folded .menu-print-slot--qr {
+  padding-bottom: 44mm;
+}
+
+.menu-print-slot__content {
+  flex: 1;
+  min-height: 0;
+}
+
+.menu-print-brand {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 3mm;
+  padding-bottom: 4mm;
+  margin-bottom: 4mm;
+  border-bottom: var(--qm-rule) solid var(--qm-primary);
+}
+
+.menu-print-brand img {
+  width: 12mm;
+  height: 12mm;
+  object-fit: contain;
+  flex: none;
+}
+
+.menu-print-brand h2 {
+  margin: 0;
+  font-family: var(--qm-heading);
+  font-weight: var(--qm-hw);
+  font-size: calc(20pt * var(--qm-fs));
+  letter-spacing: var(--qm-name-ls);
+  line-height: 1.1;
+}
+
+.menu-print-brand p {
+  margin: 1.5mm 0 0;
+  font-size: 10pt;
+  color: var(--qm-muted);
+  white-space: pre-line;
+}
+
+.menu-print-category {
+  padding-bottom: 3mm;
+}
+
+.menu-print-category h3 {
+  margin: 0;
+  padding: 1.5mm 2mm;
+  font-family: var(--qm-heading);
+  font-weight: var(--qm-hw);
+  font-size: calc(15pt * var(--qm-fs));
+  line-height: 1.2;
+  text-transform: var(--qm-eyebrow-tt);
+  letter-spacing: var(--qm-eyebrow-ls);
+  color: var(--qm-section-ink);
+  background: var(--qm-section-bg);
+  border: var(--qm-section-border);
+  border-bottom: var(--qm-section-divider);
+  border-left: var(--qm-section-rail);
+  border-radius: var(--qm-section-radius);
+}
+
+.menu-print-category p {
+  margin: 1.5mm 0 0;
+  white-space: pre-line;
+  color: var(--qm-muted);
+}
+
+.menu-print-dish {
+  padding: 0 0 3mm;
+  break-inside: avoid;
+}
+
+.menu-print-dish__name {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 3mm;
+}
+
+.menu-print-dish h4 {
+  margin: 0;
+  font-family: var(--qm-heading);
+  font-size: calc(12pt * var(--qm-fs));
+  font-weight: var(--qm-dish-weight);
+  letter-spacing: var(--qm-name-ls);
+  text-transform: var(--qm-dish-tt);
+}
+
+.menu-print-dish__name > span {
+  flex: none;
+  white-space: nowrap;
+  color: var(--qm-price);
+  font-family: var(--qm-heading);
+  font-weight: var(--qm-price-weight);
+  font-size: calc(12pt * var(--qm-fs));
+  font-variant-numeric: tabular-nums;
+}
+
+.menu-print-dish p {
+  margin: 1mm 0 0;
+  white-space: pre-line;
+}
+
+.menu-print-dish__detail {
+  color: var(--qm-muted);
+}
+
+.menu-print-qr {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 25mm;
+  text-align: center;
+}
+
+.menu-print-document--folded .menu-print-qr {
+  right: 10mm;
+  bottom: 10mm;
+}
+
+.menu-print-qr svg {
+  display: block;
+  width: 25mm;
+  height: 25mm;
+  background: #fff;
+}
+
+.menu-print-qr span {
+  display: block;
+  margin-top: 1mm;
+  font-family: var(--qm-body);
+  font-size: 9pt;
+  white-space: nowrap;
+}
+
+.menu-print-measurements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--print-column-width);
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  contain: layout;
+}
+
+.admin-menu-print-output {
+  display: none;
+}
+
+@media (max-width: 64rem) {
+  .menu-print-editor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media print {
+  body.admin-menu-printing {
+    margin: 0;
+    overflow: visible;
+    background: #fff;
+  }
+
+  body.admin-menu-printing > :not(.admin-menu-print-output) {
+    display: none !important;
+  }
+
+  body.admin-menu-printing .admin-menu-print-output {
+    display: block;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .admin-menu-print-output .menu-print-preview {
+    display: block;
+  }
+
+  .admin-menu-print-output .menu-print-side__label {
+    display: none;
+  }
+
+  .admin-menu-print-output .menu-print-side + .menu-print-side {
+    break-before: page;
+  }
+
+  .admin-menu-print-output .menu-print-sheet-frame {
+    width: var(--print-width);
+    height: var(--print-height);
+    box-shadow: none;
+  }
+
+  .admin-menu-print-output .menu-print-sheet {
+    position: static;
+    transform: none;
+  }
+}

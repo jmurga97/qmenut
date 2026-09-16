@@ -5,7 +5,6 @@ import { useState } from "react";
 
 import { trpc } from "~/lib/trpc";
 import { getThemeQueryOptions } from "~/shared/api";
-import { PageHeader } from "~/shared/components/page-header";
 
 import { QrDownloadForm } from "./qr-download-form";
 import { QrPrintablePanel } from "./qr-printable-panel";
@@ -26,8 +25,7 @@ export function QrPanel({ branchId, host }: { branchId: string; host: string }) 
   const theme = themeQuery.data ? resolveTenantThemeConfig(themeQuery.data) : null;
 
   return (
-    <div className="admin-page admin-qr-page">
-      <PageHeader kicker={`Códigos QR · ${host}`} title="Códigos QR" />
+    <div className="admin-page">
       {themeQuery.isPending ? <QrThemeState text="Cargando el tema de la sucursal…" /> : null}
       {themeQuery.isError ? (
         <QrThemeState text="No se pudo cargar el tema de esta sucursal.">

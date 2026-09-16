@@ -5,8 +5,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { notifyError } from "~/lib/notifications";
+import { buildQrUrl, renderQrPreview } from "~/shared/services/qr";
 
-import { buildQrFileBase, buildQrUrl, downloadQr, renderQrPreview } from "../services";
+import { buildQrFileBase, downloadQr } from "../services";
 
 const qrFormSchema = z.object({
   size: z.enum(["512", "1024", "2048"]),

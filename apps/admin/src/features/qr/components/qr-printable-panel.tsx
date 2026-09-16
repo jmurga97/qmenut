@@ -8,8 +8,8 @@ import { PRINT_LAYOUT_OPTIONS, QR_TARGET_OPTIONS } from "../constants";
 import { useQrPrint } from "../hooks/use-qr-print";
 
 import type { PrintLayout } from "../constants";
-import type { QrTarget } from "../services";
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
+import type { QrTarget } from "~/shared/services/qr";
 
 export function QrPrintablePanel({
   branch,

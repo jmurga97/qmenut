@@ -2,23 +2,6 @@ import { formatMoneyInput, moneyInputSchema, parseMoneyInput } from "~/shared/se
 
 import type { DishDetail, DishFormValues } from "./types";
 
-const ALLERGEN_LABELS: Record<string, string> = {
-  celery: "Apio",
-  crustaceans: "Crustáceos",
-  eggs: "Huevos",
-  fish: "Pescado",
-  gluten: "Gluten",
-  lupin: "Altramuces",
-  milk: "Leche",
-  molluscs: "Moluscos",
-  mustard: "Mostaza",
-  nuts: "Frutos de cáscara",
-  peanuts: "Cacahuetes",
-  sesame: "Sésamo",
-  soybeans: "Soja",
-  sulphites: "Sulfitos",
-};
-
 const TAG_LABELS: Record<string, string> = {
   contains_alcohol: "Contiene alcohol",
   gluten_free: "Sin gluten",
@@ -28,10 +11,6 @@ const TAG_LABELS: Record<string, string> = {
   spicy: "Picante",
   vegan: "Vegano",
 };
-
-export function toAllergenDisplayLabel(code: string) {
-  return ALLERGEN_LABELS[code] ?? code;
-}
 
 export function toTagDisplayLabel(tag: { code: string | null; id: string; label: string | null }) {
   if (tag.label) return tag.label;

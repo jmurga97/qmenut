@@ -10,6 +10,7 @@ import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
 import { useImageDraft } from "~/shared/images/use-image-drafts";
 import { useImageSave } from "~/shared/images/use-image-save";
 import { useImageUploads } from "~/shared/images/use-image-uploads";
+import { toAllergenDisplayLabel } from "~/shared/services/allergens";
 import { formatMoney } from "~/shared/services/money";
 
 import {
@@ -20,7 +21,7 @@ import {
   getMenuIngredientsQueryOptions,
   getMenuTagsQueryOptions,
 } from "../api";
-import { toAllergenDisplayLabel, toDishFormValues, toDishInput, toTagDisplayLabel } from "../mappers";
+import { toDishFormValues, toDishInput, toTagDisplayLabel } from "../mappers";
 import { categoryFormSchema, dishFormSchema } from "../types";
 
 import type { CategoryFormValues, DishDetail, DishFormValues } from "../types";

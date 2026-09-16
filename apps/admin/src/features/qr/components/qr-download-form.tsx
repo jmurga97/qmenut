@@ -5,9 +5,9 @@ import { FormProvider } from "react-hook-form";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormShell } from "~/shared/components/forms/form-shell";
 import { Icon } from "~/shared/components/icon";
+import { QR_PREVIEW_SIZE } from "~/shared/services/qr";
 
 import { QR_SIZE_OPTIONS, QR_TARGET_OPTIONS } from "../constants";
-import { QR_PREVIEW_SIZE } from "../services";
 
 import type { useQrController } from "../hooks/use-qr-controller";
 

@@ -24,6 +24,7 @@ import "./dashboard/styles.css";
 import "../features/languages/styles.css";
 import "../features/loyalty/styles.css";
 import "../features/qr/styles.css";
+import "../features/menu-print/styles.css";
 import "../features/theme/styles.css";
 import "../features/users/styles.css";
 
