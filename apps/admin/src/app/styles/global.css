@@ -611,16 +611,16 @@ button {
   color: var(--destructive);
 }
 .admin-topbar {
-  display: flex;
+  display: grid;
   width: 100%;
-  flex-wrap: wrap;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 1rem;
   align-items: center;
-  justify-content: space-between;
   background: transparent;
 }
 .admin-topbar-copy {
   display: grid;
+  min-width: 0;
   gap: 0.125rem;
 }
 .admin-topbar-context {
@@ -641,10 +641,17 @@ button {
 }
 .admin-topbar-actions {
   display: flex;
-  flex-wrap: wrap;
+  min-width: 0;
+  justify-content: flex-end;
   gap: 0.625rem;
 }
+.admin-topbar-actions > .ming-select {
+  width: auto;
+  min-width: 0;
+}
 .admin-topbar .ming-select__trigger {
+  width: 100%;
+  min-width: 0;
   min-height: 2.375rem;
   border-radius: 0.375rem;
   padding-inline: 0.625rem;
@@ -814,6 +821,16 @@ button {
 }
 
 @media (max-width: 40rem) {
+  .admin-topbar {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  .admin-topbar-actions {
+    width: 100%;
+  }
+  .admin-topbar-actions > .ming-select {
+    flex: 1 1 0;
+  }
   .admin-page {
     gap: 1.25rem;
     padding: 1rem 1rem 2rem;
