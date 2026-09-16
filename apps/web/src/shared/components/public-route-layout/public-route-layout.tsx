@@ -53,6 +53,9 @@ export function PublicRouteLayout({
           <PublicRouteHeader scrollContainerRef={scrollContainerRef} template={template} tenant={tenant} />
         )}
         <PublicRouteContentTransition />
+        <footer className="public-footer">
+          <a href="https://qmenut.app">Powered by qmenut.app</a>
+        </footer>
       </div>
     </PublicPageShell>
   );

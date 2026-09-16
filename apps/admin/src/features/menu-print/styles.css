@@ -331,6 +331,52 @@
   color: var(--qm-muted);
 }
 
+.menu-print-dish__body {
+  padding-left: 2mm;
+}
+
+.menu-print-dish__badges,
+.menu-print-dish__allergens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5mm;
+  margin-top: 1mm;
+}
+
+.menu-print-dish__badges > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 1mm;
+  padding: 0.5mm 1.5mm;
+  border: 0.2mm solid currentColor;
+  border-radius: 1mm;
+  font-size: 8pt;
+  font-weight: 600;
+  color: var(--qm-primary);
+}
+
+.menu-print-dish__badges svg {
+  width: 3mm;
+  height: 3mm;
+}
+
+.menu-print-dish__allergens svg {
+  display: block;
+  width: 4mm;
+  height: 4mm;
+}
+
+.menu-print-dish__detail strong {
+  font-weight: 700;
+}
+
+.menu-print-dish__combo-price {
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
 .menu-print-qr {
   position: absolute;
   right: 0;

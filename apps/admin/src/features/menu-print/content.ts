@@ -1,4 +1,3 @@
-import { toAllergenDisplayLabel } from "~/shared/services/allergens";
 import { formatMoney } from "~/shared/services/money";
 
 import type { RouterOutputs } from "~/lib/trpc";
@@ -11,6 +10,10 @@ export interface PrintDish {
   price: string;
   description: string;
   details: string[];
+  isFeatured: boolean;
+  isRecommended: boolean;
+  allergens: { code: string }[];
+  combo: { description: string; price: string } | null;
 }
 export interface PrintCategory {
   id: string;
@@ -30,21 +33,11 @@ export function toPrintText(html: string | null): string {
 function mapDish(dish: MenuData["categories"][number]["dishes"][number], currency: string): PrintDish {
   const money = (amount: number) => formatMoney(amount, currency);
   const details: string[] = [];
-  if (dish.comboEnabled && dish.comboPrice !== null) {
-    details.push(`Combo: ${toPrintText(dish.comboDescription)} · ${money(dish.comboPrice)}`);
-  }
   for (const group of dish.variantGroups) {
     const options = group.options.map(
       (option) => `${option.name} (${option.priceDelta > 0 ? "+" : ""}${money(option.priceDelta)})`,
     );
     details.push(`${group.name}${group.isRequired ? " (obligatorio)" : ""}: ${options.join(" · ")}`);
-  }
-  if (dish.extras.length > 0) {
-    const extras = dish.extras.map((extra) => `${extra.name} (+${money(extra.price)})`);
-    details.push(`Extras: ${extras.join(" · ")}`);
-  }
-  if (dish.allergens.length > 0) {
-    details.push(`Alérgenos: ${dish.allergens.map(({ code }) => toAllergenDisplayLabel(code)).join(", ")}`);
   }
   return {
     id: dish.id,
@@ -52,6 +45,13 @@ function mapDish(dish: MenuData["categories"][number]["dishes"][number], currenc
     price: money(dish.price),
     description: toPrintText(dish.description),
     details,
+    isFeatured: dish.isFeatured,
+    isRecommended: dish.isRecommended,
+    allergens: dish.allergens,
+    combo:
+      dish.comboEnabled && dish.comboPrice !== null
+        ? { description: toPrintText(dish.comboDescription), price: money(dish.comboPrice) }
+        : null,
   };
 }
 

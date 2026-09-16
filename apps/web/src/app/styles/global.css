@@ -272,6 +272,23 @@ img {
   display: none;
 }
 
+.public-footer {
+  padding: 1.25rem 0 0.25rem;
+  color: color-mix(in oklab, var(--qm-ink, #1c1815) 58%, transparent);
+  font-size: 0.6875rem;
+  text-align: center;
+}
+
+.public-footer a {
+  text-decoration-color: color-mix(in oklab, currentColor 45%, transparent);
+  text-underline-offset: 0.15em;
+}
+
+.public-footer a:focus-visible {
+  outline: 2px solid var(--qm-primary, currentColor);
+  outline-offset: 3px;
+}
+
 @media (prefers-reduced-transparency: reduce) {
   .scroll-hide-header {
     background: var(--qm-bg, #fff);
