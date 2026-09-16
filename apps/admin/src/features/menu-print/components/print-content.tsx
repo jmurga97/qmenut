@@ -48,7 +48,8 @@ export function PrintDishRow({ dish }: { dish: PrintDish }) {
           </p>
         ))}
         {dish.allergens.length > 0 ? (
-          <div className="menu-print-dish__allergens" role="group" aria-label="Alérgenos">
+          <div className="menu-print-dish__allergens menu-print-dish__detail" role="group" aria-label="Alérgenos">
+            <strong>Alérgenos:</strong>
             {dish.allergens.map(({ code }) => {
               const AllergenIcon = ALLERGEN_ICONS[code];
               const label = toAllergenDisplayLabel(code);

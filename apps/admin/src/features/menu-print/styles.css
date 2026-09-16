@@ -292,7 +292,7 @@
 }
 
 .menu-print-dish {
-  padding: 0 0 3mm;
+  padding: 0 0 5mm;
   break-inside: avoid;
 }
 
@@ -323,7 +323,7 @@
 }
 
 .menu-print-dish p {
-  margin: 1mm 0 0;
+  margin: 0;
   white-space: pre-line;
 }
 
@@ -332,7 +332,13 @@
 }
 
 .menu-print-dish__body {
+  display: grid;
+  gap: 2mm;
   padding-left: 2mm;
+}
+
+.menu-print-dish__body:not(:empty) {
+  margin-top: 2mm;
 }
 
 .menu-print-dish__badges,
@@ -341,7 +347,6 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 1.5mm;
-  margin-top: 1mm;
 }
 
 .menu-print-dish__badges > span {
@@ -353,7 +358,7 @@
   border-radius: 1mm;
   font-size: 8pt;
   font-weight: 600;
-  color: var(--qm-primary);
+  color: var(--qm-ink);
 }
 
 .menu-print-dish__badges svg {
