@@ -62,7 +62,7 @@ export function QrPrintablePanel({
       </div>
       <div
         ref={printableRef}
-        className={`admin-qr-printable admin-qr-printable--${layout}`}
+        className={`admin-qr-printable admin-qr-printable--${layout}${layout === "poster-primary" ? " admin-qr-printable--poster" : ""}`}
         style={buildQmThemeVars(theme)}
       >
         <div className="admin-qr-printable__brand">

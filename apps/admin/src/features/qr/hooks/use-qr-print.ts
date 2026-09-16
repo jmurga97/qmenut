@@ -106,7 +106,7 @@ export function useQrPrint({
     (document.body as ParentNode).append(output);
     const printStyle = document.createElement("style");
     printStyle.dataset.qrPrint = "true";
-    printStyle.textContent = `@page { size: ${layout === "poster" ? "210mm 297mm" : "105mm 148mm"}; margin: 0; }`;
+    printStyle.textContent = `@page { size: ${layout.startsWith("poster") ? "210mm 297mm" : "105mm 148mm"}; margin: 0; }`;
     (document.head as ParentNode).append(printStyle);
     document.body.classList.add("admin-qr-printing");
     const cleanup = () => {
