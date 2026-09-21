@@ -17,6 +17,7 @@ import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 export interface LocaleLanguageOption {
   code: string;
   isDefault: boolean;
+  label: string;
 }
 
 export interface LocaleRouteContext {

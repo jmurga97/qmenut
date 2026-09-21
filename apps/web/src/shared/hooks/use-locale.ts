@@ -45,7 +45,7 @@ export function useLocale(): LocaleState {
     langLabel: t("common.languageLabel"),
     langOptions: availableLanguages.map((language) => ({
       value: language.code,
-      label: language.code.toUpperCase(),
+      label: language.label,
     })),
   };
 }

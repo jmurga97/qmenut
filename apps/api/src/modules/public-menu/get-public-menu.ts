@@ -92,6 +92,7 @@ export async function getPublicMenu({
       available: activeLanguages.map((language) => ({
         code: language.languageCode,
         isDefault: language.languageCode === defaultLanguage,
+        label: getLanguageCatalogEntry(language.languageCode)?.label ?? language.languageCode,
       })),
       default: defaultLanguage,
       effective,

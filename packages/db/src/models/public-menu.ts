@@ -82,6 +82,7 @@ export interface PublicCategory {
 export interface PublicMenuLanguageOption {
   code: string;
   isDefault: boolean;
+  label: string;
 }
 
 export interface PublicMenuLanguage {

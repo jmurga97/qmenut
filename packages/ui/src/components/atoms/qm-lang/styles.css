@@ -25,7 +25,8 @@ select {
   font-size: var(--qm-text-md, 13.5px);
   font-weight: 700;
   letter-spacing: 1px;
-  text-transform: uppercase;
   color: var(--qm-emph-ink, #1c1815);
+  inline-size: var(--qm-lang-width, auto);
   padding-right: 16px;
+  text-overflow: ellipsis;
 }

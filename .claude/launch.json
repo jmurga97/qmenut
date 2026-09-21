@@ -19,6 +19,12 @@
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "--cwd", "apps/admin", "dev"],
       "port": 5174
+    },
+    {
+      "name": "tenant-config",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "apps/tenant-config", "dev"],
+      "port": 8788
     }
   ]
 }

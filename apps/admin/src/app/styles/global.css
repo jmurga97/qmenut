@@ -610,6 +610,10 @@ button {
   background: var(--ming-error-surface);
   color: var(--destructive);
 }
+/* Base UI portals render a real <div>; keep it out of grid/flex flow of its container. */
+.ming-portal {
+  display: contents;
+}
 .admin-topbar {
   display: grid;
   width: 100%;

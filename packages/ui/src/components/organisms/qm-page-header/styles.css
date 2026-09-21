@@ -25,6 +25,10 @@
   gap: 8px;
 }
 
+qm-lang[part="lang"] {
+  --qm-lang-width: 6em;
+}
+
 .title-wrap {
   margin-top: 9px;
 }

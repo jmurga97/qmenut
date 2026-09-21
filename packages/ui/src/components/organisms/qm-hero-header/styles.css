@@ -103,6 +103,10 @@
   gap: 8px;
 }
 
+qm-lang[part="lang"] {
+  --qm-lang-width: 6em;
+}
+
 :host([compact]) .lang-wrap {
   top: 50%;
   right: 14px;
