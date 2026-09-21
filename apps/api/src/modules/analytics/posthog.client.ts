@@ -77,7 +77,7 @@ async function executeOnce({ env, expectedColumns, query }: ExecuteInput): Promi
         authorization: `Bearer ${env.POSTHOG_PERSONAL_API_KEY}`,
         "content-type": "application/json",
       },
-      body: JSON.stringify({ query: { type: "hogql", query } }),
+      body: JSON.stringify({ query: { kind: "HogQLQuery", query } }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   } catch (error) {
