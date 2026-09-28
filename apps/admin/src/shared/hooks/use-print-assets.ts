@@ -1,10 +1,12 @@
 import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
 import { useEffect, useState } from "react";
 
+import { i18n } from "~/lib/i18n";
 import { notifyError } from "~/lib/notifications";
-import { renderQrSvg } from "~/shared/services/qr";
+import { renderQrSvg, trustQrSvg } from "~/shared/services/qr";
 
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
+import type { QrSvgMarkup } from "~/shared/services/qr";
 import "@qmenut/ui/fonts/anton.css";
 import "@qmenut/ui/fonts/barlow.css";
 import "@qmenut/ui/fonts/bebas-neue.css";
@@ -19,13 +21,13 @@ import "@qmenut/ui/fonts/work-sans.css";
 import "@qmenut/ui/fonts/yeseva-one.css";
 
 export function useQrSvg(url: string | null) {
-  const [result, setResult] = useState<{ svg: string | null; url: string; error: boolean } | null>(null);
+  const [result, setResult] = useState<{ svg: QrSvgMarkup | null; url: string; error: boolean } | null>(null);
   useEffect(() => {
     if (!url) return;
     let active = true;
     void renderQrSvg(url)
       .then((svg) => {
-        if (active) setResult({ svg, url, error: false });
+        if (active) setResult({ svg: trustQrSvg(svg), url, error: false });
       })
       .catch((error: unknown) => {
         if (!active) return;
@@ -87,7 +89,8 @@ export function usePrintFonts(theme: QmTenantThemeConfig) {
     let active = true;
     void Promise.all((JSON.parse(key) as string[]).map((font) => document.fonts.load(font)))
       .then((faces) => {
-        if (faces.some((family) => family.length === 0)) throw new Error("No se encontraron las tipografías del menú.");
+        if (faces.some((family) => family.length === 0))
+          throw new Error(i18n.t("shared___No se encontraron las tipografías del menú."));
         if (active) setResult({ key, status: "ready" });
       })
       .catch((error: unknown) => {
