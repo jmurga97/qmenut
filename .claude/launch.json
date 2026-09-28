@@ -25,6 +25,12 @@
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "--cwd", "apps/tenant-config", "dev"],
       "port": 8788
+    },
+    {
+      "name": "ming-storybook",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "/Users/murgapja/dev/ming-components", "dev"],
+      "port": 6006
     }
   ]
 }
