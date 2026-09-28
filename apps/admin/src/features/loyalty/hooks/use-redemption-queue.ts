@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import * as api from "~/features/loyalty/api";
 import * as services from "~/features/loyalty/services";
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { useNowTicker } from "~/shared/hooks/use-now-ticker";
 
@@ -38,10 +39,16 @@ export function useRedemptionQueue(branchId: string) {
       {
         onSuccess: (result) => {
           setUndoNotice({ transactionId: result.transactionId });
-          toast.success(`${redemption.rewardName} validado para ${redemption.email}.`, {
-            action: { label: "Deshacer", onClick: () => undo(result.transactionId) },
-            duration: UNDO_NOTICE_MS,
-          });
+          toast.success(
+            i18n.t("loyalty___{{reward}} validado para {{email}}.", {
+              reward: redemption.rewardName,
+              email: redemption.email,
+            }),
+            {
+              action: { label: i18n.t("loyalty___Deshacer"), onClick: () => undo(result.transactionId) },
+              duration: UNDO_NOTICE_MS,
+            },
+          );
         },
       },
     );

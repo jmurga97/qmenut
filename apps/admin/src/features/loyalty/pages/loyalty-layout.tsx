@@ -1,11 +1,12 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
 
+import { i18n } from "~/lib/i18n";
 import { useCan } from "~/shared/hooks/use-can";
 
 const TABS = [
-  { label: "Operativa", path: "/loyalty", permission: "loyalty.operate" },
-  { label: "Programa", path: "/loyalty/program", permission: "loyalty.manage" },
-  { label: "Insights", path: "/loyalty/insights", permission: "loyalty.insights" },
+  { label: i18n.t("loyalty___Operativa"), path: "/loyalty", permission: "loyalty.operate" },
+  { label: i18n.t("loyalty___Programa"), path: "/loyalty/program", permission: "loyalty.manage" },
+  { label: i18n.t("loyalty___Insights"), path: "/loyalty/insights", permission: "loyalty.insights" },
 ] as const;
 export function LoyaltyLayout() {
   const location = useLocation();
@@ -17,7 +18,7 @@ export function LoyaltyLayout() {
   const tabs = TABS.filter((tab) => permissions[tab.permission]);
   return (
     <div className="admin-loyalty-shell">
-      <nav aria-label="Secciones de fidelización" className="admin-loyalty-tabs">
+      <nav aria-label={i18n.t("loyalty___Secciones de fidelización")} className="admin-loyalty-tabs">
         {tabs.map((tab) => (
           <Link
             activeOptions={{ exact: true }}

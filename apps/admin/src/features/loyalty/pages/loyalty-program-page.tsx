@@ -3,11 +3,12 @@ import { buttonVariants } from "@jmurga97/components/button";
 import { QmLoyaltyCard } from "@qmenut/ui/components/qm-loyalty-card/react";
 import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
 import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { FormProvider, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { useLoyaltyProgramController } from "~/features/loyalty/hooks/use-loyalty-program-controller";
+import { i18n } from "~/lib/i18n";
 import { notifyError } from "~/lib/notifications";
 import { EntityListCard } from "~/shared/components/entity-list-card";
 import { FormCheckbox } from "~/shared/components/forms/adapters/form-checkbox";
@@ -15,8 +16,8 @@ import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
 import { FormTextarea } from "~/shared/components/forms/adapters/form-textarea";
 import { FormActions } from "~/shared/components/forms/form-actions";
-import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
+import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { useCan } from "~/shared/hooks/use-can";
 import { useEditorGuard } from "~/shared/hooks/use-editor-guard";
@@ -28,25 +29,42 @@ import type { CSSProperties } from "react";
 import type { LoyaltyProgramFormValues, RewardType } from "~/features/loyalty/types";
 
 const TYPE_LABELS: Record<RewardType, string> = {
-  free_dish: "Plato gratis",
-  percentage_discount: "Descuento porcentual",
-  special_price: "Precio especial",
+  free_dish: i18n.t("loyalty___Plato gratis"),
+  percentage_discount: i18n.t("loyalty___Descuento porcentual"),
+  special_price: i18n.t("loyalty___Precio especial"),
 };
 const TYPE_OPTIONS = Object.entries(TYPE_LABELS).map(([id, label]) => ({ id, label }));
 type ProgramController = ReturnType<typeof useLoyaltyProgramController>;
 export function LoyaltyProgramPage() {
   const branch = useSelectedBranch();
   const language = useSelectedLanguage();
-  if (!branch) return <NoBranchState description="Crea una sucursal antes de configurar la fidelización." />;
-  if (!language.isDefault && language.languageCode)
-    return (
-      <TranslatedLoyaltyProgram
-        branchId={branch.id}
-        languageCode={language.languageCode}
-        key={`${branch.id}:${language.languageCode}`}
-      />
-    );
-  return <LoyaltyProgramContent branchId={branch.id} key={branch.id} />;
+  if (!branch)
+    return <NoBranchState description={i18n.t("loyalty___Crea una sucursal antes de configurar la fidelización.")} />;
+  return (
+    <div className={"ming-page admin-page admin-loyalty-page"}>
+      <PageHeader kicker={i18n.t("loyalty___Programa")} title={i18n.t("loyalty___Sellos y premios")} />
+      <Suspense
+        fallback={
+          <div className={"loyalty-program-layout"}>
+            <div className={"loyalty-program-main"}>
+              <CardSkeleton rows={2} title={i18n.t("loyalty___Configuración")} />
+              <CardSkeleton title={i18n.t("loyalty___Premios")} />
+            </div>
+          </div>
+        }
+      >
+        {!language.isDefault && language.languageCode ? (
+          <TranslatedLoyaltyProgram
+            branchId={branch.id}
+            languageCode={language.languageCode}
+            key={`${branch.id}:${language.languageCode}`}
+          />
+        ) : (
+          <LoyaltyProgramContent branchId={branch.id} key={branch.id} />
+        )}
+      </Suspense>
+    </div>
+  );
 }
 function TranslatedLoyaltyProgram({ branchId, languageCode }: { branchId: string; languageCode: string }) {
   const translation = useTranslationForm({ branchId, languageCode });
@@ -84,77 +102,83 @@ function LoyaltyProgramContent({ branchId, translation }: { branchId: string; tr
   const themeVars = buildQmThemeVars(resolveTenantThemeConfig(loyalty.theme)) as CSSProperties;
   return (
     <FormProvider {...loyalty.form}>
-      <div className="admin-page admin-loyalty-page">
-        <PageHeader kicker="Programa" title="Sellos y premios" />
-        <div className="loyalty-program-layout">
-          <div className="loyalty-program-main">
-            <fieldset
-              disabled={Boolean(translation)}
-              className="admin-card loyalty-program-settings"
-              aria-labelledby="program-settings-title"
-            >
-              <div className="admin-toolbar">
-                <h3 id="program-settings-title">Configuración</h3>
-                <FormCheckbox<LoyaltyProgramFormValues> label="Programa activo" name="isActive" />
-              </div>
-              <FormTextInput<LoyaltyProgramFormValues> inputMode="decimal" label="Ticket medio" name="averageTicket" />
-              <FormActions
-                busy={loyalty.saveProgramBusy}
-                onSubmit={() => {
-                  if (!translation) void loyalty.saveProgram();
+      <div className={"loyalty-program-layout"}>
+        <div className={"loyalty-program-main"}>
+          <fieldset
+            disabled={Boolean(translation)}
+            className={"admin-card loyalty-program-settings"}
+            aria-labelledby={"program-settings-title"}
+          >
+            <h2 id={"program-settings-title"}>{i18n.t("loyalty___Configuración")}</h2>
+            <FormCheckbox<LoyaltyProgramFormValues> label={i18n.t("loyalty___Programa activo")} name={"isActive"} />
+            <FormTextInput<LoyaltyProgramFormValues>
+              inputMode={"decimal"}
+              label={i18n.t("loyalty___Ticket medio")}
+              name={"averageTicket"}
+            />
+            <FormActions
+              busy={loyalty.saveProgramBusy}
+              onSubmit={() => {
+                if (!translation) void loyalty.saveProgram();
+              }}
+              submitLabel={i18n.t("loyalty___Guardar configuración")}
+            />
+          </fieldset>
+          {translation ? (
+            <p>{i18n.t("loyalty___Cambia al idioma base para crear premios o cambiar la configuración.")}</p>
+          ) : null}
+          <EntityListCard
+            action={
+              <Button
+                disabled={Boolean(translation) || loyalty.rewardBusy || loyalty.editingIndex !== null}
+                onClick={() => {
+                  if (!translation) loyalty.newReward();
                 }}
-                submitLabel="Guardar configuración"
-              />
-            </fieldset>
-            {translation ? <p>Cambia al idioma base para crear premios o cambiar la configuración.</p> : null}
-            <EntityListCard
-              action={
-                <Button
-                  disabled={Boolean(translation) || loyalty.rewardBusy || loyalty.editingIndex !== null}
-                  onClick={() => {
-                    if (!translation) loyalty.newReward();
-                  }}
-                  variant="primary"
-                >
-                  <Icon name="plus" /> Nuevo premio
-                </Button>
-              }
-              count={loyalty.rewards.fields.length}
-              emptyText="Crea el primer premio para que los sellos tengan una meta."
-              title="Premios"
-            >
-              {loyalty.rewards.fields.map((field, index) => (
-                <RewardRow index={index} key={field.id} loyalty={loyalty} translation={translation} />
-              ))}
-            </EntityListCard>
-          </div>
-          <aside className="loyalty-preview-column loyalty-card-preview" style={themeVars}>
-            <div className="admin-kicker">Vista del cliente · {loyalty.selectedBranch?.name}</div>
-            <QmLoyaltyCard
-              restaurantName={loyalty.restaurantName}
-              email="cliente@ejemplo.com"
-              balance={loyalty.previewBalance}
-              target={loyalty.target}
-              progressLabel="Tu tarjeta"
-              gridLabel={`${loyalty.previewBalance} de ${loyalty.target} sellos`}
-              stampLabel="Pedir mi sello"
-            >
-              {loyalty.activeRewards.map((reward) => (
-                <p key={reward.id} slot="rewards">
-                  {translation?.value({
-                    entityType: "reward",
-                    entityId: reward.id,
-                    field: "name",
-                    fallback: reward.name,
-                  }) ?? reward.name}{" "}
-                  · {reward.cost} sellos
-                </p>
-              ))}
-            </QmLoyaltyCard>
-          </aside>
+                variant={"primary"}
+              >
+                {i18n.t("loyalty___Nuevo premio")}
+              </Button>
+            }
+            count={loyalty.rewards.fields.length}
+            emptyText={i18n.t("loyalty___Crea el primer premio para que los sellos tengan una meta.")}
+            title={i18n.t("loyalty___Premios")}
+          >
+            {loyalty.rewards.fields.map((field, index) => (
+              <RewardRow index={index} key={field.id} loyalty={loyalty} translation={translation} />
+            ))}
+          </EntityListCard>
         </div>
-        {translation ? null : <DeleteRewardConfirm loyalty={loyalty} />}
+        <aside className={"loyalty-preview-column loyalty-card-preview"} style={themeVars}>
+          <div className="admin-kicker">
+            {i18n.t("loyalty___Vista del cliente ·")} {loyalty.selectedBranch?.name}
+          </div>
+          <QmLoyaltyCard
+            restaurantName={loyalty.restaurantName}
+            email={i18n.t("loyalty___cliente@ejemplo.com")}
+            balance={loyalty.previewBalance}
+            target={loyalty.target}
+            progressLabel={i18n.t("loyalty___Tu tarjeta")}
+            gridLabel={i18n.t("loyalty___{{balance}} de {{target}} sellos", {
+              balance: loyalty.previewBalance,
+              target: loyalty.target,
+            })}
+            stampLabel={i18n.t("loyalty___Pedir mi sello")}
+          >
+            {loyalty.activeRewards.map((reward) => (
+              <p key={reward.id} slot={"rewards"}>
+                {translation?.value({
+                  entityType: "reward",
+                  entityId: reward.id,
+                  field: "name",
+                  fallback: reward.name,
+                }) ?? reward.name}{" "}
+                · {reward.cost} {i18n.t("loyalty___sellos")}
+              </p>
+            ))}
+          </QmLoyaltyCard>
+        </aside>
       </div>
+      {translation ? null : <DeleteRewardConfirm loyalty={loyalty} />}
     </FormProvider>
   );
 }
@@ -162,9 +186,11 @@ function DeleteRewardConfirm({ loyalty }: { loyalty: ProgramController }) {
   if (loyalty.deletingIndex === null) return null;
   return (
     <ConfirmAction
-      cancelLabel="Cancelar"
-      confirmLabel="Eliminar"
-      message={`Se eliminará “${loyalty.deletingRewardName ?? "este premio"}”. Esta acción no se puede deshacer.`}
+      cancelLabel={i18n.t("loyalty___Cancelar")}
+      confirmLabel={i18n.t("loyalty___Eliminar")}
+      message={i18n.t("loyalty___Se eliminará “{{name}}”. Esta acción no se puede deshacer.", {
+        name: loyalty.deletingRewardName ?? i18n.t("loyalty___este premio"),
+      })}
       onCancel={loyalty.cancelDeleteReward}
       onConfirm={loyalty.confirmDeleteReward}
       onOpenChange={(open) => {
@@ -173,7 +199,7 @@ function DeleteRewardConfirm({ loyalty }: { loyalty: ProgramController }) {
       }}
       open
       pending={loyalty.rewardBusy}
-      title="Eliminar premio"
+      title={i18n.t("loyalty___Eliminar premio")}
     />
   );
 }
@@ -206,118 +232,121 @@ function RewardRow({
       await translation.saveRows(rows);
       loyalty.form.resetField(`rewards.${index}.name`, { defaultValue: reward.name });
       loyalty.form.resetField(`rewards.${index}.description`, { defaultValue: reward.description });
-      toast.success("Traducción guardada.");
+      toast.success(i18n.t("loyalty___Traducción guardada."));
     } catch (error) {
       notifyError(error);
     }
   }
   if (!editing)
     return (
-      <li className="loyalty-reward-admin-row">
+      <li className={"loyalty-reward-admin-row"}>
         <div>
           <strong>{reward.name}</strong>
           <p>
-            {TYPE_LABELS[reward.type]} · {reward.cost} sellos · {reward.isActive ? "activo" : "inactivo"}
+            {TYPE_LABELS[reward.type]} · {reward.cost} {i18n.t("loyalty___sellos ·")}{" "}
+            {reward.isActive ? i18n.t("loyalty___activo") : i18n.t("loyalty___inactivo")}
           </p>
         </div>
         <DropdownMenu
-          align="end"
-          ariaLabel={`Acciones para ${reward.name}`}
+          align={"end"}
+          ariaLabel={i18n.t("loyalty___Acciones para {{name}}", { name: reward.name })}
           className={buttonVariants({ size: "sm", variant: "secondary" })}
           disabled={loyalty.rewardBusy}
           items={[
             {
               id: "edit",
-              label: (
-                <>
-                  <Icon name="edit" /> Editar
-                </>
-              ),
+              label: <>{i18n.t("loyalty___Editar")}</>,
               onSelect: () => loyalty.rewardAction(index, "edit"),
-              textValue: "Editar",
+              textValue: i18n.t("loyalty___Editar"),
             },
             {
               id: "toggle",
-              label: reward.isActive ? "Desactivar" : "Activar",
+              label: reward.isActive ? i18n.t("loyalty___Desactivar") : i18n.t("loyalty___Activar"),
               onSelect: () => loyalty.rewardAction(index, "toggle"),
             },
             {
               id: "delete",
-              label: (
-                <>
-                  <Icon name="trash" /> Eliminar
-                </>
-              ),
-              textValue: "Eliminar",
+              label: <>{i18n.t("loyalty___Eliminar")}</>,
+              textValue: i18n.t("loyalty___Eliminar"),
               onSelect: () => loyalty.rewardAction(index, "delete"),
               separatorBefore: true,
               tone: "destructive",
             },
           ]}
-          trigger="Acciones"
+          trigger={i18n.t("loyalty___Acciones")}
         />
       </li>
     );
   const field = (name: keyof typeof reward) => `rewards.${index}.${name}` as const;
   return (
-    <li className="admin-card loyalty-reward-editor">
-      <div className="admin-kicker">{reward.rewardId ? "Editar premio" : "Nuevo premio"}</div>
-      <div className="admin-form-grid admin-form-grid--two">
-        <FormTextInput<LoyaltyProgramFormValues>
-          disabled={Boolean(translation) && (!canTranslate || translation?.pending)}
-          label="Nombre"
-          maxLength={200}
-          name={field("name")}
-        />
-        <FormTextInput<LoyaltyProgramFormValues>
-          disabled={Boolean(translation)}
-          inputMode="numeric"
-          label="Coste en sellos"
-          name={field("cost")}
-          type="number"
-        />
-        <FormSelect<LoyaltyProgramFormValues>
-          disabled={Boolean(translation)}
-          label="Tipo"
-          name={field("type")}
-          options={TYPE_OPTIONS}
-        />
-        {reward.type === "percentage_discount" ? (
-          <FormTextInput<LoyaltyProgramFormValues>
-            disabled={Boolean(translation)}
-            inputMode="numeric"
-            label="Descuento (%)"
-            name={field("percentage")}
-            type="number"
-          />
-        ) : (
-          <FormSelect<LoyaltyProgramFormValues>
-            disabled={Boolean(translation)}
-            label="Plato · todas las sucursales"
-            name={field("freeDishId")}
-            options={loyalty.dishes}
-          />
-        )}
-        {reward.type === "special_price" ? (
-          <FormTextInput<LoyaltyProgramFormValues>
-            disabled={Boolean(translation)}
-            inputMode="decimal"
-            label="Precio especial"
-            name={field("specialPrice")}
-          />
-        ) : null}
+    <li className={"admin-card loyalty-reward-editor"}>
+      <div className="admin-kicker">
+        {reward.rewardId ? i18n.t("loyalty___Editar premio") : i18n.t("loyalty___Nuevo premio")}
       </div>
-      <FormTextarea<LoyaltyProgramFormValues>
-        disabled={Boolean(translation) && (!canTranslate || translation?.pending)}
-        label="Descripción"
-        name={field("description")}
-        rows={3}
-      />
-      <FormCheckbox<LoyaltyProgramFormValues>
-        disabled={Boolean(translation)}
-        label="Premio activo"
-        name={field("isActive")}
-      />
+      <div className="admin-editor-fields">
+        <section className="admin-editor-section">
+          <h3 className={"ming-section__title"}>{i18n.t("loyalty___Premio")}</h3>
+          <FormTextInput<LoyaltyProgramFormValues>
+            disabled={Boolean(translation) && (!canTranslate || translation?.pending)}
+            label={i18n.t("loyalty___Nombre")}
+            maxLength={200}
+            name={field("name")}
+          />
+          <FormTextarea<LoyaltyProgramFormValues>
+            disabled={Boolean(translation) && (!canTranslate || translation?.pending)}
+            label={i18n.t("loyalty___Descripción")}
+            name={field("description")}
+            rows={3}
+          />
+          <FormCheckbox<LoyaltyProgramFormValues>
+            disabled={Boolean(translation)}
+            label={i18n.t("loyalty___Premio activo")}
+            name={field("isActive")}
+          />
+        </section>
+        <section className="admin-editor-section">
+          <h3 className={"ming-section__title"}>{i18n.t("loyalty___Canje")}</h3>
+          <div className="admin-form-grid--two">
+            <FormSelect<LoyaltyProgramFormValues>
+              disabled={Boolean(translation)}
+              label={i18n.t("loyalty___Tipo")}
+              name={field("type")}
+              options={TYPE_OPTIONS}
+            />
+            <FormTextInput<LoyaltyProgramFormValues>
+              disabled={Boolean(translation)}
+              inputMode={"numeric"}
+              label={i18n.t("loyalty___Coste en sellos")}
+              name={field("cost")}
+              type={"number"}
+            />
+            {reward.type === "percentage_discount" ? (
+              <FormTextInput<LoyaltyProgramFormValues>
+                disabled={Boolean(translation)}
+                inputMode={"numeric"}
+                label={i18n.t("loyalty___Descuento (%)")}
+                name={field("percentage")}
+                type={"number"}
+              />
+            ) : (
+              <FormSelect<LoyaltyProgramFormValues>
+                disabled={Boolean(translation)}
+                label={i18n.t("loyalty___Plato · todas las sucursales")}
+                name={field("freeDishId")}
+                options={loyalty.dishes}
+              />
+            )}
+            {reward.type === "special_price" ? (
+              <FormTextInput<LoyaltyProgramFormValues>
+                disabled={Boolean(translation)}
+                inputMode={"decimal"}
+                label={i18n.t("loyalty___Precio especial")}
+                name={field("specialPrice")}
+              />
+            ) : null}
+          </div>
+        </section>
+      </div>
       <FormActions
         busy={loyalty.rewardBusy || translation?.pending}
         onCancel={translation ? undefined : () => loyalty.cancelReward(index)}
@@ -325,7 +354,7 @@ function RewardRow({
           if (translation) void saveTranslation();
           else void loyalty.saveReward(index);
         }}
-        submitLabel={translation ? "Guardar traducción" : "Guardar premio"}
+        submitLabel={translation ? i18n.t("loyalty___Guardar traducción") : i18n.t("loyalty___Guardar premio")}
       />
     </li>
   );

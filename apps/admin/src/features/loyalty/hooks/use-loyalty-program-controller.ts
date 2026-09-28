@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import * as api from "~/features/loyalty/api";
 import * as mappers from "~/features/loyalty/mappers";
 import { loyaltyProgramFormSchema } from "~/features/loyalty/types";
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { getMenuDishesQueryOptions, getThemeQueryOptions, getTenantQueryOptions } from "~/shared/api";
 
@@ -38,7 +39,7 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
   async function saveProgram() {
     if (!(await form.trigger(["isActive", "averageTicket"]))) return;
     saveProgramMutation.mutate(mappers.toLoyaltyProgramInput(form.getValues()), {
-      onSuccess: () => toast.success("Programa guardado."),
+      onSuccess: () => toast.success(i18n.t("loyalty___Programa guardado.")),
     });
   }
   async function saveReward(index: number) {
@@ -47,7 +48,7 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
     const onSuccess = (result: { id: string }) => {
       form.setValue(`rewards.${index}.rewardId`, result.id);
       setEditingIndex(null);
-      toast.success(reward.rewardId ? "Premio actualizado." : "Premio creado.");
+      toast.success(reward.rewardId ? i18n.t("loyalty___Premio actualizado.") : i18n.t("loyalty___Premio creado."));
     };
     if (reward.rewardId) {
       updateRewardMutation.mutate({ rewardId: reward.rewardId, data: mappers.toRewardInput(reward) }, { onSuccess });
@@ -72,7 +73,7 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
       {
         onSuccess: () => {
           form.setValue(`rewards.${index}.isActive`, isActive);
-          toast.success("Premio actualizado.");
+          toast.success(i18n.t("loyalty___Premio actualizado."));
         },
       },
     );
@@ -85,7 +86,7 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
       {
         onSuccess: () => {
           rewards.remove(index);
-          toast.success("Premio eliminado.");
+          toast.success(i18n.t("loyalty___Premio eliminado."));
         },
       },
     );

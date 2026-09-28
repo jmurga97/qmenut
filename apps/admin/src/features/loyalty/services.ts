@@ -1,3 +1,4 @@
+import { i18n } from "~/lib/i18n";
 import { formatDate } from "~/shared/services/format";
 
 import type { LoyaltyCustomer } from "~/features/loyalty/types";
@@ -5,8 +6,12 @@ import type { LoyaltyCustomer } from "~/features/loyalty/types";
 export const LOYALTY_POLL_INTERVAL_MS = 5000;
 export function formatRelativeAge(createdAt: number, now: number): string {
   const elapsedSeconds = Math.max(0, Math.floor((now - createdAt) / 1000));
-  if (elapsedSeconds < 60) return `hace ${elapsedSeconds} s`;
-  return `hace ${Math.floor(elapsedSeconds / 60)} min`;
+  const relativeTime = new Intl.RelativeTimeFormat(i18n.resolvedLanguage ?? "es", {
+    numeric: "always",
+    style: "short",
+  });
+  if (elapsedSeconds < 60) return relativeTime.format(-elapsedSeconds, "second");
+  return relativeTime.format(-Math.floor(elapsedSeconds / 60), "minute");
 }
 export function formatCountdown(remainingMs: number): string {
   const seconds = Math.ceil(remainingMs / 1000);
@@ -17,7 +22,14 @@ function escapeCsv(value: string | number): string {
   return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 export function downloadCustomersCsv(rows: LoyaltyCustomer[]) {
-  const headings = ["Email", "Sellos", "Visitas", "Primera visita", "Última visita", "Premios canjeados"];
+  const headings = [
+    i18n.t("loyalty___Email"),
+    i18n.t("loyalty___Sellos"),
+    i18n.t("loyalty___Visitas"),
+    i18n.t("loyalty___Primera visita"),
+    i18n.t("loyalty___Última visita"),
+    i18n.t("loyalty___Premios canjeados"),
+  ];
   const lines = rows.map((row) =>
     [
       row.email,
@@ -34,7 +46,7 @@ export function downloadCustomersCsv(rows: LoyaltyCustomer[]) {
   const url = URL.createObjectURL(new Blob(["\u{FEFF}", csv], { type: "text/csv;charset=utf-8" }));
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `clientes-fidelizacion-${new Date().toISOString().slice(0, 10)}.csv`;
+  anchor.download = `${i18n.t("loyalty___customers-file-name")}-${new Date().toISOString().slice(0, 10)}.csv`;
   anchor.click();
   URL.revokeObjectURL(url);
 }

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
+import { useDeferredValue } from "react";
 
 import * as api from "~/features/loyalty/api";
 import * as services from "~/features/loyalty/services";
@@ -17,10 +18,12 @@ export function useLoyaltyInsightsController() {
   const queryClient = useQueryClient();
   const navigate = insightsRoute.useNavigate();
   const search = insightsRoute.useSearch();
-  const range = getVisitsRange(search.period);
+  // Queries read the deferred search: the current table and chart stay visible while a new filter loads.
+  const dataSearch = useDeferredValue(search);
+  const range = getVisitsRange(dataSearch.period);
   const { data: summary } = useSuspenseQuery(api.getLoyaltySummaryQueryOptions({ trpc }));
   const { data: visits } = useSuspenseQuery(api.getLoyaltyVisitsQueryOptions({ ...range, trpc }));
-  const { data: customers } = useSuspenseQuery(api.getLoyaltyCustomersQueryOptions({ search, trpc }));
+  const { data: customers } = useSuspenseQuery(api.getLoyaltyCustomersQueryOptions({ search: dataSearch, trpc }));
   function updateSearch(patch: Partial<Loyalty.LoyaltyInsightsSearch>, replace = false) {
     void navigate({ search: (previous) => ({ ...previous, ...patch }), replace });
   }
@@ -56,11 +59,12 @@ export function useLoyaltyInsightsController() {
       services.downloadCustomersCsv(rows);
     },
   });
-  const visitsPoints = resolveVisitPoints(search.period, visits);
+  const visitsPoints = resolveVisitPoints(dataSearch.period, visits);
   const visitsTotals = sumVisits(visitsPoints);
   return {
     customers,
     exporting: exportMutation.isPending,
+    refreshing: dataSearch !== search,
     search,
     summary,
     totalPages: Math.max(1, Math.ceil(customers.total / PAGE_SIZE)),

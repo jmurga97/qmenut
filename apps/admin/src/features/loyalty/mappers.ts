@@ -1,3 +1,4 @@
+import { i18n } from "~/lib/i18n";
 import { formatMoneyInput, parseMoneyInput } from "~/shared/services/money";
 
 import type * as Loyalty from "~/features/loyalty/types";
@@ -60,7 +61,7 @@ export function toDishOptions(input: {
   dishLists: Array<Array<{ id: string; name: string }>>;
 }) {
   return input.dishLists.flatMap((dishes, index) => {
-    const branchName = input.branches[index]?.name ?? "Sucursal";
+    const branchName = input.branches[index]?.name ?? i18n.t("loyalty___Sucursal");
     return dishes.map((dish) => ({ id: dish.id, label: `${dish.name} · ${branchName}` }));
   });
 }

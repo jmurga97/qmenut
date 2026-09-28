@@ -1,4 +1,5 @@
 import { useRedemptionQueue } from "~/features/loyalty/hooks/use-redemption-queue";
+import { i18n } from "~/lib/i18n";
 
 import { PendingRedemptionList } from "./pending-redemption-list";
 
@@ -12,10 +13,15 @@ export function PendingRedemptionsPanel({ branchId, titleId }: PendingRedemption
   const { pendingQuery } = queue;
   return (
     <>
-      <section aria-labelledby={titleId} className="admin-card loyalty-redemptions">
+      <section aria-labelledby={titleId} className={"admin-card loyalty-redemptions"}>
         <div className="admin-toolbar">
-          <h3 id={titleId}>Canjes pendientes ({pendingQuery.data?.length ?? 0})</h3>
-          {pendingQuery.isFetching ? <span className="loyalty-live-label">Actualizando</span> : null}
+          <h2 id={titleId}>
+            {i18n.t("loyalty___Canjes pendientes (")}
+            {pendingQuery.data?.length ?? 0})
+          </h2>
+          {pendingQuery.isFetching ? (
+            <span className={"loyalty-live-label"}>{i18n.t("loyalty___Actualizando")}</span>
+          ) : null}
         </div>
         <PendingRedemptionList queue={queue} />
       </section>

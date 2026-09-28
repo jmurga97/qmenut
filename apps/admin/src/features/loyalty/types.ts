@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { i18n } from "~/lib/i18n";
 import { moneyInputSchema } from "~/shared/services/money";
 import { VISIT_PERIODS } from "~/shared/services/visit-series";
 
@@ -29,15 +30,19 @@ const optionalMoneySchema = moneyInputSchema.or(z.literal(""));
 const costSchema = z
   .string()
   .trim()
-  .regex(/^[1-9]\d*$/, "El coste debe ser un número entero de sellos");
+  .regex(/^[1-9]\d*$/, i18n.t("loyalty___El coste debe ser un número entero de sellos"));
 const percentageSchema = z
   .string()
   .trim()
-  .regex(/^(?:100|\d{1,2}|)$/, "Indica un porcentaje entre 0 y 100");
+  .regex(/^(?:100|\d{1,2}|)$/, i18n.t("loyalty___Indica un porcentaje entre 0 y 100"));
 export const rewardFormSchema = z
   .object({
     rewardId: z.string().nullable(),
-    name: z.string().trim().min(1, { message: "Escribe un nombre para el premio" }).max(200),
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: i18n.t("loyalty___Escribe un nombre para el premio") })
+      .max(200),
     description: z.string().trim().max(2000),
     cost: costSchema,
     type: rewardTypeSchema,
@@ -48,17 +53,21 @@ export const rewardFormSchema = z
   })
   .superRefine((reward, context) => {
     if (reward.type === "free_dish" && !reward.freeDishId) {
-      context.addIssue({ code: "custom", path: ["freeDishId"], message: "Selecciona un plato" });
+      context.addIssue({ code: "custom", path: ["freeDishId"], message: i18n.t("loyalty___Selecciona un plato") });
     }
     if (reward.type === "percentage_discount" && reward.percentage === "") {
-      context.addIssue({ code: "custom", path: ["percentage"], message: "Indica un porcentaje" });
+      context.addIssue({ code: "custom", path: ["percentage"], message: i18n.t("loyalty___Indica un porcentaje") });
     }
     if (reward.type === "special_price") {
       if (!reward.freeDishId) {
-        context.addIssue({ code: "custom", path: ["freeDishId"], message: "Selecciona un plato" });
+        context.addIssue({ code: "custom", path: ["freeDishId"], message: i18n.t("loyalty___Selecciona un plato") });
       }
       if (reward.specialPrice === "") {
-        context.addIssue({ code: "custom", path: ["specialPrice"], message: "Indica un precio especial" });
+        context.addIssue({
+          code: "custom",
+          path: ["specialPrice"],
+          message: i18n.t("loyalty___Indica un precio especial"),
+        });
       }
     }
   });
