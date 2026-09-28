@@ -1,0 +1,24 @@
+/* Ming type: Geist, Geist Mono, Geist Pixel Line (SIL Open Font License, Vercel).
+   Copy assets/fonts/ next to this file (or adjust the URLs). Load before the Ming stylesheet. */
+@font-face {
+  font-family: "Geist";
+  src: url("./fonts/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("./fonts/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+/* Landings and blog only. */
+@font-face {
+  font-family: "Geist Pixel Line";
+  src: url("./fonts/GeistPixel-Line.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}

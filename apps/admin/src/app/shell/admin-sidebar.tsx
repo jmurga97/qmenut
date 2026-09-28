@@ -1,20 +1,10 @@
-import { NavList, Select } from "@jmurga97/components";
+import { Button, Select, SidebarNav } from "@jmurga97/components";
 import { useState } from "react";
 
-import { Icon } from "~/shared/components/icon";
+import { i18n } from "~/lib/i18n";
 
 import type { NavListItem } from "@jmurga97/components";
-import type { IconName } from "~/shared/components/icon";
-
-export interface AdminSidebarItem extends Omit<NavListItem, "icon"> {
-  icon: IconName;
-}
-
-export interface AdminSidebarGroup {
-  id: string;
-  items: AdminSidebarItem[];
-  label: string;
-}
+import type { SyntheticEvent } from "react";
 
 interface AdminSidebarBranch {
   customDomain: string | null;
@@ -25,9 +15,11 @@ interface AdminSidebarBranch {
 interface AdminSidebarProps {
   disabled?: boolean;
   branches: AdminSidebarBranch[];
-  groups: AdminSidebarGroup[];
+  items: NavListItem[];
   onBranchChange: (branchId: string) => void;
-  /** Navigates to a section id from `groups`; session actions use `onLogout`. */
+  /** Hover or focus on a section link; receives its href so the route can preload. */
+  onIntent: (href: string) => void;
+  /** Navigates to a section id from `items`; session actions use `onLogout`. */
   onNavigate: (selectedId: string) => void;
   onLogout: () => void;
   publicMenuUrl: string | null;
@@ -38,8 +30,9 @@ interface AdminSidebarProps {
 export function AdminSidebar({
   disabled = false,
   branches,
-  groups,
+  items,
   onBranchChange,
+  onIntent,
   onNavigate,
   onLogout,
   publicMenuUrl,
@@ -47,73 +40,63 @@ export function AdminSidebar({
   selectedBranch,
 }: AdminSidebarProps) {
   const [selectPortalContainer, setSelectPortalContainer] = useState<HTMLElement | null>(null);
-  const domainStatus = selectedBranch?.customDomain ?? "Sin dominio público";
+  const domainStatus = selectedBranch?.customDomain ?? i18n.t("shell___Sin dominio público");
+
+  // SidebarNav renders plain anchors, so router Link's intent preload never fires; delegate it from here.
+  function preloadIntent(event: SyntheticEvent) {
+    const href = event.target instanceof Element ? event.target.closest("a[href]")?.getAttribute("href") : null;
+    if (href && items.some((item) => item.href === href)) onIntent(href);
+  }
+
   return (
-    <nav aria-label="Navegación del panel" className="admin-sidebar" inert={disabled} ref={setSelectPortalContainer}>
-      <header className="admin-sidebar-identity">
-        <div className="admin-sidebar-kicker">QMenut</div>
-        <div className="admin-sidebar-title" title={restaurantName}>
-          {restaurantName}
-        </div>
-        <div className="admin-branch-select">
-          <span>Sucursal activa</span>
-          <Select
-            ariaLabel="Sucursal activa"
-            disabled={branches.length < 2}
-            onValueChange={(branchId) => {
-              if (branchId) onBranchChange(branchId);
-            }}
-            options={branches.map((branch) => ({ id: branch.id, label: branch.name }))}
-            portalContainer={selectPortalContainer}
-            value={selectedBranch?.id ?? null}
-          />
-          <span className="admin-sidebar-domain" id="admin-sidebar-domain" title={domainStatus}>
-            {domainStatus}
-          </span>
-        </div>
-      </header>
-
-      <div className="admin-sidebar-groups">
-        {groups.map((group) => {
-          const labelId = `admin-sidebar-group-${group.id}`;
-          return (
-            <section aria-labelledby={labelId} className="admin-sidebar-group" key={group.id}>
-              <h2 id={labelId}>{group.label}</h2>
-              <NavList
-                items={group.items.map((item) => ({
-                  ...item,
-                  icon: <Icon className="admin-sidebar-icon" name={item.icon} />,
-                }))}
-                onNavigate={onNavigate}
+    <div
+      className="admin-sidebar"
+      inert={disabled}
+      onFocus={preloadIntent}
+      onPointerOver={preloadIntent}
+      ref={setSelectPortalContainer}
+    >
+      <SidebarNav
+        ariaLabel={i18n.t("shell___Navegación del panel")}
+        header={
+          <div className="admin-sidebar-identity">
+            <div className={"ming-eyebrow"}>{"QMenut"}</div>
+            <div className="admin-sidebar-title" title={restaurantName}>
+              {restaurantName}
+            </div>
+            <div className="admin-branch-select">
+              <span className={"ming-eyebrow"}>{i18n.t("shell___Sucursal activa")}</span>
+              <Select
+                ariaLabel={i18n.t("shell___Sucursal activa")}
+                disabled={branches.length < 2}
+                onValueChange={(branchId) => {
+                  if (branchId) onBranchChange(branchId);
+                }}
+                options={branches.map((branch) => ({ id: branch.id, label: branch.name }))}
+                portalContainer={selectPortalContainer}
+                value={selectedBranch?.id ?? null}
               />
-            </section>
-          );
-        })}
-      </div>
-
-      <footer className="admin-sidebar-footer">
-        {publicMenuUrl ? (
-          <a
-            aria-describedby="admin-sidebar-domain"
-            className="admin-sidebar-action"
-            href={publicMenuUrl}
-            rel="noreferrer"
-            target="_blank"
-          >
-            <Icon className="admin-sidebar-icon" name="public-site" />
-            <span>Ver carta</span>
-          </a>
-        ) : (
-          <span aria-disabled="true" className="admin-sidebar-action">
-            <Icon className="admin-sidebar-icon" name="public-site" />
-            <span>Ver carta</span>
-          </span>
-        )}
-        <button className="admin-sidebar-action admin-sidebar-action--destructive" onClick={onLogout} type="button">
-          <Icon className="admin-sidebar-icon" name="logout" />
-          <span>Cerrar sesión</span>
-        </button>
-      </footer>
-    </nav>
+              <span className="admin-sidebar-domain" id="admin-sidebar-domain" title={domainStatus}>
+                {domainStatus}
+              </span>
+            </div>
+          </div>
+        }
+        items={items}
+        onNavigate={onNavigate}
+        footer={
+          <div className="admin-sidebar-footer">
+            {publicMenuUrl ? (
+              <a aria-describedby="admin-sidebar-domain" href={publicMenuUrl} rel={"noreferrer"} target={"_blank"}>
+                {i18n.t("shell___Ver carta ↗")}
+              </a>
+            ) : null}
+            <Button onClick={onLogout} variant={"ghost"}>
+              {i18n.t("shell___Cerrar sesión")}
+            </Button>
+          </div>
+        }
+      />
+    </div>
   );
 }

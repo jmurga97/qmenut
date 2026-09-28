@@ -1,4 +1,4 @@
-import { AppShell, Select } from "@jmurga97/components";
+import { AppShell, ConfirmAction, Select } from "@jmurga97/components";
 import { can } from "@qmenut/permissions";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate, useRouter } from "@tanstack/react-router";
@@ -8,6 +8,7 @@ import { getListRestaurantsQueryOptions } from "~/features/auth/api";
 import { useSelectRestaurant } from "~/features/auth/hooks/use-select-restaurant";
 import { getLanguageCatalogQueryOptions } from "~/features/languages/api";
 import { signOut } from "~/lib/auth-client";
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { getLanguagesQueryOptions, getTenantQueryOptions } from "~/shared/api";
 import { ImageActivityToasts } from "~/shared/images/image-activity";
@@ -26,15 +27,10 @@ import "~/shared/images/styles.css";
 
 import { AdminSidebar } from "./admin-sidebar";
 
-import type { AdminSidebarGroup } from "./admin-sidebar";
+import type { NavListItem } from "@jmurga97/components";
 import type { Permission } from "@qmenut/permissions";
-import type { IconName } from "~/shared/components/icon";
-
-type NavigationGroupId = "business" | "operations" | "public-menu";
 
 interface Section {
-  group: NavigationGroupId;
-  icon: IconName;
   id: string;
   label: string;
   path: string;
@@ -42,76 +38,54 @@ interface Section {
 }
 
 const SECTIONS = [
-  { group: "operations", icon: "overview", id: "overview", label: "Resumen", path: "/" },
+  { id: "overview", label: i18n.t("shell___Resumen"), path: "/" },
   {
-    group: "operations",
-    icon: "analytics",
     id: "analytics",
-    label: "Analítica",
+    label: i18n.t("shell___Analítica"),
     path: "/analytics",
     permission: "analytics.read",
   },
-  { group: "operations", icon: "menu", id: "menu", label: "Menú", path: "/menu" },
+  { id: "menu", label: i18n.t("shell___Menú"), path: "/menu" },
   {
-    group: "operations",
-    icon: "promotions",
     id: "promotions",
-    label: "Promociones",
+    label: i18n.t("shell___Promociones"),
     path: "/promotions",
   },
   {
-    group: "operations",
-    icon: "loyalty",
     id: "loyalty",
-    label: "Fidelización",
+    label: i18n.t("shell___Fidelización"),
     path: "/loyalty",
   },
-  { group: "public-menu", icon: "theme", id: "theme", label: "Tema", path: "/theme" },
+  { id: "theme", label: i18n.t("shell___Tema"), path: "/theme" },
   {
-    group: "public-menu",
-    icon: "languages",
     id: "languages",
-    label: "Idiomas",
+    label: i18n.t("shell___Idiomas"),
     path: "/languages",
   },
-  { group: "public-menu", icon: "qr", id: "qr", label: "Código QR", path: "/qr" },
-  { group: "business", icon: "branch", id: "branch", label: "Sucursal", path: "/branch" },
+  { id: "qr", label: i18n.t("shell___Código QR"), path: "/qr" },
+  { id: "branch", label: i18n.t("shell___Sucursal"), path: "/branch" },
   {
-    group: "business",
-    icon: "users",
     id: "users",
-    label: "Usuarios",
+    label: i18n.t("shell___Usuarios"),
     path: "/users",
     permission: "users.manage",
   },
 ] as const satisfies readonly Section[];
 
-const NAVIGATION_GROUPS = [
-  { id: "operations", label: "Operación" },
-  { id: "public-menu", label: "Carta pública" },
-  { id: "business", label: "Negocio" },
-] as const;
-
 function getCurrentSectionLabel(pathname: string) {
   const section = SECTIONS.find((item) => item.path !== "/" && pathname.startsWith(item.path));
-  return section?.label ?? "Resumen";
+  return section?.label ?? i18n.t("shell___Resumen");
 }
 
-function getNavigationGroups(pathname: string, roleCode: Parameters<typeof can>[0]): AdminSidebarGroup[] {
-  const visibleSections = SECTIONS.filter((section) => !("permission" in section) || can(roleCode, section.permission));
-  return NAVIGATION_GROUPS.map((group) => ({
-    id: group.id,
-    label: group.label,
-    items: visibleSections
-      .filter((section) => section.group === group.id)
-      .map((section) => ({
-        current: section.path === "/" ? pathname === "/" : pathname.startsWith(section.path),
-        href: section.path,
-        icon: section.icon,
-        id: section.id,
-        label: section.label,
-      })),
-  }));
+function getNavigationItems(pathname: string, roleCode: Parameters<typeof can>[0]): NavListItem[] {
+  return SECTIONS.filter((section) => !("permission" in section) || can(roleCode, section.permission)).map(
+    (section) => ({
+      current: section.path === "/" ? pathname === "/" : pathname.startsWith(section.path),
+      href: section.path,
+      id: section.id,
+      label: section.label,
+    }),
+  );
 }
 
 export function AdminShell() {
@@ -119,7 +93,7 @@ export function AdminShell() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const location = useLocation();
-  const [topbarElement, setTopbarElement] = useState<HTMLElement | null>(null);
+  const [pendingLanguageCode, setPendingLanguageCode] = useState<string | null>(null);
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const { data: memberships } = useSuspenseQuery(getListRestaurantsQueryOptions({ trpc }));
   const { data: languageCatalog } = useSuspenseQuery(getLanguageCatalogQueryOptions({ trpc }));
@@ -132,7 +106,7 @@ export function AdminShell() {
     null;
   const languageOptions = restaurantLanguages.languages.map(({ isDefault, languageCode }) => ({
     id: languageCode,
-    label: `${languageCatalog.find((entry) => entry.code === languageCode)?.label ?? languageCode.toUpperCase()}${isDefault ? " (base)" : ""}`,
+    label: `${languageCatalog.find((entry) => entry.code === languageCode)?.label ?? languageCode.toUpperCase()}${isDefault ? i18n.t("shell___ (base)") : ""}`,
   }));
   const selectRestaurant = useSelectRestaurant();
   const editorBusy = useEditorBusy();
@@ -159,16 +133,18 @@ export function AdminShell() {
     <AppShell
       className="admin-app-shell"
       header={
-        <header className="admin-topbar" ref={setTopbarElement}>
-          <div className="admin-topbar-copy">
-            {selectedBranch ? <div className="admin-topbar-context">{selectedBranch.name}</div> : null}
-            <h1>{sectionLabel}</h1>
-          </div>
+        <div className="admin-topbar">
+          <nav aria-label={i18n.t("shell___Ruta")}>
+            <ol className={"ming-breadcrumb"}>
+              <li>{"QMenut"}</li>
+              <li aria-current={"page"}>{sectionLabel}</li>
+            </ol>
+          </nav>
           {memberships.length > 1 || languageOptions.length > 1 ? (
             <div className="admin-topbar-actions">
               {memberships.length > 1 ? (
                 <Select
-                  ariaLabel="Restaurante activo"
+                  ariaLabel={i18n.t("shell___Restaurante activo")}
                   disabled={selectRestaurant.isPending}
                   onValueChange={(restaurantId) => {
                     if (restaurantId && restaurantId !== tenant.restaurant.id && !isEditorBusy()) {
@@ -176,32 +152,33 @@ export function AdminShell() {
                     }
                   }}
                   options={memberships.map((membership) => ({ id: membership.restaurantId, label: membership.name }))}
-                  portalContainer={topbarElement}
                   value={tenant.restaurant.id}
                 />
               ) : null}
               <Select
-                ariaLabel="Idioma del contenido"
+                ariaLabel={i18n.t("shell___Idioma del contenido")}
                 disabled={editorBusy}
                 onValueChange={(languageCode) => {
                   if (!languageCode || languageCode === currentLanguage?.languageCode || isEditorBusy()) return;
-                  if (isEditorDirty() && !window.confirm("Hay cambios sin guardar. ¿Cambiar de idioma y descartarlos?"))
+                  if (isEditorDirty()) {
+                    setPendingLanguageCode(languageCode);
                     return;
+                  }
                   setSelectedLanguageCode(languageCode);
                 }}
                 options={languageOptions}
-                portalContainer={topbarElement}
                 value={currentLanguage?.languageCode ?? null}
               />
             </div>
           ) : null}
-        </header>
+        </div>
       }
       navigation={
         <AdminSidebar
           disabled={editorBusy}
           branches={tenant.branches}
-          groups={getNavigationGroups(location.pathname, tenant.roleCode)}
+          items={getNavigationItems(location.pathname, tenant.roleCode)}
+          onIntent={(href) => void router.preloadRoute({ to: href })}
           onBranchChange={(branchId) => {
             if (isEditorBusy()) return;
             setSelectedBranchId(branchId);
@@ -214,13 +191,30 @@ export function AdminShell() {
           selectedBranch={selectedBranch}
         />
       }
-      navigationLabel="Navegación del panel"
+      navigationLabel={i18n.t("shell___Navegación del panel")}
+      closeNavigationLabel={i18n.t("shell___Cerrar navegación")}
+      hideNavigationLabel={i18n.t("shell___Ocultar navegación")}
       onOpenChange={setSidebarOpen}
       open={isSidebarOpen}
+      showNavigationLabel={i18n.t("shell___Mostrar navegación")}
     >
       <div className="admin-main-slot">
         {selectedBranch ? <ImageActivityToasts branchId={selectedBranch.id} /> : null}
         <Outlet />
+        <ConfirmAction
+          cancelLabel={i18n.t("shell___Cancelar")}
+          confirmLabel={i18n.t("shell___Descartar cambios")}
+          message={i18n.t("shell___Los cambios sin guardar se perderán al cambiar de idioma.")}
+          onConfirm={() => {
+            if (pendingLanguageCode) setSelectedLanguageCode(pendingLanguageCode);
+            setPendingLanguageCode(null);
+          }}
+          onOpenChange={(open) => {
+            if (!open) setPendingLanguageCode(null);
+          }}
+          open={pendingLanguageCode !== null}
+          title={i18n.t("shell___¿Descartar cambios?")}
+        />
       </div>
     </AppShell>
   );

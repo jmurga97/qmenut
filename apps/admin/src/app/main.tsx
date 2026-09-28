@@ -1,4 +1,6 @@
+import "./styles/fonts.css";
 import "@jmurga97/components/styles.css";
+import "./styles/layout.css";
 import * as Sentry from "@sentry/react";
 import { createBrowserHistory, createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
@@ -6,6 +8,7 @@ import { createRoot } from "react-dom/client";
 
 import { AppProviders } from "~/app/providers";
 import { routeTree } from "~/app/route-tree.gen";
+import { i18n } from "~/lib/i18n";
 import { queryClient } from "~/lib/query-client";
 import { trpc } from "~/lib/trpc";
 import { RouteErrorState } from "~/shared/components/state/error-state";
@@ -45,7 +48,9 @@ const router = createRouter({
   },
   defaultErrorComponent: RouteErrorState,
   defaultNotFoundComponent: NotFoundState,
-  defaultPendingComponent: () => <LoadingState />,
+  defaultPendingComponent: LoadingState,
+  defaultPreload: "intent",
+  defaultPreloadStaleTime: 0,
   defaultPendingMinMs: 200,
   defaultPendingMs: 120,
 });
@@ -56,7 +61,7 @@ declare module "@tanstack/react-router" {
 }
 const container = document.querySelector("#root");
 if (!container) {
-  throw new Error("Unable to find root element");
+  throw new Error(i18n.t("main.tsx___Unable to find root element"));
 }
 createRoot(container).render(
   <StrictMode>

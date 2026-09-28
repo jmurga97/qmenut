@@ -1,0 +1,69 @@
+/*
+ * Tailwind v4 mapping of Ming tokens. Import after `@import "tailwindcss";`; load the Ming stylesheet too.
+ * Resets Tailwind's default palette, shadows and blur so off-brand values can't be used by accident.
+ *
+ * Utilities you get:
+ *   colours  bg-background bg-card bg-popover bg-secondary bg-accent bg-muted bg-primary
+ *            text-foreground text-muted-foreground text-primary-foreground text-destructive text-ming-link
+ *            border-border border-input  (every Ming colour token as bg-/text-/border-<name>)
+ *   spacing  p-ming-1 … p-ming-7, gap-ming-4, mt-ming-6 …  (4, 8, 12, 16, 24, 32, 40px)
+ *   radius   rounded-ming-control (2px) rounded-ming (4px) rounded-ming-pill
+ *   fonts    font-sans font-mono font-pixel
+ * Tailwind's numeric spacing (p-4, gap-6…) still works; prefer the ming-* names so the scale stays visible.
+ */
+@theme inline {
+  --color-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --blur-*: initial;
+  --font-*: initial;
+
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ming-signal: var(--ming-signal);
+  --color-ming-link: var(--ming-link);
+  --color-ming-info: var(--ming-info);
+  --color-ming-info-surface: var(--ming-info-surface);
+  --color-ming-success: var(--ming-success);
+  --color-ming-success-surface: var(--ming-success-surface);
+  --color-ming-warning: var(--ming-warning);
+  --color-ming-warning-surface: var(--ming-warning-surface);
+  --color-ming-error-surface: var(--ming-error-surface);
+  --color-ming-service: var(--ming-service);
+
+  --spacing-ming-1: var(--ming-space-1);
+  --spacing-ming-2: var(--ming-space-2);
+  --spacing-ming-3: var(--ming-space-3);
+  --spacing-ming-4: var(--ming-space-4);
+  --spacing-ming-5: var(--ming-space-5);
+  --spacing-ming-6: var(--ming-space-6);
+  --spacing-ming-7: var(--ming-space-7);
+
+  --radius-ming-control: var(--ming-radius-control);
+  --radius-ming: var(--radius);
+  --radius-ming-pill: var(--ming-radius-pill);
+
+  --font-sans: "Geist", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-pixel: "Geist Pixel Line", "Geist Mono", ui-monospace, monospace;
+}
