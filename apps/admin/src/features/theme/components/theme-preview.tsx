@@ -1,11 +1,13 @@
+import { Badge } from "@jmurga97/components";
 import {
   createThemePreviewUpdateMessage,
   isThemePreviewReadyMessage,
   QM_THEME_PREVIEW_SEARCH_PARAM,
   QM_THEME_PREVIEW_SEARCH_VALUE,
 } from "@qmenut/ui/theme/tenant-theme-config";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
+import { i18n } from "~/lib/i18n";
 import { buildPublicMenuUrl } from "~/shared/services/public-menu-url";
 
 import type { QmTenantThemeEditableConfig } from "@qmenut/ui/theme/tenant-theme-config";
@@ -18,14 +20,14 @@ interface ThemePreviewProps {
 type PreviewStatus = "error" | "loading" | "ready";
 
 const PREVIEW_STATUS_LABELS: Record<PreviewStatus, string> = {
-  error: "No disponible",
-  loading: "Cargando",
-  ready: "En directo",
+  error: i18n.t("theme___No disponible"),
+  loading: i18n.t("theme___Cargando"),
+  ready: i18n.t("theme___En directo"),
 };
+const PREVIEW_STATUS_TONES = { error: "error", loading: "info", ready: "success" } as const;
 
 export function ThemePreview({ draft, host }: ThemePreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const draftRef = useRef(draft);
   const readyRef = useRef(false);
   const [status, setStatus] = useState<PreviewStatus>("loading");
   const preview = useMemo(() => {
@@ -34,19 +36,14 @@ export function ThemePreview({ draft, host }: ThemePreviewProps) {
     return { origin: url.origin, url: url.href };
   }, [host]);
 
-  useEffect(() => {
-    draftRef.current = draft;
+  const postDraft = useEffectEvent(() => {
+    const frameWindow = iframeRef.current?.contentWindow;
+    if (!frameWindow || !draft) return;
+
+    frameWindow.postMessage(createThemePreviewUpdateMessage(draft), preview.origin);
   });
 
   useEffect(() => {
-    function postDraft() {
-      const frameWindow = iframeRef.current?.contentWindow;
-      const currentDraft = draftRef.current;
-      if (!frameWindow || !currentDraft) return;
-
-      frameWindow.postMessage(createThemePreviewUpdateMessage(currentDraft), preview.origin);
-    }
-
     function handleMessage(event: MessageEvent<unknown>) {
       if (event.origin !== preview.origin) return;
       if (!Object.is(event.source, iframeRef.current?.contentWindow)) return;
@@ -69,34 +66,34 @@ export function ThemePreview({ draft, host }: ThemePreviewProps) {
   }, [preview.origin, preview.url]);
 
   useEffect(() => {
-    const frameWindow = iframeRef.current?.contentWindow;
-    if (!readyRef.current || !frameWindow || !draft) return;
-
-    frameWindow.postMessage(createThemePreviewUpdateMessage(draft), preview.origin);
+    if (!readyRef.current) return;
+    postDraft();
   }, [draft, preview.origin]);
 
   return (
-    <aside className="admin-theme-preview" aria-label="Vista previa de la carta">
-      <div className="admin-theme-preview__header">
+    <aside className="admin-theme-preview" aria-label={i18n.t("theme___Vista previa de la carta")}>
+      <div className={"admin-theme-preview__header"}>
         <div>
-          <div className="admin-kicker">Vista previa</div>
-          <p>La carta real, antes de publicar.</p>
+          <div className="admin-kicker">{i18n.t("theme___Vista previa")}</div>
+          <p>{i18n.t("theme___La carta real, antes de publicar.")}</p>
         </div>
-        <span className={`admin-theme-preview__status admin-theme-preview__status--${status}`} role="status">
+        <Badge role={"status"} tone={PREVIEW_STATUS_TONES[status]}>
           {PREVIEW_STATUS_LABELS[status]}
-        </span>
+        </Badge>
       </div>
       <div className="admin-theme-device">
         <iframe
-          className="admin-theme-device__frame"
+          className={"admin-theme-device__frame"}
           ref={iframeRef}
           src={preview.url}
-          title={`Vista previa móvil de la carta de ${host}`}
+          title={i18n.t("theme___Vista previa móvil de la carta de {{host}}", { host })}
         />
-        {status === "loading" ? <div className="admin-theme-preview__overlay">Cargando la carta…</div> : null}
+        {status === "loading" ? (
+          <div className={"admin-theme-preview__overlay"}>{i18n.t("theme___Cargando la carta…")}</div>
+        ) : null}
         {status === "error" ? (
-          <div className="admin-theme-preview__overlay admin-theme-preview__overlay--error">
-            No se pudo conectar con la carta pública.
+          <div className={"admin-theme-preview__overlay admin-theme-preview__overlay--error"}>
+            {i18n.t("theme___No se pudo conectar con la carta pública.")}
           </div>
         ) : null}
       </div>

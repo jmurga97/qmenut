@@ -1,80 +1,85 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Badge, Button, ConfirmAction, DropdownMenu, InlineMessage, ResourceTable } from "@jmurga97/components";
 import { buttonVariants } from "@jmurga97/components/button";
+import { MoreIcon } from "@jmurga97/components/icon";
 import { useState } from "react";
 import { FormProvider } from "react-hook-form";
 
 import { useUsersController } from "~/features/users/hooks/use-users-controller";
 import { manageableRoleOptions } from "~/features/users/types";
+import { i18n } from "~/lib/i18n";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
-import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
 
 import type { ResourceTableColumn } from "@jmurga97/components";
 import type { AdminUser, CreateUserFormValues } from "~/features/users/types";
 
 const ROLE_LABELS: Record<AdminUser["roleCode"], string> = {
-  owner: "Owner",
-  admin: "Admin",
-  staff: "Staff",
+  owner: i18n.t("users___Propietario"),
+  admin: i18n.t("users___Administrador"),
+  staff: i18n.t("users___Equipo"),
 };
 
 function membershipStatus(user: AdminUser) {
-  return <Badge tone={user.isActive ? "success" : "neutral"}>{user.isActive ? "Activa" : "Inactiva"}</Badge>;
+  return (
+    <Badge tone={user.isActive ? "success" : "neutral"}>
+      {user.isActive ? i18n.t("users___Activa") : i18n.t("users___Inactiva")}
+    </Badge>
+  );
 }
 
 function inviteStatus(user: AdminUser) {
-  if (user.inviteStatus === "sent") return <Badge tone="success">Enviado</Badge>;
-  if (user.inviteStatus === "failed") return <Badge tone="error">Error</Badge>;
-  return <Badge tone="neutral">Pendiente</Badge>;
+  if (user.inviteStatus === "sent") return <Badge tone={"success"}>{i18n.t("users___Enviado")}</Badge>;
+  if (user.inviteStatus === "failed") return <Badge tone="error">{i18n.t("users___Error")}</Badge>;
+  return <Badge tone={"neutral"}>{i18n.t("users___Pendiente")}</Badge>;
 }
 
 function UserRowActions({ controller, user }: { controller: ReturnType<typeof useUsersController>; user: AdminUser }) {
-  if (user.roleCode === "owner") return <span className="admin-users-protected">Protegido</span>;
+  if (user.roleCode === "owner") return <span className="admin-users-protected">{i18n.t("users___Protegido")}</span>;
   const isOwnMembership = controller.tenant?.membershipId === user.membershipId;
   const pending = controller.isPending(user.membershipId);
   return (
     <DropdownMenu
-      align="end"
-      ariaLabel={`Acciones para ${user.name}`}
-      className={buttonVariants({ size: "sm", variant: "secondary" })}
+      align={"end"}
+      ariaLabel={i18n.t("users___Acciones para {{name}}", { name: user.name })}
+      className={buttonVariants({ iconOnly: true, size: "sm", variant: "ghost" })}
       disabled={pending}
       items={[
         {
           id: "role",
-          label: `Cambiar a ${user.roleCode === "admin" ? "staff" : "admin"}`,
+          label: i18n.t("users___Cambiar a {{role}}", {
+            role: ROLE_LABELS[user.roleCode === "admin" ? "staff" : "admin"],
+          }),
           onSelect: () => controller.updateRole(user),
         },
         ...(user.isActive && !isOwnMembership
           ? [
               {
                 id: "deactivate",
-                label: (
-                  <>
-                    <Icon name="trash" /> Desactivar
-                  </>
-                ),
-                textValue: "Desactivar",
+                label: <>{i18n.t("users___Desactivar")}</>,
+                textValue: i18n.t("users___Desactivar"),
                 onSelect: () => controller.askToDeactivate(user),
                 separatorBefore: true,
                 tone: "destructive" as const,
               },
             ]
           : []),
-        ...(user.isActive ? [] : [{ id: "activate", label: "Reactivar", onSelect: () => controller.activate(user) }]),
+        ...(user.isActive
+          ? []
+          : [{ id: "activate", label: i18n.t("users___Reactivar"), onSelect: () => controller.activate(user) }]),
         ...(user.isActive
           ? [
               {
                 id: "resend",
-                label: "Reenviar acceso",
+                label: i18n.t("users___Reenviar acceso"),
                 onSelect: () => controller.resendInvite(user),
                 separatorBefore: true,
               },
             ]
           : []),
       ]}
-      trigger="Acciones"
+      trigger={<MoreIcon />}
     />
   );
 }
@@ -84,15 +89,17 @@ function CreateUserDialog({ controller }: { controller: ReturnType<typeof useUse
   return (
     <Dialog.Root open={controller.createOpen} onOpenChange={controller.handleCreateOpenChange}>
       <Dialog.Trigger className={buttonVariants({ size: "md", variant: "primary" })}>
-        <Icon name="plus" /> Agregar usuario
+        {i18n.t("users___Agregar usuario")}
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Backdrop className="admin-users-dialog-backdrop" />
         <Dialog.Viewport className="admin-users-dialog-viewport">
           <Dialog.Popup className="admin-users-dialog-popup" ref={setSelectPortalContainer}>
-            <Dialog.Title>Agregar usuario</Dialog.Title>
+            <Dialog.Title>{i18n.t("users___Agregar usuario")}</Dialog.Title>
             <Dialog.Description>
-              Crea la cuenta y su acceso a este restaurante. La persona entrará solicitando un OTP, sin contraseña.
+              {i18n.t(
+                "users___Crea la cuenta y su acceso a este restaurante. La persona entrará solicitando un OTP, sin contraseña.",
+              )}
             </Dialog.Description>
             <FormProvider {...controller.form}>
               <form
@@ -102,25 +109,35 @@ function CreateUserDialog({ controller }: { controller: ReturnType<typeof useUse
                   void controller.form.handleSubmit(controller.create)();
                 }}
               >
-                <FormTextInput<CreateUserFormValues> autocomplete="name" label="Nombre" name="name" maxLength={120} />
                 <FormTextInput<CreateUserFormValues>
-                  autocomplete="email"
-                  label="Correo"
-                  name="email"
+                  autocomplete={"name"}
+                  label={i18n.t("users___Nombre")}
+                  name={"name"}
+                  maxLength={120}
+                />
+                <FormTextInput<CreateUserFormValues>
+                  autocomplete={"email"}
+                  label={i18n.t("users___Correo")}
+                  name={"email"}
                   maxLength={320}
-                  type="email"
+                  type={"email"}
                 />
                 <FormSelect<CreateUserFormValues>
-                  label="Rol"
-                  name="roleCode"
+                  label={i18n.t("users___Rol")}
+                  name={"roleCode"}
                   options={[...manageableRoleOptions]}
                   portalContainer={selectPortalContainer}
                 />
-                <InlineMessage message="Se enviará un correo con el acceso para iniciar sesión." tone="info" />
+                <InlineMessage
+                  message={i18n.t("users___Se enviará un correo con el acceso para iniciar sesión.")}
+                  tone={"info"}
+                />
                 <div className="admin-users-dialog-actions">
-                  <Dialog.Close className={buttonVariants({ size: "md", variant: "secondary" })}>Cancelar</Dialog.Close>
-                  <Button disabled={controller.createBusy} type="submit">
-                    {controller.createBusy ? "Creando…" : "Crear y enviar acceso"}
+                  <Dialog.Close className={buttonVariants({ size: "md", variant: "secondary" })}>
+                    {i18n.t("users___Cancelar")}
+                  </Dialog.Close>
+                  <Button disabled={controller.createBusy} type={"submit"}>
+                    {controller.createBusy ? i18n.t("users___Creando…") : i18n.t("users___Crear y enviar acceso")}
                   </Button>
                 </div>
               </form>
@@ -137,7 +154,7 @@ export function UsersPage() {
   const columns: ResourceTableColumn<AdminUser>[] = [
     {
       id: "name",
-      header: "Usuario",
+      header: i18n.t("users___Usuario"),
       render: (user) => (
         <div className="admin-users-identity">
           <strong>{user.name}</strong>
@@ -146,56 +163,62 @@ export function UsersPage() {
       ),
       width: "34%",
     },
-    { id: "role", header: "Rol", render: (user) => ROLE_LABELS[user.roleCode], width: "14%" },
-    { id: "membership", header: "Membresía", render: membershipStatus, width: "16%" },
-    { id: "invite", header: "Invitación", render: inviteStatus, width: "18%" },
+    { id: "role", header: i18n.t("users___Rol"), render: (user) => ROLE_LABELS[user.roleCode], width: "14%" },
+    { id: "membership", header: i18n.t("users___Membresía"), render: membershipStatus, width: "16%" },
+    { id: "invite", header: i18n.t("users___Invitación"), render: inviteStatus, width: "18%" },
   ];
 
   return (
-    <div className="admin-page admin-users-page">
+    <div className={"ming-page admin-page admin-users-page"}>
       <div className="admin-users-heading">
         <PageHeader
-          description="Gestiona quién puede entrar al panel de este restaurante y con qué alcance."
-          kicker="Negocio"
-          title="Usuarios"
+          description={i18n.t("users___Gestiona quién puede entrar al panel de este restaurante y con qué alcance.")}
+          kicker={i18n.t("users___Negocio")}
+          title={i18n.t("users___Usuarios")}
         />
         <CreateUserDialog controller={controller} />
       </div>
       <section aria-labelledby="admin-users-list-title" className="admin-users-table-card">
         <div className="admin-toolbar">
           <div>
-            <div className="admin-kicker">Accesos del restaurante</div>
-            <h3 id="admin-users-list-title">Equipo</h3>
+            <div className="admin-kicker">{i18n.t("users___Accesos del restaurante")}</div>
+            <h2 className={"ming-section__title"} id="admin-users-list-title">
+              {i18n.t("users___Equipo")}
+            </h2>
           </div>
           <span className="admin-users-count">
-            {controller.rows.length} {controller.rows.length === 1 ? "persona" : "personas"}
+            {controller.rows.length}{" "}
+            {controller.rows.length === 1 ? i18n.t("users___persona") : i18n.t("users___personas")}
           </span>
         </div>
         <ResourceTable
-          ariaLabel="Usuarios y membresías del restaurante"
+          actionsLabel={i18n.t("users___Acciones")}
+          ariaLabel={i18n.t("users___Usuarios y membresías del restaurante")}
           columns={columns}
-          density="comfortable"
+          density={"comfortable"}
           emptyState={
             <div className="admin-empty-state">
-              <h3>Aún no hay usuarios gestionables</h3>
-              <p>Agrega una cuenta admin o staff para compartir el acceso al panel.</p>
+              <h3>{i18n.t("users___Aún no hay usuarios gestionables")}</h3>
+              <p>{i18n.t("users___Agrega una cuenta admin o staff para compartir el acceso al panel.")}</p>
             </div>
           }
           getRowId={(user) => user.membershipId}
           loading={controller.isLoading}
-          loadingLabel="Cargando usuarios…"
+          loadingLabel={i18n.t("users___Cargando usuarios…")}
           refetching={controller.isRefetching}
+          refetchingLabel={i18n.t("users___Actualizando usuarios…")}
           renderRowActions={(user) => <UserRowActions controller={controller} user={user} />}
-          responsive="stacked"
+          responsive={"stacked"}
           rows={controller.rows}
         />
       </section>
       <ConfirmAction
-        cancelLabel="Cancelar"
-        confirmLabel="Desactivar"
+        cancelLabel={i18n.t("users___Cancelar")}
+        confirmLabel={i18n.t("users___Desactivar")}
         message={
           <>
-            Se bloqueará el acceso de <strong>{controller.deactivationTarget?.name}</strong> a este restaurante.
+            {i18n.t("users___Se bloqueará el acceso de")} <strong>{controller.deactivationTarget?.name}</strong>{" "}
+            {i18n.t("users___a este restaurante.")}
           </>
         }
         onConfirm={controller.confirmDeactivate}
@@ -204,7 +227,7 @@ export function UsersPage() {
         }}
         open={Boolean(controller.deactivationTarget)}
         pending={controller.updatingActive}
-        title="Desactivar membresía"
+        title={i18n.t("users___Desactivar membresía")}
       />
     </div>
   );

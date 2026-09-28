@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { useImageDraft, useImageGalleryDraft } from "~/shared/images/use-image-drafts";
 import { useImageSave } from "~/shared/images/use-image-save";
@@ -40,7 +41,7 @@ export function useBranchController(branchId: string) {
           { purpose: "branchPhoto", drafts: gallery.drafts, updateDraft: gallery.update },
         ],
       });
-      if (!preparedLogo) throw new Error("No se pudo preparar el logo.");
+      if (!preparedLogo) throw new Error(i18n.t("branch___No se pudo preparar el logo."));
       const data = toBranchInput({ branchId, settings, values, logo: preparedLogo, photos: preparedPhotos });
       const imageChanges = {
         logo: preparedLogo.imageChange,
@@ -56,7 +57,7 @@ export function useBranchController(branchId: string) {
       logo.accept();
       gallery.accept();
     }, uploads.clear);
-    if (succeeded) toast.success("Datos guardados.");
+    if (succeeded) toast.success(i18n.t("branch___Datos guardados."));
   });
   function setScheduleEnabled(dayOfWeek: number, enabled: boolean) {
     const indexes = schedules

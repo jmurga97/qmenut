@@ -6,7 +6,7 @@
   align-self: start;
   padding: 1rem;
   border: 1px solid var(--border, #e0e2da);
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   background: #ffffff;
 }
 
@@ -27,7 +27,7 @@
   gap: 1rem;
   padding: 1.25rem;
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   background: var(--card);
 }
 
@@ -73,7 +73,7 @@
   gap: 0.5rem;
 }
 
-.admin-qr-print-section h3 {
+.admin-qr-print-section h2 {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--admin-text-heading);
@@ -97,7 +97,7 @@
   justify-items: start;
   padding: 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   background: var(--card);
   color: var(--foreground);
   cursor: pointer;
@@ -111,7 +111,8 @@
 
 .admin-qr-print-layout--selected {
   border-color: var(--ring);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 18%, transparent);
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 
 .admin-qr-print-layout:hover {

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { getLanguageCatalogQueryOptions, getLanguageMutationOptions } from "~/features/languages/api";
 import { addLanguageSchema } from "~/features/languages/types";
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { getLanguagesQueryOptions } from "~/shared/api";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
@@ -39,19 +40,27 @@ export function useLanguagesController() {
     addMutation.mutate(values, {
       onSuccess: (result) => {
         form.reset();
-        if (result.preparationError) toast.error(`Idioma añadido, pendiente de traducción: ${result.preparationError}`);
-        else toast.success("Idioma añadido y traducido.");
+        if (result.preparationError)
+          toast.error(
+            i18n.t("languages___Idioma añadido, pendiente de traducción: {{error}}", {
+              error: result.preparationError,
+            }),
+          );
+        else toast.success(i18n.t("languages___Idioma añadido y traducido."));
       },
     });
   }
   function act(languageCode: string, action: "remove" | "translate" | "complete") {
     if (action === "remove") {
-      removeMutation.mutate({ languageCode }, { onSuccess: () => toast.success("Idioma eliminado.") });
+      removeMutation.mutate(
+        { languageCode },
+        { onSuccess: () => toast.success(i18n.t("languages___Idioma eliminado.")) },
+      );
       return;
     }
     translateMutation.mutate(
       { languageCode, overwrite: action === "translate" },
-      { onSuccess: () => toast.success("Traducción actualizada.") },
+      { onSuccess: () => toast.success(i18n.t("languages___Traducción actualizada.")) },
     );
   }
   return {

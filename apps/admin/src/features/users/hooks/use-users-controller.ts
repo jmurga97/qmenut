@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { getUserMutationOptions, getUsersQueryOptions } from "~/features/users/api";
 import { createUserFormSchema } from "~/features/users/types";
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
 
@@ -39,16 +40,20 @@ export function useUsersController() {
         setCreateOpen(false);
         if (!result.created) {
           toast.warning(
-            "La cuenta ya existía en este restaurante, así que no se envió un acceso nuevo. Puedes reenviarlo desde Acciones.",
+            i18n.t(
+              "users___La cuenta ya existía en este restaurante, así que no se envió un acceso nuevo. Puedes reenviarlo desde Acciones.",
+            ),
           );
           return;
         }
         if (result.invitation.status === "failed") {
           toast.warning(
-            "La cuenta y la membresía se crearon, pero no se pudo enviar el acceso. Puedes reenviarlo desde Acciones.",
+            i18n.t(
+              "users___La cuenta y la membresía se crearon, pero no se pudo enviar el acceso. Puedes reenviarlo desde Acciones.",
+            ),
           );
         } else {
-          toast.success("Usuario añadido y acceso enviado.");
+          toast.success(i18n.t("users___Usuario añadido y acceso enviado."));
         }
       },
     });
@@ -57,14 +62,14 @@ export function useUsersController() {
   function changeRole(user: AdminUser) {
     roleMutation.mutate(
       { membershipId: user.membershipId, roleCode: user.roleCode === "admin" ? "staff" : "admin" },
-      { onSuccess: () => toast.success("Rol actualizado.") },
+      { onSuccess: () => toast.success(i18n.t("users___Rol actualizado.")) },
     );
   }
 
   function activate(user: AdminUser) {
     activeMutation.mutate(
       { isActive: true, membershipId: user.membershipId },
-      { onSuccess: () => toast.success("Membresía reactivada.") },
+      { onSuccess: () => toast.success(i18n.t("users___Membresía reactivada.")) },
     );
   }
 
@@ -78,7 +83,7 @@ export function useUsersController() {
       { isActive: false, membershipId: deactivationTarget.membershipId },
       {
         onSuccess: () => {
-          toast.success("Membresía desactivada.");
+          toast.success(i18n.t("users___Membresía desactivada."));
           setDeactivationTarget(null);
         },
       },
@@ -91,10 +96,12 @@ export function useUsersController() {
       {
         onSuccess: (result) => {
           if (result.invitation.status === "failed") {
-            toast.warning("No se pudo enviar el acceso. El último error ha quedado registrado para reintentar.");
+            toast.warning(
+              i18n.t("users___No se pudo enviar el acceso. El último error ha quedado registrado para reintentar."),
+            );
             return;
           }
-          toast.success("Acceso reenviado.");
+          toast.success(i18n.t("users___Acceso reenviado."));
         },
       },
     );

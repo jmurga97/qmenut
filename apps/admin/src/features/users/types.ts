@@ -1,13 +1,15 @@
 import { z } from "zod";
 
+import { i18n } from "~/lib/i18n";
+
 export const manageableRoleOptions = [
-  { id: "admin", label: "Admin" },
-  { id: "staff", label: "Staff" },
+  { id: "admin", label: i18n.t("users___Admin") },
+  { id: "staff", label: i18n.t("users___Staff") },
 ] as const;
 
 export const createUserFormSchema = z.object({
-  name: z.string().trim().min(1, "Escribe un nombre").max(120),
-  email: z.email("Escribe un correo válido").trim().max(320),
+  name: z.string().trim().min(1, i18n.t("users___Escribe un nombre")).max(120),
+  email: z.email(i18n.t("users___Escribe un correo válido")).trim().max(320),
   roleCode: z.enum(["admin", "staff"]),
 });
 

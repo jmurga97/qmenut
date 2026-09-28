@@ -1,3 +1,4 @@
+import { i18n } from "~/lib/i18n";
 import { FormPhoneInput } from "~/shared/components/forms/adapters/form-phone-input";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
@@ -16,14 +17,14 @@ export function GeneralSection() {
   return (
     <>
       <section className="admin-editor-section">
-        <div className="admin-kicker">Identidad y contacto</div>
-        <div className="admin-form-grid admin-form-grid--two">
-          <FormTextInput<BranchFormValues> label="Nombre" name="name" />
-          <FormPhoneInput<BranchFormValues> label="Teléfono" name="phone" />
-          <FormPhoneInput<BranchFormValues> label="WhatsApp" name="whatsapp" />
+        <h2 className={"ming-section__title"}>{i18n.t("branch___Identidad y contacto")}</h2>
+        <div className={"admin-form-grid admin-form-grid--two"}>
+          <FormTextInput<BranchFormValues> label={i18n.t("branch___Nombre")} name={"name"} />
+          <FormPhoneInput<BranchFormValues> label={i18n.t("branch___Teléfono")} name={"phone"} />
+          <FormPhoneInput<BranchFormValues> label={i18n.t("branch___WhatsApp")} name={"whatsapp"} />
           <FormSelect<BranchFormValues>
-            label="Zona horaria del restaurante"
-            name="timezone"
+            label={i18n.t("branch___Zona horaria del restaurante")}
+            name={"timezone"}
             options={TIMEZONE_OPTIONS}
           />
           <BranchAddressAutocomplete branchId={branchId} onResolveChange={controller.setResolvePending} />
@@ -31,12 +32,12 @@ export function GeneralSection() {
       </section>
       <SocialLinksEditor />
       <section className="admin-editor-section">
-        <div className="admin-kicker">Imágenes públicas</div>
+        <h2 className={"ming-section__title"}>{i18n.t("branch___Imágenes públicas")}</h2>
         <div className="admin-branch-media-grid">
           <SingleImageUploadControl
             disabled={controller.pending}
             draft={controller.logo.draft}
-            label="Logo (icono de la app)"
+            label={i18n.t("branch___Logo (icono de la app)")}
             logo
             onRemove={controller.logo.remove}
             onSelect={controller.logo.selectFile}

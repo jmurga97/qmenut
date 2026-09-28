@@ -4,6 +4,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { i18n } from "~/lib/i18n";
 import { notifyError } from "~/lib/notifications";
 import { buildQrUrl, renderQrPreview } from "~/shared/services/qr";
 
@@ -46,7 +47,7 @@ export function useQrController({ domain, googlePlaceId }: { domain: string; goo
     runAction(async () => {
       if (!url) return;
       await navigator.clipboard.writeText(url);
-      toast.success("URL copiada.");
+      toast.success(i18n.t("qr___URL copiada."));
     });
   const download = (format: "png" | "svg") =>
     runAction(async () => {

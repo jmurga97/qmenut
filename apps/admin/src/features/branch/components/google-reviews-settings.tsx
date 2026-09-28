@@ -2,8 +2,8 @@ import { Button, Checkbox, Field, Input } from "@jmurga97/components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Activity, startTransition, useState } from "react";
 
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
-import { Icon } from "~/shared/components/icon";
 
 import { getGooglePlaceCandidatesQueryOptions, getGoogleReviewsConnectionMutationOptions } from "../api";
 
@@ -58,35 +58,36 @@ export function GoogleReviewsSettings({ address, branchId, branchName, enabled, 
   }
 
   return (
-    <section className="admin-editor-section admin-google-reviews">
+    <section className={"admin-editor-section admin-google-reviews"}>
       <div>
-        <div className="admin-kicker">Reseñas de Google</div>
-        <p className="admin-google-reviews__intro">
-          Conecta la ficha exacta de esta sucursal. Google elige y ordena las reseñas que aparecen en la página de
-          contacto.
+        <h2 className={"ming-section__title"}>{i18n.t("branch___Reseñas de Google")}</h2>
+        <p className={"admin-google-reviews__intro"}>
+          {i18n.t(
+            "branch___Conecta la ficha exacta de esta sucursal. Google elige y ordena las reseñas que aparecen en la página de contacto.",
+          )}
         </p>
       </div>
 
       {placeId ? (
-        <div className="admin-google-reviews__connection">
+        <div className={"admin-google-reviews__connection"}>
           <div>
-            <strong>Ficha de Google Maps conectada</strong>
-            <span>La conexión se guarda por sucursal.</span>
+            <strong>{i18n.t("branch___Ficha de Google Maps conectada")}</strong>
+            <span>{i18n.t("branch___La conexión se guarda por sucursal.")}</span>
           </div>
-          <div className="admin-google-reviews__actions">
-            <a className="admin-link" href={googleMapsHref(placeId)} rel="noreferrer" target="_blank">
-              Abrir en Google Maps ↗
+          <div className={"admin-google-reviews__actions"}>
+            <a className="admin-link" href={googleMapsHref(placeId)} rel={"noreferrer"} target={"_blank"}>
+              {i18n.t("branch___Abrir en Google Maps ↗")}
             </a>
-            <Button disabled={busy} onClick={() => startTransition(() => setSearchVisible(true))} variant="secondary">
-              Cambiar
+            <Button disabled={busy} onClick={() => startTransition(() => setSearchVisible(true))} variant={"secondary"}>
+              {i18n.t("branch___Cambiar")}
             </Button>
             <Button
-              className="admin-google-reviews__disconnect"
+              className={"admin-google-reviews__disconnect"}
               disabled={busy}
               onClick={() => void disconnect()}
-              variant="secondary"
+              variant={"secondary"}
             >
-              Desconectar
+              {i18n.t("branch___Desconectar")}
             </Button>
           </div>
         </div>
@@ -94,52 +95,54 @@ export function GoogleReviewsSettings({ address, branchId, branchName, enabled, 
 
       <Activity mode={searchVisible ? "visible" : "hidden"}>
         <form
-          className="admin-google-reviews__search"
+          className={"admin-google-reviews__search"}
           onSubmit={(event) => {
             event.preventDefault();
             search();
           }}
         >
-          <Field label="Buscar negocio o ficha">
-            <div className="admin-google-reviews__search-row">
+          <Field label={i18n.t("branch___Buscar negocio o ficha")} optionalLabel={i18n.t("shared___Optional")}>
+            <div className={"admin-google-reviews__search-row"}>
               <Input
                 disabled={busy}
                 onValueChange={setQuery}
-                placeholder="Nombre y dirección de la sucursal"
-                type="search"
+                placeholder={i18n.t("branch___Nombre y dirección de la sucursal")}
+                type={"search"}
                 value={query}
               />
-              <Button disabled={busy || normalizedQuery.length < 3} type="submit" variant="primary">
-                <Icon name="search" /> {candidatesQuery.isFetching ? "Buscando…" : "Buscar"}
+              <Button disabled={busy || normalizedQuery.length < 3} type={"submit"} variant={"primary"}>
+                {candidatesQuery.isFetching ? i18n.t("branch___Buscando…") : i18n.t("branch___Buscar")}
               </Button>
             </div>
           </Field>
 
           {candidatesQuery.isSuccess && candidates.length === 0 ? (
-            <p className="admin-google-reviews__status" role="status">
-              No se encontraron fichas para esta búsqueda.
+            <p className={"admin-google-reviews__status"} role={"status"}>
+              {i18n.t("branch___No se encontraron fichas para esta búsqueda.")}
             </p>
           ) : null}
           {candidates.length > 0 ? (
-            <div className="admin-google-reviews__candidates">
+            <div className={"admin-google-reviews__candidates"}>
               {candidates.map((candidate) => (
-                <article className="admin-google-reviews__candidate" key={candidate.id}>
+                <article className={"admin-google-reviews__candidate"} key={candidate.id}>
                   <div>
                     <h3>{candidate.name}</h3>
                     <p>{candidate.address}</p>
-                    <p className="admin-google-reviews__rating">
-                      {candidate.rating === null ? "Sin valoración" : `${candidate.rating.toFixed(1)} ★`}
-                      {` · ${candidate.ratingCount} reseñas`}
+                    <p className={"admin-google-reviews__rating"}>
+                      {candidate.rating === null
+                        ? i18n.t("branch___Sin valoración")
+                        : `${new Intl.NumberFormat(i18n.resolvedLanguage ?? "es", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(candidate.rating)} ★`}
+                      {i18n.t("branch___ · {{count}} reseñas", { count: candidate.ratingCount })}
                     </p>
                     <small>
-                      <span className="admin-google-reviews__google-attribution" translate="no">
+                      <span className={"admin-google-reviews__google-attribution"} translate={"no"}>
                         {candidatesQuery.data?.attribution}
                       </span>
                       {candidate.attributions.map((attribution) => ` · ${attribution.provider}`).join("")}
                     </small>
                   </div>
-                  <Button disabled={busy} onClick={() => void selectCandidate(candidate.id)} variant="primary">
-                    Conectar esta ficha
+                  <Button disabled={busy} onClick={() => void selectCandidate(candidate.id)} variant={"primary"}>
+                    {i18n.t("branch___Conectar esta ficha")}
                   </Button>
                 </article>
               ))}
@@ -148,15 +151,17 @@ export function GoogleReviewsSettings({ address, branchId, branchName, enabled, 
         </form>
       </Activity>
 
-      <div className="admin-google-reviews__toggle">
+      <div className={"admin-google-reviews__toggle"}>
         <Checkbox
           checked={enabled}
           disabled={!placeId || busy}
-          label="Mostrar reseñas en la página de contacto"
+          label={i18n.t("branch___Mostrar reseñas en la página de contacto")}
           onCheckedChange={(checked) => void saveConnection(placeId, checked)}
         />
       </div>
-      {placeId ? null : <p className="admin-field-hint">Conecta una ficha antes de activar las reseñas.</p>}
+      {placeId ? null : (
+        <p className="admin-field-hint">{i18n.t("branch___Conecta una ficha antes de activar las reseñas.")}</p>
+      )}
     </section>
   );
 }

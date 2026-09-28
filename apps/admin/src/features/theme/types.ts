@@ -3,17 +3,26 @@ import { TEMPLATES } from "@qmenut/ui/theme/presets";
 import { DEFAULT_TEMPLATE, DEFAULT_TENANT_COLORS } from "@qmenut/ui/theme/tenant-theme-config";
 import { z } from "zod";
 
+import { i18n } from "~/lib/i18n";
+
 import type { QmFontId } from "@qmenut/ui/theme/font-catalog";
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 
 const TEMPLATE_IDS = ["tapas", "fine", "cafe", "fast", "her"] as const;
-export const THEME_OPTIONS = TEMPLATE_IDS.map((id) => ({ id, label: TEMPLATES[id].label }));
+const TEMPLATE_LABELS = {
+  tapas: i18n.t("theme___Bar de tapas"),
+  fine: i18n.t("theme___Alta cocina"),
+  cafe: i18n.t("theme___Cafetería"),
+  fast: i18n.t("theme___Comida rápida"),
+  her: i18n.t("theme___Herencia"),
+} as const;
+export const THEME_OPTIONS = TEMPLATE_IDS.map((id) => ({ id, label: TEMPLATE_LABELS[id] }));
 
 export const THEME_TEMPLATE_FONT_ID = "template" as const;
 
 function buildFontOptions(isAllowed: (fontId: QmFontId) => boolean) {
   return [
-    { id: THEME_TEMPLATE_FONT_ID, label: "La de la plantilla" },
+    { id: THEME_TEMPLATE_FONT_ID, label: i18n.t("theme___La de la plantilla") },
     ...QM_FONT_IDS.filter((fontId) => isAllowed(fontId)).map((id) => ({ id, label: QM_FONT_CATALOG[id].label })),
   ];
 }
@@ -23,17 +32,23 @@ export const BODY_FONT_OPTIONS = buildFontOptions(isBodyFontId);
 
 const headingFontSchema = z
   .union([z.literal(THEME_TEMPLATE_FONT_ID), z.enum(QM_FONT_IDS)])
-  .refine((value) => value === THEME_TEMPLATE_FONT_ID || isHeadingFontId(value), "La fuente no es válida para títulos");
+  .refine(
+    (value) => value === THEME_TEMPLATE_FONT_ID || isHeadingFontId(value),
+    i18n.t("theme___La fuente no es válida para títulos"),
+  );
 
 const bodyFontSchema = z
   .union([z.literal(THEME_TEMPLATE_FONT_ID), z.enum(QM_FONT_IDS)])
-  .refine((value) => value === THEME_TEMPLATE_FONT_ID || isBodyFontId(value), "La fuente no es válida para el cuerpo");
+  .refine(
+    (value) => value === THEME_TEMPLATE_FONT_ID || isBodyFontId(value),
+    i18n.t("theme___La fuente no es válida para el cuerpo"),
+  );
 
 export const themeFormSchema = z.object({
   template: z.enum(["fine", "her", "fast", "cafe", "tapas"]),
-  primary: z.string().regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, "Color no válido"),
-  secondary: z.string().regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, "Color no válido"),
-  tagline: z.string().trim().max(120, "Máximo 120 caracteres"),
+  primary: z.string().regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, i18n.t("theme___Color no válido")),
+  secondary: z.string().regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, i18n.t("theme___Color no válido")),
+  tagline: z.string().trim().max(120, i18n.t("theme___Máximo 120 caracteres")),
   showMenuPhotos: z.boolean(),
   showDishPhoto: z.boolean(),
   headingFont: headingFontSchema,

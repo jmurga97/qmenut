@@ -2,16 +2,16 @@
 
 .admin-color-row {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--ming-space-2);
   align-items: center;
 }
 
 .admin-color-row input[type="color"] {
   width: 3rem;
   min-height: 2.75rem;
-  padding: 0.25rem;
+  padding: var(--ming-space-1);
   border: 1px solid var(--input);
-  border-radius: 0.375rem;
+  border-radius: var(--ming-radius-control);
   background: var(--card);
 }
 
@@ -23,42 +23,19 @@
   display: grid;
   width: 100%;
   max-width: 72rem;
-  gap: 2rem;
+  gap: var(--ming-space-6);
   align-items: start;
 }
 
-.admin-theme-controls,
-.admin-theme-section {
-  display: grid;
-}
-
-.admin-theme-controls {
-  gap: 2rem;
-}
-
-.admin-theme-section {
-  gap: 1.25rem;
-  padding-block-start: 2rem;
-  border-block-start: 1px solid var(--border);
-}
-
-.admin-theme-section:first-child {
-  padding-block-start: 0;
-  border-block-start: 0;
-}
-
-.admin-theme-section__heading {
-  display: grid;
-  gap: 0.375rem;
-}
-
-.admin-theme-section__heading h3,
-.admin-theme-section__heading p,
 .admin-theme-preview__header p {
   margin: 0;
 }
 
-.admin-theme-section__heading h3 {
+.admin-theme-preview__header p {
+  margin: 0;
+}
+
+.admin-theme-section__heading h2 {
   color: var(--foreground);
   font-size: var(--admin-text-heading);
   font-weight: 600;
@@ -76,68 +53,30 @@
 
 .admin-theme-photo-controls .admin-form-checkbox {
   min-height: 3.5rem;
-  padding: 0.5rem 0.75rem;
+  padding: var(--ming-space-2) var(--ming-space-3);
   border: 1px solid var(--border);
-  border-radius: 0.375rem;
+  border-radius: var(--ming-radius-control);
   background: var(--card);
 }
 
 .admin-theme-preview {
   display: grid;
   min-width: 0;
-  gap: 1rem;
+  gap: var(--ming-space-4);
   justify-items: center;
 }
 
 .admin-theme-preview__header {
   display: flex;
   width: min(100%, 24.375rem);
-  gap: 1rem;
+  gap: var(--ming-space-4);
   align-items: center;
   justify-content: space-between;
 }
 
 .admin-theme-preview__header > div {
   display: grid;
-  gap: 0.25rem;
-}
-
-.admin-theme-preview__status {
-  display: inline-flex;
-  min-height: 1.75rem;
-  flex: none;
-  align-items: center;
-  gap: 0.375rem;
-  padding-inline: 0.625rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--muted-foreground);
-  font-size: var(--admin-text-label);
-  font-weight: 600;
-}
-
-.admin-theme-preview__status::before {
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: 999px;
-  background: var(--muted-foreground);
-  content: "";
-}
-
-.admin-theme-preview__status--ready {
-  color: var(--ming-success);
-}
-
-.admin-theme-preview__status--ready::before {
-  background: var(--ming-success);
-}
-
-.admin-theme-preview__status--error {
-  color: var(--destructive);
-}
-
-.admin-theme-preview__status--error::before {
-  background: var(--destructive);
+  gap: var(--ming-space-1);
 }
 
 .admin-theme-device {
@@ -145,9 +84,8 @@
   width: min(100%, 24.375rem);
   height: 65vh;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--radius);
   background: var(--card);
-  box-shadow: 0 0 0 0.25rem var(--secondary);
   overflow: hidden;
 }
 
@@ -166,7 +104,7 @@
   place-items: center;
   background: color-mix(in srgb, var(--card) 94%, transparent);
   color: var(--muted-foreground);
-  padding: 2rem;
+  padding: var(--ming-space-6);
   font-size: var(--admin-text-body-sm);
   text-align: center;
 }

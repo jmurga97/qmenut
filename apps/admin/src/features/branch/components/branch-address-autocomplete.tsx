@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useRef, useState } from "react";
 import { useController, useFormContext, useWatch } from "react-hook-form";
 
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { useDebouncedCallback } from "~/shared/hooks/use-debounced-callback";
 
@@ -53,30 +54,30 @@ function AddressResults({
   const locationFailed = selectionStatus === "failed";
 
   return (
-    <div className="admin-address-results" id={listboxId} role="listbox">
-      {fetching ? <div className="admin-address-state">Buscando direcciones…</div> : null}
+    <div className="admin-address-results" id={listboxId} role={"listbox"}>
+      {fetching ? <div className="admin-address-state">{i18n.t("branch___Buscando direcciones…")}</div> : null}
       {resolving ? (
-        <div className="admin-address-state" role="status">
-          Obteniendo la ubicación…
+        <div className="admin-address-state" role={"status"}>
+          {i18n.t("branch___Obteniendo la ubicación…")}
         </div>
       ) : null}
       {locationFailed ? (
-        <div className="admin-address-state" role="status">
-          No se pudo obtener la ubicación del mapa. Puedes guardar la dirección sin mapa.
+        <div className="admin-address-state" role={"status"}>
+          {i18n.t("branch___No se pudo obtener la ubicación del mapa. Puedes guardar la dirección sin mapa.")}
         </div>
       ) : null}
       {rateLimited ? (
-        <div className="admin-address-state" role="status">
-          Has alcanzado el límite de búsquedas. Espera un minuto antes de continuar.
+        <div className="admin-address-state" role={"status"}>
+          {i18n.t("branch___Has alcanzado el límite de búsquedas. Espera un minuto antes de continuar.")}
         </div>
       ) : null}
       {requestFailed && !rateLimited && showSuggestions ? (
-        <div className="admin-address-state" role="status">
-          No se pudo buscar ahora. Puedes guardar la dirección sin mapa.
+        <div className="admin-address-state" role={"status"}>
+          {i18n.t("branch___No se pudo buscar ahora. Puedes guardar la dirección sin mapa.")}
         </div>
       ) : null}
       {showSuggestions && !fetching && !requestFailed && suggestions.length === 0 ? (
-        <div className="admin-address-state">No hay resultados para esta búsqueda.</div>
+        <div className="admin-address-state">{i18n.t("branch___No hay resultados para esta búsqueda.")}</div>
       ) : null}
       {showSuggestions
         ? suggestions.map((suggestion, index) => (
@@ -89,8 +90,8 @@ function AddressResults({
                 onSelect(index);
               }}
               onMouseDown={(event) => event.preventDefault()}
-              role="option"
-              type="button"
+              role={"option"}
+              type={"button"}
             >
               {suggestion.label}
             </button>
@@ -225,23 +226,23 @@ export function BranchAddressAutocomplete({ branchId, onResolveChange }: BranchA
   return (
     <div className="admin-address-autocomplete" onBlur={handleBlur} ref={rootRef}>
       <label className="admin-field" htmlFor={inputId}>
-        <span>Dirección</span>
+        <span>{i18n.t("branch___Dirección")}</span>
         <input
           aria-activedescendant={activeIndex < 0 ? undefined : `${listboxId}-${activeIndex}`}
-          aria-autocomplete="list"
+          aria-autocomplete={"list"}
           aria-controls={listboxId}
           aria-expanded={showResults}
           aria-invalid={Boolean(error)}
-          autoComplete="off"
+          autoComplete={"off"}
           id={inputId}
           onChange={(event) => handleInput(event.currentTarget.value)}
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
           ref={field.ref}
-          role="combobox"
+          role={"combobox"}
           value={field.value}
         />
-        {error ? <small role="alert">{error}</small> : null}
+        {error ? <small role={"alert"}>{error}</small> : null}
       </label>
 
       {showResults ? (
@@ -260,13 +261,15 @@ export function BranchAddressAutocomplete({ branchId, onResolveChange }: BranchA
 
       {linked ? (
         <div className="admin-address-linked">
-          <span>Ubicación del mapa vinculada</span>
-          <button onClick={clearCoordinates} type="button">
-            Quitar ubicación del mapa
+          <span>{i18n.t("branch___Ubicación del mapa vinculada")}</span>
+          <button onClick={clearCoordinates} type={"button"}>
+            {i18n.t("branch___Quitar ubicación del mapa")}
           </button>
         </div>
       ) : (
-        <p className="admin-field-hint">Selecciona una sugerencia para mostrar esta sucursal en el mapa público.</p>
+        <p className="admin-field-hint">
+          {i18n.t("branch___Selecciona una sugerencia para mostrar esta sucursal en el mapa público.")}
+        </p>
       )}
     </div>
   );

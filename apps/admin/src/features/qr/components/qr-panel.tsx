@@ -3,8 +3,10 @@ import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { getThemeQueryOptions } from "~/shared/api";
+import { CardSkeleton } from "~/shared/components/state/loading-state";
 
 import { QrDownloadForm } from "./qr-download-form";
 import { QrPrintablePanel } from "./qr-printable-panel";
@@ -25,12 +27,11 @@ export function QrPanel({ branchId, host }: { branchId: string; host: string }) 
   const theme = themeQuery.data ? resolveTenantThemeConfig(themeQuery.data) : null;
 
   return (
-    <div className="admin-page">
-      {themeQuery.isPending ? <QrThemeState text="Cargando el tema de la sucursal…" /> : null}
+    <div className={"ming-stack ming-stack--loose"}>
       {themeQuery.isError ? (
-        <QrThemeState text="No se pudo cargar el tema de esta sucursal.">
-          <Button onClick={() => void themeQuery.refetch()} variant="secondary">
-            Reintentar
+        <QrThemeState text={i18n.t("qr___No se pudo cargar el tema de esta sucursal.")}>
+          <Button onClick={() => void themeQuery.refetch()} variant={"secondary"}>
+            {i18n.t("qr___Reintentar")}
           </Button>
         </QrThemeState>
       ) : null}
@@ -44,13 +45,14 @@ export function QrPanel({ branchId, host }: { branchId: string; host: string }) 
       {theme && showPrintStyles ? (
         <QrPrintablePanel branch={branch} target={target} theme={theme} url={controller.url} />
       ) : null}
+      {themeQuery.isPending && showPrintStyles ? <CardSkeleton rows={4} /> : null}
     </div>
   );
 }
 
 function QrThemeState({ children, text }: { children?: ReactNode; text: string }) {
   return (
-    <section className="admin-card admin-qr-theme-state" role="status">
+    <section className={"admin-card admin-qr-theme-state"} role={"status"}>
       <p>{text}</p>
       {children}
     </section>

@@ -1,5 +1,6 @@
 import { FormProvider } from "react-hook-form";
 
+import { i18n } from "~/lib/i18n";
 import { FormOtpInput } from "~/shared/components/forms/adapters/form-otp-input";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
 import { FormActions } from "~/shared/components/forms/form-actions";
@@ -18,26 +19,26 @@ interface LoginCopyInput {
 function getLoginCopy({ developmentOtp, email, emailStep }: LoginCopyInput) {
   if (!emailStep) {
     return {
-      busyLabel: "Verificando...",
+      busyLabel: i18n.t("auth___Verificando…"),
       instructions: developmentOtp
-        ? `Development usa el código fijo ${developmentOtp}.`
-        : `Introduce el código enviado a ${email}.`,
-      submitLabel: "Entrar",
+        ? i18n.t("auth___Development usa el código fijo {{code}}.", { code: developmentOtp })
+        : i18n.t("auth___Introduce el código enviado a {{email}}.", { email }),
+      submitLabel: i18n.t("auth___Entrar"),
     };
   }
 
   if (developmentOtp) {
     return {
-      busyLabel: "Preparando...",
-      instructions: "Introduce el email de una cuenta provisionada.",
-      submitLabel: "Continuar",
+      busyLabel: i18n.t("auth___Preparando…"),
+      instructions: i18n.t("auth___Introduce el email de una cuenta provisionada."),
+      submitLabel: i18n.t("auth___Continuar"),
     };
   }
 
   return {
-    busyLabel: "Solicitando...",
-    instructions: "Solicita un código de acceso.",
-    submitLabel: "Solicitar código",
+    busyLabel: i18n.t("auth___Solicitando…"),
+    instructions: i18n.t("auth___Solicita un código de acceso."),
+    submitLabel: i18n.t("auth___Solicitar código"),
   };
 }
 
@@ -56,35 +57,42 @@ export function LoginPage() {
   }
   return (
     <main className="admin-login-shell">
-      <section className="admin-login-panel" aria-labelledby="login-title">
-        <div className="admin-page-header admin-login-header">
-          <h2 id="login-title">QMenut Admin</h2>
+      <section className="admin-login-panel" aria-labelledby={"login-title"}>
+        <div className={"admin-page-header admin-login-header"}>
+          <h1 id={"login-title"}>{i18n.t("auth___QMenut Admin")}</h1>
           <p>{instructions}</p>
         </div>
         <FormProvider {...controller.form}>
           <form className="admin-login-form" noValidate onSubmit={handleFormSubmit}>
             {emailStep ? (
               <FormTextInput<LoginFormValues>
-                autocomplete="email"
+                autocomplete={"email"}
                 disabled={controller.busy}
-                inputMode="email"
-                label="Email"
-                name="email"
-                placeholder="nombre@turestaurante.com"
-                type="email"
+                inputMode={"email"}
+                label={i18n.t("auth___Email")}
+                name={"email"}
+                placeholder={i18n.t("auth___nombre@turestaurante.com")}
+                type={"email"}
               />
             ) : (
-              <FormOtpInput<LoginFormValues> disabled={controller.busy} label="Código OTP" length={6} name="otp" />
+              <FormOtpInput<LoginFormValues>
+                disabled={controller.busy}
+                label={i18n.t("auth___Código OTP")}
+                length={6}
+                name={"otp"}
+              />
             )}
             {emailStep ? null : (
               <div className="admin-login-resend">
-                <span>¿No te llegó el código?</span>
+                <span>{i18n.t("auth___¿No te llegó el código?")}</span>
                 <button
                   disabled={controller.resending || controller.resendCountdown > 0}
                   onClick={controller.resendOtp}
-                  type="button"
+                  type={"button"}
                 >
-                  {controller.resendCountdown > 0 ? `Reenviar en ${controller.resendCountdown}s` : "Reenviar código"}
+                  {controller.resendCountdown > 0
+                    ? i18n.t("auth___Reenviar en {{seconds}}s", { seconds: controller.resendCountdown })
+                    : i18n.t("auth___Reenviar código")}
                 </button>
               </div>
             )}
@@ -94,7 +102,7 @@ export function LoginPage() {
               onCancel={emailStep ? undefined : controller.changeEmail}
               onSubmit={() => void controller.submit()}
               submitLabel={submitLabel}
-              submitType="submit"
+              submitType={"submit"}
             />
           </form>
         </FormProvider>

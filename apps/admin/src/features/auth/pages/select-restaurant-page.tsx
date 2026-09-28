@@ -3,6 +3,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { useNavigate, useRouter } from "@tanstack/react-router";
 
 import { signOut } from "~/lib/auth-client";
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { useBranchStore } from "~/shared/stores/branch-store";
 
@@ -12,9 +13,9 @@ import { useSelectRestaurant } from "../hooks/use-select-restaurant";
 import type { RestaurantRoleCode } from "@qmenut/permissions";
 
 const ROLE_LABELS: Record<RestaurantRoleCode, string> = {
-  owner: "Propietario",
-  admin: "Administrador",
-  staff: "Equipo",
+  owner: i18n.t("auth___Propietario"),
+  admin: i18n.t("auth___Administrador"),
+  staff: i18n.t("auth___Equipo"),
 };
 
 export function SelectRestaurantPage() {
@@ -34,13 +35,15 @@ export function SelectRestaurantPage() {
   });
   return (
     <main className="admin-login-shell">
-      <section aria-labelledby="select-restaurant-title" className="admin-login-panel">
-        <div className="admin-page-header admin-login-header">
-          <h2 id="select-restaurant-title">Elige un restaurante</h2>
+      <section aria-labelledby={"select-restaurant-title"} className="admin-login-panel">
+        <div className={"admin-page-header admin-login-header"}>
+          <h1 id={"select-restaurant-title"}>{i18n.t("auth___Elige un restaurante")}</h1>
           <p>
             {restaurants.length > 0
-              ? "Tu cuenta tiene acceso a varios restaurantes. Selecciona con cuál quieres trabajar."
-              : "Tu cuenta no tiene acceso a ningún restaurante. Contacta con soporte para configurarlo."}
+              ? i18n.t("auth___Tu cuenta tiene acceso a varios restaurantes. Selecciona con cuál quieres trabajar.")
+              : i18n.t(
+                  "auth___Tu cuenta no tiene acceso a ningún restaurante. Contacta con soporte para configurarlo.",
+                )}
           </p>
         </div>
         {restaurants.length > 0 ? (
@@ -51,7 +54,7 @@ export function SelectRestaurantPage() {
                 disabled={select.isPending}
                 key={restaurant.restaurantId}
                 onClick={() => select.mutate({ restaurantId: restaurant.restaurantId })}
-                type="button"
+                type={"button"}
               >
                 <span className="admin-select-restaurant-name">{restaurant.name}</span>
                 <span className="admin-select-restaurant-role">{ROLE_LABELS[restaurant.roleCode]}</span>
@@ -63,9 +66,9 @@ export function SelectRestaurantPage() {
           <Button
             disabled={select.isPending || signOutMutation.isPending || undefined}
             onClick={() => signOutMutation.mutate()}
-            variant="secondary"
+            variant={"secondary"}
           >
-            {signOutMutation.isPending ? "Cerrando sesión…" : "Cerrar sesión"}
+            {signOutMutation.isPending ? i18n.t("auth___Cerrando sesión…") : i18n.t("auth___Cerrar sesión")}
           </Button>
         </div>
       </section>

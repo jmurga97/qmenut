@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { getThemeQueryOptions } from "~/shared/api";
 
@@ -48,7 +49,7 @@ export function useThemeController(branchId: string) {
       save.mutate(toThemeInput({ branchId, current, values }), {
         onSuccess: () => {
           form.reset(values);
-          toast.success("Tema guardado.");
+          toast.success(i18n.t("theme___Tema guardado."));
         },
       }),
     ),

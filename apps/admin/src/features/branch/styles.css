@@ -18,14 +18,13 @@
   display: grid;
   overflow: hidden;
   border: 1px solid var(--input);
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   background: var(--popover);
-  box-shadow: 0 0.5rem 1.5rem rgb(20 22 18 / 5%);
 }
 
 .admin-address-option {
   min-height: 2.75rem;
-  padding: 0.65rem 0.75rem;
+  padding: var(--ming-space-3) var(--ming-space-3);
   border: 0;
   border-bottom: 1px solid var(--border);
   background: transparent;
@@ -47,7 +46,7 @@
 
 .admin-address-state,
 .admin-address-attribution {
-  padding: 0.7rem 0.75rem;
+  padding: var(--ming-space-3) var(--ming-space-3);
   color: var(--muted-foreground);
   font-size: var(--admin-text-body-sm);
 }
@@ -60,10 +59,10 @@
 .admin-address-linked {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 0.75rem;
+  gap: var(--ming-space-2) var(--ming-space-3);
   align-items: center;
   justify-content: space-between;
-  margin-top: 0.5rem;
+  margin-top: var(--ming-space-2);
   color: var(--ming-success);
   font-size: var(--admin-text-body-sm);
 }
@@ -80,7 +79,7 @@
 }
 
 .admin-field-hint {
-  margin: 0.5rem 0 0;
+  margin: var(--ming-space-2) 0 0;
   color: var(--muted-foreground);
   font-size: var(--admin-text-caption);
   line-height: 1.4;
@@ -92,18 +91,17 @@
   top: 0;
   display: flex;
   gap: 0;
-  padding: 0 1.25rem;
+  padding: 0 var(--ming-space-4);
   overflow: clip;
   border-bottom: 1px solid var(--border);
-  background: var(--admin-background-translucent);
-  backdrop-filter: blur(18px);
+  background: var(--background);
 }
 
 .admin-branch-tab {
   position: relative;
   min-width: 0;
   flex: 1 1 0;
-  padding: 0.875rem 1rem;
+  padding: var(--ming-space-3) var(--ming-space-4);
   border: 0;
   color: var(--muted-foreground);
   font-size: var(--admin-text-body-sm);
@@ -130,7 +128,7 @@
 
 @media (min-width: 960px) {
   .admin-branch-tabs {
-    padding-inline: 2rem;
+    padding-inline: var(--ming-space-6);
   }
 
   .admin-branch-tab {
@@ -141,61 +139,34 @@
 
 .admin-social-links {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
 }
 
 .admin-social-row {
   display: grid;
-  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
-  gap: 0.5rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--ming-space-2);
   align-items: end;
-}
-
-.admin-social-icon {
-  display: grid;
-  height: 2.5rem;
-  place-items: center;
-  color: var(--muted-foreground);
-}
-
-.admin-social-icon svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.8;
-}
-
-.admin-social-icon svg.brand-icon {
-  fill: currentColor;
-  stroke: none;
-}
-
-.admin-social-icon .fill {
-  fill: currentColor;
-  stroke: none;
 }
 
 .admin-schedule-grid {
   display: grid;
-  gap: 0.625rem;
+  gap: var(--ming-space-2);
 }
 
 .admin-branch-media-grid {
   display: grid;
   min-width: 0;
-  gap: 1.5rem;
+  gap: var(--ming-space-5);
   align-items: start;
 }
 
 .admin-schedule-day {
   display: grid;
-  gap: 0.75rem;
-  padding: 0.875rem;
+  gap: var(--ming-space-3);
+  padding: var(--ming-space-3);
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
 }
 
 .admin-schedule-day-header {
@@ -211,23 +182,23 @@
 
 .admin-schedule-intervals {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
 }
 
 .admin-schedule-interval {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 9rem)) auto;
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
   align-items: center;
 }
 
 .admin-schedule-interval input[type="time"] {
   min-height: 2.5rem;
   border: 1px solid var(--input);
-  border-radius: 0.375rem;
+  border-radius: var(--ming-radius-control);
   background: var(--card);
   color: var(--foreground);
-  padding: 0.375rem 0.625rem;
+  padding: var(--ming-space-1) var(--ming-space-2);
 }
 
 .admin-schedule-interval input[type="time"]::-webkit-calendar-picker-indicator {
@@ -247,18 +218,18 @@
 .admin-google-reviews__connection {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--ming-space-4);
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
-  border: 1px solid color-mix(in srgb, var(--ming-success) 45%, var(--border));
-  border-radius: 0.5rem;
-  background: var(--ming-success-surface);
+  padding: var(--ming-space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
 }
 
 .admin-google-reviews__connection > div:first-child {
   display: grid;
-  gap: 0.2rem;
+  gap: var(--ming-space-1);
 }
 
 .admin-google-reviews__connection span {
@@ -270,16 +241,16 @@
 .admin-google-reviews__search-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--ming-space-2);
   align-items: center;
 }
 
 .admin-google-reviews__search {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
 }
 
-.admin-google-reviews__search-row .ming-input {
+.admin-google-reviews__search-row input {
   flex: 1 1 18rem;
   min-width: 0;
 }
@@ -287,21 +258,21 @@
 .admin-google-reviews__candidates {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
 }
 
 .admin-google-reviews__candidate {
   display: grid;
-  gap: 1rem;
+  gap: var(--ming-space-4);
   min-width: 0;
-  padding: 1rem;
+  padding: var(--ming-space-4);
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   background: var(--card);
 }
 
 .admin-google-reviews__candidate h3 {
-  margin: 0 0 0.35rem;
+  margin: 0 0 var(--ming-space-1);
   color: var(--foreground);
   font-size: var(--admin-text-body);
   font-weight: 600;
@@ -309,18 +280,18 @@
 
 .admin-google-reviews__candidate small {
   display: block;
-  margin-top: 0.65rem;
+  margin-top: var(--ming-space-3);
   color: var(--muted-foreground);
   font-family: var(--font-mono);
   font-size: var(--admin-text-caption);
 }
 
 .admin-google-reviews__google-attribution {
-  padding: 0.1rem 0.25rem;
-  border-radius: 0.15rem;
-  background: #fff;
-  color: #5e5e5e;
-  font-family: sans-serif;
+  padding: var(--ming-space-1);
+  border-radius: var(--ming-radius-control);
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-family: var(--font-sans);
   font-size: 0.75rem;
   font-style: normal;
   font-weight: 400;
@@ -329,7 +300,7 @@
 }
 
 .admin-google-reviews__candidate .admin-google-reviews__rating {
-  margin-top: 0.45rem;
+  margin-top: var(--ming-space-2);
   color: var(--foreground);
   font-weight: 600;
 }

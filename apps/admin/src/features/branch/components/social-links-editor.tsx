@@ -1,38 +1,35 @@
 import { Button, InlineMessage } from "@jmurga97/components";
-import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 
+import { i18n } from "~/lib/i18n";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
-
-import { SocialIcon } from "./social-icon";
 
 import type { BranchFormValues } from "../types";
 
 export function SocialLinksEditor() {
   const { control, formState } = useFormContext<BranchFormValues>();
   const { append, fields, remove } = useFieldArray({ control, name: "socials" });
-  const socials = useWatch({ control, name: "socials" });
   const error = formState.errors.socials?.root?.message;
   return (
     <section className="admin-editor-section">
-      <div className="admin-kicker">Redes sociales</div>
+      <h2 className={"ming-section__title"}>{i18n.t("branch___Redes sociales")}</h2>
       <div className="admin-social-links">
         {fields.map((field, index) => (
           <div className="admin-social-row" key={field.id}>
-            <SocialIcon href={socials[index]?.url ?? ""} />
             <FormTextInput<BranchFormValues>
-              inputMode="url"
-              label="Red social"
+              inputMode={"url"}
+              label={i18n.t("branch___Red social")}
               name={`socials.${index}.url`}
-              placeholder="https://instagram.com/tucuenta"
+              placeholder={i18n.t("branch___https://instagram.com/tucuenta")}
             />
             <Button
-              aria-label={`Quitar red social ${index + 1}`}
-              size="sm"
-              type="button"
-              variant="ghost"
+              aria-label={i18n.t("branch___Quitar red social {{index}}", { index: index + 1 })}
+              size={"sm"}
+              type={"button"}
+              variant={"ghost"}
               onClick={() => remove(index)}
             >
-              Quitar
+              {i18n.t("branch___Quitar")}
             </Button>
           </div>
         ))}
@@ -40,15 +37,17 @@ export function SocialLinksEditor() {
       </div>
       <Button
         disabled={fields.length >= 10}
-        size="sm"
-        type="button"
-        variant="secondary"
+        size={"sm"}
+        type={"button"}
+        variant={"secondary"}
         onClick={() => append({ url: "" })}
       >
-        Agregar red social
+        {i18n.t("branch___Agregar red social")}
       </Button>
       <p className="admin-field-hint">
-        Se muestran como iconos en la página de contacto del menú público. El icono se detecta a partir del enlace.
+        {i18n.t(
+          "branch___Se muestran como iconos en la página de contacto del menú público. El icono se detecta a partir del enlace.",
+        )}
       </p>
     </section>
   );

@@ -1,7 +1,7 @@
 import { Button, Checkbox } from "@jmurga97/components";
 
+import { i18n } from "~/lib/i18n";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
-import { Icon } from "~/shared/components/icon";
 
 import { useBranchForm } from "../branch-form-context-value";
 import { DAYS } from "../types";
@@ -12,7 +12,7 @@ export function ScheduleSection() {
   const { controller } = useBranchForm();
   return (
     <section className="admin-editor-section">
-      <div className="admin-kicker">Horario semanal</div>
+      <h2 className={"ming-section__title"}>{i18n.t("branch___Horario semanal")}</h2>
       <div className="admin-schedule-grid">
         {DAYS.map((day, dayIndex) => {
           const dayOfWeek = dayIndex + 1;
@@ -29,7 +29,9 @@ export function ScheduleSection() {
                 />
                 {rows.length > 0 ? (
                   <span className="admin-schedule-count">
-                    {rows.length} {rows.length === 1 ? "franja" : "franjas"}
+                    {rows.length === 1
+                      ? i18n.t("branch___{{count}} franja", { count: rows.length })
+                      : i18n.t("branch___{{count}} franjas", { count: rows.length })}
                   </span>
                 ) : null}
               </div>
@@ -38,24 +40,24 @@ export function ScheduleSection() {
                   {rows.map(({ field, index, position }) => (
                     <div className="admin-schedule-interval" key={field.id}>
                       <FormTextInput<BranchFormValues>
-                        label={`Apertura ${day}`}
+                        label={i18n.t("branch___Apertura {{day}}", { day })}
                         name={`schedules.${index}.open`}
-                        type="time"
+                        type={"time"}
                       />
                       <FormTextInput<BranchFormValues>
-                        label={`Cierre ${day}`}
+                        label={i18n.t("branch___Cierre {{day}}", { day })}
                         name={`schedules.${index}.close`}
-                        type="time"
+                        type={"time"}
                       />
                       {rows.length > 1 ? (
                         <Button
-                          aria-label={`Quitar franja ${position} de ${day}`}
+                          aria-label={i18n.t("branch___Quitar franja {{position}} de {{day}}", { position, day })}
                           onClick={() => controller.removeSchedule(index)}
-                          size="sm"
-                          type="button"
-                          variant="ghost"
+                          size={"sm"}
+                          type={"button"}
+                          variant={"ghost"}
                         >
-                          <Icon name="trash" /> Quitar
+                          {i18n.t("branch___Quitar")}
                         </Button>
                       ) : null}
                     </div>
@@ -65,11 +67,11 @@ export function ScheduleSection() {
               <Button
                 disabled={controller.fields.length >= 21}
                 onClick={() => controller.addSchedule(dayOfWeek)}
-                size="sm"
-                type="button"
-                variant="secondary"
+                size={"sm"}
+                type={"button"}
+                variant={"secondary"}
               >
-                <Icon name="plus" /> {rows.length > 0 ? "Añadir franja" : "Añadir horario"}
+                {rows.length > 0 ? i18n.t("branch___Añadir franja") : i18n.t("branch___Añadir horario")}
               </Button>
             </div>
           );
