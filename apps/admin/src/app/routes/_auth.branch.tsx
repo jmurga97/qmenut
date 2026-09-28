@@ -1,3 +1,4 @@
+import { noop } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { getBranchQueryOptions } from "~/features/branch/api";
@@ -9,10 +10,9 @@ export const Route = createFileRoute("/_auth/branch")({
   loader: async ({ context }) => {
     const branch = await getSelectedBranch(context);
     if (branch) {
-      await context.queryClient.query({
-        ...getBranchQueryOptions({ branchId: branch.id, trpc: context.trpc }),
-        staleTime: "static",
-      });
+      void context.queryClient
+        .query({ ...getBranchQueryOptions({ branchId: branch.id, trpc: context.trpc }), staleTime: "static" })
+        .catch(noop);
     }
   },
 });

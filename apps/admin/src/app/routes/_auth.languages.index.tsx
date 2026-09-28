@@ -7,7 +7,7 @@ import { getLanguagesQueryOptions } from "~/shared/api";
 export const Route = createFileRoute("/_auth/languages/")({
   component: LanguagesPage,
   loader: ({ context }) =>
-    Promise.all([
+    void Promise.allSettled([
       context.queryClient.query({ ...getLanguagesQueryOptions({ trpc: context.trpc }), staleTime: "static" }),
       context.queryClient.query({ ...getLanguageCatalogQueryOptions({ trpc: context.trpc }), staleTime: "static" }),
     ]),

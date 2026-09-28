@@ -1,9 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { AdminShell } from "~/app/shell/admin-shell";
+import { getListRestaurantsQueryOptions } from "~/features/auth/api";
+import { getLanguageCatalogQueryOptions } from "~/features/languages/api";
 import { authClient } from "~/lib/auth-client";
 import { isForbiddenError } from "~/lib/errors";
-import { getTenantQueryOptions } from "~/shared/api";
+import { getLanguagesQueryOptions, getTenantQueryOptions } from "~/shared/api";
 
 import type { AdminRouterContext } from "~/lib/trpc";
 
@@ -28,5 +30,13 @@ export const Route = createFileRoute("/_auth")({
     }
     const tenant = await ensureTenantContext(context);
     return { session, roleCode: tenant.roleCode };
+  },
+  // The shell's selectors suspend on these; start them alongside the child loaders instead of after the first render.
+  loader: ({ context: { queryClient, trpc } }) => {
+    void Promise.allSettled([
+      queryClient.query({ ...getListRestaurantsQueryOptions({ trpc }), staleTime: "static" }),
+      queryClient.query({ ...getLanguageCatalogQueryOptions({ trpc }), staleTime: "static" }),
+      queryClient.query({ ...getLanguagesQueryOptions({ trpc }), staleTime: "static" }),
+    ]);
   },
 });

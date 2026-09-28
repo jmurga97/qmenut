@@ -8,9 +8,9 @@ export const Route = createFileRoute("/_auth/promotions")({
     const branch = await getSelectedBranch(context);
     return { promotionsBranchId: branch?.id ?? null };
   },
-  loader: async ({ context: { promotionsBranchId, queryClient, trpc } }) => {
+  loader: ({ context: { promotionsBranchId, queryClient, trpc } }) => {
     if (!promotionsBranchId) return;
-    await Promise.all([
+    void Promise.allSettled([
       queryClient.query({ ...getPromotionsQueryOptions({ branchId: promotionsBranchId, trpc }), staleTime: "static" }),
       queryClient.query({
         ...getMenuCategoriesQueryOptions({ branchId: promotionsBranchId, trpc }),

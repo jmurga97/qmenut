@@ -38,7 +38,8 @@ export const Route = createFileRoute("/_auth/")({
         queryClient.query({ ...api.getMenuDishesQueryOptions({ branchId: branch.id, trpc }), staleTime: "static" }),
       );
     }
-    await Promise.all(jobs);
+    // Non-blocking: the page renders its static frame and each card suspends on its own query.
+    void Promise.allSettled(jobs);
   },
   component: DashboardPage,
 });

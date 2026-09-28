@@ -12,9 +12,9 @@ export const Route = createFileRoute("/_auth/loyalty/insights")({
   beforeLoad: ({ context }) => {
     if (!can(context.roleCode, "loyalty.insights")) redirect({ to: "/loyalty", throw: true });
   },
-  loader: async ({ context: { queryClient, trpc }, deps }) => {
+  loader: ({ context: { queryClient, trpc }, deps }) => {
     const range = getVisitsRange(deps.period);
-    await Promise.all([
+    void Promise.allSettled([
       queryClient.query({ ...loyaltyApi.getLoyaltySummaryQueryOptions({ trpc }), staleTime: "static" }),
       queryClient.query({ ...loyaltyApi.getLoyaltyVisitsQueryOptions({ ...range, trpc }), staleTime: "static" }),
       queryClient.query({ ...loyaltyApi.getLoyaltyCustomersQueryOptions({ search: deps, trpc }), staleTime: "static" }),

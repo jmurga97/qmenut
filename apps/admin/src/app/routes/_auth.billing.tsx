@@ -1,4 +1,5 @@
 import { can } from "@qmenut/permissions";
+import { noop } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { getBillingOverviewQueryOptions } from "~/features/billing/api";
@@ -9,6 +10,9 @@ export const Route = createFileRoute("/_auth/billing")({
   beforeLoad: ({ context }) => {
     if (!can(context.roleCode, "billing.manage")) redirect({ to: "/", throw: true });
   },
-  loader: ({ context }) =>
-    context.queryClient.query({ ...getBillingOverviewQueryOptions({ trpc: context.trpc }), staleTime: "static" }),
+  loader: ({ context }) => {
+    void context.queryClient
+      .query({ ...getBillingOverviewQueryOptions({ trpc: context.trpc }), staleTime: "static" })
+      .catch(noop);
+  },
 });

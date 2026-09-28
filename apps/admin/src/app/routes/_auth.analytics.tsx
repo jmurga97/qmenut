@@ -1,4 +1,5 @@
 import { can } from "@qmenut/permissions";
+import { noop } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import * as analyticsApi from "~/features/analytics/api";
@@ -11,11 +12,10 @@ export const Route = createFileRoute("/_auth/analytics")({
   beforeLoad: ({ context }) => {
     if (!can(context.roleCode, "analytics.read")) redirect({ to: "/", throw: true });
   },
-  loader: async ({ context: { queryClient, trpc }, deps }) => {
-    await queryClient.query({
-      ...analyticsApi.getAnalyticsSnapshotQueryOptions({ period: deps.period, trpc }),
-      staleTime: "static",
-    });
+  loader: ({ context: { queryClient, trpc }, deps }) => {
+    void queryClient
+      .query({ ...analyticsApi.getAnalyticsSnapshotQueryOptions({ period: deps.period, trpc }), staleTime: "static" })
+      .catch(noop);
   },
   component: AnalyticsPage,
 });

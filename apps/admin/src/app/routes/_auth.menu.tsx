@@ -12,9 +12,9 @@ export const Route = createFileRoute("/_auth/menu")({
     const branch = await getSelectedBranch(context);
     return { menuBranchId: branch?.id ?? null };
   },
-  loader: async ({ context: { menuBranchId, queryClient, trpc } }) => {
+  loader: ({ context: { menuBranchId, queryClient, trpc } }) => {
     if (!menuBranchId) return;
-    await Promise.all([
+    void Promise.allSettled([
       queryClient.query({ ...getMenuCategoriesQueryOptions({ branchId: menuBranchId, trpc }), staleTime: "static" }),
       queryClient.query({ ...getMenuDishesQueryOptions({ branchId: menuBranchId, trpc }), staleTime: "static" }),
       queryClient.query({ ...getMenuTagsQueryOptions({ trpc }), staleTime: "static" }),
