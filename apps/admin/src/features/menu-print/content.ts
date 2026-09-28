@@ -1,3 +1,4 @@
+import { i18n } from "~/lib/i18n";
 import { formatMoney } from "~/shared/services/money";
 
 import type { RouterOutputs } from "~/lib/trpc";
@@ -37,7 +38,9 @@ function mapDish(dish: MenuData["categories"][number]["dishes"][number], currenc
     const options = group.options.map(
       (option) => `${option.name} (${option.priceDelta > 0 ? "+" : ""}${money(option.priceDelta)})`,
     );
-    details.push(`${group.name}${group.isRequired ? " (obligatorio)" : ""}: ${options.join(" · ")}`);
+    details.push(
+      `${group.name}${group.isRequired ? i18n.t("menuPrint___ (obligatorio)") : ""}: ${options.join(" · ")}`,
+    );
   }
   return {
     id: dish.id,

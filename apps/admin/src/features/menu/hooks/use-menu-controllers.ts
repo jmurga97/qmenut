@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
 
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions, getTenantQueryOptions } from "~/shared/api";
 import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
@@ -33,7 +34,6 @@ export function useMenuListController(branchId: string) {
   const dishes = useSuspenseQuery(getMenuDishesQueryOptions({ branchId, languageCode, trpc })).data;
   const availability = useMutation(getDishAvailabilityMutationOptions({ branchId, languageCode, queryClient, trpc }));
   return {
-    availabilityPendingDishId: availability.isPending ? availability.variables?.dishId : undefined,
     categories,
     dishes,
     setAvailability: (dishId: string, isActive: boolean) => availability.mutate({ branchId, dishId, isActive }),
@@ -82,7 +82,7 @@ export function useCategoryEditorController({
           },
         ],
       });
-      if (!prepared) throw new Error("No se pudo preparar la imagen.");
+      if (!prepared) throw new Error(i18n.t("menu___No se pudo preparar la imagen."));
       const data = {
         ...values,
         description: values.description || undefined,
@@ -153,7 +153,7 @@ export function useDishEditorController({
           },
         ],
       });
-      if (!prepared) throw new Error("No se pudo preparar la imagen.");
+      if (!prepared) throw new Error(i18n.t("menu___No se pudo preparar la imagen."));
       const data = toDishInput({
         imageUploadId: prepared.uploadId,
         imageUrl: prepared.imageUrl,

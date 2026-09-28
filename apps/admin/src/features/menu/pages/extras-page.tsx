@@ -1,13 +1,15 @@
-import { Button, Input, Switch } from "@jmurga97/components";
+import { Badge, Button, ConfirmAction, Input, Switch } from "@jmurga97/components";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { toast } from "sonner";
 
+import { i18n } from "~/lib/i18n";
 import { notifyError } from "~/lib/notifications";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
 import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
+import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
@@ -24,8 +26,26 @@ type IngredientDraft = { isActive: boolean; name: string; price: string };
 
 export function MenuExtrasPage() {
   const branch = useSelectedBranch();
-  if (!branch) return <NoBranchState description="Crea una sucursal para gestionar sus extras." />;
-  return <ExtrasCatalog />;
+  if (!branch) return <NoBranchState description={i18n.t("menu___Crea una sucursal para gestionar sus extras.")} />;
+  return <ExtrasPage />;
+}
+
+function ExtrasPage() {
+  const { isDefault } = useSelectedLanguage();
+  return (
+    <div className={"ming-page admin-page"}>
+      <PageHeader
+        description={i18n.t("menu___Gestiona los ingredientes opcionales y asígnalos después a cada plato.")}
+        kicker={i18n.t("menu___Carta")}
+        title={i18n.t("menu___Extras")}
+      />
+      <MenuSectionTabs current={"extras"} />
+      {isDefault ? null : <p>{i18n.t("menu___Cambia al idioma base para crear o editar extras.")}</p>}
+      <Suspense fallback={<CardSkeleton rows={5} title={i18n.t("menu___Ingredientes opcionales")} />}>
+        <ExtrasCatalog />
+      </Suspense>
+    </div>
+  );
 }
 
 function ExtrasCatalog() {
@@ -41,6 +61,7 @@ function ExtrasCatalog() {
   const update = useMutation(mutations.update);
   const remove = useMutation(mutations.remove);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Ingredient | null>(null);
   const [draft, setDraft] = useState<IngredientDraft | null>(null);
   const [newName, setNewName] = useState("");
   const [newPrice, setNewPrice] = useState("0");
@@ -61,13 +82,13 @@ function ExtrasCatalog() {
     const name = draft.name.trim();
     const price = parseMoneyInput(draft.price);
     if (!name || !Number.isSafeInteger(price) || price < 0) {
-      toast.error("Revisa el nombre y el precio del extra.");
+      toast.error(i18n.t("menu___Revisa el nombre y el precio del extra."));
       return;
     }
     try {
       await update.mutateAsync({ ingredientId, data: { isActive: draft.isActive, name, price } });
       cancelEditing();
-      toast.success("Extra actualizado.");
+      toast.success(i18n.t("menu___Extra actualizado."));
     } catch (error) {
       notifyError(error);
     }
@@ -77,57 +98,53 @@ function ExtrasCatalog() {
     const name = newName.trim();
     const price = parseMoneyInput(newPrice);
     if (!name || !Number.isSafeInteger(price) || price < 0) {
-      toast.error("Revisa el nombre y el precio del extra.");
+      toast.error(i18n.t("menu___Revisa el nombre y el precio del extra."));
       return;
     }
     try {
       await create.mutateAsync({ isActive: true, name, price });
       setNewName("");
       setNewPrice("0");
-      toast.success("Extra añadido.");
+      toast.success(i18n.t("menu___Extra añadido."));
     } catch (error) {
       notifyError(error);
     }
   }
 
   async function archiveIngredient(ingredient: Ingredient) {
-    if (!window.confirm(`¿Archivar «${ingredient.name}»? Dejará de aparecer como opción para nuevos platos.`)) return;
     try {
       await remove.mutateAsync({ ingredientId: ingredient.id });
       if (editingId === ingredient.id) cancelEditing();
-      toast.success("Extra archivado.");
+      setArchiveTarget(null);
+      toast.success(i18n.t("menu___Extra archivado."));
     } catch (error) {
       notifyError(error);
     }
   }
 
   return (
-    <div className="admin-page">
-      <div>
-        <MenuSectionTabs current="extras" />
-        <PageHeader
-          description="Gestiona los ingredientes opcionales y asígnalos después a cada plato."
-          kicker="Carta"
-          title="Extras"
-        />
-      </div>
-      {language.isDefault ? null : <p>Cambia al idioma base para crear o editar extras.</p>}
-      <section aria-labelledby="menu-extras-title" className="admin-card admin-table-card">
+    <>
+      <section aria-labelledby={"menu-extras-title"} className={"admin-card admin-table-card"}>
         <div className="admin-toolbar">
           <div>
-            <div className="admin-kicker">Catálogo de extras ({ingredients.length})</div>
-            <h3 id="menu-extras-title">Ingredientes opcionales</h3>
+            <div className="admin-kicker">
+              {i18n.t("menu___Catálogo de extras (")}
+              {ingredients.length})
+            </div>
+            <h2 className={"ming-section__title"} id={"menu-extras-title"}>
+              {i18n.t("menu___Ingredientes opcionales")}
+            </h2>
           </div>
         </div>
         <div className="admin-table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
-                <th scope="col">Nombre</th>
-                <th scope="col">Precio</th>
-                <th scope="col">Estado</th>
-                <th scope="col">
-                  <span className="admin-sr-only">Acciones</span>
+                <th scope={"col"}>{i18n.t("menu___Nombre")}</th>
+                <th scope={"col"}>{i18n.t("menu___Precio")}</th>
+                <th scope={"col"}>{i18n.t("menu___Estado")}</th>
+                <th scope={"col"}>
+                  <span className="admin-sr-only">{i18n.t("menu___Acciones")}</span>
                 </th>
               </tr>
             </thead>
@@ -136,30 +153,30 @@ function ExtrasCatalog() {
                 <tr className="admin-table-create-row">
                   <td>
                     <Input
-                      aria-label="Nombre del nuevo extra"
+                      aria-label={i18n.t("menu___Nombre del nuevo extra")}
                       onValueChange={setNewName}
-                      placeholder="Nuevo extra"
+                      placeholder={i18n.t("menu___Nuevo extra")}
                       value={newName}
                     />
                   </td>
                   <td>
                     <Input
-                      aria-label="Precio del nuevo extra"
-                      inputMode="decimal"
+                      aria-label={i18n.t("menu___Precio del nuevo extra")}
+                      inputMode={"decimal"}
                       onValueChange={setNewPrice}
                       value={newPrice}
                     />
                   </td>
                   <td>
-                    <span className="admin-list-meta">Activo</span>
+                    <span className="admin-list-meta">{i18n.t("menu___Activo")}</span>
                   </td>
                   <td>
                     <Button
                       disabled={busy || editingId !== null}
                       onClick={() => void createIngredient()}
-                      variant="secondary"
+                      variant={"secondary"}
                     >
-                      <Icon name="plus" /> Añadir
+                      {i18n.t("menu___Añadir")}
                     </Button>
                   </td>
                 </tr>
@@ -170,11 +187,11 @@ function ExtrasCatalog() {
                 if (editingDraft) {
                   rowActions = (
                     <div className="admin-table-actions">
-                      <Button disabled={busy} onClick={() => void saveIngredient(ingredient.id)} variant="primary">
-                        Guardar
+                      <Button disabled={busy} onClick={() => void saveIngredient(ingredient.id)} variant={"primary"}>
+                        {i18n.t("menu___Guardar")}
                       </Button>
-                      <Button disabled={busy} onClick={cancelEditing} variant="secondary">
-                        Cancelar
+                      <Button disabled={busy} onClick={cancelEditing} variant={"secondary"}>
+                        {i18n.t("menu___Cancelar")}
                       </Button>
                     </div>
                   );
@@ -182,20 +199,20 @@ function ExtrasCatalog() {
                   rowActions = (
                     <div className="admin-table-actions">
                       <Button
-                        aria-label={`Editar ${ingredient.name}`}
+                        aria-label={i18n.t("menu___Editar {{name}}", { name: ingredient.name })}
                         disabled={busy || editingId !== null}
                         onClick={() => startEditing(ingredient)}
-                        variant="secondary"
+                        variant={"secondary"}
                       >
-                        <Icon name="edit" />
+                        <Icon name={"edit"} />
                       </Button>
                       <Button
-                        aria-label={`Archivar ${ingredient.name}`}
+                        aria-label={i18n.t("menu___Archivar {{name}}", { name: ingredient.name })}
                         disabled={busy || editingId !== null}
-                        onClick={() => void archiveIngredient(ingredient)}
-                        variant="secondary"
+                        onClick={() => setArchiveTarget(ingredient)}
+                        variant={"ghost"}
                       >
-                        <Icon name="trash" />
+                        <Icon name={"trash"} />
                       </Button>
                     </div>
                   );
@@ -205,7 +222,7 @@ function ExtrasCatalog() {
                     <td>
                       {editingDraft ? (
                         <Input
-                          aria-label={`Nombre de ${ingredient.name}`}
+                          aria-label={i18n.t("menu___Nombre de {{name}}", { name: ingredient.name })}
                           onValueChange={(name) => setDraft({ ...editingDraft, name })}
                           value={editingDraft.name}
                         />
@@ -216,8 +233,8 @@ function ExtrasCatalog() {
                     <td>
                       {editingDraft ? (
                         <Input
-                          aria-label={`Precio de ${ingredient.name}`}
-                          inputMode="decimal"
+                          aria-label={i18n.t("menu___Precio de {{name}}", { name: ingredient.name })}
+                          inputMode={"decimal"}
                           onValueChange={(price) => setDraft({ ...editingDraft, price })}
                           value={editingDraft.price}
                         />
@@ -229,13 +246,13 @@ function ExtrasCatalog() {
                       {editingDraft ? (
                         <Switch
                           checked={editingDraft.isActive}
-                          label={editingDraft.isActive ? "Activo" : "Inactivo"}
+                          label={editingDraft.isActive ? i18n.t("menu___Activo") : i18n.t("menu___Inactivo")}
                           onCheckedChange={(isActive) => setDraft({ ...editingDraft, isActive })}
                         />
                       ) : (
-                        <span className={ingredient.isActive ? "admin-status admin-status--active" : "admin-status"}>
-                          {ingredient.isActive ? "Activo" : "Inactivo"}
-                        </span>
+                        <Badge tone={ingredient.isActive ? "success" : "neutral"}>
+                          {ingredient.isActive ? i18n.t("menu___Activo") : i18n.t("menu___Inactivo")}
+                        </Badge>
                       )}
                     </td>
                     <td>{rowActions}</td>
@@ -244,9 +261,26 @@ function ExtrasCatalog() {
               })}
             </tbody>
           </table>
-          {ingredients.length === 0 ? <p className="admin-copy">Aún no hay extras creados.</p> : null}
+          {ingredients.length === 0 ? (
+            <p className="admin-copy">{i18n.t("menu___Aún no hay extras creados.")}</p>
+          ) : null}
         </div>
       </section>
-    </div>
+      <ConfirmAction
+        confirmLabel={i18n.t("menu___Archivar extra")}
+        message={i18n.t("menu___«{{name}}» dejará de aparecer como opción para nuevos platos.", {
+          name: archiveTarget?.name ?? i18n.t("menu___Este extra"),
+        })}
+        onConfirm={() => {
+          if (archiveTarget) void archiveIngredient(archiveTarget);
+        }}
+        onOpenChange={(open) => {
+          if (!open && !remove.isPending) setArchiveTarget(null);
+        }}
+        open={archiveTarget !== null}
+        pending={remove.isPending}
+        title={i18n.t("menu___¿Archivar extra?")}
+      />
+    </>
   );
 }

@@ -1,15 +1,16 @@
+import { i18n } from "~/lib/i18n";
 import { formatMoneyInput, moneyInputSchema, parseMoneyInput } from "~/shared/services/money";
 
 import type { DishDetail, DishFormValues } from "./types";
 
 const TAG_LABELS: Record<string, string> = {
-  contains_alcohol: "Contiene alcohol",
-  gluten_free: "Sin gluten",
-  lactose_free: "Sin lactosa",
-  new: "Novedad",
-  seasonal: "De temporada",
-  spicy: "Picante",
-  vegan: "Vegano",
+  contains_alcohol: i18n.t("menu___Contiene alcohol"),
+  gluten_free: i18n.t("menu___Sin gluten"),
+  lactose_free: i18n.t("menu___Sin lactosa"),
+  new: i18n.t("menu___Novedad"),
+  seasonal: i18n.t("menu___De temporada"),
+  spicy: i18n.t("menu___Picante"),
+  vegan: i18n.t("menu___Vegano"),
 };
 
 export function toTagDisplayLabel(tag: { code: string | null; id: string; label: string | null }) {

@@ -1,7 +1,7 @@
 import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions } from "~/shared/api";
 
 import type { QueryClient } from "@tanstack/react-query";
-import type { TrpcOptionsProxy } from "~/lib/trpc";
+import type { RouterOutputs, TrpcOptionsProxy } from "~/lib/trpc";
 
 interface BranchQueryInput {
   branchId: string;
@@ -72,8 +72,26 @@ export function getIngredientMutationOptions({
     update: trpc.admin.menu.taxonomy.updateIngredient.mutationOptions({ onSuccess: invalidate }),
   };
 }
+type DishList = RouterOutputs["admin"]["menu"]["dishes"]["list"];
+
+// Optimistic: the switch flips at once in every cached dish list; the refetch on settle restores the truth on error.
+// One scope runs rapid toggles in click order, and only the last one to settle refetches, so a stale list never
+// overwrites a flip that is still queued.
 export function getDishAvailabilityMutationOptions(input: MenuMutationInput) {
-  return input.trpc.admin.menu.dishes.setAvailability.mutationOptions({
-    onSuccess: () => invalidateMenu(input),
+  const { queryClient, trpc } = input;
+  const listKey = trpc.admin.menu.dishes.list.pathKey();
+  const mutationKey = trpc.admin.menu.dishes.setAvailability.mutationKey();
+  return trpc.admin.menu.dishes.setAvailability.mutationOptions({
+    scope: { id: "dish-availability" },
+    onMutate: async ({ dishId, isActive }) => {
+      await queryClient.cancelQueries({ queryKey: listKey });
+      queryClient.setQueriesData<DishList>({ queryKey: listKey }, (dishes) =>
+        dishes?.map((dish) => (dish.id === dishId ? { ...dish, isActive } : dish)),
+      );
+    },
+    onSettled: () => {
+      if (queryClient.isMutating({ mutationKey }) > 1) return;
+      return queryClient.invalidateQueries({ queryKey: listKey });
+    },
   });
 }

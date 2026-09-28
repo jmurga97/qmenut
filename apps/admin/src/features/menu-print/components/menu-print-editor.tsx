@@ -2,7 +2,7 @@ import { Button } from "@jmurga97/components";
 import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
 import { useMemo, useState } from "react";
 
-import { Icon } from "~/shared/components/icon";
+import { i18n } from "~/lib/i18n";
 import { useLogoState, usePrintFonts, useQrSvg } from "~/shared/hooks/use-print-assets";
 import { usePrintDocument } from "~/shared/hooks/use-print-document";
 import { buildQrUrl } from "~/shared/services/qr";
@@ -24,12 +24,12 @@ function CategoryPicker({
   onChange: (ids: string[]) => void;
 }) {
   return (
-    <fieldset className="menu-print-categories">
-      <legend>Categorías de la carta</legend>
+    <fieldset className={"menu-print-categories"}>
+      <legend>{i18n.t("menuPrint___Categorías de la carta")}</legend>
       {categories.map((category) => (
         <label key={category.id}>
           <input
-            type="checkbox"
+            type={"checkbox"}
             checked={!excluded.includes(category.id)}
             onChange={(event) =>
               onChange(event.target.checked ? excluded.filter((id) => id !== category.id) : [...excluded, category.id])
@@ -61,68 +61,78 @@ export function MenuPrintEditor({ data, theme, host }: { data: MenuData; theme: 
   const layoutKey = JSON.stringify({ format, theme, logoState, name: data.branch.name, tagline: data.tagline });
   const pages = useMenuPagination({ ref: printableRef, categories, ready: assetsReady, layoutKey });
   const canPrint = Boolean(pages && !pages.overflow && categories.length > 0);
-  let status = "Preparando las tipografías y la carta…";
-  if (pages) status = "La carta cabe en una hoja a doble cara.";
-  if (pages?.overflow) status = "La carta no cabe. Desmarca categorías hasta que quepa; no se recortará ningún plato.";
-  if (categories.length === 0) status = "Selecciona al menos una categoría para imprimir.";
+  let status = i18n.t("menuPrint___Preparando las tipografías y la carta…");
+  if (pages) status = i18n.t("menuPrint___La carta cabe en una hoja a doble cara.");
+  if (pages?.overflow)
+    status = i18n.t("menuPrint___La carta no cabe. Desmarca categorías hasta que quepa; no se recortará ningún plato.");
+  if (categories.length === 0) status = i18n.t("menuPrint___Selecciona al menos una categoría para imprimir.");
   if (fontState === "error" || qr.error)
-    status = "No se pudo preparar la carta. Recarga la página para volver a intentarlo.";
+    status = i18n.t("menuPrint___No se pudo preparar la carta. Recarga la página para volver a intentarlo.");
   return (
-    <div className="menu-print-editor">
-      <section className="admin-card menu-print-controls" aria-labelledby="menu-print-title">
+    <div className={"menu-print-editor"}>
+      <section className={"admin-card menu-print-controls"} aria-labelledby={"menu-print-title"}>
         <div>
-          <div className="admin-kicker">Del menú a la mesa</div>
-          <h2 id="menu-print-title">Carta para imprimir</h2>
-          <p>Tu plantilla, tus colores y tus fuentes. Sin fotografías y con los precios habituales.</p>
+          <div className="admin-kicker">{i18n.t("menuPrint___Del menú a la mesa")}</div>
+          <h2 id={"menu-print-title"}>{i18n.t("menuPrint___Carta para imprimir")}</h2>
+          <p>
+            {i18n.t(
+              "menuPrint___Tu plantilla, tus colores y tus fuentes. Sin fotografías y con los precios habituales.",
+            )}
+          </p>
         </div>
-        <fieldset className="menu-print-formats">
-          <legend>Formato del papel</legend>
-          <label htmlFor="print-format-a4" aria-label="A4 a doble cara">
+        <fieldset className={"menu-print-formats"}>
+          <legend>{i18n.t("menuPrint___Formato del papel")}</legend>
+          <label htmlFor={"print-format-a4"} aria-label={i18n.t("menuPrint___A4 a doble cara")}>
             <input
-              id="print-format-a4"
-              type="radio"
-              name="print-format"
+              id={"print-format-a4"}
+              type={"radio"}
+              name={"print-format"}
               checked={format === "a4"}
               onChange={() => setFormat("a4")}
             />
             <span>
-              <strong>A4 a doble cara</strong>
-              <small>Una hoja vertical, anverso y reverso</small>
+              <strong>{i18n.t("menuPrint___A4 a doble cara")}</strong>
+              <small>{i18n.t("menuPrint___Una hoja vertical, anverso y reverso")}</small>
             </span>
           </label>
-          <label htmlFor="print-format-folded" aria-label="Díptico">
+          <label htmlFor={"print-format-folded"} aria-label={i18n.t("menuPrint___Díptico")}>
             <input
-              id="print-format-folded"
-              type="radio"
-              name="print-format"
+              id={"print-format-folded"}
+              type={"radio"}
+              name={"print-format"}
               checked={format === "folded"}
               onChange={() => setFormat("folded")}
             />
             <span>
-              <strong>Díptico</strong>
-              <small>Una hoja horizontal, cuatro caras A5</small>
+              <strong>{i18n.t("menuPrint___Díptico")}</strong>
+              <small>{i18n.t("menuPrint___Una hoja horizontal, cuatro caras A5")}</small>
             </span>
           </label>
         </fieldset>
         <CategoryPicker categories={allCategories} excluded={excluded} onChange={setExcluded} />
-        <p className={`menu-print-status${pages?.overflow ? " menu-print-status--overflow" : ""}`} role="status">
+        <p className={`menu-print-status${pages?.overflow ? " menu-print-status--overflow" : ""}`} role={"status"}>
           {status}
         </p>
         {logoState === "error" ? (
-          <p className="admin-field-hint">No se pudo cargar el logo. Se imprimirá el nombre del local.</p>
+          <p className="admin-field-hint">
+            {i18n.t("menuPrint___No se pudo cargar el logo. Se imprimirá el nombre del local.")}
+          </p>
         ) : null}
         <Button
           disabled={!canPrint}
           onClick={() => {
             if (canPrint) print();
           }}
-          variant="primary"
+          variant={"primary"}
         >
-          <Icon name="download" /> Imprimir / Guardar PDF
+          {i18n.t("menuPrint___Imprimir / Guardar PDF")}
         </Button>
         <p className="admin-field-hint">
-          Elige A4, escala 100 %, sin encabezados y con gráficos de fondo. Para doble cara, gira por el borde{" "}
-          {format === "a4" ? "largo" : "corto"}. Para descargar, elige «Guardar como PDF» en el diálogo de impresión.
+          {i18n.t(
+            "menuPrint___Elige A4, escala 100 %, sin encabezados y con gráficos de fondo. Para doble cara, gira por el borde",
+          )}{" "}
+          {format === "a4" ? i18n.t("menuPrint___largo") : i18n.t("menuPrint___corto")}
+          {i18n.t("menuPrint___. Para descargar, elige «Guardar como PDF» en el diálogo de impresión.")}
         </p>
       </section>
       <div

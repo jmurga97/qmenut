@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { i18n } from "~/lib/i18n";
 import { moneyInputSchema } from "~/shared/services/money";
 
 import type { RouterOutputs } from "~/lib/trpc";
@@ -11,17 +12,20 @@ export const promotionStatuses = ["active", "inactive", "expired"] as const;
 const percentage = z
   .string()
   .trim()
-  .regex(/^(?:100|\d{1,2}|)$/, "Introduce un porcentaje entre 0 y 100");
+  .regex(/^(?:100|\d{1,2}|)$/, i18n.t("promotions___Introduce un porcentaje entre 0 y 100"));
 const price = moneyInputSchema.or(z.literal(""));
 const quantity = z
   .string()
   .trim()
-  .regex(/^(?:[1-9]\d*|)$/, "Introduce un número entero mayor que 0");
+  .regex(/^(?:[1-9]\d*|)$/, i18n.t("promotions___Introduce un número entero mayor que 0"));
 export const promotionFormSchema = z
   .object({
     buyQuantity: quantity,
     description: z.string().trim().max(2000),
-    name: z.string().trim().min(1, { message: "El nombre es obligatorio" }),
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: i18n.t("promotions___El nombre es obligatorio") }),
     paidQuantity: quantity,
     percentage,
     scope: z.enum(promotionScopes),
@@ -32,26 +36,30 @@ export const promotionFormSchema = z
   })
   .superRefine((values, context) => {
     if (values.targetIds.length === 0) {
-      context.addIssue({ code: "custom", message: "Selecciona al menos un destino", path: ["targetIds"] });
+      context.addIssue({
+        code: "custom",
+        message: i18n.t("promotions___Selecciona al menos un destino"),
+        path: ["targetIds"],
+      });
     }
     if (values.type === "percentage_discount" && values.percentage === "") {
-      context.addIssue({ code: "custom", message: "Indica un porcentaje", path: ["percentage"] });
+      context.addIssue({ code: "custom", message: i18n.t("promotions___Indica un porcentaje"), path: ["percentage"] });
     }
     if (values.type === "special_price" && values.specialPrice === "") {
-      context.addIssue({ code: "custom", message: "Indica un precio", path: ["specialPrice"] });
+      context.addIssue({ code: "custom", message: i18n.t("promotions___Indica un precio"), path: ["specialPrice"] });
     }
     if (values.type === "two_for_one") {
       if (values.buyQuantity === "") {
         context.addIssue({
           code: "custom",
-          message: "Indica las unidades que lleva",
+          message: i18n.t("promotions___Indica las unidades que lleva"),
           path: ["buyQuantity"],
         });
       }
       if (values.paidQuantity === "") {
         context.addIssue({
           code: "custom",
-          message: "Indica las unidades que paga",
+          message: i18n.t("promotions___Indica las unidades que paga"),
           path: ["paidQuantity"],
         });
       }
@@ -62,7 +70,7 @@ export const promotionFormSchema = z
       ) {
         context.addIssue({
           code: "custom",
-          message: "Las unidades pagadas no pueden superar las compradas",
+          message: i18n.t("promotions___Las unidades pagadas no pueden superar las compradas"),
           path: ["paidQuantity"],
         });
       }

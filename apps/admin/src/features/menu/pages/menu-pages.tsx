@@ -1,10 +1,11 @@
-import { Button, Field, Input, Switch } from "@jmurga97/components";
+import { Badge, Button, Field, InlineMessage, Input, Switch } from "@jmurga97/components";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { FormProvider, useController, useFormContext, useWatch } from "react-hook-form";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { FormProvider, useFormContext, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
+import { i18n } from "~/lib/i18n";
 import { notifyError } from "~/lib/notifications";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
@@ -15,8 +16,8 @@ import { FormTextInput } from "~/shared/components/forms/adapters/form-text-inpu
 import { FormTextarea } from "~/shared/components/forms/adapters/form-textarea";
 import { FormChipGroup } from "~/shared/components/forms/form-chip-group";
 import { FormShell } from "~/shared/components/forms/form-shell";
-import { Icon } from "~/shared/components/icon";
 import { PageHeader } from "~/shared/components/page-header";
+import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { NotFoundState } from "~/shared/components/state/not-found-state";
 import { useCan } from "~/shared/hooks/use-can";
@@ -39,115 +40,148 @@ import type { DishDetail, CategoryFormValues, DishFormValues } from "../types";
 
 export function MenuListPage() {
   const branch = useSelectedBranch();
-  if (!branch) return <NoBranchState description="Crea una sucursal para gestionar su carta." />;
+  if (!branch) return <NoBranchState description={i18n.t("menu___Crea una sucursal para gestionar su carta.")} />;
   return <MenuList branchId={branch.id} />;
 }
 export function MenuSectionTabs({ current }: { current: "extras" | "menu" }) {
   return (
-    <nav aria-label="Secciones de la carta" className="admin-tabs">
+    <nav aria-label={i18n.t("menu___Secciones de la carta")} className="admin-tabs">
       <Link
+        activeOptions={{ exact: true }}
         aria-current={current === "menu" ? "page" : undefined}
         className={current === "menu" ? "active" : undefined}
-        to="/menu"
+        to={"/menu"}
       >
-        Menú
+        {i18n.t("menu___Menú")}
       </Link>
       <Link
         aria-current={current === "extras" ? "page" : undefined}
         className={current === "extras" ? "active" : undefined}
-        to="/menu/extras"
+        to={"/menu/extras"}
       >
-        Extras
+        {i18n.t("menu___Extras")}
       </Link>
     </nav>
   );
 }
 function MenuList({ branchId }: { branchId: string }) {
-  const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
-  const canToggleAvailability = useCan("menu.toggleDishAvailability");
   const canWrite = useCan("menu.write");
   const { isDefault } = useSelectedLanguage();
-  const canManage = isDefault && canWrite;
-  const { availabilityPendingDishId, categories, dishes, setAvailability } = useMenuListController(branchId);
   return (
-    <div className="admin-page">
-      <MenuSectionTabs current="menu" />
-      <PageHeader description="Gestiona las categorías y los platos de esta sucursal." kicker="Carta" title="Menú" />
-      {isDefault ? null : <p>Cambia al idioma base para crear contenido o cambiar su configuración.</p>}
-      {canWrite && !isDefault ? (
-        <div className="admin-toolbar">
-          <Button disabled>Nueva categoría</Button>
-          <Button disabled>Nuevo plato</Button>
-        </div>
-      ) : null}
-      <EntityListCard
-        action={
-          canManage ? (
-            <Link className="admin-link" to="/menu/categories/new">
-              <Icon name="plus" /> Nueva categoría
-            </Link>
+    <div className={"ming-page admin-page"}>
+      <PageHeader
+        actions={
+          canWrite ? (
+            <>
+              <Button
+                disabled={!isDefault}
+                nativeButton={false}
+                render={<Link to={"/menu/categories/new"} />}
+                variant={"secondary"}
+              >
+                {i18n.t("menu___Crear categoría")}
+              </Button>
+              <Button
+                disabled={!isDefault}
+                nativeButton={false}
+                render={<Link to={"/menu/dishes/new"} />}
+                variant={"primary"}
+              >
+                {i18n.t("menu___Crear plato")}
+              </Button>
+            </>
           ) : null
         }
+        description={i18n.t("menu___Gestiona las categorías y los platos de esta sucursal.")}
+        kicker={i18n.t("menu___Carta")}
+        title={i18n.t("menu___Menú")}
+      />
+      <MenuSectionTabs current={"menu"} />
+      {isDefault ? null : (
+        <InlineMessage>
+          {i18n.t("menu___Cambia al idioma base para crear contenido o cambiar su configuración.")}
+        </InlineMessage>
+      )}
+      <Suspense
+        fallback={
+          <>
+            <CardSkeleton title={i18n.t("menu___Categorías")} />
+            <CardSkeleton rows={5} title={i18n.t("menu___Platos")} />
+          </>
+        }
+      >
+        <MenuListCards branchId={branchId} />
+      </Suspense>
+    </div>
+  );
+}
+function MenuListCards({ branchId }: { branchId: string }) {
+  const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
+  const canToggleAvailability = useCan("menu.toggleDishAvailability");
+  const { isDefault } = useSelectedLanguage();
+  const { categories, dishes, setAvailability } = useMenuListController(branchId);
+  return (
+    <>
+      <EntityListCard
+        action={null}
         count={categories.length}
-        emptyText="Aún no hay categorías."
-        title="Categorías"
+        emptyText={i18n.t("menu___Aún no hay categorías.")}
+        title={i18n.t("menu___Categorías")}
       >
         {categories.map((category) => (
           <li className="admin-list-item" key={category.id}>
             <Link
-              className="admin-link admin-list-label"
+              className={"admin-link admin-list-label"}
               params={{ categoryId: category.id }}
-              to="/menu/categories/$categoryId"
+              to={"/menu/categories/$categoryId"}
             >
               {category.name}
             </Link>
-            <span className="admin-list-meta">{category.isActive ? "activa" : "oculta"}</span>
+            <Badge tone={category.isActive ? "success" : "neutral"}>
+              {category.isActive ? i18n.t("menu___Activa") : i18n.t("menu___Oculta")}
+            </Badge>
           </li>
         ))}
       </EntityListCard>
       <EntityListCard
-        action={
-          canManage ? (
-            <Link className="admin-link" to="/menu/dishes/new">
-              <Icon name="plus" /> Nuevo plato
-            </Link>
-          ) : null
-        }
+        action={null}
         count={dishes.length}
-        emptyText="Aún no hay platos."
-        title="Platos"
+        emptyText={i18n.t("menu___Aún no hay platos.")}
+        title={i18n.t("menu___Platos")}
       >
         {dishes.map((dish) => (
           <li className="admin-list-item" key={dish.id}>
-            <Link className="admin-link admin-list-label" params={{ dishId: dish.id }} to="/menu/dishes/$dishId">
-              {dish.name}
-            </Link>
-            <div className="admin-toolbar-controls">
+            <div className="admin-list-text">
+              <Link className={"admin-link admin-list-label"} params={{ dishId: dish.id }} to={"/menu/dishes/$dishId"}>
+                {dish.name}
+              </Link>
               <span className="admin-list-meta">{formatMoney(dish.price, tenant.restaurant.sourceCurrency)}</span>
-              {canToggleAvailability ? (
-                <Switch
-                  aria-label={`Disponibilidad de ${dish.name}`}
-                  checked={dish.isActive}
-                  disabled={!isDefault || availabilityPendingDishId === dish.id}
-                  label={dish.isActive ? "Disponible" : "Oculto"}
-                  onCheckedChange={(checked) => {
-                    if (isDefault) setAvailability(dish.id, checked);
-                  }}
-                />
-              ) : (
-                <span className="admin-list-meta">{dish.isActive ? "Disponible" : "Oculto"}</span>
-              )}
             </div>
+            {canToggleAvailability ? (
+              <Switch
+                aria-label={i18n.t("menu___Disponibilidad de {{name}}", { name: dish.name })}
+                checked={dish.isActive}
+                disabled={!isDefault}
+                label={dish.isActive ? i18n.t("menu___Disponible") : i18n.t("menu___Oculto")}
+                onCheckedChange={(checked) => {
+                  if (isDefault) setAvailability(dish.id, checked);
+                }}
+              />
+            ) : (
+              <span className="admin-list-meta">
+                {dish.isActive ? i18n.t("menu___Disponible") : i18n.t("menu___Oculto")}
+              </span>
+            )}
           </li>
         ))}
       </EntityListCard>
-    </div>
+    </>
   );
 }
 export function CategoryEditorPage({ categoryId }: { categoryId?: string }) {
   const branch = useSelectedBranch();
   const language = useSelectedLanguage();
-  if (!branch) return <NoBranchState description="Crea una sucursal para editar su carta." />;
+  if (!branch) return <NoBranchState description={i18n.t("menu___Crea una sucursal para editar su carta.")} />;
   if (!language.isDefault && language.languageCode)
     return categoryId ? (
       <TranslatedCategoryForm
@@ -157,7 +191,7 @@ export function CategoryEditorPage({ categoryId }: { categoryId?: string }) {
         languageCode={language.languageCode}
       />
     ) : (
-      <TranslationBlockedMessage entity="una categoría" />
+      <TranslationBlockedMessage entity={i18n.t("menu___una categoría")} />
     );
   return (
     <CategoryForm
@@ -176,10 +210,10 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
   });
   if (categoryId && !controller.category) return <NotFoundState />;
   return (
-    <div className="admin-page admin-editor-page">
+    <div className={"ming-page admin-page admin-editor-page"}>
       <PageHeader
-        kicker={categoryId ? "Editar categoría" : "Nueva categoría"}
-        title={controller.category?.name ?? "Categoría"}
+        kicker={categoryId ? i18n.t("menu___Editar categoría") : i18n.t("menu___Nueva categoría")}
+        title={controller.category?.name ?? i18n.t("menu___Categoría")}
       />
       <FormProvider {...controller.form}>
         <FormShell
@@ -190,16 +224,16 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
           readOnly={!canWrite}
         >
           <div className="admin-form-grid">
-            <FormTextInput<CategoryFormValues> label="Nombre" name="name" />
-            <FormTextarea<CategoryFormValues> label="Descripción" name="description" rows={3} />
+            <FormTextInput<CategoryFormValues> label={i18n.t("menu___Nombre")} name={"name"} />
+            <FormTextarea<CategoryFormValues> label={i18n.t("menu___Descripción")} name={"description"} rows={3} />
             <SingleImageUploadControl
               disabled={controller.busy}
               draft={controller.image.draft}
-              label="Imagen de categoría"
+              label={i18n.t("menu___Imagen de categoría")}
               onRemove={controller.image.remove}
               onSelect={controller.image.selectFile}
             />
-            <FormCheckbox<CategoryFormValues> label="Categoría activa" name="isActive" />
+            <FormCheckbox<CategoryFormValues> label={i18n.t("menu___Categoría activa")} name={"isActive"} />
           </div>
         </FormShell>
       </FormProvider>
@@ -256,17 +290,19 @@ function TranslatedCategoryForm({
     try {
       await translation.saveRows(rows);
       controller.form.reset(values);
-      toast.success("Traducción guardada.");
+      toast.success(i18n.t("menu___Traducción guardada."));
     } catch (error) {
       notifyError(error);
     }
   };
   if (!controller.category) return <NotFoundState />;
   return (
-    <div className="admin-page admin-editor-page">
+    <div className={"ming-page admin-page admin-editor-page"}>
       <PageHeader
-        description="Edita los textos de esta categoría. El resto de la configuración se mantiene en el idioma base."
-        kicker="Editar categoría"
+        description={i18n.t(
+          "menu___Edita los textos de esta categoría. El resto de la configuración se mantiene en el idioma base.",
+        )}
+        kicker={i18n.t("menu___Editar categoría")}
         title={controller.category.name}
       />
       <FormProvider {...controller.form}>
@@ -275,24 +311,28 @@ function TranslatedCategoryForm({
           onCancel={controller.cancel}
           onSubmit={() => void submit()}
           readOnly={!canTranslate}
-          submitLabel="Guardar traducción"
+          submitLabel={i18n.t("menu___Guardar traducción")}
         >
           <div className="admin-form-grid">
-            <FormTextInput<CategoryFormValues> disabled={!canTranslate} label="Nombre" name="name" />
+            <FormTextInput<CategoryFormValues> disabled={!canTranslate} label={i18n.t("menu___Nombre")} name={"name"} />
             <FormTextarea<CategoryFormValues>
               disabled={!canTranslate}
-              label="Descripción"
-              name="description"
+              label={i18n.t("menu___Descripción")}
+              name={"description"}
               rows={3}
             />
             <SingleImageUploadControl
               disabled
               draft={controller.image.draft}
-              label="Imagen de categoría (idioma base)"
+              label={i18n.t("menu___Imagen de categoría (idioma base)")}
               onRemove={controller.image.remove}
               onSelect={controller.image.selectFile}
             />
-            <FormCheckbox<CategoryFormValues> disabled label="Categoría activa (idioma base)" name="isActive" />
+            <FormCheckbox<CategoryFormValues>
+              disabled
+              label={i18n.t("menu___Categoría activa (idioma base)")}
+              name={"isActive"}
+            />
           </div>
         </FormShell>
       </FormProvider>
@@ -302,7 +342,7 @@ function TranslatedCategoryForm({
 export function DishEditorPage({ dishId }: { dishId?: string }) {
   const branch = useSelectedBranch();
   const language = useSelectedLanguage();
-  if (!branch) return <NoBranchState description="Crea una sucursal para editar su carta." />;
+  if (!branch) return <NoBranchState description={i18n.t("menu___Crea una sucursal para editar su carta.")} />;
   if (!language.isDefault && language.languageCode)
     return dishId ? (
       <TranslatedDishForm
@@ -312,7 +352,7 @@ export function DishEditorPage({ dishId }: { dishId?: string }) {
         languageCode={language.languageCode}
       />
     ) : (
-      <TranslationBlockedMessage entity="un plato" />
+      <TranslationBlockedMessage entity={i18n.t("menu___un plato")} />
     );
   return dishId ? (
     <ExistingDish branchId={branch.id} dishId={dishId} key={`${branch.id}:${dishId}:${language.languageCode}`} />
@@ -325,42 +365,122 @@ function ExistingDish({ branchId, dishId }: { branchId: string; dishId: string }
   const dish = useSuspenseQuery(getDishDetailQueryOptions({ dishId, languageCode, trpc })).data;
   return <DishForm branchId={branchId} dish={dish} />;
 }
-function DishComboFields({
-  canTranslate = true,
-  translation = false,
+type DishEditorController = ReturnType<typeof useDishEditorController>;
+
+// `locked` = translation mode: only name and descriptions stay editable; the rest belongs to the base language.
+function DishFields({
+  canEdit = true,
+  controller,
+  locked = false,
 }: {
-  canTranslate?: boolean;
-  translation?: boolean;
+  canEdit?: boolean;
+  controller: DishEditorController;
+  locked?: boolean;
 }) {
   const { control } = useFormContext<DishFormValues>();
   const comboEnabled = useWatch({ control, name: "comboEnabled" });
-  const comboSwitch = useController({ control, name: "comboEnabled" });
+  const base = (label: string) => (locked ? i18n.t("menu___{{label}} (idioma base)", { label }) : label);
   return (
-    <div className="admin-combo-fields">
-      <Switch
-        checked={Boolean(comboSwitch.field.value)}
-        disabled={translation || !canTranslate}
-        label={translation ? "Combo (idioma base)" : "Combo"}
-        onCheckedChange={comboSwitch.field.onChange}
-      />
-      {comboEnabled ? (
-        <div className="admin-form-grid">
-          <FormTextInput<DishFormValues>
-            disabled={translation || !canTranslate}
-            inputMode="decimal"
-            label={translation ? "Precio total del combo (idioma base)" : "Precio total del combo"}
-            name="comboPrice"
+    <>
+      <section className="admin-editor-section">
+        <h2 className={"ming-section__title"}>{i18n.t("menu___Datos del plato")}</h2>
+        <FormTextInput<DishFormValues> disabled={!canEdit} label={i18n.t("menu___Nombre")} name={"name"} />
+        <div className="admin-form-grid--two">
+          <FormSelect<DishFormValues>
+            disabled={locked}
+            label={base(i18n.t("menu___Categoría"))}
+            name={"categoryId"}
+            options={controller.categoryOptions}
           />
-          <FormTextarea<DishFormValues>
-            disabled={!canTranslate}
-            label="Descripción del combo"
-            maxLength={2000}
-            name="comboDescription"
-            rows={3}
+          <FormTextInput<DishFormValues>
+            disabled={locked}
+            inputMode={"decimal"}
+            label={base(i18n.t("menu___Precio"))}
+            name={"price"}
           />
         </div>
-      ) : null}
-    </div>
+        <FormTextarea<DishFormValues>
+          disabled={!canEdit}
+          label={i18n.t("menu___Descripción")}
+          name={"description"}
+          rows={3}
+        />
+        <SingleImageUploadControl
+          disabled={locked || controller.busy}
+          draft={controller.image.draft}
+          label={base(i18n.t("menu___Imagen del plato"))}
+          onRemove={controller.image.remove}
+          onSelect={controller.image.selectFile}
+        />
+      </section>
+      <section className="admin-editor-section">
+        <h2 className={"ming-section__title"}>{i18n.t("menu___Visibilidad en la carta")}</h2>
+        <div className="admin-choice-grid">
+          <FormCheckbox<DishFormValues> disabled={locked} label={base(i18n.t("menu___Activo"))} name={"isActive"} />
+          <FormCheckbox<DishFormValues>
+            disabled={locked}
+            label={base(i18n.t("menu___Recomendado"))}
+            name={"isRecommended"}
+          />
+          <FormCheckbox<DishFormValues>
+            disabled={locked}
+            label={base(i18n.t("menu___Destacado"))}
+            name={"isFeatured"}
+          />
+        </div>
+        <p className="admin-copy">
+          {i18n.t(
+            "menu___La carta pública muestra un único plato estrella: el primer destacado según el orden de la carta.",
+          )}
+        </p>
+      </section>
+      <section className="admin-editor-section">
+        <h2 className={"ming-section__title"}>{i18n.t("menu___Combo")}</h2>
+        <FormCheckbox<DishFormValues>
+          disabled={locked}
+          label={base(i18n.t("menu___Vender como combo"))}
+          name={"comboEnabled"}
+        />
+        {comboEnabled ? (
+          <>
+            <FormTextInput<DishFormValues>
+              disabled={locked}
+              inputMode={"decimal"}
+              label={base(i18n.t("menu___Precio total del combo"))}
+              name={"comboPrice"}
+            />
+            <FormTextarea<DishFormValues>
+              disabled={!canEdit}
+              label={i18n.t("menu___Descripción del combo")}
+              maxLength={2000}
+              name={"comboDescription"}
+              rows={3}
+            />
+          </>
+        ) : null}
+      </section>
+      <section className="admin-editor-section">
+        <h2 className={"ming-section__title"}>{i18n.t("menu___Etiquetas, alérgenos y extras")}</h2>
+        <FormChipGroup<DishFormValues>
+          disabled={locked}
+          label={base(i18n.t("menu___Etiquetas"))}
+          name={"tagIds"}
+          options={controller.tagOptions}
+        />
+        <FormChipGroup<DishFormValues>
+          disabled={locked}
+          label={base(i18n.t("menu___Alérgenos"))}
+          name={"allergenIds"}
+          options={controller.allergenOptions}
+        />
+        <FormChipGroup<DishFormValues>
+          disabled={locked}
+          label={base(i18n.t("menu___Extras"))}
+          name={"extraIngredientIds"}
+          options={controller.extraOptions}
+        />
+      </section>
+    </>
   );
 }
 function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | null }) {
@@ -371,8 +491,11 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
     pending: controller.busy,
   });
   return (
-    <div className="admin-page admin-editor-page">
-      <PageHeader kicker={dish ? "Editar plato" : "Nuevo plato"} title={dish?.name ?? "Plato"} />
+    <div className={"ming-page admin-page admin-editor-page"}>
+      <PageHeader
+        kicker={dish ? i18n.t("menu___Editar plato") : i18n.t("menu___Nuevo plato")}
+        title={dish?.name ?? i18n.t("menu___Plato")}
+      />
       <FormProvider {...controller.form}>
         <FormShell
           operation={controller.operation}
@@ -381,28 +504,7 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
           onSubmit={() => void controller.submit()}
           readOnly={!canWrite}
         >
-          <div className="admin-form-grid">
-            <FormTextInput<DishFormValues> label="Nombre" name="name" />
-            <FormSelect<DishFormValues> label="Categoría" name="categoryId" options={controller.categoryOptions} />
-            <FormTextInput<DishFormValues> inputMode="decimal" label="Precio" name="price" />
-            <SingleImageUploadControl
-              disabled={controller.busy}
-              draft={controller.image.draft}
-              label="Imagen del plato"
-              onRemove={controller.image.remove}
-              onSelect={controller.image.selectFile}
-            />
-            <FormTextarea<DishFormValues> label="Descripción" name="description" rows={3} />
-            <DishComboFields />
-            <div className="admin-choice-grid">
-              <FormCheckbox<DishFormValues> label="Activo" name="isActive" />
-              <FormCheckbox<DishFormValues> label="Recomendado" name="isRecommended" />
-              <FormCheckbox<DishFormValues> label="Destacado" name="isFeatured" />
-            </div>
-          </div>
-          <FormChipGroup<DishFormValues> label="Etiquetas" name="tagIds" options={controller.tagOptions} />
-          <FormChipGroup<DishFormValues> label="Alérgenos" name="allergenIds" options={controller.allergenOptions} />
-          <FormChipGroup<DishFormValues> label="Extras" name="extraIngredientIds" options={controller.extraOptions} />
+          <DishFields controller={controller} />
         </FormShell>
       </FormProvider>
     </div>
@@ -472,16 +574,18 @@ function TranslatedDishForm({
       await translation.saveRows(rows);
       controller.form.reset(values);
       setRelatedValues({});
-      toast.success("Traducción guardada.");
+      toast.success(i18n.t("menu___Traducción guardada."));
     } catch (error) {
       notifyError(error);
     }
   };
   return (
-    <div className="admin-page admin-editor-page">
+    <div className={"ming-page admin-page admin-editor-page"}>
       <PageHeader
-        description="Edita los textos de este plato. El resto de la configuración se mantiene en el idioma base."
-        kicker="Editar plato"
+        description={i18n.t(
+          "menu___Edita los textos de este plato. El resto de la configuración se mantiene en el idioma base.",
+        )}
+        kicker={i18n.t("menu___Editar plato")}
         title={dish.name}
       />
       <FormProvider {...controller.form}>
@@ -490,64 +594,29 @@ function TranslatedDishForm({
           onCancel={controller.cancel}
           onSubmit={() => void submit()}
           readOnly={!canTranslate}
-          submitLabel="Guardar traducción"
+          submitLabel={i18n.t("menu___Guardar traducción")}
         >
-          <div className="admin-form-grid">
-            <FormTextInput<DishFormValues> disabled={!canTranslate} label="Nombre" name="name" />
-            <FormSelect<DishFormValues>
-              disabled
-              label="Categoría (idioma base)"
-              name="categoryId"
-              options={controller.categoryOptions}
-            />
-            <FormTextInput<DishFormValues> disabled inputMode="decimal" label="Precio (idioma base)" name="price" />
-            <SingleImageUploadControl
-              disabled
-              draft={controller.image.draft}
-              label="Imagen del plato (idioma base)"
-              onRemove={controller.image.remove}
-              onSelect={controller.image.selectFile}
-            />
-            <FormTextarea<DishFormValues> disabled={!canTranslate} label="Descripción" name="description" rows={3} />
-            <DishComboFields canTranslate={canTranslate} translation />
-            <div className="admin-choice-grid">
-              <FormCheckbox<DishFormValues> disabled label="Activo (idioma base)" name="isActive" />
-              <FormCheckbox<DishFormValues> disabled label="Recomendado (idioma base)" name="isRecommended" />
-              <FormCheckbox<DishFormValues> disabled label="Destacado (idioma base)" name="isFeatured" />
-            </div>
-          </div>
-          <FormChipGroup<DishFormValues>
-            disabled
-            label="Etiquetas (idioma base)"
-            name="tagIds"
-            options={controller.tagOptions}
-          />
-          <FormChipGroup<DishFormValues>
-            disabled
-            label="Alérgenos (idioma base)"
-            name="allergenIds"
-            options={controller.allergenOptions}
-          />
-          <FormChipGroup<DishFormValues>
-            disabled
-            label="Extras (idioma base)"
-            name="extraIngredientIds"
-            options={controller.extraOptions}
-          />
-          {related.map((row) => (
-            <Field
-              key={`${row.entityType}:${row.entityId}`}
-              label={`${row.entityType === "ingredient" ? "Extra" : "Variante"} · ${row.text}`}
-            >
-              <Input
-                disabled={!canTranslate || translation.pending}
-                value={relatedValues[`${row.entityType}:${row.entityId}`] ?? translation.value(row)}
-                onValueChange={(value) =>
-                  setRelatedValues((current) => ({ ...current, [`${row.entityType}:${row.entityId}`]: value }))
-                }
-              />
-            </Field>
-          ))}
+          <DishFields canEdit={canTranslate} controller={controller} locked />
+          {related.length > 0 ? (
+            <section className="admin-editor-section">
+              <h2 className={"ming-section__title"}>{i18n.t("menu___Extras y variantes")}</h2>
+              {related.map((row) => (
+                <Field
+                  key={`${row.entityType}:${row.entityId}`}
+                  label={`${row.entityType === "ingredient" ? i18n.t("menu___Extra") : i18n.t("menu___Variante")} · ${row.text}`}
+                  optionalLabel={i18n.t("shared___Optional")}
+                >
+                  <Input
+                    disabled={!canTranslate || translation.pending}
+                    value={relatedValues[`${row.entityType}:${row.entityId}`] ?? translation.value(row)}
+                    onValueChange={(value) =>
+                      setRelatedValues((current) => ({ ...current, [`${row.entityType}:${row.entityId}`]: value }))
+                    }
+                  />
+                </Field>
+              ))}
+            </section>
+          ) : null}
         </FormShell>
       </FormProvider>
     </div>
@@ -556,9 +625,14 @@ function TranslatedDishForm({
 
 function TranslationBlockedMessage({ entity }: { entity: string }) {
   return (
-    <div className="admin-page">
-      <PageHeader kicker="Idioma traducido" title="Acción disponible en el idioma base" />
-      <p>Cambia al idioma base para crear {entity} o modificar su configuración.</p>
+    <div className={"ming-page admin-page"}>
+      <PageHeader
+        kicker={i18n.t("menu___Idioma traducido")}
+        title={i18n.t("menu___Acción disponible en el idioma base")}
+      />
+      <p className="admin-copy">
+        {i18n.t("menu___Cambia al idioma base para crear")} {entity} {i18n.t("menu___o modificar su configuración.")}
+      </p>
     </div>
   );
 }

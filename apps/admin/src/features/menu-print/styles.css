@@ -75,7 +75,7 @@
   padding: 0.8rem;
   margin-bottom: 0.5rem;
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   cursor: pointer;
 }
 
@@ -117,13 +117,14 @@
 
 .menu-print-controls .menu-print-status {
   padding: 0.75rem;
-  border-radius: 0.375rem;
-  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
   color: var(--foreground);
 }
 
 .menu-print-controls .menu-print-status--overflow {
-  background: var(--ming-warning-surface);
+  border-color: var(--ming-warning);
   color: var(--ming-warning);
 }
 
@@ -159,7 +160,7 @@
   width: 100%;
   max-width: var(--print-width);
   aspect-ratio: 210 / 297;
-  box-shadow: 0 2px 12px #0000000d;
+  border: 1px solid var(--border);
 }
 
 .menu-print-document--folded .menu-print-sheet-frame {
