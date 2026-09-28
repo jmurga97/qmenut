@@ -5,6 +5,9 @@
 }
 
 button {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   min-height: var(--qm-touch-min, 44px);
   padding: 8px 13px;
   border: var(--qm-category-border, 1px solid var(--qm-hairline, rgba(0, 0, 0, 0.12)));

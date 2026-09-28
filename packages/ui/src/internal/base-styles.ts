@@ -10,6 +10,8 @@ export const qmHostResetStyles = css`
     display: block;
     box-sizing: border-box;
     font-family: var(--qm-body, sans-serif);
+    /* Tenant text can hold one unbreakable word; "anywhere" also shrinks min-content so flex/grid parents stay in bounds. */
+    overflow-wrap: anywhere;
   }
 
   :host *,
