@@ -14,9 +14,12 @@ export function EntityListCard({
   title: string;
 }) {
   return (
-    <section className="admin-card">
+    <section className="admin-card" aria-label={title}>
       <div className="admin-toolbar">
-        <div className="admin-kicker">{`${title} (${count})`}</div>
+        <div className={"ming-cluster"}>
+          <h2 className={"ming-section__title"}>{title}</h2>
+          <span className={"ming-eyebrow"}>{count}</span>
+        </div>
         {action}
       </div>
       {count === 0 ? <p className="admin-copy">{emptyText}</p> : <ul className="admin-list">{children}</ul>}

@@ -1,6 +1,8 @@
 import { Field, Select } from "@jmurga97/components";
 import { useController, useFormContext } from "react-hook-form";
 
+import { i18n } from "~/lib/i18n";
+
 import type { FieldPath, FieldValues } from "react-hook-form";
 
 type SelectOption = {
@@ -26,14 +28,14 @@ export function FormSelect<TValues extends FieldValues>({
   const { field } = useController({ control, name });
   const error = getFieldState(name, formState).error?.message;
   return (
-    <Field error={error} invalid={Boolean(error)} label={label}>
+    <Field error={error} invalid={Boolean(error)} label={label} optionalLabel={i18n.t("shared___Optional")}>
       <Select
         disabled={disabled}
         name={field.name}
         onValueChange={(value) => field.onChange(value ?? "")}
         options={options}
         portalContainer={portalContainer}
-        placeholder="Selecciona…"
+        placeholder={i18n.t("shared___Selecciona…")}
         value={field.value ? String(field.value) : null}
       />
     </Field>

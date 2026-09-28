@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { i18n } from "~/lib/i18n";
+
 import { createImageDraft, replaceImageDraftFile, revokeImageDraftPreview, validateImageFile } from "./image-draft";
 
 import type { ImageDraft } from "./image-draft";
@@ -68,7 +70,7 @@ export function useImageDraft(initialUrl: string | null) {
     [setDrafts],
   );
   const draft = drafts[0];
-  if (!draft) throw new Error("No se pudo inicializar el borrador de imagen.");
+  if (!draft) throw new Error(i18n.t("images___No se pudo inicializar el borrador de imagen."));
 
   const remove = useCallback(() => reset(draft.id), [draft.id, reset]);
   const selectFile = useCallback((file: File) => replace(draft.id, file), [draft.id, replace]);
@@ -106,7 +108,7 @@ export function useImageGalleryDraft(initialUrls: string[], maximum = 20) {
       if (files.length === 0) return;
       const remaining = maximum - draftsRef.current.length;
       if (files.length > remaining) {
-        setError(`La galería admite hasta ${maximum} imágenes.`);
+        setError(i18n.t("images___La galería admite hasta {{maximum}} imágenes.", { maximum }));
         return;
       }
       const invalidFile = files.find((file) => validateImageFile(file));

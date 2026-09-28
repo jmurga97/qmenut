@@ -1,3 +1,4 @@
+import { i18n } from "~/lib/i18n";
 import { trpcClient } from "~/lib/trpc";
 import { uploadFile } from "~/shared/services/upload-file";
 
@@ -41,7 +42,7 @@ async function transferOne(input: {
       imageChange: { kind: draft.changed ? "remove" : "keep" },
     };
   if (draft.transferred && draft.uploadId) return preparedUpload(draft.uploadId);
-  if (!isAcceptedImageType(file.type)) throw new Error("Selecciona una imagen JPEG, PNG o WebP.");
+  if (!isAcceptedImageType(file.type)) throw new Error(i18n.t("images___Selecciona una imagen JPEG, PNG o WebP."));
   group.updateDraft(draft.id, { status: "uploading", error: undefined });
   const upload = await trpcClient.admin.images.createUpload.mutate(
     {
@@ -56,9 +57,11 @@ async function transferOne(input: {
   );
   input.signal.throwIfAborted();
   group.updateDraft(draft.id, { uploadId: upload.uploadId });
-  if (upload.status === "failed") throw new Error("No se pudo preparar la imagen. Selecciona otra imagen.");
+  if (upload.status === "failed")
+    throw new Error(i18n.t("images___No se pudo preparar la imagen. Selecciona otra imagen."));
   if (upload.status === "awaiting_upload") {
-    if (!upload.upload) throw new Error("No se pudo obtener la URL de subida. Pulsa Guardar para reintentar.");
+    if (!upload.upload)
+      throw new Error(i18n.t("images___No se pudo obtener la URL de subida. Pulsa Guardar para reintentar."));
     input.onProgress(0);
     await uploadFile({ ...upload.upload, file, signal: input.signal, onProgress: input.onProgress });
   }
@@ -102,10 +105,15 @@ export async function transferImageDrafts(input: TransferInput): Promise<Prepare
         });
       } catch (error) {
         failure =
-          error instanceof Error ? error : new Error("No se pudo subir la imagen. Pulsa Guardar para reintentar.");
+          error instanceof Error
+            ? error
+            : new Error(i18n.t("images___No se pudo subir la imagen. Pulsa Guardar para reintentar."));
         item.group.updateDraft(item.draft.id, {
           status: "failed",
-          error: error instanceof Error ? error.message : "No se pudo subir la imagen. Pulsa Guardar para reintentar.",
+          error:
+            error instanceof Error
+              ? error.message
+              : i18n.t("images___No se pudo subir la imagen. Pulsa Guardar para reintentar."),
         });
       }
     }

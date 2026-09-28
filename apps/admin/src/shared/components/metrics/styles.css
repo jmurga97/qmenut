@@ -2,7 +2,7 @@
   display: grid;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   background: var(--card);
 }
 
@@ -29,20 +29,20 @@
   display: grid;
   min-height: 6.5rem;
   align-content: space-between;
-  gap: 0.75rem;
-  padding: 1rem;
+  gap: var(--ming-space-3);
+  padding: var(--ming-space-4);
 }
 
 .admin-metric--primary {
   min-height: 8.5rem;
-  padding: 1.5rem;
+  padding: var(--ming-space-5);
 }
 
 .admin-metric--primary::before {
   position: absolute;
   inset: 1.25rem auto 1.25rem 0;
   width: 0.1875rem;
-  background: var(--admin-identity-accent);
+  background: var(--ming-service);
   content: "";
 }
 

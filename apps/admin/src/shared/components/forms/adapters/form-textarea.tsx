@@ -1,6 +1,8 @@
 import { Field, Textarea } from "@jmurga97/components";
 import { useFormContext } from "react-hook-form";
 
+import { i18n } from "~/lib/i18n";
+
 import type { FieldPath, FieldValues } from "react-hook-form";
 
 type FormTextareaProps<TValues extends FieldValues> = {
@@ -20,7 +22,7 @@ export function FormTextarea<TValues extends FieldValues>({
   const { formState, getFieldState, register } = useFormContext<TValues>();
   const error = getFieldState(name, formState).error?.message;
   return (
-    <Field error={error} invalid={Boolean(error)} label={label}>
+    <Field error={error} invalid={Boolean(error)} label={label} optionalLabel={i18n.t("shared___Optional")}>
       <Textarea {...register(name)} disabled={disabled} maxLength={maxLength} rows={rows} />
     </Field>
   );

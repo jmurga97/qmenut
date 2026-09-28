@@ -1,6 +1,8 @@
 import { Field, Input } from "@jmurga97/components";
 import { useFormContext } from "react-hook-form";
 
+import { i18n } from "~/lib/i18n";
+
 import type { HTMLInputTypeAttribute } from "react";
 import type { FieldPath, FieldValues } from "react-hook-form";
 
@@ -27,7 +29,7 @@ export function FormTextInput<TValues extends FieldValues>({
   const { formState, getFieldState, register } = useFormContext<TValues>();
   const error = getFieldState(name, formState).error?.message;
   return (
-    <Field error={error} invalid={Boolean(error)} label={label}>
+    <Field error={error} invalid={Boolean(error)} label={label} optionalLabel={i18n.t("shared___Optional")}>
       <Input
         {...register(name)}
         autoComplete={autocomplete}

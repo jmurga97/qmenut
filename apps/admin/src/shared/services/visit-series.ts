@@ -45,7 +45,11 @@ export function sumVisits(points: VisitSeriesPoint[]): { newVisits: number; retu
 }
 
 export function formatDayLabel(day: string): string {
-  return new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" }).format(
-    new Date(`${day}T00:00:00Z`),
-  );
+  return new Intl.DateTimeFormat(i18n.resolvedLanguage ?? "es", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).format(new Date(`${day}T00:00:00Z`));
 }
+
+import { i18n } from "~/lib/i18n";

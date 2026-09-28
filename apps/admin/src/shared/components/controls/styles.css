@@ -1,18 +1,18 @@
 .admin-segmented {
   display: flex;
-  padding: 0.2rem;
+  padding: var(--ming-space-1);
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   background: var(--background);
 }
 
 .admin-segmented button {
   min-height: 2rem;
   border: 0;
-  border-radius: 0.375rem;
+  border-radius: var(--ming-radius-control);
   background: transparent;
   color: var(--muted-foreground);
-  padding: 0.45rem 0.65rem;
+  padding: var(--ming-space-2) var(--ming-space-3);
   font-size: var(--admin-text-caption);
   cursor: pointer;
   transition:

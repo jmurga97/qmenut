@@ -19,13 +19,17 @@ export function SegmentedToggle<T extends string>({
   value,
 }: SegmentedToggleProps<T>) {
   return (
-    <div aria-label={ariaLabel} className={className ? `admin-segmented ${className}` : "admin-segmented"} role="group">
+    <div
+      aria-label={ariaLabel}
+      className={className ? `admin-segmented ${className}` : "admin-segmented"}
+      role={"group"}
+    >
       {options.map((option) => (
         <button
           aria-pressed={option.value === value}
           key={option.value}
           onClick={() => onChange(option.value)}
-          type="button"
+          type={"button"}
         >
           {option.label}
         </button>

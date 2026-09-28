@@ -1,6 +1,6 @@
 .stacked-bar {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
 }
 
 .stacked-bar__plot {
@@ -34,7 +34,7 @@
 .stacked-bar__axis {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--ming-space-4);
   color: var(--muted-foreground);
   font-size: var(--admin-text-caption);
   line-height: 1.35;
@@ -43,7 +43,7 @@
 .stacked-bar__legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.375rem 1rem;
+  gap: var(--ming-space-1) var(--ming-space-4);
   align-items: center;
   margin: 0;
   padding: 0;
@@ -52,7 +52,7 @@
 
 .stacked-bar__legend-item {
   display: inline-flex;
-  gap: 0.4375rem;
+  gap: var(--ming-space-2);
   align-items: center;
   color: var(--muted-foreground);
   font-size: var(--admin-text-caption);
@@ -68,7 +68,7 @@
   flex: 0 0 0.625rem;
   width: 0.625rem;
   height: 0.625rem;
-  border-radius: 0.1875rem;
+  border-radius: var(--ming-radius-control);
 }
 
 .stacked-bar__empty {
@@ -76,11 +76,11 @@
   place-items: center;
   min-height: 8rem;
   border: 1px dashed var(--input);
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   background: var(--background);
   color: var(--muted-foreground);
   font-size: var(--admin-text-body-sm);
-  padding: 1rem;
+  padding: var(--ming-space-4);
   margin: 0;
 }
 

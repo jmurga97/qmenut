@@ -4,8 +4,8 @@ type EmptyStateProps = {
 };
 export function EmptyState({ title, description }: EmptyStateProps) {
   return (
-    <div className="admin-empty-state">
-      <h3>{title}</h3>
+    <div className={"ming-empty"}>
+      <h1>{title}</h1>
       <p>{description}</p>
     </div>
   );

@@ -1,17 +1,17 @@
 .admin-theme-preference {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--ming-space-4);
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
+  padding: var(--ming-space-4);
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   background: var(--card);
 }
 .admin-theme-preference-copy {
   display: grid;
-  gap: 0.25rem;
+  gap: var(--ming-space-1);
 }
 .admin-theme-preference-copy h2,
 .admin-theme-preference-copy p {

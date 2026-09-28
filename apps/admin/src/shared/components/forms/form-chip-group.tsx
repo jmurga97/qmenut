@@ -1,17 +1,11 @@
-import { InlineMessage } from "@jmurga97/components";
+import { Field, TagPicker } from "@jmurga97/components";
 import { useController, useFormContext } from "react-hook-form";
+
+import { i18n } from "~/lib/i18n";
 
 import type { FieldPath, FieldValues } from "react-hook-form";
 
 type ChipId = number | string;
-
-function SelectedChipIcon() {
-  return (
-    <svg aria-hidden="true" className="admin-chip__icon" fill="none" viewBox="0 0 16 16">
-      <path d="m3.5 8.25 2.75 2.75 6.25-6.25" stroke="currentColor" strokeLinecap="round" strokeWidth="1.75" />
-    </svg>
-  );
-}
 
 interface FormChipGroupProps<TValues extends FieldValues> {
   disabled?: boolean;
@@ -28,31 +22,24 @@ export function FormChipGroup<TValues extends FieldValues>({
   const { control } = useFormContext<TValues>();
   const { field, fieldState } = useController({ control, name });
   const selected = Array.isArray(field.value) ? (field.value as ChipId[]) : [];
-  function toggle(id: ChipId) {
-    field.onChange(selected.includes(id) ? selected.filter((value) => value !== id) : [...selected, id]);
-  }
+  const ids = new Map(options.map((option) => [String(option.id), option.id]));
   return (
-    <section className="admin-editor-section">
-      <div className="admin-kicker">{label}</div>
-      <div className="admin-chip-row">
-        {options.map((option) => {
-          const active = selected.includes(option.id);
-          return (
-            <button
-              aria-pressed={active}
-              className={active ? "admin-chip admin-chip--active" : "admin-chip"}
-              disabled={disabled}
-              key={option.id}
-              onClick={() => toggle(option.id)}
-              type="button"
-            >
-              {active ? <SelectedChipIcon /> : null}
-              <span>{option.label}</span>
-            </button>
-          );
-        })}
-      </div>
-      {fieldState.error?.message ? <InlineMessage message={fieldState.error.message} tone="error" /> : null}
-    </section>
+    <Field
+      disabled={disabled}
+      error={fieldState.error?.message}
+      invalid={Boolean(fieldState.error)}
+      label={label}
+      optionalLabel={i18n.t("shared___Optional")}
+    >
+      <TagPicker
+        ariaLabel={label}
+        disabled={disabled}
+        emptyLabel={i18n.t("shared___No hay resultados")}
+        onValueChange={(value) => field.onChange(value.map((id) => ids.get(id) ?? id))}
+        options={options.map(({ id, label: optionLabel }) => ({ id: String(id), label: optionLabel }))}
+        placeholder={i18n.t("shared___Buscar")}
+        value={selected.map(String)}
+      />
+    </Field>
   );
 }

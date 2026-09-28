@@ -6,7 +6,7 @@
 .admin-image-gallery {
   display: grid;
   min-width: 0;
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
 }
 .admin-image-control__header,
 .admin-image-gallery__footer {
@@ -14,29 +14,24 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--ming-space-2);
 }
+/* Matches the library Field label so image controls read as one more field. */
 .admin-image-control__label {
   margin: 0;
-  color: var(--foreground);
-  font-size: var(--admin-text-body-sm);
-  font-weight: 600;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: var(--admin-text-label);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .admin-image-help,
-.admin-image-status,
 .admin-image-picker small,
 .admin-image-gallery__footer > span {
   color: var(--muted-foreground);
   font-size: var(--admin-text-caption);
 }
-.admin-image-status--uploading,
-.admin-image-status--optimizing {
-  color: var(--ming-warning);
-}
-.admin-image-status--succeeded {
-  color: var(--ming-success);
-}
-.admin-image-status--failed,
 .admin-image-picker .admin-image-error {
   color: var(--destructive);
 }
@@ -44,11 +39,11 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
+  gap: var(--ming-space-4);
+  padding: var(--ming-space-4);
   border: 1px dashed var(--input);
-  border-radius: 0.625rem;
-  background: color-mix(in srgb, var(--secondary) 40%, var(--card));
+  border-radius: var(--radius);
+  background: var(--muted);
 }
 .admin-image-picker--over {
   border-color: var(--ring);
@@ -62,7 +57,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
 }
 .admin-image-picker small {
   line-height: 1.5;
@@ -75,7 +70,7 @@
   width: 10rem;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  border-radius: 0.375rem;
+  border-radius: var(--ming-radius-control);
   background: var(--secondary);
 }
 .admin-image-preview img {
@@ -94,7 +89,7 @@
 .admin-image-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--ming-space-2);
 }
 .admin-image-picker button,
 .admin-photo-list button {
@@ -117,7 +112,7 @@
 }
 .admin-image-gallery {
   width: 100%;
-  gap: 0.875rem;
+  gap: var(--ming-space-3);
 }
 .admin-image-gallery__footer > span {
   white-space: nowrap;
@@ -143,17 +138,28 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
   min-width: 0;
-  padding: 0.625rem 0.25rem;
-  border-block-start: 1px solid color-mix(in srgb, var(--border) 60%, var(--card));
+  padding: var(--ming-space-2) var(--ming-space-1);
+  border-block-start: 1px solid var(--border);
 }
 .admin-photo-list > li:hover {
-  background: color-mix(in srgb, var(--secondary) 40%, var(--card));
+  background: var(--secondary);
+}
+::view-transition-group(*) {
+  animation-duration: 200ms;
+  animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
 }
 .admin-photo-list > .admin-photo-list__target {
-  outline: 3px solid var(--ring);
-  outline-offset: -3px;
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
 }
 .admin-photo-list .admin-photo-list__handle {
   width: 1.5rem;
@@ -173,7 +179,7 @@
   height: 3rem;
   flex-shrink: 0;
   overflow: hidden;
-  border-radius: 0.375rem;
+  border-radius: var(--ming-radius-control);
   background: var(--secondary);
 }
 .admin-photo-list__thumb img {
@@ -186,7 +192,7 @@
   display: grid;
   flex: 1;
   min-width: 0;
-  gap: 0.1875rem;
+  gap: var(--ming-space-1);
 }
 .admin-photo-list__name {
   overflow: hidden;
@@ -199,26 +205,15 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--ming-space-2);
   color: var(--muted-foreground);
   font-size: var(--admin-text-label);
   font-variant-numeric: tabular-nums;
 }
-.admin-photo-list__badge {
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  background: var(--foreground);
-  color: var(--background);
-  font-size: 0.625rem;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
 .admin-photo-list__actions {
   display: flex;
   flex-shrink: 0;
-  gap: 0.375rem;
+  gap: var(--ming-space-1);
   margin-inline-start: auto;
 }
 .admin-photo-list__actions button {
@@ -228,7 +223,7 @@
   min-height: 1.875rem;
   padding: 0;
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--ming-radius-control);
   box-shadow: none;
 }
 .admin-photo-list .admin-photo-list__remove:not(:disabled) {
@@ -243,21 +238,18 @@
 
 .admin-image-picker button {
   min-height: 2.25rem;
-  padding: 0.5rem 0.75rem;
+  padding: var(--ming-space-2) var(--ming-space-3);
   border: 1px solid var(--input);
-  border-radius: 0.5625rem;
+  border-radius: var(--ming-radius-control);
   font-size: var(--admin-text-body-sm);
   font-weight: 400;
   white-space: nowrap;
   box-shadow: none;
 }
-.admin-photo-list .ming-icon {
-  width: 1rem;
-  height: 1rem;
-}
+
 .admin-photo-list .admin-photo-list__remove:hover:not(:disabled) {
-  background: var(--ming-error-surface);
-  border-color: color-mix(in srgb, var(--destructive) 30%, var(--border));
+  background: var(--card);
+  border-color: var(--destructive);
 }
 @media (pointer: coarse) {
   .admin-photo-list__actions button,
@@ -280,7 +272,7 @@
 
 .admin-file-operation {
   display: grid;
-  gap: 0.5rem;
+  gap: var(--ming-space-2);
   width: min(100%, 24rem);
   font-size: var(--admin-text-body-sm);
   font-variant-numeric: tabular-nums;
@@ -299,26 +291,26 @@
   appearance: none;
   overflow: hidden;
   border: 0;
-  border-radius: 0.25rem;
+  border-radius: var(--ming-radius-control);
   background: var(--secondary);
 }
 .admin-file-operation progress[value]::-webkit-progress-bar {
   background: var(--secondary);
-  border-radius: 0.25rem;
+  border-radius: var(--ming-radius-control);
 }
 .admin-file-operation progress[value]::-webkit-progress-value {
   background: var(--ring);
-  border-radius: 0.25rem;
+  border-radius: var(--ming-radius-control);
 }
 .admin-file-operation progress[value]::-moz-progress-bar {
   background: var(--ring);
-  border-radius: 0.25rem;
+  border-radius: var(--ming-radius-control);
 }
 
 .admin-file-operation__label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--ming-space-2);
 }
 .admin-file-operation__loader {
   width: 1rem;
@@ -326,7 +318,7 @@
   flex-shrink: 0;
   border: 2px solid var(--secondary);
   border-top-color: var(--ring);
-  border-radius: 50%;
+  border-radius: 0;
   animation: admin-file-operation-spin 0.8s linear infinite;
 }
 @keyframes admin-file-operation-spin {

@@ -1,9 +1,12 @@
-import { Button } from "@jmurga97/components";
+import { Badge, Button } from "@jmurga97/components";
 import { useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
+import { i18n } from "~/lib/i18n";
 import { Icon } from "~/shared/components/icon";
+import { formatNumber } from "~/shared/services/format";
 
-import { imageStatusLabel } from "./image-draft";
+import { imageStatusLabel, imageStatusTone } from "./image-draft";
 import { ImageFilePicker } from "./image-file-picker";
 
 import type { ImageDraft } from "./image-draft";
@@ -23,13 +26,18 @@ interface ImageGalleryControlProps {
 const reorderKeys: Record<string, number> = { ArrowUp: -1, ArrowLeft: -1, ArrowDown: 1, ArrowRight: 1 };
 
 function formatBytes(bytes: number) {
-  return bytes < 1024 ** 2 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1024 ** 2).toFixed(1)} MB`;
+  return bytes < 1024 ** 2
+    ? `${formatNumber(Math.round(bytes / 1024))} KB`
+    : `${new Intl.NumberFormat(i18n.resolvedLanguage ?? "es", { maximumFractionDigits: 1 }).format(bytes / 1024 ** 2)} MB`;
 }
 
 function fileName(draft: ImageDraft, index: number) {
   const stored = draft.imageUrl?.split("?")[0]?.split("/").pop();
   // Stored URLs are not always file-shaped, so only borrow the basename when it actually looks like one.
-  return draft.file?.name ?? (stored && /\.[a-z0-9]{3,4}$/i.test(stored) ? stored : `Foto ${index + 1}`);
+  return (
+    draft.file?.name ??
+    (stored && /\.[a-z0-9]{3,4}$/i.test(stored) ? stored : i18n.t("images___Foto {{index}}", { index: index + 1 }))
+  );
 }
 
 export function ImageGalleryControl({
@@ -56,8 +64,15 @@ export function ImageGalleryControl({
     if (locked() || index < 0 || index >= drafts.length) return;
     // Focus travels with the row's DOM node, so grab the handle before the list reorders.
     handles()?.[drafts.findIndex((draft) => draft.id === id)]?.focus({ preventScroll: true });
-    onMove(id, index);
-    setAnnouncement(`Foto movida a la posición ${index + 1}${index === 0 ? ", portada" : ""}.`);
+    // Rows glide to their new slot instead of teleporting; browsers without the API just reorder.
+    if (document.startViewTransition) document.startViewTransition(() => flushSync(() => onMove(id, index)));
+    else onMove(id, index);
+    setAnnouncement(
+      i18n.t("images___Foto movida a la posición {{index}}{{cover}}.", {
+        index: index + 1,
+        cover: index === 0 ? i18n.t("images___, portada") : "",
+      }),
+    );
   };
   const remove = (id: string, index: number) => {
     if (locked()) return;
@@ -66,12 +81,14 @@ export function ImageGalleryControl({
     if (next) next.focus();
     else gallery.current?.querySelector<HTMLButtonElement>(":scope > .admin-image-picker button")?.focus();
     onRemove(id);
-    setAnnouncement(`Foto ${index + 1} quitada. Los cambios se aplican al guardar.`);
+    setAnnouncement(
+      i18n.t("images___Foto {{index}} quitada. Los cambios se aplican al guardar.", { index: index + 1 }),
+    );
   };
   return (
     <section aria-label={label} className="admin-image-gallery" ref={gallery}>
       <ImageFilePicker
-        action="Elegir fotos"
+        action={i18n.t("images___Elegir fotos")}
         disabled={disabled || drafts.length >= maximum}
         error={error}
         label={label}
@@ -79,23 +96,32 @@ export function ImageGalleryControl({
         onSelect={onAdd}
       >
         {drafts.length === 0 ? (
-          <p className="admin-image-gallery__empty">Añade fotos del espacio, la terraza o tus platos.</p>
+          <p className={"admin-image-gallery__empty"}>
+            {i18n.t("images___Añade fotos del espacio, la terraza o tus platos.")}
+          </p>
         ) : null}
       </ImageFilePicker>
       {drafts.length >= maximum ? (
         <small className="admin-image-help">
-          Has alcanzado el máximo de {maximum} fotos. Quita una para añadir otra.
+          {i18n.t("images___Has alcanzado el máximo de")} {maximum}{" "}
+          {i18n.t("images___fotos. Quita una para añadir otra.")}
         </small>
       ) : null}
       <ol className="admin-photo-list">
         {drafts.map((draft, index) => {
           const name = fileName(draft, index);
-          const status = imageStatusLabel[draft.status] || (draft.changed ? "Pendiente de guardar" : "");
+          const status =
+            imageStatusLabel[draft.status] || (draft.changed ? i18n.t("images___Pendiente de guardar") : "");
           return (
             <li
-              aria-label={`Foto ${index + 1}${index === 0 ? ", portada" : ""}: ${name}`}
+              aria-label={i18n.t("images___Foto {{index}}{{cover}}: {{name}}", {
+                index: index + 1,
+                cover: index === 0 ? i18n.t("images___, portada") : "",
+                name,
+              })}
               className={target === draft.id ? "admin-photo-list__target" : undefined}
               key={draft.id}
+              style={{ viewTransitionName: `photo-${draft.id}` }}
               onDragOver={(event) => {
                 if (!dragged || locked() || event.dataTransfer.types.includes("Files")) return;
                 event.preventDefault();
@@ -116,9 +142,9 @@ export function ImageGalleryControl({
               {/* ponytail: pointer drag + arrow keys only. Touch can set the cover but not reorder freely;
                   add a long-press drag (or up/down buttons) if that turns out to matter. */}
               <Button
-                variant="ghost"
-                aria-label={`Reordenar ${name}. Arrastra, o usa las flechas para moverla.`}
-                className="admin-photo-list__handle"
+                variant={"ghost"}
+                aria-label={i18n.t("images___Reordenar {{name}}. Arrastra, o usa las flechas para moverla.", { name })}
+                className={"admin-photo-list__handle"}
                 disabled={disabled}
                 draggable={!disabled}
                 onDragStart={(event) => {
@@ -140,11 +166,11 @@ export function ImageGalleryControl({
                   event.preventDefault();
                   move(draft.id, event.key === "Home" ? 0 : index + step);
                 }}
-                type="button"
+                type={"button"}
               >
-                <Icon name="drag" />
+                <Icon name={"drag"} />
               </Button>
-              <div className="admin-photo-list__thumb">
+              <div className={"admin-photo-list__thumb"}>
                 {draft.previewUrl ? (
                   <img
                     alt=""
@@ -158,74 +184,79 @@ export function ImageGalleryControl({
                   />
                 ) : null}
               </div>
-              <div className="admin-photo-list__meta">
-                <span className="admin-photo-list__name" title={name}>
+              <div className={"admin-photo-list__meta"}>
+                <span className={"admin-photo-list__name"} title={name}>
                   {name}
                 </span>
-                <span className="admin-photo-list__facts">
+                <span className={"admin-photo-list__facts"}>
                   {draft.file ? <span>{formatBytes(draft.file.size)}</span> : null}
                   {dimensions[draft.id] ? <span>{dimensions[draft.id]}</span> : null}
-                  {index === 0 ? <span className="admin-photo-list__badge">Portada</span> : null}
+                  {index === 0 ? <Badge tone={"info"}>{i18n.t("images___Portada")}</Badge> : null}
                   {status ? (
-                    <span aria-live="polite" className={`admin-image-status admin-image-status--${draft.status}`}>
+                    <Badge
+                      aria-live={"polite"}
+                      tone={draft.changed && draft.status === "idle" ? "warning" : imageStatusTone[draft.status]}
+                    >
                       {status}
-                    </span>
+                    </Badge>
                   ) : null}
                 </span>
                 {draft.error ? (
-                  <small className="admin-image-error" role="alert">
+                  <small className="admin-image-error" role={"alert"}>
                     {draft.error}
                   </small>
                 ) : null}
               </div>
-              <div className="admin-photo-list__actions">
+              <div className={"admin-photo-list__actions"}>
                 <Button
-                  variant="secondary"
-                  aria-label={`Usar ${name} como portada`}
+                  variant={"secondary"}
+                  aria-label={i18n.t("images___Usar {{name}} como portada", { name })}
                   disabled={disabled || index === 0}
                   onClick={() => move(draft.id, 0)}
-                  title="Usar como portada"
-                  type="button"
+                  title={i18n.t("images___Usar como portada")}
+                  type={"button"}
                 >
-                  <Icon name="star" />
+                  <Icon name={"star"} />
                 </Button>
                 <Button
-                  variant="secondary"
-                  aria-label={`Reemplazar ${name}`}
+                  variant={"secondary"}
+                  aria-label={i18n.t("images___Reemplazar {{name}}", { name })}
                   disabled={disabled}
                   onClick={() => {
                     replacing.current = draft.id;
                     replaceInput.current?.click();
                   }}
-                  title="Reemplazar"
-                  type="button"
+                  title={i18n.t("images___Reemplazar")}
+                  type={"button"}
                 >
-                  <Icon name="image" />
+                  <Icon name={"image"} />
                 </Button>
                 <Button
-                  variant="secondary"
-                  aria-label={`Quitar ${name}`}
-                  className="admin-photo-list__remove"
+                  variant={"secondary"}
+                  aria-label={i18n.t("images___Quitar {{name}}", { name })}
+                  className={"admin-photo-list__remove"}
                   disabled={disabled}
                   onClick={() => remove(draft.id, index)}
-                  title="Quitar"
-                  type="button"
+                  title={i18n.t("images___Quitar")}
+                  type={"button"}
                 >
-                  <Icon name="trash" />
+                  <Icon name={"trash"} />
                 </Button>
               </div>
             </li>
           );
         })}
       </ol>
-      <div className="admin-image-gallery__footer">
-        <small className="admin-image-help">La primera foto será la portada. Los cambios se aplican al guardar.</small>
+      <div className={"admin-image-gallery__footer"}>
+        <small className="admin-image-help">
+          {i18n.t("images___La primera foto será la portada. Los cambios se aplican al guardar.")}
+        </small>
         <span>
-          {drafts.length} de {maximum}
+          {drafts.length} {i18n.t("images___de")} {maximum}
         </span>
       </div>
       <input
-        accept="image/jpeg,image/png,image/webp"
+        accept={"image/jpeg,image/png,image/webp"}
         className="admin-visually-hidden"
         disabled={disabled}
         onChange={(event) => {
@@ -235,9 +266,9 @@ export function ImageGalleryControl({
         }}
         ref={replaceInput}
         tabIndex={-1}
-        type="file"
+        type={"file"}
       />
-      <span aria-live="polite" className="admin-visually-hidden">
+      <span aria-live={"polite"} className="admin-visually-hidden">
         {announcement}
       </span>
     </section>

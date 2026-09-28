@@ -1,8 +1,13 @@
 import { z } from "zod";
 
+import { i18n } from "~/lib/i18n";
+
 const MONEY_INPUT_PATTERN = /^\d+(?:[.,]\d{1,2})?$/;
 
-export const moneyInputSchema = z.string().trim().regex(MONEY_INPUT_PATTERN, "Introduce un importe válido");
+export const moneyInputSchema = z
+  .string()
+  .trim()
+  .regex(MONEY_INPUT_PATTERN, i18n.t("shared___Introduce un importe válido"));
 
 export function parseMoneyInput(value: string): number {
   const normalized = value.trim();
@@ -31,9 +36,13 @@ export function formatMoneyInput(minorUnits: number | null | undefined): string 
   const whole = digits.slice(0, -2).replace(/^0+(?=\d)/, "");
   const fraction = digits.slice(-2);
 
-  return fraction === "00" ? `${sign}${whole}` : `${sign}${whole}.${fraction}`;
+  if (fraction === "00") return `${sign}${whole}`;
+  const decimal = new Intl.NumberFormat(i18n.resolvedLanguage ?? "es")
+    .formatToParts(1.1)
+    .find(({ type }) => type === "decimal")?.value;
+  return `${sign}${whole}${decimal ?? "."}${fraction}`;
 }
 
 export function formatMoney(minorUnits: number, currency: string): string {
-  return new Intl.NumberFormat("es-ES", { currency, style: "currency" }).format(minorUnits / 100);
+  return new Intl.NumberFormat(i18n.resolvedLanguage ?? "es", { currency, style: "currency" }).format(minorUnits / 100);
 }

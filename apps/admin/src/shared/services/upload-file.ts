@@ -1,3 +1,5 @@
+import { i18n } from "~/lib/i18n";
+
 interface UploadFileInput {
   url: string;
   headers: Record<string, string>;
@@ -26,22 +28,24 @@ export function uploadFile(input: UploadFileInput): Promise<void> {
     });
     request.addEventListener("load", () => {
       if (request.status < 200 || request.status >= 300) {
-        finish(new Error("No se pudo transferir el archivo. Pulsa Guardar para reintentar."));
+        finish(new Error(i18n.t("shared___No se pudo transferir el archivo. Pulsa Guardar para reintentar.")));
         return;
       }
       input.onProgress(input.file.size);
       finish();
     });
     request.addEventListener("error", () =>
-      finish(new Error("No se pudo subir el archivo. Comprueba tu conexión y pulsa Guardar.")),
+      finish(new Error(i18n.t("shared___No se pudo subir el archivo. Comprueba tu conexión y pulsa Guardar."))),
     );
     request.addEventListener("timeout", () =>
-      finish(new Error("La subida tardó demasiado. Pulsa Guardar para reintentar.")),
+      finish(new Error(i18n.t("shared___La subida tardó demasiado. Pulsa Guardar para reintentar."))),
     );
-    request.addEventListener("abort", () => finish(new DOMException("Subida interrumpida", "AbortError")));
+    request.addEventListener("abort", () =>
+      finish(new DOMException(i18n.t("shared___Subida interrumpida"), "AbortError")),
+    );
     input.signal.addEventListener("abort", abort, { once: true });
     if (input.signal.aborted) {
-      finish(new DOMException("Subida interrumpida", "AbortError"));
+      finish(new DOMException(i18n.t("shared___Subida interrumpida"), "AbortError"));
       return;
     }
     request.send(input.file);

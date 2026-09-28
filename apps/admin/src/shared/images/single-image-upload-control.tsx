@@ -1,8 +1,8 @@
-import { Button } from "@jmurga97/components";
+import { Badge, Button } from "@jmurga97/components";
 
-import { Icon } from "~/shared/components/icon";
+import { i18n } from "~/lib/i18n";
 
-import { imageStatusLabel } from "./image-draft";
+import { imageStatusLabel, imageStatusTone } from "./image-draft";
 import { ImageFilePicker } from "./image-file-picker";
 
 import type { ImageDraft } from "./image-draft";
@@ -24,26 +24,32 @@ export function SingleImageUploadControl({
   onRemove,
   onSelect,
 }: SingleImageUploadControlProps) {
+  const status = imageStatusLabel[draft.status] || (draft.changed ? i18n.t("images___Pendiente de guardar") : "");
   return (
     <div className={`admin-image-control${logo ? " admin-image-control--logo" : ""}`}>
-      <div className="admin-image-control__header">
-        <span className="admin-image-control__label">{label}</span>
-        <span aria-live="polite" className={`admin-image-status admin-image-status--${draft.status}`}>
-          {imageStatusLabel[draft.status] || (draft.changed ? "Pendiente de guardar" : "")}
-        </span>
+      <div className={"admin-image-control__header"}>
+        <span className={"admin-image-control__label"}>{label}</span>
+        {status ? (
+          <Badge
+            aria-live={"polite"}
+            tone={draft.changed && draft.status === "idle" ? "warning" : imageStatusTone[draft.status]}
+          >
+            {status}
+          </Badge>
+        ) : null}
       </div>
       <ImageFilePicker
-        action={draft.previewUrl ? "Reemplazar" : "Seleccionar imagen"}
+        action={draft.previewUrl ? i18n.t("images___Reemplazar") : i18n.t("images___Seleccionar imagen")}
         actions={
           draft.previewUrl ? (
             <Button
-              variant="secondary"
-              aria-label={`Quitar: ${label}`}
+              variant={"secondary"}
+              aria-label={i18n.t("images___Quitar: {{label}}", { label })}
               disabled={disabled}
               onClick={onRemove}
-              type="button"
+              type={"button"}
             >
-              <Icon name="trash" /> Quitar
+              {i18n.t("images___Quitar")}
             </Button>
           ) : null
         }
@@ -60,7 +66,7 @@ export function SingleImageUploadControl({
           </div>
         ) : null}
       </ImageFilePicker>
-      <small className="admin-image-help">Los cambios se aplican al guardar.</small>
+      <small className="admin-image-help">{i18n.t("images___Los cambios se aplican al guardar.")}</small>
     </div>
   );
 }

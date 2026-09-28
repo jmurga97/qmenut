@@ -1,3 +1,5 @@
+import { i18n } from "~/lib/i18n";
+
 const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 const acceptedImageTypes: ReadonlySet<string> = new Set(ACCEPTED_IMAGE_TYPES);
@@ -8,12 +10,20 @@ export type ImagePurpose = "branchLogo" | "branchPhoto" | "categoryImage" | "dis
 
 export const imageStatusLabel: Record<ImageDraftStatus, string> = {
   idle: "",
-  ready: "Pendiente de guardar",
-  uploading: "Subiendo",
-  optimizing: "Procesando imagen",
-  succeeded: "Archivo recibido",
-  failed: "Error en la imagen",
+  ready: i18n.t("images___Pendiente de guardar"),
+  uploading: i18n.t("images___Subiendo"),
+  optimizing: i18n.t("images___Procesando imagen"),
+  succeeded: i18n.t("images___Archivo recibido"),
+  failed: i18n.t("images___Error en la imagen"),
 };
+export const imageStatusTone = {
+  idle: "neutral",
+  ready: "warning",
+  uploading: "info",
+  optimizing: "info",
+  succeeded: "success",
+  failed: "error",
+} as const;
 
 export interface ImageDraft {
   id: string;
@@ -59,11 +69,11 @@ export function isAcceptedImageType(value: string): value is AcceptedImageType {
 
 export function validateImageFile(file: File): string | null {
   if (!isAcceptedImageType(file.type)) {
-    return "Selecciona una imagen JPEG, PNG o WebP.";
+    return i18n.t("images___Selecciona una imagen JPEG, PNG o WebP.");
   }
-  if (file.size === 0) return "El archivo está vacío. Selecciona otra imagen.";
+  if (file.size === 0) return i18n.t("images___El archivo está vacío. Selecciona otra imagen.");
   if (file.size > MAX_IMAGE_BYTES) {
-    return "La imagen no puede superar 25 MiB.";
+    return i18n.t("images___La imagen no puede superar 25 MiB.");
   }
   return null;
 }

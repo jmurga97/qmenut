@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { i18n } from "~/lib/i18n";
 import { SegmentedToggle } from "~/shared/components/controls/segmented-toggle";
 
 import type { SegmentedOption } from "~/shared/components/controls/segmented-toggle";
@@ -11,8 +12,8 @@ export type AdminTheme = "light" | "dark";
 export const ADMIN_THEME_STORAGE_KEY = "qmenut-admin-theme";
 
 const THEME_OPTIONS: ReadonlyArray<SegmentedOption<AdminTheme>> = [
-  { label: "Claro", value: "light" },
-  { label: "Oscuro", value: "dark" },
+  { label: i18n.t("shared___Claro"), value: "light" },
+  { label: i18n.t("shared___Oscuro"), value: "dark" },
 ];
 
 function readStoredTheme(): AdminTheme {
@@ -48,10 +49,15 @@ export function AdminThemePreference() {
   return (
     <section aria-labelledby="admin-theme-preference-title" className="admin-theme-preference">
       <div className="admin-theme-preference-copy">
-        <h2 id="admin-theme-preference-title">Tema del panel</h2>
-        <p>Solo cambia cómo ves QMenut en este dispositivo.</p>
+        <h2 id="admin-theme-preference-title">{i18n.t("shared___Tema del panel")}</h2>
+        <p>{i18n.t("shared___Solo cambia cómo ves QMenut en este dispositivo.")}</p>
       </div>
-      <SegmentedToggle ariaLabel="Tema del panel" onChange={setTheme} options={THEME_OPTIONS} value={theme} />
+      <SegmentedToggle
+        ariaLabel={i18n.t("shared___Tema del panel")}
+        onChange={setTheme}
+        options={THEME_OPTIONS}
+        value={theme}
+      />
     </section>
   );
 }

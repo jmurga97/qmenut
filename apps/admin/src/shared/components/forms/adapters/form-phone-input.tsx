@@ -1,6 +1,7 @@
 import { Field, Input } from "@jmurga97/components";
 import { useFormContext } from "react-hook-form";
 
+import { i18n } from "~/lib/i18n";
 import { formatPhone } from "~/shared/lib/phone-formatter";
 
 import type { CountryCode } from "libphonenumber-js";
@@ -25,18 +26,18 @@ export function FormPhoneInput<TValues extends FieldValues>({
   const error = getFieldState(name, formState).error?.message;
   const { onChange, ...field } = register(name);
   return (
-    <Field error={error} invalid={Boolean(error)} label={label}>
+    <Field error={error} invalid={Boolean(error)} label={label} optionalLabel={i18n.t("shared___Optional")}>
       <Input
         {...field}
-        autoComplete="tel"
+        autoComplete={"tel"}
         disabled={disabled}
-        inputMode="tel"
+        inputMode={"tel"}
         onChange={(event) => {
           event.target.value = formatPhone(event.target.value, country);
           void onChange(event);
         }}
         placeholder={placeholder}
-        type="tel"
+        type={"tel"}
       />
     </Field>
   );

@@ -56,7 +56,7 @@ export function StackedBarChart({ ariaLabel, emptyLabel, points, series }: Stack
   }
 
   if (points.length === 0 || maxTotal === 0) {
-    return <p className="stacked-bar__empty">{emptyLabel}</p>;
+    return <p className={"stacked-bar__empty"}>{emptyLabel}</p>;
   }
 
   const yMax = getNiceCeil(maxTotal);
@@ -65,13 +65,13 @@ export function StackedBarChart({ ariaLabel, emptyLabel, points, series }: Stack
   const axisLabels = getAxisLabels(points);
 
   return (
-    <figure className="stacked-bar">
-      <div className="stacked-bar__plot">
+    <figure className={"stacked-bar"}>
+      <div className={"stacked-bar__plot"}>
         <svg
           aria-label={ariaLabel}
-          className="stacked-bar__svg"
-          preserveAspectRatio="xMidYMid meet"
-          role="img"
+          className={"stacked-bar__svg"}
+          preserveAspectRatio={"xMidYMid meet"}
+          role={"img"}
           style={{ maxWidth: `${plotWidth}px` }}
           viewBox={`0 0 ${plotWidth} ${PLOT_HEIGHT}`}
         >
@@ -106,18 +106,18 @@ export function StackedBarChart({ ariaLabel, emptyLabel, points, series }: Stack
         </svg>
       </div>
       {axisLabels.length > 1 ? (
-        <div aria-hidden="true" className="stacked-bar__axis">
+        <div aria-hidden={"true"} className={"stacked-bar__axis"}>
           {axisLabels.map((label, index) => (
             <span key={`${index}-${label}`}>{label}</span>
           ))}
         </div>
       ) : null}
       <figcaption>
-        <ul className="stacked-bar__legend">
+        <ul className={"stacked-bar__legend"}>
           {series.map((entry) => (
-            <li className="stacked-bar__legend-item" key={entry.key}>
-              <span aria-hidden="true" className={`stacked-bar__swatch stacked-bar__segment--${entry.tone}`} />
-              <span className="stacked-bar__legend-value">{totalsBySeries.get(entry.key) ?? 0}</span>
+            <li className={"stacked-bar__legend-item"} key={entry.key}>
+              <span aria-hidden={"true"} className={`stacked-bar__swatch stacked-bar__segment--${entry.tone}`} />
+              <span className={"stacked-bar__legend-value"}>{totalsBySeries.get(entry.key) ?? 0}</span>
               {entry.label}
             </li>
           ))}

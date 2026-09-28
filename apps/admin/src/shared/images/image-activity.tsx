@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 
 import type { ImagePurpose } from "./image-draft";
@@ -9,10 +10,10 @@ import type { RouterOutputs } from "~/lib/trpc";
 
 type Assignment = RouterOutputs["admin"]["images"]["assignments"]["list"][number];
 const labels: Record<ImagePurpose, string> = {
-  branchLogo: "Logo de la sucursal",
-  branchPhoto: "Galería de la sucursal",
-  categoryImage: "Imagen de categoría",
-  dishImage: "Imagen del plato",
+  branchLogo: i18n.t("images___Logo de la sucursal"),
+  branchPhoto: i18n.t("images___Galería de la sucursal"),
+  categoryImage: i18n.t("images___Imagen de categoría"),
+  dishImage: i18n.t("images___Imagen del plato"),
 };
 
 /**
@@ -37,9 +38,9 @@ export function ImageActivityToasts({ branchId }: { branchId: string }) {
       {
         onSuccess: (result) => {
           if (result.needsFile) {
-            toast.warning("Vuelve a seleccionar el archivo. Los demás cambios están guardados.");
+            toast.warning(i18n.t("images___Vuelve a seleccionar el archivo. Los demás cambios están guardados."));
           } else {
-            toast.success("Reintento de imagen iniciado.");
+            toast.success(i18n.t("images___Reintento de imagen iniciado."));
           }
           void query.refetch();
         },
@@ -68,12 +69,19 @@ export function ImageActivityToasts({ branchId }: { branchId: string }) {
       shown.current.set(row.id, row.status);
       switch (row.status) {
         case "pending": {
-          toast.loading(`${labels[row.purpose]}: preparando…`, { duration: Infinity, id: row.id });
+          toast.loading(i18n.t("images___{{label}}: preparando…", { label: labels[row.purpose] }), {
+            duration: Infinity,
+            id: row.id,
+          });
           break;
         }
         case "applied": {
           applied = true;
-          toast.success(`${labels[row.purpose]} actualizada`, { closeButton: true, duration: 6000, id: row.id });
+          toast.success(i18n.t("images___{{label}} actualizada", { label: labels[row.purpose] }), {
+            closeButton: true,
+            duration: 6000,
+            id: row.id,
+          });
           break;
         }
         case "superseded": {
@@ -81,12 +89,15 @@ export function ImageActivityToasts({ branchId }: { branchId: string }) {
           break;
         }
         case "failed": {
-          toast.error(row.error ?? `${labels[row.purpose]}: la imagen necesita atención`, {
-            action: { label: "Reintentar", onClick: () => retryRowRef.current(row) },
-            closeButton: true,
-            duration: Infinity,
-            id: row.id,
-          });
+          toast.error(
+            row.error ?? i18n.t("images___{{label}}: la imagen necesita atención", { label: labels[row.purpose] }),
+            {
+              action: { label: i18n.t("images___Reintentar"), onClick: () => retryRowRef.current(row) },
+              closeButton: true,
+              duration: Infinity,
+              id: row.id,
+            },
+          );
           break;
         }
       }

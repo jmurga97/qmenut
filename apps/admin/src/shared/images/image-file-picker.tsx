@@ -1,6 +1,8 @@
 import { Button } from "@jmurga97/components";
 import { useId, useRef, useState } from "react";
 
+import { i18n } from "~/lib/i18n";
+
 import type { ReactNode } from "react";
 
 interface ImageFilePickerProps {
@@ -34,7 +36,7 @@ export function ImageFilePicker({
     if (files.length === 0 || disabled || input.current?.matches(":disabled") || input.current?.closest("[inert]"))
       return;
     if (!multiple && files.length > 1) {
-      setSelectionError("Selecciona una sola imagen.");
+      setSelectionError(i18n.t("images___Selecciona una sola imagen."));
       return;
     }
     setSelectionError(undefined);
@@ -62,19 +64,21 @@ export function ImageFilePicker({
       }}
     >
       {children}
-      <div className="admin-image-picker__selection">
+      <div className={"admin-image-picker__selection"}>
         <small id={`${id}-help`}>
-          <strong>{multiple ? "Arrastra tus fotos aquí" : "Arrastra aquí una imagen"}</strong>
-          JPEG, PNG o WebP · máximo 25 MiB por imagen
+          <strong>
+            {multiple ? i18n.t("images___Arrastra tus fotos aquí") : i18n.t("images___Arrastra aquí una imagen")}
+          </strong>
+          {i18n.t("images___JPEG, PNG o WebP · máximo 25 MiB por imagen")}
         </small>
         <div className="admin-image-actions">
           <Button
-            variant="secondary"
+            variant={"secondary"}
             aria-describedby={descriptionId}
-            aria-label={`${action}: ${label}`}
+            aria-label={i18n.t("images___{{action}}: {{label}}", { action, label })}
             disabled={disabled}
             onClick={() => input.current?.click()}
-            type="button"
+            type={"button"}
           >
             {action}
           </Button>
@@ -82,7 +86,7 @@ export function ImageFilePicker({
         </div>
       </div>
       <input
-        accept="image/jpeg,image/png,image/webp"
+        accept={"image/jpeg,image/png,image/webp"}
         aria-describedby={descriptionId}
         aria-invalid={Boolean(message)}
         aria-label={label}
@@ -95,10 +99,10 @@ export function ImageFilePicker({
         }}
         ref={input}
         tabIndex={-1}
-        type="file"
+        type={"file"}
       />
       {message ? (
-        <small className="admin-image-error" id={`${id}-error`} role="alert">
+        <small className="admin-image-error" id={`${id}-error`} role={"alert"}>
           {message}
         </small>
       ) : null}
