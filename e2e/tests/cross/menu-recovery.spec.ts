@@ -25,12 +25,12 @@ test("creates a complete dish and publishes it to a diner @critical", async ({ p
   await expect(page.getByRole("link", { name: categoryName, exact: true })).toBeVisible();
   await fillDish(page, name);
   await selectMingOption(page, "Categoría", categoryName);
-  await page.getByRole("button", { name: "Gluten", exact: true }).click();
-  await page.getByRole("button", { name: /Pan con tomate/ }).click();
+  await page.getByRole("option", { name: "Gluten", exact: true }).click();
+  await page.getByRole("option", { name: /Pan con tomate/ }).click();
   const saved = await saveDish(page, name);
   expect(saved).toMatchObject({ price: 950, allergenIds: [1], extraIngredientIds: ["ing_tapas_pan"] });
   await page.getByRole("link", { name, exact: true }).click();
-  await expect(page.getByRole("button", { name: "Gluten", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("option", { name: "Gluten", exact: true })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByRole("textbox", { name: "Precio", exact: true }).first()).toHaveValue("9.50");
   await diner.goto("/es/");
   await diner.getByText(name, { exact: true }).first().click();
@@ -62,7 +62,7 @@ for (const failure of ["before write", "relations", "lost response"] as const) {
     const name = `Plato E2E recuperar ${crypto.randomUUID()}`;
     cleanMenu({ page, cleanup, name });
     await fillDish(page, name);
-    await page.getByRole("button", { name: "Gluten", exact: true }).click();
+    await page.getByRole("option", { name: "Gluten", exact: true }).click();
     const path = mutation(failure === "relations" ? "saveRelations" : "create");
     let intercepted = false;
     await page.route(path, async (route) => {
@@ -128,7 +128,12 @@ test("staff hides and restores a featured dish across public pages", async ({ pa
   await staff.goto("/menu");
   for (const active of [true, false, true]) {
     const toggle = staff.getByRole("switch", { name: `Disponibilidad de ${name}` });
-    if ((await toggle.isChecked()) !== active) await toggle.click();
+    // The switch is optimistic: wait for the server write before checking the public menu.
+    if ((await toggle.isChecked()) !== active)
+      await Promise.all([
+        staff.waitForResponse((response) => response.url().includes("setAvailability")),
+        toggle.click(),
+      ]);
     await expect(toggle).toBeChecked({ checked: active });
     for (const path of ["/es/", "/es/destacados"]) {
       await diner.goto(path);

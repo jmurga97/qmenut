@@ -95,10 +95,10 @@ test("owner provisions an idempotent global account across restaurants", async (
   await expect(page.getByRole("main").getByRole("heading", { name: "Usuarios" })).toBeVisible();
   await expect(page.getByText("Cuenta e2e existente", { exact: true })).toBeVisible();
   await expect(
-    page.getByRole("row").filter({ hasText: "Cuenta e2e existente" }).getByText("Admin", { exact: true }),
+    page.getByRole("row").filter({ hasText: "Cuenta e2e existente" }).getByText("Administrador", { exact: true }),
   ).toBeVisible();
 
-  const addUser = page.getByRole("button", { name: "+ Agregar usuario" });
+  const addUser = page.getByRole("button", { name: "Agregar usuario" });
   await addUser.focus();
   await page.keyboard.press("Enter");
   const dialog = page.getByRole("dialog");

@@ -15,7 +15,7 @@ test("logs in with the keyboard and cannot return after logout @critical", async
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/localhost:5174\/(?:\?.*)?$/);
   await page.goto("http://localhost:5174/menu");
-  await expect(page.getByRole("link", { name: "+ Nuevo plato" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Crear plato" })).toBeVisible();
   // On an iPhone-sized admin viewport the navigation lives in a drawer.
   const logout = page.getByRole("button", { name: "Cerrar sesión", exact: true });
   if (!(await logout.isVisible())) await page.getByRole("button", { name: "Show navigation" }).click();

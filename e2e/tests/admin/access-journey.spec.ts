@@ -52,7 +52,7 @@ test("provisions staff through the UI and revokes an open session", async ({ pag
       });
   });
   await page.goto("/users");
-  await page.getByRole("button", { name: "+ Agregar usuario" }).click();
+  await page.getByRole("button", { name: "Agregar usuario" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Nombre", { exact: true }).fill("E2E Journey");
   await dialog.getByLabel("Correo", { exact: true }).fill(email);
@@ -73,14 +73,14 @@ test("provisions staff through the UI and revokes an open session", async ({ pag
     await login(employee, email);
     await expect(employee).toHaveURL(/localhost:5174\/(?:\?.*)?$/);
     await employee.goto("http://localhost:5174/menu");
-    await expect(employee.getByRole("link", { name: "+ Nuevo plato" })).toBeVisible();
+    await expect(employee.getByRole("link", { name: "Crear plato" })).toBeVisible();
     await page.getByRole("button", { name: "Acciones para E2E Journey" }).click();
     await page.getByRole("menuitem", { name: "Desactivar", exact: true }).click();
     await page.getByRole("button", { name: "Desactivar", exact: true }).click();
     await expect(page.getByRole("row").filter({ hasText: email })).toContainText("Inactiva");
     expect((await callTrpcQuery(employee, "admin.menu.dishes.list", { branchId: "branch_tapas" })).ok).toBe(false);
     await employee.reload();
-    await expect(employee.getByRole("link", { name: "+ Nuevo plato" })).toHaveCount(0);
+    await expect(employee.getByRole("link", { name: "Crear plato" })).toHaveCount(0);
   } finally {
     await context.close();
   }

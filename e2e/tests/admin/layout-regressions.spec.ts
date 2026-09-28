@@ -28,7 +28,7 @@ test("keeps Select popups exactly as wide as their trigger", async ({ page }) =>
   await page.goto("/", { waitUntil: "domcontentloaded" });
   const trigger = page.getByRole("combobox", { name: "Sucursal activa" });
   await trigger.click();
-  const positioner = page.locator(".ming-select__positioner");
+  const positioner = page.getByRole("listbox").locator("../..");
   await expect(positioner).toBeVisible();
 
   const [triggerBox, popupBox] = await Promise.all([trigger.boundingBox(), positioner.boundingBox()]);

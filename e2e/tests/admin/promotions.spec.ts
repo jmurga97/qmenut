@@ -38,7 +38,7 @@ test("creates and edits a promotion", async ({ page }) => {
     await page.goto("/promotions/new", { waitUntil: "domcontentloaded" });
     await page.getByLabel("Nombre").fill(initialName);
     await page.getByLabel("Porcentaje (0-100)").fill("15");
-    await page.getByRole("button", { name: "Patatas bravas" }).click();
+    await page.getByRole("option", { name: "Patatas bravas" }).click();
     await page.getByText("Guardar", { exact: true }).click();
 
     const promotionLink = page.getByRole("link", { name: initialName });
@@ -84,7 +84,7 @@ test("creates and edits a 2x1 promotion", async ({ page }) => {
     await selectMingOption(page, "Tipo", "2x1");
     await page.getByLabel("Unidades que lleva").fill("2");
     await page.getByLabel("Unidades que paga").fill("3");
-    await page.getByRole("button", { name: "Patatas bravas" }).click();
+    await page.getByRole("option", { name: "Patatas bravas" }).click();
     await page.getByText("Guardar", { exact: true }).click();
     await expect(page.getByText("Las unidades pagadas no pueden superar las compradas", { exact: true })).toBeVisible();
 

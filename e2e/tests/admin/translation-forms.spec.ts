@@ -22,8 +22,8 @@ test("edits dish translations in context without changing canonical data", async
   await expect(page.getByRole("combobox", { name: /^Categoría/ })).toBeDisabled();
 
   await name.fill(translatedName);
-  page.once("dialog", (dialog) => dialog.dismiss());
   await selectMingOption(page, "Idioma del contenido", "Español (base)");
+  await page.getByRole("alertdialog").getByRole("button", { name: "Cancelar", exact: true }).click();
   await expect(name).toHaveValue(translatedName);
   await expect(page.getByRole("combobox", { name: "Idioma del contenido" })).toHaveText("English");
 
