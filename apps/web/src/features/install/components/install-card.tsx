@@ -1,4 +1,4 @@
-import { Share, Smartphone, X } from "lucide-react";
+import { Share, Smartphone, X } from "@qmenut/ui/icons";
 import { useTranslation } from "react-i18next";
 
 import "~/features/install/styles.css";

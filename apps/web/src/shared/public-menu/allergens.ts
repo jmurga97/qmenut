@@ -13,9 +13,9 @@ import {
   Shrimp,
   Sprout,
   Wheat,
-} from "lucide-react";
+} from "@qmenut/ui/icons";
 
-import type { LucideIcon } from "lucide-react";
+import type { QmIcon } from "@qmenut/ui/icons";
 
 export type AllergenCode =
   | "gluten"
@@ -33,7 +33,7 @@ export type AllergenCode =
   | "lupin"
   | "molluscs";
 
-export const ALLERGEN_META: Record<AllergenCode, { label: string; Icon: LucideIcon }> = {
+export const ALLERGEN_META: Record<AllergenCode, { label: string; Icon: QmIcon }> = {
   gluten: { label: "Gluten", Icon: Wheat },
   crustaceans: { label: "Crustáceos", Icon: Shrimp },
   eggs: { label: "Huevo", Icon: Egg },

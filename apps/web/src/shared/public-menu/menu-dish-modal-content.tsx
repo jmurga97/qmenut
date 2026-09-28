@@ -1,7 +1,7 @@
 import { QmAllergen } from "@qmenut/ui/components/qm-allergen/react";
 import { QmDishExtras } from "@qmenut/ui/components/qm-dish-extras/react";
 import { QmDishModal } from "@qmenut/ui/components/qm-dish-modal/react";
-import { X } from "lucide-react";
+import { X } from "@qmenut/ui/icons";
 import { useTranslation } from "react-i18next";
 
 import { responsivePhotoSource } from "~/shared/lib/photo-url";

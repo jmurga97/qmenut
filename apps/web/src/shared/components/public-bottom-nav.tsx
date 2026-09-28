@@ -1,7 +1,7 @@
 import { QmNavBar } from "@qmenut/ui/components/qm-nav-bar/react";
 import { QmTab } from "@qmenut/ui/components/qm-tab/react";
+import { Gift, Phone, Tag, UtensilsCrossed } from "@qmenut/ui/icons";
 import { useNavigate, useRouter, useRouterState, useSearch } from "@tanstack/react-router";
-import { Gift, Phone, Tag, UtensilsCrossed } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const NAV_ICON_SIZE = 19;

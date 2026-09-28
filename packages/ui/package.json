@@ -29,6 +29,10 @@
       "types": "./src/theme/font-catalog.ts",
       "import": "./src/theme/font-catalog.ts"
     },
+    "./icons": {
+      "types": "./src/icons/index.ts",
+      "import": "./src/icons/index.ts"
+    },
     "./jsx-types": {
       "types": "./src/jsx-types.ts",
       "import": "./src/jsx-types.ts"

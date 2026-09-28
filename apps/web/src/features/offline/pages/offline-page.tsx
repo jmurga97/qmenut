@@ -1,5 +1,5 @@
+import { WifiOff } from "@qmenut/ui/icons";
 import { useParams, useSearch } from "@tanstack/react-router";
-import { WifiOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import "~/features/offline/styles.css";

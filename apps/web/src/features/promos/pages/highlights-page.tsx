@@ -1,6 +1,6 @@
 import { QmFeatured } from "@qmenut/ui/components/qm-featured/react";
 import { QmHeading } from "@qmenut/ui/components/qm-heading/react";
-import { ChefHat, Sparkles, Tag } from "lucide-react";
+import { ChefHat, Sparkles, Tag } from "@qmenut/ui/icons";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
