@@ -1,8 +1,8 @@
 .analytics-page {
-  gap: 1.25rem;
+  gap: var(--ming-space-4);
 }
 
-.analytics-page h3 {
+.analytics-page h2 {
   margin: 0;
   color: var(--foreground);
   font-size: var(--admin-text-heading);
@@ -17,7 +17,7 @@
 
 .analytics-period-copy {
   display: grid;
-  gap: 0.25rem;
+  gap: var(--ming-space-1);
 }
 
 .analytics-period-copy strong,
@@ -68,7 +68,7 @@
 }
 
 .analytics-panel-description {
-  margin: 0.25rem 0 0;
+  margin: var(--ming-space-1) 0 0;
   color: var(--muted-foreground);
   font-size: var(--admin-text-body-sm);
   line-height: 1.45;
@@ -76,13 +76,13 @@
 
 .analytics-grid {
   display: grid;
-  gap: 1.25rem;
+  gap: var(--ming-space-4);
 }
 
 .analytics-detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
 }
 
 .analytics-detail-grid--four {
@@ -92,8 +92,8 @@
 .analytics-detail-stat {
   display: grid;
   min-width: 0;
-  gap: 0.25rem;
-  padding: 0.75rem 0;
+  gap: var(--ming-space-1);
+  padding: var(--ming-space-3) 0;
   border-block-end: 1px solid var(--border);
 }
 
@@ -123,7 +123,7 @@
 .analytics-inline-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
 }
 
 .analytics-inline-stats--five {
@@ -133,8 +133,8 @@
 .analytics-inline-stat {
   display: grid;
   min-width: 0;
-  gap: 0.3rem;
-  padding-block: 0.5rem;
+  gap: var(--ming-space-1);
+  padding-block: var(--ming-space-2);
 }
 
 .analytics-inline-stat > strong {
@@ -143,12 +143,12 @@
 
 .analytics-subsection {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
   padding-block-start: 1rem;
   border-block-start: 1px solid var(--border);
 }
 
-.analytics-subsection h4 {
+.analytics-subsection h3 {
   margin: 0;
   color: var(--foreground);
   font-size: var(--admin-text-body-sm);
@@ -168,7 +168,7 @@
 
 .analytics-bar-list {
   display: grid;
-  gap: 0.875rem;
+  gap: var(--ming-space-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -176,14 +176,14 @@
 
 .analytics-bar-list__item {
   display: grid;
-  gap: 0.35rem;
+  gap: var(--ming-space-1);
 }
 
 .analytics-bar-list__heading {
   display: grid;
   min-width: 0;
   grid-template-columns: 1.25rem minmax(0, 1fr) auto;
-  gap: 0.5rem;
+  gap: var(--ming-space-2);
   align-items: baseline;
 }
 
@@ -214,7 +214,7 @@
   height: 0.375rem;
   margin-inline-start: 1.75rem;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: var(--ming-radius-control);
   background: var(--secondary);
 }
 
@@ -234,7 +234,7 @@
 .analytics-chip-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--ming-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -242,10 +242,10 @@
 
 .analytics-chip-list li {
   display: grid;
-  gap: 0.125rem;
-  padding: 0.625rem 0.75rem;
+  gap: var(--ming-space-1);
+  padding: var(--ming-space-2) var(--ming-space-3);
   border: 1px solid var(--border);
-  border-radius: 0.375rem;
+  border-radius: var(--radius);
   background: var(--background);
 }
 
@@ -262,7 +262,7 @@
 }
 
 .analytics-insights {
-  gap: 1.25rem;
+  gap: var(--ming-space-4);
 }
 
 .analytics-insight-list {
@@ -276,9 +276,9 @@
 .analytics-insight-list li {
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
   align-items: start;
-  padding-block: 0.75rem;
+  padding-block: var(--ming-space-3);
   border-block-start: 1px solid var(--border);
 }
 
@@ -286,24 +286,6 @@
   margin: 0;
   color: var(--foreground);
   line-height: 1.45;
-}
-
-.analytics-insight-tone {
-  padding: 0.2rem 0.45rem;
-  border-radius: 0.25rem;
-  font-size: var(--admin-text-caption);
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.analytics-insight-tone--improvement {
-  background: var(--ming-success-surface);
-  color: var(--ming-success);
-}
-
-.analytics-insight-tone--opportunity {
-  background: var(--ming-warning-surface);
-  color: var(--ming-warning);
 }
 
 .analytics-footnote {
@@ -370,6 +352,6 @@
 
   .analytics-insight-list li {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
+    gap: var(--ming-space-2);
   }
 }

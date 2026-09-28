@@ -1,17 +1,17 @@
 .admin-dashboard {
-  gap: 1.5rem;
+  gap: var(--ming-space-5);
 }
 
 .admin-dashboard-analytics-pulse {
-  gap: 1.25rem;
+  gap: var(--ming-space-4);
 }
 
 .admin-exchange-rates-card {
-  gap: 1rem;
+  gap: var(--ming-space-4);
 }
 
-.admin-exchange-rates-card h3 {
-  margin: 0.25rem 0 0;
+.admin-exchange-rates-card h2 {
+  margin: var(--ming-space-1) 0 0;
 }
 
 .admin-exchange-rates-unit,
@@ -27,20 +27,20 @@
 
 .admin-exchange-rates-grid {
   display: grid;
-  gap: 1rem;
+  gap: var(--ming-space-4);
   grid-template-columns: minmax(12rem, 0.8fr) minmax(0, 1.2fr);
 }
 
 .admin-exchange-rates-reference {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--ming-space-3);
   margin: 0;
   padding: 0;
 }
 
 .admin-exchange-rates-reference div {
   display: flex;
-  gap: 1rem;
+  gap: var(--ming-space-4);
   align-items: baseline;
   justify-content: space-between;
   border-block-end: 1px solid var(--border);
@@ -63,7 +63,7 @@
 .admin-exchange-rates-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--ming-space-4);
   align-items: center;
   justify-content: space-between;
 }
@@ -73,7 +73,7 @@
   line-height: 1.45;
 }
 
-.admin-dashboard-analytics-pulse h3 {
+.admin-dashboard-analytics-pulse h2 {
   margin: 0;
 }
 
@@ -88,8 +88,8 @@
 .admin-dashboard-pulse-metric {
   display: grid;
   min-width: 0;
-  gap: 0.35rem;
-  padding: 1rem 1rem 0;
+  gap: var(--ming-space-1);
+  padding: var(--ming-space-4) var(--ming-space-4) 0;
   border-inline-end: 1px solid var(--border);
 }
 
@@ -119,17 +119,17 @@
 .admin-dashboard-bottom {
   display: grid;
   align-items: start;
-  gap: 1.25rem;
+  gap: var(--ming-space-4);
 }
 
 .admin-dashboard-bottom .admin-dashboard-ops {
   display: grid;
   align-content: start;
-  gap: 1.25rem;
+  gap: var(--ming-space-4);
 }
 
-.admin-visits-card h3 {
-  margin-block: 0.3rem;
+.admin-visits-card h2 {
+  margin-block: var(--ming-space-1);
 }
 
 .admin-chart-summary {
@@ -160,13 +160,13 @@
 
   .admin-dashboard-pulse-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem 0;
+    gap: var(--ming-space-3) 0;
   }
 
   .admin-dashboard-pulse-metric,
   .admin-dashboard-pulse-metric:first-child,
   .admin-dashboard-pulse-metric:last-child {
-    padding: 0.75rem 0.75rem 0;
+    padding: var(--ming-space-3) var(--ming-space-3) 0;
     border-inline-end: 0;
   }
 

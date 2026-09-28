@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 
 import * as api from "~/app/dashboard/api";
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
 import { EntityListCard } from "~/shared/components/entity-list-card";
@@ -31,32 +32,31 @@ function AvailabilityList({ branchId }: { branchId: string }) {
     <div className="admin-dashboard-scroll">
       <EntityListCard
         action={
-          <Link className="admin-link" to="/menu">
-            Gestionar menú →
+          <Link className="admin-link" to={"/menu"}>
+            {i18n.t("dashboard___Gestionar menú →")}
           </Link>
         }
         count={dishes.length}
-        emptyText="Añade platos a la carta para controlar su disponibilidad desde aquí."
-        title="Disponibilidad de la carta"
+        emptyText={i18n.t("dashboard___Añade platos a la carta para controlar su disponibilidad desde aquí.")}
+        title={i18n.t("dashboard___Disponibilidad de la carta")}
       >
         {sortedDishes.map((dish) => (
           <li className="admin-list-item" key={dish.id}>
-            <Link className="admin-link admin-list-label" params={{ dishId: dish.id }} to="/menu/dishes/$dishId">
-              {dish.name}
-            </Link>
-            <div className="admin-toolbar-controls">
+            <div className="admin-list-text">
+              <Link className={"admin-link admin-list-label"} params={{ dishId: dish.id }} to={"/menu/dishes/$dishId"}>
+                {dish.name}
+              </Link>
               <span className="admin-list-meta">
                 {nameByCategory.get(dish.categoryId) ?? ""} ·{" "}
                 {formatMoney(dish.price, tenant.restaurant.sourceCurrency)}
               </span>
-              <Switch
-                aria-label={`Disponibilidad de ${dish.name}`}
-                checked={dish.isActive}
-                disabled={availability.isPending && availability.variables?.dishId === dish.id}
-                label={dish.isActive ? "Disponible" : "Oculto"}
-                onCheckedChange={(checked) => availability.mutate({ branchId, dishId: dish.id, isActive: checked })}
-              />
             </div>
+            <Switch
+              aria-label={i18n.t("dashboard___Disponibilidad de {{name}}", { name: dish.name })}
+              checked={dish.isActive}
+              label={dish.isActive ? i18n.t("dashboard___Disponible") : i18n.t("dashboard___Oculto")}
+              onCheckedChange={(checked) => availability.mutate({ branchId, dishId: dish.id, isActive: checked })}
+            />
           </li>
         ))}
       </EntityListCard>

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { i18n } from "~/lib/i18n";
+
 import type { RouterOutputs } from "~/lib/trpc";
 
 const analyticsPeriodSchema = z.enum(["15d", "30d", "90d"]);
@@ -9,9 +11,9 @@ export const analyticsSearchSchema = z.object({
 });
 
 export const ANALYTICS_PERIOD_OPTIONS = [
-  { label: "15 días", value: "15d" },
-  { label: "30 días", value: "30d" },
-  { label: "90 días", value: "90d" },
+  { label: i18n.t("analytics___15 días"), value: "15d" },
+  { label: i18n.t("analytics___30 días"), value: "30d" },
+  { label: i18n.t("analytics___90 días"), value: "90d" },
 ] as const;
 
 export type AnalyticsPeriod = z.infer<typeof analyticsPeriodSchema>;
