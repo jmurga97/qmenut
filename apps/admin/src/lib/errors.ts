@@ -1,5 +1,7 @@
 import { TRPCClientError } from "@trpc/client";
 
+import { i18n } from "~/lib/i18n";
+
 export function isForbiddenError(error: unknown): boolean {
   if (!(error instanceof TRPCClientError)) return false;
   const data: unknown = error.data;
@@ -8,7 +10,7 @@ export function isForbiddenError(error: unknown): boolean {
 
 export function getErrorMessage(error: unknown): string {
   if (isForbiddenError(error)) {
-    return "No tienes permisos para realizar esta acción.";
+    return i18n.t("common___No tienes permisos para realizar esta acción.");
   }
   if (error instanceof Error && error.message) {
     return error.message;
@@ -16,5 +18,5 @@ export function getErrorMessage(error: unknown): string {
   if (typeof error === "string" && error) {
     return error;
   }
-  return "Se ha producido un error inesperado.";
+  return i18n.t("common___Se ha producido un error inesperado.");
 }
