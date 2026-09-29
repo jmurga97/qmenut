@@ -274,7 +274,7 @@ img {
 
 .public-footer {
   padding: 1.25rem 0 0.25rem;
-  color: color-mix(in oklab, var(--qm-ink, #1c1815) 58%, transparent);
+  color: color-mix(in oklab, var(--qm-ink, #1c1815) 75%, transparent);
   font-size: 0.6875rem;
   text-align: center;
 }

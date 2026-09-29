@@ -583,7 +583,8 @@ body {
   background: var(--card);
 }
 .admin-topbar-actions > * {
-  width: 12rem;
+  width: auto;
+  max-width: 12rem;
   min-width: 0;
   flex: none;
 }
@@ -647,7 +648,7 @@ body {
   }
   .admin-topbar .admin-topbar-actions > * {
     flex: none;
-    width: 10.5rem;
+    max-width: 10.5rem;
   }
   /* The page title already names the section; drop the root crumb so the selectors fit on one line. */
   .admin-topbar .ming-breadcrumb li:first-child {
