@@ -22,7 +22,7 @@ async function useAuthenticatedPage({ browser, email, use }: AuthenticatedPageIn
   const page = await context.newPage();
   await blockPlaceholderImages(page);
   await page.goto("/login");
-  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Correo electrónico").fill(email);
   await page.getByRole("button", { name: "Continuar" }).click();
   await expectOtpValue(page, "000000");
   await page.getByRole("button", { name: "Entrar" }).click();

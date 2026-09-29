@@ -46,7 +46,6 @@ test("preserves a long accented name with emoji at a narrow viewport", async ({ 
   await page.setViewportSize({ width: 390, height: 844 });
   await fillDish(page, name);
   expect((await saveDish(page, name)).name).toBe(name);
-  await page.getByRole("link", { name, exact: true }).click();
   await expect(page.getByLabel("Nombre", { exact: true })).toHaveValue(name);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

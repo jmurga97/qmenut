@@ -303,9 +303,8 @@ test("renders logo and gallery controls on the branch page", async ({ page }) =>
   await expect(page.getByText("Galería de la sucursal")).toBeVisible();
   await expect(page.getByText("1 de 20")).toBeVisible();
   await expect(page.getByText("Portada", { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Seleccionar fotos: Galería de la sucursal" })).toBeVisible();
-  await expect(page.getByLabel("Mover foto 1 antes")).toBeDisabled();
-  await expect(page.getByLabel("Mover foto 1 después")).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Elegir fotos: Galería de la sucursal" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Usar .+ como portada$/ })).toBeDisabled();
 });
 
 test("manages gallery drafts locally without uploading", async ({ page }) => {
@@ -319,21 +318,27 @@ test("manages gallery drafts locally without uploading", async ({ page }) => {
   ]);
   await expect(page.getByText("3 de 20")).toBeVisible();
   await expect(page.getByText("Pendiente de guardar")).toHaveCount(2);
-  await expect(page.getByLabel("Mover foto 1 después")).toBeEnabled();
 
-  const photos = page.locator(".admin-photo-grid > li");
+  const photos = page.locator(".admin-photo-list > li");
   const original = await photos.first().locator("img").getAttribute("src");
   const selected = await photos.nth(2).locator("img").getAttribute("src");
-  await page.getByRole("button", { name: "Usar foto 3 como portada", exact: true }).click();
+  await page.getByRole("button", { name: "Usar galeria-2.png como portada", exact: true }).click();
   await expect(photos.first().locator("img")).toHaveAttribute("src", selected!);
   await expect(photos.nth(1).locator("img")).toHaveAttribute("src", original!);
-  await page.getByRole("button", { name: "Mover foto 1 después", exact: true }).click();
+  await photos
+    .first()
+    .getByRole("button", { name: /^Reordenar / })
+    .press("ArrowDown");
   await expect(photos.first().locator("img")).toHaveAttribute("src", original!);
-  await page
-    .getByRole("button", { name: "Arrastrar foto 3 para reordenar" })
+  await photos
+    .nth(2)
+    .getByRole("button", { name: /^Reordenar / })
     .dragTo(photos.first(), { targetPosition: { x: 20, y: 20 } });
   await expect(photos.nth(1).locator("img")).toHaveAttribute("src", original!);
-  await page.getByRole("button", { name: "Quitar: Foto 2", exact: true }).click();
+  await photos
+    .nth(1)
+    .getByRole("button", { name: /^Quitar / })
+    .click();
   await expect(page.getByText("2 de 20")).toBeVisible();
   await expect(photos).toHaveCount(2);
 });

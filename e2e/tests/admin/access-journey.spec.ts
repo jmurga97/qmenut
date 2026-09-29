@@ -7,7 +7,7 @@ import type { Page } from "@playwright/test";
 
 async function login(page: Page, email: string) {
   await page.goto("http://localhost:5174/login");
-  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Correo electrónico").fill(email);
   await page.getByRole("button", { name: "Continuar" }).click();
   await expectOtpValue(page, "000000");
   await page.getByRole("button", { name: "Entrar" }).click();
@@ -56,7 +56,7 @@ test("provisions staff through the UI and revokes an open session", async ({ pag
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Nombre", { exact: true }).fill("E2E Journey");
   await dialog.getByLabel("Correo", { exact: true }).fill(email);
-  await selectMingOption(page, "Rol", "Staff");
+  await selectMingOption(page, "Rol", "Personal");
   await dialog.getByRole("button", { name: "Crear y enviar acceso" }).click();
   await expect(dialog).toBeHidden();
   const users = getTrpcData<Array<{ email: string; membershipId: string }>>(
@@ -73,14 +73,14 @@ test("provisions staff through the UI and revokes an open session", async ({ pag
     await login(employee, email);
     await expect(employee).toHaveURL(/localhost:5174\/(?:\?.*)?$/);
     await employee.goto("http://localhost:5174/menu");
-    await expect(employee.getByRole("link", { name: "Crear plato" })).toBeVisible();
+    await expect(employee.getByRole("button", { name: "Crear plato" })).toBeVisible();
     await page.getByRole("button", { name: "Acciones para E2E Journey" }).click();
     await page.getByRole("menuitem", { name: "Desactivar", exact: true }).click();
     await page.getByRole("button", { name: "Desactivar", exact: true }).click();
     await expect(page.getByRole("row").filter({ hasText: email })).toContainText("Inactiva");
     expect((await callTrpcQuery(employee, "admin.menu.dishes.list", { branchId: "branch_tapas" })).ok).toBe(false);
     await employee.reload();
-    await expect(employee.getByRole("link", { name: "Crear plato" })).toHaveCount(0);
+    await expect(employee.getByRole("button", { name: "Crear plato" })).toHaveCount(0);
   } finally {
     await context.close();
   }
@@ -99,7 +99,7 @@ test("an expired session cannot save a draft", async ({ page, browser }) => {
       headers: { Origin: "http://localhost:5174" },
     });
     await editor.getByRole("button", { name: "Guardar", exact: true }).click();
-    await expect(editor.getByRole("alert")).toBeVisible();
+    await expect(editor.locator("[data-sonner-toast][data-type=error]")).toBeVisible();
     expect((await listDishes(page)).some((dish) => dish.name === name)).toBe(false);
   } finally {
     await context.close();

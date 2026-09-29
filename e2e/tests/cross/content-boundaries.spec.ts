@@ -87,7 +87,8 @@ test("keeps incomplete languages unpublished and removes a language", async ({ p
     await diner.goto("/es/");
     await expect(diner.locator('qm-lang option[value="fr"]')).toHaveCount(0);
     await diner.goto("/fr/");
-    await expect(diner).toHaveURL(/\/es\/?$/);
+    // An inactive prefix falls back to the unprefixed default-language URL.
+    await expect(diner).toHaveURL("http://tapas.localhost:4011/");
     await expect(diner.getByText("Croquetas de jamón", { exact: true }).first()).toBeVisible();
     await expect(diner.getByText("Patatas bravas", { exact: true }).first()).toBeVisible();
   } finally {

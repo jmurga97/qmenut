@@ -23,7 +23,7 @@ test("uses semantic navigation and an environment-aware public menu link", async
   await expect(page.getByRole("link", { name: "Menú", exact: true })).toHaveAttribute("href", "/menu");
   // Both the sidebar and the dashboard header link to the public menu.
   for (const link of await page.getByRole("link", { name: "Ver carta" }).all()) {
-    await expect(link).toHaveAttribute("href", "http://tapas.localhost:4011");
+    await expect(link).toHaveAttribute("href", /^http:\/\/tapas\.localhost:(?:4011|5173)$/);
   }
 });
 

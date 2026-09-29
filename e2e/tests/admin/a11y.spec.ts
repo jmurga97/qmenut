@@ -24,7 +24,7 @@ test("has no serious accessibility violations across core admin workflows", asyn
   test.slow(); // This test runs a full accessibility scan on 17 separate routes.
   for (const route of ROUTES) {
     await page.goto(route, { waitUntil: "domcontentloaded" });
-    await page.locator(".admin-page").waitFor();
+    await page.locator(".admin-page:not([aria-busy])").waitFor();
     await page.waitForFunction(() => document.getAnimations().every((animation) => animation.playState === "finished"));
     await expectNoSeriousA11yViolations(page);
   }

@@ -76,7 +76,7 @@ test("publishes a normalized theme through tenant-config and the public worker",
 
   // The explicit hidden state also survives a template whose preset shows photos.
   await showMenuPhotos.click();
-  await selectMingOption(page, "Plantilla", "Fast food");
+  await selectMingOption(page, "Plantilla", "Comida rápida");
   await expect(showMenuPhotos).not.toBeChecked();
   await expect(showDishPhoto).not.toBeChecked();
   await expect(previewShell).toHaveAttribute("data-template", "fast");

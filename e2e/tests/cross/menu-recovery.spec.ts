@@ -22,16 +22,17 @@ test("creates a complete dish and publishes it to a diner @critical", async ({ p
   await page.goto("/menu/categories/new");
   await page.getByLabel("Nombre", { exact: true }).fill(categoryName);
   await page.getByRole("button", { name: "Guardar", exact: true }).click();
-  await expect(page.getByRole("link", { name: categoryName, exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: categoryName, exact: true })).toBeVisible();
   await fillDish(page, name);
   await selectMingOption(page, "Categoría", categoryName);
   await page.getByRole("option", { name: "Gluten", exact: true }).click();
   await page.getByRole("option", { name: /Pan con tomate/ }).click();
   const saved = await saveDish(page, name);
   expect(saved).toMatchObject({ price: 950, allergenIds: [1], extraIngredientIds: ["ing_tapas_pan"] });
-  await page.getByRole("link", { name, exact: true }).click();
+  // Narrow viewports hide the list beside an open editor, so re-read the saved dish by reloading.
+  await page.reload();
   await expect(page.getByRole("option", { name: "Gluten", exact: true })).toHaveAttribute("aria-selected", "true");
-  await expect(page.getByRole("textbox", { name: "Precio", exact: true }).first()).toHaveValue("9.50");
+  await expect(page.getByRole("textbox", { name: "Precio", exact: true }).first()).toHaveValue("9,50");
   await diner.goto("/es/");
   await diner.getByText(name, { exact: true }).first().click();
   await expect(diner.locator("qm-dish-modal")).toContainText("Pan con tomate");
@@ -75,7 +76,7 @@ for (const failure of ["before write", "relations", "lost response"] as const) {
       await route.abort("failed");
     });
     await page.getByRole("button", { name: "Guardar", exact: true }).click();
-    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(page.locator("[data-sonner-toast][data-type=error]")).toBeVisible();
     await expect(page.getByLabel("Nombre", { exact: true })).toHaveValue(name);
     expect(intercepted).toBe(true);
     expect((await listDishes(page)).filter((dish) => dish.name === name)).toHaveLength(

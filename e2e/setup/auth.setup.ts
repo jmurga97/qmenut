@@ -7,7 +7,7 @@ const authFile = ".auth/admin.json";
 
 setup("authenticate with the fixed test OTP", async ({ page }) => {
   await page.goto("/login");
-  await page.getByLabel("Email").fill("e2e@test.local");
+  await page.getByLabel("Correo electrónico").fill("e2e@test.local");
   await page.getByRole("button", { name: "Continuar" }).click();
   await expectOtpValue(page, "000000");
   await page.getByRole("button", { name: "Entrar" }).click();

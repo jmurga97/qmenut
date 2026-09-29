@@ -9,6 +9,7 @@ test("switches branches and publishes an edit only to the selected branch", asyn
   const dishId = "dish_her_callos";
   const before = getTrpcData<{
     name: string;
+    comboDescription: string | null;
     description: string | null;
     imageUrl: string | null;
     categoryId: string;
@@ -23,7 +24,12 @@ test("switches branches and publishes an edit only to the selected branch", asyn
       await callTrpcMutation(page, "admin.menu.dishes.update", {
         branchId: "branch_her",
         dishId,
-        data: { ...before, description: before.description ?? undefined, imageUrl: before.imageUrl ?? undefined },
+        data: {
+          ...before,
+          comboDescription: before.comboDescription ?? undefined,
+          description: before.description ?? undefined,
+          imageUrl: before.imageUrl ?? undefined,
+        },
       }),
     ).toMatchObject({ ok: true });
   });

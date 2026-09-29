@@ -37,7 +37,7 @@ export async function fillDish(page: Page, name: string) {
 
 export async function saveDish(page: Page, name: string) {
   await page.getByRole("button", { name: "Guardar", exact: true }).click();
-  await expect(page.getByRole("link", { name, exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
   const dishes = (await listDishes(page)).filter((dish) => dish.name === name);
   expect(dishes).toHaveLength(1);
   return getTrpcData<DishRecord>(await callTrpcQuery(page, "admin.menu.dishes.detail", { dishId: dishes[0]!.id }));
