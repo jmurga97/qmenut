@@ -206,8 +206,8 @@ model, see [Custom domains](domains/custom-domains.md).
 ## Testing
 
 Playwright end-to-end tests live in `e2e/` and run locally with `bun run test:e2e`. There
-is no CI workflow. The reset script recreates the local D1 database and the shared KV
-namespace before starting the api, tenant-config, admin, and public-menu Workers. Tests
+is no CI workflow. The reset script clears local D1 and KV data and reseeds it before
+Playwright reuses running development servers or starts missing E2E Workers. Tests
 select a tenant with the `Host` header. End-to-end authentication uses `e2e@test.local`
 with the fixed OTP `000000`, supplied through `DEV_FIXED_OTP`. Local, test, and the deployed
 development environment enable it; production ignores it and must never configure it.
@@ -218,8 +218,7 @@ Local end-to-end runs require `tapas.localhost`, `fine.localhost`, `cafe.localho
 mandatory because one production build of the web Worker serves every tenant and the
 tests change only the `Host` header.
 
-Two environment variables control the run: `E2E_REUSE_SERVERS=1` keeps the stack running
-between iterations, and `E2E_VISUAL=1` registers the mobile template snapshot project.
+`E2E_VISUAL=1` registers the mobile template snapshot project.
 Snapshot baselines include the platform in their path. Generate Linux baselines in a
 Linux container, or treat the snapshots as macOS-only. See
 [Testing](operations/testing.md).

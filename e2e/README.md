@@ -33,8 +33,9 @@ cd e2e
 bunx --no-install playwright test --list
 ```
 
-`E2E_REUSE_SERVERS=1` permite reutilizar servicios E2E ya arrancados. No ejecutar un
-reset mientras otros procesos usan el mismo D1/KV. Las capturas visuales siguen siendo
+Playwright reutiliza automáticamente los servicios de desarrollo ya arrancados y levanta
+los que falten. El reset limpia D1/KV en el mismo almacenamiento local e invalida la caché
+pública sin detener los Workers. Las capturas visuales siguen siendo
 optativas con `E2E_VISUAL=1` o `CI`; sus baselines dependen del sistema operativo.
 
 ## Matriz de recorridos añadidos

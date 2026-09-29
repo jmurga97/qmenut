@@ -132,3 +132,36 @@ SELECT 'e2e_en_' || entity_id || '_' || field, 'rest_tapas', entity_type, entity
 FROM english WHERE true
 ON CONFLICT (entity_type, entity_id, language_code, field)
 DO UPDATE SET source_text = excluded.source_text, value = excluded.value, is_manual = 0;
+
+-- Aurum (no loyalty) publishes English too, so the localized sitemap has a tenant without /puntos.
+-- Texts without an English value reuse the Spanish source; existing English values are kept.
+-- D1 caps a compound SELECT at five terms, hence the nested groups.
+INSERT INTO translations (id, restaurant_id, entity_type, entity_id, language_code, field, source_text, value)
+SELECT 'e2e_en_' || entity_id || '_' || field, 'rest_fine', entity_type, entity_id, 'en', field, source_text, source_text
+FROM (
+  SELECT * FROM (
+    SELECT 'category' AS entity_type, id AS entity_id, 'name' AS field, name AS source_text FROM categories WHERE restaurant_id = 'rest_fine'
+    UNION ALL SELECT 'category', id, 'description', description FROM categories WHERE restaurant_id = 'rest_fine'
+    UNION ALL SELECT 'dish', id, 'name', name FROM dishes WHERE restaurant_id = 'rest_fine'
+    UNION ALL SELECT 'dish', id, 'description', description FROM dishes WHERE restaurant_id = 'rest_fine'
+    UNION ALL SELECT 'dish', id, 'comboDescription', combo_description FROM dishes WHERE restaurant_id = 'rest_fine'
+  )
+  UNION ALL SELECT * FROM (
+    SELECT 'promotion', id, 'name', name FROM promotions WHERE restaurant_id = 'rest_fine'
+    UNION ALL SELECT 'promotion', id, 'description', description FROM promotions WHERE restaurant_id = 'rest_fine'
+    UNION ALL SELECT 'reward', id, 'name', name FROM loyalty_rewards WHERE restaurant_id = 'rest_fine'
+    UNION ALL SELECT 'reward', id, 'description', description FROM loyalty_rewards WHERE restaurant_id = 'rest_fine'
+    UNION ALL SELECT 'ingredient', id, 'name', name FROM ingredients WHERE restaurant_id = 'rest_fine'
+  )
+  UNION ALL SELECT * FROM (
+    SELECT 'variant_group', g.id, 'name', g.name
+      FROM dish_variant_groups g JOIN dishes d ON d.id = g.dish_id WHERE d.restaurant_id = 'rest_fine'
+    UNION ALL SELECT 'variant_option', o.id, 'name', o.name
+      FROM dish_variant_options o JOIN dish_variant_groups g ON g.id = o.group_id JOIN dishes d ON d.id = g.dish_id
+      WHERE d.restaurant_id = 'rest_fine'
+    UNION ALL SELECT 'branch', 'branch_fine', 'tagline', 'Cocina de autor, producto de temporada'
+  )
+)
+WHERE trim(coalesce(source_text, '')) <> ''
+ON CONFLICT (entity_type, entity_id, language_code, field)
+DO UPDATE SET source_text = excluded.source_text, value = coalesce(nullif(trim(translations.value), ''), excluded.value), is_manual = 0;

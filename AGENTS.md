@@ -72,13 +72,12 @@ echo "127.0.0.1 tapas.localhost fine.localhost cafe.localhost her.localhost fast
 ```
 
 Then run `bun run test:e2e`. The test reset
-recreates local D1 data and shared tenant-theme KV data before starting the API,
-tenant-config, admin, and public-menu workers. The public menu runs as one worker
+clears and reseeds local D1 and shared tenant-theme KV data. Playwright reuses running
+development servers and starts any missing E2E workers. The public menu runs as one worker
 with the tenant selected by the Host header. E2E auth uses `e2e@test.local` with OTP `000000`.
 The `DEV_FIXED_OTP` flag enables `000000` for provisioned accounts in local, test, and
-the deployed development worker; it must never be configured in production. Use
-`E2E_REUSE_SERVERS=1` while iterating against already-running
-E2E workers. Set `E2E_VISUAL=1` to register the OS-sensitive template snapshot
+the deployed development worker; it must never be configured in production.
+Set `E2E_VISUAL=1` to register the OS-sensitive template snapshot
 project locally; generate Linux baselines by running the visual project in a Linux container.
 
 ## Commit & Pull Request Guidelines

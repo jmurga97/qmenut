@@ -78,19 +78,19 @@ To reset local state, run:
 bun run --cwd e2e reset
 ```
 
-That command runs `e2e/scripts/reset-local-state.sh`, which removes the local D1 database,
-`.wrangler-shared/state`, and the stored authentication file; reapplies the generated
-Drizzle migrations; seeds the public menu and the end-to-end database rows; and seeds the
-KV themes for all five templates. The suite's wrapper runs cleanup SQL afterward, because
-product deletes are soft deletes by design.
+That command runs `e2e/scripts/reset-local-state.sh`, which clears local D1 data, KV keys,
+Playwright artifacts, and the public cache when its Worker is stopped. It reapplies pending
+Drizzle migrations, seeds the public menu and end-to-end rows, and seeds the five KV themes.
+When the public Worker is already running, a fresh content version bypasses its old cache.
+Playwright reuses running development servers and starts any missing E2E servers. The suite's
+wrapper runs cleanup SQL afterward, because product deletes are soft deletes by design.
 
-Three environment variables control a run:
+Two environment variables affect a run:
 
-| Variable              | Effect                                                                                                                                    |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `E2E_REUSE_SERVERS=1` | Reuses an already-running stack while you iterate.                                                                                        |
-| `E2E_VISUAL=1`        | Registers the visual template project locally.                                                                                            |
-| `DEV_FIXED_OTP=true`  | Fixes OTP `000000` for every provisioned account; no email is sent. Supplied by the local and E2E API scripts and the development Worker. |
+| Variable             | Effect                                                                                                                                    |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `E2E_VISUAL=1`       | Registers the visual template project locally.                                                                                            |
+| `DEV_FIXED_OTP=true` | Fixes OTP `000000` for every provisioned account; no email is sent. Supplied by the local and E2E API scripts and the development Worker. |
 
 Never configure `DEV_FIXED_OTP` on the production Worker. `create-auth.ts` only accepts
 the fixed OTP when `NODE_ENV` is `development` or `test`.
