@@ -1,5 +1,5 @@
 import { Button, Checkbox, OverviewPanel, SearchField } from "@jmurga97/components";
-import { ArrowDownIcon, ArrowUpIcon } from "@jmurga97/components/icon";
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import { Suspense } from "react";
 
 import { useLoyaltyInsightsController } from "~/features/loyalty/hooks/use-loyalty-insights-controller";

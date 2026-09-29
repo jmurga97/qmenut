@@ -30,7 +30,7 @@
       "dependencies": {
         "@base-ui/react": "^1.7.0",
         "@hookform/resolvers": "^5.2.2",
-        "@jmurga97/components": "2.0.2",
+        "@jmurga97/components": "2.0.4",
         "@qmenut/api": "workspace:*",
         "@qmenut/auth": "workspace:*",
         "@qmenut/permissions": "workspace:*",
@@ -44,6 +44,7 @@
         "i18next": "^26.3.4",
         "i18next-http-backend": "^4.0.2",
         "libphonenumber-js": "^1.13.13",
+        "lucide-react": "^1.48.0",
         "qrcode": "^1.5.4",
         "react": "19.3.0",
         "react-dom": "19.3.0",
@@ -515,7 +516,7 @@
 
     "@img/sharp-win32-x64": ["@img/sharp-win32-x64@0.34.5", "", { "os": "win32", "cpu": "x64" }, "sha512-+29YMsqY2/9eFEiW93eqWnuLcWcufowXewwSNIT6UwZdUUCrM3oFjMWH/Z6/TMmb4hlFenmfAVbpWeup2jryCw=="],
 
-    "@jmurga97/components": ["@jmurga97/components@2.0.2", "https://npm.pkg.github.com/download/@jmurga97/components/2.0.2/37a293257c9fd3b436ce05e345bb6b98ae18f04b", { "dependencies": { "@base-ui/react": "^1.7.0", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "tailwind-merge": "^3.6.0" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }, "sha512-tO+XN6EdP+JCwMa1fHUM5e5WX79k7oinipW81HcLfy9cZ95rNGt9V6DevZwU2/BmAGxt0/FUpNTx2YWppD110Q=="],
+    "@jmurga97/components": ["@jmurga97/components@2.0.4", "https://npm.pkg.github.com/download/@jmurga97/components/2.0.4/53222171ea222e60e7ae743e55577601aa5c37d7", { "dependencies": { "@base-ui/react": "^1.7.0", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "lucide-react": "^1.48.0", "tailwind-merge": "^3.6.0" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }, "sha512-8sl8c7DeXiiYD92V9lOAvvjPtIQHe7ZZKkIY5P6bbuW3DM1PKhcrfcOYyv+PGHvWcI7s9GtIdA4H3u1KgGtqQg=="],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 
@@ -1636,6 +1637,8 @@
     "longest-streak": ["longest-streak@3.1.0", "", {}, "sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g=="],
 
     "lru-cache": ["lru-cache@11.5.2", "", {}, "sha512-4pfM1Ff0x50o0tQwb5ucw/RzNyD0/YJME6IVcStalZuMWxdt3sR3huStTtxz4PUmvZfRguvDejasvQ2kifR11g=="],
+
+    "lucide-react": ["lucide-react@1.48.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-R0CIKY/fXiC6y9xRBADgsK+VW2p/pcTJOMhLZf1T+uG+vJUvyUR02nGOgmIIC7MPkiNK4Ox8QDnbqF8rJYWPZQ=="],
 
     "magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
 

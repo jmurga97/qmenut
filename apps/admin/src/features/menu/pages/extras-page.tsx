@@ -1,5 +1,6 @@
 import { Badge, Button, ConfirmAction, Input, Switch } from "@jmurga97/components";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { PencilIcon, Trash2Icon } from "lucide-react";
 import { Suspense, useState } from "react";
 import { toast } from "sonner";
 
@@ -7,7 +8,6 @@ import { i18n } from "~/lib/i18n";
 import { notifyError } from "~/lib/notifications";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
-import { Icon } from "~/shared/components/icon";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { useCan } from "~/shared/hooks/use-can";
@@ -192,7 +192,7 @@ function ExtrasCatalog() {
                         onClick={() => startEditing(ingredient)}
                         variant={"secondary"}
                       >
-                        <Icon name={"edit"} />
+                        <PencilIcon />
                       </Button>
                       <Button
                         aria-label={i18n.t("menu___Archivar {{name}}", { name: ingredient.name })}
@@ -200,7 +200,7 @@ function ExtrasCatalog() {
                         onClick={() => setArchiveTarget(ingredient)}
                         variant={"ghost"}
                       >
-                        <Icon name={"trash"} />
+                        <Trash2Icon />
                       </Button>
                     </div>
                   );

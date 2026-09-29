@@ -1,7 +1,7 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Badge, Button, ConfirmAction, DropdownMenu, InlineMessage, ResourceTable } from "@jmurga97/components";
 import { buttonVariants } from "@jmurga97/components/button";
-import { MoreIcon } from "@jmurga97/components/icon";
+import { EllipsisIcon } from "lucide-react";
 import { useState } from "react";
 import { FormProvider } from "react-hook-form";
 
@@ -79,7 +79,7 @@ function UserRowActions({ controller, user }: { controller: ReturnType<typeof us
             ]
           : []),
       ]}
-      trigger={<MoreIcon />}
+      trigger={<EllipsisIcon />}
     />
   );
 }

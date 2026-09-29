@@ -1,9 +1,9 @@
 import { Badge, Button } from "@jmurga97/components";
+import { GripVerticalIcon, ImageIcon, StarIcon, Trash2Icon } from "lucide-react";
 import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
 import { i18n } from "~/lib/i18n";
-import { Icon } from "~/shared/components/icon";
 import { formatNumber } from "~/shared/services/format";
 
 import { imageStatusLabel, imageStatusTone } from "./image-draft";
@@ -168,7 +168,7 @@ export function ImageGalleryControl({
                 }}
                 type={"button"}
               >
-                <Icon name={"drag"} />
+                <GripVerticalIcon />
               </Button>
               <div className={"admin-photo-list__thumb"}>
                 {draft.previewUrl ? (
@@ -216,7 +216,7 @@ export function ImageGalleryControl({
                   title={i18n.t("images___Usar como portada")}
                   type={"button"}
                 >
-                  <Icon name={"star"} />
+                  <StarIcon />
                 </Button>
                 <Button
                   variant={"secondary"}
@@ -229,7 +229,7 @@ export function ImageGalleryControl({
                   title={i18n.t("images___Reemplazar")}
                   type={"button"}
                 >
-                  <Icon name={"image"} />
+                  <ImageIcon />
                 </Button>
                 <Button
                   variant={"secondary"}
@@ -240,7 +240,7 @@ export function ImageGalleryControl({
                   title={i18n.t("images___Quitar")}
                   type={"button"}
                 >
-                  <Icon name={"trash"} />
+                  <Trash2Icon />
                 </Button>
               </div>
             </li>
