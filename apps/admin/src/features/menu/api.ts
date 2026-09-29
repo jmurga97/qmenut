@@ -1,5 +1,3 @@
-import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions } from "~/shared/api";
-
 import type { QueryClient } from "@tanstack/react-query";
 import type { RouterOutputs, TrpcOptionsProxy } from "~/lib/trpc";
 
@@ -34,14 +32,11 @@ export function getMenuIngredientsQueryOptions({
 }) {
   return trpc.admin.menu.taxonomy.ingredients.queryOptions({ languageCode: languageCode ?? undefined });
 }
-function invalidateMenu({ branchId, languageCode, queryClient, trpc }: MenuMutationInput) {
+// Editors query in the base language (languageCode undefined) while lists key on the selected one, so match by path.
+function invalidateMenu({ queryClient, trpc }: MenuMutationInput) {
   return Promise.all([
-    queryClient.invalidateQueries({
-      queryKey: getMenuCategoriesQueryOptions({ branchId, languageCode, trpc }).queryKey,
-    }),
-    queryClient.invalidateQueries({
-      queryKey: getMenuDishesQueryOptions({ branchId, languageCode, trpc }).queryKey,
-    }),
+    queryClient.invalidateQueries({ queryKey: trpc.admin.menu.categories.list.pathKey() }),
+    queryClient.invalidateQueries({ queryKey: trpc.admin.menu.dishes.list.pathKey() }),
     // The list | editor layout reopens dishes without leaving the page, so cached details must not go stale.
     queryClient.invalidateQueries({ queryKey: trpc.admin.menu.dishes.detail.pathKey() }),
   ]);
