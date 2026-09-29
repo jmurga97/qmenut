@@ -69,6 +69,13 @@ const exchangeRateWorkerBindingSchema = z.custom<ExchangeRateWorkerBinding>(
   "El binding de servicio EXCHANGE_RATE_WORKER debe implementar getLatestRates",
 );
 
+// An empty value disables an optional provider, so `--var KEY:` can switch one off over .dev.vars.
+const optionalSecret = z
+  .string()
+  .trim()
+  .optional()
+  .transform((value) => value || undefined);
+
 export const envSchema = z.object({
   ALLOWED_ORIGINS: z
     .string()
@@ -82,7 +89,7 @@ export const envSchema = z.object({
     ),
   BETTER_AUTH_SECRET: z.string().min(1),
   BETTER_AUTH_URL: z.url(),
-  DEEPL_API_KEY: z.string().trim().min(1).optional(),
+  DEEPL_API_KEY: optionalSecret,
   DEEPL_API_URL: z.url().default("https://api-free.deepl.com"),
   DEV_FIXED_OTP: z.string().trim().optional(),
   GEOCODING_LIMITER: z.custom<RateLimit>(
@@ -114,11 +121,11 @@ export const envSchema = z.object({
   STRIPE_PRICE_BASIC: z.string().min(1),
   ADMIN_APP_URL: z.url(),
   SENTRY_DSN: z.string().trim().optional(),
-  GOOGLE_PLACES_API_KEY: z.string().trim().min(1).optional(),
+  GOOGLE_PLACES_API_KEY: optionalSecret,
   NODE_ENV: nodeEnvSchema.default("development"),
   POSTHOG_API_HOST: z.url().default("https://eu.posthog.com"),
-  POSTHOG_PERSONAL_API_KEY: z.string().trim().min(1).optional(),
-  POSTHOG_PROJECT_ID: z.string().trim().min(1).optional(),
+  POSTHOG_PERSONAL_API_KEY: optionalSecret,
+  POSTHOG_PROJECT_ID: optionalSecret,
 });
 
 export type EnvBindings = z.input<typeof envSchema>;
