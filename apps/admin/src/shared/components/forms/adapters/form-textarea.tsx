@@ -19,6 +19,8 @@ export function FormTextarea<TValues extends FieldValues>({
   name,
   rows = 5,
 }: FormTextareaProps<TValues>) {
+  // form.reset() drops registered refs; register() must run on every render to re-attach them.
+  "use no memo";
   const { formState, getFieldState, register } = useFormContext<TValues>();
   const error = getFieldState(name, formState).error?.message;
   return (

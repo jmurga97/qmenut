@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { FormProvider } from "react-hook-form";
 
 import { i18n } from "~/lib/i18n";
@@ -6,6 +7,7 @@ import { FormTextInput } from "~/shared/components/forms/adapters/form-text-inpu
 import { FormActions } from "~/shared/components/forms/form-actions";
 
 import { useLoginController } from "../hooks/use-login-controller";
+import { loginFormSchema } from "../types";
 
 import type { LoginFormValues } from "../types";
 import type { SyntheticEvent } from "react";
@@ -51,6 +53,13 @@ export function LoginPage() {
     email,
     emailStep,
   });
+  const formRef = useRef<HTMLFormElement>(null);
+  const focusSubmit = () => formRef.current?.querySelector<HTMLButtonElement>("button[type=submit]")?.focus();
+  const { busy, form, step } = controller;
+  // The submit button remounts when `busy` flips, so move focus once the OTP step is idle and already filled.
+  useEffect(() => {
+    if (step === "otp" && !busy && loginFormSchema.shape.otp.safeParse(form.getValues("otp")).success) focusSubmit();
+  }, [busy, form, step]);
   function handleFormSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     void controller.submit();
@@ -63,7 +72,7 @@ export function LoginPage() {
           <p>{instructions}</p>
         </div>
         <FormProvider {...controller.form}>
-          <form className="admin-login-form" noValidate onSubmit={handleFormSubmit}>
+          <form className="admin-login-form" noValidate onSubmit={handleFormSubmit} ref={formRef}>
             {emailStep ? (
               <FormTextInput<LoginFormValues>
                 autocomplete={"email"}
@@ -80,6 +89,7 @@ export function LoginPage() {
                 label={i18n.t("auth___Código OTP")}
                 length={6}
                 name={"otp"}
+                onComplete={focusSubmit}
               />
             )}
             {emailStep ? null : (

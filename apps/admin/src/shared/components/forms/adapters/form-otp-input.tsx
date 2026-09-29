@@ -11,6 +11,7 @@ type FormOtpInputProps<TValues extends FieldValues> = {
   label: string;
   length: number;
   name: FieldPath<TValues>;
+  onComplete?: () => void;
 };
 
 export function FormOtpInput<TValues extends FieldValues>({
@@ -18,6 +19,7 @@ export function FormOtpInput<TValues extends FieldValues>({
   label,
   length,
   name,
+  onComplete,
 }: FormOtpInputProps<TValues>) {
   const { control } = useFormContext<TValues>();
   const { field, fieldState } = useController({ control, name });
@@ -35,6 +37,7 @@ export function FormOtpInput<TValues extends FieldValues>({
         onValueChange={(next: string) => {
           field.onChange(next);
         }}
+        onValueComplete={() => onComplete?.()}
       >
         <div className={"admin-otp-field__slots"}>
           {Array.from({ length }, (_, index) => (

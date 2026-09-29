@@ -22,6 +22,8 @@ export function FormPhoneInput<TValues extends FieldValues>({
   name,
   placeholder,
 }: FormPhoneInputProps<TValues>) {
+  // form.reset() drops registered refs; register() must run on every render to re-attach them.
+  "use no memo";
   const { formState, getFieldState, register } = useFormContext<TValues>();
   const error = getFieldState(name, formState).error?.message;
   const { onChange, ...field } = register(name);
