@@ -390,7 +390,7 @@ body {
 .admin-list-label[href]:focus-visible {
   outline: 0;
 }
-.admin-list-item :is(a:not(.admin-list-label), button, label, input, select) {
+.admin-list-item :is(a:not(.admin-list-label), button, label, input, select, [role="switch"]) {
   position: relative;
   z-index: 1;
 }
