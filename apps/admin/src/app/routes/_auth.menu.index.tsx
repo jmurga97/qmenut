@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-import { MenuListPage } from "~/features/menu/pages/menu-pages";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_auth/menu/")({
-  component: MenuListPage,
+  beforeLoad: () => {
+    redirect({ to: "/menu/dishes", replace: true, throw: true });
+  },
 });

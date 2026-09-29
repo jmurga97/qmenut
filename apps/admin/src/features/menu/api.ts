@@ -42,6 +42,8 @@ function invalidateMenu({ branchId, languageCode, queryClient, trpc }: MenuMutat
     queryClient.invalidateQueries({
       queryKey: getMenuDishesQueryOptions({ branchId, languageCode, trpc }).queryKey,
     }),
+    // The list | editor layout reopens dishes without leaving the page, so cached details must not go stale.
+    queryClient.invalidateQueries({ queryKey: trpc.admin.menu.dishes.detail.pathKey() }),
   ]);
 }
 export function getCategoryMutationOptions(input: MenuMutationInput) {

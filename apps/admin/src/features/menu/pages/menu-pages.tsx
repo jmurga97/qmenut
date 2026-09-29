@@ -1,6 +1,6 @@
 import { Badge, Button, Field, InlineMessage, Input, Switch } from "@jmurga97/components";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, Outlet } from "@tanstack/react-router";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFormContext, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,7 +16,9 @@ import { FormTextInput } from "~/shared/components/forms/adapters/form-text-inpu
 import { FormTextarea } from "~/shared/components/forms/adapters/form-textarea";
 import { FormChipGroup } from "~/shared/components/forms/form-chip-group";
 import { FormShell } from "~/shared/components/forms/form-shell";
+import { DetailEmpty, MasterDetail } from "~/shared/components/master-detail";
 import { PageHeader } from "~/shared/components/page-header";
+import { SectionTabs } from "~/shared/components/section-tabs";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { NotFoundState } from "~/shared/components/state/not-found-state";
@@ -38,144 +40,137 @@ import { toDishFormValues } from "../mappers";
 
 import type { DishDetail, CategoryFormValues, DishFormValues } from "../types";
 
-export function MenuListPage() {
+const MENU_TABS = [
+  { label: i18n.t("menu___Platos"), to: "/menu/dishes" },
+  { label: i18n.t("menu___Categorías"), to: "/menu/categories" },
+  { label: i18n.t("menu___Extras"), to: "/menu/extras" },
+] as const;
+export function MenuLayout() {
   const branch = useSelectedBranch();
-  if (!branch) return <NoBranchState description={i18n.t("menu___Crea una sucursal para gestionar su carta.")} />;
-  return <MenuList branchId={branch.id} />;
-}
-export function MenuSectionTabs({ current }: { current: "extras" | "menu" }) {
-  return (
-    <nav aria-label={i18n.t("menu___Secciones de la carta")} className="admin-tabs">
-      <Link
-        activeOptions={{ exact: true }}
-        aria-current={current === "menu" ? "page" : undefined}
-        className={current === "menu" ? "active" : undefined}
-        to={"/menu"}
-      >
-        {i18n.t("menu___Menú")}
-      </Link>
-      <Link
-        aria-current={current === "extras" ? "page" : undefined}
-        className={current === "extras" ? "active" : undefined}
-        to={"/menu/extras"}
-      >
-        {i18n.t("menu___Extras")}
-      </Link>
-    </nav>
-  );
-}
-function MenuList({ branchId }: { branchId: string }) {
-  const canWrite = useCan("menu.write");
   const { isDefault } = useSelectedLanguage();
+  if (!branch) return <NoBranchState description={i18n.t("menu___Crea una sucursal para gestionar su carta.")} />;
   return (
     <div className={"ming-page admin-page"}>
       <PageHeader
-        actions={
-          canWrite ? (
-            <>
-              <Button
-                disabled={!isDefault}
-                nativeButton={false}
-                render={<Link to={"/menu/categories/new"} />}
-                variant={"secondary"}
-              >
-                {i18n.t("menu___Crear categoría")}
-              </Button>
-              <Button
-                disabled={!isDefault}
-                nativeButton={false}
-                render={<Link to={"/menu/dishes/new"} />}
-                variant={"primary"}
-              >
-                {i18n.t("menu___Crear plato")}
-              </Button>
-            </>
-          ) : null
-        }
         description={i18n.t("menu___Gestiona las categorías y los platos de esta sucursal.")}
         kicker={i18n.t("menu___Carta")}
         title={i18n.t("menu___Menú")}
       />
-      <MenuSectionTabs current={"menu"} />
+      <SectionTabs ariaLabel={i18n.t("menu___Secciones de la carta")} tabs={MENU_TABS} />
       {isDefault ? null : (
         <InlineMessage>
           {i18n.t("menu___Cambia al idioma base para crear contenido o cambiar su configuración.")}
         </InlineMessage>
       )}
-      <Suspense
-        fallback={
-          <>
-            <CardSkeleton title={i18n.t("menu___Categorías")} />
-            <CardSkeleton rows={5} title={i18n.t("menu___Platos")} />
-          </>
-        }
-      >
-        <MenuListCards branchId={branchId} />
-      </Suspense>
+      <Outlet />
     </div>
   );
 }
-function MenuListCards({ branchId }: { branchId: string }) {
+function CreateButton({ label, to }: { label: string; to: "/menu/categories/new" | "/menu/dishes/new" }) {
+  const canWrite = useCan("menu.write");
+  const { isDefault } = useSelectedLanguage();
+  if (!canWrite) return null;
+  return (
+    <Button disabled={!isDefault} nativeButton={false} render={<Link to={to} />} size={"sm"} variant={"secondary"}>
+      {label}
+    </Button>
+  );
+}
+export function DishesLayout() {
+  const branch = useSelectedBranch();
+  if (!branch) return null;
+  return (
+    <MasterDetail
+      list={
+        <Suspense fallback={<CardSkeleton rows={5} title={i18n.t("menu___Platos")} />}>
+          <DishList branchId={branch.id} />
+        </Suspense>
+      }
+    />
+  );
+}
+export function DishesIndex() {
+  return <DetailEmpty text={i18n.t("menu___Selecciona un plato para editarlo o crea uno nuevo.")} />;
+}
+function DishList({ branchId }: { branchId: string }) {
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const canToggleAvailability = useCan("menu.toggleDishAvailability");
   const { isDefault } = useSelectedLanguage();
-  const { categories, dishes, setAvailability } = useMenuListController(branchId);
+  const { dishes, setAvailability } = useMenuListController(branchId);
   return (
-    <>
-      <EntityListCard
-        action={null}
-        count={categories.length}
-        emptyText={i18n.t("menu___Aún no hay categorías.")}
-        title={i18n.t("menu___Categorías")}
-      >
-        {categories.map((category) => (
-          <li className="admin-list-item" key={category.id}>
-            <Link
-              className={"admin-link admin-list-label"}
-              params={{ categoryId: category.id }}
-              to={"/menu/categories/$categoryId"}
-            >
-              {category.name}
+    <EntityListCard
+      action={<CreateButton label={i18n.t("menu___Crear plato")} to={"/menu/dishes/new"} />}
+      count={dishes.length}
+      emptyText={i18n.t("menu___Aún no hay platos.")}
+      title={i18n.t("menu___Platos")}
+    >
+      {dishes.map((dish) => (
+        <li className="admin-list-item" key={dish.id}>
+          <div className="admin-list-text">
+            <Link className={"admin-link admin-list-label"} params={{ dishId: dish.id }} to={"/menu/dishes/$dishId"}>
+              {dish.name}
             </Link>
-            <Badge tone={category.isActive ? "success" : "neutral"}>
-              {category.isActive ? i18n.t("menu___Activa") : i18n.t("menu___Oculta")}
-            </Badge>
-          </li>
-        ))}
-      </EntityListCard>
-      <EntityListCard
-        action={null}
-        count={dishes.length}
-        emptyText={i18n.t("menu___Aún no hay platos.")}
-        title={i18n.t("menu___Platos")}
-      >
-        {dishes.map((dish) => (
-          <li className="admin-list-item" key={dish.id}>
-            <div className="admin-list-text">
-              <Link className={"admin-link admin-list-label"} params={{ dishId: dish.id }} to={"/menu/dishes/$dishId"}>
-                {dish.name}
-              </Link>
-              <span className="admin-list-meta">{formatMoney(dish.price, tenant.restaurant.sourceCurrency)}</span>
-            </div>
-            {canToggleAvailability ? (
-              <Switch
-                aria-label={i18n.t("menu___Disponibilidad de {{name}}", { name: dish.name })}
-                checked={dish.isActive}
-                disabled={!isDefault}
-                label={dish.isActive ? i18n.t("menu___Disponible") : i18n.t("menu___Oculto")}
-                onCheckedChange={(checked) => {
-                  if (isDefault) setAvailability(dish.id, checked);
-                }}
-              />
-            ) : (
-              <span className="admin-list-meta">
-                {dish.isActive ? i18n.t("menu___Disponible") : i18n.t("menu___Oculto")}
-              </span>
-            )}
-          </li>
-        ))}
-      </EntityListCard>
-    </>
+            <span className="admin-list-meta">{formatMoney(dish.price, tenant.restaurant.sourceCurrency)}</span>
+          </div>
+          {canToggleAvailability ? (
+            <Switch
+              aria-label={i18n.t("menu___Disponibilidad de {{name}}", { name: dish.name })}
+              checked={dish.isActive}
+              disabled={!isDefault}
+              onCheckedChange={(checked) => {
+                if (isDefault) setAvailability(dish.id, checked);
+              }}
+            />
+          ) : (
+            <span className="admin-list-meta">
+              {dish.isActive ? i18n.t("menu___Disponible") : i18n.t("menu___Oculto")}
+            </span>
+          )}
+        </li>
+      ))}
+    </EntityListCard>
+  );
+}
+export function CategoriesLayout() {
+  const branch = useSelectedBranch();
+  if (!branch) return null;
+  return (
+    <MasterDetail
+      list={
+        <Suspense fallback={<CardSkeleton title={i18n.t("menu___Categorías")} />}>
+          <CategoryList branchId={branch.id} />
+        </Suspense>
+      }
+    />
+  );
+}
+export function CategoriesIndex() {
+  return <DetailEmpty text={i18n.t("menu___Selecciona una categoría para editarla o crea una nueva.")} />;
+}
+function CategoryList({ branchId }: { branchId: string }) {
+  const { categories } = useMenuListController(branchId);
+  return (
+    <EntityListCard
+      action={<CreateButton label={i18n.t("menu___Crear categoría")} to={"/menu/categories/new"} />}
+      count={categories.length}
+      emptyText={i18n.t("menu___Aún no hay categorías.")}
+      title={i18n.t("menu___Categorías")}
+    >
+      {categories.map((category) => (
+        <li className="admin-list-item" key={category.id}>
+          <Link
+            className={"admin-link admin-list-label"}
+            params={{ categoryId: category.id }}
+            to={"/menu/categories/$categoryId"}
+          >
+            {category.name}
+          </Link>
+          <Badge tone={category.isActive ? "success" : "neutral"}>
+            {category.isActive ? i18n.t("menu___Activa") : i18n.t("menu___Oculta")}
+          </Badge>
+        </li>
+      ))}
+    </EntityListCard>
   );
 }
 export function CategoryEditorPage({ categoryId }: { categoryId?: string }) {
@@ -210,8 +205,9 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
   });
   if (categoryId && !controller.category) return <NotFoundState />;
   return (
-    <div className={"ming-page admin-page admin-editor-page"}>
+    <div className="admin-detail">
       <PageHeader
+        headingLevel={2}
         kicker={categoryId ? i18n.t("menu___Editar categoría") : i18n.t("menu___Nueva categoría")}
         title={controller.category?.name ?? i18n.t("menu___Categoría")}
       />
@@ -297,8 +293,9 @@ function TranslatedCategoryForm({
   };
   if (!controller.category) return <NotFoundState />;
   return (
-    <div className={"ming-page admin-page admin-editor-page"}>
+    <div className="admin-detail">
       <PageHeader
+        headingLevel={2}
         description={i18n.t(
           "menu___Edita los textos de esta categoría. El resto de la configuración se mantiene en el idioma base.",
         )}
@@ -491,8 +488,9 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
     pending: controller.busy,
   });
   return (
-    <div className={"ming-page admin-page admin-editor-page"}>
+    <div className="admin-detail">
       <PageHeader
+        headingLevel={2}
         kicker={dish ? i18n.t("menu___Editar plato") : i18n.t("menu___Nuevo plato")}
         title={dish?.name ?? i18n.t("menu___Plato")}
       />
@@ -580,8 +578,9 @@ function TranslatedDishForm({
     }
   };
   return (
-    <div className={"ming-page admin-page admin-editor-page"}>
+    <div className="admin-detail">
       <PageHeader
+        headingLevel={2}
         description={i18n.t(
           "menu___Edita los textos de este plato. El resto de la configuración se mantiene en el idioma base.",
         )}
@@ -625,8 +624,9 @@ function TranslatedDishForm({
 
 function TranslationBlockedMessage({ entity }: { entity: string }) {
   return (
-    <div className={"ming-page admin-page"}>
+    <div className="admin-detail">
       <PageHeader
+        headingLevel={2}
         kicker={i18n.t("menu___Idioma traducido")}
         title={i18n.t("menu___Acción disponible en el idioma base")}
       />

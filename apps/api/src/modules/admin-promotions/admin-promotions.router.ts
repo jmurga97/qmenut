@@ -2,6 +2,7 @@ import {
   getPromotion,
   getPromotionBranchId,
   listPromotions,
+  setPromotionStatus,
   softDeletePromotion,
 } from "@qmenut/db/repositories/admin-promotions.repository";
 import { TRPCError } from "@trpc/server";
@@ -16,6 +17,7 @@ import { requirePermission } from "../admin-tenant/require-permission";
 
 const branchIdSchema = z.object({ branchId: z.string().trim().min(1) });
 const promotionIdSchema = z.object({ promotionId: z.string().trim().min(1) });
+const promotionStatusSchema = promotionIdSchema.extend({ status: z.enum(["active", "inactive"]) });
 
 export const adminPromotionsRouter = router({
   list: tenantProcedure.input(branchIdSchema).query(async ({ ctx, input }) => {
@@ -79,6 +81,30 @@ export const adminPromotionsRouter = router({
     });
 
     return result;
+  }),
+  setStatus: tenantProcedure.input(promotionStatusSchema).mutation(async ({ ctx, input }) => {
+    requirePermission(ctx.tenant, "promotions.write");
+    const branchId = await getPromotionBranchId({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      promotionId: input.promotionId,
+    });
+    if (!branchId) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Promoción no encontrada" });
+    }
+    await setPromotionStatus({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      promotionId: input.promotionId,
+      status: input.status,
+    });
+    await bumpPublicContentVersionForBranch({
+      branchId,
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+    });
+    return { id: input.promotionId, status: input.status };
   }),
   remove: tenantProcedure.input(promotionIdSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "promotions.write");

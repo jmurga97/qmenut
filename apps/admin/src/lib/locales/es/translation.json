@@ -36,7 +36,12 @@
     "Resumen": "Resumen",
     "Tasa VES": "Tasa VES",
     "Cambia solo. Compártelo para que tus clientes sumen sellos.": "Cambia solo. Compártelo para que tus clientes sumen sellos.",
-    "Código de la sucursal": "Código de la sucursal"
+    "Código de la sucursal": "Código de la sucursal",
+    "Gestionar promociones →": "Gestionar promociones →",
+    "No hay promociones activas ni programadas.": "No hay promociones activas ni programadas.",
+    "Promociones": "Promociones",
+    "Ver carta ↗": "Ver carta ↗",
+    "Código QR": "Código QR"
   },
   "main.tsx": {
     "Unable to find root element": "No se encontró el elemento raíz"
@@ -398,7 +403,8 @@
     "No se pudo transferir el archivo. Pulsa Guardar para reintentar.": "No se pudo transferir el archivo. Pulsa Guardar para reintentar.",
     "No se pudo subir el archivo. Comprueba tu conexión y pulsa Guardar.": "No se pudo subir el archivo. Comprueba tu conexión y pulsa Guardar.",
     "La subida tardó demasiado. Pulsa Guardar para reintentar.": "La subida tardó demasiado. Pulsa Guardar para reintentar.",
-    "Subida interrumpida": "Subida interrumpida"
+    "Subida interrumpida": "Subida interrumpida",
+    "Los cambios sin guardar se perderán.": "Los cambios sin guardar se perderán."
   },
   "exchangeRates": {
     "Sin referencia disponible": "Sin referencia disponible",
@@ -667,7 +673,11 @@
     "Elige una categoría": "Elige una categoría",
     "La descripción no puede superar 2.000 caracteres": "La descripción no puede superar 2.000 caracteres",
     "El precio del combo es obligatorio": "El precio del combo es obligatorio",
-    "La descripción del combo es obligatoria": "La descripción del combo es obligatoria"
+    "La descripción del combo es obligatoria": "La descripción del combo es obligatoria",
+    "Selecciona un plato para editarlo o crea uno nuevo.": "Selecciona un plato para editarlo o crea uno nuevo.",
+    "Selecciona una categoría para editarla o crea una nueva.": "Selecciona una categoría para editarla o crea una nueva.",
+    "Plato guardado.": "Plato guardado.",
+    "Categoría guardada.": "Categoría guardada."
   },
   "menuPrint": {
     "Categorías de la carta": "Categorías de la carta",
@@ -753,7 +763,10 @@
     "Indica un precio": "Indica un precio",
     "Indica las unidades que lleva": "Indica las unidades que lleva",
     "Indica las unidades que paga": "Indica las unidades que paga",
-    "Las unidades pagadas no pueden superar las compradas": "Las unidades pagadas no pueden superar las compradas"
+    "Las unidades pagadas no pueden superar las compradas": "Las unidades pagadas no pueden superar las compradas",
+    "Promoción guardada.": "Promoción guardada.",
+    "Selecciona una promoción para editarla o crea una nueva.": "Selecciona una promoción para editarla o crea una nueva.",
+    "Activar {{name}}": "Activar {{name}}"
   },
   "qr": {
     "Ocultar estilos": "Ocultar estilos",

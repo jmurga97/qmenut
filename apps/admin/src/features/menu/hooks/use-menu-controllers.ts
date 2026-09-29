@@ -3,6 +3,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
@@ -69,8 +70,9 @@ export function useCategoryEditorController({
   const image = useImageDraft(category?.imageUrl ?? null);
   const uploads = useImageUploads();
   const imageSave = useImageSave();
-  const cancel = () => void navigate({ to: "/menu" });
+  const cancel = () => void navigate({ to: "/menu/categories", ignoreBlocker: true });
   const submit = form.handleSubmit(async (values) => {
+    let createdId: string | undefined;
     const succeeded = await imageSave.run(async () => {
       const [prepared] = await uploads.transfer({
         branchId,
@@ -92,12 +94,22 @@ export function useCategoryEditorController({
         position: category?.position ?? categories.length,
       };
       const operationId = imageSave.operationIdFor({ categoryId, branchId, data });
-      await (categoryId
-        ? update.mutateAsync({ categoryId, data, operationId })
-        : create.mutateAsync({ branchId, data, operationId }));
+      if (categoryId) {
+        await update.mutateAsync({ categoryId, data, operationId });
+      } else {
+        const created = await create.mutateAsync({ branchId, data, operationId });
+        createdId = created.id;
+      }
       void queryClient.invalidateQueries({ queryKey: trpc.admin.images.assignments.pathKey() });
     }, uploads.clear);
-    if (succeeded) cancel();
+    if (!succeeded) return;
+    toast.success(i18n.t("menu___Categoría guardada."));
+    if (createdId) {
+      await navigate({ to: "/menu/categories/$categoryId", params: { categoryId: createdId }, ignoreBlocker: true });
+      return;
+    }
+    form.reset(values);
+    image.accept();
   });
   return {
     operation: uploads.operation,
@@ -139,7 +151,7 @@ export function useDishEditorController({
   const image = useImageDraft(dish?.imageUrl ?? null);
   const uploads = useImageUploads();
   const imageSave = useImageSave();
-  const cancel = () => void navigate({ to: "/menu" });
+  const cancel = () => void navigate({ to: "/menu/dishes", ignoreBlocker: true });
   const submit = form.handleSubmit(async (values) => {
     const succeeded = await imageSave.run(async () => {
       relations.reset();
@@ -174,7 +186,14 @@ export function useDishEditorController({
         tagIds: values.tagIds,
       });
     }, uploads.clear);
-    if (succeeded) cancel();
+    if (!succeeded || !dishId.current) return;
+    toast.success(i18n.t("menu___Plato guardado."));
+    if (!dish) {
+      await navigate({ to: "/menu/dishes/$dishId", params: { dishId: dishId.current }, ignoreBlocker: true });
+      return;
+    }
+    form.reset(values);
+    image.accept();
   });
   return {
     allergenOptions: allergens.map(({ code, id }) => ({ id, label: toAllergenDisplayLabel(code) })),

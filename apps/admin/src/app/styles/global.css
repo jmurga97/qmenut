@@ -143,21 +143,90 @@ body {
 .admin-inline-button {
   inline-size: fit-content;
 }
-.admin-tabs {
+.admin-section-tabs {
+  position: sticky;
+  z-index: 5;
+  top: 0;
   display: flex;
-  gap: var(--ming-space-4);
-  border-block-end: 1px solid var(--border);
+  gap: 0;
+  padding: 0 var(--ming-space-4);
+  overflow: clip;
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
 }
-.admin-tabs a {
-  padding-block: var(--ming-space-1) var(--ming-space-3);
+
+.admin-section-tab {
+  position: relative;
+  min-width: 0;
+  flex: 1 1 0;
+  padding: var(--ming-space-3) var(--ming-space-4);
+  border: 0;
   color: var(--muted-foreground);
+  font-size: var(--admin-text-body-sm);
+  font-weight: 550;
   text-decoration: none;
-  border-block-end: 2px solid transparent;
+  text-align: center;
 }
-.admin-tabs a:hover,
-.admin-tabs a.active {
+
+.admin-section-tab:hover {
   color: var(--foreground);
-  border-block-end-color: var(--foreground);
+}
+
+.admin-section-tab[aria-current="page"] {
+  color: var(--foreground);
+}
+
+.admin-section-tab[aria-current="page"]::after {
+  position: absolute;
+  inset: auto 1rem -1px;
+  height: 0.1875rem;
+  background: var(--ming-service);
+  content: "";
+}
+
+@media (min-width: 960px) {
+  .admin-section-tabs {
+    padding-inline: var(--ming-space-6);
+  }
+
+  .admin-section-tab {
+    flex: 0 0 auto;
+    text-align: start;
+  }
+}
+
+/* List | editor: the list keeps its place while the child route's editor fills the rest. */
+.admin-master-detail {
+  display: grid;
+  align-items: start;
+  gap: var(--ming-space-5);
+}
+.admin-master-list,
+.admin-detail-pane,
+.admin-detail {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--ming-space-5);
+}
+/* One column at a time on narrow screens: the list until an item opens, then only its editor. */
+@media (max-width: 63.99rem) {
+  .admin-master-detail:has(.admin-detail-empty) .admin-detail-pane,
+  .admin-master-detail:not(:has(.admin-detail-empty)) .admin-master-list {
+    display: none;
+  }
+}
+@media (min-width: 64rem) {
+  .admin-master-detail {
+    grid-template-columns: minmax(17rem, 1fr) minmax(0, 3fr);
+  }
+  .admin-master-list {
+    position: sticky;
+    top: 0;
+    max-block-size: calc(100dvh - 8rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
 }
 .admin-table-card {
   max-inline-size: 72rem;
@@ -219,16 +288,13 @@ body {
   display: grid;
   gap: var(--ming-space-5);
 }
-.admin-editor-page .admin-editor-shell,
+.admin-detail .admin-editor-shell,
 .admin-branch-page .admin-editor-shell {
   width: 100%;
   padding: clamp(var(--ming-space-4), 3vw, var(--ming-space-6));
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
-}
-.admin-editor-page .admin-editor-shell {
-  max-width: var(--ming-page-narrow);
 }
 .admin-branch-page .admin-editor-shell {
   max-width: var(--ming-page-wide);
@@ -329,7 +395,8 @@ body {
   z-index: 1;
 }
 .admin-list-item:has(.admin-list-label[href]:hover),
-.admin-list-item:has(.admin-list-label[href]:focus-visible) {
+.admin-list-item:has(.admin-list-label[href]:focus-visible),
+.admin-list-item:has(.admin-list-label[aria-current="page"]) {
   background: var(--secondary);
 }
 .admin-list-item:has(.admin-list-label[href]:focus-visible) {
@@ -337,7 +404,8 @@ body {
   outline-offset: -2px;
 }
 .admin-list-item:has(.admin-list-label[href]:hover)::before,
-.admin-list-item:has(.admin-list-label[href]:focus-visible)::before {
+.admin-list-item:has(.admin-list-label[href]:focus-visible)::before,
+.admin-list-item:has(.admin-list-label[aria-current="page"])::before {
   position: absolute;
   inset-block-start: 50%;
   inset-inline-start: calc((var(--ming-space-4) - var(--ming-dot)) / 2);
@@ -503,7 +571,7 @@ body {
   min-inline-size: 8rem;
 }
 /* Editor footers stay reachable while scrolling long forms, especially on phones. */
-.admin-editor-page .admin-editor-shell > .admin-form-actions,
+.admin-detail .admin-editor-shell > .admin-form-actions,
 .admin-branch-page .admin-editor-shell > .admin-form-actions {
   position: sticky;
   z-index: 2;

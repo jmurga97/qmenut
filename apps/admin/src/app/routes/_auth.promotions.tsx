@@ -1,6 +1,7 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { getPromotionsQueryOptions } from "~/features/promotions/api";
+import { PromotionsLayout } from "~/features/promotions/pages/promotion-pages";
 import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions, getSelectedBranch } from "~/shared/api";
 
 export const Route = createFileRoute("/_auth/promotions")({
@@ -19,5 +20,5 @@ export const Route = createFileRoute("/_auth/promotions")({
       queryClient.query({ ...getMenuDishesQueryOptions({ branchId: promotionsBranchId, trpc }), staleTime: "static" }),
     ]);
   },
-  component: () => <Outlet />,
+  component: PromotionsLayout,
 });

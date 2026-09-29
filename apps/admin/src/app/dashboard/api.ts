@@ -13,3 +13,4 @@ export {
 } from "~/features/loyalty/api";
 export { getDishAvailabilityMutationOptions } from "~/features/menu/api";
 export { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions } from "~/shared/api";
+export { getPromotionsQueryOptions } from "~/features/promotions/api";

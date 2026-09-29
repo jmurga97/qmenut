@@ -265,3 +265,24 @@ export async function softDeletePromotion({ db, restaurantId, promotionId }: Sof
     .set({ deletedAt: now, updatedAt: now })
     .where(and(eq(promotions.id, promotionId), eq(promotions.restaurantId, restaurantId)));
 }
+
+interface SetPromotionStatusInput {
+  db: DrizzleDb;
+  restaurantId: string;
+  promotionId: string;
+  status: PromotionStatus;
+}
+
+export async function setPromotionStatus({
+  db,
+  restaurantId,
+  promotionId,
+  status,
+}: SetPromotionStatusInput): Promise<void> {
+  await db
+    .update(promotions)
+    .set({ status, updatedAt: Date.now() })
+    .where(
+      and(eq(promotions.id, promotionId), eq(promotions.restaurantId, restaurantId), isNull(promotions.deletedAt)),
+    );
+}

@@ -79,6 +79,7 @@ export const promotionFormSchema = z
 export type PromotionFormValues = z.infer<typeof promotionFormSchema>;
 export type PromotionScope = PromotionFormValues["scope"];
 export type PromotionType = PromotionFormValues["type"];
+export type PromotionStatus = (typeof promotionStatuses)[number];
 export type EditablePromotion = PromotionDetail & { scope: PromotionScope; type: PromotionType };
 export function isEditablePromotion(promotion: PromotionDetail): promotion is EditablePromotion {
   return (

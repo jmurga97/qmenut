@@ -14,6 +14,7 @@ import { FormTextInput } from "~/shared/components/forms/adapters/form-text-inpu
 import { FormTextarea } from "~/shared/components/forms/adapters/form-textarea";
 import { FormChipGroup } from "~/shared/components/forms/form-chip-group";
 import { FormShell } from "~/shared/components/forms/form-shell";
+import { DetailEmpty, MasterDetail } from "~/shared/components/master-detail";
 import { PageHeader } from "~/shared/components/page-header";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
@@ -25,6 +26,7 @@ import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
 import { useTranslationForm } from "~/shared/hooks/use-translation-form";
 
 import { getPromotionQueryOptions } from "../api";
+import { PromotionStatusControl } from "../components/promotion-status-control";
 import { usePromotionEditorController, usePromotionsListController } from "../hooks/use-promotions-controller";
 import { toPromotionFormValues } from "../mappers";
 import { isEditablePromotion } from "../types";
@@ -51,58 +53,68 @@ const STATUS_OPTIONS = [
   { id: "inactive", label: i18n.t("promotions___Inactiva") },
   { id: "expired", label: i18n.t("promotions___Expirada") },
 ];
-export function PromotionsListPage() {
+export function PromotionsLayout() {
   const branch = useSelectedBranch();
+  const { isDefault } = useSelectedLanguage();
   if (!branch)
     return <NoBranchState description={i18n.t("promotions___Crea una sucursal para gestionar promociones.")} />;
-  return <PromotionsList branchId={branch.id} />;
-}
-function PromotionsList({ branchId }: { branchId: string }) {
-  const canWrite = useCan("promotions.write");
-  const { isDefault } = useSelectedLanguage();
   return (
     <div className={"ming-page admin-page"}>
       <PageHeader kicker={i18n.t("promotions___Promociones")} title={i18n.t("promotions___Promociones")} />
-      {canWrite && !isDefault ? (
-        <div>
-          <p>{i18n.t("promotions___Cambia al idioma base para crear promociones.")}</p>
-          <Button disabled>{i18n.t("promotions___Nueva promoción")}</Button>
-        </div>
-      ) : null}
-      <Suspense fallback={<CardSkeleton rows={4} title={i18n.t("promotions___Activas y programadas")} />}>
-        <PromotionsListCard branchId={branchId} canManage={canWrite && isDefault} />
-      </Suspense>
+      {isDefault ? null : (
+        <InlineMessage>{i18n.t("promotions___Cambia al idioma base para crear promociones.")}</InlineMessage>
+      )}
+      <MasterDetail
+        list={
+          <Suspense fallback={<CardSkeleton rows={4} title={i18n.t("promotions___Activas y programadas")} />}>
+            <PromotionsList branchId={branch.id} />
+          </Suspense>
+        }
+      />
     </div>
   );
 }
-function PromotionsListCard({ branchId, canManage }: { branchId: string; canManage: boolean }) {
+function CreatePromotionButton() {
+  const canWrite = useCan("promotions.write");
+  const { isDefault } = useSelectedLanguage();
+  if (!canWrite) return null;
+  return (
+    <Button
+      disabled={!isDefault}
+      nativeButton={false}
+      render={<Link to={"/promotions/new"} />}
+      size={"sm"}
+      variant={"secondary"}
+    >
+      {i18n.t("promotions___Nueva promoción")}
+    </Button>
+  );
+}
+export function PromotionsIndex() {
+  return <DetailEmpty text={i18n.t("promotions___Selecciona una promoción para editarla o crea una nueva.")} />;
+}
+function PromotionsList({ branchId }: { branchId: string }) {
   const promotions = usePromotionsListController(branchId);
   return (
     <EntityListCard
-      action={
-        canManage ? (
-          <Link className="admin-link" to={"/promotions/new"}>
-            {i18n.t("promotions___Nueva promoción")}
-          </Link>
-        ) : null
-      }
+      action={<CreatePromotionButton />}
       count={promotions.length}
       emptyText={i18n.t("promotions___Aún no hay promociones.")}
       title={i18n.t("promotions___Activas y programadas")}
     >
       {promotions.map((promotion) => (
         <li className="admin-list-item" key={promotion.id}>
-          <Link
-            className={"admin-link admin-list-label"}
-            params={{ promotionId: promotion.id }}
-            to={"/promotions/$promotionId"}
-          >
-            {promotion.name}
-          </Link>
-          <span className="admin-list-meta">
-            {TYPE_LABELS[promotion.type] ?? promotion.type} ·{" "}
-            {STATUS_OPTIONS.find(({ id }) => id === promotion.status)?.label.toLowerCase() ?? promotion.status}
-          </span>
+          <div className="admin-list-text">
+            <Link
+              className={"admin-link admin-list-label"}
+              params={{ promotionId: promotion.id }}
+              to={"/promotions/$promotionId"}
+            >
+              {promotion.name}
+            </Link>
+            <span className="admin-list-meta">{TYPE_LABELS[promotion.type] ?? promotion.type}</span>
+          </div>
+          <PromotionStatusControl branchId={branchId} promotion={promotion} />
         </li>
       ))}
     </EntityListCard>
@@ -122,7 +134,7 @@ export function PromotionEditorPage({ promotionId }: { promotionId?: string }) {
         promotionId={promotionId}
       />
     ) : (
-      <p>{i18n.t("promotions___Cambia al idioma base para crear una promoción.")}</p>
+      <DetailEmpty text={i18n.t("promotions___Cambia al idioma base para crear una promoción.")} />
     );
   return promotionId ? (
     <ExistingPromotion branchId={branch.id} promotionId={promotionId} key={`${branch.id}:${promotionId}`} />
@@ -135,12 +147,13 @@ function ExistingPromotion({ branchId, promotionId }: { branchId: string; promot
   if (!isEditablePromotion(data)) {
     return <UnsupportedPromotion name={data.name} />;
   }
-  return <PromotionForm branchId={branchId} promotion={data} />;
+  // Keyed on status so a toggle from the list reloads the form instead of leaving a stale "Estado".
+  return <PromotionForm branchId={branchId} key={data.status} promotion={data} />;
 }
 function UnsupportedPromotion({ name }: { name: string }) {
   return (
-    <div className={"ming-page admin-page"}>
-      <PageHeader kicker={i18n.t("promotions___Promoción no editable")} title={name} />
+    <div className="admin-detail">
+      <PageHeader headingLevel={2} kicker={i18n.t("promotions___Promoción no editable")} title={name} />
       <InlineMessage
         message={i18n.t(
           "promotions___Este tipo de promoción se conserva sin cambios, pero todavía no puede editarse desde este formulario.",
@@ -155,8 +168,9 @@ function PromotionForm({ branchId, promotion }: { branchId: string; promotion: E
   const controller = usePromotionEditorController({ branchId, promotion });
   useEditorGuard({ dirty: controller.form.formState.isDirty, pending: controller.busy });
   return (
-    <div className={"ming-page admin-page admin-editor-page"}>
+    <div className="admin-detail">
       <PageHeader
+        headingLevel={2}
         kicker={promotion ? i18n.t("promotions___Editar promoción") : i18n.t("promotions___Nueva promoción")}
         title={promotion?.name ?? i18n.t("promotions___Promoción")}
       />
@@ -185,7 +199,7 @@ function TranslatedPromotionForm({
   const { data: promotion } = useSuspenseQuery(getPromotionQueryOptions({ promotionId, trpc }));
   if (!isEditablePromotion(promotion)) {
     return (
-      <div className={"ming-page admin-page"}>
+      <div className="admin-detail">
         <UnsupportedPromotion name={promotion.name} />
         <p>
           {TYPE_LABELS[promotion.type] ?? promotion.type} · {promotion.status}
@@ -259,8 +273,9 @@ function TranslatedEditablePromotion({
     }
   };
   return (
-    <div className={"ming-page admin-page admin-editor-page"}>
+    <div className="admin-detail">
       <PageHeader
+        headingLevel={2}
         description={i18n.t(
           "promotions___Edita los textos de esta promoción. El resto de la configuración se mantiene en el idioma base.",
         )}

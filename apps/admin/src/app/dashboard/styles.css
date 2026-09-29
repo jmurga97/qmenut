@@ -116,13 +116,13 @@
   letter-spacing: -0.04em;
 }
 
-.admin-dashboard-bottom {
+.admin-dashboard-split {
   display: grid;
   align-items: start;
   gap: var(--ming-space-4);
 }
 
-.admin-dashboard-bottom .admin-dashboard-ops {
+.admin-dashboard-split .admin-dashboard-ops {
   display: grid;
   align-content: start;
   gap: var(--ming-space-4);
@@ -148,7 +148,7 @@
 }
 
 @media (min-width: 64rem) {
-  .admin-dashboard-bottom {
+  .admin-dashboard-split {
     grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
   }
 }

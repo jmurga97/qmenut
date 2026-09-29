@@ -16,7 +16,6 @@ import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
 import { FormTextarea } from "~/shared/components/forms/adapters/form-textarea";
 import { FormActions } from "~/shared/components/forms/form-actions";
-import { PageHeader } from "~/shared/components/page-header";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { useCan } from "~/shared/hooks/use-can";
@@ -41,29 +40,26 @@ export function LoyaltyProgramPage() {
   if (!branch)
     return <NoBranchState description={i18n.t("loyalty___Crea una sucursal antes de configurar la fidelización.")} />;
   return (
-    <div className={"ming-page admin-page admin-loyalty-page"}>
-      <PageHeader kicker={i18n.t("loyalty___Programa")} title={i18n.t("loyalty___Sellos y premios")} />
-      <Suspense
-        fallback={
-          <div className={"loyalty-program-layout"}>
-            <div className={"loyalty-program-main"}>
-              <CardSkeleton rows={2} title={i18n.t("loyalty___Configuración")} />
-              <CardSkeleton title={i18n.t("loyalty___Premios")} />
-            </div>
+    <Suspense
+      fallback={
+        <div className={"loyalty-program-layout"}>
+          <div className={"loyalty-program-main"}>
+            <CardSkeleton rows={2} title={i18n.t("loyalty___Configuración")} />
+            <CardSkeleton title={i18n.t("loyalty___Premios")} />
           </div>
-        }
-      >
-        {!language.isDefault && language.languageCode ? (
-          <TranslatedLoyaltyProgram
-            branchId={branch.id}
-            languageCode={language.languageCode}
-            key={`${branch.id}:${language.languageCode}`}
-          />
-        ) : (
-          <LoyaltyProgramContent branchId={branch.id} key={branch.id} />
-        )}
-      </Suspense>
-    </div>
+        </div>
+      }
+    >
+      {!language.isDefault && language.languageCode ? (
+        <TranslatedLoyaltyProgram
+          branchId={branch.id}
+          languageCode={language.languageCode}
+          key={`${branch.id}:${language.languageCode}`}
+        />
+      ) : (
+        <LoyaltyProgramContent branchId={branch.id} key={branch.id} />
+      )}
+    </Suspense>
   );
 }
 function TranslatedLoyaltyProgram({ branchId, languageCode }: { branchId: string; languageCode: string }) {

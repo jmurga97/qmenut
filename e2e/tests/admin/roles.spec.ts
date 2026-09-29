@@ -9,8 +9,9 @@ test("allows staff menu edits and availability changes while restricting billing
   await staff.goto("/billing", { waitUntil: "domcontentloaded" });
   await expect(staff).toHaveURL(/\/(?:\?.*)?$/);
 
-  await staff.goto("/menu", { waitUntil: "domcontentloaded" });
+  await staff.goto("/menu/categories", { waitUntil: "domcontentloaded" });
   await expect(staff.getByRole("link", { name: "Crear categoría" })).toBeVisible();
+  await staff.goto("/menu", { waitUntil: "domcontentloaded" });
   await expect(staff.getByRole("link", { name: "Crear plato" })).toBeVisible();
 
   const availability = staff.getByRole("switch", { name: "Disponibilidad de Patatas bravas" });
@@ -22,7 +23,6 @@ test("allows staff menu edits and availability changes while restricting billing
       availability.click(),
     ]);
     await expect(availability).not.toBeChecked();
-    await expect(availability.locator("..")).toContainText("Oculto");
 
     await staff.getByRole("link", { name: "Patatas bravas" }).click();
     await expect(staff.getByLabel("Nombre", { exact: true })).toBeEnabled();

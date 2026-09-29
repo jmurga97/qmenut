@@ -8,7 +8,6 @@ import { notifyError } from "~/lib/notifications";
 import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
 import { Icon } from "~/shared/components/icon";
-import { PageHeader } from "~/shared/components/page-header";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { useCan } from "~/shared/hooks/use-can";
@@ -17,7 +16,6 @@ import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
 import { formatMoney, formatMoneyInput, parseMoneyInput } from "~/shared/services/money";
 
 import { getIngredientMutationOptions, getMenuIngredientsQueryOptions } from "../api";
-import { MenuSectionTabs } from "./menu-pages";
 
 import type { RouterOutputs } from "~/lib/trpc";
 
@@ -31,20 +29,10 @@ export function MenuExtrasPage() {
 }
 
 function ExtrasPage() {
-  const { isDefault } = useSelectedLanguage();
   return (
-    <div className={"ming-page admin-page"}>
-      <PageHeader
-        description={i18n.t("menu___Gestiona los ingredientes opcionales y asígnalos después a cada plato.")}
-        kicker={i18n.t("menu___Carta")}
-        title={i18n.t("menu___Extras")}
-      />
-      <MenuSectionTabs current={"extras"} />
-      {isDefault ? null : <p>{i18n.t("menu___Cambia al idioma base para crear o editar extras.")}</p>}
-      <Suspense fallback={<CardSkeleton rows={5} title={i18n.t("menu___Ingredientes opcionales")} />}>
-        <ExtrasCatalog />
-      </Suspense>
-    </div>
+    <Suspense fallback={<CardSkeleton rows={5} title={i18n.t("menu___Ingredientes opcionales")} />}>
+      <ExtrasCatalog />
+    </Suspense>
   );
 }
 

@@ -8,6 +8,7 @@ import { getListRestaurantsQueryOptions } from "~/features/auth/api";
 import { useSelectRestaurant } from "~/features/auth/hooks/use-select-restaurant";
 import { getLanguageCatalogQueryOptions } from "~/features/languages/api";
 import { signOut } from "~/lib/auth-client";
+import { FEATURES } from "~/lib/features";
 import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { getLanguagesQueryOptions, getTenantQueryOptions } from "~/shared/api";
@@ -78,14 +79,14 @@ function getCurrentSectionLabel(pathname: string) {
 }
 
 function getNavigationItems(pathname: string, roleCode: Parameters<typeof can>[0]): NavListItem[] {
-  return SECTIONS.filter((section) => !("permission" in section) || can(roleCode, section.permission)).map(
-    (section) => ({
+  return SECTIONS.filter((section) => section.id !== "analytics" || FEATURES.analytics)
+    .filter((section) => !("permission" in section) || can(roleCode, section.permission))
+    .map((section) => ({
       current: section.path === "/" ? pathname === "/" : pathname.startsWith(section.path),
       href: section.path,
       id: section.id,
       label: section.label,
-    }),
-  );
+    }));
 }
 
 export function AdminShell() {

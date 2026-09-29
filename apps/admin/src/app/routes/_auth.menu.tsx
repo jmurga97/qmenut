@@ -1,10 +1,11 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import {
   getMenuAllergensQueryOptions,
   getMenuIngredientsQueryOptions,
   getMenuTagsQueryOptions,
 } from "~/features/menu/api";
+import { MenuLayout } from "~/features/menu/pages/menu-pages";
 import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions, getSelectedBranch } from "~/shared/api";
 
 export const Route = createFileRoute("/_auth/menu")({
@@ -22,5 +23,5 @@ export const Route = createFileRoute("/_auth/menu")({
       queryClient.query({ ...getMenuIngredientsQueryOptions({ trpc }), staleTime: "static" }),
     ]);
   },
-  component: () => <Outlet />,
+  component: MenuLayout,
 });

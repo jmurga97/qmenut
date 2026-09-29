@@ -3,7 +3,9 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 
+import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions } from "~/shared/api";
 
@@ -44,14 +46,30 @@ export function usePromotionEditorController({
   const options = getPromotionMutationOptions(mutationInput);
   const createMutation = useMutation(options.create);
   const updateMutation = useMutation(options.update);
-  const cancel = () => void navigate({ to: "/promotions" });
+  const cancel = () => void navigate({ to: "/promotions", ignoreBlocker: true });
   const submit = form.handleSubmit((values) => {
     const input = toPromotionInput({ promotion, values });
     if (promotion) {
-      updateMutation.mutate({ promotionId: promotion.id, ...input }, { onSuccess: cancel });
+      updateMutation.mutate(
+        { promotionId: promotion.id, ...input },
+        {
+          onSuccess: () => {
+            toast.success(i18n.t("promotions___Promoción guardada."));
+            form.reset(values);
+          },
+        },
+      );
       return;
     }
-    createMutation.mutate({ branchId, ...input }, { onSuccess: cancel });
+    createMutation.mutate(
+      { branchId, ...input },
+      {
+        onSuccess: ({ id }) => {
+          toast.success(i18n.t("promotions___Promoción guardada."));
+          void navigate({ to: "/promotions/$promotionId", params: { promotionId: id }, ignoreBlocker: true });
+        },
+      },
+    );
   });
   const targets = scope === "dish" ? dishes : categories;
   return {

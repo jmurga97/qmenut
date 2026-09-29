@@ -7,7 +7,6 @@ import { i18n } from "~/lib/i18n";
 import { StackedBarChart } from "~/shared/components/charts/stacked-bar-chart";
 import { VISIT_SERIES, toVisitChartPoints } from "~/shared/components/charts/visit-chart";
 import { SegmentedToggle } from "~/shared/components/controls/segmented-toggle";
-import { PageHeader } from "~/shared/components/page-header";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { formatDate, formatNumber, formatPercent } from "~/shared/services/format";
 
@@ -24,20 +23,17 @@ const COLUMNS: Array<{ key: CustomerSort; label: string }> = [
 
 export function LoyaltyInsightsPage() {
   return (
-    <div className={"ming-page admin-page admin-loyalty-page"}>
-      <PageHeader kicker={i18n.t("loyalty___Insights")} title={i18n.t("loyalty___La salud del programa")} />
-      <Suspense
-        fallback={
-          <>
-            <CardSkeleton rows={2} title={i18n.t("loyalty___Indicadores de fidelización")} />
-            <CardSkeleton rows={4} title={i18n.t("loyalty___Nuevos y recurrentes")} />
-            <CardSkeleton rows={5} title={i18n.t("loyalty___Clientes")} />
-          </>
-        }
-      >
-        <LoyaltyInsightsContent />
-      </Suspense>
-    </div>
+    <Suspense
+      fallback={
+        <>
+          <CardSkeleton rows={2} title={i18n.t("loyalty___Indicadores de fidelización")} />
+          <CardSkeleton rows={4} title={i18n.t("loyalty___Nuevos y recurrentes")} />
+          <CardSkeleton rows={5} title={i18n.t("loyalty___Clientes")} />
+        </>
+      }
+    >
+      <LoyaltyInsightsContent />
+    </Suspense>
   );
 }
 

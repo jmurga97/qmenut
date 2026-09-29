@@ -36,7 +36,12 @@
     "Resumen": "Summary",
     "Tasa VES": "VES rate",
     "Cambia solo. Compártelo para que tus clientes sumen sellos.": "The code rotates automatically. Share it so customers can collect stamps.",
-    "Código de la sucursal": "Branch code"
+    "Código de la sucursal": "Branch code",
+    "Gestionar promociones →": "Manage promotions →",
+    "No hay promociones activas ni programadas.": "No active or scheduled promotions.",
+    "Promociones": "Promotions",
+    "Ver carta ↗": "View menu ↗",
+    "Código QR": "QR code"
   },
   "main.tsx": {
     "Unable to find root element": "Unable to find root element"
@@ -398,7 +403,8 @@
     "No se pudo transferir el archivo. Pulsa Guardar para reintentar.": "The file could not be transferred. Press Save to retry.",
     "No se pudo subir el archivo. Comprueba tu conexión y pulsa Guardar.": "The file could not be uploaded. Check your connection and press Save.",
     "La subida tardó demasiado. Pulsa Guardar para reintentar.": "The upload took too long. Press Save to retry.",
-    "Subida interrumpida": "Upload interrupted"
+    "Subida interrumpida": "Upload interrupted",
+    "Los cambios sin guardar se perderán.": "Unsaved changes will be lost."
   },
   "exchangeRates": {
     "Sin referencia disponible": "No reference available",
@@ -667,7 +673,11 @@
     "Elige una categoría": "Choose a category",
     "La descripción no puede superar 2.000 caracteres": "Description cannot exceed 2,000 characters",
     "El precio del combo es obligatorio": "The price of the combo is mandatory",
-    "La descripción del combo es obligatoria": "Combo description is required"
+    "La descripción del combo es obligatoria": "Combo description is required",
+    "Selecciona un plato para editarlo o crea uno nuevo.": "Select a dish to edit it or create a new one.",
+    "Selecciona una categoría para editarla o crea una nueva.": "Select a category to edit it or create a new one.",
+    "Plato guardado.": "Dish saved.",
+    "Categoría guardada.": "Category saved."
   },
   "menuPrint": {
     "Categorías de la carta": "Menu categories",
@@ -753,7 +763,10 @@
     "Indica un precio": "Indicates a price",
     "Indica las unidades que lleva": "Indicates the units it carries",
     "Indica las unidades que paga": "Indicates the units paid",
-    "Las unidades pagadas no pueden superar las compradas": "Units paid cannot exceed units purchased"
+    "Las unidades pagadas no pueden superar las compradas": "Units paid cannot exceed units purchased",
+    "Promoción guardada.": "Promotion saved.",
+    "Selecciona una promoción para editarla o crea una nueva.": "Select a promotion to edit it or create a new one.",
+    "Activar {{name}}": "Activate {{name}}"
   },
   "qr": {
     "Ocultar estilos": "Hide styles",
