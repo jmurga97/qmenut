@@ -1,2 +1,2 @@
 /*
-  Content-Security-Policy: require-trusted-types-for 'script'; trusted-types qmenut-qr-svg lit-html
+  Content-Security-Policy: require-trusted-types-for 'script'; trusted-types qmenut-qr-svg qmenut-print-text lit-html

@@ -26,10 +26,24 @@ export interface PrintCategory {
 export function toPrintText(html: string | null): string {
   if (!html) return "";
   const separated = html.replaceAll(/<\/(?:p|div|li|ul|ol)>|<br\s*\/?>/gi, "\n");
-  const parsed = new DOMParser().parseFromString(separated, "text/html");
+  const runtime = globalThis as typeof globalThis & {
+    trustedTypes?: {
+      createPolicy: (name: string, rules: { createHTML: (value: string) => string }) => PrintTextPolicy;
+    };
+    __qmenutPrintTextPolicy?: PrintTextPolicy;
+  };
+  if (runtime.trustedTypes && !runtime.__qmenutPrintTextPolicy) {
+    runtime.__qmenutPrintTextPolicy = runtime.trustedTypes.createPolicy("qmenut-print-text", {
+      createHTML: (value) => value,
+    });
+  }
+  const trustedHtml = runtime.__qmenutPrintTextPolicy?.createHTML(separated) ?? separated;
+  const parsed = new DOMParser().parseFromString(trustedHtml, "text/html");
   parsed.querySelectorAll("script, style, img").forEach((node) => node.remove());
   return (parsed.body.textContent ?? "").trim();
 }
+
+type PrintTextPolicy = { createHTML: (value: string) => string };
 
 function mapDish(dish: MenuData["categories"][number]["dishes"][number], currency: string): PrintDish {
   const money = (amount: number) => formatMoney(amount, currency);
