@@ -19,9 +19,6 @@ export function PendingRedemptionsPanel({ branchId, titleId }: PendingRedemption
             {i18n.t("loyalty___Canjes pendientes (")}
             {pendingQuery.data?.length ?? 0})
           </h2>
-          {pendingQuery.isFetching ? (
-            <span className={"loyalty-live-label"}>{i18n.t("loyalty___Actualizando")}</span>
-          ) : null}
         </div>
         <PendingRedemptionList queue={queue} />
       </section>

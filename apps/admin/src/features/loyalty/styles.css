@@ -70,8 +70,7 @@
   place-items: center;
 }
 
-.loyalty-countdown span,
-.loyalty-live-label {
+.loyalty-countdown span {
   color: var(--muted-foreground);
   font-family: var(--font-mono);
   font-size: var(--admin-text-caption);
