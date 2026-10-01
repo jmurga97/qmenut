@@ -328,6 +328,9 @@ body {
   align-items: start;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
 }
+.admin-form-grid--two > * {
+  min-width: 0;
+}
 .admin-choice-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
@@ -362,6 +365,17 @@ body {
   padding: var(--ming-space-3) var(--ming-space-4);
   border-block-start: 1px solid var(--border);
   transition: background-color 150ms ease;
+}
+.admin-list-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--ming-space-1);
+  align-items: center;
+}
+/* Ming has no icon-only button size; square the sm buttons so the row fits the narrow list column. */
+.admin-list-actions > button {
+  width: 2rem;
+  padding-inline: 0;
 }
 .admin-list-group {
   padding-block-start: var(--ming-space-4);

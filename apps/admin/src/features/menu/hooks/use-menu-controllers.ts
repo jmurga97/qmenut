@@ -18,6 +18,7 @@ import { formatMoney } from "~/shared/services/money";
 
 import {
   getCategoryMutationOptions,
+  getCategoryReorderMutationOptions,
   getDishAvailabilityMutationOptions,
   getDishMutationOptions,
   getMenuAllergensQueryOptions,
@@ -35,9 +36,18 @@ export function useMenuListController(branchId: string) {
   const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, languageCode, trpc })).data;
   const dishes = useSuspenseQuery(getMenuDishesQueryOptions({ branchId, languageCode, trpc })).data;
   const availability = useMutation(getDishAvailabilityMutationOptions({ branchId, languageCode, queryClient, trpc }));
+  const reorder = useMutation(getCategoryReorderMutationOptions({ branchId, languageCode, queryClient, trpc }));
+  const moveCategory = (index: number, offset: -1 | 1) => {
+    const categoryIds = categories.map(({ id }) => id);
+    const target = index + offset;
+    if (target < 0 || target >= categoryIds.length) return;
+    [categoryIds[index], categoryIds[target]] = [categoryIds[target], categoryIds[index]];
+    reorder.mutate({ branchId, categoryIds });
+  };
   return {
     categories,
     dishes,
+    moveCategory,
     setAvailability: (dishId: string, isActive: boolean) => availability.mutate({ branchId, dishId, isActive }),
   };
 }

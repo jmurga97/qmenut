@@ -87,3 +87,4 @@ export type LoyaltyProgramResponse = RouterOutputs["admin"]["loyalty"]["getProgr
 export type PendingRedemption = RouterOutputs["admin"]["loyalty"]["pendingRedemptions"][number];
 export type LoyaltyCustomer = RouterOutputs["admin"]["loyalty"]["insights"]["customers"]["rows"][number];
 export type LoyaltyVisitsPoint = RouterOutputs["admin"]["loyalty"]["insights"]["visitsChart"][number];
+export type DishGroup = { label: string; options: Array<{ id: string; label: string }> };

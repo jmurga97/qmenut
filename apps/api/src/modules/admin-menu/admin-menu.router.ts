@@ -1,4 +1,8 @@
-import { getCategoryContext, softDeleteCategory } from "@qmenut/db/repositories/admin-categories.repository";
+import {
+  getCategoryContext,
+  reorderCategories,
+  softDeleteCategory,
+} from "@qmenut/db/repositories/admin-categories.repository";
 import { getDishContext, setDishAvailability, softDeleteDish } from "@qmenut/db/repositories/admin-dishes.repository";
 import {
   createIngredient,
@@ -19,6 +23,7 @@ import {
   createDishSchema,
   createIngredientSchema,
   dishRelationsSchema,
+  reorderCategoriesSchema,
   updateCategorySchema,
   updateDishSchema,
   updateIngredientSchema,
@@ -152,6 +157,27 @@ const categoriesRouter = router({
         return result;
       },
     });
+  }),
+  reorder: tenantProcedure.input(reorderCategoriesSchema).mutation(async ({ ctx, input }) => {
+    requirePermission(ctx.tenant, "menu.write");
+    await assertBranchAccess({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      branchId: input.branchId,
+    });
+    await reorderCategories({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      branchId: input.branchId,
+      categoryIds: input.categoryIds,
+    });
+    await bumpPublicContentVersionForBranch({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
+      branchId: input.branchId,
+    });
+    return { branchId: input.branchId };
   }),
   remove: tenantProcedure.input(categoryIdInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");

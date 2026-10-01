@@ -1,6 +1,7 @@
 import { Badge, Button, ConfirmAction, Field, InlineMessage, Input, Switch } from "@jmurga97/components";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Outlet } from "@tanstack/react-router";
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import { Fragment, Suspense, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFormContext, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -174,7 +175,10 @@ export function CategoriesIndex() {
   return <DetailEmpty text={i18n.t("menu___Selecciona una categoría para editarla o crea una nueva.")} />;
 }
 function CategoryList({ branchId }: { branchId: string }) {
-  const { categories } = useMenuListController(branchId);
+  const { categories, moveCategory } = useMenuListController(branchId);
+  const canWrite = useCan("menu.write");
+  const { isDefault } = useSelectedLanguage();
+  const canReorder = canWrite && isDefault;
   return (
     <EntityListCard
       action={<CreateButton label={i18n.t("menu___Crear categoría")} to={"/menu/categories/new"} />}
@@ -182,7 +186,7 @@ function CategoryList({ branchId }: { branchId: string }) {
       emptyText={i18n.t("menu___Aún no hay categorías.")}
       title={i18n.t("menu___Categorías")}
     >
-      {categories.map((category) => (
+      {categories.map((category, index) => (
         <li className="admin-list-item" key={category.id}>
           <Link
             className={"admin-link admin-list-label"}
@@ -191,9 +195,33 @@ function CategoryList({ branchId }: { branchId: string }) {
           >
             {category.name}
           </Link>
-          <Badge tone={category.isActive ? "success" : "neutral"}>
-            {category.isActive ? i18n.t("menu___Activa") : i18n.t("menu___Oculta")}
-          </Badge>
+          <div className={"admin-list-actions"}>
+            <Badge tone={category.isActive ? "success" : "neutral"}>
+              {category.isActive ? i18n.t("menu___Activa") : i18n.t("menu___Oculta")}
+            </Badge>
+            {canReorder ? (
+              <>
+                <Button
+                  aria-label={i18n.t("menu___Subir {{name}}", { name: category.name })}
+                  disabled={index === 0}
+                  onClick={() => moveCategory(index, -1)}
+                  size={"sm"}
+                  variant={"ghost"}
+                >
+                  <ArrowUpIcon aria-hidden={"true"} />
+                </Button>
+                <Button
+                  aria-label={i18n.t("menu___Bajar {{name}}", { name: category.name })}
+                  disabled={index === categories.length - 1}
+                  onClick={() => moveCategory(index, 1)}
+                  size={"sm"}
+                  variant={"ghost"}
+                >
+                  <ArrowDownIcon aria-hidden={"true"} />
+                </Button>
+              </>
+            ) : null}
+          </div>
         </li>
       ))}
     </EntityListCard>

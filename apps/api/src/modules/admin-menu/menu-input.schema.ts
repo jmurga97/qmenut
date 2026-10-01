@@ -35,6 +35,11 @@ export const updateCategorySchema = z.object({
   data: categoryWriteSchema,
 });
 
+export const reorderCategoriesSchema = z.object({
+  branchId: z.string().trim().min(1),
+  categoryIds: z.array(z.string().trim().min(1)).max(500),
+});
+
 export const dishWriteSchema = z
   .object({
     categoryId: z.string().trim().min(1),

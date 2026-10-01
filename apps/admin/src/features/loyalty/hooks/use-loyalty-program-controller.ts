@@ -115,7 +115,7 @@ export function useLoyaltyProgramController(selectedBranchId: string) {
     },
     deletingIndex,
     deletingRewardName: deletingIndex === null ? null : form.getValues(`rewards.${deletingIndex}.name`),
-    dishes: mappers.toDishOptions({ branches: tenant.branches, dishLists: dishQueries.map((query) => query.data) }),
+    dishGroups: mappers.toDishGroups({ branches: tenant.branches, dishLists: dishQueries.map((query) => query.data) }),
     editingIndex,
     form,
     previewBalance: Math.min(3, target),

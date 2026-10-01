@@ -7,6 +7,7 @@ import { Suspense, useEffect } from "react";
 import { FormProvider, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
+import { DishSelect } from "~/features/loyalty/components/dish-select";
 import { useLoyaltyProgramController } from "~/features/loyalty/hooks/use-loyalty-program-controller";
 import { i18n } from "~/lib/i18n";
 import { notifyError } from "~/lib/notifications";
@@ -325,11 +326,11 @@ function RewardRow({
                 type={"number"}
               />
             ) : (
-              <FormSelect<LoyaltyProgramFormValues>
+              <DishSelect
                 disabled={Boolean(translation)}
+                groups={loyalty.dishGroups}
                 label={i18n.t("loyalty___Plato · todas las sucursales")}
-                name={field("freeDishId")}
-                options={loyalty.dishes}
+                name={`rewards.${index}.freeDishId`}
               />
             )}
             {reward.type === "special_price" ? (

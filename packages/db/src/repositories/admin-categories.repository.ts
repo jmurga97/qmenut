@@ -42,8 +42,39 @@ export async function listCategories({ db, restaurantId, branchId }: ListCategor
     .where(
       and(eq(categories.restaurantId, restaurantId), eq(categories.branchId, branchId), isNull(categories.deletedAt)),
     )
-    .orderBy(asc(categories.position))
+    .orderBy(asc(categories.position), asc(categories.id))
     .all();
+}
+
+interface ReorderCategoriesInput {
+  db: DrizzleDb;
+  restaurantId: string;
+  branchId: string;
+  categoryIds: string[];
+}
+
+export async function reorderCategories({
+  db,
+  restaurantId,
+  branchId,
+  categoryIds,
+}: ReorderCategoriesInput): Promise<void> {
+  if (categoryIds.length === 0) return;
+  const now = Date.now();
+  const statements: BatchItem<"sqlite">[] = categoryIds.map((categoryId, position) =>
+    db
+      .update(categories)
+      .set({ position, updatedAt: now })
+      .where(
+        and(
+          eq(categories.id, categoryId),
+          eq(categories.restaurantId, restaurantId),
+          eq(categories.branchId, branchId),
+          isNull(categories.deletedAt),
+        ),
+      ),
+  );
+  await db.batch(statements as [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]]);
 }
 
 interface CreateCategoryInput {
@@ -128,7 +159,6 @@ export function updateCategoryStatement({
       name: data.name,
       description: data.description,
       imageUrl: preserveImage ? undefined : data.imageUrl,
-      position: data.position,
       isActive: data.isActive,
       updatedAt: Date.now(),
     })

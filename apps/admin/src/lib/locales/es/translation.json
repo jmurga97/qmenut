@@ -682,7 +682,9 @@
     "¿Eliminar plato?": "¿Eliminar plato?",
     "«{{name}}» se eliminará de la carta. Esta acción no se puede deshacer.": "«{{name}}» se eliminará de la carta. Esta acción no se puede deshacer.",
     "Plato guardado.": "Plato guardado.",
-    "Categoría guardada.": "Categoría guardada."
+    "Categoría guardada.": "Categoría guardada.",
+    "Subir {{name}}": "Subir {{name}}",
+    "Bajar {{name}}": "Bajar {{name}}"
   },
   "menuPrint": {
     "Categorías de la carta": "Categorías de la carta",

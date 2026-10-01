@@ -56,12 +56,14 @@ export function toRewardInput(values: Loyalty.RewardFormValues) {
     isActive: values.isActive,
   };
 }
-export function toDishOptions(input: {
+export function toDishGroups(input: {
   branches: Array<{ name: string }>;
   dishLists: Array<Array<{ id: string; name: string }>>;
-}) {
-  return input.dishLists.flatMap((dishes, index) => {
-    const branchName = input.branches[index]?.name ?? i18n.t("loyalty___Sucursal");
-    return dishes.map((dish) => ({ id: dish.id, label: `${dish.name} · ${branchName}` }));
-  });
+}): Loyalty.DishGroup[] {
+  return input.dishLists
+    .map((dishes, index) => ({
+      label: input.branches[index]?.name ?? i18n.t("loyalty___Sucursal"),
+      options: dishes.map((dish) => ({ id: dish.id, label: dish.name })),
+    }))
+    .filter((group) => group.options.length > 0);
 }

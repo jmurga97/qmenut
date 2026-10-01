@@ -96,3 +96,30 @@ export function getDishAvailabilityMutationOptions(input: MenuMutationInput) {
     },
   });
 }
+type CategoryList = RouterOutputs["admin"]["menu"]["categories"]["list"];
+
+// Optimistic like availability: cached lists of this branch reorder at once, one scope keeps rapid moves in order,
+// and only the last move to settle refetches.
+export function getCategoryReorderMutationOptions(input: MenuMutationInput) {
+  const { queryClient, trpc } = input;
+  const listKey = trpc.admin.menu.categories.list.pathKey();
+  const mutationKey = trpc.admin.menu.categories.reorder.mutationKey();
+  return trpc.admin.menu.categories.reorder.mutationOptions({
+    scope: { id: "category-reorder" },
+    onMutate: async ({ categoryIds }) => {
+      await queryClient.cancelQueries({ queryKey: listKey });
+      const positions = new Map(categoryIds.map((id, position) => [id, position]));
+      queryClient.setQueriesData<CategoryList>({ queryKey: listKey }, (categories) => {
+        // Lists of other branches share the path key; leave them untouched.
+        if (!categories?.every(({ id }) => positions.has(id))) return categories;
+        return categories
+          .map((category) => ({ ...category, position: positions.get(category.id) ?? category.position }))
+          .toSorted((a, b) => a.position - b.position);
+      });
+    },
+    onSettled: () => {
+      if (queryClient.isMutating({ mutationKey }) > 1) return;
+      return queryClient.invalidateQueries({ queryKey: listKey });
+    },
+  });
+}

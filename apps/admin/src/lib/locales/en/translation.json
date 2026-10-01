@@ -682,7 +682,9 @@
     "¿Eliminar plato?": "Delete dish?",
     "«{{name}}» se eliminará de la carta. Esta acción no se puede deshacer.": "“{{name}}” will be removed from the menu. This can't be undone.",
     "Plato guardado.": "Dish saved.",
-    "Categoría guardada.": "Category saved."
+    "Categoría guardada.": "Category saved.",
+    "Subir {{name}}": "Move {{name}} up",
+    "Bajar {{name}}": "Move {{name}} down"
   },
   "menuPrint": {
     "Categorías de la carta": "Menu categories",

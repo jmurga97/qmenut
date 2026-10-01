@@ -568,7 +568,7 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-modal-handle-width": "82px",
       "--qm-modal-handle-height": "36px",
       "--qm-modal-handle-bg": "var(--qm-card)",
-      "--qm-modal-handle-border": "1px solid var(--qm-hairline)",
+      "--qm-modal-handle-border": "none",
       "--qm-modal-handle-radius": "999px 999px 0 0",
       "--qm-modal-close-bg": "var(--qm-tint)",
       "--qm-modal-close-border": "1px solid var(--qm-hairline)",
