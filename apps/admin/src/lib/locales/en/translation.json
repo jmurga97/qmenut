@@ -80,7 +80,9 @@
     "Sin dominio público": "Not public domain",
     "Sucursal activa": "Active Branch",
     "Ver carta ↗": "View menu ↗",
-    "Cerrar sesión": "Sign out"
+    "Cerrar sesión": "Sign out",
+    "Instalar app": "Install app",
+    "Instalar: Compartir → Añadir a inicio": "Install: Share → Add to Home Screen"
   },
   "analytics": {
     "Sin datos en este periodo.": "No data in this period.",

@@ -2,6 +2,7 @@ import { Button, Select, SidebarNav } from "@jmurga97/components";
 import { useState } from "react";
 
 import { i18n } from "~/lib/i18n";
+import { useInstallPrompt } from "~/shared/hooks/use-install-prompt";
 
 import type { NavListItem } from "@jmurga97/components";
 import type { SyntheticEvent } from "react";
@@ -40,6 +41,7 @@ export function AdminSidebar({
   selectedBranch,
 }: AdminSidebarProps) {
   const [selectPortalContainer, setSelectPortalContainer] = useState<HTMLElement | null>(null);
+  const { install, mode: installMode } = useInstallPrompt();
   const domainStatus = selectedBranch?.customDomain ?? i18n.t("shell___Sin dominio público");
 
   // SidebarNav renders plain anchors, so router Link's intent preload never fires; delegate it from here.
@@ -90,6 +92,14 @@ export function AdminSidebar({
               <a aria-describedby="admin-sidebar-domain" href={publicMenuUrl} rel={"noreferrer"} target={"_blank"}>
                 {i18n.t("shell___Ver carta ↗")}
               </a>
+            ) : null}
+            {installMode === "prompt" ? (
+              <Button onClick={install} variant={"ghost"}>
+                {i18n.t("shell___Instalar app")}
+              </Button>
+            ) : null}
+            {installMode === "ios" ? (
+              <span className="admin-sidebar-domain">{i18n.t("shell___Instalar: Compartir → Añadir a inicio")}</span>
             ) : null}
             <Button onClick={onLogout} variant={"ghost"}>
               {i18n.t("shell___Cerrar sesión")}

@@ -14,6 +14,7 @@ import { trpc } from "~/lib/trpc";
 import { RouteErrorState } from "~/shared/components/state/error-state";
 import { LoadingState } from "~/shared/components/state/loading-state";
 import { NotFoundState } from "~/shared/components/state/not-found-state";
+import { captureInstallPrompt } from "~/shared/hooks/use-install-prompt";
 import "./styles/global.css";
 import "../shared/components/charts/styles.css";
 import "../shared/components/controls/styles.css";
@@ -39,6 +40,7 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     tracesSampleRate: 0,
   });
 }
+captureInstallPrompt();
 const router = createRouter({
   routeTree,
   history: createBrowserHistory(),
