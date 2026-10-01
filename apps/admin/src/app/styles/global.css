@@ -363,6 +363,9 @@ body {
   border-block-start: 1px solid var(--border);
   transition: background-color 150ms ease;
 }
+.admin-list-group {
+  padding-block-start: var(--ming-space-4);
+}
 .admin-list-text {
   display: grid;
   min-width: 0;
@@ -569,6 +572,9 @@ body {
 }
 .admin-form-actions > * {
   min-inline-size: 8rem;
+}
+.admin-form-actions > .admin-form-actions__start {
+  margin-inline-end: auto;
 }
 /* Editor footers stay reachable while scrolling long forms, especially on phones. */
 .admin-detail .admin-editor-shell > .admin-form-actions,

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
+import { getMenuDishesQueryOptions } from "~/shared/api";
 
 import type { ImagePurpose } from "./image-draft";
 import type { RouterOutputs } from "~/lib/trpc";
@@ -31,6 +32,10 @@ export function ImageActivityToasts({ branchId }: { branchId: string }) {
       },
     ),
   );
+  const dishes = useQuery({
+    ...getMenuDishesQueryOptions({ branchId, trpc }),
+    enabled: query.data?.some((row) => row.purpose === "dishImage"),
+  });
   const retry = useMutation(trpc.admin.images.assignments.retry.mutationOptions());
   const retryRow = (row: Assignment) => {
     retry.mutate(
@@ -52,7 +57,7 @@ export function ImageActivityToasts({ branchId }: { branchId: string }) {
     retryRowRef.current = retryRow;
   });
 
-  const shown = useRef(new Map<string, Assignment["status"]>());
+  const shown = useRef(new Map<string, string>());
   useEffect(() => {
     const shownMap = shown.current;
     return () => {
@@ -63,13 +68,17 @@ export function ImageActivityToasts({ branchId }: { branchId: string }) {
 
   useEffect(() => {
     const rows = query.data ?? [];
+    const dishNames = new Map(dishes.data?.map((dish) => [dish.id, dish.name]));
     let applied = false;
     for (const row of rows) {
-      if (shown.current.get(row.id) === row.status) continue;
-      shown.current.set(row.id, row.status);
+      const dishName = row.purpose === "dishImage" ? dishNames.get(row.entityId) : undefined;
+      const label = dishName ? i18n.t("images___Imagen del plato ({{name}})", { name: dishName }) : labels[row.purpose];
+      const key = `${row.status}:${label}`;
+      if (shown.current.get(row.id) === key) continue;
+      shown.current.set(row.id, key);
       switch (row.status) {
         case "pending": {
-          toast.loading(i18n.t("images___{{label}}: preparando…", { label: labels[row.purpose] }), {
+          toast.loading(i18n.t("images___{{label}}: preparando…", { label }), {
             duration: Infinity,
             id: row.id,
           });
@@ -77,7 +86,7 @@ export function ImageActivityToasts({ branchId }: { branchId: string }) {
         }
         case "applied": {
           applied = true;
-          toast.success(i18n.t("images___{{label}} actualizada", { label: labels[row.purpose] }), {
+          toast.success(i18n.t("images___{{label}} actualizada", { label }), {
             closeButton: true,
             duration: 6000,
             id: row.id,
@@ -89,15 +98,12 @@ export function ImageActivityToasts({ branchId }: { branchId: string }) {
           break;
         }
         case "failed": {
-          toast.error(
-            row.error ?? i18n.t("images___{{label}}: la imagen necesita atención", { label: labels[row.purpose] }),
-            {
-              action: { label: i18n.t("images___Reintentar"), onClick: () => retryRowRef.current(row) },
-              closeButton: true,
-              duration: Infinity,
-              id: row.id,
-            },
-          );
+          toast.error(row.error ?? i18n.t("images___{{label}}: la imagen necesita atención", { label }), {
+            action: { label: i18n.t("images___Reintentar"), onClick: () => retryRowRef.current(row) },
+            closeButton: true,
+            duration: Infinity,
+            id: row.id,
+          });
           break;
         }
       }
@@ -112,7 +118,7 @@ export function ImageActivityToasts({ branchId }: { branchId: string }) {
     if (!applied) return;
     void queryClient.invalidateQueries({ queryKey: trpc.admin.menu.pathKey() });
     void queryClient.invalidateQueries({ queryKey: trpc.admin.branches.pathKey() });
-  }, [query.data, queryClient]);
+  }, [query.data, dishes.data, queryClient]);
 
   return null;
 }

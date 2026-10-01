@@ -150,7 +150,7 @@
 }
 
 .admin-schedule-interval input[type="time"]::-webkit-calendar-picker-indicator {
-  pointer-events: none;
+  display: none;
 }
 
 .admin-google-reviews__intro,

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { i18n } from "~/lib/i18n";
+import { notifyError } from "~/lib/notifications";
 import { trpc } from "~/lib/trpc";
 import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions, getTenantQueryOptions } from "~/shared/api";
 import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
@@ -148,6 +149,7 @@ export function useDishEditorController({
   const create = useMutation(options.create);
   const update = useMutation(options.update);
   const relations = useMutation(options.relations);
+  const remove = useMutation(options.remove);
   const image = useImageDraft(dish?.imageUrl ?? null);
   const uploads = useImageUploads();
   const imageSave = useImageSave();
@@ -195,6 +197,16 @@ export function useDishEditorController({
     form.reset(values);
     image.accept();
   });
+  const removeDish = async () => {
+    if (!dish) return;
+    try {
+      await remove.mutateAsync({ dishId: dish.id });
+      toast.success(i18n.t("menu___Plato eliminado."));
+      await navigate({ to: "/menu/dishes", ignoreBlocker: true });
+    } catch (error) {
+      notifyError(error);
+    }
+  };
   return {
     allergenOptions: allergens.map(({ code, id }) => ({ id, label: toAllergenDisplayLabel(code) })),
     operation: uploads.operation,
@@ -207,6 +219,8 @@ export function useDishEditorController({
     })),
     form,
     image,
+    removeDish,
+    removing: remove.isPending,
     submit,
     tagOptions: tags.map((tag) => ({ id: tag.id, label: toTagDisplayLabel(tag) })),
   };

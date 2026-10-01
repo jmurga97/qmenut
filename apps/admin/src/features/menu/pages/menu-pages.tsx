@@ -1,7 +1,7 @@
-import { Badge, Button, Field, InlineMessage, Input, Switch } from "@jmurga97/components";
+import { Badge, Button, ConfirmAction, Field, InlineMessage, Input, Switch } from "@jmurga97/components";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Outlet } from "@tanstack/react-router";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Fragment, Suspense, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFormContext, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -96,37 +96,63 @@ function DishList({ branchId }: { branchId: string }) {
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const canToggleAvailability = useCan("menu.toggleDishAvailability");
   const { isDefault } = useSelectedLanguage();
-  const { dishes, setAvailability } = useMenuListController(branchId);
+  const { categories, dishes, setAvailability } = useMenuListController(branchId);
+  const [search, setSearch] = useState("");
+  const query = search.trim().toLowerCase();
+  const matches = dishes.filter((dish) => dish.name.toLowerCase().includes(query));
+  const groups = categories
+    .map((category) => ({ category, dishes: matches.filter((dish) => dish.categoryId === category.id) }))
+    .filter((group) => group.dishes.length > 0);
   return (
     <EntityListCard
-      action={<CreateButton label={i18n.t("menu___Crear plato")} to={"/menu/dishes/new"} />}
-      count={dishes.length}
-      emptyText={i18n.t("menu___Aún no hay platos.")}
+      action={
+        <div className={"admin-toolbar-controls"}>
+          <Input
+            aria-label={i18n.t("menu___Buscar plato")}
+            placeholder={i18n.t("menu___Buscar plato")}
+            type={"search"}
+            value={search}
+            onValueChange={setSearch}
+          />
+          <CreateButton label={i18n.t("menu___Crear plato")} to={"/menu/dishes/new"} />
+        </div>
+      }
+      count={matches.length}
+      emptyText={query ? i18n.t("menu___Ningún plato coincide con la búsqueda.") : i18n.t("menu___Aún no hay platos.")}
       title={i18n.t("menu___Platos")}
     >
-      {dishes.map((dish) => (
-        <li className="admin-list-item" key={dish.id}>
-          <div className="admin-list-text">
-            <Link className={"admin-link admin-list-label"} params={{ dishId: dish.id }} to={"/menu/dishes/$dishId"}>
-              {dish.name}
-            </Link>
-            <span className="admin-list-meta">{formatMoney(dish.price, tenant.restaurant.sourceCurrency)}</span>
-          </div>
-          {canToggleAvailability ? (
-            <Switch
-              aria-label={i18n.t("menu___Disponibilidad de {{name}}", { name: dish.name })}
-              checked={dish.isActive}
-              disabled={!isDefault}
-              onCheckedChange={(checked) => {
-                if (isDefault) setAvailability(dish.id, checked);
-              }}
-            />
-          ) : (
-            <span className="admin-list-meta">
-              {dish.isActive ? i18n.t("menu___Disponible") : i18n.t("menu___Oculto")}
-            </span>
-          )}
-        </li>
+      {groups.map(({ category, dishes: categoryDishes }) => (
+        <Fragment key={category.id}>
+          <li className="admin-list-group ming-eyebrow">{category.name}</li>
+          {categoryDishes.map((dish) => (
+            <li className="admin-list-item" key={dish.id}>
+              <div className="admin-list-text">
+                <Link
+                  className={"admin-link admin-list-label"}
+                  params={{ dishId: dish.id }}
+                  to={"/menu/dishes/$dishId"}
+                >
+                  {dish.name}
+                </Link>
+                <span className="admin-list-meta">{formatMoney(dish.price, tenant.restaurant.sourceCurrency)}</span>
+              </div>
+              {canToggleAvailability ? (
+                <Switch
+                  aria-label={i18n.t("menu___Disponibilidad de {{name}}", { name: dish.name })}
+                  checked={dish.isActive}
+                  disabled={!isDefault}
+                  onCheckedChange={(checked) => {
+                    if (isDefault) setAvailability(dish.id, checked);
+                  }}
+                />
+              ) : (
+                <span className="admin-list-meta">
+                  {dish.isActive ? i18n.t("menu___Disponible") : i18n.t("menu___Oculto")}
+                </span>
+              )}
+            </li>
+          ))}
+        </Fragment>
       ))}
     </EntityListCard>
   );
@@ -483,9 +509,10 @@ function DishFields({
 function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | null }) {
   const canWrite = useCan("menu.write");
   const controller = useDishEditorController({ branchId, dish });
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   useEditorGuard({
     dirty: controller.form.formState.isDirty || Boolean(controller.image.draft.changed),
-    pending: controller.busy,
+    pending: controller.busy || controller.removing,
   });
   return (
     <div className="admin-detail">
@@ -496,6 +523,17 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
       />
       <FormProvider {...controller.form}>
         <FormShell
+          actions={
+            dish ? (
+              <Button
+                className={"admin-form-actions__start"}
+                onClick={() => setConfirmingRemove(true)}
+                variant={"destructive"}
+              >
+                {i18n.t("menu___Eliminar plato")}
+              </Button>
+            ) : null
+          }
           operation={controller.operation}
           busy={controller.busy}
           onCancel={controller.cancel}
@@ -505,6 +543,19 @@ function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | nul
           <DishFields controller={controller} />
         </FormShell>
       </FormProvider>
+      <ConfirmAction
+        confirmLabel={i18n.t("menu___Eliminar plato")}
+        message={i18n.t("menu___«{{name}}» se eliminará de la carta. Esta acción no se puede deshacer.", {
+          name: dish?.name ?? i18n.t("menu___Plato"),
+        })}
+        onConfirm={() => void controller.removeDish()}
+        onOpenChange={(open) => {
+          if (!open && !controller.removing) setConfirmingRemove(false);
+        }}
+        open={confirmingRemove}
+        pending={controller.removing}
+        title={i18n.t("menu___¿Eliminar plato?")}
+      />
     </div>
   );
 }

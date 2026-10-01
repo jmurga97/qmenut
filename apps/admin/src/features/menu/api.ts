@@ -51,6 +51,10 @@ export function getCategoryMutationOptions(input: MenuMutationInput) {
 export function getDishMutationOptions(input: MenuMutationInput) {
   return {
     create: input.trpc.admin.menu.dishes.create.mutationOptions(),
+    // Lists only: refetching the detail of the dish just deleted would throw NOT_FOUND in the still-mounted editor.
+    remove: input.trpc.admin.menu.dishes.remove.mutationOptions({
+      onSuccess: () => input.queryClient.invalidateQueries({ queryKey: input.trpc.admin.menu.dishes.list.pathKey() }),
+    }),
     relations: input.trpc.admin.menu.dishes.saveRelations.mutationOptions({ onSuccess: () => invalidateMenu(input) }),
     update: input.trpc.admin.menu.dishes.update.mutationOptions(),
   };
