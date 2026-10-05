@@ -496,6 +496,13 @@ export async function getPublicMenu({
       description: rows.translationsByEntity.get(row.id)?.get("description") ?? row.description,
     }));
   const promotionsById = new Map(activePromotions.map((row) => [row.id, row]));
+  const visibleCategoryRows = rows.categoryRows.filter((row) =>
+    isPromotionLikeActiveNow({
+      promotion: { ...row, isRecurring: true, startsAt: null, endsAt: null },
+      nowMs,
+      timeZone,
+    }),
+  );
   const bestPromotionsByDish = createBestPromotionMap({
     candidates: rows.promotionCandidateRows,
     nowMs,
@@ -518,7 +525,7 @@ export async function getPublicMenu({
   return {
     branch: branchWithVariants,
     categories: mapPublicCategories({
-      categoryRows: rows.categoryRows,
+      categoryRows: visibleCategoryRows,
       dishesByCategory,
       imageVariantsByCanonicalUrl,
       translationsByEntity: rows.translationsByEntity,

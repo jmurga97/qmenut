@@ -71,7 +71,6 @@ export type QmTemplateLayoutDefaults = Pick<
   | "--qm-modal-photo-cap"
   | "--qm-modal-photo-ratio"
   | "--qm-modal-price-size"
-  | "--qm-modal-section-bg"
   | "--qm-modal-section-border"
   | "--qm-modal-title-leading"
   | "--qm-modal-title-size"
@@ -220,7 +219,6 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-modal-lead-bg": "transparent",
       "--qm-modal-lead-border": "1px solid var(--qm-ink)",
       "--qm-modal-lead-rail": "none",
-      "--qm-modal-section-bg": "transparent",
       "--qm-modal-section-border": "1px solid var(--qm-hairline)",
       "--qm-modal-handle-overhang": "0px",
       "--qm-modal-handle-width": "64px",
@@ -334,7 +332,6 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-modal-lead-bg": "transparent",
       "--qm-modal-lead-border": "1px solid var(--qm-hairline)",
       "--qm-modal-lead-rail": "5px solid var(--qm-secondary)",
-      "--qm-modal-section-bg": "var(--qm-card)",
       "--qm-modal-section-border": "1px solid var(--qm-hairline)",
       "--qm-modal-handle-overhang": "0px",
       "--qm-modal-handle-width": "64px",
@@ -448,7 +445,6 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-modal-lead-bg": "transparent",
       "--qm-modal-lead-border": "1px solid var(--qm-hairline)",
       "--qm-modal-lead-rail": "6px solid var(--qm-secondary)",
-      "--qm-modal-section-bg": "transparent",
       "--qm-modal-section-border": "1px solid var(--qm-hairline)",
       "--qm-modal-handle-overhang": "0px",
       "--qm-modal-handle-width": "68px",
@@ -562,7 +558,6 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-modal-lead-bg": "transparent",
       "--qm-modal-lead-border": "none",
       "--qm-modal-lead-rail": "none",
-      "--qm-modal-section-bg": "var(--qm-tint)",
       "--qm-modal-section-border": "1px solid var(--qm-hairline)",
       "--qm-modal-handle-overhang": "16px",
       "--qm-modal-handle-width": "82px",
@@ -677,7 +672,6 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
       "--qm-modal-lead-bg": "transparent",
       "--qm-modal-lead-border": "1px solid var(--qm-ink)",
       "--qm-modal-lead-rail": "4px solid var(--qm-primary)",
-      "--qm-modal-section-bg": "transparent",
       "--qm-modal-section-border": "1px solid var(--qm-hairline)",
       "--qm-modal-handle-overhang": "0px",
       "--qm-modal-handle-width": "64px",

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 import type { MenuDishModalContent } from "./menu-dish-modal-content";
 import type { MenuDishViewModel } from "~/shared/public-menu/menu-view-model";
@@ -44,6 +45,10 @@ interface MenuDishModalProps {
 
 export function MenuDishModal({ dish, onClose, showDishPhoto }: MenuDishModalProps) {
   const [Content, setContent] = useState<DishModalContent | null>(null);
+  // The last dish stays mounted with `open=false` so the sheet can slide out; it unrenders itself afterwards.
+  const [lastDish, setLastDish] = useState(dish);
+  if (dish && dish !== lastDish) setLastDish(dish);
+  const shownDish = dish ?? lastDish;
   const isWaitingForOpen = dish !== null && Content === null;
 
   useEffect(() => {
@@ -77,9 +82,14 @@ export function MenuDishModal({ dish, onClose, showDishPhoto }: MenuDishModalPro
     };
   }, [Content, isWaitingForOpen]);
 
-  if (!dish || !Content) {
+  if (!shownDish || !Content) {
     return null;
   }
 
-  return <Content dish={dish} showDishPhoto={showDishPhoto} onClose={onClose} />;
+  // iOS Safari routes touches on a fixed sheet nested in `.home-scroll` to that scroller and paints the
+  // bottom nav over it, so the sheet renders beside the column, inside the shell that carries the theme.
+  return createPortal(
+    <Content dish={shownDish} open={dish !== null} showDishPhoto={showDishPhoto} onClose={onClose} />,
+    document.querySelector(".home-shell") ?? document.body,
+  );
 }

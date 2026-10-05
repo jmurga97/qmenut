@@ -22,6 +22,9 @@ export const categoryWriteSchema = z.object({
   imageChange: imageChangeSchema.optional(),
   position: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
+  recurringDays: nullableText,
+  recurringStartMinute: z.number().int().min(0).max(1439).nullable().default(null),
+  recurringEndMinute: z.number().int().min(0).max(1439).nullable().default(null),
 });
 
 export const createCategorySchema = branchScopedSchema.extend({

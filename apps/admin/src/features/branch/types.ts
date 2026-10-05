@@ -2,15 +2,6 @@ import { z } from "zod";
 
 import { i18n } from "~/lib/i18n";
 
-export const DAYS = [
-  i18n.t("branch___Lunes"),
-  i18n.t("branch___Martes"),
-  i18n.t("branch___Miércoles"),
-  i18n.t("branch___Jueves"),
-  i18n.t("branch___Viernes"),
-  i18n.t("branch___Sábado"),
-  i18n.t("branch___Domingo"),
-];
 export const TIMEZONE_OPTIONS = [
   { id: "Europe/Madrid", label: i18n.t("branch___España peninsular — Madrid") },
   { id: "Atlantic/Canary", label: i18n.t("branch___España — Islas Canarias") },

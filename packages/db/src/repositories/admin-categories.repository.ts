@@ -12,6 +12,9 @@ export interface AdminCategory {
   imageUrl: string | null;
   position: number;
   isActive: boolean;
+  recurringDays: string | null;
+  recurringStartMinute: number | null;
+  recurringEndMinute: number | null;
 }
 
 export interface CategoryWriteData {
@@ -20,6 +23,9 @@ export interface CategoryWriteData {
   imageUrl: string | null;
   position: number;
   isActive: boolean;
+  recurringDays: string | null;
+  recurringStartMinute: number | null;
+  recurringEndMinute: number | null;
 }
 
 interface ListCategoriesInput {
@@ -37,6 +43,9 @@ export async function listCategories({ db, restaurantId, branchId }: ListCategor
       imageUrl: categories.imageUrl,
       position: categories.position,
       isActive: categories.isActive,
+      recurringDays: categories.recurringDays,
+      recurringStartMinute: categories.recurringStartMinute,
+      recurringEndMinute: categories.recurringEndMinute,
     })
     .from(categories)
     .where(
@@ -102,6 +111,9 @@ export function createCategoryStatement({
     imageUrl: data.imageUrl,
     position: data.position,
     isActive: data.isActive,
+    recurringDays: data.recurringDays,
+    recurringStartMinute: data.recurringStartMinute,
+    recurringEndMinute: data.recurringEndMinute,
     createdAt: now,
     updatedAt: now,
   });
@@ -160,6 +172,9 @@ export function updateCategoryStatement({
       description: data.description,
       imageUrl: preserveImage ? undefined : data.imageUrl,
       isActive: data.isActive,
+      recurringDays: data.recurringDays,
+      recurringStartMinute: data.recurringStartMinute,
+      recurringEndMinute: data.recurringEndMinute,
       updatedAt: Date.now(),
     })
     .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId), isNull(categories.deletedAt)));

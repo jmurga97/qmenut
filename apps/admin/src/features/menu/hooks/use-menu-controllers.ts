@@ -25,7 +25,13 @@ import {
   getMenuIngredientsQueryOptions,
   getMenuTagsQueryOptions,
 } from "../api";
-import { toDishFormValues, toDishInput, toTagDisplayLabel } from "../mappers";
+import {
+  toCategoryInput,
+  toCategoryScheduleValues,
+  toDishFormValues,
+  toDishInput,
+  toTagDisplayLabel,
+} from "../mappers";
 import { categoryFormSchema, dishFormSchema } from "../types";
 
 import type { CategoryFormValues, DishDetail, DishFormValues } from "../types";
@@ -71,6 +77,7 @@ export function useCategoryEditorController({
       description: category?.description ?? "",
       isActive: category?.isActive ?? true,
       name: category?.name ?? "",
+      ...toCategoryScheduleValues(category),
     },
     resolver: zodResolver(categoryFormSchema),
   });
@@ -97,7 +104,7 @@ export function useCategoryEditorController({
       });
       if (!prepared) throw new Error(i18n.t("menu___No se pudo preparar la imagen."));
       const data = {
-        ...values,
+        ...toCategoryInput(values),
         description: values.description || undefined,
         imageUrl: prepared.imageUrl ?? undefined,
         imageUploadId: prepared.uploadId,

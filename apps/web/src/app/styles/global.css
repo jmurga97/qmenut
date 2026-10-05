@@ -252,9 +252,6 @@ img {
      under whatever precedes the scroller; an in-flow header overrides this with its height. */
   --scroll-sticky-header-offset: calc(-1 * var(--qm-content-top, 16px));
   min-height: 0;
-  /* Outranks the nav bar, whose blurred pill is a stacking context of its own: the dish modal
-     is fixed inside this scroller and has to paint over it. Scrolled content stays clipped. */
-  z-index: 1;
   padding: var(--qm-content-top, 16px) var(--qm-shell-pad-x, 18px)
     calc(var(--qm-content-bottom, 20px) + env(safe-area-inset-bottom));
   overflow-y: auto;
@@ -266,6 +263,11 @@ img {
 /* Naming the scroller keeps the captured slide the size of the visible area. */
 .home-scroll:has(.public-route-transition-surface--animated) {
   view-transition-name: qm-public-route;
+}
+
+/* A sheet with nothing left to scroll would otherwise chain the swipe into the menu behind it. */
+.home-shell:has(qm-dish-modal[open]) .home-scroll {
+  overflow-y: hidden;
 }
 
 .home-scroll::-webkit-scrollbar {

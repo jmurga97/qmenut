@@ -1,5 +1,7 @@
 :host {
   display: contents;
+  /* iOS sheet curve: one decelerating stroke, so open, close and snap-back never visibly change pace. */
+  --sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .surface {
@@ -21,7 +23,7 @@
   inset: 0;
   background: rgba(28, 24, 21, 0.5);
   opacity: 1;
-  transition: opacity 180ms ease;
+  transition: opacity 420ms var(--sheet-ease);
 }
 
 @starting-style {
@@ -39,19 +41,15 @@
   padding-top: var(--qm-modal-handle-overhang, 0px);
   flex-direction: column;
   font-family: var(--qm-body, sans-serif);
-  opacity: 1;
   transform: translate3d(0, 0, 0);
   transform-origin: bottom center;
-  transition:
-    opacity 180ms ease-out,
-    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 420ms var(--sheet-ease);
   will-change: transform;
 }
 
 @starting-style {
   .dialog {
-    opacity: 0;
-    transform: translate3d(0, 32px, 0);
+    transform: translate3d(0, 100%, 0);
   }
 }
 
@@ -70,12 +68,12 @@
 
 .surface--closing .backdrop {
   opacity: 0;
+  transition-duration: 320ms;
 }
 
 .surface--closing .dialog {
-  opacity: 0;
-  transform: translate3d(0, calc(100% + 32px), 0);
-  transition-duration: 220ms;
+  transform: translate3d(0, 100%, 0);
+  transition-duration: 320ms;
 }
 
 .dialog[data-dragging="true"] {
@@ -160,6 +158,8 @@
   display: var(--qm-photo, none);
   flex: none;
   width: calc(100% - var(--qm-modal-media-inset, 12px) - var(--qm-modal-media-inset, 12px));
+  /* Short viewports cap the photo so the dish details stay in view; tall ones keep the full ratio. */
+  max-height: 38dvh;
   aspect-ratio: var(--qm-modal-photo-ratio, 4 / 3);
   align-self: center;
   background: var(--qm-ph, #e5e0d8);
@@ -227,7 +227,6 @@
 .extras,
 .allergens {
   padding: 18px var(--qm-modal-pad-x, 20px);
-  background: var(--qm-modal-section-bg, transparent);
   border-top: var(--qm-modal-section-border, 1px solid var(--qm-hairline, #e5e0d8));
 }
 
@@ -249,9 +248,9 @@
 
 .extras {
   --qm-text-md: 1rem;
-  --qm-text-sm: 0.9375rem;
-  font-size: 0.9375rem;
-  line-height: 1.45;
+  --qm-text-sm: 0.8125rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
   color: var(--qm-ink, #1c1815);
 }
 
@@ -282,12 +281,6 @@
   gap: 7px;
 }
 
-@media (max-height: 560px) {
-  .photo {
-    max-height: 220px;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .backdrop,
   .dialog {
@@ -303,6 +296,7 @@
   }
 
   .surface--closing .dialog {
+    opacity: 0;
     transform: none;
   }
 

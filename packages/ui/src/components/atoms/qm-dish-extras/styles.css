@@ -15,7 +15,8 @@
 
 .list {
   display: grid;
-  gap: 7px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -23,20 +24,24 @@
 
 .item {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   min-width: 0;
 }
 
 .name {
   min-width: 0;
+  overflow-wrap: anywhere;
   color: var(--qm-muted, #8c857b);
 }
 
 .price {
   flex: none;
+  padding: 2px 6px;
   font-size: var(--qm-text-sm, 12px);
   font-weight: var(--qm-price-weight, 700);
-  color: var(--qm-price, var(--qm-ink, #1c1815));
+  color: var(--qm-emph-ink, var(--qm-ink, #1c1815));
+  background: var(--qm-tint, transparent);
+  border-radius: var(--qm-radius, 0px);
 }

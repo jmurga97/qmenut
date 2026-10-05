@@ -695,7 +695,13 @@
     "Plato guardado.": "Dish saved.",
     "Categoría guardada.": "Category saved.",
     "Subir {{name}}": "Move {{name}} up",
-    "Bajar {{name}}": "Move {{name}} down"
+    "Bajar {{name}}": "Move {{name}} down",
+    "Mostrar solo en un horario": "Show only during a schedule",
+    "Días visibles": "Visible days",
+    "Desde": "From",
+    "Hasta": "Until",
+    "Elige al menos un día": "Choose at least one day",
+    "La hora es obligatoria": "Time is required"
   },
   "menuPrint": {
     "Categorías de la carta": "Menu categories",

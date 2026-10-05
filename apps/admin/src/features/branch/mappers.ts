@@ -1,8 +1,7 @@
 import { socialIcon } from "@qmenut/ui/components/qm-social-links";
 
 import { formatPhone } from "~/shared/lib/phone-formatter";
-
-import { hhmmToMinutes, minutesToHHMM } from "./services";
+import { hhmmToMinutes, minutesToHHMM } from "~/shared/services/week-time";
 
 import type { BranchFormValues } from "./types";
 import type { RouterOutputs } from "~/lib/trpc";

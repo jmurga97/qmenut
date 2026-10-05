@@ -2,9 +2,9 @@ import { Button, Checkbox } from "@jmurga97/components";
 
 import { i18n } from "~/lib/i18n";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
+import { DAYS } from "~/shared/services/week-time";
 
 import { useBranchForm } from "../branch-form-context-value";
-import { DAYS } from "../types";
 
 import type { BranchFormValues } from "../types";
 

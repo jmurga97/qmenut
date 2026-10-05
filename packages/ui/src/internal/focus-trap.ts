@@ -20,12 +20,12 @@ export class FocusTrap {
   activate(): void {
     this.previouslyFocused = document.activeElement as HTMLElement | null;
     this.root.addEventListener("keydown", this.handleKeydown);
-    this.getFocusableElements()[0]?.focus();
+    this.getFocusableElements()[0]?.focus({ preventScroll: true });
   }
 
   deactivate(): void {
     this.root.removeEventListener("keydown", this.handleKeydown);
-    this.previouslyFocused?.focus();
+    this.previouslyFocused?.focus({ preventScroll: true });
     this.previouslyFocused = null;
   }
 

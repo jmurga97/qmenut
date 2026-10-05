@@ -27,6 +27,10 @@ export const categories = sqliteTable(
     imageUrl: text("image_url"),
     position: integer("position").notNull().default(0),
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    // Optional visibility window; all null = always visible. Same semantics as promotions.
+    recurringDays: text("recurring_days"),
+    recurringStartMinute: integer("recurring_start_minute"),
+    recurringEndMinute: integer("recurring_end_minute"),
     createdAt: integer("created_at").notNull().default(epochMilliseconds),
     updatedAt: integer("updated_at").notNull().default(epochMilliseconds),
     deletedAt: integer("deleted_at"),

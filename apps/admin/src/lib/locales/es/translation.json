@@ -695,7 +695,13 @@
     "Plato guardado.": "Plato guardado.",
     "Categoría guardada.": "Categoría guardada.",
     "Subir {{name}}": "Subir {{name}}",
-    "Bajar {{name}}": "Bajar {{name}}"
+    "Bajar {{name}}": "Bajar {{name}}",
+    "Mostrar solo en un horario": "Mostrar solo en un horario",
+    "Días visibles": "Días visibles",
+    "Desde": "Desde",
+    "Hasta": "Hasta",
+    "Elige al menos un día": "Elige al menos un día",
+    "La hora es obligatoria": "La hora es obligatoria"
   },
   "menuPrint": {
     "Categorías de la carta": "Categorías de la carta",

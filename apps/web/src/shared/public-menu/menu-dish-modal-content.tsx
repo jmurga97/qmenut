@@ -13,10 +13,12 @@ const MODAL_IMAGE_WIDTH_PX = 430;
 
 export function MenuDishModalContent({
   dish,
+  open,
   onClose,
   showDishPhoto,
 }: {
   dish: MenuDishViewModel;
+  open: boolean;
   onClose: () => void;
   showDishPhoto: boolean;
 }) {
@@ -30,7 +32,7 @@ export function MenuDishModalContent({
 
   return (
     <QmDishModal
-      open
+      open={open}
       name={dish.name}
       photoUrl={showDishPhoto ? photoSource?.src : undefined}
       photoSrcSet={showDishPhoto ? photoSource?.srcSet : undefined}

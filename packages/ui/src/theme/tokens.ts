@@ -116,7 +116,6 @@ export interface QmThemeTokens {
   "--qm-modal-lead-bg": string;
   "--qm-modal-lead-border": string;
   "--qm-modal-lead-rail": string;
-  "--qm-modal-section-bg": string;
   "--qm-modal-section-border": string;
   "--qm-modal-handle-overhang": string;
   "--qm-modal-handle-width": string;

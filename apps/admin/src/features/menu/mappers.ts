@@ -1,7 +1,14 @@
 import { i18n } from "~/lib/i18n";
 import { formatMoneyInput, moneyInputSchema, parseMoneyInput } from "~/shared/services/money";
+import { hhmmToMinutes, minutesToHHMM } from "~/shared/services/week-time";
 
-import type { DishDetail, DishFormValues } from "./types";
+import type { CategoryFormValues, DishDetail, DishFormValues } from "./types";
+
+interface CategorySchedule {
+  recurringDays: string | null;
+  recurringEndMinute: number | null;
+  recurringStartMinute: number | null;
+}
 
 const TAG_LABELS: Record<string, string> = {
   contains_alcohol: i18n.t("menu___Contiene alcohol"),
@@ -61,5 +68,29 @@ export function toDishInput({
     name: values.name,
     position,
     price: parseMoneyInput(values.price),
+  };
+}
+
+export function toCategoryScheduleValues(category: CategorySchedule | undefined) {
+  return {
+    scheduleDays: category?.recurringDays?.split(",").map(Number) ?? [],
+    scheduleEnabled: Boolean(category?.recurringDays),
+    scheduleEnd: typeof category?.recurringEndMinute === "number" ? minutesToHHMM(category.recurringEndMinute) : "",
+    scheduleStart:
+      typeof category?.recurringStartMinute === "number" ? minutesToHHMM(category.recurringStartMinute) : "",
+  };
+}
+export function toCategoryInput({
+  scheduleDays,
+  scheduleEnabled,
+  scheduleEnd,
+  scheduleStart,
+  ...values
+}: CategoryFormValues) {
+  return {
+    ...values,
+    recurringDays: scheduleEnabled ? scheduleDays.toSorted((a, b) => a - b).join(",") : undefined,
+    recurringEndMinute: scheduleEnabled ? hhmmToMinutes(scheduleEnd) : null,
+    recurringStartMinute: scheduleEnabled ? hhmmToMinutes(scheduleStart) : null,
   };
 }

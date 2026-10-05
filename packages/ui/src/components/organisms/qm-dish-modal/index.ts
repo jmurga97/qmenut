@@ -1,6 +1,5 @@
 import { html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
-import { animate } from "motion";
 
 import componentStylesText from "./styles.css?inline";
 import { qmHostResetStyles } from "../../../internal/base-styles";
@@ -13,7 +12,6 @@ import { defineQmImage } from "../../atoms/qm-image";
 import { defineQmPrice } from "../../atoms/qm-price";
 
 import type { PropertyValues } from "lit";
-import type { AnimationPlaybackControls } from "motion";
 
 export const QM_DISH_MODAL_TAG_NAME = "qm-dish-modal";
 
@@ -21,12 +19,8 @@ const componentStyles = createComponentStyles(componentStylesText);
 const PROJECT_DECELERATION_RATE = 0.998;
 const DISMISS_VELOCITY_PX_S = 700;
 const MAX_UPWARD_STRETCH = 1.025;
-
-interface AnimateSheetArgs {
-  dialog: HTMLElement;
-  targetY: number;
-  velocity: number;
-}
+// Outlasts the 320ms closing transition in styles.css before the sheet unrenders.
+const CLOSE_UNRENDER_MS = 340;
 
 let instanceCount = 0;
 
@@ -87,7 +81,6 @@ export class QmDishModal extends QmElement {
   private focusTrap?: FocusTrap;
   private focusTrapFrame?: number;
   private closeTimer?: ReturnType<typeof setTimeout>;
-  private sheetAnimation?: AnimationPlaybackControls;
   private dragPointerId?: number;
   private dragStartY = 0;
   private dragY = 0;
@@ -134,8 +127,9 @@ export class QmDishModal extends QmElement {
     if (!dialog) return;
 
     const handle = event.currentTarget as HTMLElement;
-    this.sheetAnimation?.stop();
-    this.sheetAnimation = undefined;
+    // Grabbing mid snap-back continues from where the sheet is painted, not from its target.
+    this.dragY = Math.max(0, new DOMMatrix(getComputedStyle(dialog).transform).m42);
+    dialog.style.transform = `translate3d(0, ${this.dragY}px, 0)`;
     this.dragPointerId = event.pointerId;
     this.dragStartY = event.clientY - this.dragY;
     this.dragHistory = [{ time: event.timeStamp, y: event.clientY }];
@@ -180,12 +174,14 @@ export class QmDishModal extends QmElement {
     const projectedY = this.dragY + (velocity / 1000) * (PROJECT_DECELERATION_RATE / (1 - PROJECT_DECELERATION_RATE));
     const dismiss = velocity > DISMISS_VELOCITY_PX_S || projectedY > dialog.clientHeight * 0.48;
 
+    // Both paths hand the release position to the CSS transition; closing removes the inline transform.
     if (dismiss) {
-      void this.animateDismiss(dialog, velocity);
+      this.postEvent({ name: "qm-close", detail: undefined });
       return;
     }
 
-    this.animateTo({ dialog, targetY: 0, velocity });
+    this.dragY = 0;
+    dialog.style.removeProperty("transform");
   };
 
   private readonly handleKeydown = (event: KeyboardEvent) => {
@@ -218,16 +214,12 @@ export class QmDishModal extends QmElement {
         }
         this.focusTrap?.activate();
       });
-      const dialog = this.getDialog();
-      if (dialog && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        this.animateTo({ dialog, targetY: 0, velocity: 0 });
-      }
     } else {
-      this.sheetAnimation?.stop();
-      this.sheetAnimation = undefined;
+      const dialog = this.getDialog();
       this.dragPointerId = undefined;
       this.dragY = 0;
-      this.getDialog()?.style.removeProperty("transform");
+      if (dialog) delete dialog.dataset.dragging;
+      dialog?.style.removeProperty("transform");
       if (this.focusTrapFrame !== undefined) {
         cancelAnimationFrame(this.focusTrapFrame);
         this.focusTrapFrame = undefined;
@@ -237,7 +229,7 @@ export class QmDishModal extends QmElement {
       this.closeTimer = setTimeout(() => {
         this.closeTimer = undefined;
         this.rendered = false;
-      }, 240);
+      }, CLOSE_UNRENDER_MS);
     }
   }
 
@@ -253,8 +245,6 @@ export class QmDishModal extends QmElement {
     }
     this.removeEventListener("keydown", this.handleKeydown);
     this.focusTrap?.deactivate();
-    this.sheetAnimation?.stop();
-    this.sheetAnimation = undefined;
   }
 
   private getDialog(): HTMLElement | null {
@@ -272,38 +262,6 @@ export class QmDishModal extends QmElement {
     if (!first || !last || last.time === first.time) return 0;
 
     return ((last.y - first.y) / (last.time - first.time)) * 1000;
-  }
-
-  private animateTo({ dialog, targetY, velocity }: AnimateSheetArgs): void {
-    this.sheetAnimation?.stop();
-    this.sheetAnimation = animate(
-      dialog,
-      { y: targetY, scaleY: 1 },
-      {
-        type: "spring",
-        bounce: targetY === 0 ? 0.08 : 0,
-        duration: 0.38,
-        velocity,
-      },
-    );
-    this.dragY = targetY;
-  }
-
-  private async animateDismiss(dialog: HTMLElement, velocity: number): Promise<void> {
-    this.sheetAnimation?.stop();
-    this.sheetAnimation = animate(
-      dialog,
-      { y: dialog.clientHeight + 32, scaleY: 1 },
-      {
-        type: "spring",
-        bounce: 0,
-        duration: 0.34,
-        velocity,
-      },
-    );
-    await this.sheetAnimation.finished;
-    this.dragY = 0;
-    this.postEvent({ name: "qm-close", detail: undefined });
   }
 
   private readonly handlePhotoError = (event: Event) => {

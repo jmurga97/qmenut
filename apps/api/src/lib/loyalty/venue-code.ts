@@ -1,6 +1,7 @@
 import { importHmacKey } from "./token";
 
 export const VENUE_CODE_WINDOW_MS = 3 * 60 * 1000;
+const VENUE_CODE_GRACE_MS = 15 * 1000;
 
 const CODE_DIGITS = 4;
 const CODE_MODULUS = 10 ** CODE_DIGITS;
@@ -45,32 +46,6 @@ export async function getVenueCode({
   return { code, expiresAt: (windowIndex + 1) * VENUE_CODE_WINDOW_MS };
 }
 
-interface BranchMatchesCodeInput {
-  secret: string;
-  restaurantId: string;
-  branchId: string;
-  code: string;
-  currentWindow: number;
-}
-
-async function branchMatchesCode({
-  secret,
-  restaurantId,
-  branchId,
-  code,
-  currentWindow,
-}: BranchMatchesCodeInput): Promise<boolean> {
-  for (const windowIndex of [currentWindow, currentWindow - 1]) {
-    const candidate = await computeCode({ secret, restaurantId, branchId, windowIndex });
-
-    if (candidate === code) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 interface VerifyVenueCodeInput {
   secret: string;
   restaurantId: string;
@@ -79,7 +54,7 @@ interface VerifyVenueCodeInput {
   now?: number;
 }
 
-/** Accepts the current and previous window (skew + slow readers). Returns the matching branch id. */
+/** Accepts the current code, and the previous one for VENUE_CODE_GRACE_MS after it expires. Returns the branch id. */
 export async function verifyVenueCode({
   secret,
   restaurantId,
@@ -88,9 +63,13 @@ export async function verifyVenueCode({
   now = Date.now(),
 }: VerifyVenueCodeInput): Promise<string | null> {
   const currentWindow = Math.floor(now / VENUE_CODE_WINDOW_MS);
+  const inGrace = now % VENUE_CODE_WINDOW_MS < VENUE_CODE_GRACE_MS;
+  const windows = inGrace ? [currentWindow, currentWindow - 1] : [currentWindow];
 
-  for (const branchId of branchIds) {
-    if (await branchMatchesCode({ secret, restaurantId, branchId, code, currentWindow })) {
+  const candidates = branchIds.flatMap((branchId) => windows.map((windowIndex) => ({ branchId, windowIndex })));
+
+  for (const { branchId, windowIndex } of candidates) {
+    if ((await computeCode({ secret, restaurantId, branchId, windowIndex })) === code) {
       return branchId;
     }
   }

@@ -10,8 +10,9 @@
   font-family: var(--qm-body, sans-serif);
   font-size: var(--qm-text-2xs, 10px);
   font-weight: 600;
-  color: var(--qm-muted, #8c857b);
-  border: 1px solid var(--qm-hairline, #e5e0d8);
+  color: var(--qm-emph-ink, var(--qm-muted, #8c857b));
+  background: var(--qm-tint, transparent);
+  border: 1px solid transparent;
   border-radius: var(--qm-radius, 0px);
 }
 

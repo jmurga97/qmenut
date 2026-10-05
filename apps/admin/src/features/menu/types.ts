@@ -6,14 +6,31 @@ import { moneyInputSchema } from "~/shared/services/money";
 import type { RouterOutputs } from "~/lib/trpc";
 
 export type DishDetail = RouterOutputs["admin"]["menu"]["dishes"]["detail"];
-export const categoryFormSchema = z.object({
-  description: z.string().trim(),
-  isActive: z.boolean(),
-  name: z
-    .string()
-    .trim()
-    .min(1, { message: i18n.t("menu___El nombre es obligatorio") }),
-});
+export const categoryFormSchema = z
+  .object({
+    description: z.string().trim(),
+    isActive: z.boolean(),
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: i18n.t("menu___El nombre es obligatorio") }),
+    scheduleDays: z.array(z.number().int().min(1).max(7)),
+    scheduleEnabled: z.boolean(),
+    scheduleEnd: z.string(),
+    scheduleStart: z.string(),
+  })
+  .superRefine((values, context) => {
+    if (!values.scheduleEnabled) return;
+
+    if (values.scheduleDays.length === 0) {
+      context.addIssue({ code: "custom", message: i18n.t("menu___Elige al menos un día"), path: ["scheduleDays"] });
+    }
+    for (const path of ["scheduleStart", "scheduleEnd"] as const) {
+      if (!values[path]) {
+        context.addIssue({ code: "custom", message: i18n.t("menu___La hora es obligatoria"), path: [path] });
+      }
+    }
+  });
 export const dishFormSchema = z
   .object({
     allergenIds: z.array(z.number().int().positive()),

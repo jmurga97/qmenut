@@ -30,6 +30,7 @@ import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
 import { useTranslationForm } from "~/shared/hooks/use-translation-form";
 import { SingleImageUploadControl } from "~/shared/images/single-image-upload-control";
 import { formatMoney } from "~/shared/services/money";
+import { DAYS } from "~/shared/services/week-time";
 
 import { getDishDetailQueryOptions } from "../api";
 import {
@@ -284,10 +285,30 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
               onSelect={controller.image.selectFile}
             />
             <FormCheckbox<CategoryFormValues> label={i18n.t("menu___Categoría activa")} name={"isActive"} />
+            <CategoryScheduleFields />
           </div>
         </FormShell>
       </FormProvider>
     </div>
+  );
+}
+function CategoryScheduleFields() {
+  const enabled = useWatch<CategoryFormValues, "scheduleEnabled">({ name: "scheduleEnabled" });
+  return (
+    <>
+      <FormCheckbox<CategoryFormValues> label={i18n.t("menu___Mostrar solo en un horario")} name={"scheduleEnabled"} />
+      {enabled ? (
+        <>
+          <FormChipGroup<CategoryFormValues>
+            label={i18n.t("menu___Días visibles")}
+            name={"scheduleDays"}
+            options={DAYS.map((label, index) => ({ id: index + 1, label }))}
+          />
+          <FormTextInput<CategoryFormValues> label={i18n.t("menu___Desde")} name={"scheduleStart"} type={"time"} />
+          <FormTextInput<CategoryFormValues> label={i18n.t("menu___Hasta")} name={"scheduleEnd"} type={"time"} />
+        </>
+      ) : null}
+    </>
   );
 }
 function TranslatedCategoryForm({
