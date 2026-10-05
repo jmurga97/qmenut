@@ -18,7 +18,7 @@ import { DetailEmpty, MasterDetail } from "~/shared/components/master-detail";
 import { PageHeader } from "~/shared/components/page-header";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
-import { TranslationEditor } from "~/shared/components/translation-editor";
+import { TranslationEditor } from "~/shared/components/translation-editor/translation-editor";
 import { useCan } from "~/shared/hooks/use-can";
 import { useEditorGuard } from "~/shared/hooks/use-editor-guard";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";

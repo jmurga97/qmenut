@@ -10,7 +10,7 @@ import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormActions } from "~/shared/components/forms/form-actions";
 import { PageHeader } from "~/shared/components/page-header";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
-import { TranslationEditor } from "~/shared/components/translation-editor";
+import { TranslationEditor } from "~/shared/components/translation-editor/translation-editor";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
 import { useLanguageStore } from "~/shared/stores/language-store";
