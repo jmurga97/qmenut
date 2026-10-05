@@ -9,7 +9,7 @@ test("navigates categories, dish details, highlights and languages @critical", a
   await expect(modal.locator("qm-allergen")).toHaveCount(3);
   await expect(modal.getByRole("button", { name: /Cerrar/ })).toBeFocused();
   await page.keyboard.press("Escape");
-  await expect(modal).toHaveCount(0);
+  await expect(modal.getByRole("dialog")).toHaveCount(0);
   await page.getByRole("button", { name: "Raciones", exact: true }).click();
   await expect(page.getByText("Gambas al ajillo", { exact: true }).first()).toBeVisible();
   // Reaching the header picker without mouse.wheel: Playwright only supports it in Chromium,

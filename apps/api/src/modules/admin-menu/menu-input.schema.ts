@@ -11,7 +11,7 @@ const nullableText = z
   .string()
   .trim()
   .max(2000)
-  .optional()
+  .nullish()
   .transform((value) => (value && value.length > 0 ? value : null));
 
 export const categoryWriteSchema = z.object({
