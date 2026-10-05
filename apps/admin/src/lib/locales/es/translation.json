@@ -984,6 +984,12 @@
     "No se pudo obtener la URL de subida. Pulsa Guardar para reintentar.": "No se pudo obtener la URL de subida. Pulsa Guardar para reintentar.",
     "No se pudo subir la imagen. Pulsa Guardar para reintentar.": "No se pudo subir la imagen. Pulsa Guardar para reintentar.",
     "No se pudo inicializar el borrador de imagen.": "No se pudo inicializar el borrador de imagen.",
-    "La galería admite hasta {{maximum}} imágenes.": "La galería admite hasta {{maximum}} imágenes."
+    "La galería admite hasta {{maximum}} imágenes.": "La galería admite hasta {{maximum}} imágenes.",
+    "Ajustar logo": "Ajustar logo",
+    "Arrastra para centrar y usa el zoom para encuadrar el logo.": "Arrastra para centrar y usa el zoom para encuadrar el logo.",
+    "Zoom": "Zoom",
+    "Cancelar": "Cancelar",
+    "Aplicar": "Aplicar",
+    "No se pudo recortar la imagen. Prueba con otra.": "No se pudo recortar la imagen. Prueba con otra."
   }
 }

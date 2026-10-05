@@ -113,7 +113,8 @@
   color: var(--destructive);
 }
 
-@media (min-width: 56.0625rem) {
+/* Form (20rem) + phone preview (24.375rem) + gap. */
+@container (min-width: 47rem) {
   .admin-theme-page {
     padding-block-end: 0;
   }

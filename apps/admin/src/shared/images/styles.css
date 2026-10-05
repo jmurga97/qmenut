@@ -331,3 +331,22 @@
     animation: none;
   }
 }
+.admin-logo-crop {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--ming-radius-control);
+  /* Checkerboard reveals the transparent padding added when zooming out. */
+  background: repeating-conic-gradient(var(--secondary) 0 25%, var(--card) 0 50%) 0 0 / 1rem 1rem;
+}
+.admin-logo-crop__zoom {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--ming-space-3);
+  align-items: center;
+  font-size: var(--admin-text-body-sm);
+}
+.admin-logo-crop__zoom input {
+  accent-color: var(--foreground);
+}

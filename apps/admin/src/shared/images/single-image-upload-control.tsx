@@ -1,11 +1,14 @@
 import { Badge, Button } from "@jmurga97/components";
+import { useState } from "react";
 
 import { i18n } from "~/lib/i18n";
 
-import { imageStatusLabel, imageStatusTone } from "./image-draft";
+import { imageStatusLabel, imageStatusTone, validateImageFile } from "./image-draft";
 import { ImageFilePicker } from "./image-file-picker";
+import { LogoCropDialog } from "./logo-crop-dialog";
 
 import type { ImageDraft } from "./image-draft";
+import type { LogoCropSource } from "./logo-crop-dialog";
 
 interface SingleImageUploadControlProps {
   disabled?: boolean;
@@ -24,6 +27,11 @@ export function SingleImageUploadControl({
   onRemove,
   onSelect,
 }: SingleImageUploadControlProps) {
+  const [cropSource, setCropSource] = useState<LogoCropSource | null>(null);
+  const closeCrop = () => {
+    if (cropSource) URL.revokeObjectURL(cropSource.url);
+    setCropSource(null);
+  };
   const status = imageStatusLabel[draft.status] || (draft.changed ? i18n.t("images___Pendiente de guardar") : "");
   return (
     <div className={`admin-image-control${logo ? " admin-image-control--logo" : ""}`}>
@@ -57,7 +65,11 @@ export function SingleImageUploadControl({
         error={draft.error}
         label={label}
         onSelect={(files) => {
-          if (files[0]) onSelect?.(files[0]);
+          if (!files[0]) return;
+          // Invalid files skip the cropper so the draft surfaces the usual validation error.
+          if (logo && !validateImageFile(files[0]))
+            setCropSource({ file: files[0], url: URL.createObjectURL(files[0]) });
+          else onSelect?.(files[0]);
         }}
       >
         {draft.previewUrl ? (
@@ -67,6 +79,16 @@ export function SingleImageUploadControl({
         ) : null}
       </ImageFilePicker>
       <small className="admin-image-help">{i18n.t("images___Los cambios se aplican al guardar.")}</small>
+      {logo ? (
+        <LogoCropDialog
+          onCancel={closeCrop}
+          onConfirm={(file) => {
+            closeCrop();
+            onSelect?.(file);
+          }}
+          source={cropSource}
+        />
+      ) : null}
     </div>
   );
 }

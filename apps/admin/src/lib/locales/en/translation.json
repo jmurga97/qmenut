@@ -984,6 +984,12 @@
     "No se pudo obtener la URL de subida. Pulsa Guardar para reintentar.": "Could not get the upload URL. Press Save to retry.",
     "No se pudo subir la imagen. Pulsa Guardar para reintentar.": "Could not upload image. Press Save to retry.",
     "No se pudo inicializar el borrador de imagen.": "The image draft could not be initialized.",
-    "La galería admite hasta {{maximum}} imágenes.": "The gallery supports up to {{maximum}} images."
+    "La galería admite hasta {{maximum}} imágenes.": "The gallery supports up to {{maximum}} images.",
+    "Ajustar logo": "Adjust logo",
+    "Arrastra para centrar y usa el zoom para encuadrar el logo.": "Drag to center and use zoom to frame the logo.",
+    "Zoom": "Zoom",
+    "Cancelar": "Cancel",
+    "Aplicar": "Apply",
+    "No se pudo recortar la imagen. Prueba con otra.": "Could not crop the image. Try another one."
   }
 }

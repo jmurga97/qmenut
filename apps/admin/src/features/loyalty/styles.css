@@ -46,6 +46,8 @@
 
 .loyalty-code-panel--compact .loyalty-code-live {
   min-width: 0;
+  flex-wrap: wrap;
+  row-gap: var(--ming-space-4);
 }
 
 .loyalty-code-digits,
@@ -273,7 +275,8 @@
 }
 
 @media (min-width: 700px) {
-  .loyalty-code-panel {
+  /* The compact panel sits in narrow side columns and keeps one column. */
+  .loyalty-code-panel:not(.loyalty-code-panel--compact) {
     grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1.45fr);
     align-items: center;
   }
@@ -289,9 +292,9 @@
   }
 }
 
-@media (min-width: 960px) {
+@container (min-width: 50rem) {
   .loyalty-program-layout {
-    grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+    grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.65fr);
   }
 
   .loyalty-preview-column {

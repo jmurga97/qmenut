@@ -92,9 +92,9 @@ function CreateUserDialog({ controller }: { controller: ReturnType<typeof useUse
         {i18n.t("users___Agregar usuario")}
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Backdrop className="admin-users-dialog-backdrop" />
-        <Dialog.Viewport className="admin-users-dialog-viewport">
-          <Dialog.Popup className="admin-users-dialog-popup" ref={setSelectPortalContainer}>
+        <Dialog.Backdrop className="admin-dialog-backdrop" />
+        <Dialog.Viewport className="admin-dialog-viewport">
+          <Dialog.Popup className="admin-dialog-popup" ref={setSelectPortalContainer}>
             <Dialog.Title>{i18n.t("users___Agregar usuario")}</Dialog.Title>
             <Dialog.Description>
               {i18n.t(
@@ -132,7 +132,7 @@ function CreateUserDialog({ controller }: { controller: ReturnType<typeof useUse
                   message={i18n.t("users___Se enviará un correo con el acceso para iniciar sesión.")}
                   tone={"info"}
                 />
-                <div className="admin-users-dialog-actions">
+                <div className="admin-dialog-actions">
                   <Dialog.Close className={buttonVariants({ size: "md", variant: "secondary" })}>
                     {i18n.t("users___Cancelar")}
                   </Dialog.Close>

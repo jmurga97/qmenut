@@ -32,7 +32,9 @@ body {
 .admin-app-shell {
   height: 100dvh;
 }
+/* Page layouts query this box, not the viewport: the docked sidebar takes 15rem above 56rem. */
 .admin-main-slot {
+  container-type: inline-size;
   min-height: 0;
   height: 100%;
   overflow-y: auto;
@@ -194,6 +196,12 @@ body {
     text-align: start;
   }
 }
+/* Landscape phones: the few rows of height go to the editor, not to the tabs. */
+@media (max-height: 30rem) {
+  .admin-section-tabs {
+    position: static;
+  }
+}
 
 /* List | editor: the list keeps its place while the child route's editor fills the rest. */
 .admin-master-detail {
@@ -209,15 +217,16 @@ body {
   gap: var(--ming-space-5);
 }
 /* One column at a time on narrow screens: the list until an item opens, then only its editor. */
-@media (max-width: 63.99rem) {
+@container (max-width: 51.99rem) {
   .admin-master-detail:has(.admin-detail-empty) .admin-detail-pane,
   .admin-master-detail:not(:has(.admin-detail-empty)) .admin-master-list {
     display: none;
   }
 }
-@media (min-width: 64rem) {
+/* Side by side only when the list fits its toolbar and the editor keeps ~30rem. */
+@container (min-width: 52rem) {
   .admin-master-detail {
-    grid-template-columns: minmax(17rem, 1fr) minmax(0, 3fr);
+    grid-template-columns: minmax(20rem, 1fr) minmax(0, 3fr);
   }
   .admin-master-list {
     position: sticky;

@@ -68,76 +68,6 @@
   font-size: var(--admin-text-caption);
 }
 
-.admin-users-dialog-backdrop {
-  position: fixed;
-  z-index: 100;
-  inset: 0;
-  background: color-mix(in srgb, var(--foreground) 32%, transparent);
-  opacity: 1;
-  transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.admin-users-dialog-backdrop[data-starting-style],
-.admin-users-dialog-backdrop[data-ending-style] {
-  opacity: 0;
-}
-
-.admin-users-dialog-viewport {
-  position: fixed;
-  z-index: 101;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  overflow-y: auto;
-  padding: var(--ming-space-5);
-  pointer-events: none;
-}
-
-.admin-users-dialog-popup {
-  display: grid;
-  gap: var(--ming-space-4);
-  width: min(100%, 32rem);
-  max-height: calc(100dvh - 3rem);
-  overflow-y: auto;
-  padding: clamp(var(--ming-space-4), 4vw, var(--ming-space-6));
-  border: 1px solid var(--input);
-  border-radius: var(--radius);
-  background: var(--popover);
-  color: var(--popover-foreground);
-  pointer-events: auto;
-  opacity: 1;
-  transition:
-    opacity 200ms cubic-bezier(0.23, 1, 0.32, 1),
-    transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.admin-users-dialog-popup[data-starting-style],
-.admin-users-dialog-popup[data-ending-style] {
-  opacity: 0;
-  transform: scale(0.97);
-}
-
-.admin-users-dialog-popup[data-ending-style] {
-  transition-duration: 150ms;
-}
-
-.admin-users-dialog-popup h2 {
-  margin: 0;
-  color: var(--foreground);
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-}
-
-.admin-users-dialog-popup p {
-  margin: 0;
-  color: var(--muted-foreground);
-  font-size: var(--admin-text-body-sm);
-  line-height: 1.5;
-}
-
 .admin-users-form {
   display: grid;
   gap: var(--ming-space-4);
@@ -147,36 +77,8 @@
   color: var(--muted-foreground);
 }
 
-.admin-users-dialog-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ming-space-3);
-  justify-content: end;
-  padding-top: var(--ming-space-2);
-}
-
 @media (max-width: 40rem) {
   .admin-users-heading > button {
     width: 100%;
-  }
-
-  .admin-users-dialog-viewport {
-    align-items: end;
-    padding: var(--ming-space-3);
-  }
-
-  .admin-users-dialog-popup {
-    max-height: calc(100dvh - 1.5rem);
-  }
-
-  .admin-users-dialog-actions > * {
-    flex: 1 1 10rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .admin-users-dialog-popup[data-starting-style],
-  .admin-users-dialog-popup[data-ending-style] {
-    transform: none;
   }
 }
