@@ -1,4 +1,5 @@
 import { Button, SearchField } from "@jmurga97/components";
+import { useState } from "react";
 
 import { i18n } from "~/lib/i18n";
 import { FormActions } from "~/shared/components/forms/form-actions";
@@ -45,6 +46,7 @@ export function TranslationEditor(props: TranslationEditorProps) {
   const { drafts, change, undo, discard } = useTranslationDrafts();
   const filter = useTranslationFilter({ drafts, items, names, scoped });
   const save = useSaveTranslations({ branchId, languageCode, onSaved: discard });
+  const [tab, setTab] = useState<string>();
   useEditorGuard({ dirty: drafts.size > 0, pending: save.isPending });
 
   const renderRow = (item: TextItem) => (
@@ -57,9 +59,15 @@ export function TranslationEditor(props: TranslationEditorProps) {
       readOnly={!canWrite || save.isPending}
     />
   );
-  const sections = [...toSections(items)]
-    .map(([id, all]) => ({ id, all, shown: all.filter((item) => filter.isVisible(item)) }))
-    .filter((section) => section.shown.length > 0);
+  const sections = [...toSections(items)].map(([id, all]) => ({
+    id,
+    all,
+    shown: all.filter((item) => filter.isVisible(item)),
+  }));
+  const active =
+    sections.find((section) => section.id === tab) ??
+    sections.find((section) => section.shown.length > 0) ??
+    sections[0];
 
   return (
     <div className="admin-translation-editor">
@@ -73,12 +81,14 @@ export function TranslationEditor(props: TranslationEditorProps) {
       ) : (
         <>
           <TranslationToolbar filter={filter} />
-          {sections.map((section) => (
-            <TranslationSection key={section.id} names={names} renderRow={renderRow} section={section} />
-          ))}
-          {sections.length === 0 ? (
-            <p className="admin-list-meta">{i18n.t("shared___No hay textos en esta selección.")}</p>
-          ) : null}
+          <TranslationTabs active={active?.id} names={names} onSelect={setTab} sections={sections} />
+          <div aria-labelledby={active && `translation-tab-${active.id}`} role="tabpanel">
+            {active && active.shown.length > 0 ? (
+              <TranslationSection names={names} renderRow={renderRow} section={active} />
+            ) : (
+              <p className="admin-list-meta">{i18n.t("shared___No hay textos en esta selección.")}</p>
+            )}
+          </div>
         </>
       )}
       {canWrite && drafts.size > 0 ? (
@@ -121,6 +131,54 @@ function TranslationToolbar({ filter }: { filter: ReturnType<typeof useTranslati
           </Button>
         ))}
       </div>
+    </div>
+  );
+}
+
+/** One tab per carta section, scrolling sideways when they overflow; the count is what the filter shows. */
+function TranslationTabs({
+  active,
+  names,
+  onSelect,
+  sections,
+}: {
+  active: string | undefined;
+  names: ReadonlyMap<string, string>;
+  onSelect: (id: string) => void;
+  sections: Section[];
+}) {
+  const focus = (index: number) => {
+    const next = sections[(index + sections.length) % sections.length];
+    onSelect(next.id);
+    document.querySelector<HTMLElement>(`[id="translation-tab-${next.id}"]`)?.focus();
+  };
+  return (
+    <div aria-label={i18n.t("shared___Secciones")} className="admin-translation-tabs" role="tablist">
+      {sections.map((section, index) => (
+        <button
+          aria-selected={section.id === active}
+          id={`translation-tab-${section.id}`}
+          key={section.id}
+          onClick={() => onSelect(section.id)}
+          onKeyDown={(event) => {
+            const moves: Record<string, number> = {
+              ArrowLeft: index - 1,
+              ArrowRight: index + 1,
+              End: sections.length - 1,
+              Home: 0,
+            };
+            if (!(event.key in moves)) return;
+            event.preventDefault();
+            focus(moves[event.key]);
+          }}
+          role="tab"
+          tabIndex={section.id === active ? 0 : -1}
+          type="button"
+        >
+          {SECTION_LABELS[section.id] ?? names.get(section.id)}
+          <span className="admin-translation-tab-count">{section.shown.length}</span>
+        </button>
+      ))}
     </div>
   );
 }

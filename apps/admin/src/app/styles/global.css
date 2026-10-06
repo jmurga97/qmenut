@@ -719,6 +719,39 @@ body {
   flex-wrap: wrap;
   gap: var(--ming-space-1);
 }
+.admin-translation-tabs {
+  display: flex;
+  gap: var(--ming-space-5);
+  overflow-x: auto;
+  border-block-end: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+.admin-translation-tabs > button {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--ming-space-2);
+  align-items: baseline;
+  padding-block: var(--ming-space-3);
+  border: 0;
+  border-block-end: 2px solid transparent;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: var(--admin-text-body-sm);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.admin-translation-tabs > button[aria-selected="true"] {
+  border-block-end-color: var(--foreground);
+  color: var(--foreground);
+}
+.admin-translation-tabs > button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.admin-translation-tab-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
+}
 .admin-translation-section {
   gap: var(--ming-space-3);
 }
