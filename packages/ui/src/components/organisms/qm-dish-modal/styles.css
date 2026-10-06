@@ -223,6 +223,15 @@
   padding-bottom: 2px;
 }
 
+.prices {
+  display: flex;
+  flex: none;
+  gap: 4px 20px;
+  padding-bottom: 2px;
+  --qm-price-align: flex-start;
+  --qm-price-size: var(--qm-modal-price-size, 1.375rem);
+}
+
 .description,
 .extras,
 .allergens {

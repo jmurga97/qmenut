@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { i18n } from "~/lib/i18n";
-import { moneyInputSchema } from "~/shared/services/money";
+import { moneyInputSchema, parseMoneyInput } from "~/shared/services/money";
 
 import type { RouterOutputs } from "~/lib/trpc";
 
@@ -31,6 +31,14 @@ export const categoryFormSchema = z
       }
     }
   });
+const dishVariantFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .max(24, { message: i18n.t("menu___Máximo 24 caracteres") }),
+  price: z.string().trim(),
+  variantId: z.string().optional(),
+});
 export const dishFormSchema = z
   .object({
     allergenIds: z.array(z.number().int().positive()),
@@ -53,10 +61,22 @@ export const dishFormSchema = z
       .string()
       .trim()
       .min(1, { message: i18n.t("menu___El nombre es obligatorio") }),
-    price: moneyInputSchema,
+    price: z.string().trim(),
     tagIds: z.array(z.string()),
+    variantGroupId: z.string().optional(),
+    variantGroupName: z
+      .string()
+      .trim()
+      .max(60, { message: i18n.t("menu___Máximo 60 caracteres") }),
+    variants: z.array(dishVariantFormSchema),
+    variantsEnabled: z.boolean(),
   })
   .superRefine((values, context) => {
+    if (values.variantsEnabled) {
+      addVariantIssues({ context, values });
+    } else if (!moneyInputSchema.safeParse(values.price).success) {
+      context.addIssue({ code: "custom", message: i18n.t("shared___Introduce un importe válido"), path: ["price"] });
+    }
     if (!values.comboEnabled) return;
 
     if (!moneyInputSchema.safeParse(values.comboPrice).success) {
@@ -76,3 +96,47 @@ export const dishFormSchema = z
   });
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 export type DishFormValues = z.infer<typeof dishFormSchema>;
+
+export const MAX_DISH_VARIANTS = 6;
+
+function addVariantIssues({
+  context,
+  values,
+}: {
+  context: z.RefinementCtx;
+  values: Pick<DishFormValues, "variantGroupName" | "variants">;
+}) {
+  if (!values.variantGroupName) {
+    context.addIssue({
+      code: "custom",
+      message: i18n.t("menu___El nombre es obligatorio"),
+      path: ["variantGroupName"],
+    });
+  }
+  if (values.variants.length < 2) {
+    context.addIssue({ code: "custom", message: i18n.t("menu___Añade al menos dos variantes"), path: ["variants"] });
+  }
+  if (new Set(values.variants.map((variant) => parseMoneyInput(variant.price))).size < 2) {
+    context.addIssue({
+      code: "custom",
+      message: i18n.t("menu___Las variantes deben tener precios distintos"),
+      path: ["variants"],
+    });
+  }
+  values.variants.forEach((variant, index) => {
+    if (!variant.name) {
+      context.addIssue({
+        code: "custom",
+        message: i18n.t("menu___El nombre es obligatorio"),
+        path: ["variants", index, "name"],
+      });
+    }
+    if (!moneyInputSchema.safeParse(variant.price).success) {
+      context.addIssue({
+        code: "custom",
+        message: i18n.t("shared___Introduce un importe válido"),
+        path: ["variants", index, "price"],
+      });
+    }
+  });
+}

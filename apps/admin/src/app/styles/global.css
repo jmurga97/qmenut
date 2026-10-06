@@ -340,6 +340,12 @@ body {
 .admin-form-grid--two > * {
   min-width: 0;
 }
+.admin-variant-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: var(--ming-space-2);
+  align-items: end;
+}
 .admin-choice-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));

@@ -89,3 +89,22 @@
 qm-price {
   --qm-price-size: var(--qm-row-price-size, var(--qm-text-xl, 17px));
 }
+
+/* Dish variants: two labelled columns. If they don't fit next to a ~7rem name (long labels,
+   VES prices) they wrap under each other instead of squeezing the name. */
+.row--prices .body {
+  min-width: 7rem;
+}
+
+.prices {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 14px;
+  min-width: 0;
+}
+
+.prices qm-price {
+  --qm-price-size: calc(var(--qm-row-price-size, var(--qm-text-xl, 17px)) * 0.9);
+}

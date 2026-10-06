@@ -41,6 +41,30 @@ export function toDishFormValues(dish: DishDetail | null): DishFormValues {
     name: dish?.name ?? "",
     price: formatMoneyInput(dish?.price),
     tagIds: dish?.tagIds ?? [],
+    variantGroupId: dish?.variantGroup?.id,
+    variantGroupName: dish?.variantGroup?.name ?? i18n.t("menu___Tamaño"),
+    variants: dish?.variantGroup?.options.map((option) => ({
+      name: option.name,
+      price: formatMoneyInput(option.price),
+      variantId: option.id,
+    })) ?? [
+      { name: "", price: "" },
+      { name: "", price: "" },
+    ],
+    variantsEnabled: Boolean(dish?.variantGroup),
+  };
+}
+
+export function toDishVariantGroupInput(values: DishFormValues) {
+  if (!values.variantsEnabled) return null;
+  return {
+    id: values.variantGroupId,
+    name: values.variantGroupName,
+    options: values.variants.map((variant) => ({
+      id: variant.variantId,
+      name: variant.name,
+      price: parseMoneyInput(variant.price),
+    })),
   };
 }
 export function toDishInput({
@@ -67,7 +91,10 @@ export function toDishInput({
     isRecommended: values.isRecommended,
     name: values.name,
     position,
-    price: parseMoneyInput(values.price),
+    // With variants the base price is the cheapest one; the API recomputes it when saving the variants.
+    price: values.variantsEnabled
+      ? Math.min(...values.variants.map((variant) => parseMoneyInput(variant.price)))
+      : parseMoneyInput(values.price),
   };
 }
 

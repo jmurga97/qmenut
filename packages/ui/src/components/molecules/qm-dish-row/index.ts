@@ -6,7 +6,9 @@ import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
 import { restorePhotoFallback } from "../../../internal/photo-fallback";
 import { defineQmBadge } from "../../atoms/qm-badge";
-import { defineQmPrice } from "../../atoms/qm-price";
+import { defineQmPrice, renderPriceColumns } from "../../atoms/qm-price";
+
+import type { QmPriceColumn } from "../../atoms/qm-price";
 
 export const QM_DISH_ROW_TAG_NAME = "qm-dish-row";
 
@@ -18,13 +20,15 @@ const componentStyles = createComponentStyles(componentStylesText);
  * be repeated inside a list; the surrounding card/list container belongs to the (organism)
  * menu section, out of scope here. Composes `qm-badge` for its optional tag so promotion
  * emphasis follows each template's badge shape. `featured` overrides the badge variables
- * with the stronger featured-tag token group.
+ * with the stronger featured-tag token group. `prices` (dish variants, e.g. 15 cm / 30 cm)
+ * replaces the single price with labelled columns.
  */
 export interface QmDishRowValue {
   name: string;
   desc: string;
   price: string;
   oldPrice?: string;
+  prices?: QmPriceColumn[];
   comboLabel?: string;
   tag?: string;
   featured?: boolean;
@@ -66,9 +70,10 @@ export class QmDishRow extends LitElement {
   render() {
     const photoImage = this.renderPhoto();
     const tagClass = this.value?.featured ? "tag tag--featured" : "tag";
+    const prices = this.value?.prices?.length ? this.value.prices : undefined;
 
     return html`
-      <div part="row" class="row">
+      <div part="row" class=${prices ? "row row--prices" : "row"}>
         ${this.value?.photo ? html` <span part="photo" class="photo">${photoImage}</span> ` : nothing}
         <div class="body">
           <div class="name-line">
@@ -82,7 +87,15 @@ export class QmDishRow extends LitElement {
           </div>
           <div part="desc" class="desc">${this.value?.desc ?? ""}</div>
         </div>
-        <qm-price part="price" .value=${this.value?.price ?? ""} .oldValue=${this.value?.oldPrice}></qm-price>
+        ${
+          prices
+            ? renderPriceColumns(prices)
+            : html`<qm-price
+                part="price"
+                .value=${this.value?.price ?? ""}
+                .oldValue=${this.value?.oldPrice}
+              ></qm-price>`
+        }
       </div>
     `;
   }

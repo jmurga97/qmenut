@@ -373,12 +373,17 @@ function PromotionValueFields({ type, disabled = false }: { type: PromotionType;
 
   if (type === "special_price") {
     return (
-      <FormTextInput<PromotionFormValues>
-        disabled={disabled}
-        inputMode={"decimal"}
-        label={i18n.t("promotions___Precio especial")}
-        name={"specialPrice"}
-      />
+      <>
+        <FormTextInput<PromotionFormValues>
+          disabled={disabled}
+          inputMode={"decimal"}
+          label={i18n.t("promotions___Precio especial")}
+          name={"specialPrice"}
+        />
+        <p className="admin-copy">
+          {i18n.t("promotions___En platos con variantes de precio se aplica a la variante más barata.")}
+        </p>
+      </>
     );
   }
 

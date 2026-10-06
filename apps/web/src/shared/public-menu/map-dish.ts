@@ -3,7 +3,11 @@ import { formatDiscount } from "~/shared/public-menu/promotion-formatting";
 
 import type { TFunction } from "i18next";
 import type { AllergenCode } from "~/shared/public-menu/allergens";
-import type { MenuDishBadgeViewModel, MenuDishViewModel } from "~/shared/public-menu/menu-view-model";
+import type {
+  MenuDishBadgeViewModel,
+  MenuDishPriceViewModel,
+  MenuDishViewModel,
+} from "~/shared/public-menu/menu-view-model";
 import type { PublicMenuDish } from "~/shared/public-menu/public-menu-types";
 
 function isAllergenCode(code: string): code is AllergenCode {
@@ -12,6 +16,53 @@ function isAllergenCode(code: string): code is AllergenCode {
 
 export function stripHtml(html: string): string {
   return html.replaceAll(/<[^<>]*>/g, "");
+}
+
+/**
+ * Mirrors v_dish_promotion_prices per variant: the view prices the base (cheapest, delta 0)
+ * variant; percentage promotions scale every variant, fixed-price ones only replace the base.
+ */
+function promotedVariantPrice({ dish, priceDelta }: { dish: PublicMenuDish; priceDelta: number }): number {
+  const { promotion } = dish;
+  const regular = dish.price + priceDelta;
+  if (!promotion) return regular;
+  if (priceDelta === 0) return promotion.effectiveUnitPrice;
+  const scales =
+    promotion.type === "percentage_discount" || (promotion.type === "happy_hour" && promotion.specialPrice === null);
+  return scales ? Math.round((regular * (100 - (promotion.percentage ?? 0))) / 100) : regular;
+}
+
+/** Price variants are the first group whose options cost differently; free choices (flavour, drink…) are not. */
+export function findPriceVariantGroup(dish: PublicMenuDish) {
+  return dish.variantGroups.find((group) => new Set(group.options.map((option) => option.priceDelta)).size > 1);
+}
+
+function mapVariants({
+  dish,
+  formatPrice,
+}: {
+  dish: PublicMenuDish;
+  formatPrice: (cents: number) => string;
+}): Pick<MenuDishViewModel, "prices" | "variantList"> {
+  const group = findPriceVariantGroup(dish);
+  if (!group) return {};
+
+  const variants: MenuDishPriceViewModel[] = group.options.map((option) => {
+    const regular = dish.price + option.priceDelta;
+    const effective = promotedVariantPrice({ dish, priceDelta: option.priceDelta });
+    return {
+      label: option.name,
+      oldValue: effective < regular ? formatPrice(regular) : undefined,
+      value: formatPrice(effective),
+    };
+  });
+  return {
+    prices: variants.slice(0, 2),
+    variantList:
+      variants.length > 2
+        ? { items: variants.map(({ label, value }) => ({ name: label, price: value })), label: group.name }
+        : undefined,
+  };
 }
 
 export function mapDish({
@@ -60,5 +111,6 @@ export function mapDish({
     photoVariants: dish.variants,
     price: formatPrice(promotion?.effectiveUnitPrice ?? dish.price),
     rowKey: dish.id,
+    ...mapVariants({ dish, formatPrice }),
   };
 }

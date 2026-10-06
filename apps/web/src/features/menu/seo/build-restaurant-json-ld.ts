@@ -1,3 +1,5 @@
+import { findPriceVariantGroup } from "~/shared/public-menu/map-dish";
+
 import type { PublicMenuData } from "~/shared/public-menu/public-menu-types";
 
 const SCHEMA_DAY_NAMES: Record<number, string> = {
@@ -63,11 +65,12 @@ export function buildRestaurantJsonLd({
             name: dish.name,
             ...(dish.description && { description: dish.description }),
             ...(dish.imageUrl && { image: dish.imageUrl }),
-            offers: {
+            offers: (findPriceVariantGroup(dish)?.options ?? [{ name: undefined, priceDelta: 0 }]).map((option) => ({
               "@type": "Offer",
-              price: (dish.price / 100).toFixed(2),
+              ...(option.name && { name: option.name }),
+              price: ((dish.price + option.priceDelta) / 100).toFixed(2),
               priceCurrency: sourceCurrency,
-            },
+            })),
           })),
         })),
       },

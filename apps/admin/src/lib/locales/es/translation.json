@@ -701,7 +701,20 @@
     "Desde": "Desde",
     "Hasta": "Hasta",
     "Elige al menos un día": "Elige al menos un día",
-    "La hora es obligatoria": "La hora es obligatoria"
+    "La hora es obligatoria": "La hora es obligatoria",
+    "Máximo 60 caracteres": "Máximo 60 caracteres",
+    "Máximo 24 caracteres": "Máximo 24 caracteres",
+    "Añade al menos dos variantes": "Añade al menos dos variantes",
+    "Tamaño": "Tamaño",
+    "Variantes de precio": "Variantes de precio",
+    "Este plato tiene variantes (tamaños)": "Este plato tiene variantes (tamaños)",
+    "Nombre del grupo": "Nombre del grupo",
+    "15 cm": "15 cm",
+    "Quitar variante {{index}}": "Quitar variante {{index}}",
+    "Quitar": "Quitar",
+    "Añadir variante": "Añadir variante",
+    "La carta pública muestra las dos primeras variantes junto al nombre y todas en el detalle del plato. Usa etiquetas cortas (15 cm, S, XXL).": "La carta pública muestra las dos primeras variantes junto al nombre y todas en el detalle del plato. Usa etiquetas cortas (15 cm, S, XXL).",
+    "Las variantes deben tener precios distintos": "Las variantes deben tener precios distintos"
   },
   "menuPrint": {
     "Categorías de la carta": "Categorías de la carta",
@@ -734,7 +747,6 @@
     "Interior · carta abierta": "Interior · carta abierta",
     "Anverso": "Anverso",
     "Reverso": "Reverso",
-    " (obligatorio)": " (obligatorio)",
     "No se pudo cargar la carta o el tema de la sucursal.": "No se pudo cargar la carta o el tema de la sucursal.",
     "Reintentar": "Reintentar",
     "Tu carta todavía está vacía": "Tu carta todavía está vacía",
@@ -790,7 +802,8 @@
     "Las unidades pagadas no pueden superar las compradas": "Las unidades pagadas no pueden superar las compradas",
     "Promoción guardada.": "Promoción guardada.",
     "Selecciona una promoción para editarla o crea una nueva.": "Selecciona una promoción para editarla o crea una nueva.",
-    "Activar {{name}}": "Activar {{name}}"
+    "Activar {{name}}": "Activar {{name}}",
+    "En platos con variantes de precio se aplica a la variante más barata.": "En platos con variantes de precio se aplica a la variante más barata."
   },
   "qr": {
     "Ocultar estilos": "Ocultar estilos",

@@ -87,11 +87,30 @@ export const updateDishSchema = z.object({
   data: dishWriteSchema,
 });
 
+const dishVariantOptionSchema = z.object({
+  id: z.string().trim().min(1).optional(),
+  name: z.string().trim().min(1).max(24),
+  price: z.number().int().min(0),
+});
+
+const dishVariantGroupSchema = z.object({
+  id: z.string().trim().min(1).optional(),
+  name: z.string().trim().min(1).max(60),
+  options: z
+    .array(dishVariantOptionSchema)
+    .min(2)
+    .max(6)
+    .refine((options) => new Set(options.map((option) => option.price)).size > 1, {
+      message: "Las variantes deben tener precios distintos",
+    }),
+});
+
 export const dishRelationsSchema = z.object({
   dishId: z.string().trim().min(1),
   tagIds: z.array(z.string().trim().min(1)).default([]),
   allergenIds: z.array(z.number().int().positive()).default([]),
   extraIngredientIds: z.array(z.string().trim().min(1)).default([]),
+  variantGroup: dishVariantGroupSchema.nullable().default(null),
 });
 
 export const createIngredientSchema = z.object({

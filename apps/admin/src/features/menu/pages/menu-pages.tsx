@@ -3,7 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Outlet } from "@tanstack/react-router";
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import { Fragment, Suspense, useEffect, useMemo, useState } from "react";
-import { FormProvider, useFormContext, useWatch } from "react-hook-form";
+import { FormProvider, useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { i18n } from "~/lib/i18n";
@@ -39,6 +39,7 @@ import {
   useMenuListController,
 } from "../hooks/use-menu-controllers";
 import { toDishFormValues } from "../mappers";
+import { MAX_DISH_VARIANTS } from "../types";
 
 import type { DishDetail, CategoryFormValues, DishFormValues } from "../types";
 
@@ -451,6 +452,7 @@ function DishFields({
 }) {
   const { control } = useFormContext<DishFormValues>();
   const comboEnabled = useWatch({ control, name: "comboEnabled" });
+  const variantsEnabled = useWatch({ control, name: "variantsEnabled" });
   const base = (label: string) => (locked ? i18n.t("menu___{{label}} (idioma base)", { label }) : label);
   return (
     <>
@@ -464,12 +466,14 @@ function DishFields({
             name={"categoryId"}
             options={controller.categoryOptions}
           />
-          <FormTextInput<DishFormValues>
-            disabled={locked}
-            inputMode={"decimal"}
-            label={base(i18n.t("menu___Precio"))}
-            name={"price"}
-          />
+          {variantsEnabled ? null : (
+            <FormTextInput<DishFormValues>
+              disabled={locked}
+              inputMode={"decimal"}
+              label={base(i18n.t("menu___Precio"))}
+              name={"price"}
+            />
+          )}
         </div>
         <FormTextarea<DishFormValues>
           disabled={!canEdit}
@@ -506,6 +510,7 @@ function DishFields({
           )}
         </p>
       </section>
+      <DishVariantsSection base={base} locked={locked} />
       <section className="admin-editor-section">
         <h2 className={"ming-section__title"}>{i18n.t("menu___Combo")}</h2>
         <FormCheckbox<DishFormValues>
@@ -553,6 +558,74 @@ function DishFields({
         />
       </section>
     </>
+  );
+}
+function DishVariantsSection({ base, locked }: { base: (label: string) => string; locked: boolean }) {
+  const { control, formState } = useFormContext<DishFormValues>();
+  const enabled = useWatch({ control, name: "variantsEnabled" });
+  const { append, fields, remove } = useFieldArray({ control, name: "variants" });
+  const error = formState.errors.variants?.root?.message;
+  return (
+    <section className="admin-editor-section">
+      <h2 className={"ming-section__title"}>{i18n.t("menu___Variantes de precio")}</h2>
+      <FormCheckbox<DishFormValues>
+        disabled={locked}
+        label={base(i18n.t("menu___Este plato tiene variantes (tamaños)"))}
+        name={"variantsEnabled"}
+      />
+      {enabled ? (
+        <>
+          <FormTextInput<DishFormValues>
+            disabled={locked}
+            label={base(i18n.t("menu___Nombre del grupo"))}
+            maxLength={60}
+            name={"variantGroupName"}
+          />
+          {fields.map((field, index) => (
+            <div className="admin-variant-row" key={field.id}>
+              <FormTextInput<DishFormValues>
+                disabled={locked}
+                label={base(i18n.t("menu___Variante"))}
+                maxLength={24}
+                name={`variants.${index}.name`}
+                placeholder={i18n.t("menu___15 cm")}
+              />
+              <FormTextInput<DishFormValues>
+                disabled={locked}
+                inputMode={"decimal"}
+                label={base(i18n.t("menu___Precio"))}
+                name={`variants.${index}.price`}
+              />
+              <Button
+                aria-label={i18n.t("menu___Quitar variante {{index}}", { index: index + 1 })}
+                disabled={locked || fields.length <= 2}
+                size={"sm"}
+                type={"button"}
+                variant={"ghost"}
+                onClick={() => remove(index)}
+              >
+                {i18n.t("menu___Quitar")}
+              </Button>
+            </div>
+          ))}
+          {error ? <InlineMessage tone="error">{error}</InlineMessage> : null}
+          <Button
+            disabled={locked || fields.length >= MAX_DISH_VARIANTS}
+            size={"sm"}
+            type={"button"}
+            variant={"secondary"}
+            onClick={() => append({ name: "", price: "" })}
+          >
+            {i18n.t("menu___Añadir variante")}
+          </Button>
+        </>
+      ) : null}
+      <p className="admin-copy">
+        {i18n.t(
+          "menu___La carta pública muestra las dos primeras variantes junto al nombre y todas en el detalle del plato. Usa etiquetas cortas (15 cm, S, XXL).",
+        )}
+      </p>
+    </section>
   );
 }
 function DishForm({ branchId, dish }: { branchId: string; dish: DishDetail | null }) {

@@ -92,3 +92,10 @@
 qm-price {
   --qm-price-size: var(--qm-row-price-size, var(--qm-text-xl, 17px));
 }
+
+.prices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  --qm-price-align: flex-start;
+}

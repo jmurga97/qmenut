@@ -10,6 +10,13 @@ export interface MenuDishExtraViewModel {
   price: string;
 }
 
+/** A labelled variant price (e.g. "15 cm" · "4,50 €"), shown as a column. */
+export interface MenuDishPriceViewModel {
+  label: string;
+  oldValue?: string;
+  value: string;
+}
+
 export interface MenuDishBadgeViewModel {
   compactText: string;
   fullText: string;
@@ -30,7 +37,11 @@ export interface MenuDishViewModel {
   photoUrl?: string;
   photoVariants?: PublicImageVariant[];
   price: string;
+  /** First two variants; replaces `price` in rows, cards and the modal header. */
+  prices?: MenuDishPriceViewModel[];
   rowKey: string;
+  /** Every variant, only when there are more than the two `prices` show. */
+  variantList?: { items: MenuDishExtraViewModel[]; label: string };
 }
 
 export interface SelectDishInput {

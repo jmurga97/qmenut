@@ -42,6 +42,7 @@ export function MenuDishModalContent({
       closeLabel={t("menu.closeLabel")}
       price={dish.price}
       oldPrice={dish.oldPrice}
+      prices={dish.prices}
       tag={dish.badge?.fullText}
       allergensLabel={t("menu.allergensLabel")}
       onQmClose={onClose}
@@ -57,6 +58,9 @@ export function MenuDishModalContent({
             <span>{t("menu.comboPriceLabel")}:</span> {dish.comboPrice}
           </p>
         </div>
+      ) : null}
+      {dish.variantList ? (
+        <QmDishExtras slot="extras" label={dish.variantList.label} items={dish.variantList.items} />
       ) : null}
       {dish.extras && dish.extras.length > 0 ? (
         <QmDishExtras slot="extras" label={t("menu.extrasLabel")} items={dish.extras} />

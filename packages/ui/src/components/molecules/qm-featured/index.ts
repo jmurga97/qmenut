@@ -6,7 +6,9 @@ import { qmHostResetStyles } from "../../../internal/base-styles";
 import { createComponentStyles } from "../../../internal/component-styles";
 import { restorePhotoFallback } from "../../../internal/photo-fallback";
 import { defineQmBadge } from "../../atoms/qm-badge";
-import { defineQmPrice } from "../../atoms/qm-price";
+import { defineQmPrice, renderPriceColumns } from "../../atoms/qm-price";
+
+import type { QmPriceColumn } from "../../atoms/qm-price";
 
 export const QM_FEATURED_TAG_NAME = "qm-featured";
 
@@ -27,6 +29,7 @@ export interface QmFeaturedValue {
   desc: string;
   price: string;
   oldPrice?: string;
+  prices?: QmPriceColumn[];
   comboLabel?: string;
   tag?: string;
   secondaryTag?: string;
@@ -76,7 +79,15 @@ export class QmFeatured extends LitElement {
           ${tags}
           <div part="name" class="name">${this.value?.name ?? ""}</div>
           <div part="desc" class="desc">${this.value?.desc ?? ""}</div>
-          <qm-price part="price" .value=${this.value?.price ?? ""} .oldValue=${this.value?.oldPrice}></qm-price>
+          ${
+            this.value?.prices?.length
+              ? renderPriceColumns(this.value.prices)
+              : html`<qm-price
+                  part="price"
+                  .value=${this.value?.price ?? ""}
+                  .oldValue=${this.value?.oldPrice}
+                ></qm-price>`
+          }
         </div>
       </div>
     `;

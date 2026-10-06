@@ -74,6 +74,7 @@ export function MenuFeatured({
               photoSrcSet: source?.srcSet,
               photoSizes: source?.sizes,
               price: featured.price,
+              prices: featured.prices,
               secondaryTag: featured.featured ? featuredLabel : undefined,
               tag: featured.badge?.compactText,
             }}

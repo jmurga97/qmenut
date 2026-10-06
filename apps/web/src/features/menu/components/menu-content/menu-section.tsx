@@ -61,6 +61,7 @@ export function MenuSection({ index, onSelectDish, section, showDishPhotos }: Me
                   photoSrcSet: source?.srcSet,
                   photoSizes: source?.sizes,
                   price: dish.price,
+                  prices: dish.prices,
                   tag: dish.badge?.compactText,
                 }}
               />

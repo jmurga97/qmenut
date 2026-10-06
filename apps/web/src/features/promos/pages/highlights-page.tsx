@@ -77,6 +77,7 @@ export function HighlightsPage() {
               photoSrcSet: featuredSource?.srcSet,
               photoSizes: featuredSource?.sizes,
               price: content.featured.price,
+              prices: content.featured.prices,
               secondaryTag: t(`menu.featuredBadges.${template}`),
               tag: content.featured.badge?.compactText,
             }}

@@ -9,8 +9,9 @@ import { restorePhotoFallback } from "../../../internal/photo-fallback";
 import { QmElement } from "../../../internal/qm-element";
 import { defineQmBadge } from "../../atoms/qm-badge";
 import { defineQmImage } from "../../atoms/qm-image";
-import { defineQmPrice } from "../../atoms/qm-price";
+import { defineQmPrice, renderPriceColumns } from "../../atoms/qm-price";
 
+import type { QmPriceColumn } from "../../atoms/qm-price";
 import type { PropertyValues } from "lit";
 
 export const QM_DISH_MODAL_TAG_NAME = "qm-dish-modal";
@@ -65,6 +66,10 @@ export class QmDishModal extends QmElement {
 
   @property({ type: String, attribute: "old-price" })
   oldPrice?: string;
+
+  /** Dish variants as labelled price columns; replaces `price` when set. */
+  @property({ attribute: false })
+  prices?: QmPriceColumn[];
 
   @property({ type: String })
   tag?: string;
@@ -292,14 +297,16 @@ export class QmDishModal extends QmElement {
         ${this.tag ? html`<qm-badge part="tag" class="tag" .text=${this.tag}></qm-badge>` : nothing}
         <div class="identity">
           <h2 part="title" id=${this.resolvedTitleId} class="title">${this.name}</h2>
-          ${
-            this.price
-              ? html` <qm-price part="price" class="price" .value=${this.price} .oldValue=${this.oldPrice}></qm-price> `
-              : nothing
-          }
+          ${this.renderPrice()}
         </div>
       </div>
     `;
+  }
+
+  private renderPrice(): unknown {
+    if (this.prices?.length) return renderPriceColumns(this.prices);
+    if (!this.price) return nothing;
+    return html` <qm-price part="price" class="price" .value=${this.price} .oldValue=${this.oldPrice}></qm-price> `;
   }
 
   private renderDescription(): unknown {

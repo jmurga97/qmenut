@@ -1,12 +1,15 @@
 import {
+  getDishPriceVariantGroup,
   setDishAllergensStatements,
   setDishExtrasStatements,
   setDishTagsStatements,
+  setDishVariantStatements,
 } from "@qmenut/db/repositories/admin-dishes.repository";
 import { listAllergens, listIngredients, listTags } from "@qmenut/db/repositories/admin-menu-taxonomy.repository";
 import { TRPCError } from "@trpc/server";
 
 import type { DrizzleDb } from "@qmenut/db/client";
+import type { DishVariantGroupWrite } from "@qmenut/db/repositories/admin-dishes.repository";
 
 interface SaveDishRelationsInput {
   db: DrizzleDb;
@@ -15,9 +18,10 @@ interface SaveDishRelationsInput {
   tagIds: string[];
   allergenIds: number[];
   extraIngredientIds: string[];
+  variantGroup: DishVariantGroupWrite | null;
 }
 
-/** Reemplaza tags, alérgenos y extras de un plato (estrategia borrar-e-insertar). */
+/** Reemplaza tags, alérgenos, extras y variantes de un plato (estrategia borrar-e-insertar). */
 export async function saveDishRelations({
   db,
   dishId,
@@ -25,11 +29,13 @@ export async function saveDishRelations({
   tagIds,
   allergenIds,
   extraIngredientIds,
+  variantGroup,
 }: SaveDishRelationsInput): Promise<void> {
-  const [availableTags, availableAllergens, availableIngredients] = await Promise.all([
+  const [availableTags, availableAllergens, availableIngredients, existingVariants] = await Promise.all([
     listTags({ db, restaurantId }),
     listAllergens({ db }),
     listIngredients({ db, restaurantId }),
+    getDishPriceVariantGroup({ db, dishId }),
   ]);
   assertKnownIds({ ids: tagIds, knownIds: availableTags.map((tag) => tag.id), relationLabel: "etiquetas" });
   assertKnownIds({
@@ -42,11 +48,19 @@ export async function saveDishRelations({
     knownIds: availableIngredients.map((ingredient) => ingredient.id),
     relationLabel: "extras",
   });
+  assertKnownIds({
+    ids: [variantGroup?.id, ...(variantGroup?.options.map((option) => option.id) ?? [])].filter(
+      (id): id is string => id !== undefined,
+    ),
+    knownIds: existingVariants ? [existingVariants.id, ...existingVariants.options.map((option) => option.id)] : [],
+    relationLabel: "variantes",
+  });
 
   await db.batch([
     ...setDishTagsStatements({ db, dishId, tagIds }),
     ...setDishAllergensStatements({ db, dishId, allergenIds }),
     ...setDishExtrasStatements({ db, dishId, ingredientIds: extraIngredientIds }),
+    ...setDishVariantStatements({ db, dishId, existing: existingVariants, group: variantGroup }),
   ]);
 }
 

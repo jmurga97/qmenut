@@ -327,6 +327,7 @@ const dishesRouter = router({
       tagIds: input.tagIds,
       allergenIds: input.allergenIds,
       extraIngredientIds: input.extraIngredientIds,
+      variantGroup: input.variantGroup,
     });
 
     await bumpPublicContentVersionForBranch({

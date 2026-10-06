@@ -20,6 +20,7 @@ import {
   getCategoryMutationOptions,
   getCategoryReorderMutationOptions,
   getDishAvailabilityMutationOptions,
+  getDishDetailQueryOptions,
   getDishMutationOptions,
   getMenuAllergensQueryOptions,
   getMenuIngredientsQueryOptions,
@@ -30,6 +31,7 @@ import {
   toCategoryScheduleValues,
   toDishFormValues,
   toDishInput,
+  toDishVariantGroupInput,
   toTagDisplayLabel,
 } from "../mappers";
 import { categoryFormSchema, dishFormSchema } from "../types";
@@ -203,6 +205,7 @@ export function useDishEditorController({
         dishId: saved.id,
         extraIngredientIds: values.extraIngredientIds,
         tagIds: values.tagIds,
+        variantGroup: toDishVariantGroupInput(values),
       });
     }, uploads.clear);
     if (!succeeded || !dishId.current) return;
@@ -211,7 +214,9 @@ export function useDishEditorController({
       await navigate({ to: "/menu/dishes/$dishId", params: { dishId: dishId.current }, ignoreBlocker: true });
       return;
     }
-    form.reset(values);
+    // Reset from the server: new variants only get their ids once saved.
+    const saved = await queryClient.fetchQuery(getDishDetailQueryOptions({ dishId: dish.id, trpc }));
+    form.reset(toDishFormValues(saved));
     image.accept();
   });
   const removeDish = async () => {

@@ -51,6 +51,7 @@ export function RecommendedList({ content, onSelectDish, showDishPhotos }: Recom
                 photoSrcSet: source?.srcSet,
                 photoSizes: source?.sizes,
                 price: dish.price,
+                prices: dish.prices,
                 tag: dish.badge?.compactText,
               }}
             />

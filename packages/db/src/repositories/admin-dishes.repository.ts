@@ -1,6 +1,15 @@
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
-import { categories, dishAllergens, dishExtras, dishTags, dishes } from "../schema/menu";
+import {
+  categories,
+  dishAllergens,
+  dishExtras,
+  dishTags,
+  dishVariantGroups,
+  dishVariantOptions,
+  dishes,
+} from "../schema/menu";
+import { translations } from "../schema/translations";
 
 import type { DrizzleDb } from "../client";
 import type { BatchItem } from "drizzle-orm/batch";
@@ -25,6 +34,20 @@ export interface AdminDishDetail extends AdminDishListItem {
   tagIds: string[];
   allergenIds: number[];
   extraIngredientIds: string[];
+  variantGroup: DishVariantGroup | null;
+}
+
+/** Variantes de precio (p. ej. 15 cm / 30 cm). `price` es absoluto; en DB se guarda como delta sobre `dishes.price`. */
+export interface DishVariantGroup {
+  id: string;
+  name: string;
+  options: { id: string; name: string; price: number }[];
+}
+
+export interface DishVariantGroupWrite {
+  id?: string;
+  name: string;
+  options: { id?: string; name: string; price: number }[];
 }
 
 export interface DishWriteData {
@@ -86,7 +109,7 @@ export async function getDishDetail({ db, restaurantId, dishId }: GetDishDetailI
     return null;
   }
 
-  const [tagRows, allergenRows, extraRows] = await Promise.all([
+  const [tagRows, allergenRows, extraRows, variantRows] = await Promise.all([
     db.select({ tagId: dishTags.tagId }).from(dishTags).where(eq(dishTags.dishId, dishId)).all(),
     db
       .select({ allergenId: dishAllergens.allergenId })
@@ -99,6 +122,7 @@ export async function getDishDetail({ db, restaurantId, dishId }: GetDishDetailI
       .where(eq(dishExtras.dishId, dishId))
       .orderBy(asc(dishExtras.position))
       .all(),
+    listDishVariantRows({ db, dishId }),
   ]);
 
   return {
@@ -118,7 +142,118 @@ export async function getDishDetail({ db, restaurantId, dishId }: GetDishDetailI
     tagIds: tagRows.map((row) => row.tagId),
     allergenIds: allergenRows.map((row) => row.allergenId),
     extraIngredientIds: extraRows.map((row) => row.ingredientId),
+    variantGroup: toPriceVariantGroup({ basePrice: dish.price, rows: variantRows }),
   };
+}
+
+type DishVariantRow = Awaited<ReturnType<typeof listDishVariantRows>>[number];
+
+function listDishVariantRows({ db, dishId }: { db: DrizzleDb; dishId: string }) {
+  return db
+    .select({
+      groupId: dishVariantGroups.id,
+      groupName: dishVariantGroups.name,
+      optionId: dishVariantOptions.id,
+      optionName: dishVariantOptions.name,
+      priceDelta: dishVariantOptions.priceDelta,
+    })
+    .from(dishVariantGroups)
+    .leftJoin(dishVariantOptions, eq(dishVariantOptions.groupId, dishVariantGroups.id))
+    .where(eq(dishVariantGroups.dishId, dishId))
+    .orderBy(asc(dishVariantGroups.position), asc(dishVariantOptions.position))
+    .all();
+}
+
+/**
+ * El grupo de variantes de precio es el primero cuyas opciones cuestan distinto (p. ej. 15 cm / 30 cm).
+ * Los grupos de elección sin coste (sabor, bebida…) no fijan precios y el admin no los toca.
+ */
+function toPriceVariantGroup({
+  basePrice,
+  rows,
+}: {
+  basePrice: number;
+  rows: DishVariantRow[];
+}): DishVariantGroup | null {
+  const isPriceGroup = (groupId: string) =>
+    new Set(rows.filter((row) => row.groupId === groupId && row.optionId).map((row) => row.priceDelta)).size > 1;
+  const groupRows = rows.filter(
+    (row) => row.groupId === rows.find((candidate) => isPriceGroup(candidate.groupId))?.groupId,
+  );
+  const first = groupRows.at(0);
+  if (!first) return null;
+
+  const options = groupRows.flatMap((row) =>
+    row.optionId && row.optionName !== null
+      ? [{ id: row.optionId, name: row.optionName, price: basePrice + (row.priceDelta ?? 0) }]
+      : [],
+  );
+  return { id: first.groupId, name: first.groupName, options };
+}
+
+export async function getDishPriceVariantGroup({
+  db,
+  dishId,
+}: {
+  db: DrizzleDb;
+  dishId: string;
+}): Promise<DishVariantGroup | null> {
+  return toPriceVariantGroup({ basePrice: 0, rows: await listDishVariantRows({ db, dishId }) });
+}
+
+interface SetDishVariantsInput {
+  db: DrizzleDb;
+  dishId: string;
+  existing: DishVariantGroup | null;
+  group: DishVariantGroupWrite | null;
+}
+
+/**
+ * Borrar-e-insertar el grupo de precio conservando los ids recibidos, para que sus traducciones sigan
+ * valiendo. `dishes.price` pasa a ser el precio mínimo y cada opción guarda su delta sobre él.
+ */
+export function setDishVariantStatements({ db, dishId, existing, group }: SetDishVariantsInput): BatchItem<"sqlite">[] {
+  const keptIds = new Set([group?.id, ...(group?.options.map((option) => option.id) ?? [])]);
+  const existingIds = existing ? [existing.id, ...existing.options.map((option) => option.id)] : [];
+  const removedIds = existingIds.filter((id) => !keptIds.has(id));
+  const statements: BatchItem<"sqlite">[] = existing
+    ? [db.delete(dishVariantGroups).where(eq(dishVariantGroups.id, existing.id))]
+    : [];
+
+  if (removedIds.length > 0) {
+    const orphanTranslations = and(
+      inArray(translations.entityType, ["variant_group", "variant_option"]),
+      inArray(translations.entityId, removedIds),
+    );
+    statements.push(db.delete(translations).where(orphanTranslations));
+  }
+  if (!group) return statements;
+
+  const groupId = group.id ?? crypto.randomUUID();
+  const basePrice = Math.min(...group.options.map((option) => option.price));
+  statements.push(
+    db.insert(dishVariantGroups).values({
+      id: groupId,
+      dishId,
+      name: group.name,
+      selectionType: "single",
+      isRequired: true,
+      minSelect: 1,
+      maxSelect: 1,
+      position: 0,
+    }),
+    db.insert(dishVariantOptions).values(
+      group.options.map((option, position) => ({
+        id: option.id ?? crypto.randomUUID(),
+        groupId,
+        name: option.name,
+        priceDelta: option.price - basePrice,
+        position,
+      })),
+    ),
+    db.update(dishes).set({ price: basePrice, updatedAt: Date.now() }).where(eq(dishes.id, dishId)),
+  );
+  return statements;
 }
 
 interface CreateDishInput {

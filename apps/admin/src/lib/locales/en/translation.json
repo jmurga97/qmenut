@@ -701,7 +701,20 @@
     "Desde": "From",
     "Hasta": "Until",
     "Elige al menos un día": "Choose at least one day",
-    "La hora es obligatoria": "Time is required"
+    "La hora es obligatoria": "Time is required",
+    "Máximo 60 caracteres": "Maximum 60 characters",
+    "Máximo 24 caracteres": "Maximum 24 characters",
+    "Añade al menos dos variantes": "Add at least two variants",
+    "Tamaño": "Size",
+    "Variantes de precio": "Price variants",
+    "Este plato tiene variantes (tamaños)": "This dish has variants (sizes)",
+    "Nombre del grupo": "Group name",
+    "15 cm": "15 cm",
+    "Quitar variante {{index}}": "Remove variant {{index}}",
+    "Quitar": "Remove",
+    "Añadir variante": "Add variant",
+    "La carta pública muestra las dos primeras variantes junto al nombre y todas en el detalle del plato. Usa etiquetas cortas (15 cm, S, XXL).": "The public menu shows the first two variants next to the name and all of them in the dish details. Use short labels (15 cm, S, XXL).",
+    "Las variantes deben tener precios distintos": "Variants must have different prices"
   },
   "menuPrint": {
     "Categorías de la carta": "Menu categories",
@@ -734,7 +747,6 @@
     "Interior · carta abierta": "Inside · open menu",
     "Anverso": "Front",
     "Reverso": "Back",
-    " (obligatorio)": "(required)",
     "No se pudo cargar la carta o el tema de la sucursal.": "Could not load the menu or this branch’s theme.",
     "Reintentar": "Retry",
     "Tu carta todavía está vacía": "Your menu is still empty",
@@ -790,7 +802,8 @@
     "Las unidades pagadas no pueden superar las compradas": "Units paid cannot exceed units purchased",
     "Promoción guardada.": "Promotion saved.",
     "Selecciona una promoción para editarla o crea una nueva.": "Select a promotion to edit it or create a new one.",
-    "Activar {{name}}": "Activate {{name}}"
+    "Activar {{name}}": "Activate {{name}}",
+    "En platos con variantes de precio se aplica a la variante más barata.": "On dishes with price variants it applies to the cheapest variant."
   },
   "qr": {
     "Ocultar estilos": "Hide styles",
