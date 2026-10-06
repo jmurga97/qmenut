@@ -3,6 +3,7 @@ import { Button } from "@jmurga97/components";
 import { buttonVariants } from "@jmurga97/components/button";
 import { useState } from "react";
 import Cropper from "react-easy-crop";
+import "react-easy-crop/react-easy-crop.css";
 
 import { i18n } from "~/lib/i18n";
 
@@ -86,6 +87,8 @@ function LogoCropper({ source, onConfirm }: { source: LogoCropSource; onConfirm:
         <Cropper
           aspect={1}
           crop={crop}
+          // Its default style injection assigns innerHTML, which the Trusted Types CSP blocks.
+          disableAutomaticStylesInjection
           image={source.url}
           maxZoom={MAX_ZOOM}
           minZoom={MIN_ZOOM}

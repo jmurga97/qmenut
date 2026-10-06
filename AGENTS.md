@@ -89,3 +89,5 @@ Pull requests should include a short summary, verification commands, linked issu
 ## Security & Configuration Tips
 
 Do not commit secrets or local Cloudflare state. Keep environment-specific values in local Wrangler configuration or platform-managed secrets, and document any required variables in the relevant app README or PR description.
+
+The admin enforces Trusted Types (`require-trusted-types-for 'script'` in `apps/admin/public/_headers`). Never assign raw strings to `innerHTML`/`outerHTML`/`srcdoc` or use `dangerouslySetInnerHTML` there; use DOM APIs or a named policy added to the `trusted-types` allowlist (see `shared/services/qr.ts`). Check new dependencies too: disable any runtime style/HTML injection they do (e.g. `react-easy-crop` → `disableAutomaticStylesInjection` + import its CSS).
