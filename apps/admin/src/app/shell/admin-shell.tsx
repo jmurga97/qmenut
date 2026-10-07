@@ -1,24 +1,20 @@
-import { AppShell, ConfirmAction, Select } from "@jmurga97/components";
+import { AppShell, Select } from "@jmurga97/components";
 import { can } from "@qmenut/permissions";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
 
 import { getListRestaurantsQueryOptions } from "~/features/auth/api";
 import { useSelectRestaurant } from "~/features/auth/hooks/use-select-restaurant";
-import { getLanguageCatalogQueryOptions } from "~/features/languages/api";
 import { signOut } from "~/lib/auth-client";
 import { FEATURES } from "~/lib/features";
 import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
-import { getLanguagesQueryOptions, getTenantQueryOptions } from "~/shared/api";
+import { getTenantQueryOptions } from "~/shared/api";
 import { ImageActivityToasts } from "~/shared/images/image-activity";
 import { buildPublicMenuUrl } from "~/shared/services/public-menu-url";
 import { resolveSelectedBranch, useBranchStore } from "~/shared/stores/branch-store";
-import { useLanguageStore } from "~/shared/stores/language-store";
 import {
   isEditorBusy,
-  isEditorDirty,
   useEditorBusy,
   useShellActions,
   useShellMobile,
@@ -94,21 +90,8 @@ export function AdminShell() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const location = useLocation();
-  const [pendingLanguageCode, setPendingLanguageCode] = useState<string | null>(null);
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const { data: memberships } = useSuspenseQuery(getListRestaurantsQueryOptions({ trpc }));
-  const { data: languageCatalog } = useSuspenseQuery(getLanguageCatalogQueryOptions({ trpc }));
-  const { data: restaurantLanguages } = useSuspenseQuery(getLanguagesQueryOptions({ trpc }));
-  const selectedLanguageCode = useLanguageStore((state) => state.selectedLanguageCode);
-  const setSelectedLanguageCode = useLanguageStore((state) => state.setSelectedLanguageCode);
-  const currentLanguage =
-    restaurantLanguages.languages.find(({ languageCode }) => languageCode === selectedLanguageCode) ??
-    restaurantLanguages.languages[0] ??
-    null;
-  const languageOptions = restaurantLanguages.languages.map(({ isDefault, languageCode }) => ({
-    id: languageCode,
-    label: `${languageCatalog.find((entry) => entry.code === languageCode)?.label ?? languageCode.toUpperCase()}${isDefault ? i18n.t("shell___ (base)") : ""}`,
-  }));
   const selectRestaurant = useSelectRestaurant();
   const editorBusy = useEditorBusy();
   const isMobile = useShellMobile();
@@ -141,34 +124,18 @@ export function AdminShell() {
               <li aria-current={"page"}>{sectionLabel}</li>
             </ol>
           </nav>
-          {memberships.length > 1 || languageOptions.length > 1 ? (
+          {memberships.length > 1 ? (
             <div className="admin-topbar-actions">
-              {memberships.length > 1 ? (
-                <Select
-                  ariaLabel={i18n.t("shell___Restaurante activo")}
-                  disabled={selectRestaurant.isPending}
-                  onValueChange={(restaurantId) => {
-                    if (restaurantId && restaurantId !== tenant.restaurant.id && !isEditorBusy()) {
-                      selectRestaurant.mutate({ restaurantId });
-                    }
-                  }}
-                  options={memberships.map((membership) => ({ id: membership.restaurantId, label: membership.name }))}
-                  value={tenant.restaurant.id}
-                />
-              ) : null}
               <Select
-                ariaLabel={i18n.t("shell___Idioma del contenido")}
-                disabled={editorBusy}
-                onValueChange={(languageCode) => {
-                  if (!languageCode || languageCode === currentLanguage?.languageCode || isEditorBusy()) return;
-                  if (isEditorDirty()) {
-                    setPendingLanguageCode(languageCode);
-                    return;
+                ariaLabel={i18n.t("shell___Restaurante activo")}
+                disabled={selectRestaurant.isPending}
+                onValueChange={(restaurantId) => {
+                  if (restaurantId && restaurantId !== tenant.restaurant.id && !isEditorBusy()) {
+                    selectRestaurant.mutate({ restaurantId });
                   }
-                  setSelectedLanguageCode(languageCode);
                 }}
-                options={languageOptions}
-                value={currentLanguage?.languageCode ?? null}
+                options={memberships.map((membership) => ({ id: membership.restaurantId, label: membership.name }))}
+                value={tenant.restaurant.id}
               />
             </div>
           ) : null}
@@ -202,20 +169,6 @@ export function AdminShell() {
       <div className="admin-main-slot">
         {selectedBranch ? <ImageActivityToasts branchId={selectedBranch.id} /> : null}
         <Outlet />
-        <ConfirmAction
-          cancelLabel={i18n.t("shell___Cancelar")}
-          confirmLabel={i18n.t("shell___Descartar cambios")}
-          message={i18n.t("shell___Los cambios sin guardar se perderán al cambiar de idioma.")}
-          onConfirm={() => {
-            if (pendingLanguageCode) setSelectedLanguageCode(pendingLanguageCode);
-            setPendingLanguageCode(null);
-          }}
-          onOpenChange={(open) => {
-            if (!open) setPendingLanguageCode(null);
-          }}
-          open={pendingLanguageCode !== null}
-          title={i18n.t("shell___¿Descartar cambios?")}
-        />
       </div>
     </AppShell>
   );

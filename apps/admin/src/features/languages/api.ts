@@ -21,7 +21,6 @@ export function getLanguageMutationOptions(context: ApiContext) {
         Promise.all([
           onSuccess(),
           context.queryClient.invalidateQueries({ queryKey: context.trpc.admin.translations.pathKey() }),
-          context.queryClient.invalidateQueries({ queryKey: context.trpc.admin.menu.pathKey() }),
         ]),
     }),
   };

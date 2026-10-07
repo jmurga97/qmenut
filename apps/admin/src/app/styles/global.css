@@ -786,6 +786,9 @@ body {
 .admin-translation-row[data-state="modified"] {
   background: var(--secondary);
 }
+.admin-translation-row[data-state="locked"] .admin-translation-textarea {
+  color: var(--muted-foreground);
+}
 .admin-translation-label {
   display: grid;
   align-content: start;

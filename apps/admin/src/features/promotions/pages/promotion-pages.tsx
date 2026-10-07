@@ -1,12 +1,10 @@
 import { Button, InlineMessage } from "@jmurga97/components";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Suspense, useEffect, useMemo } from "react";
+import { Suspense } from "react";
 import { FormProvider } from "react-hook-form";
-import { toast } from "sonner";
 
 import { i18n } from "~/lib/i18n";
-import { notifyError } from "~/lib/notifications";
 import { trpc } from "~/lib/trpc";
 import { EntityListCard } from "~/shared/components/entity-list-card";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
@@ -18,17 +16,13 @@ import { DetailEmpty, MasterDetail } from "~/shared/components/master-detail";
 import { PageHeader } from "~/shared/components/page-header";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
-import { TranslationEditor } from "~/shared/components/translation-editor/translation-editor";
 import { useCan } from "~/shared/hooks/use-can";
 import { useEditorGuard } from "~/shared/hooks/use-editor-guard";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
-import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
-import { useTranslationForm } from "~/shared/hooks/use-translation-form";
 
 import { getPromotionQueryOptions } from "../api";
 import { PromotionStatusControl } from "../components/promotion-status-control";
 import { usePromotionEditorController, usePromotionsListController } from "../hooks/use-promotions-controller";
-import { toPromotionFormValues } from "../mappers";
 import { isEditablePromotion } from "../types";
 
 import type { EditablePromotion, PromotionFormValues, PromotionType } from "../types";
@@ -55,15 +49,11 @@ const STATUS_OPTIONS = [
 ];
 export function PromotionsLayout() {
   const branch = useSelectedBranch();
-  const { isDefault } = useSelectedLanguage();
   if (!branch)
     return <NoBranchState description={i18n.t("promotions___Crea una sucursal para gestionar promociones.")} />;
   return (
     <div className={"ming-page admin-page"}>
       <PageHeader kicker={i18n.t("promotions___Promociones")} title={i18n.t("promotions___Promociones")} />
-      {isDefault ? null : (
-        <InlineMessage>{i18n.t("promotions___Cambia al idioma base para crear promociones.")}</InlineMessage>
-      )}
       <MasterDetail
         list={
           <Suspense fallback={<CardSkeleton rows={4} title={i18n.t("promotions___Activas y programadas")} />}>
@@ -76,16 +66,9 @@ export function PromotionsLayout() {
 }
 function CreatePromotionButton() {
   const canWrite = useCan("promotions.write");
-  const { isDefault } = useSelectedLanguage();
   if (!canWrite) return null;
   return (
-    <Button
-      disabled={!isDefault}
-      nativeButton={false}
-      render={<Link to={"/promotions/new"} />}
-      size={"sm"}
-      variant={"secondary"}
-    >
+    <Button nativeButton={false} render={<Link to={"/promotions/new"} />} size={"sm"} variant={"secondary"}>
       {i18n.t("promotions___Nueva promoción")}
     </Button>
   );
@@ -122,20 +105,8 @@ function PromotionsList({ branchId }: { branchId: string }) {
 }
 export function PromotionEditorPage({ promotionId }: { promotionId?: string }) {
   const branch = useSelectedBranch();
-  const language = useSelectedLanguage();
   if (!branch)
     return <NoBranchState description={i18n.t("promotions___Crea una sucursal para gestionar promociones.")} />;
-  if (!language.isDefault && language.languageCode)
-    return promotionId ? (
-      <TranslatedPromotionForm
-        key={`${branch.id}:${promotionId}:${language.languageCode}`}
-        branchId={branch.id}
-        languageCode={language.languageCode}
-        promotionId={promotionId}
-      />
-    ) : (
-      <DetailEmpty text={i18n.t("promotions___Cambia al idioma base para crear una promoción.")} />
-    );
   return promotionId ? (
     <ExistingPromotion branchId={branch.id} promotionId={promotionId} key={`${branch.id}:${promotionId}`} />
   ) : (
@@ -187,143 +158,17 @@ function PromotionForm({ branchId, promotion }: { branchId: string; promotion: E
     </div>
   );
 }
-function TranslatedPromotionForm({
-  branchId,
-  languageCode,
-  promotionId,
-}: {
-  branchId: string;
-  languageCode: string;
-  promotionId: string;
-}) {
-  const { data: promotion } = useSuspenseQuery(getPromotionQueryOptions({ promotionId, trpc }));
-  if (!isEditablePromotion(promotion)) {
-    return (
-      <div className="admin-detail">
-        <UnsupportedPromotion name={promotion.name} />
-        <p>
-          {TYPE_LABELS[promotion.type] ?? promotion.type} · {promotion.status}
-        </p>
-        <TranslationEditor branchId={branchId} entityId={promotionId} languageCode={languageCode} />
-      </div>
-    );
-  }
-  return <TranslatedEditablePromotion branchId={branchId} languageCode={languageCode} promotion={promotion} />;
-}
-
-function TranslatedEditablePromotion({
-  branchId,
-  languageCode,
-  promotion,
-}: {
-  branchId: string;
-  languageCode: string;
-  promotion: EditablePromotion;
-}) {
-  const canTranslate = useCan("languages.write");
-  const controller = usePromotionEditorController({ branchId, promotion });
-  const translation = useTranslationForm({ branchId, languageCode });
-  const initialValues = useMemo(
-    () => ({
-      ...toPromotionFormValues(promotion),
-      description: translation.value({
-        entityType: "promotion",
-        entityId: promotion.id,
-        field: "description",
-        fallback: promotion.description ?? "",
-      }),
-      name: translation.value({
-        entityType: "promotion",
-        entityId: promotion.id,
-        field: "name",
-        fallback: promotion.name,
-      }),
-    }),
-    [promotion, translation],
-  );
-  useEffect(() => {
-    if (!controller.form.formState.isDirty) controller.form.reset(initialValues);
-  }, [controller.form, initialValues]);
-  useEditorGuard({ dirty: controller.form.formState.isDirty, pending: translation.pending });
-  const submit = async () => {
-    if (!canTranslate || !(await controller.form.trigger(["name", "description"]))) return;
-    const values = controller.form.getValues();
-    const rows = [
-      values.name === initialValues.name &&
-      !translation.isIncomplete({ entityType: "promotion", entityId: promotion.id, field: "name" })
-        ? null
-        : translation.saveRow({ entityType: "promotion", entityId: promotion.id, field: "name", value: values.name }),
-      values.description === initialValues.description &&
-      !translation.isIncomplete({ entityType: "promotion", entityId: promotion.id, field: "description" })
-        ? null
-        : translation.saveRow({
-            entityType: "promotion",
-            entityId: promotion.id,
-            field: "description",
-            value: values.description,
-          }),
-    ].filter((row): row is NonNullable<typeof row> => row !== null);
-    if (rows.length === 0) return;
-    try {
-      await translation.saveRows(rows);
-      controller.form.reset(values);
-      toast.success(i18n.t("promotions___Traducción guardada."));
-    } catch (error) {
-      notifyError(error);
-    }
-  };
-  return (
-    <div className="admin-detail">
-      <PageHeader
-        headingLevel={2}
-        description={i18n.t(
-          "promotions___Edita los textos de esta promoción. El resto de la configuración se mantiene en el idioma base.",
-        )}
-        kicker={i18n.t("promotions___Editar promoción")}
-        title={promotion.name}
-      />
-      <FormProvider {...controller.form}>
-        <FormShell
-          busy={translation.pending}
-          onCancel={controller.cancel}
-          onSubmit={() => void submit()}
-          readOnly={!canTranslate}
-          submitLabel={i18n.t("promotions___Guardar traducción")}
-        >
-          <PromotionFields canEdit={canTranslate} controller={controller} locked />
-        </FormShell>
-      </FormProvider>
-    </div>
-  );
-}
-
 type PromotionEditorController = ReturnType<typeof usePromotionEditorController>;
 
-// `locked` = translation mode: only name and description stay editable; the rest belongs to the base language.
-function PromotionFields({
-  canEdit = true,
-  controller,
-  locked = false,
-}: {
-  canEdit?: boolean;
-  controller: PromotionEditorController;
-  locked?: boolean;
-}) {
-  const base = (label: string) => (locked ? i18n.t("promotions___{{label}} (idioma base)", { label }) : label);
+function PromotionFields({ controller }: { controller: PromotionEditorController }) {
   return (
     <>
       <section className="admin-editor-section">
         <h2 className={"ming-section__title"}>{i18n.t("promotions___Datos de la promoción")}</h2>
-        <FormTextInput<PromotionFormValues> disabled={!canEdit} label={i18n.t("promotions___Nombre")} name={"name"} />
-        <FormTextarea<PromotionFormValues>
-          disabled={!canEdit}
-          label={i18n.t("promotions___Descripción")}
-          name={"description"}
-          rows={3}
-        />
+        <FormTextInput<PromotionFormValues> label={i18n.t("promotions___Nombre")} name={"name"} />
+        <FormTextarea<PromotionFormValues> label={i18n.t("promotions___Descripción")} name={"description"} rows={3} />
         <FormSelect<PromotionFormValues>
-          disabled={locked}
-          label={base(i18n.t("promotions___Estado"))}
+          label={i18n.t("promotions___Estado")}
           name={"status"}
           options={STATUS_OPTIONS}
         />
@@ -331,26 +176,19 @@ function PromotionFields({
       <section className="admin-editor-section">
         <h2 className={"ming-section__title"}>{i18n.t("promotions___Descuento")}</h2>
         <div className="admin-form-grid--two">
-          <FormSelect<PromotionFormValues>
-            disabled={locked}
-            label={base(i18n.t("promotions___Tipo"))}
-            name={"type"}
-            options={TYPE_OPTIONS}
-          />
-          <PromotionValueFields disabled={locked} type={controller.type} />
+          <FormSelect<PromotionFormValues> label={i18n.t("promotions___Tipo")} name={"type"} options={TYPE_OPTIONS} />
+          <PromotionValueFields type={controller.type} />
         </div>
       </section>
       <section className="admin-editor-section">
         <h2 className={"ming-section__title"}>{i18n.t("promotions___Alcance")}</h2>
         <FormSelect<PromotionFormValues>
-          disabled={locked}
-          label={base(i18n.t("promotions___Aplicar a"))}
+          label={i18n.t("promotions___Aplicar a")}
           name={"scope"}
           options={SCOPE_OPTIONS}
         />
         <FormChipGroup<PromotionFormValues>
-          disabled={locked}
-          label={base(controller.scope === "dish" ? i18n.t("promotions___Platos") : i18n.t("promotions___Categorías"))}
+          label={controller.scope === "dish" ? i18n.t("promotions___Platos") : i18n.t("promotions___Categorías")}
           name={"targetIds"}
           options={controller.targetOptions}
         />
@@ -359,11 +197,10 @@ function PromotionFields({
   );
 }
 
-function PromotionValueFields({ type, disabled = false }: { type: PromotionType; disabled?: boolean }) {
+function PromotionValueFields({ type }: { type: PromotionType }) {
   if (type === "percentage_discount") {
     return (
       <FormTextInput<PromotionFormValues>
-        disabled={disabled}
         inputMode={"decimal"}
         label={i18n.t("promotions___Porcentaje (0-100)")}
         name={"percentage"}
@@ -375,7 +212,6 @@ function PromotionValueFields({ type, disabled = false }: { type: PromotionType;
     return (
       <>
         <FormTextInput<PromotionFormValues>
-          disabled={disabled}
           inputMode={"decimal"}
           label={i18n.t("promotions___Precio especial")}
           name={"specialPrice"}
@@ -390,13 +226,11 @@ function PromotionValueFields({ type, disabled = false }: { type: PromotionType;
   return (
     <>
       <FormTextInput<PromotionFormValues>
-        disabled={disabled}
         inputMode={"numeric"}
         label={i18n.t("promotions___Unidades que lleva")}
         name={"buyQuantity"}
       />
       <FormTextInput<PromotionFormValues>
-        disabled={disabled}
         inputMode={"numeric"}
         label={i18n.t("promotions___Unidades que paga")}
         name={"paidQuantity"}

@@ -31,7 +31,6 @@ import {
 import { createMenuCategory, updateMenuCategory } from "./save-category";
 import { saveDish } from "./save-dish";
 import { saveDishRelations } from "./save-dish-relations";
-import { getTranslationTexts, translateText } from "./translation-overlay";
 import {
   bumpPublicContentVersionForBranch,
   bumpPublicContentVersionForRestaurant,
@@ -42,14 +41,9 @@ import { prepareMenuImageSave } from "../admin-images/prepare-menu-image-save";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 import { requirePermission } from "../admin-tenant/require-permission";
 
-const dishDetailInputSchema = z.object({
-  dishId: z.string().trim().min(1),
-  languageCode: z.string().trim().min(1).optional(),
-});
 const categoryIdInputSchema = z.object({ categoryId: z.string().trim().min(1) });
 const dishIdInputSchema = z.object({ dishId: z.string().trim().min(1) });
 const ingredientIdInputSchema = z.object({ ingredientId: z.string().trim().min(1) });
-const ingredientListInputSchema = z.object({ languageCode: z.string().trim().min(1).optional() });
 const setDishAvailabilityInputSchema = z.object({
   branchId: z.string().trim().min(1),
   dishId: z.string().trim().min(1),
@@ -60,7 +54,6 @@ const categoriesRouter = router({
   list: tenantProcedure.input(branchScopedSchema).query(async ({ ctx, input }) => {
     const catalog = await getMenuCatalog({
       db: ctx.db,
-      languageCode: input.languageCode,
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
@@ -205,16 +198,14 @@ const dishesRouter = router({
   list: tenantProcedure.input(branchScopedSchema).query(async ({ ctx, input }) => {
     const catalog = await getMenuCatalog({
       db: ctx.db,
-      languageCode: input.languageCode,
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
     return catalog.dishes;
   }),
-  detail: tenantProcedure.input(dishDetailInputSchema).query(({ ctx, input }) =>
+  detail: tenantProcedure.input(dishIdInputSchema).query(({ ctx, input }) =>
     getDishDetail({
       db: ctx.db,
-      languageCode: input.languageCode,
       restaurantId: ctx.tenant.restaurantId,
       dishId: input.dishId,
     }),
@@ -386,22 +377,9 @@ const dishesRouter = router({
 const taxonomyRouter = router({
   tags: tenantProcedure.query(({ ctx }) => listTags({ db: ctx.db, restaurantId: ctx.tenant.restaurantId })),
   allergens: tenantProcedure.query(({ ctx }) => listAllergens({ db: ctx.db })),
-  ingredients: tenantProcedure.input(ingredientListInputSchema).query(async ({ ctx, input }) => {
-    const rows = await listIngredients({ db: ctx.db, restaurantId: ctx.tenant.restaurantId });
-    if (!input.languageCode) {
-      return rows;
-    }
-    const texts = await getTranslationTexts({
-      db: ctx.db,
-      ids: rows.map((ingredient) => ingredient.id),
-      languageCode: input.languageCode,
-      restaurantId: ctx.tenant.restaurantId,
-    });
-    return rows.map((ingredient) => ({
-      ...ingredient,
-      name: translateText({ entityId: ingredient.id, fallback: ingredient.name, field: "name", texts }),
-    }));
-  }),
+  ingredients: tenantProcedure.query(({ ctx }) =>
+    listIngredients({ db: ctx.db, restaurantId: ctx.tenant.restaurantId }),
+  ),
   createIngredient: tenantProcedure.input(createIngredientSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "menu.write");
     const id = await createIngredient({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, data: input });

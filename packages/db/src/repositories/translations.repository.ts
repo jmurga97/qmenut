@@ -1,6 +1,6 @@
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 
-import { translations } from "../schema/translations";
+import { translationLocks, translations } from "../schema/translations";
 
 import type { DrizzleDb } from "../client";
 import type { ResolvedTenant } from "../domain/tenant";
@@ -135,4 +135,56 @@ export function deleteTranslationsForLanguageStatement({
   return db
     .delete(translations)
     .where(and(eq(translations.restaurantId, restaurantId), eq(translations.languageCode, languageCode)));
+}
+
+export function listTranslationLocks({ db, restaurantId }: { db: DrizzleDb; restaurantId: string }) {
+  return db
+    .select({
+      entityType: translationLocks.entityType,
+      entityId: translationLocks.entityId,
+      field: translationLocks.field,
+    })
+    .from(translationLocks)
+    .where(eq(translationLocks.restaurantId, restaurantId))
+    .all();
+}
+
+interface SetTranslationLockInput {
+  db: DrizzleDb;
+  restaurantId: string;
+  entityType: TranslationEntityType;
+  entityId: string;
+  field: string;
+  locked: boolean;
+}
+
+/** Locking also drops the stored translations, so every view falls back to the base text. */
+export async function setTranslationLock({
+  db,
+  restaurantId,
+  entityType,
+  entityId,
+  field,
+  locked,
+}: SetTranslationLockInput): Promise<void> {
+  const key = and(
+    eq(translationLocks.restaurantId, restaurantId),
+    eq(translationLocks.entityType, entityType),
+    eq(translationLocks.entityId, entityId),
+    eq(translationLocks.field, field),
+  );
+  if (!locked) {
+    await db.delete(translationLocks).where(key);
+    return;
+  }
+  const stored = and(
+    eq(translations.restaurantId, restaurantId),
+    eq(translations.entityType, entityType),
+    eq(translations.entityId, entityId),
+    eq(translations.field, field),
+  );
+  await db.batch([
+    db.insert(translationLocks).values({ restaurantId, entityType, entityId, field }).onConflictDoNothing(),
+    db.delete(translations).where(stored),
+  ]);
 }

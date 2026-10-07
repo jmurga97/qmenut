@@ -9,7 +9,6 @@ import { i18n } from "~/lib/i18n";
 import { notifyError } from "~/lib/notifications";
 import { trpc } from "~/lib/trpc";
 import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions, getTenantQueryOptions } from "~/shared/api";
-import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
 import { useImageDraft } from "~/shared/images/use-image-drafts";
 import { useImageSave } from "~/shared/images/use-image-save";
 import { useImageUploads } from "~/shared/images/use-image-uploads";
@@ -40,11 +39,10 @@ import type { CategoryFormValues, DishDetail, DishFormValues } from "../types";
 
 export function useMenuListController(branchId: string) {
   const queryClient = useQueryClient();
-  const { languageCode } = useSelectedLanguage();
-  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, languageCode, trpc })).data;
-  const dishes = useSuspenseQuery(getMenuDishesQueryOptions({ branchId, languageCode, trpc })).data;
-  const availability = useMutation(getDishAvailabilityMutationOptions({ branchId, languageCode, queryClient, trpc }));
-  const reorder = useMutation(getCategoryReorderMutationOptions({ branchId, languageCode, queryClient, trpc }));
+  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, trpc })).data;
+  const dishes = useSuspenseQuery(getMenuDishesQueryOptions({ branchId, trpc })).data;
+  const availability = useMutation(getDishAvailabilityMutationOptions({ branchId, queryClient, trpc }));
+  const reorder = useMutation(getCategoryReorderMutationOptions({ branchId, queryClient, trpc }));
   const moveCategory = (index: number, offset: -1 | 1) => {
     const categoryIds = categories.map(({ id }) => id);
     const target = index + offset;
@@ -59,20 +57,10 @@ export function useMenuListController(branchId: string) {
     setAvailability: (dishId: string, isActive: boolean) => availability.mutate({ branchId, dishId, isActive }),
   };
 }
-export function useCategoryEditorController({
-  branchId,
-  categoryId,
-  languageCodeOverride,
-}: {
-  branchId: string;
-  categoryId?: string;
-  languageCodeOverride?: string | null;
-}) {
+export function useCategoryEditorController({ branchId, categoryId }: { branchId: string; categoryId?: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const selectedLanguage = useSelectedLanguage();
-  const languageCode = languageCodeOverride === null ? null : (languageCodeOverride ?? selectedLanguage.languageCode);
-  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, languageCode, trpc })).data;
+  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, trpc })).data;
   const category = categoryId ? categories.find(({ id }) => id === categoryId) : undefined;
   const form = useForm<CategoryFormValues>({
     defaultValues: {
@@ -83,8 +71,7 @@ export function useCategoryEditorController({
     },
     resolver: zodResolver(categoryFormSchema),
   });
-  const mutationInput = { branchId, languageCode, queryClient, trpc };
-  const options = getCategoryMutationOptions(mutationInput);
+  const options = getCategoryMutationOptions({ branchId, queryClient, trpc });
   const create = useMutation(options.create);
   const update = useMutation(options.update);
   const image = useImageDraft(category?.imageUrl ?? null);
@@ -141,30 +128,20 @@ export function useCategoryEditorController({
     submit,
   };
 }
-export function useDishEditorController({
-  branchId,
-  dish,
-  languageCodeOverride,
-}: {
-  branchId: string;
-  dish: DishDetail | null;
-  languageCodeOverride?: string | null;
-}) {
+export function useDishEditorController({ branchId, dish }: { branchId: string; dish: DishDetail | null }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const selectedLanguage = useSelectedLanguage();
-  const languageCode = languageCodeOverride === null ? null : (languageCodeOverride ?? selectedLanguage.languageCode);
   const dishId = useRef(dish?.id);
-  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, languageCode, trpc })).data;
+  const categories = useSuspenseQuery(getMenuCategoriesQueryOptions({ branchId, trpc })).data;
   const tenant = useSuspenseQuery(getTenantQueryOptions({ trpc })).data;
   const tags = useSuspenseQuery(getMenuTagsQueryOptions({ trpc })).data;
   const allergens = useSuspenseQuery(getMenuAllergensQueryOptions({ trpc })).data;
-  const ingredients = useSuspenseQuery(getMenuIngredientsQueryOptions({ languageCode, trpc })).data;
+  const ingredients = useSuspenseQuery(getMenuIngredientsQueryOptions({ trpc })).data;
   const form = useForm<DishFormValues>({
     defaultValues: toDishFormValues(dish),
     resolver: zodResolver(dishFormSchema),
   });
-  const options = getDishMutationOptions({ branchId, languageCode, queryClient, trpc });
+  const options = getDishMutationOptions({ branchId, queryClient, trpc });
   const create = useMutation(options.create);
   const update = useMutation(options.update);
   const relations = useMutation(options.relations);

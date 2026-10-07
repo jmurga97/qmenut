@@ -9,26 +9,13 @@ import { keyOf, ownerOf, storedValue } from "./translation-model";
 
 import type { Drafts, SaveRow, TextItem } from "./translation-model";
 
-type Filter = "all" | "pending" | "modified";
+type Filter = "all" | "pending" | "modified" | "locked";
 const SAVE_CHUNK = 100;
 
-/** Translatable texts of the scope, without empty originals, plus each entity's source name. */
-export function useTranslationTexts({
-  branchId,
-  languageCode,
-  entityId,
-  entityType,
-}: {
-  branchId: string;
-  languageCode: string;
-  entityId?: string;
-  entityType?: TextItem["entityType"];
-}) {
+/** Translatable texts of the branch, without empty originals, plus each entity's source name. */
+export function useTranslationTexts({ branchId, languageCode }: { branchId: string; languageCode: string }) {
   const { data } = useSuspenseQuery(trpc.admin.translations.list.queryOptions({ branchId, languageCode }));
-  const items = data.filter(
-    (row) =>
-      row.text.trim() && (!entityId || row.entityId === entityId) && (!entityType || row.entityType === entityType),
-  );
+  const items = data.filter((row) => row.text.trim());
   const names = new Map(items.filter((item) => item.field === "name").map((item) => [item.entityId, item.text]));
   return { items, names };
 }
@@ -55,30 +42,34 @@ export function useTranslationDrafts() {
   };
 }
 
-/** Search and status filter. Opens on pending texts when there are any, unless scoped to one entity. */
+/** Search and status filter. Opens on pending texts when there are any. */
 export function useTranslationFilter({
   drafts,
   items,
   names,
-  scoped,
 }: {
   drafts: Drafts;
   items: TextItem[];
   names: ReadonlyMap<string, string>;
-  scoped: boolean;
 }) {
   const pending = items.filter((item) => !item.complete).length;
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<Filter>(pending > 0 && !scoped ? "pending" : "all");
+  const [filter, setFilter] = useState<Filter>(pending > 0 ? "pending" : "all");
   const query = search.trim().toLocaleLowerCase();
   function isVisible(item: TextItem) {
     if (filter === "pending" && item.complete) return false;
     if (filter === "modified" && !drafts.has(keyOf(item))) return false;
+    if (filter === "locked" && !item.locked) return false;
     const haystack = `${names.get(ownerOf(item)) ?? ""} ${item.text} ${drafts.get(keyOf(item)) ?? item.value}`;
     return haystack.toLocaleLowerCase().includes(query);
   }
   return {
-    counts: { all: items.length, pending, modified: drafts.size } satisfies Record<Filter, number>,
+    counts: {
+      all: items.length,
+      pending,
+      modified: drafts.size,
+      locked: items.filter((item) => item.locked).length,
+    } satisfies Record<Filter, number>,
     filter,
     isVisible,
     search,
@@ -117,10 +108,27 @@ export function useSaveTranslations({
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: trpc.admin.translations.pathKey() }),
         queryClient.invalidateQueries({ queryKey: trpc.admin.languages.pathKey() }),
-        queryClient.invalidateQueries({ queryKey: trpc.admin.menu.pathKey() }),
       ]);
       onSaved();
       toast.success(i18n.t("shared___Traducción guardada."));
+    },
+  });
+}
+
+/** Locks apply at once to every language, outside the save bar; a locked text drops its draft. */
+export function useToggleTranslationLock({ onLocked }: { onLocked: (item: TextItem) => void }) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (item: TextItem) => {
+      const { entityId, entityType, field } = item;
+      await trpcClient.admin.translations.setLock.mutate({ entityId, entityType, field, locked: !item.locked });
+    },
+    onSuccess: async (_, item) => {
+      if (!item.locked) onLocked(item);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: trpc.admin.translations.pathKey() }),
+        queryClient.invalidateQueries({ queryKey: trpc.admin.languages.pathKey() }),
+      ]);
     },
   });
 }

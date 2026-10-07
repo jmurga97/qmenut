@@ -1,5 +1,6 @@
 import { listBranches } from "@qmenut/db/repositories/admin-branches.repository";
 import { collectTranslatableTexts } from "@qmenut/db/repositories/admin-translations.repository";
+import { listTranslationLocks } from "@qmenut/db/repositories/translations.repository";
 import { translations } from "@qmenut/db/schema/translations";
 import { eq } from "drizzle-orm";
 
@@ -21,10 +22,11 @@ export function translationKey(item: { entityType: string; entityId: string; fie
 }
 
 export async function getTranslationContent({ db, env, restaurantId, branchId }: TranslationContentInput) {
-  const [texts, branches, rows] = await Promise.all([
+  const [texts, branches, rows, locks] = await Promise.all([
     collectTranslatableTexts({ db, restaurantId, branchId }),
     listBranches({ db, restaurantId }),
     db.select().from(translations).where(eq(translations.restaurantId, restaurantId)).all(),
+    listTranslationLocks({ db, restaurantId }),
   ]);
   if (env) {
     const taglines = await Promise.all(
@@ -37,7 +39,7 @@ export async function getTranslationContent({ db, env, restaurantId, branchId }:
     );
     texts.push(...taglines);
   }
-  return { texts, rows };
+  return { texts, rows, locks: new Set(locks.map((lock) => translationKey(lock))) };
 }
 
 export type TranslationContent = Awaited<ReturnType<typeof getTranslationContent>>;
@@ -47,6 +49,9 @@ export function languageTexts(content: TranslationContent, languageCode: string)
     content.rows.filter((row) => row.languageCode === languageCode).map((row) => [translationKey(row), row]),
   );
   return content.texts.map((item) => {
+    // A locked text stays in the base language, so it is always complete.
+    if (content.locks.has(translationKey(item)))
+      return { ...item, value: item.text, sourceText: item.text, isManual: false, complete: true, locked: true };
     const row = stored.get(translationKey(item));
     const complete = !item.text.trim() || Boolean(row?.value.trim() && row.sourceText === item.text);
     return {
@@ -55,6 +60,7 @@ export function languageTexts(content: TranslationContent, languageCode: string)
       sourceText: row?.sourceText ?? null,
       isManual: row?.isManual ?? false,
       complete,
+      locked: false,
     };
   });
 }

@@ -3,14 +3,12 @@ import { buttonVariants } from "@jmurga97/components/button";
 import { QmLoyaltyCard } from "@qmenut/ui/components/qm-loyalty-card/react";
 import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
 import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 import { FormProvider, useWatch } from "react-hook-form";
-import { toast } from "sonner";
 
 import { DishSelect } from "~/features/loyalty/components/dish-select";
 import { useLoyaltyProgramController } from "~/features/loyalty/hooks/use-loyalty-program-controller";
 import { i18n } from "~/lib/i18n";
-import { notifyError } from "~/lib/notifications";
 import { EntityListCard } from "~/shared/components/entity-list-card";
 import { FormCheckbox } from "~/shared/components/forms/adapters/form-checkbox";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
@@ -19,11 +17,8 @@ import { FormTextarea } from "~/shared/components/forms/adapters/form-textarea";
 import { FormActions } from "~/shared/components/forms/form-actions";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
-import { useCan } from "~/shared/hooks/use-can";
 import { useEditorGuard } from "~/shared/hooks/use-editor-guard";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
-import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
-import { useTranslationForm } from "~/shared/hooks/use-translation-form";
 
 import type { CSSProperties } from "react";
 import type { LoyaltyProgramFormValues, RewardType } from "~/features/loyalty/types";
@@ -37,7 +32,6 @@ const TYPE_OPTIONS = Object.entries(TYPE_LABELS).map(([id, label]) => ({ id, lab
 type ProgramController = ReturnType<typeof useLoyaltyProgramController>;
 export function LoyaltyProgramPage() {
   const branch = useSelectedBranch();
-  const language = useSelectedLanguage();
   if (!branch)
     return <NoBranchState description={i18n.t("loyalty___Crea una sucursal antes de configurar la fidelización.")} />;
   return (
@@ -51,61 +45,22 @@ export function LoyaltyProgramPage() {
         </div>
       }
     >
-      {!language.isDefault && language.languageCode ? (
-        <TranslatedLoyaltyProgram
-          branchId={branch.id}
-          languageCode={language.languageCode}
-          key={`${branch.id}:${language.languageCode}`}
-        />
-      ) : (
-        <LoyaltyProgramContent branchId={branch.id} key={branch.id} />
-      )}
+      <LoyaltyProgramContent branchId={branch.id} key={branch.id} />
     </Suspense>
   );
 }
-function TranslatedLoyaltyProgram({ branchId, languageCode }: { branchId: string; languageCode: string }) {
-  const translation = useTranslationForm({ branchId, languageCode });
-  return <LoyaltyProgramContent branchId={branchId} translation={translation} />;
-}
-type Translation = ReturnType<typeof useTranslationForm>;
-function LoyaltyProgramContent({ branchId, translation }: { branchId: string; translation?: Translation }) {
+function LoyaltyProgramContent({ branchId }: { branchId: string }) {
   const loyalty = useLoyaltyProgramController(branchId);
-  useEffect(() => {
-    if (!translation || loyalty.form.formState.isDirty) return;
-    const values = loyalty.form.getValues();
-    loyalty.form.reset({
-      ...values,
-      rewards: values.rewards.map((reward) => ({
-        ...reward,
-        name: translation.value({
-          entityType: "reward",
-          entityId: reward.rewardId ?? "",
-          field: "name",
-          fallback: reward.name,
-        }),
-        description: translation.value({
-          entityType: "reward",
-          entityId: reward.rewardId ?? "",
-          field: "description",
-          fallback: reward.description,
-        }),
-      })),
-    });
-  }, [loyalty.form, translation]);
   useEditorGuard({
     dirty: loyalty.form.formState.isDirty,
-    pending: loyalty.rewardBusy || loyalty.saveProgramBusy || Boolean(translation?.pending),
+    pending: loyalty.rewardBusy || loyalty.saveProgramBusy,
   });
   const themeVars = buildQmThemeVars(resolveTenantThemeConfig(loyalty.theme)) as CSSProperties;
   return (
     <FormProvider {...loyalty.form}>
       <div className={"loyalty-program-layout"}>
         <div className={"loyalty-program-main"}>
-          <fieldset
-            disabled={Boolean(translation)}
-            className={"admin-card loyalty-program-settings"}
-            aria-labelledby={"program-settings-title"}
-          >
+          <fieldset className={"admin-card loyalty-program-settings"} aria-labelledby={"program-settings-title"}>
             <h2 id={"program-settings-title"}>{i18n.t("loyalty___Configuración")}</h2>
             <FormCheckbox<LoyaltyProgramFormValues> label={i18n.t("loyalty___Programa activo")} name={"isActive"} />
             <FormTextInput<LoyaltyProgramFormValues>
@@ -115,22 +70,15 @@ function LoyaltyProgramContent({ branchId, translation }: { branchId: string; tr
             />
             <FormActions
               busy={loyalty.saveProgramBusy}
-              onSubmit={() => {
-                if (!translation) void loyalty.saveProgram();
-              }}
+              onSubmit={() => void loyalty.saveProgram()}
               submitLabel={i18n.t("loyalty___Guardar configuración")}
             />
           </fieldset>
-          {translation ? (
-            <p>{i18n.t("loyalty___Cambia al idioma base para crear premios o cambiar la configuración.")}</p>
-          ) : null}
           <EntityListCard
             action={
               <Button
-                disabled={Boolean(translation) || loyalty.rewardBusy || loyalty.editingIndex !== null}
-                onClick={() => {
-                  if (!translation) loyalty.newReward();
-                }}
+                disabled={loyalty.rewardBusy || loyalty.editingIndex !== null}
+                onClick={() => loyalty.newReward()}
                 variant={"primary"}
               >
                 {i18n.t("loyalty___Nuevo premio")}
@@ -141,7 +89,7 @@ function LoyaltyProgramContent({ branchId, translation }: { branchId: string; tr
             title={i18n.t("loyalty___Premios")}
           >
             {loyalty.rewards.fields.map((field, index) => (
-              <RewardRow index={index} key={field.id} loyalty={loyalty} translation={translation} />
+              <RewardRow index={index} key={field.id} loyalty={loyalty} />
             ))}
           </EntityListCard>
         </div>
@@ -163,19 +111,13 @@ function LoyaltyProgramContent({ branchId, translation }: { branchId: string; tr
           >
             {loyalty.activeRewards.map((reward) => (
               <p key={reward.id} slot={"rewards"}>
-                {translation?.value({
-                  entityType: "reward",
-                  entityId: reward.id,
-                  field: "name",
-                  fallback: reward.name,
-                }) ?? reward.name}{" "}
-                · {reward.cost} {i18n.t("loyalty___sellos")}
+                {reward.name} · {reward.cost} {i18n.t("loyalty___sellos")}
               </p>
             ))}
           </QmLoyaltyCard>
         </aside>
       </div>
-      {translation ? null : <DeleteRewardConfirm loyalty={loyalty} />}
+      <DeleteRewardConfirm loyalty={loyalty} />
     </FormProvider>
   );
 }
@@ -200,40 +142,9 @@ function DeleteRewardConfirm({ loyalty }: { loyalty: ProgramController }) {
     />
   );
 }
-function RewardRow({
-  index,
-  loyalty,
-  translation,
-}: {
-  index: number;
-  loyalty: ProgramController;
-  translation?: Translation;
-}) {
-  const canTranslate = useCan("languages.write");
+function RewardRow({ index, loyalty }: { index: number; loyalty: ProgramController }) {
   const reward = useWatch({ control: loyalty.form.control, name: `rewards.${index}` });
-  const editing = Boolean(translation) || loyalty.editingIndex === index;
-  async function saveTranslation() {
-    if (!translation || !canTranslate || !reward.rewardId) return;
-    if (!(await loyalty.form.trigger([`rewards.${index}.name`, `rewards.${index}.description`]))) return;
-    const rows = (["name", "description"] as const).flatMap((field) => {
-      const row = translation.saveRow({
-        entityType: "reward",
-        entityId: reward.rewardId!,
-        field,
-        value: reward[field],
-      });
-      return row ? [row] : [];
-    });
-    if (rows.length === 0) return;
-    try {
-      await translation.saveRows(rows);
-      loyalty.form.resetField(`rewards.${index}.name`, { defaultValue: reward.name });
-      loyalty.form.resetField(`rewards.${index}.description`, { defaultValue: reward.description });
-      toast.success(i18n.t("loyalty___Traducción guardada."));
-    } catch (error) {
-      notifyError(error);
-    }
-  }
+  const editing = loyalty.editingIndex === index;
   if (!editing)
     return (
       <li className={"loyalty-reward-admin-row"}>
@@ -284,34 +195,26 @@ function RewardRow({
         <section className="admin-editor-section">
           <h3 className={"ming-section__title"}>{i18n.t("loyalty___Premio")}</h3>
           <FormTextInput<LoyaltyProgramFormValues>
-            disabled={Boolean(translation) && (!canTranslate || translation?.pending)}
             label={i18n.t("loyalty___Nombre")}
             maxLength={200}
             name={field("name")}
           />
           <FormTextarea<LoyaltyProgramFormValues>
-            disabled={Boolean(translation) && (!canTranslate || translation?.pending)}
             label={i18n.t("loyalty___Descripción")}
             name={field("description")}
             rows={3}
           />
-          <FormCheckbox<LoyaltyProgramFormValues>
-            disabled={Boolean(translation)}
-            label={i18n.t("loyalty___Premio activo")}
-            name={field("isActive")}
-          />
+          <FormCheckbox<LoyaltyProgramFormValues> label={i18n.t("loyalty___Premio activo")} name={field("isActive")} />
         </section>
         <section className="admin-editor-section">
           <h3 className={"ming-section__title"}>{i18n.t("loyalty___Canje")}</h3>
           <div className="admin-form-grid--two">
             <FormSelect<LoyaltyProgramFormValues>
-              disabled={Boolean(translation)}
               label={i18n.t("loyalty___Tipo")}
               name={field("type")}
               options={TYPE_OPTIONS}
             />
             <FormTextInput<LoyaltyProgramFormValues>
-              disabled={Boolean(translation)}
               inputMode={"numeric"}
               label={i18n.t("loyalty___Coste en sellos")}
               name={field("cost")}
@@ -319,7 +222,6 @@ function RewardRow({
             />
             {reward.type === "percentage_discount" ? (
               <FormTextInput<LoyaltyProgramFormValues>
-                disabled={Boolean(translation)}
                 inputMode={"numeric"}
                 label={i18n.t("loyalty___Descuento (%)")}
                 name={field("percentage")}
@@ -327,7 +229,6 @@ function RewardRow({
               />
             ) : (
               <DishSelect
-                disabled={Boolean(translation)}
                 groups={loyalty.dishGroups}
                 label={i18n.t("loyalty___Plato · todas las sucursales")}
                 name={`rewards.${index}.freeDishId`}
@@ -335,7 +236,6 @@ function RewardRow({
             )}
             {reward.type === "special_price" ? (
               <FormTextInput<LoyaltyProgramFormValues>
-                disabled={Boolean(translation)}
                 inputMode={"decimal"}
                 label={i18n.t("loyalty___Precio especial")}
                 name={field("specialPrice")}
@@ -345,13 +245,10 @@ function RewardRow({
         </section>
       </div>
       <FormActions
-        busy={loyalty.rewardBusy || translation?.pending}
-        onCancel={translation ? undefined : () => loyalty.cancelReward(index)}
-        onSubmit={() => {
-          if (translation) void saveTranslation();
-          else void loyalty.saveReward(index);
-        }}
-        submitLabel={translation ? i18n.t("loyalty___Guardar traducción") : i18n.t("loyalty___Guardar premio")}
+        busy={loyalty.rewardBusy}
+        onCancel={() => loyalty.cancelReward(index)}
+        onSubmit={() => void loyalty.saveReward(index)}
+        submitLabel={i18n.t("loyalty___Guardar premio")}
       />
     </li>
   );

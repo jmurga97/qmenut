@@ -12,7 +12,6 @@ import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { useCan } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
-import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
 import { formatMoney, formatMoneyInput, parseMoneyInput } from "~/shared/services/money";
 
 import { getIngredientMutationOptions, getMenuIngredientsQueryOptions } from "../api";
@@ -38,12 +37,9 @@ function ExtrasPage() {
 
 function ExtrasCatalog() {
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
-  const language = useSelectedLanguage();
-  const canEdit = useCan("menu.write") && language.isDefault;
+  const canEdit = useCan("menu.write");
   const queryClient = useQueryClient();
-  const ingredients = useSuspenseQuery(
-    getMenuIngredientsQueryOptions({ languageCode: language.languageCode, trpc }),
-  ).data;
+  const ingredients = useSuspenseQuery(getMenuIngredientsQueryOptions({ trpc })).data;
   const mutations = getIngredientMutationOptions({ queryClient, trpc });
   const create = useMutation(mutations.create);
   const update = useMutation(mutations.update);

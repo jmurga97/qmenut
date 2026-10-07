@@ -21,6 +21,7 @@ const SOURCE_MUTATIONS = new Set([
   "admin.loyalty.createReward",
   "admin.loyalty.updateReward",
   "admin.loyalty.deleteReward",
+  "admin.translations.setLock",
 ]);
 
 export async function syncTranslationsAfterSave({

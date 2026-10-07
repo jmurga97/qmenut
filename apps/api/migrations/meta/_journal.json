@@ -78,6 +78,13 @@
       "when": 1791195259656,
       "tag": "0010_category_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1791361601626,
+      "tag": "0011_translation_locks",
+      "breakpoints": true
     }
   ]
 }

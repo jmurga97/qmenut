@@ -5,6 +5,7 @@ import {
 } from "@qmenut/db/repositories/restaurant-languages.repository";
 import {
   deleteTranslationsForLanguageStatement,
+  setTranslationLock,
   TRANSLATION_ENTITY_TYPES,
   upsertTranslations,
 } from "@qmenut/db/repositories/translations.repository";
@@ -50,13 +51,16 @@ const translationListSchema = z.object({
   branchId: z.string().trim().min(1),
   languageCode: languageCodeSchema,
 });
-const translationRowSchema = z.object({
+const translationKeySchema = z.object({
   entityType: z.enum(TRANSLATION_ENTITY_TYPES),
   entityId: z.string().min(1),
   field: z.enum(["name", "description", "comboDescription", "tagline"]),
+});
+const translationRowSchema = translationKeySchema.extend({
   sourceText: z.string().max(10_000),
   value: z.string().trim().max(10_000),
 });
+const translationLockSchema = translationKeySchema.extend({ locked: z.boolean() });
 const translationSaveSchema = translationListSchema.extend({
   rows: z.array(translationRowSchema).min(1).max(100),
 });
@@ -212,6 +216,8 @@ const translationsRouter = router({
     const rows = input.rows.map((row) => {
       const source = sources.get(translationKey(row));
       if (!source) throw new TRPCError({ code: "NOT_FOUND", message: "Texto no encontrado en esta sucursal" });
+      if (content.locks.has(translationKey(row)))
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Este texto está marcado para no traducirse" });
       if (source.text !== row.sourceText)
         throw new TRPCError({
           code: "CONFLICT",
@@ -231,6 +237,12 @@ const translationsRouter = router({
     await upsertTranslations({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, rows });
     await bumpPublicContentVersionForRestaurant({ db: ctx.db, env: ctx.env, restaurantId: ctx.tenant.restaurantId });
     return { saved: rows.length };
+  }),
+  // Listed in SOURCE_MUTATIONS: the sync fills an unlocked text and bumps the public content version.
+  setLock: tenantProcedure.input(translationLockSchema).mutation(async ({ ctx, input }) => {
+    requirePermission(ctx.tenant, "languages.write");
+    await setTranslationLock({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, ...input });
+    return input;
   }),
   translateAll: tenantProcedure.input(translateAllInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "languages.write");

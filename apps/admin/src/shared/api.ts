@@ -7,14 +7,13 @@ export function getLanguagesQueryOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
 }
 interface BranchQueryInput {
   branchId: string;
-  languageCode?: string | null;
   trpc: TrpcOptionsProxy;
 }
-export function getMenuCategoriesQueryOptions({ branchId, languageCode, trpc }: BranchQueryInput) {
-  return trpc.admin.menu.categories.list.queryOptions({ branchId, languageCode: languageCode ?? undefined });
+export function getMenuCategoriesQueryOptions({ branchId, trpc }: BranchQueryInput) {
+  return trpc.admin.menu.categories.list.queryOptions({ branchId });
 }
-export function getMenuDishesQueryOptions({ branchId, languageCode, trpc }: BranchQueryInput) {
-  return trpc.admin.menu.dishes.list.queryOptions({ branchId, languageCode: languageCode ?? undefined });
+export function getMenuDishesQueryOptions({ branchId, trpc }: BranchQueryInput) {
+  return trpc.admin.menu.dishes.list.queryOptions({ branchId });
 }
 export function getThemeQueryOptions({ branchId, trpc }: { branchId: string; trpc: TrpcOptionsProxy }) {
   return trpc.admin.theme.get.queryOptions({ branchId });

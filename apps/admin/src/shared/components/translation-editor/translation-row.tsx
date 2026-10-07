@@ -1,4 +1,5 @@
 import { Button, Textarea } from "@jmurga97/components";
+import { LockIcon, LockOpenIcon } from "lucide-react";
 
 import { i18n } from "~/lib/i18n";
 
@@ -23,12 +24,14 @@ const FIELD_LABELS: Record<string, string> = {
   tagline: i18n.t("shared___Eslogan"),
 };
 const STATUS_LABELS = {
+  locked: i18n.t("shared___No se traduce"),
   modified: i18n.t("shared___Modificado"),
   pending: i18n.t("shared___Pendiente"),
 };
 
-/** Unsaved edits win; otherwise a text missing or outdated in this language is pending. */
+/** A locked text keeps its original; unsaved edits win; otherwise a text missing or outdated is pending. */
 function rowState(item: TextItem, draft: string | undefined) {
+  if (item.locked) return "locked";
   if (draft !== undefined) return "modified";
   return item.complete ? undefined : "pending";
 }
@@ -37,12 +40,14 @@ export function TranslationRow({
   draft,
   item,
   onChange,
+  onToggleLock,
   onUndo,
   readOnly,
 }: {
   draft: string | undefined;
   item: TextItem;
   onChange: (value: string) => void;
+  onToggleLock?: () => void;
   onUndo: () => void;
   readOnly: boolean;
 }) {
@@ -57,6 +62,9 @@ export function TranslationRow({
     state === "modified"
       ? { label: i18n.t("shared___Deshacer"), run: onUndo }
       : { label: i18n.t("shared___Confirmar"), run: () => onChange(storedValue(item)) };
+  const lockLabel = item.locked
+    ? i18n.t("shared___Permitir traducción")
+    : i18n.t("shared___No traducir: mantener el texto original en todos los idiomas");
   return (
     <div className="admin-translation-row" data-indent={item.dishId ? true : undefined} data-state={state}>
       <div className="admin-translation-label">
@@ -69,15 +77,28 @@ export function TranslationRow({
           aria-label={`${label}: ${item.text}`}
           className="admin-translation-textarea"
           onValueChange={onChange}
-          readOnly={readOnly}
+          readOnly={readOnly || item.locked}
           rows={1}
           value={draft ?? storedValue(item)}
         />
-        {readOnly || !state ? null : (
+        {readOnly || !state || item.locked ? null : (
           <Button onClick={action.run} size="sm" variant="ghost">
             {action.label}
           </Button>
         )}
+        {onToggleLock ? (
+          <Button
+            aria-label={lockLabel}
+            aria-pressed={item.locked}
+            disabled={readOnly}
+            onClick={onToggleLock}
+            size="sm"
+            title={lockLabel}
+            variant="ghost"
+          >
+            {item.locked ? <LockIcon aria-hidden="true" /> : <LockOpenIcon aria-hidden="true" />}
+          </Button>
+        ) : null}
       </div>
     </div>
   );

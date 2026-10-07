@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 
 import { deeplTranslate } from "./deepl.service";
 import { getLanguageCatalogEntry } from "./language-catalog";
-import { getTranslationContent, languageTexts } from "./translation-content";
+import { getTranslationContent, languageTexts, translationKey } from "./translation-content";
 import { sanitizeDescription } from "../public-menu/sanitize-description";
 
 import type { RuntimeEnv } from "../../config/env/schema";
@@ -74,9 +74,9 @@ export async function translateAll({
 }: TranslateAllInput): Promise<TranslateAllResult> {
   const content = await getTranslationContent({ branchId, db, env, restaurantId });
   const texts = overwrite
-    ? content.texts
+    ? content.texts.filter((item) => !content.locks.has(translationKey(item)))
     : languageTexts(content, languageCode).filter(
-        (item) => !item.isManual && (!item.complete || item.sourceText !== item.text),
+        (item) => !item.locked && !item.isManual && (!item.complete || item.sourceText !== item.text),
       );
   if (texts.length === 0) return { batches: 0, translated: 0 };
   if (!deeplApiKey) {

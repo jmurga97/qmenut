@@ -10,6 +10,7 @@ import { isHeaded, keyOf, ownerOf, toSections } from "./translation-model";
 import { TranslationRow } from "./translation-row";
 import {
   useSaveTranslations,
+  useToggleTranslationLock,
   useTranslationDrafts,
   useTranslationFilter,
   useTranslationTexts,
@@ -18,12 +19,6 @@ import {
 import type { TextItem } from "./translation-model";
 import type { ReactNode } from "react";
 
-interface TranslationEditorProps {
-  branchId: string;
-  languageCode: string;
-  entityId?: string;
-  entityType?: TextItem["entityType"];
-}
 interface Section {
   id: string;
   all: TextItem[];
@@ -38,14 +33,13 @@ const SECTION_LABELS: Record<string, string> = {
   branch: i18n.t("shared___Sucursal"),
 };
 
-export function TranslationEditor(props: TranslationEditorProps) {
-  const { branchId, languageCode } = props;
+export function TranslationEditor({ branchId, languageCode }: { branchId: string; languageCode: string }) {
   const canWrite = useCan("languages.write");
-  const scoped = Boolean(props.entityId);
-  const { items, names } = useTranslationTexts(props);
+  const { items, names } = useTranslationTexts({ branchId, languageCode });
   const { drafts, change, undo, discard } = useTranslationDrafts();
-  const filter = useTranslationFilter({ drafts, items, names, scoped });
+  const filter = useTranslationFilter({ drafts, items, names });
   const save = useSaveTranslations({ branchId, languageCode, onSaved: discard });
+  const lock = useToggleTranslationLock({ onLocked: undo });
   const [tab, setTab] = useState<string>();
   useEditorGuard({ dirty: drafts.size > 0, pending: save.isPending });
 
@@ -55,8 +49,9 @@ export function TranslationEditor(props: TranslationEditorProps) {
       draft={drafts.get(keyOf(item))}
       item={item}
       onChange={(value) => change(item, value)}
+      onToggleLock={canWrite ? () => lock.mutate(item) : undefined}
       onUndo={() => undo(item)}
-      readOnly={!canWrite || save.isPending}
+      readOnly={!canWrite || save.isPending || lock.isPending}
     />
   );
   const sections = [...toSections(items)].map(([id, all]) => ({
@@ -76,21 +71,15 @@ export function TranslationEditor(props: TranslationEditorProps) {
           {i18n.t("shared___La traducción automática usa catalán. Puedes adaptar aquí los textos al valenciano.")}
         </p>
       ) : null}
-      {scoped ? (
-        <div className="admin-translation-rows">{items.map((item) => renderRow(item))}</div>
-      ) : (
-        <>
-          <TranslationToolbar filter={filter} />
-          <TranslationTabs active={active?.id} names={names} onSelect={setTab} sections={sections} />
-          <div aria-labelledby={active && `translation-tab-${active.id}`} role="tabpanel">
-            {active && active.shown.length > 0 ? (
-              <TranslationSection names={names} renderRow={renderRow} section={active} />
-            ) : (
-              <p className="admin-list-meta">{i18n.t("shared___No hay textos en esta selección.")}</p>
-            )}
-          </div>
-        </>
-      )}
+      <TranslationToolbar filter={filter} />
+      <TranslationTabs active={active?.id} names={names} onSelect={setTab} sections={sections} />
+      <div aria-labelledby={active && `translation-tab-${active.id}`} role="tabpanel">
+        {active && active.shown.length > 0 ? (
+          <TranslationSection names={names} renderRow={renderRow} section={active} />
+        ) : (
+          <p className="admin-list-meta">{i18n.t("shared___No hay textos en esta selección.")}</p>
+        )}
+      </div>
       {canWrite && drafts.size > 0 ? (
         <TranslationSaveBar
           busy={save.isPending}
@@ -108,6 +97,7 @@ function TranslationToolbar({ filter }: { filter: ReturnType<typeof useTranslati
     { id: "all", label: i18n.t("shared___Todos ({{count}})", { count: filter.counts.all }) },
     { id: "pending", label: i18n.t("shared___Pendientes ({{count}})", { count: filter.counts.pending }) },
     { id: "modified", label: i18n.t("shared___Modificados ({{count}})", { count: filter.counts.modified }) },
+    { id: "locked", label: i18n.t("shared___No se traducen ({{count}})", { count: filter.counts.locked }) },
   ] as const;
   return (
     <div className="admin-translation-toolbar">

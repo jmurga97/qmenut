@@ -1,21 +1,13 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { RouterOutputs, TrpcOptionsProxy } from "~/lib/trpc";
 
-interface BranchQueryInput {
+interface MenuMutationInput {
   branchId: string;
-  languageCode?: string | null;
-  trpc: TrpcOptionsProxy;
-}
-interface DetailQueryInput {
-  dishId: string;
-  languageCode?: string | null;
-  trpc: TrpcOptionsProxy;
-}
-interface MenuMutationInput extends BranchQueryInput {
   queryClient: QueryClient;
+  trpc: TrpcOptionsProxy;
 }
-export function getDishDetailQueryOptions({ dishId, languageCode, trpc }: DetailQueryInput) {
-  return trpc.admin.menu.dishes.detail.queryOptions({ dishId, languageCode: languageCode ?? undefined });
+export function getDishDetailQueryOptions({ dishId, trpc }: { dishId: string; trpc: TrpcOptionsProxy }) {
+  return trpc.admin.menu.dishes.detail.queryOptions({ dishId });
 }
 export function getMenuTagsQueryOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
   return trpc.admin.menu.taxonomy.tags.queryOptions();
@@ -23,16 +15,9 @@ export function getMenuTagsQueryOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
 export function getMenuAllergensQueryOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
   return trpc.admin.menu.taxonomy.allergens.queryOptions();
 }
-export function getMenuIngredientsQueryOptions({
-  languageCode,
-  trpc,
-}: {
-  languageCode?: string | null;
-  trpc: TrpcOptionsProxy;
-}) {
-  return trpc.admin.menu.taxonomy.ingredients.queryOptions({ languageCode: languageCode ?? undefined });
+export function getMenuIngredientsQueryOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
+  return trpc.admin.menu.taxonomy.ingredients.queryOptions();
 }
-// Editors query in the base language (languageCode undefined) while lists key on the selected one, so match by path.
 function invalidateMenu({ queryClient, trpc }: MenuMutationInput) {
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: trpc.admin.menu.categories.list.pathKey() }),

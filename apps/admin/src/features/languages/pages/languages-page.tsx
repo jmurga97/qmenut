@@ -12,17 +12,19 @@ import { PageHeader } from "~/shared/components/page-header";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { TranslationEditor } from "~/shared/components/translation-editor/translation-editor";
 import { useCan } from "~/shared/hooks/use-can";
-import { useSelectedLanguage } from "~/shared/hooks/use-selected-language";
-import { useLanguageStore } from "~/shared/stores/language-store";
 
 import type { AddLanguageFormValues } from "~/features/languages/types";
 
 export function LanguagesPage() {
   const canWrite = useCan("languages.write");
   const controller = useLanguagesController();
-  const selectedLanguage = useSelectedLanguage();
-  const selectLanguage = useLanguageStore((state) => state.setSelectedLanguageCode);
+  const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [retranslating, setRetranslating] = useState<string | null>(null);
+  const translated = controller.languages.filter((language) => !language.isDefault);
+  // Opens on the first translated language; falls back to it when the selected one is removed.
+  const editingCode = (translated.find(({ languageCode }) => languageCode === selectedCode) ?? translated[0])
+    ?.languageCode;
+  const editingLabel = controller.catalog.find(({ code }) => code === editingCode)?.label ?? editingCode?.toUpperCase();
   return (
     <div className={"ming-page admin-page admin-languages-page"}>
       <PageHeader
@@ -63,7 +65,7 @@ export function LanguagesPage() {
                       {
                         id: "edit",
                         label: i18n.t("languages___Editar traducciones"),
-                        onSelect: () => selectLanguage(language.languageCode),
+                        onSelect: () => setSelectedCode(language.languageCode),
                       },
                       {
                         id: "complete",
@@ -117,10 +119,15 @@ export function LanguagesPage() {
           </section>
         ) : null}
       </div>
-      {controller.branch && !selectedLanguage.isDefault && selectedLanguage.languageCode ? (
-        <Suspense fallback={<CardSkeleton rows={6} />} key={`${controller.branch.id}:${selectedLanguage.languageCode}`}>
-          <TranslationEditor branchId={controller.branch.id} languageCode={selectedLanguage.languageCode} />
-        </Suspense>
+      {controller.branch && editingCode ? (
+        <section aria-labelledby={"translations-title"}>
+          <h2 className={"ming-section__title"} id={"translations-title"}>
+            {i18n.t("languages___Traducciones · {{language}}", { language: editingLabel })}
+          </h2>
+          <Suspense fallback={<CardSkeleton rows={6} />} key={`${controller.branch.id}:${editingCode}`}>
+            <TranslationEditor branchId={controller.branch.id} languageCode={editingCode} />
+          </Suspense>
+        </section>
       ) : null}
       {retranslating ? (
         <ConfirmAction
