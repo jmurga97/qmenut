@@ -17,7 +17,8 @@
     "lint:fixtures": "bun scripts/lint-fixtures.ts",
     "format": "oxfmt && prettier --write \"apps/landing/**/*.astro\"",
     "format:check": "oxfmt --check . && prettier --check \"apps/landing/**/*.astro\"",
-    "deploy": "bun scripts/deploy.ts",
+    "deploy": "bun run dev:kill && bun scripts/deploy.ts",
+    "dev:kill": "pkill -f 'turbo dev'; lsof -ti tcp:4011,4321,5173,5174,8787,8788 -sTCP:LISTEN | xargs kill 2>/dev/null; true",
     "db:generate": "bun run --cwd apps/api db:generate --",
     "prepare": "husky"
   },

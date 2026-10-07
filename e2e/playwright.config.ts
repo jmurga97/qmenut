@@ -24,7 +24,8 @@ export default defineConfig({
     {
       command: "bun run --cwd ../apps/api dev:e2e",
       url: "http://localhost:8787/health",
-      reuseExistingServer: true,
+      // Never reuse `bun run dev`: it loads .dev.vars (real DeepL key, different loyalty secret).
+      reuseExistingServer: false,
       timeout: 120_000,
     },
     {
@@ -36,7 +37,8 @@ export default defineConfig({
     {
       command: "VITE_PUBLIC_MENU_PORT=4011 bun run --cwd ../apps/admin dev",
       url: "http://localhost:5174",
-      reuseExistingServer: true,
+      // The dev admin previews the public menu on 5173, not on the E2E worker at 4011.
+      reuseExistingServer: false,
       timeout: 120_000,
     },
     {

@@ -14,6 +14,8 @@ test("logs in with the keyboard and cannot return after logout @critical", async
   await page.getByRole("button", { name: "Entrar" }).focus();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/localhost:5174\/(?:\?.*)?$/);
+  // Firefox aborts a goto issued while the dashboard is still loading its lazy modules.
+  await page.waitForLoadState("networkidle");
   await page.goto("http://localhost:5174/menu");
   await expect(page.getByRole("button", { name: "Crear plato" })).toBeVisible();
   // On an iPhone-sized admin viewport the navigation lives in a drawer.
