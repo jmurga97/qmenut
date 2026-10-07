@@ -27,6 +27,7 @@ export default {
     },
   },
   menu: {
+    seoDescription: "Carta de {{name}}: {{categories}}",
     categoryNavigationLabel: "Categorías del menú",
     closeLabel: "Cerrar",
     dishCount_one: "{{count}} plato",

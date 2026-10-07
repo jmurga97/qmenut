@@ -27,6 +27,7 @@ export default {
     },
   },
   menu: {
+    seoDescription: "{{name}} menu: {{categories}}",
     categoryNavigationLabel: "Menu categories",
     closeLabel: "Close",
     dishCount_one: "{{count}} dish",

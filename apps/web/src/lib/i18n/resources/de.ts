@@ -33,6 +33,7 @@ export default {
   },
   menu: {
     ...en.menu,
+    seoDescription: "Speisekarte von {{name}}: {{categories}}",
     categoryNavigationLabel: "Speisekartenkategorien",
     closeLabel: "Schließen",
     dishCount_one: "{{count}} Gericht",

@@ -44,16 +44,13 @@ function toOpenGraphLocale(locale: string): string {
   return OPEN_GRAPH_LOCALES[base] ?? normalized;
 }
 
-function buildMenuDescription(data: PublicMenuData): string {
-  const firstDescription = data.categories
-    .flatMap((category) => [category.description, ...category.dishes.map((dish) => dish.description)])
-    .find((description): description is string => Boolean(description?.trim()));
+// Built from category names, never from free-text descriptions: link previews would show
+// e.g. a category's opening hours as if they were the restaurant's.
+function buildMenuDescription(data: PublicMenuData, i18n: I18nInstance): string {
+  const categories = data.categories.map((category) => category.name).join(", ");
+  if (!categories) return data.branch.address ? `${data.branch.name} – ${data.branch.address}` : data.branch.name;
 
-  if (firstDescription) {
-    return firstDescription.slice(0, 155);
-  }
-
-  return data.branch.address ? `${data.branch.name} – ${data.branch.address}` : data.branch.name;
+  return i18n.t("menu.seoDescription", { name: data.branch.name, categories }).slice(0, 155);
 }
 
 function getLcpPhotoSource({
@@ -123,7 +120,7 @@ export function buildPageHead({
   const title = titleKey ? match.context.i18n.t(titleKey, translationValues) : loaderData.branch.name;
   const description = descriptionKey
     ? match.context.i18n.t(descriptionKey, translationValues)
-    : buildMenuDescription(loaderData);
+    : buildMenuDescription(loaderData, match.context.i18n);
   const effectiveLocale = match.context.effectiveLocale ?? loaderData.language.effective;
   const ogLocale = toOpenGraphLocale(effectiveLocale);
   const alternateLocales = loaderData.language.available

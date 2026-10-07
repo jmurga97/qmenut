@@ -22,6 +22,7 @@ export default {
     navigation: { menu: "Menukaart", destacados: "Aanraders", contact: "Contact", loyalty: "Beloningen" },
   },
   menu: {
+    seoDescription: "Menukaart van {{name}}: {{categories}}",
     categoryNavigationLabel: "Menucategorieën",
     closeLabel: "Sluiten",
     dishCount_one: "{{count}} gerecht",

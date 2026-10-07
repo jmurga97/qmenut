@@ -27,6 +27,7 @@ export default {
   },
   menu: {
     ...en.menu,
+    seoDescription: "{{name}} 菜单：{{categories}}",
     categoryNavigationLabel: "菜单分类",
     closeLabel: "关闭",
     dishCount_one: "{{count}} 道菜",

@@ -22,6 +22,7 @@ export default {
     navigation: { menu: "Menu", destacados: "Polecane", contact: "Kontakt", loyalty: "Nagrody" },
   },
   menu: {
+    seoDescription: "Menu {{name}}: {{categories}}",
     categoryNavigationLabel: "Kategorie menu",
     closeLabel: "Zamknij",
     dishCount_one: "{{count}} danie",
