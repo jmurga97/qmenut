@@ -1,51 +1,41 @@
-import { getBranchSubscription } from "@qmenut/db/repositories/billing.repository";
+import { listBranchPlanCodes } from "@qmenut/db/repositories/admin-branches.repository";
+import { hasFeature, RESTAURANT_FEATURES } from "@qmenut/permissions";
 import { TRPCError } from "@trpc/server";
 
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { PlanCode, SubscriptionStatus } from "@qmenut/db/repositories/billing.repository";
-
-const PLAN_LEVEL: Record<PlanCode, number> = {
-  basic: 0,
-  business: 1,
-};
-
-export interface BranchEntitlement {
-  planCode: PlanCode;
-  subscriptionStatus: SubscriptionStatus | null;
-}
-
-interface GetBranchEntitlementInput {
-  db: DrizzleDb;
-  restaurantId: string;
-  branchId: string;
-}
+import type { PlanFeature } from "@qmenut/permissions";
 
 export function entitledPlanCode(status: SubscriptionStatus, planCode: PlanCode): PlanCode {
   return status === "canceled" ? "basic" : planCode;
 }
 
-export async function getBranchEntitlement({
-  db,
-  restaurantId,
-  branchId,
-}: GetBranchEntitlementInput): Promise<BranchEntitlement> {
-  const subscription = await getBranchSubscription({ db, restaurantId, branchId });
-
-  if (!subscription) {
-    return { planCode: "basic", subscriptionStatus: null };
-  }
-
-  return {
-    planCode: entitledPlanCode(subscription.status, subscription.planCode),
-    subscriptionStatus: subscription.status,
-  };
+interface RequireFeatureInput {
+  db: DrizzleDb;
+  restaurantId: string;
+  feature: PlanFeature;
+  /** Required for branch-scoped features; ignored for restaurant-scoped ones. */
+  branchId?: string;
 }
 
-export function requirePlan(entitlement: BranchEntitlement, minPlan: PlanCode): void {
-  if (PLAN_LEVEL[entitlement.planCode] < PLAN_LEVEL[minPlan]) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "El plan de la sucursal no permite esta función",
-    });
+/**
+ * Lee branches.plan_code (el plan efectivo que escribe syncSubscriptionState). Las funciones
+ * de restaurante se activan si alguna sucursal las tiene; el resto depende de la sucursal.
+ */
+export async function requireFeature({ db, restaurantId, feature, branchId }: RequireFeatureInput): Promise<void> {
+  const restaurantScoped = RESTAURANT_FEATURES.includes(feature);
+
+  if (!restaurantScoped && !branchId) {
+    throw new Error(`La función ${feature} necesita una sucursal`);
+  }
+
+  const planCodes = await listBranchPlanCodes({
+    db,
+    restaurantId,
+    branchId: restaurantScoped ? undefined : branchId,
+  });
+
+  if (!hasFeature(planCodes, feature)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Disponible en el plan Business" });
   }
 }

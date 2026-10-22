@@ -3,13 +3,14 @@ import { and, asc, eq, isNull } from "drizzle-orm";
 import { branchPhotos, branchSchedules, branches } from "../schema/branches";
 
 import type { DrizzleDb } from "../client";
+import type { PlanCode } from "@qmenut/permissions";
 import type { BatchItem } from "drizzle-orm/batch";
 
 export interface AdminBranchSummary {
   id: string;
   name: string;
   customDomain: string | null;
-  planCode: "basic" | "business";
+  planCode: PlanCode;
   isActive: boolean;
 }
 
@@ -51,6 +52,33 @@ export async function getBranch({ db, restaurantId, branchId }: GetBranchInput) 
     .get();
 
   return row ?? null;
+}
+
+interface ListBranchPlanCodesInput {
+  db: DrizzleDb;
+  restaurantId: string;
+  branchId?: string;
+}
+
+/** Planes de una sucursal o, sin branchId, de todas las sucursales del restaurante. */
+export async function listBranchPlanCodes({
+  db,
+  restaurantId,
+  branchId,
+}: ListBranchPlanCodesInput): Promise<PlanCode[]> {
+  const rows = await db
+    .select({ planCode: branches.planCode })
+    .from(branches)
+    .where(
+      and(
+        eq(branches.restaurantId, restaurantId),
+        isNull(branches.deletedAt),
+        branchId ? eq(branches.id, branchId) : undefined,
+      ),
+    )
+    .all();
+
+  return rows.map((row) => row.planCode);
 }
 
 export interface BranchScheduleRow {

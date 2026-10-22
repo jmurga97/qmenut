@@ -65,3 +65,49 @@ const ROLE_PERMISSIONS: Record<RestaurantRoleCode, readonly Permission[]> = {
 export function can(role: RestaurantRoleCode, permission: Permission): boolean {
   return ROLE_PERMISSIONS[role].includes(permission);
 }
+
+export const PLAN_CODES = ["basic", "business"] as const;
+
+export type PlanCode = (typeof PLAN_CODES)[number];
+
+/** Business-only features (keys from docs/sales/plan-features.md); what Basic includes needs no key. */
+export type PlanFeature =
+  | "promotions"
+  | "highlights"
+  | "menu.schedules"
+  | "contact.gallery"
+  | "contact.googleReviews"
+  | "languages"
+  | "loyalty"
+  | "pwa"
+  | "theme"
+  | "menuPrint"
+  | "analytics"
+  | "users"
+  | "multiBranch";
+
+const PLAN_FEATURES: Record<PlanCode, readonly PlanFeature[]> = {
+  basic: [],
+  business: [
+    "promotions",
+    "highlights",
+    "menu.schedules",
+    "contact.gallery",
+    "contact.googleReviews",
+    "languages",
+    "loyalty",
+    "pwa",
+    "theme",
+    "menuPrint",
+    "analytics",
+    "users",
+    "multiBranch",
+  ],
+};
+
+/** Features shared by the whole restaurant: on when any of its branches has them. The rest follow each branch's plan. */
+export const RESTAURANT_FEATURES: readonly PlanFeature[] = ["languages", "loyalty", "analytics", "users"];
+
+export function hasFeature(planCodes: readonly PlanCode[], feature: PlanFeature): boolean {
+  return planCodes.some((planCode) => PLAN_FEATURES[planCode].includes(feature));
+}

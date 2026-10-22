@@ -1,4 +1,4 @@
-import { ROLE_CODES } from "@qmenut/permissions";
+import { PLAN_CODES, ROLE_CODES } from "@qmenut/permissions";
 import { sql } from "drizzle-orm";
 import {
   check,
@@ -61,9 +61,7 @@ export const branches = sqliteTable(
     googlePlaceId: text("google_place_id"),
     googleReviewsEnabled: integer("google_reviews_enabled", { mode: "boolean" }).notNull().default(false),
     customDomain: text("custom_domain"),
-    planCode: text("plan_code", { enum: ["basic", "business"] })
-      .notNull()
-      .default("basic"),
+    planCode: text("plan_code", { enum: PLAN_CODES }).notNull().default("basic"),
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
     createdAt: integer("created_at").notNull().default(epochMilliseconds),
     updatedAt: integer("updated_at").notNull().default(epochMilliseconds),
@@ -159,7 +157,7 @@ export const branchSubscriptions = sqliteTable(
     id: text("id").primaryKey(),
     restaurantId: text("restaurant_id").notNull(),
     branchId: text("branch_id").notNull(),
-    planCode: text("plan_code", { enum: ["basic", "business"] }).notNull(),
+    planCode: text("plan_code", { enum: PLAN_CODES }).notNull(),
     status: text("status", { enum: ["trialing", "active", "past_due", "canceled"] })
       .notNull()
       .default("trialing"),

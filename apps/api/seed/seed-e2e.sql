@@ -165,3 +165,6 @@ FROM (
 WHERE trim(coalesce(source_text, '')) <> ''
 ON CONFLICT (entity_type, entity_id, language_code, field)
 DO UPDATE SET source_text = excluded.source_text, value = coalesce(nullif(trim(translations.value), ''), excluded.value), is_manual = 0;
+
+-- Seeded tenants exercise every feature, so they all run on Business.
+UPDATE branches SET plan_code = 'business';

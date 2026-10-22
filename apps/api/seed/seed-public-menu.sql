@@ -338,3 +338,6 @@ INSERT INTO restaurant_languages (restaurant_id, language_code) VALUES
 
 INSERT INTO branches (id, restaurant_id, name, address, phone, custom_domain)
 VALUES ('branch_ven', 'rest_ven', 'Sazón Caracas', 'Av. Francisco de Miranda 100, Caracas', '+582129990000', 'ven.localhost');
+
+-- Seeded tenants exercise every feature, so they all run on Business.
+UPDATE branches SET plan_code = 'business';

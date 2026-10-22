@@ -5,9 +5,10 @@ import { branches } from "../schema/branches";
 import { branchSubscriptions } from "../schema/restaurants";
 
 import type { DrizzleDb } from "../client";
+import type { PlanCode } from "@qmenut/permissions";
 import type { BatchItem } from "drizzle-orm/batch";
 
-export type PlanCode = "basic" | "business";
+export type { PlanCode } from "@qmenut/permissions";
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled";
 
 export interface BranchSubscriptionRow {
