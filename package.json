@@ -23,6 +23,14 @@
     "prepare": "husky"
   },
   "packageManager": "bun@1.4.0",
+  "overrides": {
+    "@astrojs/cloudflare": {
+      "wrangler": "4.151.3"
+    },
+    "unifont": {
+      "undici": "8.12.2"
+    }
+  },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
     "@happy-dom/global-registrator": "^20.14.0",

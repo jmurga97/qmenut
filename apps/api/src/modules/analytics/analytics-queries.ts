@@ -122,7 +122,8 @@ function toNullableNumber(value: unknown): number | null {
 }
 
 function toDayString(value: unknown): string {
-  return typeof value === "string" ? value : "";
+  // PostHog infiere `analytics_day` como DateTime y lo devuelve como "YYYY-MM-DDT00:00:00Z".
+  return typeof value === "string" ? value.slice(0, 10) : "";
 }
 
 function toDimension(value: unknown, fallback: string): string {
