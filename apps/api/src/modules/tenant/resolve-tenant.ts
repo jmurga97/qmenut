@@ -2,7 +2,7 @@ import { normalizeTenantHost } from "@qmenut/db/domain/tenant";
 import { resolveTenantByHost } from "@qmenut/db/repositories/tenant.repository";
 
 import type { DrizzleDb } from "@qmenut/db/client";
-import type { ResolvedTenant } from "@qmenut/db/domain/tenant";
+import type { PublicTenant } from "@qmenut/db/domain/tenant";
 
 function getRequestHostname(request: Request): string {
   const forwardedHost = request.headers.get("x-forwarded-host");
@@ -35,6 +35,6 @@ export async function resolveTenantFromRequest({
   db,
   host,
   request,
-}: ResolveTenantFromRequestInput): Promise<ResolvedTenant | null> {
+}: ResolveTenantFromRequestInput): Promise<PublicTenant | null> {
   return resolveTenantByHost({ db, host: resolveRequestTenantHost({ host, request }) });
 }

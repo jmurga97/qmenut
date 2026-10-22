@@ -1,5 +1,6 @@
 import { getPublicMenu as findPublicMenu } from "@qmenut/db/repositories/public-menu.repository";
 import { getRestaurantLanguageInfo } from "@qmenut/db/repositories/restaurant-languages.repository";
+import { hasFeature } from "@qmenut/permissions";
 
 import { sanitizeNullableDescription } from "./sanitize-description";
 import { getLanguageCatalogEntry } from "../admin-translations/language-catalog";
@@ -9,8 +10,9 @@ import { getPublicLoyaltyFeatures } from "../loyalty/get-loyalty-program";
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { PublicLoyaltyFeatures } from "../loyalty/get-loyalty-program";
 import type { DrizzleDb } from "@qmenut/db/client";
-import type { ResolvedTenant } from "@qmenut/db/domain/tenant";
+import type { PublicTenant } from "@qmenut/db/domain/tenant";
 import type { PublicCategory, PublicMenuData, PublicMenuLanguage } from "@qmenut/db/models/public-menu";
+import type { PlanFeature } from "@qmenut/permissions";
 
 export const FALLBACK_LANGUAGE_CODE = "es";
 
@@ -18,24 +20,31 @@ interface GetPublicMenuInput {
   db: DrizzleDb;
   locale?: string;
   nowMs?: number;
-  tenant: ResolvedTenant;
+  tenant: PublicTenant;
   env?: RuntimeEnv;
 }
 
 export type PublicMenuPayload = PublicMenuData & {
   language: PublicMenuLanguage;
-  publicFeatures: PublicLoyaltyFeatures;
+  publicFeatures: PublicLoyaltyFeatures & { highlights: boolean; pwa: boolean };
   tagline: string;
 };
 
-function sanitizeCategories(categories: PublicCategory[]): PublicCategory[] {
+type PlanCheck = (feature: PlanFeature) => boolean;
+
+/** Business content stays stored on Basic; it is only left out of what diners receive. */
+function sanitizeCategories(categories: PublicCategory[], can: PlanCheck): PublicCategory[] {
   return categories.map((category) => ({
     ...category,
     description: sanitizeNullableDescription(category.description),
     dishes: category.dishes.map((dish) => ({
       ...dish,
+      availabilityWindows: can("menu.schedules") ? dish.availabilityWindows : [],
       comboDescription: sanitizeNullableDescription(dish.comboDescription),
       description: sanitizeNullableDescription(dish.description),
+      isFeatured: can("highlights") && dish.isFeatured,
+      isRecommended: can("highlights") && dish.isRecommended,
+      promotion: can("promotions") ? dish.promotion : null,
     })),
   }));
 }
@@ -47,13 +56,15 @@ export async function getPublicMenu({
   tenant,
   env,
 }: GetPublicMenuInput): Promise<PublicMenuPayload | null> {
+  const can: PlanCheck = (feature) => hasFeature([tenant.planCode], feature);
   const info = await getRestaurantLanguageInfo({ db, restaurantId: tenant.restaurantId });
   const defaultLanguage = info?.defaultLanguageCode ?? FALLBACK_LANGUAGE_CODE;
   const content = await getTranslationContent({ db, env, restaurantId: tenant.restaurantId });
   const activeLanguages = (info?.languages ?? [{ languageCode: defaultLanguage, isDefault: true }]).filter(
     (language) =>
       language.isDefault ||
-      (Boolean(getLanguageCatalogEntry(language.languageCode)) &&
+      (can("languages") &&
+        Boolean(getLanguageCatalogEntry(language.languageCode)) &&
         languageTexts(content, language.languageCode).every((item) => item.complete)),
   );
   const requested = locale?.toLowerCase() ?? null;
@@ -65,6 +76,7 @@ export async function getPublicMenu({
     effective === defaultLanguage ? undefined : publicTranslationMap(languageTexts(content, effective));
   const [data, publicFeatures] = await Promise.all([
     findPublicMenu({
+      applySchedules: can("menu.schedules"),
       db,
       nowMs,
       tenant,
@@ -72,7 +84,7 @@ export async function getPublicMenu({
       isDefaultLocale: effective === defaultLanguage,
       translatedTexts,
     }),
-    getPublicLoyaltyFeatures({ db, restaurantId: tenant.restaurantId }),
+    can("loyalty") ? getPublicLoyaltyFeatures({ db, restaurantId: tenant.restaurantId }) : { loyalty: false },
   ]);
 
   if (!data) {
@@ -81,13 +93,20 @@ export async function getPublicMenu({
 
   return {
     ...data,
+    branch: {
+      ...data.branch,
+      googleReviewsEnabled: can("contact.googleReviews") && data.branch.googleReviewsEnabled,
+      // The first photo is the cover every plan keeps.
+      photos: can("contact.gallery") ? data.branch.photos : data.branch.photos.slice(0, 1),
+    },
+    promotions: can("promotions") ? data.promotions : [],
     tagline:
       effective === defaultLanguage
         ? (content.texts.find((item) => item.entityId === tenant.branchId && item.field === "tagline")?.text ?? "")
         : (languageTexts(content, effective).find(
             (item) => item.entityId === tenant.branchId && item.field === "tagline",
           )?.value ?? ""),
-    categories: sanitizeCategories(data.categories),
+    categories: sanitizeCategories(data.categories, can),
     language: {
       available: activeLanguages.map((language) => ({
         code: language.languageCode,
@@ -98,6 +117,6 @@ export async function getPublicMenu({
       effective,
       requested,
     },
-    publicFeatures,
+    publicFeatures: { ...publicFeatures, highlights: can("highlights"), pwa: can("pwa") },
   };
 }

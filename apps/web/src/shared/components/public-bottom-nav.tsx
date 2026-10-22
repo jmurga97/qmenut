@@ -7,7 +7,12 @@ import { useTranslation } from "react-i18next";
 const NAV_ICON_SIZE = 19;
 const NAV_ICON_STROKE_WIDTH = 1.9;
 
-export function PublicBottomNav({ showLoyalty }: { showLoyalty: boolean }) {
+interface PublicBottomNavProps {
+  showHighlights: boolean;
+  showLoyalty: boolean;
+}
+
+export function PublicBottomNav({ showHighlights, showLoyalty }: PublicBottomNavProps) {
   const navigate = useNavigate();
   const router = useRouter();
   const search = useSearch({ from: "/{-$locale}" });
@@ -50,17 +55,19 @@ export function PublicBottomNav({ showLoyalty }: { showLoyalty: boolean }) {
         <UtensilsCrossed slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
         {t("common.navigation.menu")}
       </QmTab>
-      <QmTab
-        value="/destacados"
-        active={routeId === "/{-$locale}/destacados"}
-        onPointerEnter={preloadHighlights}
-        onFocus={preloadHighlights}
-        onTouchStart={preloadHighlights}
-        onQmSelect={() => void navigate({ to: "/{-$locale}/destacados", params: (prev) => prev, search })}
-      >
-        <Tag slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
-        {t("common.navigation.destacados")}
-      </QmTab>
+      {showHighlights ? (
+        <QmTab
+          value="/destacados"
+          active={routeId === "/{-$locale}/destacados"}
+          onPointerEnter={preloadHighlights}
+          onFocus={preloadHighlights}
+          onTouchStart={preloadHighlights}
+          onQmSelect={() => void navigate({ to: "/{-$locale}/destacados", params: (prev) => prev, search })}
+        >
+          <Tag slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
+          {t("common.navigation.destacados")}
+        </QmTab>
+      ) : null}
       <QmTab
         value="/contacto"
         active={routeId === "/{-$locale}/contacto"}

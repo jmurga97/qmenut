@@ -4,9 +4,10 @@ import {
   listRewards,
 } from "@qmenut/db/repositories/loyalty-admin.repository";
 import { getRestaurantLanguageInfo } from "@qmenut/db/repositories/restaurant-languages.repository";
+import { hasFeature } from "@qmenut/permissions";
 
 import { getTranslationContent, languageTexts, publicTranslationMap } from "../admin-translations/translation-content";
-import { resolvePublicTenant } from "../public-menu/resolve-public-tenant";
+import { resolveTenantFromRequest } from "../tenant/resolve-tenant";
 
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { LoyaltyRewardView } from "@qmenut/db/models/loyalty";
@@ -50,9 +51,9 @@ export async function getLoyaltyProgramForClient({
   host,
   locale,
 }: GetLoyaltyProgramForClientInput): Promise<PublicLoyaltyProgram | null> {
-  const tenant = await resolvePublicTenant({ db, request, host });
+  const tenant = await resolveTenantFromRequest({ db, request, host });
 
-  if (!tenant) {
+  if (!tenant || !hasFeature([tenant.planCode], "loyalty")) {
     return null;
   }
 

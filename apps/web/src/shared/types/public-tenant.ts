@@ -9,7 +9,9 @@ export interface PublicTenant {
   showDishPhoto: boolean;
   showMenuPhotos: boolean;
   publicFeatures: {
+    highlights: boolean;
     loyalty: boolean;
+    pwa: boolean;
   };
   secondary: string;
   template: QmTemplateName;

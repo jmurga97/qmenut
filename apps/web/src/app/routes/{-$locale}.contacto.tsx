@@ -32,5 +32,13 @@ export const Route = createFileRoute("/{-$locale}/contacto")({
   headers: () => ({
     "Cache-Control": BROWSER_CACHE_CONTROL,
   }),
-  component: () => <ContactPage installCard={<InstallCard />} legalLinksNav={<LegalLinksNav />} />,
+  component: ContactRoute,
 });
+
+function ContactRoute() {
+  const data = Route.useLoaderData();
+
+  return (
+    <ContactPage installCard={data?.publicFeatures.pwa ? <InstallCard /> : null} legalLinksNav={<LegalLinksNav />} />
+  );
+}

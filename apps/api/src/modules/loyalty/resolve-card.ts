@@ -1,9 +1,10 @@
 import { hasCurrentLoyaltyConsent } from "@qmenut/db/repositories/customers.repository";
+import { hasFeature } from "@qmenut/permissions";
 import { TRPCError } from "@trpc/server";
 
 import { LOYALTY_CONSENT_VERSION } from "./consent";
 import { verifyLoyaltyToken } from "../../lib/loyalty/token";
-import { resolvePublicTenant } from "../public-menu/resolve-public-tenant";
+import { resolveTenantFromRequest } from "../tenant/resolve-tenant";
 
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
@@ -34,9 +35,9 @@ export async function resolveCard({
   cardToken,
   requireConsent = true,
 }: ResolveCardInput): Promise<ResolvedCard> {
-  const tenant = await resolvePublicTenant({ db, request, host });
+  const tenant = await resolveTenantFromRequest({ db, request, host });
 
-  if (!tenant) {
+  if (!tenant || !hasFeature([tenant.planCode], "loyalty")) {
     throw new TRPCError({ code: "NOT_FOUND", message: "No hay ninguna sucursal asociada a este dominio" });
   }
 

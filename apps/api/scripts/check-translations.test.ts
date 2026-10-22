@@ -75,7 +75,11 @@ test("retranslates only branch content, clears removed descriptions, and sends S
         )
         .get(),
     ).toEqual({ value: "Translated Croquetas de jamón" });
-    const menuInput = { db, tenant: { restaurantId: "rest_tapas", branchId: "branch_tapas" }, locale: "en" };
+    const menuInput = {
+      db,
+      tenant: { restaurantId: "rest_tapas", branchId: "branch_tapas", planCode: "business" as const },
+      locale: "en",
+    };
     expect((await getPublicMenu(menuInput))?.language.effective).toBe("es");
     const translationInput = {
       db,

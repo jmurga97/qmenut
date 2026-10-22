@@ -1,3 +1,4 @@
+import { getBranch } from "@qmenut/db/repositories/admin-branches.repository";
 import {
   updateBranchPlanStatement,
   upsertBranchSubscriptionStatement,
@@ -6,6 +7,7 @@ import {
 import { mapStripeStatus } from "./map-stripe-status";
 import { entitledPlanCode } from "../../lib/billing/entitlement";
 import { planCodeFor } from "../../lib/billing/plan-catalog";
+import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
 
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
@@ -40,6 +42,8 @@ export async function syncSubscriptionState({ db, env, subscription }: SyncSubsc
 
   const currentPeriodEnd = subscription.items.data[0]?.current_period_end ?? null;
   const status = mapStripeStatus(subscription.status);
+  const effectivePlanCode = entitledPlanCode(status, planCode);
+  const branch = await getBranch({ db, restaurantId, branchId });
 
   await db.batch([
     upsertBranchSubscriptionStatement({
@@ -59,7 +63,12 @@ export async function syncSubscriptionState({ db, env, subscription }: SyncSubsc
       db,
       restaurantId,
       branchId,
-      planCode: entitledPlanCode(status, planCode),
+      planCode: effectivePlanCode,
     }),
   ]);
+
+  // The public menu strips Business content by this branch's plan, so its cached pages must refresh.
+  if (branch?.planCode !== effectivePlanCode) {
+    await bumpPublicContentVersionForBranch({ db, env, restaurantId, branchId });
+  }
 }

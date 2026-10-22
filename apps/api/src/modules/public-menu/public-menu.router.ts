@@ -1,11 +1,12 @@
 import { getGoogleReviewsConfig } from "@qmenut/db/repositories/google-reviews.repository";
+import { hasFeature } from "@qmenut/permissions";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { getPublicMenu } from "./get-public-menu";
 import { getGoogleReviews } from "./google-reviews.service";
-import { resolvePublicTenant } from "./resolve-public-tenant";
 import { publicProcedure, router } from "../../trpc/trpc";
+import { resolveTenantFromRequest } from "../tenant/resolve-tenant";
 
 const localeSchema = z
   .string()
@@ -21,7 +22,7 @@ const publicMenuInputSchema = z
 
 export const publicMenuRouter = router({
   publicData: publicProcedure.input(publicMenuInputSchema).query(async ({ ctx, input }) => {
-    const tenant = await resolvePublicTenant({
+    const tenant = await resolveTenantFromRequest({
       db: ctx.db,
       request: ctx.request,
       host: input?.host,
@@ -34,12 +35,12 @@ export const publicMenuRouter = router({
     return getPublicMenu({ db: ctx.db, env: ctx.env, tenant, locale: input?.locale });
   }),
   googleReviews: publicProcedure.input(publicMenuInputSchema).query(async ({ ctx, input }) => {
-    const tenant = await resolvePublicTenant({
+    const tenant = await resolveTenantFromRequest({
       db: ctx.db,
       request: ctx.request,
       host: input?.host,
     });
-    if (!tenant) return null;
+    if (!tenant || !hasFeature([tenant.planCode], "contact.googleReviews")) return null;
 
     const config = await getGoogleReviewsConfig({ db: ctx.db, tenant });
     if (!config?.enabled || !config.placeId) return null;

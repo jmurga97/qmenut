@@ -41,7 +41,11 @@ export const Route = createFileRoute("/sitemap.xml")({
           return new Response("Not found", { status: 404 });
         }
 
-        const publicRoutePaths = ROUTE_PATHS.filter((path) => path !== "/puntos" || data.publicFeatures.loyalty);
+        const publicRoutePaths = ROUTE_PATHS.filter(
+          (path) =>
+            (path !== "/puntos" || data.publicFeatures.loyalty) &&
+            (path !== "/destacados" || data.publicFeatures.highlights),
+        );
         const urlEntries = publicRoutePaths.map((path) => {
           const alternates = buildHreflangAlternates({ language: data.language, origin, path });
           const defaultHref = alternates.find((alt) => alt.hreflang === "x-default")?.href ?? origin + path;

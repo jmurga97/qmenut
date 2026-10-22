@@ -1,8 +1,14 @@
 import type { DrizzleDb } from "../client";
+import type { PlanCode } from "@qmenut/permissions";
 
 export interface ResolvedTenant {
   branchId: string;
   restaurantId: string;
+}
+
+/** Tenant resolved from a public host; the plan decides which Business content it serves. */
+export interface PublicTenant extends ResolvedTenant {
+  planCode: PlanCode;
 }
 
 export interface TenantInput {

@@ -4,14 +4,14 @@ import { normalizeTenantHost } from "../domain/tenant";
 import { branches } from "../schema/branches";
 
 import type { DrizzleDb } from "../client";
-import type { ResolvedTenant } from "../domain/tenant";
+import type { PublicTenant } from "../domain/tenant";
 
 interface ResolveTenantByHostInput {
   db: DrizzleDb;
   host: string;
 }
 
-export async function resolveTenantByHost({ db, host }: ResolveTenantByHostInput): Promise<ResolvedTenant | null> {
+export async function resolveTenantByHost({ db, host }: ResolveTenantByHostInput): Promise<PublicTenant | null> {
   const normalizedHost = normalizeTenantHost(host);
 
   if (!normalizedHost) {
@@ -22,6 +22,7 @@ export async function resolveTenantByHost({ db, host }: ResolveTenantByHostInput
     .select({
       branchId: branches.id,
       restaurantId: branches.restaurantId,
+      planCode: branches.planCode,
     })
     .from(branches)
     .where(and(eq(branches.customDomain, normalizedHost), isNull(branches.deletedAt), eq(branches.isActive, true)))

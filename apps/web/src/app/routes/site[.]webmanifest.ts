@@ -18,7 +18,8 @@ export const Route = createFileRoute("/site.webmanifest")({
         const trpc = createServerTrpcCaller();
         const [data, theme] = await Promise.all([trpc.menu.publicData.query({ host }), readTenantTheme(host)]);
 
-        if (!data) {
+        // Only plans with the installable app get a manifest.
+        if (!data?.publicFeatures.pwa) {
           return new Response("Not found", { status: 404 });
         }
 

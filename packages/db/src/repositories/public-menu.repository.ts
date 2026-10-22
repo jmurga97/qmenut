@@ -80,6 +80,8 @@ export interface ExtraRow {
 }
 
 interface GetPublicMenuInput extends TenantInput {
+  /** False on plans without time-based schedules: every active category is shown. */
+  applySchedules: boolean;
   isDefaultLocale: boolean;
   locale: string;
   nowMs: number;
@@ -461,6 +463,7 @@ async function loadPublicMenuImageVariants({
 }
 
 export async function getPublicMenu({
+  applySchedules,
   db,
   isDefaultLocale,
   locale,
@@ -496,12 +499,14 @@ export async function getPublicMenu({
       description: rows.translationsByEntity.get(row.id)?.get("description") ?? row.description,
     }));
   const promotionsById = new Map(activePromotions.map((row) => [row.id, row]));
-  const visibleCategoryRows = rows.categoryRows.filter((row) =>
-    isPromotionLikeActiveNow({
-      promotion: { ...row, isRecurring: true, startsAt: null, endsAt: null },
-      nowMs,
-      timeZone,
-    }),
+  const visibleCategoryRows = rows.categoryRows.filter(
+    (row) =>
+      !applySchedules ||
+      isPromotionLikeActiveNow({
+        promotion: { ...row, isRecurring: true, startsAt: null, endsAt: null },
+        nowMs,
+        timeZone,
+      }),
   );
   const bestPromotionsByDish = createBestPromotionMap({
     candidates: rows.promotionCandidateRows,
