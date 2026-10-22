@@ -322,6 +322,8 @@ export async function getDishContext({ db, dishId, restaurantId }: GetDishContex
 
 interface UpdateDishInput {
   preserveImage?: boolean;
+  /** Keeps the stored featured/recommended flags when the branch's plan cannot edit them. */
+  preserveHighlights?: boolean;
   db: DrizzleDb;
   restaurantId: string;
   dishId: string;
@@ -334,6 +336,7 @@ export function updateDishStatement({
   dishId,
   data,
   preserveImage,
+  preserveHighlights,
 }: UpdateDishInput): BatchItem<"sqlite"> {
   return db
     .update(dishes)
@@ -348,8 +351,8 @@ export function updateDishStatement({
       imageUrl: preserveImage ? undefined : data.imageUrl,
       position: data.position,
       isActive: data.isActive,
-      isRecommended: data.isRecommended,
-      isFeatured: data.isFeatured,
+      isRecommended: preserveHighlights ? undefined : data.isRecommended,
+      isFeatured: preserveHighlights ? undefined : data.isFeatured,
       updatedAt: Date.now(),
     })
     .where(and(eq(dishes.id, dishId), eq(dishes.restaurantId, restaurantId), isNull(dishes.deletedAt)));

@@ -152,6 +152,8 @@ export async function getCategoryContext({
 
 interface UpdateCategoryInput {
   preserveImage?: boolean;
+  /** Keeps the stored schedule when the branch's plan cannot edit it. */
+  preserveSchedule?: boolean;
   db: DrizzleDb;
   restaurantId: string;
   categoryId: string;
@@ -164,6 +166,7 @@ export function updateCategoryStatement({
   categoryId,
   data,
   preserveImage,
+  preserveSchedule,
 }: UpdateCategoryInput): BatchItem<"sqlite"> {
   return db
     .update(categories)
@@ -172,9 +175,9 @@ export function updateCategoryStatement({
       description: data.description,
       imageUrl: preserveImage ? undefined : data.imageUrl,
       isActive: data.isActive,
-      recurringDays: data.recurringDays,
-      recurringStartMinute: data.recurringStartMinute,
-      recurringEndMinute: data.recurringEndMinute,
+      recurringDays: preserveSchedule ? undefined : data.recurringDays,
+      recurringStartMinute: preserveSchedule ? undefined : data.recurringStartMinute,
+      recurringEndMinute: preserveSchedule ? undefined : data.recurringEndMinute,
       updatedAt: Date.now(),
     })
     .where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId), isNull(categories.deletedAt)));

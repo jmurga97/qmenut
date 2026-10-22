@@ -31,6 +31,7 @@ import {
 import { createMenuCategory, updateMenuCategory } from "./save-category";
 import { saveDish } from "./save-dish";
 import { saveDishRelations } from "./save-dish-relations";
+import { hasPlanFeature } from "../../lib/billing/entitlement";
 import {
   bumpPublicContentVersionForBranch,
   bumpPublicContentVersionForRestaurant,
@@ -40,6 +41,10 @@ import { imageSaveOperation } from "../admin-images/image-save-operation";
 import { prepareMenuImageSave } from "../admin-images/prepare-menu-image-save";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 import { requirePermission } from "../admin-tenant/require-permission";
+
+// Basic plans neither schedule categories nor feature dishes; new rows are saved without them.
+const NO_SCHEDULE = { recurringDays: null, recurringStartMinute: null, recurringEndMinute: null };
+const NO_HIGHLIGHTS = { isFeatured: false, isRecommended: false };
 
 const categoryIdInputSchema = z.object({ categoryId: z.string().trim().min(1) });
 const dishIdInputSchema = z.object({ dishId: z.string().trim().min(1) });
@@ -66,6 +71,7 @@ const categoriesRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
+    const schedules = await hasPlanFeature(ctx, { feature: "menu.schedules", branchId: input.branchId });
     return imageSaveOperation({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -87,7 +93,7 @@ const categoriesRouter = router({
           db: ctx.db,
           restaurantId: ctx.tenant.restaurantId,
           branchId: input.branchId,
-          data: { ...input.data, imageUrl: image.imageUrl },
+          data: { ...input.data, imageUrl: image.imageUrl, ...(schedules ? {} : NO_SCHEDULE) },
           preserveImage: image.preserveImage,
           entityId,
           statements: [...statements, ...image.statements],
@@ -112,6 +118,7 @@ const categoriesRouter = router({
     if (!categoryContext) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Categoría no encontrada" });
     }
+    const schedules = await hasPlanFeature(ctx, { feature: "menu.schedules", branchId: categoryContext.branchId });
     return imageSaveOperation({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -136,6 +143,7 @@ const categoriesRouter = router({
           categoryId: input.categoryId,
           data: { ...input.data, imageUrl: image.imageUrl },
           preserveImage: image.preserveImage,
+          preserveSchedule: !schedules,
           entityId,
           statements: [...statements, ...image.statements],
         });
@@ -217,6 +225,7 @@ const dishesRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
+    const highlights = await hasPlanFeature(ctx, { feature: "highlights", branchId: input.branchId });
     return imageSaveOperation({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -238,7 +247,7 @@ const dishesRouter = router({
           db: ctx.db,
           restaurantId: ctx.tenant.restaurantId,
           branchId: input.branchId,
-          data: { ...input.data, imageUrl: image.imageUrl },
+          data: { ...input.data, imageUrl: image.imageUrl, ...(highlights ? {} : NO_HIGHLIGHTS) },
           preserveImage: image.preserveImage,
           entityId,
           statements: [...statements, ...image.statements],
@@ -263,6 +272,7 @@ const dishesRouter = router({
     if (!dishContext || dishContext.branchId !== input.branchId) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Plato no encontrado" });
     }
+    const highlights = await hasPlanFeature(ctx, { feature: "highlights", branchId: input.branchId });
     return imageSaveOperation({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -288,6 +298,7 @@ const dishesRouter = router({
           dishId: input.dishId,
           data: { ...input.data, imageUrl: image.imageUrl },
           preserveImage: image.preserveImage,
+          preserveHighlights: !highlights,
           entityId,
           statements: [...statements, ...image.statements],
         });

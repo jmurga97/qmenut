@@ -23,16 +23,18 @@ import { saveReward } from "./save-reward";
 import { undoLoyaltyAction } from "./undo-loyalty-action";
 import { validateRedemption } from "./validate-redemption";
 import { bumpPublicContentVersionForRestaurant } from "../../lib/public-content-version";
-import { router, tenantProcedure } from "../../trpc/trpc";
+import { featureProcedure, router } from "../../trpc/trpc";
 import { requirePermission } from "../admin-tenant/require-permission";
 
+const loyaltyProcedure = featureProcedure("loyalty");
+
 const insightsRouter = router({
-  summary: tenantProcedure.query(({ ctx }) => {
+  summary: loyaltyProcedure.query(({ ctx }) => {
     requirePermission(ctx.tenant, "loyalty.insights");
 
     return getLoyaltyInsightsSummary({ db: ctx.db, restaurantId: ctx.tenant.restaurantId });
   }),
-  customers: tenantProcedure.input(listCustomersInputSchema).query(({ ctx, input }) => {
+  customers: loyaltyProcedure.input(listCustomersInputSchema).query(({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.insights");
 
     return listInsightsCustomers({
@@ -46,7 +48,7 @@ const insightsRouter = router({
       inactiveDays: input.inactiveDays ?? null,
     });
   }),
-  visitsChart: tenantProcedure.input(visitsChartInputSchema).query(({ ctx, input }) => {
+  visitsChart: loyaltyProcedure.input(visitsChartInputSchema).query(({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.insights");
 
     return getInsightsVisitsChart({
@@ -59,7 +61,7 @@ const insightsRouter = router({
 });
 
 export const adminLoyaltyRouter = router({
-  getProgram: tenantProcedure.query(async ({ ctx }) => {
+  getProgram: loyaltyProcedure.query(async ({ ctx }) => {
     requirePermission(ctx.tenant, "loyalty.manage");
     const [program, rewards] = await Promise.all([
       getLoyaltyProgram({ db: ctx.db, restaurantId: ctx.tenant.restaurantId }),
@@ -68,7 +70,7 @@ export const adminLoyaltyRouter = router({
 
     return { program, rewards };
   }),
-  saveProgram: tenantProcedure.input(programInputSchema).mutation(async ({ ctx, input }) => {
+  saveProgram: loyaltyProcedure.input(programInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.manage");
 
     await saveLoyaltyProgram({
@@ -84,7 +86,7 @@ export const adminLoyaltyRouter = router({
       restaurantId: ctx.tenant.restaurantId,
     });
   }),
-  createReward: tenantProcedure.input(createRewardSchema).mutation(async ({ ctx, input }) => {
+  createReward: loyaltyProcedure.input(createRewardSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.manage");
 
     const result = await saveReward({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, data: input.data });
@@ -96,7 +98,7 @@ export const adminLoyaltyRouter = router({
 
     return result;
   }),
-  updateReward: tenantProcedure.input(updateRewardSchema).mutation(async ({ ctx, input }) => {
+  updateReward: loyaltyProcedure.input(updateRewardSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.manage");
 
     const result = await saveReward({
@@ -113,7 +115,7 @@ export const adminLoyaltyRouter = router({
 
     return result;
   }),
-  deleteReward: tenantProcedure.input(rewardIdInputSchema).mutation(async ({ ctx, input }) => {
+  deleteReward: loyaltyProcedure.input(rewardIdInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.manage");
     await softDeleteReward({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, rewardId: input.rewardId });
     await bumpPublicContentVersionForRestaurant({
@@ -124,7 +126,7 @@ export const adminLoyaltyRouter = router({
 
     return { id: input.rewardId };
   }),
-  venueCode: tenantProcedure.input(venueCodeInputSchema).query(({ ctx, input }) => {
+  venueCode: loyaltyProcedure.input(venueCodeInputSchema).query(({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.operate");
     return getVenueCode({
       db: ctx.db,
@@ -133,11 +135,11 @@ export const adminLoyaltyRouter = router({
       branchId: input.branchId,
     });
   }),
-  pendingRedemptions: tenantProcedure.query(({ ctx }) => {
+  pendingRedemptions: loyaltyProcedure.query(({ ctx }) => {
     requirePermission(ctx.tenant, "loyalty.operate");
     return pendingRedemptions({ db: ctx.db, restaurantId: ctx.tenant.restaurantId });
   }),
-  rejectRedemption: tenantProcedure.input(rejectRedemptionInputSchema).mutation(({ ctx, input }) => {
+  rejectRedemption: loyaltyProcedure.input(rejectRedemptionInputSchema).mutation(({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.operate");
     return rejectRedemption({
       db: ctx.db,
@@ -145,7 +147,7 @@ export const adminLoyaltyRouter = router({
       redemptionId: input.redemptionId,
     });
   }),
-  validateRedemption: tenantProcedure.input(validateRedemptionInputSchema).mutation(({ ctx, input }) => {
+  validateRedemption: loyaltyProcedure.input(validateRedemptionInputSchema).mutation(({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.operate");
     return validateRedemption({
       db: ctx.db,
@@ -155,7 +157,7 @@ export const adminLoyaltyRouter = router({
       validatedBy: ctx.tenant.membershipId,
     });
   }),
-  undo: tenantProcedure.input(undoInputSchema).mutation(({ ctx, input }) => {
+  undo: loyaltyProcedure.input(undoInputSchema).mutation(({ ctx, input }) => {
     requirePermission(ctx.tenant, "loyalty.operate");
     return undoLoyaltyAction({
       db: ctx.db,

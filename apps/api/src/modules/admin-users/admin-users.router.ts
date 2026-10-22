@@ -12,7 +12,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { sendUserInviteEmail } from "./send-user-invite-email";
-import { router, tenantProcedure } from "../../trpc/trpc";
+import { featureProcedure, router } from "../../trpc/trpc";
 import { requirePermission } from "../admin-tenant/require-permission";
 
 import type { UserInviteSendResult } from "./send-user-invite-email";
@@ -105,13 +105,15 @@ async function sendAndPersistInvite({
   return result;
 }
 
+const usersProcedure = featureProcedure("users");
+
 export const adminUsersRouter = router({
-  list: tenantProcedure.query(async ({ ctx }) => {
+  list: usersProcedure.query(async ({ ctx }) => {
     requirePermission(ctx.tenant, "users.manage");
     return listRestaurantUsers({ db: ctx.db, restaurantId: ctx.tenant.restaurantId });
   }),
 
-  create: tenantProcedure.input(createUserSchema).mutation(async ({ ctx, input }) => {
+  create: usersProcedure.input(createUserSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "users.manage");
     const email = normalizeEmail(input.email);
     if (isInternalSupportEmail(email)) {
@@ -151,7 +153,7 @@ export const adminUsersRouter = router({
     return { created: true, invitation: { errorCode: invitation.errorCode, status: user.inviteStatus }, user };
   }),
 
-  updateRole: tenantProcedure.input(updateRoleSchema).mutation(async ({ ctx, input }) => {
+  updateRole: usersProcedure.input(updateRoleSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "users.manage");
     const membership = await getRestaurantUser({
       db: ctx.db,
@@ -171,7 +173,7 @@ export const adminUsersRouter = router({
     return getRestaurantUser({ db: ctx.db, membershipId: input.membershipId, restaurantId: ctx.tenant.restaurantId });
   }),
 
-  setActive: tenantProcedure.input(setActiveSchema).mutation(async ({ ctx, input }) => {
+  setActive: usersProcedure.input(setActiveSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "users.manage");
     if (!input.isActive && input.membershipId === ctx.tenant.membershipId) {
       throw new TRPCError({ code: "FORBIDDEN", message: "No puedes desactivar tu propia membresía" });
@@ -194,7 +196,7 @@ export const adminUsersRouter = router({
     return getRestaurantUser({ db: ctx.db, membershipId: input.membershipId, restaurantId: ctx.tenant.restaurantId });
   }),
 
-  resendInvite: tenantProcedure.input(membershipIdSchema).mutation(async ({ ctx, input }) => {
+  resendInvite: usersProcedure.input(membershipIdSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "users.manage");
     const membership = await getRestaurantUser({
       db: ctx.db,

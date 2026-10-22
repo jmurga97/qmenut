@@ -10,6 +10,7 @@ import { z } from "zod";
 
 import { createPromotionSchema, updatePromotionSchema } from "./promotion-input.schema";
 import { createBranchPromotion, updateBranchPromotion } from "./save-promotion";
+import { requireFeature } from "../../lib/billing/entitlement";
 import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
 import { router, tenantProcedure } from "../../trpc/trpc";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
@@ -22,9 +23,16 @@ const promotionStatusSchema = promotionIdSchema.extend({ status: z.enum(["active
 export const adminPromotionsRouter = router({
   list: tenantProcedure.input(branchIdSchema).query(async ({ ctx, input }) => {
     await assertBranchAccess({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, branchId: input.branchId });
+    await requireFeature(ctx, { feature: "promotions", branchId: input.branchId });
     return listPromotions({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, branchId: input.branchId });
   }),
   get: tenantProcedure.input(promotionIdSchema).query(async ({ ctx, input }) => {
+    const branchId = await getPromotionBranchId({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      promotionId: input.promotionId,
+    });
+    if (branchId) await requireFeature(ctx, { feature: "promotions", branchId });
     const promotion = await getPromotion({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -39,6 +47,7 @@ export const adminPromotionsRouter = router({
   }),
   create: tenantProcedure.input(createPromotionSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "promotions.write");
+    await requireFeature(ctx, { feature: "promotions", branchId: input.branchId });
     const result = await createBranchPromotion({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -64,6 +73,7 @@ export const adminPromotionsRouter = router({
     if (!branchId) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Promoción no encontrada" });
     }
+    await requireFeature(ctx, { feature: "promotions", branchId });
     const result = await updateBranchPromotion({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -92,6 +102,7 @@ export const adminPromotionsRouter = router({
     if (!branchId) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Promoción no encontrada" });
     }
+    await requireFeature(ctx, { feature: "promotions", branchId });
     await setPromotionStatus({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
@@ -113,6 +124,7 @@ export const adminPromotionsRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       promotionId: input.promotionId,
     });
+    if (branchId) await requireFeature(ctx, { feature: "promotions", branchId });
     await softDeletePromotion({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, promotionId: input.promotionId });
 
     if (branchId) {

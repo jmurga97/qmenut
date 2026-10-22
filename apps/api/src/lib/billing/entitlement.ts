@@ -10,9 +10,12 @@ export function entitledPlanCode(status: SubscriptionStatus, planCode: PlanCode)
   return status === "canceled" ? "basic" : planCode;
 }
 
-interface RequireFeatureInput {
+interface FeatureContext {
   db: DrizzleDb;
-  restaurantId: string;
+  tenant: { restaurantId: string };
+}
+
+interface FeatureCheck {
   feature: PlanFeature;
   /** Required for branch-scoped features; ignored for restaurant-scoped ones. */
   branchId?: string;
@@ -22,7 +25,10 @@ interface RequireFeatureInput {
  * Lee branches.plan_code (el plan efectivo que escribe syncSubscriptionState). Las funciones
  * de restaurante se activan si alguna sucursal las tiene; el resto depende de la sucursal.
  */
-export async function requireFeature({ db, restaurantId, feature, branchId }: RequireFeatureInput): Promise<void> {
+export async function hasPlanFeature(
+  { db, tenant }: FeatureContext,
+  { feature, branchId }: FeatureCheck,
+): Promise<boolean> {
   const restaurantScoped = RESTAURANT_FEATURES.includes(feature);
 
   if (!restaurantScoped && !branchId) {
@@ -31,11 +37,15 @@ export async function requireFeature({ db, restaurantId, feature, branchId }: Re
 
   const planCodes = await listBranchPlanCodes({
     db,
-    restaurantId,
+    restaurantId: tenant.restaurantId,
     branchId: restaurantScoped ? undefined : branchId,
   });
 
-  if (!hasFeature(planCodes, feature)) {
+  return hasFeature(planCodes, feature);
+}
+
+export async function requireFeature(ctx: FeatureContext, check: FeatureCheck): Promise<void> {
+  if (!(await hasPlanFeature(ctx, check))) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Disponible en el plan Business" });
   }
 }

@@ -18,6 +18,7 @@ interface SaveDishInput {
   entityId?: string;
   statements?: BatchItem<"sqlite">[];
   preserveImage?: boolean;
+  preserveHighlights?: boolean;
 }
 
 /**
@@ -34,6 +35,7 @@ export async function saveDish({
   entityId = crypto.randomUUID(),
   statements: extraStatements = [],
   preserveImage,
+  preserveHighlights,
 }: SaveDishInput): Promise<{ id: string }> {
   // The menu router authorizes the branch or existing dish context before calling this writer.
   const categoryOk = await categoryBelongsToBranch({ db, branchId, categoryId: data.categoryId });
@@ -43,7 +45,10 @@ export async function saveDish({
   }
 
   if (dishId) {
-    await db.batch([updateDishStatement({ db, restaurantId, dishId, data, preserveImage }), ...extraStatements]);
+    await db.batch([
+      updateDishStatement({ db, restaurantId, dishId, data, preserveImage, preserveHighlights }),
+      ...extraStatements,
+    ]);
 
     return { id: dishId };
   }

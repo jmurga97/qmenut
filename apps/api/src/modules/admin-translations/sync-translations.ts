@@ -1,6 +1,7 @@
 import { getRestaurantLanguageInfo } from "@qmenut/db/repositories/restaurant-languages.repository";
 
 import { translateAll } from "./translate-all";
+import { hasPlanFeature } from "../../lib/billing/entitlement";
 import { bumpPublicContentVersionForRestaurant } from "../../lib/public-content-version";
 
 import type { TranslationContentInput } from "./translation-content";
@@ -34,7 +35,12 @@ export async function syncTranslationsAfterSave({
   try {
     if (env.DEEPL_API_KEY) {
       const info = await getRestaurantLanguageInfo({ db, restaurantId });
-      const targets = info?.languages.filter((language) => !language.isDefault) ?? [];
+      const extraLanguages = info?.languages.filter((language) => !language.isDefault) ?? [];
+      // Languages kept from Business stay stored but are not retranslated (and DeepL not billed) on Basic.
+      const targets =
+        extraLanguages.length > 0 && (await hasPlanFeature({ db, tenant: { restaurantId } }, { feature: "languages" }))
+          ? extraLanguages
+          : [];
       await Promise.all(
         targets.map(async (language) => {
           try {

@@ -1,6 +1,7 @@
 import { isBodyFontId, isHeadingFontId, QM_FONT_IDS } from "@qmenut/ui/theme/font-catalog";
 import { z } from "zod";
 
+import { requireFeature } from "../../lib/billing/entitlement";
 import { bumpPublicContentVersion, getTheme, putTheme } from "../../lib/theme/theme-worker-client";
 import { router, tenantProcedure } from "../../trpc/trpc";
 import { requirePermission } from "../admin-tenant/require-permission";
@@ -40,6 +41,7 @@ export const themeRouter = router({
   }),
   save: tenantProcedure.input(saveThemeSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "theme.write");
+    await requireFeature(ctx, { feature: "theme", branchId: input.branchId });
     const host = await resolveBranchHost({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,

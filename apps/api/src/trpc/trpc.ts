@@ -1,10 +1,13 @@
 import { resolveActiveMembership } from "@qmenut/db/repositories/restaurant-users.repository";
+import { isInternalSupportEmail } from "@qmenut/permissions";
 import { initTRPC, TRPCError } from "@trpc/server";
 
+import { hasPlanFeature, requireFeature } from "../lib/billing/entitlement";
 import { syncTranslationsAfterSave } from "../modules/admin-translations/sync-translations";
 
 import type { TrpcContext } from "./context";
 import type { RestaurantRoleCode } from "@qmenut/db/repositories/restaurant-users.repository";
+import type { PlanFeature } from "@qmenut/permissions";
 
 export interface TenantContext {
   membershipId: string;
@@ -44,6 +47,15 @@ export const tenantProcedure = protectedProcedure.use(async ({ ctx, next, path, 
     throw new TRPCError({ code: "FORBIDDEN", message: "No hay ninguna membresía activa en un restaurante" });
   }
 
+  // Basic is owner-only: other members keep their membership but lose access until the restaurant upgrades.
+  if (
+    membership.roleCode !== "owner" &&
+    !isInternalSupportEmail(ctx.session.user.email) &&
+    !(await hasPlanFeature({ db: ctx.db, tenant: membership }, { feature: "users" }))
+  ) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "El restaurante está en el plan Básico" });
+  }
+
   const tenant: TenantContext = {
     membershipId: membership.id,
     restaurantId: membership.restaurantId,
@@ -61,3 +73,11 @@ export const tenantProcedure = protectedProcedure.use(async ({ ctx, next, path, 
   }
   return result;
 });
+
+/** Tenant procedure for a restaurant-wide plan feature (see RESTAURANT_FEATURES). */
+export function featureProcedure(feature: PlanFeature) {
+  return tenantProcedure.use(async ({ ctx, next }) => {
+    await requireFeature(ctx, { feature });
+    return next();
+  });
+}

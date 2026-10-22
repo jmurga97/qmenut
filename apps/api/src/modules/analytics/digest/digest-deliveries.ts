@@ -64,6 +64,10 @@ export async function createDeliveriesForOwners({
     FROM restaurant_users ru
     JOIN restaurants r ON r.id = ru.restaurant_id
     WHERE ru.role_code = 'owner' AND ru.is_active = 1 AND r.deleted_at IS NULL
+      AND EXISTS (
+        SELECT 1 FROM branches b
+        WHERE b.restaurant_id = r.id AND b.plan_code = 'business' AND b.deleted_at IS NULL
+      )
   `);
 
   let inserted = 0;

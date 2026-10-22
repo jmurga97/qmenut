@@ -7,6 +7,7 @@ import { getBranchSettings } from "./get-branch-settings";
 import { autocompleteAddresses, getPlaceLocation } from "./google-places-autocomplete.service";
 import { searchGooglePlaces } from "./google-places.service";
 import { saveBranchSettings } from "./save-branch-settings";
+import { requireFeature } from "../../lib/billing/entitlement";
 import {
   bumpPublicContentVersionForBranch,
   bumpPublicContentVersionForRestaurant,
@@ -119,6 +120,7 @@ export const adminBranchesRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
+    await requireFeature(ctx, { feature: "contact.googleReviews", branchId: input.branchId });
     const throttle = await ctx.env.GEOCODING_LIMITER.limit({ key: ctx.tenant.membershipId });
     if (!throttle.success) {
       throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Demasiadas búsquedas, espera un momento" });
@@ -153,6 +155,8 @@ export const adminBranchesRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
     });
+    // Turning reviews off stays allowed after a downgrade.
+    if (input.enabled) await requireFeature(ctx, { feature: "contact.googleReviews", branchId: input.branchId });
     const changed = branch.googlePlaceId !== input.placeId || branch.googleReviewsEnabled !== input.enabled;
     if (!changed) return { id: input.branchId };
 
@@ -179,6 +183,13 @@ export const adminBranchesRouter = router({
       branchId: input.branchId,
     });
     const existingPhotos = await listBranchPhotos({ db: ctx.db, branchId: input.branchId });
+    const photoCount = input.imageChanges
+      ? (input.imageChanges.gallery?.length ?? existingPhotos.length)
+      : input.photos.length;
+    // Basic keeps only the cover photo: a gallery kept from Business may shrink but not grow.
+    if (photoCount > Math.max(1, existingPhotos.length)) {
+      await requireFeature(ctx, { feature: "contact.gallery", branchId: input.branchId });
+    }
     return imageSaveOperation({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,

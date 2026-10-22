@@ -16,7 +16,7 @@ import { getLanguageCatalogEntry, LANGUAGE_CATALOG } from "./language-catalog";
 import { translateAll } from "./translate-all";
 import { getTranslationContent, languageTexts, translationKey } from "./translation-content";
 import { bumpPublicContentVersionForRestaurant } from "../../lib/public-content-version";
-import { router, tenantProcedure } from "../../trpc/trpc";
+import { featureProcedure, router, tenantProcedure } from "../../trpc/trpc";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 import { requirePermission } from "../admin-tenant/require-permission";
 import { sanitizeDescription } from "../public-menu/sanitize-description";
@@ -90,6 +90,8 @@ async function assertTranslatableLanguage({
   }
 }
 
+const languagesProcedure = featureProcedure("languages");
+
 const languagesRouter = router({
   catalog: tenantProcedure.query(() =>
     LANGUAGE_CATALOG.map((entry) => ({
@@ -98,7 +100,7 @@ const languagesRouter = router({
       translatable: Boolean(entry.deeplTarget),
     })),
   ),
-  list: tenantProcedure.query(async ({ ctx }) => {
+  list: languagesProcedure.query(async ({ ctx }) => {
     const info = await getRestaurantLanguageInfo({ db: ctx.db, restaurantId: ctx.tenant.restaurantId });
     const content = await getTranslationContent({ db: ctx.db, env: ctx.env, restaurantId: ctx.tenant.restaurantId });
     return {
@@ -110,7 +112,7 @@ const languagesRouter = router({
       }),
     };
   }),
-  add: tenantProcedure.input(addLanguageInputSchema).mutation(async ({ ctx, input }) => {
+  add: languagesProcedure.input(addLanguageInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "languages.write");
     await assertTranslatableLanguage({
       db: ctx.db,
@@ -147,7 +149,7 @@ const languagesRouter = router({
 
     return { added: true as const, preparationError };
   }),
-  remove: tenantProcedure.input(removeLanguageInputSchema).mutation(async ({ ctx, input }) => {
+  remove: languagesProcedure.input(removeLanguageInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "languages.write");
     await assertTranslatableLanguage({
       db: ctx.db,
@@ -179,7 +181,7 @@ const languagesRouter = router({
 });
 
 const translationsRouter = router({
-  list: tenantProcedure.input(translationListSchema).query(async ({ ctx, input }) => {
+  list: languagesProcedure.input(translationListSchema).query(async ({ ctx, input }) => {
     await assertBranchAccess({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, branchId: input.branchId });
     await assertTranslatableLanguage({
       db: ctx.db,
@@ -197,7 +199,7 @@ const translationsRouter = router({
       input.languageCode,
     );
   }),
-  save: tenantProcedure.input(translationSaveSchema).mutation(async ({ ctx, input }) => {
+  save: languagesProcedure.input(translationSaveSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "languages.write");
     await assertBranchAccess({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, branchId: input.branchId });
     await assertTranslatableLanguage({
@@ -239,12 +241,12 @@ const translationsRouter = router({
     return { saved: rows.length };
   }),
   // Listed in SOURCE_MUTATIONS: the sync fills an unlocked text and bumps the public content version.
-  setLock: tenantProcedure.input(translationLockSchema).mutation(async ({ ctx, input }) => {
+  setLock: languagesProcedure.input(translationLockSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "languages.write");
     await setTranslationLock({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, ...input });
     return input;
   }),
-  translateAll: tenantProcedure.input(translateAllInputSchema).mutation(async ({ ctx, input }) => {
+  translateAll: languagesProcedure.input(translateAllInputSchema).mutation(async ({ ctx, input }) => {
     requirePermission(ctx.tenant, "languages.write");
     await assertTranslatableLanguage({
       db: ctx.db,

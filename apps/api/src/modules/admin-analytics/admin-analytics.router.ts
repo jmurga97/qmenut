@@ -1,11 +1,13 @@
 import { analyticsSnapshotInputSchema } from "./admin-analytics-input.schema";
 import { resolveAnalyticsPeriod } from "./analytics-period";
-import { router, tenantProcedure } from "../../trpc/trpc";
+import { featureProcedure, router } from "../../trpc/trpc";
 import { requirePermission } from "../admin-tenant/require-permission";
 import { getRestaurantAnalyticsSnapshot } from "../analytics/get-restaurant-analytics-snapshot";
 
+const analyticsProcedure = featureProcedure("analytics");
+
 export const adminAnalyticsRouter = router({
-  snapshot: tenantProcedure.input(analyticsSnapshotInputSchema).query(({ ctx, input }) => {
+  snapshot: analyticsProcedure.input(analyticsSnapshotInputSchema).query(({ ctx, input }) => {
     requirePermission(ctx.tenant, "analytics.read");
 
     const bounds = resolveAnalyticsPeriod({ period: input.period });

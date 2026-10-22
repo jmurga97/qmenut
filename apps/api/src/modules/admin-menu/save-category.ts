@@ -35,6 +35,7 @@ interface UpdateCategoryInput {
   data: CategoryWriteData;
   statements?: BatchItem<"sqlite">[];
   preserveImage?: boolean;
+  preserveSchedule?: boolean;
 }
 
 export async function updateMenuCategory({
@@ -44,8 +45,12 @@ export async function updateMenuCategory({
   data,
   statements: extraStatements = [],
   preserveImage,
+  preserveSchedule,
 }: UpdateCategoryInput): Promise<{ id: string }> {
-  await db.batch([updateCategoryStatement({ db, restaurantId, categoryId, data, preserveImage }), ...extraStatements]);
+  await db.batch([
+    updateCategoryStatement({ db, restaurantId, categoryId, data, preserveImage, preserveSchedule }),
+    ...extraStatements,
+  ]);
 
   return { id: categoryId };
 }
