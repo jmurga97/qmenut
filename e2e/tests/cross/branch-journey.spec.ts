@@ -55,6 +55,7 @@ test("copies QR destinations and downloads valid PNG and SVG files", async ({ pa
   await context.grantPermissions(["clipboard-read", "clipboard-write"], { origin: "http://localhost:5174" });
   await page.goto("/qr");
   await selectMingOption(page, "Sucursal activa", "Mesón Herencia");
+  await page.getByText("Descargar el QR para otro diseño", { exact: true }).click();
   for (const target of ["Carta", "Fidelización"]) {
     await selectMingOption(page, "Destino del QR", target);
     await page.getByRole("button", { name: "Copiar URL" }).click();

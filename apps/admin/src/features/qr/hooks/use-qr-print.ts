@@ -1,29 +1,47 @@
+import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
+
 import { useLogoState, usePrintFonts, useQrSvg } from "~/shared/hooks/use-print-assets";
 import { usePrintDocument } from "~/shared/hooks/use-print-document";
 
-import type { PrintLayout } from "../constants";
+import type { QrPrintStyle } from "../constants";
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
+import type { QrTarget } from "~/shared/services/qr";
 
 export function useQrPrint({
-  url,
+  urls,
+  targets,
   logoUrl,
   theme,
-  layout,
+  style,
+  pageSize,
 }: {
-  url: string | null;
+  urls: Record<QrTarget, string | null>;
+  targets: QrTarget[];
   logoUrl: string | null;
-  theme: QmTenantThemeConfig;
-  layout: PrintLayout;
+  theme: QmTenantThemeConfig | null;
+  style: QrPrintStyle;
+  pageSize: string;
 }) {
-  const { svg: qrSvg } = useQrSvg(url);
-  const logoState = useLogoState(logoUrl);
-  const fontState = usePrintFonts(theme);
-  const printReady = Boolean(qrSvg) && logoState !== "loading" && fontState === "ready";
+  const codes = {
+    menu: useQrSvg(urls.menu),
+    reviews: useQrSvg(urls.reviews),
+    loyalty: useQrSvg(urls.loyalty),
+  };
+  const branded = style !== "plain";
+  const logoState = useLogoState(branded ? logoUrl : null);
+  const fontState = usePrintFonts(theme ?? resolveTenantThemeConfig(null), branded && Boolean(theme));
+  const qrError = targets.some((target) => codes[target].error);
+  const printReady =
+    targets.length > 0 &&
+    targets.every((target) => Boolean(codes[target].svg)) &&
+    (!branded || Boolean(theme)) &&
+    logoState !== "loading" &&
+    fontState === "ready";
   const { print, printableRef } = usePrintDocument({
     ready: printReady,
-    pageSize: layout.startsWith("poster") ? "210mm 297mm" : "105mm 148mm",
+    pageSize,
     outputClass: "admin-qr-print-output",
     bodyClass: "admin-qr-printing",
   });
-  return { qrSvg, logoState, fontState, printReady, print, printableRef };
+  return { codes, logoState, fontState, qrError, printReady, print, printableRef };
 }

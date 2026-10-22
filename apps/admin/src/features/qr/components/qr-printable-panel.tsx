@@ -1,94 +1,207 @@
-import { Button } from "@jmurga97/components";
-import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
-import { useState } from "react";
+import { Button, Checkbox, Field, Input, Select } from "@jmurga97/components";
+import { Link } from "@tanstack/react-router";
+import { FormProvider } from "react-hook-form";
 
 import { i18n } from "~/lib/i18n";
+import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 
-import { PRINT_LAYOUT_OPTIONS, QR_TARGET_OPTIONS } from "../constants";
-import { useQrPrint } from "../hooks/use-qr-print";
+import { QrDownloadForm } from "./qr-download-form";
+import { QrPrintDocument } from "./qr-print-document";
+import { QR_PAPER_SIZES, QR_STYLE_OPTIONS, QR_TABLE_SIZES, QR_TARGET_OPTIONS } from "../constants";
+import { useQrPrintController } from "../hooks/use-qr-print-controller";
 
-import type { PrintLayout } from "../constants";
+import type { QrPrintBranch } from "./qr-print-document";
+import type { QrPrintMode } from "../constants";
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
-import type { QrTarget } from "~/shared/services/qr";
 
 export function QrPrintablePanel({
   branch,
-  target,
+  host,
+  mode,
   theme,
-  url,
 }: {
-  branch: { logoUrl: string | null; name: string };
-  target: QrTarget;
-  theme: QmTenantThemeConfig;
-  url: string | null;
+  branch: QrPrintBranch;
+  host: string;
+  mode: QrPrintMode;
+  theme: QmTenantThemeConfig | null;
 }) {
-  const [layout, setLayout] = useState<PrintLayout>("branded");
-  const { qrSvg, logoState, fontState, printReady, print, printableRef } = useQrPrint({
-    url,
-    logoUrl: branch.logoUrl,
-    theme,
-    layout,
-  });
-  let instruction = i18n.t("qr___Escanea para ver la carta");
-  if (target === "reviews") instruction = i18n.t("qr___Comparte tu experiencia en Google");
-  if (target === "loyalty") instruction = i18n.t("qr___Escanea para acceder a tu tarjeta");
-  const targetLabel = QR_TARGET_OPTIONS.find((option) => option.id === target)?.label;
-  const tagline = theme.tagline;
+  const state = useQrPrintController({ branch, host, mode, theme });
+  const {
+    controller,
+    style,
+    tableSize,
+    paper,
+    quantity,
+    quantityValid,
+    targets,
+    assets,
+    canPrint,
+    previewLabel,
+    status,
+  } = state;
+  const title = mode === "tables" ? i18n.t("qr___QR para las mesas") : i18n.t("qr___Folletos y carteles");
   return (
-    <section className={"admin-card admin-qr-print-section"} aria-labelledby="admin-qr-print-title">
-      <div className={"admin-qr-print-section__heading"}>
-        <div>
-          <div className="admin-kicker">{i18n.t("qr___Estilos para imprimir")}</div>
-          <h2 id="admin-qr-print-title">{i18n.t("qr___Un QR listo para tu local")}</h2>
-          <p>
-            {i18n.t(
-              "qr___Elige una composición con el tema guardado de la sucursal y abre la impresión o guarda un PDF.",
-            )}
-          </p>
-        </div>
-        <Button disabled={!printReady} onClick={() => void print()} variant={"primary"}>
-          {i18n.t("qr___Imprimir / Guardar PDF")}
-        </Button>
-      </div>
-      <div aria-label={i18n.t("qr___Estilo de impresión")} className="admin-qr-print-layouts" role={"group"}>
-        {PRINT_LAYOUT_OPTIONS.map((option) => (
-          <button
-            aria-pressed={layout === option.id}
-            className={`admin-qr-print-layout${layout === option.id ? " admin-qr-print-layout--selected" : ""}`}
-            key={option.id}
-            onClick={() => setLayout(option.id)}
-            type={"button"}
+    <FormProvider {...controller.form}>
+      <div className="admin-qr-editor">
+        <section className="admin-card admin-qr-controls" aria-labelledby={`qr-${mode}-title`}>
+          <div className="admin-qr-intro">
+            <h2 id={`qr-${mode}-title`}>{title}</h2>
+            <p>
+              {mode === "tables"
+                ? i18n.t("qr___El mismo QR, tantas veces como necesites. Imprime en A4 y recorta por las guías.")
+                : i18n.t("qr___Tu carta, las reseñas y la fidelización, juntos o por separado en una misma página.")}
+            </p>
+          </div>
+          <QrPrintFields state={state} mode={mode} googlePlaceId={branch.googlePlaceId} />
+          <Field
+            label={i18n.t("qr___Estilo")}
+            hint={
+              style === "plain"
+                ? i18n.t("qr___Sin logo ni colores. El QR se imprime negro sobre blanco.")
+                : i18n.t("qr___Usa el logo, los colores y las tipografías guardados de esta sucursal.")
+            }
           >
-            <strong>{option.label}</strong>
-            <span>{option.description}</span>
-          </button>
-        ))}
+            <Select
+              value={style}
+              onValueChange={(value) => value && state.setStyleId(value)}
+              options={[...QR_STYLE_OPTIONS]}
+            />
+          </Field>
+          {!branch.googlePlaceId && (mode === "flyer" || controller.target === "reviews") ? (
+            <p className="admin-field-hint">
+              {i18n.t("qr___Conecta la ficha de Google de esta sucursal para generar el QR de reseñas.")}{" "}
+              <Link to="/branch">{i18n.t("qr___Abrir ajustes de sucursal")}</Link>
+            </p>
+          ) : null}
+          {style !== "plain" && assets.logoState === "error" ? (
+            <p className="admin-field-hint">
+              {i18n.t("qr___No se pudo cargar el logo. Se imprimirá el nombre del local.")}
+            </p>
+          ) : null}
+          <div className="admin-qr-print-actions">
+            <p className="admin-qr-status" role="status">
+              {status}
+            </p>
+            <Button
+              disabled={!canPrint}
+              onClick={() => {
+                if (canPrint) assets.print();
+              }}
+              variant="primary"
+            >
+              {i18n.t("qr___Imprimir / Guardar PDF")}
+            </Button>
+            <p className="admin-field-hint">
+              {i18n.t("qr___Imprime a escala 100 %, sin encabezados. Para descargar, elige «Guardar como PDF».")}
+            </p>
+            {style === "colour" ? (
+              <p className="admin-field-hint">
+                {i18n.t("qr___Activa los gráficos de fondo para imprimir el color de marca.")}
+              </p>
+            ) : null}
+          </div>
+          {mode === "tables" ? <QrDownloadForm controller={controller} /> : null}
+        </section>
+        <section className="admin-qr-preview-area" aria-label={i18n.t("qr___Vista previa de impresión")}>
+          <div className="admin-qr-preview-heading">
+            <h2>{i18n.t("qr___Vista previa")}</h2>
+            <p>{previewLabel}</p>
+          </div>
+          <div ref={assets.printableRef}>
+            <QrPrintDocument
+              branch={branch}
+              codes={assets.codes}
+              logoReady={assets.logoState === "ready"}
+              mode={mode}
+              paper={paper}
+              quantity={quantityValid ? quantity : 0}
+              style={style}
+              tableSize={tableSize}
+              targets={targets}
+              theme={theme}
+            />
+          </div>
+        </section>
       </div>
-      <div
-        ref={printableRef}
-        className={`admin-qr-printable admin-qr-printable--${layout}${layout === "poster-primary" ? " admin-qr-printable--poster" : ""}`}
-        style={buildQmThemeVars(theme)}
-      >
-        <div className={"admin-qr-printable__brand"}>
-          {branch.logoUrl && logoState === "ready" ? <img alt="" src={branch.logoUrl} /> : null}
-          <span>{branch.name}</span>
-        </div>
-        <p className={"admin-qr-printable__target"}>{targetLabel}</p>
-        {qrSvg ? (
-          <div className={"admin-qr-printable__code"} dangerouslySetInnerHTML={{ __html: qrSvg }} />
-        ) : (
-          <div className={"admin-qr-printable__code admin-qr-printable__code--empty"} />
-        )}
-        <p className={"admin-qr-printable__instruction"}>{instruction}</p>
-        {tagline ? <p className={"admin-qr-printable__tagline"}>{tagline}</p> : null}
-      </div>
-      {printReady ? null : (
-        <p className="admin-field-hint">
-          {fontState === "error"
-            ? i18n.t("qr___No se pudieron cargar las tipografías. Recarga la página para volver a intentarlo.")
-            : i18n.t("qr___Preparando el QR y la identidad visual…")}
-        </p>
+    </FormProvider>
+  );
+}
+
+function QrPrintFields({
+  state,
+  mode,
+  googlePlaceId,
+}: {
+  state: ReturnType<typeof useQrPrintController>;
+  mode: QrPrintMode;
+  googlePlaceId: string | null;
+}) {
+  const {
+    sizeId,
+    setSizeId,
+    paperId,
+    setPaperId,
+    quantityInput,
+    setQuantityInput,
+    quantityValid,
+    flyerTargets,
+    setFlyerTargets,
+    paper,
+  } = state;
+  return (
+    <>
+      {mode === "tables" ? (
+        <>
+          <FormSelect label={i18n.t("qr___Destino del QR")} name="target" options={QR_TARGET_OPTIONS} />
+          <Field label={i18n.t("qr___Tamaño de cada QR")}>
+            <Select value={sizeId} onValueChange={(value) => value && setSizeId(value)} options={[...QR_TABLE_SIZES]} />
+          </Field>
+          <Field
+            label={i18n.t("qr___Cantidad de QR")}
+            invalid={!quantityValid}
+            error={quantityValid ? undefined : i18n.t("qr___Indica una cantidad entre 1 y 300.")}
+          >
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={300}
+              step={1}
+              value={quantityInput}
+              onValueChange={setQuantityInput}
+              invalid={!quantityValid}
+            />
+          </Field>
+        </>
+      ) : (
+        <>
+          <fieldset className="admin-qr-destinations">
+            <legend>{i18n.t("qr___Qué quieres incluir")}</legend>
+            {QR_TARGET_OPTIONS.map((option) => (
+              <Checkbox
+                key={option.id}
+                label={option.label}
+                checked={flyerTargets.includes(option.id)}
+                disabled={option.id === "reviews" && !googlePlaceId}
+                onCheckedChange={(checked) =>
+                  setFlyerTargets(
+                    QR_TARGET_OPTIONS.filter((candidate) =>
+                      candidate.id === option.id ? checked : flyerTargets.includes(candidate.id),
+                    ).map((candidate) => candidate.id),
+                  )
+                }
+              />
+            ))}
+          </fieldset>
+          <Field label={i18n.t("qr___Tamaño del papel")} hint={`${paper.width} × ${paper.height} mm`}>
+            <Select
+              value={paperId}
+              onValueChange={(value) => value && setPaperId(value)}
+              options={[...QR_PAPER_SIZES]}
+            />
+          </Field>
+        </>
       )}
-    </section>
+    </>
   );
 }

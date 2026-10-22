@@ -1,29 +1,22 @@
 import { Button } from "@jmurga97/components";
 import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
 
 import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
 import { getThemeQueryOptions } from "~/shared/api";
-import { CardSkeleton } from "~/shared/components/state/loading-state";
 
-import { QrDownloadForm } from "./qr-download-form";
 import { QrPrintablePanel } from "./qr-printable-panel";
-import { useQrController } from "../hooks/use-qr-controller";
 
+import type { QrPrintMode } from "../constants";
 import type { ReactNode } from "react";
 
-export function QrPanel({ branchId, host }: { branchId: string; host: string }) {
+export function QrPanel({ branchId, host, mode }: { branchId: string; host: string; mode: QrPrintMode }) {
   const { data: branch } = useSuspenseQuery(trpc.admin.branches.get.queryOptions({ branchId }));
   const themeQuery = useQuery({
     ...getThemeQueryOptions({ branchId, trpc }),
     retry: false,
   });
-  const controller = useQrController({ domain: host, googlePlaceId: branch.googlePlaceId });
-  const [showPrintStyles, setShowPrintStyles] = useState(false);
-
-  const target = controller.target;
   const theme = themeQuery.data ? resolveTenantThemeConfig(themeQuery.data) : null;
 
   return (
@@ -35,17 +28,7 @@ export function QrPanel({ branchId, host }: { branchId: string; host: string }) 
           </Button>
         </QrThemeState>
       ) : null}
-      <QrDownloadForm
-        controller={controller}
-        googlePlaceId={branch.googlePlaceId}
-        showPrintStyles={showPrintStyles}
-        onTogglePrintStyles={() => setShowPrintStyles((visible) => !visible)}
-      />
-
-      {theme && showPrintStyles ? (
-        <QrPrintablePanel branch={branch} target={target} theme={theme} url={controller.url} />
-      ) : null}
-      {themeQuery.isPending && showPrintStyles ? <CardSkeleton rows={4} /> : null}
+      <QrPrintablePanel branch={branch} host={host} mode={mode} theme={theme} />
     </div>
   );
 }

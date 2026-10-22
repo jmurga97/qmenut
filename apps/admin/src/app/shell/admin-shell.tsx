@@ -59,7 +59,7 @@ const SECTIONS = [
     label: i18n.t("shell___Idiomas"),
     path: "/languages",
   },
-  { id: "qr", label: i18n.t("shell___Código QR"), path: "/qr" },
+  { id: "qr", label: i18n.t("shell___Material para imprimir"), path: "/qr" },
   { id: "branch", label: i18n.t("shell___Sucursal"), path: "/branch" },
   {
     id: "users",

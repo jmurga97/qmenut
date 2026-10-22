@@ -72,7 +72,7 @@ export function useLogoState(logoUrl: string | null) {
   return result.status;
 }
 
-export function usePrintFonts(theme: QmTenantThemeConfig) {
+export function usePrintFonts(theme: QmTenantThemeConfig, enabled = true) {
   const vars = buildQmThemeVars(theme);
   const requests = [
     ...new Set([
@@ -86,6 +86,7 @@ export function usePrintFonts(theme: QmTenantThemeConfig) {
   const key = JSON.stringify(requests);
   const [result, setResult] = useState<{ key: string; status: "ready" | "error" } | null>(null);
   useEffect(() => {
+    if (!enabled) return;
     let active = true;
     void Promise.all((JSON.parse(key) as string[]).map((font) => document.fonts.load(font)))
       .then((faces) => {
@@ -101,6 +102,7 @@ export function usePrintFonts(theme: QmTenantThemeConfig) {
     return () => {
       active = false;
     };
-  }, [key]);
+  }, [enabled, key]);
+  if (!enabled) return "ready";
   return result?.key === key ? result.status : "loading";
 }

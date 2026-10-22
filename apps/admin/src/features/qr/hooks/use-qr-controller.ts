@@ -1,12 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { i18n } from "~/lib/i18n";
 import { notifyError } from "~/lib/notifications";
-import { buildQrUrl, renderQrPreview } from "~/shared/services/qr";
+import { buildQrUrl } from "~/shared/services/qr";
 
 import { buildQrFileBase, downloadQr } from "../services";
 
@@ -25,7 +24,6 @@ async function runAction(action: () => Promise<void>): Promise<void> {
 }
 
 export function useQrController({ domain, googlePlaceId }: { domain: string; googlePlaceId: string | null }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const form = useForm<QrFormValues>({
     resolver: zodResolver(qrFormSchema),
     defaultValues: { size: "1024", target: "menu" },
@@ -35,14 +33,6 @@ export function useQrController({ domain, googlePlaceId }: { domain: string; goo
   const canGenerate = target !== "reviews" || Boolean(googlePlaceId);
   const url = canGenerate ? buildQrUrl({ domain, googlePlaceId, target }) : null;
   const fileBase = buildQrFileBase({ domain, target });
-  useEffect(() => {
-    if (!canvasRef.current) return;
-    if (!url) {
-      canvasRef.current.getContext("2d")?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      return;
-    }
-    void renderQrPreview(canvasRef.current, url).catch(notifyError);
-  }, [url]);
   const copy = () =>
     runAction(async () => {
       if (!url) return;
@@ -54,5 +44,5 @@ export function useQrController({ domain, googlePlaceId }: { domain: string; goo
       if (!url) return;
       await downloadQr({ fileBase, format, size, url });
     });
-  return { canGenerate, canvasRef, copy, download, form, target, url };
+  return { canGenerate, copy, download, form, target, url };
 }
