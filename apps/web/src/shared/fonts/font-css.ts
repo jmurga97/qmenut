@@ -3,6 +3,8 @@ import barlowCss from "@qmenut/ui/fonts/barlow.css?url";
 import bebasNeueCss from "@qmenut/ui/fonts/bebas-neue.css?url";
 import cormorantGaramondCss from "@qmenut/ui/fonts/cormorant-garamond.css?url";
 import dmSansCss from "@qmenut/ui/fonts/dm-sans.css?url";
+import geistMonoCss from "@qmenut/ui/fonts/geist-mono.css?url";
+import geistCss from "@qmenut/ui/fonts/geist.css?url";
 import jostCss from "@qmenut/ui/fonts/jost.css?url";
 import nunitoSansCss from "@qmenut/ui/fonts/nunito-sans.css?url";
 import playfairDisplayCss from "@qmenut/ui/fonts/playfair-display.css?url";
@@ -29,19 +31,26 @@ export const FONT_CSS_URLS: Record<QmFontId, string> = {
   barlow: barlowCss,
   "nunito-sans": nunitoSansCss,
   "dm-sans": dmSansCss,
+  geist: geistCss,
+  "geist-mono": geistMonoCss,
 };
 
-const FONT_ASSET_URLS = import.meta.glob<string>("../../../../../packages/ui/src/fonts/*-latin-*-normal.woff2", {
-  eager: true,
-  import: "default",
-  query: "?url",
-});
+const FONT_DIR = "../../../../../packages/ui/src/fonts";
+const FONT_ASSET_URLS = import.meta.glob<string>(
+  [
+    "../../../../../packages/ui/src/fonts/*-latin-*-normal.woff2",
+    "../../../../../packages/ui/src/fonts/*-variable.woff2",
+  ],
+  { eager: true, import: "default", query: "?url" },
+);
 
 type FontPreloadUrls = Record<QmFontId, Record<number, string>>;
 
 function getFontAssetUrl(fontId: QmFontId, weight: number): string {
-  const key = `../../../../../packages/ui/src/fonts/${fontId}-latin-${weight}-normal.woff2`;
-  const url = FONT_ASSET_URLS[key];
+  // Static families ship one file per weight; variable families one file for every weight.
+  const url =
+    FONT_ASSET_URLS[`${FONT_DIR}/${fontId}-latin-${weight}-normal.woff2`] ??
+    FONT_ASSET_URLS[`${FONT_DIR}/${fontId}-variable.woff2`];
 
   if (!url) {
     throw new Error(`Missing vendored latin font asset for ${fontId} weight ${weight}`);
@@ -63,12 +72,13 @@ export interface TenantFontTheme {
   bodyFont?: QmFontId;
 }
 
-export function resolveTenantFontIds(theme: TenantFontTheme): { heading: QmFontId; body: QmFontId } {
+export function resolveTenantFontIds(theme: TenantFontTheme): { heading: QmFontId; body: QmFontId; mono?: QmFontId } {
   const preset = TEMPLATES[theme.template];
 
   return {
     heading: theme.headingFont ?? preset.headingFontId,
     body: theme.bodyFont ?? preset.bodyFontId,
+    mono: preset.monoFontId,
   };
 }
 

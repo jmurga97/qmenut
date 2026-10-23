@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import "~/shared/styles/dev.css";
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 
-const TEMPLATE_ORDER: QmTemplateName[] = ["fine", "her", "fast", "cafe", "tapas"];
+const TEMPLATE_ORDER: QmTemplateName[] = ["fine", "her", "fast", "cafe", "tapas", "qmenut"];
 
 export function DevTemplateSwitcher() {
   const devTemplate = useRouteContext({ from: "/{-$locale}", select: (context) => context.devTemplate });

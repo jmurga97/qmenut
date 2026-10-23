@@ -83,7 +83,7 @@
   display: flex;
   align-items: center;
   padding: 5px 10px;
-  border-radius: 20px;
+  border-radius: var(--qm-hero-chip-radius, 20px);
   /* No backdrop-filter: blurring a moving backdrop every frame is the hero's single biggest paint
      cost. A slightly more opaque fill keeps the chip legible over the photo without the blur. */
   background: rgba(255, 255, 255, 0.28);

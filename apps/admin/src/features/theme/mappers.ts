@@ -16,8 +16,10 @@ export function toThemeFormValues(theme: ThemeConfig): ThemeFormValues {
   });
   if (parsed.success) return parsed.data;
   // Fall back to the tenant's own template so the photo flags match its preset (a photo-less
-  // template must not default to both photo checkboxes checked).
-  return defaultThemeFormValues(theme?.template ?? DEFAULT_TEMPLATE);
+  // template must not default to both photo checkboxes checked). `qmenut` is never editable,
+  // so a branch upgrading from it starts from the default template.
+  const template = themeFormSchema.shape.template.safeParse(theme?.template);
+  return defaultThemeFormValues(template.success ? template.data : DEFAULT_TEMPLATE);
 }
 type ThemeMapperInput = {
   branchId: string;
@@ -31,7 +33,9 @@ export function toThemeInput({ branchId, current, values }: ThemeMapperInput) {
   };
 }
 
-export function toThemeDraft({ values }: Omit<ThemeMapperInput, "branchId">): QmTenantThemeEditableConfig {
+export function toThemeDraft({
+  values,
+}: Omit<ThemeMapperInput, "branchId">): QmTenantThemeEditableConfig & Pick<ThemeFormValues, "template"> {
   const { bodyFont, headingFont, ...editableValues } = values;
 
   return {

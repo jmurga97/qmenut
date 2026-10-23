@@ -2,7 +2,7 @@ import type { QmFontId } from "./font-catalog";
 import type { QmThemeTokens } from "./tokens";
 
 /**
- * The 5 QMenut templates — everything a tenant does NOT choose. A tenant only supplies a
+ * The QMenut templates — everything a tenant does NOT choose. A tenant only supplies a
  * template name plus `primary`/`secondary` colors (see `theme/derive.ts`); every other
  * visual decision (typography, geometry, photo layout, badge shape, nav chrome) comes from
  * here.
@@ -10,11 +10,11 @@ import type { QmThemeTokens } from "./tokens";
  * Values began from the reference `qmenut-theme.js` engine and are now tuned as product
  * defaults for the mobile-first client menu view.
  */
-export type QmTemplateName = "fine" | "her" | "fast" | "cafe" | "tapas";
+export type QmTemplateName = "fine" | "her" | "fast" | "cafe" | "tapas" | "qmenut";
 
 export type QmPhotoMode = "none" | "thumb" | "hero" | "heroxl";
 export type QmBadgeShape = "outline" | "block" | "pill";
-export type QmNavStyle = "bar" | "floating" | "solid";
+export type QmNavStyle = "bar" | "floating" | "solid" | "signal";
 
 /** Percentages mixed via `color-mix(in oklab, ...)` when deriving the color group. */
 export interface QmToneMix {
@@ -46,6 +46,7 @@ export type QmTemplateLayoutDefaults = Pick<
   | "--qm-header-pad-top"
   | "--qm-header-pad-x"
   | "--qm-header-title-size"
+  | "--qm-hero-chip-radius"
   | "--qm-hero-logo-radius"
   | "--qm-hero-name-size"
   | "--qm-hero-scrim"
@@ -123,6 +124,8 @@ export interface QmTemplatePreset {
   /** Catalog ids used to load the preset's heading and body faces. */
   headingFontId: QmFontId;
   bodyFontId: QmFontId;
+  /** Face for prices, numerals and eyebrows. Omitted = they use the body/heading faces. */
+  monoFontId?: QmFontId;
   headingWeight: number;
   dishWeight: number;
   /** Weight of the section numeral ("01"), which is set in the template's heading face. */
@@ -146,6 +149,8 @@ export interface QmTemplatePreset {
   saturationCap: number | null;
   /** Neutral background base the tenant's primary is mixed into for `--qm-bg`. */
   paper: string;
+  /** Colors that replace the tenant's own, for a template with a fixed look. */
+  fixedColors?: { primary: string; secondary: string };
   cardShadow?: string;
   rowPad?: number;
   tone: QmToneMix;
@@ -718,5 +723,125 @@ export const TEMPLATES: Record<QmTemplateName, QmTemplatePreset> = {
     paper: "#EFE5D4",
     rowPad: 10,
     tone: { bgMix: 8, inkMix: 30, hairMix: 20, tintMix: 20, mutedMix: 46 },
+  },
+  qmenut: {
+    // Basic plan's fixed look: the Ming design system, light palette only (ink on paper,
+    // hairlines, no shadows or gradients). Never offered in the admin template picker.
+    label: "QMenut",
+    layout: {
+      "--qm-shell-pad-x": "16px",
+      "--qm-content-top": "16px",
+      "--qm-content-bottom": "32px",
+      "--qm-section-gap": "40px",
+      "--qm-list-gap": "16px",
+      "--qm-header-pad-x": "16px",
+      "--qm-header-pad-top": "24px",
+      "--qm-header-title-size": "24px",
+      "--qm-hero-scrim": "rgba(0,0,0,.48)",
+      "--qm-hero-name-size": "24px",
+      "--qm-hero-chip-radius": "2px",
+      "--qm-hero-logo-radius": "2px",
+      "--qm-section-bg": "transparent",
+      "--qm-section-ink": "var(--qm-ink)",
+      "--qm-section-muted": "var(--qm-muted)",
+      "--qm-section-pad": "0 0 8px",
+      "--qm-section-radius": "0px",
+      "--qm-section-border": "none",
+      "--qm-section-divider": "var(--qm-rule) solid var(--qm-hairline)",
+      "--qm-section-rail": "none",
+      "--qm-secondary-heading-bg": "transparent",
+      "--qm-secondary-heading-border": "none",
+      "--qm-secondary-heading-color": "var(--qm-muted)",
+      "--qm-secondary-heading-icon-bg": "transparent",
+      "--qm-secondary-heading-icon-color": "var(--qm-ink)",
+      "--qm-secondary-heading-icon-display": "none",
+      "--qm-secondary-heading-icon-radius": "0px",
+      "--qm-secondary-heading-padding": "4px 0",
+      "--qm-secondary-heading-radius": "0px",
+      "--qm-secondary-heading-rail": "none",
+      "--qm-row-bg": "transparent",
+      "--qm-row-border": "1px solid var(--qm-hairline)",
+      "--qm-row-radius": "0px",
+      "--qm-row-pad-x": "0px",
+      "--qm-row-shadow": "none",
+      "--qm-row-stack-gap": "0px",
+      "--qm-row-name-size": "15px",
+      "--qm-row-price-size": "15px",
+      "--qm-row-photo-radius": "2px",
+      "--qm-featured-bg": "var(--qm-card)",
+      "--qm-featured-border": "1px solid var(--qm-hairline)",
+      "--qm-featured-cap": "none",
+      "--qm-featured-radius": "4px",
+      "--qm-featured-body-pad": "16px",
+      "--qm-featured-name-size": "20px",
+      "--qm-promo-discount-width": "64px",
+      "--qm-promo-body-pad": "16px",
+      "--qm-surface-radius": "4px",
+      "--qm-surface-shadow": "none",
+      "--qm-sheet-radius": "4px",
+      "--qm-sheet-photo-radius": "2px",
+      "--qm-sheet-min": "0px",
+      "--qm-modal-pad-x": "24px",
+      "--qm-modal-chrome-height": "56px",
+      "--qm-modal-title-size": "1.5rem",
+      "--qm-modal-title-leading": "1.2",
+      "--qm-modal-title-tracking": "-0.02em",
+      "--qm-modal-price-size": "1.25rem",
+      "--qm-modal-media-inset": "16px",
+      "--qm-modal-photo-ratio": "4 / 3",
+      "--qm-modal-photo-border": "1px solid var(--qm-hairline)",
+      "--qm-modal-photo-cap": "none",
+      "--qm-modal-lead-bg": "transparent",
+      "--qm-modal-lead-border": "1px solid var(--qm-hairline)",
+      "--qm-modal-lead-rail": "none",
+      "--qm-modal-section-border": "1px solid var(--qm-hairline)",
+      "--qm-modal-handle-overhang": "0px",
+      "--qm-modal-handle-width": "64px",
+      "--qm-modal-handle-height": "32px",
+      "--qm-modal-handle-bg": "transparent",
+      "--qm-modal-handle-border": "none",
+      "--qm-modal-handle-radius": "0px",
+      "--qm-modal-close-bg": "var(--qm-card)",
+      "--qm-modal-close-border": "1px solid var(--qm-muted)",
+      "--qm-modal-close-color": "var(--qm-ink)",
+      "--qm-modal-close-radius": "2px",
+      "--qm-category-radius": "2px",
+      "--qm-category-bg": "var(--qm-card)",
+      "--qm-category-border": "1px solid var(--qm-hairline)",
+      "--qm-category-gap": "8px",
+      "--qm-category-separator": "none",
+      "--qm-category-active-bg": "var(--qm-ink)",
+      "--qm-category-active-color": "var(--qm-on-primary)",
+      "--qm-category-active-border": "1px solid transparent",
+      "--qm-map-link-icon-display": "inline-flex",
+      "--qm-nav-icon-display": "none",
+    },
+    heading: "'Geist',sans-serif",
+    body: "'Geist',sans-serif",
+    headingFontId: "geist",
+    bodyFontId: "geist",
+    monoFontId: "geist-mono",
+    headingWeight: 500,
+    dishWeight: 500,
+    numWeight: 400,
+    priceWeight: 500,
+    fontScale: 1,
+    tracking: 0,
+    eyebrowCase: "uppercase",
+    eyebrowSpacing: 0.9,
+    radius: 2,
+    borderWidth: 1,
+    rule: 1,
+    photoMode: "hero",
+    badgeShape: "outline",
+    navStyle: "signal",
+    numbers: true,
+    saturationCap: 0,
+    paper: "#F5F5F5",
+    // Ming light ink. With inkMix 100 and bgMix 0, --qm-ink and --qm-bg land exactly on Ming's
+    // foreground/background; hairline and tint mixes approximate its border and accent greys.
+    fixedColors: { primary: "#1A1A1A", secondary: "#1A1A1A" },
+    rowPad: 12,
+    tone: { bgMix: 0, inkMix: 100, hairMix: 8, tintMix: 11, mutedMix: 61 },
   },
 };

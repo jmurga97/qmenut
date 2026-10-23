@@ -33,9 +33,9 @@ export function PublicPageShell({ children, template, tenant, theme }: PublicPag
 
   const fontIds = useMemo(() => {
     const activeTheme = template === theme.template ? theme : { template };
-    const { heading, body } = resolveTenantFontIds(activeTheme);
+    const { heading, body, mono } = resolveTenantFontIds(activeTheme);
 
-    return [...new Set([heading, body])] as QmFontId[];
+    return [...new Set([heading, body, mono ?? body])] as QmFontId[];
   }, [template, theme]);
 
   useEffect(() => {

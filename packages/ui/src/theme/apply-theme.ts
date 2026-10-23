@@ -218,6 +218,22 @@ function buildNavTokens({ navStyle, colors, rule }: BuildNavTokensArgs): Record<
       "--qm-nav-active-pad": "6px 12px",
       "--qm-nav-muted": mix({ from: colors.onPrimary, percent: 72, to: colors.primary }),
     },
+    // Ming: hairline bar, ink label and a red signal dot on the current item.
+    signal: {
+      "--qm-nav-m": "0px",
+      "--qm-nav-radius": "0px",
+      "--qm-nav-bg": colors.card,
+      "--qm-nav-bt": `1px solid ${colors.hairline}`,
+      "--qm-nav-shadow": "none",
+      "--qm-nav-backdrop": "none",
+      "--qm-nav-active-bg": "transparent",
+      "--qm-nav-active-color": colors.ink,
+      "--qm-nav-active-bd": "2px solid transparent",
+      "--qm-nav-active-radius": "0px",
+      "--qm-nav-active-pad": "6px 10px",
+      "--qm-nav-muted": colors.muted,
+      "--qm-nav-dot": "inline-block",
+    },
   };
   return navByStyle[navStyle];
 }
@@ -230,6 +246,7 @@ function resolveTemplate(input: QmThemeInput): QmTemplatePreset {
     layout: { ...template.layout, ...input.layout },
     headingFontId: template.headingFontId,
     bodyFontId: template.bodyFontId,
+    monoFontId: template.monoFontId,
     // Catalog font pick wins, then any raw `heading`/`body` override, then the template preset.
     heading: getFontStack(input.headingFont) ?? input.heading ?? template.heading,
     body: getFontStack(input.bodyFont) ?? input.body ?? template.body,
@@ -289,6 +306,7 @@ function buildTextScaleTokens(fontScale: number): Record<string, string> {
 export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
   const resolved = resolveTemplate(input);
   const colors = deriveQmTheme(input);
+  const mono = getFontStack(resolved.monoFontId);
   const hasDivider = resolved.photoMode === "none" || resolved.photoMode === "thumb";
   const showPresetPhotos = resolved.photoMode !== "none";
   const showMenuPhotos = input.showMenuPhotos ?? showPresetPhotos;
@@ -331,6 +349,7 @@ export function buildQmThemeVars(input: QmThemeInput): Record<string, string> {
     "--qm-eyebrow-tt": resolved.eyebrowCase,
     "--qm-eyebrow-ls": `${resolved.eyebrowSpacing}px`,
     "--qm-dish-tt": resolved.dishCase ?? "none",
+    ...(mono ? { "--qm-mono": mono } : {}),
     ...buildTextScaleTokens(resolved.fontScale),
     ...buildLayoutTokens({ colors, layout: resolved.layout }),
 

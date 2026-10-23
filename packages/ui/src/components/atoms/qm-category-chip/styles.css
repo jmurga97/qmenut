@@ -14,7 +14,7 @@ button {
   border-radius: var(--qm-category-radius, 0px);
   background: var(--qm-category-bg, var(--qm-card, #fff));
   color: var(--qm-muted, #6d746f);
-  font-family: var(--qm-body, sans-serif);
+  font-family: var(--qm-mono, var(--qm-body, sans-serif));
   font-size: var(--qm-text-xs, 11px);
   font-weight: 800;
   letter-spacing: var(--qm-eyebrow-ls, 0.5px);

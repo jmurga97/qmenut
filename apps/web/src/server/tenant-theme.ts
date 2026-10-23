@@ -1,4 +1,4 @@
-import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
+import { resolvePublicTenantTheme, resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import { createServerFn } from "@tanstack/react-start";
 
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
@@ -25,7 +25,7 @@ export async function readTenantTheme(
 ): Promise<QmTenantThemeConfig> {
   const raw = await readTenantThemeFromKv(host);
 
-  return resolveTenantThemeConfig(raw, fallbackTemplate);
+  return resolvePublicTenantTheme(resolveTenantThemeConfig(raw, fallbackTemplate));
 }
 
 export const getTenantContext = createServerFn({ method: "GET" }).handler(async (): Promise<TenantContext> => {
@@ -37,12 +37,12 @@ export const getTenantContext = createServerFn({ method: "GET" }).handler(async 
   const theme = await readTenantTheme(host, fallbackTemplate);
   const { FONT_CSS_TEXT } = await import("~/shared/fonts/font-css-server");
   const { resolveTenantFontIds } = await import("~/shared/fonts/font-css");
-  const { heading, body } = resolveTenantFontIds(theme);
+  const { heading, body, mono } = resolveTenantFontIds(theme);
 
   return {
     host,
     theme,
-    fontStyles: [...new Set([heading, body])].map((fontId) => ({
+    fontStyles: [...new Set([heading, body, mono ?? body])].map((fontId) => ({
       children: FONT_CSS_TEXT[fontId],
       id: `qm-font-${fontId}`,
       type: "text/css" as const,

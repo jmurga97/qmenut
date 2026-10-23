@@ -12,6 +12,8 @@ import "@qmenut/ui/fonts/barlow.css";
 import "@qmenut/ui/fonts/bebas-neue.css";
 import "@qmenut/ui/fonts/cormorant-garamond.css";
 import "@qmenut/ui/fonts/dm-sans.css";
+import "@qmenut/ui/fonts/geist-mono.css";
+import "@qmenut/ui/fonts/geist.css";
 import "@qmenut/ui/fonts/jost.css";
 import "@qmenut/ui/fonts/nunito-sans.css";
 import "@qmenut/ui/fonts/playfair-display.css";

@@ -22,7 +22,11 @@ export interface QmTenantThemeEditableConfig {
  * field) plus the tenant's own choices: template name, brand colors and optional tagline.
  * Tenants without a KV entry fall back to `TEMPLATES[DEFAULT_TEMPLATE]`.
  */
-export interface QmTenantThemeConfig extends QmTemplatePreset, QmTenantThemeEditableConfig {}
+export interface QmTenantThemeConfig extends QmTemplatePreset, QmTenantThemeEditableConfig {
+  /** Set while the branch's effective plan is Basic: the public menu then renders `qmenut` and
+   *  the stored custom theme stays untouched for a re-upgrade. Missing = not Basic. */
+  plan?: "basic";
+}
 
 export const QM_THEME_PREVIEW_READY = "qmenut.theme-preview.ready" as const;
 export const QM_THEME_PREVIEW_UPDATE = "qmenut.theme-preview.update" as const;
@@ -41,7 +45,7 @@ export interface QmThemePreviewUpdateMessage {
   payload: QmTenantThemeEditableConfig;
 }
 
-export const DEFAULT_TEMPLATE: QmTemplateName = "her";
+export const DEFAULT_TEMPLATE = "her" satisfies QmTemplateName;
 
 export const DEFAULT_TENANT_COLORS = {
   primary: "#A23A28",
@@ -67,8 +71,8 @@ export function buildDefaultTenantThemeConfig(template: QmTemplateName = DEFAULT
   return {
     ...preset,
     template,
-    primary: DEFAULT_TENANT_COLORS.primary,
-    secondary: DEFAULT_TENANT_COLORS.secondary,
+    primary: preset.fixedColors?.primary ?? DEFAULT_TENANT_COLORS.primary,
+    secondary: preset.fixedColors?.secondary ?? DEFAULT_TENANT_COLORS.secondary,
     showMenuPhotos: showPresetPhotos,
     showDishPhoto: showPresetPhotos,
   };
@@ -111,14 +115,25 @@ export function resolveTenantThemeConfig(
     ...candidate,
     layout,
     template: candidate.template,
-    primary: colorOrDefault(candidate.primary, DEFAULT_TENANT_COLORS.primary),
-    secondary: colorOrDefault(candidate.secondary, DEFAULT_TENANT_COLORS.secondary),
+    primary: base.fixedColors?.primary ?? colorOrDefault(candidate.primary, DEFAULT_TENANT_COLORS.primary),
+    secondary: base.fixedColors?.secondary ?? colorOrDefault(candidate.secondary, DEFAULT_TENANT_COLORS.secondary),
     tagline: typeof candidate.tagline === "string" ? candidate.tagline : undefined,
     showMenuPhotos: typeof candidate.showMenuPhotos === "boolean" ? candidate.showMenuPhotos : showPresetPhotos,
     showDishPhoto: typeof candidate.showDishPhoto === "boolean" ? candidate.showDishPhoto : showPresetPhotos,
     headingFont: isHeadingFontId(candidate.headingFont) ? candidate.headingFont : undefined,
     bodyFont: isBodyFontId(candidate.bodyFont) ? candidate.bodyFont : undefined,
+    plan: candidate.plan === "basic" ? "basic" : undefined,
   };
+}
+
+/**
+ * The theme the public menu actually renders. Basic branches get the fixed `qmenut` look, rebuilt
+ * from the current preset so stale preset fields, fonts or colors stored in KV never leak in.
+ */
+export function resolvePublicTenantTheme(theme: QmTenantThemeConfig): QmTenantThemeConfig {
+  if (theme.plan !== "basic" && theme.template !== "qmenut") return theme;
+
+  return { ...buildDefaultTenantThemeConfig("qmenut"), plan: theme.plan };
 }
 
 export function createThemePreviewReadyMessage(): QmThemePreviewReadyMessage {

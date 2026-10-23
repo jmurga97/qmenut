@@ -3,14 +3,17 @@ import {
   updateBranchPlanStatement,
   upsertBranchSubscriptionStatement,
 } from "@qmenut/db/repositories/billing.repository";
+import { buildDefaultTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 
 import { mapStripeStatus } from "./map-stripe-status";
 import { entitledPlanCode } from "../../lib/billing/entitlement";
 import { planCodeFor } from "../../lib/billing/plan-catalog";
 import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
+import { getTheme, putTheme } from "../../lib/theme/theme-worker-client";
 
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
+import type { PlanCode } from "@qmenut/db/repositories/billing.repository";
 import type Stripe from "stripe";
 
 interface SyncSubscriptionStateInput {
@@ -67,8 +70,35 @@ export async function syncSubscriptionState({ db, env, subscription }: SyncSubsc
     }),
   ]);
 
+  const themeChanged = branch?.customDomain
+    ? await syncBasicThemeFlag({ env, host: branch.customDomain, planCode: effectivePlanCode })
+    : false;
+
   // The public menu strips Business content by this branch's plan, so its cached pages must refresh.
-  if (branch?.planCode !== effectivePlanCode) {
+  if (branch?.planCode !== effectivePlanCode || themeChanged) {
     await bumpPublicContentVersionForBranch({ db, env, restaurantId, branchId });
   }
+}
+
+interface SyncBasicThemeFlagInput {
+  env: RuntimeEnv;
+  host: string;
+  planCode: PlanCode;
+}
+
+/**
+ * Basic branches render the fixed `qmenut` look. The flag lives in the KV theme so the stored
+ * custom theme survives untouched for a re-upgrade. Idempotent: it writes only when the flag is
+ * out of date, so a webhook retry after a failed write still converges. Returns whether it wrote.
+ */
+async function syncBasicThemeFlag({ env, host, planCode }: SyncBasicThemeFlagInput): Promise<boolean> {
+  const plan = planCode === "basic" ? "basic" : undefined;
+  const theme = await getTheme(env, host);
+
+  if (theme?.plan === plan || (!theme && !plan)) {
+    return false;
+  }
+
+  await putTheme({ config: { ...(theme ?? buildDefaultTenantThemeConfig("qmenut")), plan }, env, host });
+  return true;
 }

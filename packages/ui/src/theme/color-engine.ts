@@ -120,8 +120,8 @@ class QmColorEngine {
     const template = TEMPLATES[cfg.template];
     const { saturationCap: cap = template.saturationCap } = cfg;
 
-    const rawPrimary = cfg.primary || this.config.defaultPrimary;
-    const rawSecondary = cfg.secondary || this.config.defaultSecondary;
+    const rawPrimary = template.fixedColors?.primary ?? (cfg.primary || this.config.defaultPrimary);
+    const rawSecondary = template.fixedColors?.secondary ?? (cfg.secondary || this.config.defaultSecondary);
     const primary = this.clampChroma(rawPrimary, cap);
     const secondary = this.clampChroma(rawSecondary, cap);
     const paper = cfg.paper || template.paper;

@@ -3,6 +3,8 @@ import barlowCss from "@qmenut/ui/fonts/barlow.css?inline";
 import bebasNeueCss from "@qmenut/ui/fonts/bebas-neue.css?inline";
 import cormorantGaramondCss from "@qmenut/ui/fonts/cormorant-garamond.css?inline";
 import dmSansCss from "@qmenut/ui/fonts/dm-sans.css?inline";
+import geistMonoCss from "@qmenut/ui/fonts/geist-mono.css?inline";
+import geistCss from "@qmenut/ui/fonts/geist.css?inline";
 import jostCss from "@qmenut/ui/fonts/jost.css?inline";
 import nunitoSansCss from "@qmenut/ui/fonts/nunito-sans.css?inline";
 import playfairDisplayCss from "@qmenut/ui/fonts/playfair-display.css?inline";
@@ -26,4 +28,6 @@ export const FONT_CSS_TEXT: Record<QmFontId, string> = {
   barlow: barlowCss,
   "nunito-sans": nunitoSansCss,
   "dm-sans": dmSansCss,
+  geist: geistCss,
+  "geist-mono": geistMonoCss,
 };

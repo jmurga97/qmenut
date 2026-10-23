@@ -55,6 +55,7 @@ export default {
       cafe: "Наш фаворит",
       fast: "Наш фаворит",
       tapas: "Блюдо-звезда",
+      qmenut: "Наш фаворит",
     },
   },
   destacados: {

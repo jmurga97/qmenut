@@ -1,0 +1,13 @@
+/*
+ * geist-mono — one variable face (100–900) covering catalog weights.
+ * Keep in sync with packages/ui/src/theme/font-catalog.ts.
+ * Source: Vercel geist (Ming design system assets); license: SIL OFL-1.1.
+ */
+
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("./geist-mono-variable.woff2") format("woff2");
+}

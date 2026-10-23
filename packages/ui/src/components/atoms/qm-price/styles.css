@@ -17,7 +17,7 @@
   max-width: 18ch;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: var(--qm-body, sans-serif);
+  font-family: var(--qm-mono, var(--qm-body, sans-serif));
   font-size: var(--qm-text-2xs, 10px);
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -31,7 +31,7 @@
 }
 
 .old-value {
-  font-family: var(--qm-body, sans-serif);
+  font-family: var(--qm-mono, var(--qm-body, sans-serif));
   font-size: var(--qm-text-xs, 11px);
   font-weight: 500;
   color: var(--qm-muted, #8c857b);
@@ -39,7 +39,7 @@
 }
 
 .value {
-  font-family: var(--qm-body, sans-serif);
+  font-family: var(--qm-mono, var(--qm-body, sans-serif));
   font-size: var(--qm-price-size, var(--qm-text-xl, 17px));
   font-weight: var(--qm-price-weight, 700);
   line-height: 1.05;

@@ -22,12 +22,15 @@ export const QM_FONT_IDS = [
   "barlow",
   "nunito-sans",
   "dm-sans",
+  "geist",
+  "geist-mono",
 ] as const;
 
 export type QmFontId = (typeof QM_FONT_IDS)[number];
 
-/** Which slot a family is suited for. `both` is valid for either heading or body. */
-export type QmFontRole = "heading" | "body" | "both";
+/** Which slot a family is suited for. `both` is valid for either heading or body; `template`
+ *  families load only for the template that names them and are never offered in pickers. */
+export type QmFontRole = "heading" | "body" | "both" | "template";
 
 export interface QmFontCatalogEntry {
   id: QmFontId;
@@ -126,6 +129,20 @@ export const QM_FONT_CATALOG: Record<QmFontId, QmFontCatalogEntry> = {
     role: "body",
     weights: [400, 500, 700],
   },
+  geist: {
+    id: "geist",
+    label: "Geist",
+    stack: "'Geist',sans-serif",
+    role: "template",
+    weights: [400, 500, 600],
+  },
+  "geist-mono": {
+    id: "geist-mono",
+    label: "Geist Mono",
+    stack: "'Geist Mono',monospace",
+    role: "template",
+    weights: [400, 500],
+  },
 };
 
 function isFontId(value: unknown): value is QmFontId {
@@ -139,10 +156,10 @@ export function getFontStack(id: unknown): string | undefined {
 
 /** True if `value` is a catalog id usable in the heading slot (`heading` or `both`). */
 export function isHeadingFontId(value: unknown): value is QmFontId {
-  return isFontId(value) && QM_FONT_CATALOG[value].role !== "body";
+  return isFontId(value) && ["heading", "both"].includes(QM_FONT_CATALOG[value].role);
 }
 
 /** True if `value` is a catalog id usable in the body slot (`body` or `both`). */
 export function isBodyFontId(value: unknown): value is QmFontId {
-  return isFontId(value) && QM_FONT_CATALOG[value].role !== "heading";
+  return isFontId(value) && ["body", "both"].includes(QM_FONT_CATALOG[value].role);
 }

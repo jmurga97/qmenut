@@ -6,7 +6,6 @@ import { z } from "zod";
 import { i18n } from "~/lib/i18n";
 
 import type { QmFontId } from "@qmenut/ui/theme/font-catalog";
-import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 
 const TEMPLATE_IDS = ["tapas", "fine", "cafe", "fast", "her"] as const;
 const TEMPLATE_LABELS = {
@@ -56,7 +55,7 @@ export const themeFormSchema = z.object({
 });
 
 /** Defaults derived from a template's preset so the photo flags match what the public menu shows. */
-export function defaultThemeFormValues(template: QmTemplateName = DEFAULT_TEMPLATE): ThemeFormValues {
+export function defaultThemeFormValues(template: ThemeFormValues["template"] = DEFAULT_TEMPLATE): ThemeFormValues {
   const showPresetPhotos = TEMPLATES[template].photoMode !== "none";
   return {
     template,

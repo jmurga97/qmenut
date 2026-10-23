@@ -1,5 +1,5 @@
 import { Button } from "@jmurga97/components";
-import { resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
+import { resolvePublicTenantTheme, resolveTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { i18n } from "~/lib/i18n";
@@ -17,7 +17,8 @@ export function QrPanel({ branchId, host, mode }: { branchId: string; host: stri
     ...getThemeQueryOptions({ branchId, trpc }),
     retry: false,
   });
-  const theme = themeQuery.data ? resolveTenantThemeConfig(themeQuery.data) : null;
+  // Flyers print the look the public menu shows, so Basic branches get `qmenut` here too.
+  const theme = themeQuery.data ? resolvePublicTenantTheme(resolveTenantThemeConfig(themeQuery.data)) : null;
 
   return (
     <div className={"ming-stack ming-stack--loose"}>

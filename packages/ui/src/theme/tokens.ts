@@ -32,6 +32,8 @@ export interface QmThemeTokens {
   "--qm-eyebrow-tt": "uppercase" | "none";
   "--qm-eyebrow-ls": string;
   "--qm-dish-tt": "uppercase" | "none";
+  /** Face for prices, numerals and eyebrows; only set by templates with a `monoFontId`. */
+  "--qm-mono"?: string;
 
   // Type scale — concrete px values already multiplied by the template's `fontScale`
   // (components must NOT multiply by `--qm-fs` again). `2xs` has a 10px legibility floor.
@@ -58,6 +60,8 @@ export interface QmThemeTokens {
   "--qm-header-title-size": string;
   "--qm-hero-scrim": string;
   "--qm-hero-name-size": string;
+  /** Optional: corner of the chips over the hero photo; omitted = 20px. */
+  "--qm-hero-chip-radius"?: string;
   "--qm-hero-logo-radius": string;
   "--qm-section-bg": string;
   "--qm-section-ink": string;
@@ -216,4 +220,6 @@ export interface QmThemeTokens {
   "--qm-nav-active-pad": string;
   "--qm-nav-muted": string;
   "--qm-nav-icon-display": string;
+  /** `signal` nav only: shows the red dot on the current item. */
+  "--qm-nav-dot"?: string;
 }

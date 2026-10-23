@@ -46,6 +46,7 @@ export default {
       cafe: "Our favorite",
       fast: "Our favorite",
       tapas: "Star dish",
+      qmenut: "Our favorite",
     },
   },
   destacados: {

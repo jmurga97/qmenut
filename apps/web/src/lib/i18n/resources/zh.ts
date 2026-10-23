@@ -47,6 +47,7 @@ export default {
       cafe: "我们的最爱",
       fast: "我们的最爱",
       tapas: "招牌菜",
+      qmenut: "我们的最爱",
     },
   },
   destacados: {

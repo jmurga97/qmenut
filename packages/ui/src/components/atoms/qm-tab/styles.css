@@ -44,6 +44,18 @@ button[data-active="true"] {
   align-items: center;
 }
 
+/* Ming's red signal dot on the current item; only the `signal` nav style turns it on. */
+button[data-active="true"] .label::before {
+  display: var(--qm-nav-dot, none);
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--qm-signal, #d71921);
+  content: "";
+}
+
 .label {
   max-width: 100%;
   overflow: hidden;

@@ -4,6 +4,7 @@ import type { QmTenantThemeConfig, QmTenantThemeEditableConfig } from "@qmenut/u
 export type TenantThemeInput = Omit<QmTenantThemeEditableConfig, "showDishPhoto" | "showMenuPhotos"> & {
   showDishPhoto?: boolean;
   showMenuPhotos?: boolean;
+  plan?: QmTenantThemeConfig["plan"];
 };
 
 const THEME_ORIGIN = "https://theme-worker.internal";

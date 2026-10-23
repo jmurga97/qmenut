@@ -41,6 +41,7 @@ export default {
       cafe: "Onze favoriet",
       fast: "Onze favoriet",
       tapas: "Topgerecht",
+      qmenut: "Onze favoriet",
     },
   },
   destacados: {
