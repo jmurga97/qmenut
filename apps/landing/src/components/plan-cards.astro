@@ -1,0 +1,26 @@
+---
+import { Badge } from "@jmurga97/components/badge";
+
+import { PLANS } from "../lib/content";
+---
+
+<ul class="plan-grid">
+  {PLANS.map((plan) => (
+    <li class:list={["plan", { "plan--featured": plan.code === "business" }]}>
+      <h3 class="plan__name">
+        {plan.name}
+        {plan.price === null && <Badge>Próximamente</Badge>}
+      </h3>
+      <p class="plan__price">
+        {plan.price ?? "—"}
+        {plan.price && <small> / mes</small>}
+      </p>
+      <p class="plan__summary">{plan.summary}</p>
+      <ul class="plan__highlights">
+        {plan.highlights.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    </li>
+  ))}
+</ul>

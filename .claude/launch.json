@@ -27,6 +27,12 @@
       "port": 8788
     },
     {
+      "name": "landing",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "apps/landing", "dev"],
+      "port": 4321
+    },
+    {
       "name": "ming-storybook",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "--cwd", "/Users/murgapja/dev/ming-components", "dev"],

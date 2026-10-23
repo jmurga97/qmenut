@@ -1,0 +1,37 @@
+---
+import BaseLayout from "../layouts/base-layout.astro";
+
+export const prerender = true;
+
+// ponytail: structure only; the legal texts need the holder's data before launch.
+export function getStaticPaths() {
+  return [
+    { legal: "aviso-legal", title: "Aviso legal", intro: "Datos del titular de este sitio web y condiciones de uso." },
+    {
+      legal: "privacidad",
+      title: "Política de privacidad",
+      intro: "Qué datos tratamos, para qué y cómo ejercer tus derechos.",
+    },
+    { legal: "condiciones", title: "Condiciones del servicio", intro: "Las condiciones de la suscripción a QMenut." },
+  ].map(({ legal, ...props }) => ({ params: { legal }, props }));
+}
+
+const { title, intro } = Astro.props;
+---
+
+<BaseLayout title={`${title} · QMenut`} description={intro}>
+  <div class="landing">
+    <section class="container page-intro" aria-labelledby="legal-title">
+      <p class="section-mark">Legal</p>
+      <h1 class="pixel-heading" id="legal-title">
+        {title}
+      </h1>
+      <p class="lede">{intro}</p>
+    </section>
+    <div class="container legal-body">
+      <div class="ming-prose">
+        <p>Este texto está en preparación.</p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

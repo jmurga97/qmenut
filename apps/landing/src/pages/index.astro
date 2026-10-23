@@ -1,443 +1,435 @@
 ---
-const title = "qmenut — Your restaurant, fully itself";
-const description =
-  "Branded digital menus, promotions, loyalty, translations, and multi-location tools—built for restaurants.";
+import { Badge } from "@jmurga97/components/badge";
+
+import { LinkButton } from "../components/link-button";
+import PlanCards from "../components/plan-cards.astro";
+import BaseLayout from "../layouts/base-layout.astro";
+import { DEMOS, START_PATH } from "../lib/content";
+
+const RESTAURANT_BUSINESS = "https://www.restaurantbusinessonline.com/technology/customers-really-dont-qr-code-menus";
+
+// ponytail: the "before going" figures still need their primary sources (docs/sales/landing-content.md to-dos).
+const AT_THE_TABLE = [
+  { figure: "88%", text: "prefiere la carta en papel cuando se sienta a la mesa.", source: RESTAURANT_BUSINESS },
+  { figure: "66%", text: "no quiere sacar el móvil nada más sentarse.", source: RESTAURANT_BUSINESS },
+];
+const BEFORE_GOING = [
+  { figure: "83%", text: "mira el menú en el móvil antes de salir.", source: null },
+  { figure: "77%", text: "visita la web del restaurante antes de decidir.", source: null },
+];
+
+type Plan = "basic" | "business" | "soon";
+
+interface Feature {
+  title: string;
+  body: string;
+  plan: Plan;
+}
+
+const GROUPS: { id: string; mark: string; title: string; features: Feature[] }[] = [
+  {
+    id: "que-te-elijan",
+    mark: "Que te elijan",
+    title: "Que se vea como tu restaurante, no como una plantilla",
+    features: [
+      {
+        title: "Un menú pensado para el móvil",
+        body: "Fotos, variantes, extras y alérgenos: menos preguntas al personal y más confianza para quien tiene alergias.",
+        plan: "basic",
+      },
+      {
+        title: "Dólares y bolívares",
+        body: "Tus precios en dólares, y en bolívares a la tasa que tú decidas.",
+        plan: "basic",
+      },
+      {
+        title: "Tu marca, en cada plato",
+        body: "Cinco estilos, los colores y las tipografías de tu marca, sin el sello de QMenut.",
+        plan: "business",
+      },
+      {
+        title: "Destacados y promociones",
+        body: "Dirige la atención a tu especialidad, a lo nuevo o a lo que más margen te deja.",
+        plan: "business",
+      },
+    ],
+  },
+  {
+    id: "que-vuelvan",
+    mark: "Que vuelvan",
+    title: "Una razón para volver",
+    features: [
+      {
+        title: "Puntos de fidelización",
+        body: "Tus clientes suman visitas y canjean recompensas, sin app ni tarjeta de cartón.",
+        plan: "business",
+      },
+      {
+        title: "En la pantalla de inicio",
+        body: "Tus clientes habituales instalan tu menú como una app y te tienen siempre a mano.",
+        plan: "business",
+      },
+      {
+        title: "Reservas",
+        body: "Que reserven mesa desde tu propio canal.",
+        plan: "soon",
+      },
+    ],
+  },
+  {
+    id: "que-no-te-cueste",
+    mark: "Que no te cueste",
+    title: "¿Cambió un precio? ¿Se acabó un plato? Diez segundos y listo",
+    features: [
+      {
+        title: "Tu panel, tus cambios",
+        body: "Edita precios, oculta un plato agotado o actualiza tus horarios cuando quieras, sin reimprimir nada.",
+        plan: "basic",
+      },
+      {
+        title: "Tu carta en papel sigue en la mesa",
+        body: "Descarga tu código QR para imprimir. QMenut acompaña a tu carta, no la sustituye.",
+        plan: "basic",
+      },
+      {
+        title: "Menús por horario",
+        body: "Desayuno, comida y cena cambian solos a su hora.",
+        plan: "business",
+      },
+      {
+        title: "Tu equipo y tus locales",
+        body: "Tu equipo marca platos agotados sin ver la facturación. Gestiona todos tus locales desde un mismo sitio.",
+        plan: "business",
+      },
+      {
+        title: "Carta imprimible",
+        body: "Genera la versión en PDF de tu carta, siempre al día con tu menú.",
+        plan: "business",
+      },
+    ],
+  },
+  {
+    id: "que-sepas-que-funciona",
+    mark: "Que sepas qué funciona",
+    title: "Señales, no suposiciones",
+    features: [
+      {
+        title: "Qué platos interesan",
+        body: "Descubre qué se consulta más, en qué idiomas y cuántos tocan para llamar o ver cómo llegar.",
+        plan: "business",
+      },
+      {
+        title: "Un resumen en tu correo",
+        body: "La actividad de tu menú llega a tu bandeja, sin tener que entrar al panel.",
+        plan: "business",
+      },
+    ],
+  },
+];
+
+const BADGES: Record<Plan, string | null> = { basic: null, business: "Business", soon: "Próximamente" };
+
+const DELIVERY_GAINS = [
+  { title: "El cliente es tuyo", body: "Sus datos, su relación y su próxima visita se quedan contigo." },
+  { title: "Tu marca, no la de un marketplace", body: "Piden en tu canal, con tu imagen y tu menú." },
+  { title: "Cuota fija", body: "Pagas una cuota, no un porcentaje de cada pedido." },
+  { title: "Cobro y bandeja de pedidos", body: "Pago online en tu cuenta y cada pedido con su estado." },
+];
+
+const FAQ = [
+  {
+    question: "¿Tengo que quitar la carta en papel?",
+    answer:
+      "No. QMenut está donde se decide a qué restaurante ir: en el móvil, antes de llegar. En la mesa puedes seguir ofreciendo tu carta impresa.",
+  },
+  {
+    question: "Ya estoy en Instagram y en Google, ¿para qué lo necesito?",
+    answer:
+      "Instagram y Google ayudan a que te descubran. QMenut completa ese descubrimiento con un menú actualizado y legible para buscadores, sin que nadie tenga que buscar precios entre publicaciones antiguas.",
+  },
+  {
+    question: "¿No me basta con un PDF?",
+    answer:
+      "Un PDF hay que ampliarlo, recorrerlo página a página y volver a subirlo cada vez que cambia un precio. Y ni Google ni los asistentes de IA pueden leer bien sus platos.",
+  },
+  {
+    question: "¿Mis clientes tienen que descargar una app?",
+    answer: "No. Tu menú se abre en el navegador del móvil.",
+  },
+  {
+    question: "¿De quién es el dominio?",
+    answer:
+      "Tuyo. En Business el dominio está incluido mientras tengas la suscripción, y si un día te vas, puedes llevártelo.",
+  },
+  {
+    question: "¿Puedo pasar de Basic a Business?",
+    answer: "Sí, cuando quieras y sin perder nada de lo que ya tienes publicado.",
+  },
+  {
+    question: "¿Cómo funciona la prueba?",
+    answer:
+      "Tienes 14 días para probar cualquier plan. Te pedimos la tarjeta al empezar y no se cobra nada hasta que termina la prueba.",
+  },
+  {
+    question: "¿Tiene pedidos o delivery?",
+    answer: "Todavía no. Los pedidos para recoger y a domicilio llegarán pronto como una ampliación de Business.",
+  },
+];
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="description" content={description} />
-    <meta name="theme-color" content="#EFEFEF" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="/assets/scenes/01-restaurant.jpg" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preload" as="image" href="/assets/scenes/01-restaurant.jpg" />
-    <title>{title}</title>
-  </head>
-  <body id="top">
-    <main>
-      <div id="world" aria-label="Explore the qmenut product world"></div>
-    </main>
+<BaseLayout
+  title="QMenut · La presencia digital de tu restaurante"
+  description="Tu menú, tu marca y tu dominio en un canal propio que Google y la IA entienden. Para que te elijan antes de llegar y vuelvan después."
+>
+  <div class="landing">
+    <section class="container hero" aria-labelledby="hero-title">
+      <p class="section-mark">La presencia digital de tu restaurante</p>
+      <h1 class="pixel-hero" id="hero-title">
+        A la altura de lo que sirves
+      </h1>
+      <p class="lede">
+        Tu menú, tu marca y tu dominio en un canal propio que Google y la IA entienden. Para que te elijan antes de
+        llegar y vuelvan después.
+      </p>
+      <div class="ming-cluster">
+        <LinkButton href={START_PATH} size="lg">
+          Prueba 14 días
+        </LinkButton>
+        <a class="text-link" href="#demos">
+          Ver demos
+        </a>
+      </div>
+    </section>
 
-    <noscript>
-      <section class="no-script">
-        <p class="no-script__eyebrow">qmenut</p>
-        <h1>Your restaurant. Fully itself.</h1>
-        <p>A branded digital menu on your own domain, with everything you need to run it from one dashboard.</p>
+    <section class="container section" aria-labelledby="giro-title">
+      <div class="section__header">
+        <p class="section-mark">La decisión se toma antes de llegar</p>
+        <h2 class="pixel-title" id="giro-title">
+          Nadie quiere mirar el móvil en la mesa. Todos lo miran antes de ir.
+        </h2>
+        <p class="lede">
+          QMenut no sustituye tu carta impresa. Está donde se decide a qué restaurante ir: en el móvil, horas antes de
+          sentarse.
+        </p>
+      </div>
+      <div class="contrast">
+        <div class="contrast__column">
+          <p class="ming-eyebrow">En la mesa</p>
+          <ul class="stat-list">
+            {AT_THE_TABLE.map((stat) => (
+              <li class="stat">
+                <span class="stat__figure">{stat.figure}</span>
+                <span>{stat.text}</span>
+                {stat.source && (
+                  <span class="source">
+                    <a href={stat.source}>Technomic, vía Restaurant Business</a>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div class="contrast__column">
+          <p class="ming-eyebrow">Antes de ir</p>
+          <ul class="stat-list">
+            {BEFORE_GOING.map((stat) => (
+              <li class="stat">
+                <span class="stat__figure">{stat.figure}</span>
+                <span>{stat.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="container section" id="funcionalidades" aria-labelledby="encuentren-title">
+      <div class="section__header">
+        <p class="section-mark">Que te encuentren</p>
+        <h2 class="pixel-title" id="encuentren-title">
+          Si no te pueden leer, no existes
+        </h2>
+        <p class="lede">
+          Una carta en PDF, una foto del menú o un post de Instagram no le dicen nada a Google ni a ChatGPT: no pueden
+          leer tus platos ni tus precios. En QMenut cada plato, precio y horario se publica en un formato que los
+          buscadores y los asistentes de IA entienden y pueden recomendar.
+        </p>
+      </div>
+      <div class="statement-grid">
+        <article class="statement">
+          <h3 class="statement__title">
+            Tu nombre, no el nuestro <Badge>Business</Badge>
+          </h3>
+          <p>
+            Tu menú en <code>turestaurante.com</code>: la dirección que pones en Google, en Instagram y en WhatsApp.
+            Cada enlace y cada reseña suma a tu marca, no a una plataforma. El dominio está incluido, y si un día te
+            vas, se va contigo.
+          </p>
+        </article>
+        <article class="statement">
+          <h3 class="statement__title">Listo para compartir</h3>
+          <p>
+            En Basic tu menú vive en <code>turestaurante.qmenut.app</code> desde el primer día, igual de legible para
+            Google y la IA.
+          </p>
+        </article>
+        <article class="statement">
+          <h3 class="statement__title">
+            Turistas que te entienden <Badge>Business</Badge>
+          </h3>
+          <p>Publica tu menú en varios idiomas, y Google muestra a cada visitante el suyo.</p>
+        </article>
+        <article class="statement">
+          <h3 class="statement__title">
+            Reseñas en el momento justo <Badge>Business</Badge>
+          </h3>
+          <p>Tus reseñas de Google y tu galería de fotos, justo cuando deciden si venir.</p>
+        </article>
+      </div>
+    </section>
+
+    {GROUPS.map((group) => (
+      <section class="container section" id={group.id} aria-labelledby={`${group.id}-title`}>
+        <div class="section__header">
+          <p class="section-mark">{group.mark}</p>
+          <h2 class="pixel-heading" id={`${group.id}-title`}>
+            {group.title}
+          </h2>
+        </div>
+        <ol class="feature-list">
+          {group.features.map((feature, index) => (
+            <li class="feature">
+              <span class="feature__index">{String(index + 1).padStart(2, "0")}</span>
+              <h3 class="feature__title">
+                {feature.title}
+                {BADGES[feature.plan] && <Badge>{BADGES[feature.plan]}</Badge>}
+              </h3>
+              <p class="feature__body">{feature.body}</p>
+            </li>
+          ))}
+        </ol>
       </section>
-    </noscript>
+    ))}
 
-    <script is:inline src="/scripts/scroll-world.js"></script>
-    <script is:inline>
-      (async () => {
-        let videosReady = false;
-        try {
-          const response = await fetch("/assets/video/manifest.json");
-          const manifest = response.ok ? await response.json() : {};
-          videosReady = manifest.desktop === true;
-        } catch {
-          videosReady = false;
-        }
+    <section class="container section" id="demos" aria-labelledby="demos-title">
+      <div class="section__header">
+        <p class="section-mark">Demos</p>
+        <h2 class="pixel-heading" id="demos-title">
+          Mira cómo se ve
+        </h2>
+        <p class="lede">Cinco estilos, cinco restaurantes de ejemplo. Ábrelos en tu móvil.</p>
+      </div>
+      <ol class="demo-list">
+        {DEMOS.map((demo, index) => (
+          <li>
+            <a class="demo" href={demo.href}>
+              <span class="feature__index">{String(index + 1).padStart(2, "0")}</span>
+              <span class="demo__name">{demo.name}</span>
+              <span class="demo__host">{new URL(demo.href).host}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </section>
 
-        const video = (path) => (videosReady ? path : undefined);
+    <section class="container section" id="delivery" aria-labelledby="delivery-title">
+      <div class="delivery">
+        <div class="section__header">
+          <p class="section-mark">Delivery · Próximamente</p>
+          <h2 class="pixel-title" id="delivery-title">
+            Tus pedidos, en tu propio canal
+          </h2>
+          <p class="lede">
+            Pronto podrás recibir pedidos para recoger y a domicilio desde tu menú QMenut: con tu marca, con tus
+            clientes y con una cuota fija.
+          </p>
+        </div>
+        <ol class="feature-list">
+          {DELIVERY_GAINS.map((gain, index) => (
+            <li class="feature">
+              <span class="feature__index">{String(index + 1).padStart(2, "0")}</span>
+              <h3 class="feature__title">{gain.title}</h3>
+              <p class="feature__body">{gain.body}</p>
+            </li>
+          ))}
+        </ol>
+        <a class="text-link" href={START_PATH}>
+          Quiero enterarme primero
+        </a>
+      </div>
+    </section>
 
-        window.mountScrollWorld(document.getElementById("world"), {
-          brand: { name: "qmenut", href: "#top" },
-          cta: { label: "Coming up", href: "#coming-up" },
-          hint: "Scroll to enter",
-          nav: true,
-          atmosphere: false,
-          diveScroll: 1.55,
-          connScroll: 0.82,
-          crossfade: 0.14,
-          sections: [
-            {
-              id: "restaurant",
-              label: "Restaurant",
-              still: "/assets/scenes/01-restaurant.jpg",
-              clip: video("/assets/video/01-restaurant.mp4"),
-              accent: "#325A9F",
-              scroll: 1.85,
-              linger: 0.38,
-              eyebrow: "Your menu. Your domain.",
-              title: "Your restaurant. Fully itself.",
-              body: "Give every location a fast, on-brand menu on its own domain—no app and no generic template.",
-              tags: ["Own domain", "No app", "No commissions"],
-            },
-            {
-              id: "menu-builder",
-              label: "Builder",
-              still: "/assets/scenes/02-menu-builder.jpg",
-              clip: video("/assets/video/02-menu-builder.mp4"),
-              accent: "#556C97",
-              scroll: 1.65,
-              linger: 0.3,
-              eyebrow: "A real menu builder",
-              title: "Built for what kitchens actually sell.",
-              body: "Shape categories, dishes, sizes, options, extras, tags, allergens, and timed availability without flattening your menu into a PDF.",
-              tags: ["Variants + extras", "Allergens", "Timed availability"],
-            },
-            {
-              id: "brand-engine",
-              label: "Brand",
-              still: "/assets/scenes/03-brand-engine.jpg",
-              clip: video("/assets/video/03-brand-engine.mp4"),
-              accent: "#A190BA",
-              scroll: 1.7,
-              linger: 0.42,
-              eyebrow: "Brand in the first byte",
-              title: "Looks yours before it loads.",
-              body: "Choose a restaurant style and two brand colors; qmenut derives an accessible system and renders it at the edge with no wrong-theme flash.",
-              tags: ["5 restaurant styles", "Accessible colors", "Edge-rendered"],
-            },
-            {
-              id: "reach",
-              label: "Reach",
-              still: "/assets/scenes/04-reach.jpg",
-              clip: video("/assets/video/04-reach.mp4"),
-              accent: "#325A9F",
-              scroll: 1.55,
-              linger: 0.28,
-              eyebrow: "Every guest. Every branch.",
-              title: "One dashboard reaches every table.",
-              body: "Publish QR menus across locations and languages, combining machine translation with your own review and edits.",
-              tags: ["DeepL + review", "Instant QR", "Multi-location"],
-            },
-            {
-              id: "growth",
-              label: "Growth",
-              still: "/assets/scenes/05-growth.jpg",
-              clip: video("/assets/video/05-growth.mp4"),
-              accent: "#556C97",
-              scroll: 1.72,
-              linger: 0.4,
-              eyebrow: "Bring them back",
-              title: "Run the offer. Reward the return.",
-              body: "Schedule flexible promotions and run points or stamps with in-person rewards—native to qmenut, not bolted on.",
-              tags: ["Scheduled promos", "Points or stamps", "One simple stack"],
-            },
-            {
-              id: "delivery",
-              label: "Delivery",
-              still: "/assets/scenes/06-delivery.jpg",
-              clip: video("/assets/video/06-delivery.mp4"),
-              accent: "#A190BA",
-              scroll: 2,
-              linger: 0.5,
-              eyebrow: "Coming up",
-              title: "Save 50% on delivery costs.",
-              body: "Delivery for restaurants is coming soon to qmenut—bringing the same direct, restaurant-first approach beyond the menu.",
-              tags: ["Restaurant-first", "Lower delivery costs"],
-              cta: {
-                primary: { label: "Stay for the launch", href: "#coming-up" },
-                secondary: { label: "Back to the start", href: "#top" },
-              },
-            },
-          ],
-          connectors: videosReady
-            ? [
-                "/assets/video/conn-01.mp4",
-                "/assets/video/conn-02.mp4",
-                "/assets/video/conn-03.mp4",
-                "/assets/video/conn-04.mp4",
-                "/assets/video/conn-05.mp4",
-              ]
-            : [],
-        });
+    <section class="container section" aria-labelledby="nisia-title">
+      <div class="proof">
+        <div class="section__header">
+          <p class="section-mark">Ya funciona</p>
+          <h2 class="pixel-heading" id="nisia-title">
+            Nisia Café + Bocatas, en Valencia
+          </h2>
+          <p class="lede">
+            Su menú vive en su propio dominio, y Google lee cada plato, cada precio y cada horario directamente de él.
+          </p>
+          <a class="text-link" href="https://nisiacafeteria.com">
+            Ver nisiacafeteria.com
+          </a>
+        </div>
+        <dl class="proof__facts">
+          <div>
+            <dt>Dominio</dt>
+            <dd>nisiacafeteria.com</dd>
+          </div>
+          <div>
+            <dt>Lo lee Google</dt>
+            <dd>Platos, precios, dirección y horarios</dd>
+          </div>
+          <div>
+            <dt>Ciudad</dt>
+            <dd>Valencia, España</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
 
-        document.querySelectorAll('a[href="#coming-up"]').forEach((link) => {
-          link.addEventListener("click", (event) => {
-            event.preventDefault();
-            const route = document.querySelectorAll(".sw-route__dot");
-            route[route.length - 1]?.click();
-          });
-        });
-      })();
-    </script>
-  </body>
-</html>
+    <section class="container section" aria-labelledby="precios-title">
+      <div class="section__header">
+        <p class="section-mark">Precios</p>
+        <h2 class="pixel-heading" id="precios-title">
+          Empieza con 14 días de prueba
+        </h2>
+      </div>
+      <PlanCards />
+      <a class="text-link" href="/precios">
+        Comparar los planes
+      </a>
+    </section>
 
-<style is:global>
-  @font-face {
-    font-family: "Barlow";
-    src: url("/fonts/barlow-800.woff2") format("woff2");
-    font-display: swap;
-    font-style: normal;
-    font-weight: 800;
-  }
+    <section class="container section" aria-labelledby="faq-title">
+      <div class="section__header">
+        <p class="section-mark">Preguntas frecuentes</p>
+        <h2 class="pixel-heading" id="faq-title">
+          Lo que suelen preguntarnos
+        </h2>
+      </div>
+      <div class="faq">
+        {FAQ.map((item) => (
+          <details name="faq">
+            <summary>{item.question}</summary>
+            <p>{item.answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
 
-  @font-face {
-    font-family: "Work Sans";
-    src: url("/fonts/work-sans-400.woff2") format("woff2");
-    font-display: swap;
-    font-style: normal;
-    font-weight: 400;
-  }
-
-  @font-face {
-    font-family: "Work Sans";
-    src: url("/fonts/work-sans-600.woff2") format("woff2");
-    font-display: swap;
-    font-style: normal;
-    font-weight: 600;
-  }
-
-  :root {
-    color: #02132e;
-    background: #efefef;
-    font-family: "Work Sans", sans-serif;
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
-  body {
-    min-width: 320px;
-    margin: 0;
-    background: #efefef;
-  }
-
-  button,
-  a {
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  a:focus-visible,
-  button:focus-visible {
-    outline: 3px solid #bad5f6;
-    outline-offset: 4px;
-  }
-
-  .sw-root {
-    --sw-bg: #efefef;
-    --sw-ink: #02132e;
-    --sw-ink-soft: #556c97;
-    --sw-accent: #325a9f;
-    --sw-font-display: "Barlow", sans-serif;
-    --sw-font-body: "Work Sans", sans-serif;
-  }
-
-  .sw-brand__mark {
-    display: none;
-  }
-
-  .sw-brand__name {
-    font-family: "Barlow", sans-serif;
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: -0.075em;
-  }
-
-  .sw-topbar {
-    padding-top: max(clamp(16px, 2.4vw, 28px), env(safe-area-inset-top));
-  }
-
-  .sw-nav {
-    border-color: rgb(50 90 159 / 16%);
-    background:
-      linear-gradient(#ffffffa8, #ffffffa8) padding-box,
-      linear-gradient(120deg, #ffffff, #a190ba70, #ffffff) border-box;
-    box-shadow:
-      0 14px 40px rgb(2 19 46 / 6%),
-      inset 0 1px 0 rgb(255 255 255 / 90%);
-  }
-
-  .sw-nav__item,
-  .sw-topcta,
-  .sw-btn,
-  .sw-copy__tags li {
-    border-radius: 999px;
-  }
-
-  .sw-nav__item.is-active {
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 35%),
-      0 6px 18px color-mix(in srgb, var(--sw-accent) 24%, transparent);
-  }
-
-  .sw-topcta,
-  .sw-btn--primary {
-    border: 1px solid rgb(255 255 255 / 34%);
-    background: linear-gradient(145deg, #02132e, #325a9f);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 30%),
-      0 12px 26px rgb(2 19 46 / 18%);
-  }
-
-  .sw-scene__still {
-    background: #efefef;
-    filter: saturate(0.98) contrast(1.015);
-  }
-
-  .sw-copylayer::before {
-    width: min(56vw, 760px);
-    background: linear-gradient(
-      90deg,
-      #efefef 0%,
-      rgb(239 239 239 / 93%) 32%,
-      rgb(239 239 239 / 54%) 64%,
-      transparent 100%
-    );
-  }
-
-  .sw-copy {
-    width: min(39vw, 500px);
-  }
-
-  .sw-copy__num {
-    color: #556c97;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-  }
-
-  .sw-copy__eyebrow {
-    font-family: "Work Sans", sans-serif;
-    font-weight: 600;
-  }
-
-  .sw-copy__title {
-    max-width: 11ch;
-    font-size: clamp(2.7rem, 5vw, 5.4rem);
-    line-height: 0.91;
-    letter-spacing: -0.055em;
-    text-wrap: balance;
-  }
-
-  .sw-copy__body {
-    max-width: 43ch;
-    color: #263d62;
-  }
-
-  .sw-copy__tags li {
-    color: #02132e;
-    background: rgb(255 255 255 / 58%);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 80%);
-  }
-
-  .sw-route__dot.is-active i {
-    box-shadow:
-      0 0 0 5px color-mix(in srgb, var(--sw-accent) 20%, transparent),
-      0 0 24px color-mix(in srgb, var(--sw-accent) 44%, transparent);
-  }
-
-  .no-script {
-    display: grid;
-    min-height: 100vh;
-    place-content: center;
-    padding: 2rem;
-    text-align: center;
-  }
-
-  .no-script__eyebrow {
-    color: #325a9f;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-  }
-
-  .no-script h1 {
-    max-width: 12ch;
-    margin: 0 auto;
-    font-family: "Barlow", sans-serif;
-    font-size: clamp(3rem, 10vw, 7rem);
-    line-height: 0.9;
-    letter-spacing: -0.06em;
-  }
-
-  .no-script p:last-child {
-    max-width: 42rem;
-    margin: 1.5rem auto 0;
-    color: #556c97;
-    line-height: 1.6;
-  }
-
-  @media (max-width: 860px) {
-    .sw-topcta {
-      padding: 9px 16px;
-      font-size: 0.78rem;
-    }
-
-    .sw-scene__still {
-      object-position: center 28%;
-    }
-
-    .sw-copylayer::before {
-      width: 100%;
-      height: 68%;
-      background: linear-gradient(
-        0deg,
-        #efefef 18%,
-        rgb(239 239 239 / 88%) 44%,
-        rgb(239 239 239 / 42%) 70%,
-        transparent 100%
-      );
-    }
-
-    .sw-copy {
-      bottom: calc(clamp(48px, 9dvh, 86px) + env(safe-area-inset-bottom));
-    }
-
-    .sw-copy__eyebrow {
-      margin-top: 12px;
-    }
-
-    .sw-copy__title {
-      max-width: 13ch;
-      margin-top: 8px;
-      font-size: clamp(2.15rem, 10vw, 3.3rem);
-    }
-
-    .sw-copy__body {
-      display: -webkit-box;
-      margin-top: 12px;
-      overflow: hidden;
-      font-size: 0.95rem;
-      line-height: 1.42;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 3;
-    }
-
-    .sw-copy__tags {
-      gap: 6px;
-      margin-top: 14px;
-    }
-
-    .sw-copy__tags li {
-      padding: 5px 10px;
-      font-size: 0.7rem;
-    }
-
-    .sw-copy__cta {
-      margin-top: 16px;
-    }
-  }
-
-  @media (max-width: 430px) and (max-height: 760px) {
-    .sw-copy__body {
-      -webkit-line-clamp: 2;
-    }
-
-    .sw-copy__tags {
-      display: none;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-  }
-</style>
+    <section class="container section" aria-labelledby="cierre-title">
+      <div class="closing">
+        <p class="section-mark">QMenut</p>
+        <h2 class="pixel-title" id="cierre-title">
+          La presencia digital de tu restaurante, a la altura de lo que sirves
+        </h2>
+        <LinkButton href={START_PATH} size="lg">
+          Prueba 14 días
+        </LinkButton>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

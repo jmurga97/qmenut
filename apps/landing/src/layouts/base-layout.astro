@@ -1,0 +1,129 @@
+---
+import "../styles/fonts.css";
+import "@jmurga97/components/styles.css";
+import "../styles/layout.css";
+import "../styles/landing.css";
+
+import { LinkButton } from "../components/link-button";
+import { ADMIN_URL, START_PATH } from "../lib/content";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" href="/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/GeistPixel-Line.woff2" as="font" type="font/woff2" crossorigin />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">
+      Saltar al contenido
+    </a>
+    <header class="site-nav">
+      <div class="site-nav__inner">
+        <a class="brand" href="/">
+          <span class="brand__mark" aria-hidden="true"></span>
+          <span>QMenut</span>
+        </a>
+        <nav aria-label="Principal">
+          <ul class="site-nav__links">
+            <li>
+              <a href="/#funcionalidades">Funcionalidades</a>
+            </li>
+            <li>
+              <a href="/#demos">Demos</a>
+            </li>
+            <li>
+              <a href="/precios">Precios</a>
+            </li>
+            <li>
+              <a href={ADMIN_URL}>Entrar</a>
+            </li>
+          </ul>
+        </nav>
+        <LinkButton href={START_PATH} variant="secondary" size="sm">
+          Prueba 14 días
+        </LinkButton>
+      </div>
+    </header>
+
+    <main id="contenido">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__brand">
+          <a class="brand" href="/">
+            <span class="brand__mark" aria-hidden="true"></span>
+            <span>QMenut</span>
+          </a>
+          <p>La presencia digital de tu restaurante, a la altura de lo que sirves.</p>
+        </div>
+        <nav class="site-footer__column" aria-labelledby="footer-producto">
+          <p class="ming-eyebrow" id="footer-producto">
+            Producto
+          </p>
+          <ul>
+            <li>
+              <a href="/#funcionalidades">Funcionalidades</a>
+            </li>
+            <li>
+              <a href="/#demos">Demos</a>
+            </li>
+            <li>
+              <a href="/#delivery">Delivery</a>
+            </li>
+            <li>
+              <a href="/precios">Precios</a>
+            </li>
+          </ul>
+        </nav>
+        <nav class="site-footer__column" aria-labelledby="footer-cuenta">
+          <p class="ming-eyebrow" id="footer-cuenta">
+            Cuenta
+          </p>
+          <ul>
+            <li>
+              <a href={START_PATH}>Empezar</a>
+            </li>
+            <li>
+              <a href={ADMIN_URL}>Entrar</a>
+            </li>
+          </ul>
+        </nav>
+        <nav class="site-footer__column" aria-labelledby="footer-legal">
+          <p class="ming-eyebrow" id="footer-legal">
+            Legal
+          </p>
+          <ul>
+            <li>
+              <a href="/aviso-legal">Aviso legal</a>
+            </li>
+            <li>
+              <a href="/privacidad">Privacidad</a>
+            </li>
+            <li>
+              <a href="/condiciones">Condiciones</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <p class="site-footer__legal">© {new Date().getFullYear()} QMenut</p>
+    </footer>
+  </body>
+</html>

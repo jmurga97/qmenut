@@ -1,0 +1,23 @@
+---
+import { LinkButton } from "../components/link-button";
+import BaseLayout from "../layouts/base-layout.astro";
+
+// ponytail: placeholder until self-serve sign-up exists; every sign-up CTA lands here.
+---
+
+<BaseLayout title="Empezar · QMenut" description="Crea el menú digital de tu restaurante con QMenut.">
+  <div class="landing">
+    <section class="container page-intro" aria-labelledby="empezar-title">
+      <p class="section-mark">Empezar</p>
+      <h1 class="pixel-title" id="empezar-title">
+        Muy pronto podrás crear tu menú aquí
+      </h1>
+      <p class="lede">
+        Estamos preparando el alta en línea. Mientras tanto, mira cómo se ve QMenut en los restaurantes de ejemplo.
+      </p>
+      <LinkButton href="/#demos" size="lg">
+        Ver demos
+      </LinkButton>
+    </section>
+  </div>
+</BaseLayout>

@@ -163,6 +163,11 @@
             "from": { "element": { "type": "package" } },
             "allow": { "to": { "element": { "type": "package" } } },
           },
+          // landing: its pages, layouts, components and lib import each other.
+          {
+            "from": { "file": { "categories": ["astro"] } },
+            "allow": { "to": { "file": { "categories": ["astro"] } } },
+          },
           // tests, tooling and scripts may reach anything known.
           {
             "from": { "element": { "type": "e2e" } },

@@ -1,0 +1,161 @@
+---
+import { LinkButton } from "../components/link-button";
+import PlanCards from "../components/plan-cards.astro";
+import BaseLayout from "../layouts/base-layout.astro";
+import { START_PATH } from "../lib/content";
+
+// Scope mirrors docs/sales/plan-features.md and packages/permissions. Delivery includes Business.
+type Cell = "yes" | "no" | "soon";
+
+const CELL_LABEL: Record<Cell, string> = { yes: "Incluido", no: "—", soon: "Próximamente" };
+
+const GROUPS: { title: string; rows: [string, Cell, Cell][] }[] = [
+  {
+    title: "Que te encuentren",
+    rows: [
+      ["Menú legible para Google y la IA", "yes", "yes"],
+      ["Dirección turestaurante.qmenut.app", "yes", "yes"],
+      ["Tu propio dominio incluido", "no", "yes"],
+      ["Idiomas y traducciones", "no", "yes"],
+      ["Reseñas de Google y galería de fotos", "no", "yes"],
+    ],
+  },
+  {
+    title: "Que te elijan",
+    rows: [
+      ["Menú con fotos, variantes, extras y alérgenos", "yes", "yes"],
+      ["Precios en dólares y bolívares", "yes", "yes"],
+      ["Contacto, mapa, horarios y redes", "yes", "yes"],
+      ["Cinco estilos, colores y tipografías de tu marca", "no", "yes"],
+      ["Sin el sello de QMenut", "no", "yes"],
+      ["Destacados y promociones", "no", "yes"],
+    ],
+  },
+  {
+    title: "Que vuelvan",
+    rows: [
+      ["Puntos de fidelización", "no", "yes"],
+      ["Instalable en la pantalla de inicio", "no", "yes"],
+      ["Reservas", "no", "soon"],
+    ],
+  },
+  {
+    title: "Que no te cueste",
+    rows: [
+      ["Panel para editar tu menú", "yes", "yes"],
+      ["Código QR para imprimir", "yes", "yes"],
+      ["Menús por horario", "no", "yes"],
+      ["Carta imprimible en PDF", "no", "yes"],
+      ["Equipo con roles", "no", "yes"],
+      ["Varios locales", "no", "yes"],
+    ],
+  },
+  {
+    title: "Que sepas qué funciona",
+    rows: [["Analítica y resumen por correo", "no", "yes"]],
+  },
+  {
+    title: "Pedidos",
+    rows: [
+      ["Pedidos para recoger y pago online", "no", "no"],
+      ["Pedidos a domicilio y repartidores", "no", "no"],
+    ],
+  },
+];
+
+// Delivery is Business plus ordering, so its column repeats Business and marks ordering as coming soon.
+const deliveryCell = (groupTitle: string, business: Cell): Cell => (groupTitle === "Pedidos" ? "soon" : business);
+
+const FAQ = [
+  {
+    question: "¿Cómo funciona la prueba?",
+    answer:
+      "14 días en cualquier plan. Te pedimos la tarjeta al empezar y no se cobra nada hasta que termina la prueba.",
+  },
+  {
+    question: "¿Puedo cambiar de plan?",
+    answer: "Sí. Puedes pasar de Basic a Business cuando quieras, sin perder nada de lo que ya tienes publicado.",
+  },
+  {
+    question: "¿Qué pasa si cancelo?",
+    answer: "Puedes pedir la exportación de tus datos y la transferencia de tu dominio sin coste adicional.",
+  },
+  {
+    question: "¿De quién es el dominio?",
+    answer: "Tuyo. En Business está incluido mientras tengas la suscripción.",
+  },
+];
+---
+
+<BaseLayout
+  title="Precios · QMenut"
+  description="Basic 15 USD y Business 55 USD al mes, con 14 días de prueba. Delivery, próximamente."
+>
+  <div class="landing">
+    <section class="container hero" aria-labelledby="precios-title">
+      <p class="section-mark">Precios</p>
+      <h1 class="pixel-title" id="precios-title">
+        Un precio fijo cada mes
+      </h1>
+      <p class="lede">14 días de prueba en cualquier plan. Cancela cuando quieras.</p>
+      <PlanCards />
+      <LinkButton href={START_PATH} size="lg">
+        Prueba 14 días
+      </LinkButton>
+    </section>
+
+    <section class="container section" aria-labelledby="comparar-title">
+      <div class="section__header">
+        <p class="section-mark">Comparar</p>
+        <h2 class="pixel-heading" id="comparar-title">
+          Qué incluye cada plan
+        </h2>
+      </div>
+      <div class="compare-scroll" role="region" aria-labelledby="comparar-title" tabindex="0">
+        {GROUPS.map((group) => (
+          <table class="compare">
+            <caption>{group.title}</caption>
+            <thead>
+              <tr>
+                <th scope="col">Funcionalidad</th>
+                <th scope="col">Basic</th>
+                <th scope="col">Business</th>
+                <th scope="col">Delivery</th>
+              </tr>
+            </thead>
+            <tbody>
+              {group.rows.map(([feature, basic, business]) => {
+                const delivery = deliveryCell(group.title, business);
+                return (
+                  <tr>
+                    <th scope="row">{feature}</th>
+                    {[basic, business, delivery].map((cell) => (
+                      <td data-included={String(cell === "yes")}>{CELL_LABEL[cell]}</td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ))}
+      </div>
+    </section>
+
+    <section class="container section" aria-labelledby="faq-title">
+      <div class="section__header">
+        <p class="section-mark">Facturación</p>
+        <h2 class="pixel-heading" id="faq-title">
+          Preguntas sobre el pago
+        </h2>
+      </div>
+      <div class="faq">
+        {FAQ.map((item) => (
+          <details name="faq">
+            <summary>{item.question}</summary>
+            <p>{item.answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
