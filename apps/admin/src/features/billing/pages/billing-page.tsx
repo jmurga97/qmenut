@@ -56,62 +56,64 @@ function BillingBranches() {
   // Basic is a single-location plan; the API refuses it too.
   const multiBranch = controller.overview.branches.length > 1;
   return (
-    <div className="admin-page-grid">
+    <>
       {multiBranch ? (
         <p className="admin-copy">{i18n.t("billing___Con varias sucursales, cada una necesita el plan Business.")}</p>
       ) : null}
-      {controller.overview.branches.map((branch) => {
-        const subscribed = branch.hasStripeSubscription && branch.status !== "canceled";
-        return (
-          <section className="admin-card" key={branch.branchId}>
-            <h3 className="admin-list-label">{branch.branchName}</h3>
-            <p className="admin-list-meta">
-              {branch.status ? (STATUS_LABELS[branch.status] ?? branch.status) : i18n.t("billing___Sin suscripción")}
-              {branch.planCode ? ` · ${PLAN_LABELS[branch.planCode]}` : ""}
-            </p>
-            {branch.cancelAtPeriodEnd ? (
-              <p className="admin-copy">{i18n.t("billing___Cancelación programada.")}</p>
-            ) : null}
-            <div className="admin-topbar-actions">
-              {PLAN_CODES.filter((planCode) => !subscribed || planCode !== branch.planCode).map((planCode) => {
-                const label = planActionLabel({
-                  planCode,
-                  subscribed,
-                  hadSubscription: branch.hasStripeSubscription,
-                });
-                return (
-                  <Button
-                    aria-label={i18n.t("billing___{{plan}} para {{branch}}", {
-                      plan: label,
-                      branch: branch.branchName,
-                    })}
-                    disabled={controller.busy || (planCode === "basic" && multiBranch)}
-                    key={planCode}
-                    onClick={() =>
-                      subscribed
-                        ? controller.changePlan(branch.branchId, planCode)
-                        : controller.subscribe(branch.branchId, planCode)
-                    }
-                    variant={planCode === "business" ? "primary" : "secondary"}
-                  >
-                    {label}
-                  </Button>
-                );
-              })}
-              {subscribed ? (
-                <Button
-                  aria-label={i18n.t("billing___Gestionar {{branch}} en Stripe", { branch: branch.branchName })}
-                  disabled={controller.busy}
-                  onClick={controller.openPortal}
-                  variant={"ghost"}
-                >
-                  {i18n.t("billing___Gestionar en Stripe")}
-                </Button>
+      <div className="admin-page-grid">
+        {controller.overview.branches.map((branch) => {
+          const subscribed = branch.hasStripeSubscription && branch.status !== "canceled";
+          return (
+            <section className="admin-card" key={branch.branchId}>
+              <h3 className="admin-list-label">{branch.branchName}</h3>
+              <p className="admin-list-meta">
+                {branch.status ? (STATUS_LABELS[branch.status] ?? branch.status) : i18n.t("billing___Sin suscripción")}
+                {branch.planCode ? ` · ${PLAN_LABELS[branch.planCode]}` : ""}
+              </p>
+              {branch.cancelAtPeriodEnd ? (
+                <p className="admin-copy">{i18n.t("billing___Cancelación programada.")}</p>
               ) : null}
-            </div>
-          </section>
-        );
-      })}
-    </div>
+              <div className="admin-topbar-actions">
+                {PLAN_CODES.filter((planCode) => !subscribed || planCode !== branch.planCode).map((planCode) => {
+                  const label = planActionLabel({
+                    planCode,
+                    subscribed,
+                    hadSubscription: branch.hasStripeSubscription,
+                  });
+                  return (
+                    <Button
+                      aria-label={i18n.t("billing___{{plan}} para {{branch}}", {
+                        plan: label,
+                        branch: branch.branchName,
+                      })}
+                      disabled={controller.busy || (planCode === "basic" && multiBranch)}
+                      key={planCode}
+                      onClick={() =>
+                        subscribed
+                          ? controller.changePlan(branch.branchId, planCode)
+                          : controller.subscribe(branch.branchId, planCode)
+                      }
+                      variant={planCode === "business" ? "primary" : "secondary"}
+                    >
+                      {label}
+                    </Button>
+                  );
+                })}
+                {subscribed ? (
+                  <Button
+                    aria-label={i18n.t("billing___Gestionar {{branch}} en Stripe", { branch: branch.branchName })}
+                    disabled={controller.busy}
+                    onClick={controller.openPortal}
+                    variant={"ghost"}
+                  >
+                    {i18n.t("billing___Gestionar en Stripe")}
+                  </Button>
+                ) : null}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+    </>
   );
 }
