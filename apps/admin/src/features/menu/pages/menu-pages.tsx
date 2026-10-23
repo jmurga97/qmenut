@@ -21,6 +21,7 @@ import { SectionTabs } from "~/shared/components/section-tabs";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { NotFoundState } from "~/shared/components/state/not-found-state";
+import { PlanLock } from "~/shared/components/state/plan-locked-state";
 import { useCan } from "~/shared/hooks/use-can";
 import { useEditorGuard } from "~/shared/hooks/use-editor-guard";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
@@ -260,7 +261,7 @@ function CategoryForm({ branchId, categoryId }: { branchId: string; categoryId?:
 function CategoryScheduleFields() {
   const enabled = useWatch<CategoryFormValues, "scheduleEnabled">({ name: "scheduleEnabled" });
   return (
-    <>
+    <PlanLock feature={"menu.schedules"}>
       <FormCheckbox<CategoryFormValues> label={i18n.t("menu___Mostrar solo en un horario")} name={"scheduleEnabled"} />
       {enabled ? (
         <>
@@ -273,7 +274,7 @@ function CategoryScheduleFields() {
           <FormTextInput<CategoryFormValues> label={i18n.t("menu___Hasta")} name={"scheduleEnd"} type={"time"} />
         </>
       ) : null}
-    </>
+    </PlanLock>
   );
 }
 export function DishEditorPage({ dishId }: { dishId?: string }) {
@@ -323,9 +324,13 @@ function DishFields({ controller }: { controller: DishEditorController }) {
         <h2 className={"ming-section__title"}>{i18n.t("menu___Visibilidad en la carta")}</h2>
         <div className="admin-choice-grid">
           <FormCheckbox<DishFormValues> label={i18n.t("menu___Activo")} name={"isActive"} />
-          <FormCheckbox<DishFormValues> label={i18n.t("menu___Recomendado")} name={"isRecommended"} />
-          <FormCheckbox<DishFormValues> label={i18n.t("menu___Destacado")} name={"isFeatured"} />
         </div>
+        <PlanLock feature={"highlights"}>
+          <div className="admin-choice-grid">
+            <FormCheckbox<DishFormValues> label={i18n.t("menu___Recomendado")} name={"isRecommended"} />
+            <FormCheckbox<DishFormValues> label={i18n.t("menu___Destacado")} name={"isFeatured"} />
+          </div>
+        </PlanLock>
         <p className="admin-copy">
           {i18n.t(
             "menu___La carta pública muestra un único plato estrella: el primer destacado según el orden de la carta.",

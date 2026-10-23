@@ -2,12 +2,18 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { getPromotionsQueryOptions } from "~/features/promotions/api";
 import { PromotionsLayout } from "~/features/promotions/pages/promotion-pages";
-import { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions, getSelectedBranch } from "~/shared/api";
+import {
+  getMenuCategoriesQueryOptions,
+  getMenuDishesQueryOptions,
+  getSelectedBranch,
+  hasSelectedFeature,
+} from "~/shared/api";
 
 export const Route = createFileRoute("/_auth/promotions")({
   beforeLoad: async ({ context }) => {
     const branch = await getSelectedBranch(context);
-    return { promotionsBranchId: branch?.id ?? null };
+    const enabled = await hasSelectedFeature(context, "promotions");
+    return { promotionsBranchId: enabled ? (branch?.id ?? null) : null };
   },
   loader: ({ context: { promotionsBranchId, queryClient, trpc } }) => {
     if (!promotionsBranchId) return;

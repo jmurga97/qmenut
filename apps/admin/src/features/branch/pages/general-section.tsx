@@ -2,6 +2,7 @@ import { i18n } from "~/lib/i18n";
 import { FormPhoneInput } from "~/shared/components/forms/adapters/form-phone-input";
 import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 import { FormTextInput } from "~/shared/components/forms/adapters/form-text-input";
+import { PlanLock } from "~/shared/components/state/plan-locked-state";
 import { SingleImageUploadControl } from "~/shared/images/single-image-upload-control";
 
 import { useBranchForm } from "../branch-form-context-value";
@@ -44,13 +45,15 @@ export function GeneralSection() {
           />
         </div>
       </section>
-      <GoogleReviewsSettings
-        address={controller.settings.address}
-        branchId={branchId}
-        branchName={controller.settings.name}
-        enabled={controller.settings.googleReviewsEnabled}
-        placeId={controller.settings.googlePlaceId}
-      />
+      <PlanLock feature={"contact.googleReviews"}>
+        <GoogleReviewsSettings
+          address={controller.settings.address}
+          branchId={branchId}
+          branchName={controller.settings.name}
+          enabled={controller.settings.googleReviewsEnabled}
+          placeId={controller.settings.googlePlaceId}
+        />
+      </PlanLock>
     </>
   );
 }

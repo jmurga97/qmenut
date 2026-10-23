@@ -8,6 +8,8 @@ import { PageHeader } from "~/shared/components/page-header";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
 import { NoDomainState } from "~/shared/components/state/no-domain-state";
+import { PlanLockedState } from "~/shared/components/state/plan-locked-state";
+import { useFeature } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 
 export const Route = createFileRoute("/_auth/qr")({
@@ -35,6 +37,7 @@ function PrintPage() {
 
 function PrintWorkspace({ branchId, host }: { branchId: string; host: string }) {
   const [tab, setTab] = useState<(typeof PRINT_TABS)[number]["id"]>("tables");
+  const menuPanel = useFeature("menuPrint") ? <MenuPrintPage branchId={branchId} host={host} /> : <PlanLockedState />;
   function focusTab(index: number) {
     const next = PRINT_TABS[(index + PRINT_TABS.length) % PRINT_TABS.length];
     setTab(next.id);
@@ -87,11 +90,7 @@ function PrintWorkspace({ branchId, host }: { branchId: string; host: string }) 
         >
           <Activity mode={tab === item.id ? "visible" : "hidden"}>
             <Suspense fallback={<CardSkeleton rows={4} title={item.label} />}>
-              {item.id === "menu" ? (
-                <MenuPrintPage branchId={branchId} host={host} />
-              ) : (
-                <QrPanel branchId={branchId} host={host} mode={item.id} />
-              )}
+              {item.id === "menu" ? menuPanel : <QrPanel branchId={branchId} host={host} mode={item.id} />}
             </Suspense>
           </Activity>
         </div>

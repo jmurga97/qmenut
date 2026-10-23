@@ -4,6 +4,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import * as loyaltyApi from "~/features/loyalty/api";
 import { LoyaltyInsightsPage } from "~/features/loyalty/pages/loyalty-insights-page";
 import { loyaltyInsightsSearchSchema } from "~/features/loyalty/types";
+import { hasSelectedFeature } from "~/shared/api";
 import { getVisitsRange } from "~/shared/services/visit-series";
 
 export const Route = createFileRoute("/_auth/loyalty/insights")({
@@ -12,7 +13,9 @@ export const Route = createFileRoute("/_auth/loyalty/insights")({
   beforeLoad: ({ context }) => {
     if (!can(context.roleCode, "loyalty.insights")) redirect({ to: "/loyalty", throw: true });
   },
-  loader: ({ context: { queryClient, trpc }, deps }) => {
+  loader: async ({ context, deps }) => {
+    if (!(await hasSelectedFeature(context, "loyalty"))) return;
+    const { queryClient, trpc } = context;
     const range = getVisitsRange(deps.period);
     void Promise.allSettled([
       queryClient.query({ ...loyaltyApi.getLoyaltySummaryQueryOptions({ trpc }), staleTime: "static" }),

@@ -308,7 +308,8 @@ body {
 .admin-branch-page .admin-editor-shell {
   max-width: var(--ming-page-wide);
 }
-.admin-editor-shell fieldset {
+.admin-editor-shell fieldset,
+.admin-plan-lock {
   min-inline-size: 0;
   margin: 0;
   padding: 0;

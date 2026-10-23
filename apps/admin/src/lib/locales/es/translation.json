@@ -220,14 +220,18 @@
     "Pago pendiente": "Pago pendiente",
     "Cancelada": "Cancelada",
     "Básico": "Básico",
-    "Suscribir Básico": "Suscribir Básico",
     "Facturación": "Facturación",
     "Suscripción": "Suscripción",
     "Sin suscripción": "Sin suscripción",
     "Cancelación programada.": "Cancelación programada.",
     "Gestionar {{branch}} en Stripe": "Gestionar {{branch}} en Stripe",
     "Gestionar en Stripe": "Gestionar en Stripe",
-    "{{plan}} para {{branch}}": "{{plan}} para {{branch}}"
+    "{{plan}} para {{branch}}": "{{plan}} para {{branch}}",
+    "Business": "Business",
+    "Cambiar a {{plan}}": "Cambiar a {{plan}}",
+    "Con varias sucursales, cada una necesita el plan Business.": "Con varias sucursales, cada una necesita el plan Business.",
+    "Probar {{plan}} 14 días": "Probar {{plan}} 14 días",
+    "Suscribir {{plan}}": "Suscribir {{plan}}"
   },
   "branch": {
     "useBranchForm debe usarse dentro de BranchFormProvider": "useBranchForm debe usarse dentro de BranchFormProvider",
@@ -332,7 +336,8 @@
     "Máximo 10 redes sociales": "Máximo 10 redes sociales",
     "Email no válido": "Email no válido",
     "La zona horaria es obligatoria": "La zona horaria es obligatoria",
-    "Selecciona una dirección para completar la ubicación del mapa": "Selecciona una dirección para completar la ubicación del mapa"
+    "Selecciona una dirección para completar la ubicación del mapa": "Selecciona una dirección para completar la ubicación del mapa",
+    "En el plan Básico la carta muestra solo la foto de portada. La galería es del plan Business.": "En el plan Básico la carta muestra solo la foto de portada. La galería es del plan Business."
   },
   "shared": {
     "Optional": "Opcional",
@@ -423,7 +428,11 @@
     "No se traducen ({{count}})": "No se traducen ({{count}})",
     "No se traduce": "No se traduce",
     "Permitir traducción": "Permitir traducción",
-    "No traducir: mantener el texto original en todos los idiomas": "No traducir: mantener el texto original en todos los idiomas"
+    "No traducir: mantener el texto original en todos los idiomas": "No traducir: mantener el texto original en todos los idiomas",
+    "Disponible en Business": "Disponible en Business",
+    "Disponible en el plan Business.": "Disponible en el plan Business.",
+    "Esta sección está incluida en el plan Business. Tus datos se conservan.": "Esta sección está incluida en el plan Business. Tus datos se conservan.",
+    "Ver planes": "Ver planes"
   },
   "exchangeRates": {
     "Sin referencia disponible": "Sin referencia disponible",

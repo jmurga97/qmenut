@@ -9,7 +9,8 @@ import { signOut } from "~/lib/auth-client";
 import { FEATURES } from "~/lib/features";
 import { i18n } from "~/lib/i18n";
 import { trpc } from "~/lib/trpc";
-import { getTenantQueryOptions } from "~/shared/api";
+import { getTenantQueryOptions, isFeatureEnabled } from "~/shared/api";
+import { PlanLockedState } from "~/shared/components/state/plan-locked-state";
 import { ImageActivityToasts } from "~/shared/images/image-activity";
 import { buildPublicMenuUrl } from "~/shared/services/public-menu-url";
 import { resolveSelectedBranch, useBranchStore } from "~/shared/stores/branch-store";
@@ -25,13 +26,14 @@ import "~/shared/images/styles.css";
 import { AdminSidebar } from "./admin-sidebar";
 
 import type { NavListItem } from "@jmurga97/components";
-import type { Permission } from "@qmenut/permissions";
+import type { Permission, PlanFeature } from "@qmenut/permissions";
 
 interface Section {
   id: string;
   label: string;
   path: string;
   permission?: Permission;
+  feature?: PlanFeature;
 }
 
 const SECTIONS = [
@@ -41,23 +43,27 @@ const SECTIONS = [
     label: i18n.t("shell___Analítica"),
     path: "/analytics",
     permission: "analytics.read",
+    feature: "analytics",
   },
   { id: "menu", label: i18n.t("shell___Menú"), path: "/menu" },
   {
     id: "promotions",
     label: i18n.t("shell___Promociones"),
     path: "/promotions",
+    feature: "promotions",
   },
   {
     id: "loyalty",
     label: i18n.t("shell___Fidelización"),
     path: "/loyalty",
+    feature: "loyalty",
   },
-  { id: "theme", label: i18n.t("shell___Tema"), path: "/theme" },
+  { id: "theme", label: i18n.t("shell___Tema"), path: "/theme", feature: "theme" },
   {
     id: "languages",
     label: i18n.t("shell___Idiomas"),
     path: "/languages",
+    feature: "languages",
   },
   { id: "qr", label: i18n.t("shell___Material para imprimir"), path: "/qr" },
   { id: "branch", label: i18n.t("shell___Sucursal"), path: "/branch" },
@@ -66,19 +72,27 @@ const SECTIONS = [
     label: i18n.t("shell___Usuarios"),
     path: "/users",
     permission: "users.manage",
+    feature: "users",
   },
 ] as const satisfies readonly Section[];
 
-function getCurrentSectionLabel(pathname: string) {
-  const section = SECTIONS.find((item) => item.path !== "/" && pathname.startsWith(item.path));
-  return section?.label ?? i18n.t("shell___Resumen");
+function getCurrentSection(pathname: string): Section | undefined {
+  return SECTIONS.find((item) => item.path !== "/" && pathname.startsWith(item.path));
 }
 
-function getNavigationItems(pathname: string, roleCode: Parameters<typeof can>[0]): NavListItem[] {
+interface NavigationInput {
+  pathname: string;
+  roleCode: Parameters<typeof can>[0];
+  isLocked: (section: Section) => boolean;
+}
+
+function getNavigationItems({ pathname, roleCode, isLocked }: NavigationInput): NavListItem[] {
   return SECTIONS.filter((section) => section.id !== "analytics" || FEATURES.analytics)
     .filter((section) => !("permission" in section) || can(roleCode, section.permission))
     .map((section) => ({
       current: section.path === "/" ? pathname === "/" : pathname.startsWith(section.path),
+      // Locked sections stay visible so owners can see what Business adds.
+      description: isLocked(section) ? "Business" : undefined,
       href: section.path,
       id: section.id,
       label: section.label,
@@ -100,7 +114,11 @@ export function AdminShell() {
   const selectedBranchId = useBranchStore((state) => state.selectedBranchId);
   const setSelectedBranchId = useBranchStore((state) => state.setSelectedBranchId);
   const selectedBranch = resolveSelectedBranch(tenant.branches, selectedBranchId);
-  const sectionLabel = getCurrentSectionLabel(location.pathname);
+  const currentSection = getCurrentSection(location.pathname);
+  const sectionLabel = currentSection?.label ?? i18n.t("shell___Resumen");
+  const isLocked = (section: Section) =>
+    section.feature !== undefined &&
+    !isFeatureEnabled({ branches: tenant.branches, selectedBranchId, feature: section.feature });
   async function selectNavigation(selectedId: string) {
     const section = SECTIONS.find((item) => item.id === selectedId);
     await navigate({ to: section?.path ?? "/" });
@@ -145,7 +163,7 @@ export function AdminShell() {
         <AdminSidebar
           disabled={editorBusy}
           branches={tenant.branches}
-          items={getNavigationItems(location.pathname, tenant.roleCode)}
+          items={getNavigationItems({ pathname: location.pathname, roleCode: tenant.roleCode, isLocked })}
           onIntent={(href) => void router.preloadRoute({ to: href })}
           onBranchChange={(branchId) => {
             if (isEditorBusy()) return;
@@ -168,7 +186,7 @@ export function AdminShell() {
     >
       <div className="admin-main-slot">
         {selectedBranch ? <ImageActivityToasts branchId={selectedBranch.id} /> : null}
-        <Outlet />
+        {currentSection && isLocked(currentSection) ? <PlanLockedState /> : <Outlet />}
       </div>
     </AppShell>
   );

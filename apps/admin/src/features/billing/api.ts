@@ -12,3 +12,6 @@ export function getCheckoutMutationOptions({ trpc }: { trpc: TrpcOptionsProxy })
 export function getPortalMutationOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
   return trpc.admin.billing.portal.mutationOptions({ onSuccess: redirectToBillingUrl });
 }
+export function getChangePlanMutationOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
+  return trpc.admin.billing.changePlan.mutationOptions({ onSuccess: redirectToBillingUrl });
+}

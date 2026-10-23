@@ -6,6 +6,7 @@ import * as analyticsApi from "~/features/analytics/api";
 import { AnalyticsPage } from "~/features/analytics/pages/analytics-page";
 import { analyticsSearchSchema } from "~/features/analytics/types";
 import { FEATURES } from "~/lib/features";
+import { hasSelectedFeature } from "~/shared/api";
 
 export const Route = createFileRoute("/_auth/analytics")({
   validateSearch: analyticsSearchSchema,
@@ -13,7 +14,9 @@ export const Route = createFileRoute("/_auth/analytics")({
   beforeLoad: ({ context }) => {
     if (!FEATURES.analytics || !can(context.roleCode, "analytics.read")) redirect({ to: "/", throw: true });
   },
-  loader: ({ context: { queryClient, trpc }, deps }) => {
+  loader: async ({ context, deps }) => {
+    if (!(await hasSelectedFeature(context, "analytics"))) return;
+    const { queryClient, trpc } = context;
     void queryClient
       .query({ ...analyticsApi.getAnalyticsSnapshotQueryOptions({ period: deps.period, trpc }), staleTime: "static" })
       .catch(noop);

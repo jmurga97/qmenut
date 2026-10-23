@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import * as api from "~/app/dashboard/api";
 import { DashboardPage } from "~/app/dashboard/pages/dashboard-page";
 import { dashboardSearchSchema } from "~/app/dashboard/types";
-import { getSelectedBranch } from "~/shared/api";
+import { getSelectedBranch, hasSelectedFeature } from "~/shared/api";
 import { getVisitsRange } from "~/shared/services/visit-series";
 
 export const Route = createFileRoute("/_auth/")({
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_auth/")({
   loader: async ({ context, deps }) => {
     const { queryClient, roleCode, trpc } = context;
     const jobs: Array<Promise<unknown>> = [];
-    if (can(roleCode, "analytics.read")) {
+    if (can(roleCode, "analytics.read") && (await hasSelectedFeature(context, "analytics"))) {
       const range = getVisitsRange(deps.period);
       jobs.push(
         queryClient.query({ ...api.getAnalyticsSnapshotQueryOptions({ period: "15d", trpc }), staleTime: "static" }),
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_auth/")({
     if (tenant.restaurant.sourceCurrency === "USD" && can(roleCode, "exchangeRates.write")) {
       jobs.push(queryClient.query({ ...api.getExchangeRatesSummaryQueryOptions({ trpc }), staleTime: "static" }));
     }
-    if (branch && can(roleCode, "loyalty.operate")) {
+    if (branch && can(roleCode, "loyalty.operate") && (await hasSelectedFeature(context, "loyalty"))) {
       jobs.push(
         queryClient.query({ ...api.getPendingRedemptionsQueryOptions({ trpc }), staleTime: "static" }),
         queryClient.query({ ...api.getVenueCodeQueryOptions({ branchId: branch.id, trpc }), staleTime: "static" }),

@@ -11,7 +11,7 @@ import { trpc } from "~/lib/trpc";
 import { getTenantQueryOptions } from "~/shared/api";
 import { PageHeader } from "~/shared/components/page-header";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
-import { useCan } from "~/shared/hooks/use-can";
+import { useCan, useFeature } from "~/shared/hooks/use-can";
 import { useSelectedBranch } from "~/shared/hooks/use-selected-branch";
 import { buildPublicMenuUrl } from "~/shared/services/public-menu-url";
 
@@ -26,8 +26,11 @@ import { VisitsChartCard } from "../components/visits-chart-card";
 export function DashboardPage() {
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const branch = useSelectedBranch();
-  const canInsights = useCan("analytics.read") && FEATURES.analytics;
-  const canOperate = useCan("loyalty.operate");
+  const hasAnalytics = useFeature("analytics");
+  const hasLoyalty = useFeature("loyalty");
+  const hasPromotions = useFeature("promotions");
+  const canInsights = useCan("analytics.read") && hasAnalytics && FEATURES.analytics;
+  const canOperate = useCan("loyalty.operate") && hasLoyalty;
   const canToggleAvailability = useCan("menu.toggleDishAvailability");
   const canExchangeRates = useCan("exchangeRates.write") && tenant.restaurant.sourceCurrency === "USD";
   return (
@@ -78,9 +81,11 @@ export function DashboardPage() {
         </div>
       ) : null}
       <div className="admin-dashboard-split">
-        <Suspense fallback={<CardSkeleton rows={3} title={i18n.t("dashboard___Promociones")} />}>
-          <PromotionsCard />
-        </Suspense>
+        {hasPromotions ? (
+          <Suspense fallback={<CardSkeleton rows={3} title={i18n.t("dashboard___Promociones")} />}>
+            <PromotionsCard />
+          </Suspense>
+        ) : null}
         {canExchangeRates ? (
           <Suspense fallback={<CardSkeleton rows={2} title={i18n.t("dashboard___Tasa VES")} />}>
             <ExchangeRatesCard />

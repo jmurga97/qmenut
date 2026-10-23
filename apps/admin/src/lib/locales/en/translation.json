@@ -220,14 +220,18 @@
     "Pago pendiente": "Pending payment",
     "Cancelada": "Cancelled",
     "Básico": "Basic",
-    "Suscribir Básico": "Subscribe Basic",
     "Facturación": "Billing",
     "Suscripción": "Subscription",
     "Sin suscripción": "No subscription",
     "Cancelación programada.": "Scheduled cancellation.",
     "Gestionar {{branch}} en Stripe": "Manage {{branch}} in Stripe",
     "Gestionar en Stripe": "Manage in Stripe",
-    "{{plan}} para {{branch}}": "{{plan}} for {{branch}}"
+    "{{plan}} para {{branch}}": "{{plan}} for {{branch}}",
+    "Business": "Business",
+    "Cambiar a {{plan}}": "Switch to {{plan}}",
+    "Con varias sucursales, cada una necesita el plan Business.": "With several branches, each one needs the Business plan.",
+    "Probar {{plan}} 14 días": "Try {{plan}} for 14 days",
+    "Suscribir {{plan}}": "Subscribe to {{plan}}"
   },
   "branch": {
     "useBranchForm debe usarse dentro de BranchFormProvider": "useBranchForm must be used inside BranchFormProvider",
@@ -332,7 +336,8 @@
     "Máximo 10 redes sociales": "Maximum 10 social networks",
     "Email no válido": "Invalid email",
     "La zona horaria es obligatoria": "Time zone is required",
-    "Selecciona una dirección para completar la ubicación del mapa": "Select an address to complete the map location"
+    "Selecciona una dirección para completar la ubicación del mapa": "Select an address to complete the map location",
+    "En el plan Básico la carta muestra solo la foto de portada. La galería es del plan Business.": "On the Basic plan the menu shows only the cover photo. The gallery is part of the Business plan."
   },
   "shared": {
     "Optional": "Optional",
@@ -423,7 +428,11 @@
     "No se traducen ({{count}})": "Not translated ({{count}})",
     "No se traduce": "Not translated",
     "Permitir traducción": "Allow translation",
-    "No traducir: mantener el texto original en todos los idiomas": "Don't translate: keep the original text in every language"
+    "No traducir: mantener el texto original en todos los idiomas": "Don't translate: keep the original text in every language",
+    "Disponible en Business": "Available on Business",
+    "Disponible en el plan Business.": "Available on the Business plan.",
+    "Esta sección está incluida en el plan Business. Tus datos se conservan.": "This section is part of the Business plan. Your data is kept.",
+    "Ver planes": "See plans"
   },
   "exchangeRates": {
     "Sin referencia disponible": "No reference available",
