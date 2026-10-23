@@ -16,6 +16,7 @@ export interface QrPrintBranch {
 type QrDocumentProps = {
   branch: QrPrintBranch;
   codes: Record<QrTarget, { svg: QrSvgMarkup | null }>;
+  host: string;
   logoReady: boolean;
   mode: QrPrintMode;
   paper: (typeof QR_PAPER_SIZES)[number];
@@ -86,7 +87,7 @@ function QrTableSheets({ branch, codes, logoReady, quantity, style, tableSize, t
   ));
 }
 
-function QrFlyer({ branch, codes, logoReady, paper, style, targets, theme }: QrDocumentProps) {
+function QrFlyer({ branch, codes, host, logoReady, paper, style, targets, theme }: QrDocumentProps) {
   return (
     <div
       className="admin-qr-paper admin-qr-flyer"
@@ -103,12 +104,18 @@ function QrFlyer({ branch, codes, logoReady, paper, style, targets, theme }: QrD
         <div className={`admin-qr-flyer-codes admin-qr-flyer-codes--${targets.length}`}>
           {targets.map((target) => (
             <div className="admin-qr-flyer-target" key={target}>
+              <span className="admin-qr-flyer-eyebrow">
+                {QR_TARGET_OPTIONS.find((option) => option.id === target)?.label}
+              </span>
               <QrCode svg={codes[target].svg} target={target} />
               <p>{QR_INSTRUCTIONS[target]}</p>
             </div>
           ))}
         </div>
-        {style !== "plain" && theme?.tagline ? <p className="admin-qr-flyer-tagline">{theme.tagline}</p> : null}
+        <footer className="admin-qr-flyer-footer">
+          {style !== "plain" && theme?.tagline ? <p>{theme.tagline}</p> : null}
+          <span>{host}</span>
+        </footer>
       </div>
     </div>
   );

@@ -116,6 +116,7 @@ export function QrPrintablePanel({
             <QrPrintDocument
               branch={branch}
               codes={assets.codes}
+              host={host}
               logoReady={assets.logoState === "ready"}
               mode={mode}
               paper={paper}
