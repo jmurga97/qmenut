@@ -1,3 +1,4 @@
+import { listBranchPlanCodes } from "@qmenut/db/repositories/admin-branches.repository";
 import { getBranchSubscription } from "@qmenut/db/repositories/billing.repository";
 import { getRestaurantById } from "@qmenut/db/repositories/restaurants.repository";
 import { TRPCError } from "@trpc/server";
@@ -13,6 +14,7 @@ import type { DrizzleDb } from "@qmenut/db/client";
 import type { PlanCode } from "@qmenut/db/repositories/billing.repository";
 
 const BLOCKING_STATUSES = new Set(["active", "trialing", "past_due"]);
+const TRIAL_DAYS = 14;
 
 interface CreateCheckoutSessionInput {
   db: DrizzleDb;
@@ -20,7 +22,24 @@ interface CreateCheckoutSessionInput {
   restaurantId: string;
   userEmail: string;
   branchId: string;
-  planCode: Extract<PlanCode, "basic">;
+  planCode: PlanCode;
+}
+
+interface AssertPlanAllowedInput {
+  db: DrizzleDb;
+  restaurantId: string;
+  planCode: PlanCode;
+}
+
+/** Basic is a single-location plan: a restaurant with several branches stays on Business. */
+export async function assertPlanAllowed({ db, restaurantId, planCode }: AssertPlanAllowedInput): Promise<void> {
+  if (planCode !== "basic") return;
+
+  const branchPlans = await listBranchPlanCodes({ db, restaurantId });
+
+  if (branchPlans.length > 1) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "El plan Básico es para restaurantes con una sola sucursal" });
+  }
 }
 
 export async function createCheckoutSession({
@@ -32,10 +51,12 @@ export async function createCheckoutSession({
   planCode,
 }: CreateCheckoutSessionInput): Promise<{ url: string }> {
   await assertBranchAccess({ db, restaurantId, branchId });
+  await assertPlanAllowed({ db, restaurantId, planCode });
 
   const existing = await getBranchSubscription({ db, restaurantId, branchId });
 
-  if (existing && BLOCKING_STATUSES.has(existing.status)) {
+  // Operator-created tenants carry a trialing row without a Stripe subscription; only a real one blocks.
+  if (existing?.stripeSubscriptionId && BLOCKING_STATUSES.has(existing.status)) {
     throw new TRPCError({ code: "CONFLICT", message: "La sucursal ya tiene una suscripción activa" });
   }
 
@@ -54,7 +75,7 @@ export async function createCheckoutSession({
   });
 
   const stripe = StripeProvider.getInstance().getClient(env);
-  const priceId = priceIdFor(env);
+  const priceId = priceIdFor(env, planCode);
 
   let session: Stripe.Checkout.Session;
 
@@ -67,16 +88,18 @@ export async function createCheckoutSession({
         client_reference_id: branchId,
         subscription_data: {
           metadata: { restaurantId, branchId, planCode },
+          // One free trial per branch: a branch that already had a Stripe subscription pays from day one.
+          trial_period_days: existing?.stripeSubscriptionId ? undefined : TRIAL_DAYS,
         },
         metadata: { restaurantId, branchId, planCode },
         success_url: `${env.ADMIN_APP_URL}/billing?checkout=success`,
         cancel_url: `${env.ADMIN_APP_URL}/billing?checkout=canceled`,
       },
       {
-        // Intentionally branch-scoped: plan changes belong in the Customer Portal.
-        // Stripe retains idempotency keys for 24 hours, so a different checkout
-        // attempt in that window is reported as a conflict.
-        idempotencyKey: `checkout:${branchId}`,
+        // Scoped to branch and plan: plan changes after checkout belong in the Customer Portal.
+        // Stripe retains idempotency keys for 24 hours, so repeating the same plan's checkout
+        // in that window with different parameters is reported as a conflict.
+        idempotencyKey: `checkout:${branchId}:${planCode}`,
       },
     );
   } catch (error) {

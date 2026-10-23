@@ -9,6 +9,8 @@ export interface BillingBranchOverview {
   branchName: string;
   planCode: BranchSubscriptionRow["planCode"] | null;
   status: BranchSubscriptionRow["status"] | null;
+  /** False for operator-created trials, which have no Stripe subscription to manage yet. */
+  hasStripeSubscription: boolean;
   cancelAtPeriodEnd: boolean;
   currentPeriodEnd: number | null;
 }
@@ -41,6 +43,7 @@ export async function getBillingOverview({ db, restaurantId }: GetBillingOvervie
         branchName: branch.name,
         planCode: subscription?.planCode ?? null,
         status: subscription?.status ?? null,
+        hasStripeSubscription: Boolean(subscription?.stripeSubscriptionId),
         cancelAtPeriodEnd: subscription?.cancelAtPeriodEnd ?? false,
         currentPeriodEnd: subscription?.currentPeriodEnd ?? null,
       };

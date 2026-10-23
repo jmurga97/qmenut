@@ -1,14 +1,15 @@
+import { PLAN_CODES } from "@qmenut/permissions";
 import { z } from "zod";
 
 import { createCheckoutSession } from "./create-checkout-session";
-import { createPortalSession } from "./create-portal-session";
+import { createPlanChangeSession, createPortalSession } from "./create-portal-session";
 import { getBillingOverview } from "./get-billing-overview";
 import { router, tenantProcedure } from "../../trpc/trpc";
 import { requirePermission } from "../admin-tenant/require-permission";
 
-const checkoutSchema = z.object({
+const planChoiceSchema = z.object({
   branchId: z.string().trim().min(1),
-  planCode: z.enum(["basic"]),
+  planCode: z.enum(PLAN_CODES),
 });
 
 export const billingRouter = router({
@@ -16,13 +17,23 @@ export const billingRouter = router({
     requirePermission(ctx.tenant, "billing.manage");
     return getBillingOverview({ db: ctx.db, restaurantId: ctx.tenant.restaurantId });
   }),
-  checkout: tenantProcedure.input(checkoutSchema).mutation(({ ctx, input }) => {
+  checkout: tenantProcedure.input(planChoiceSchema).mutation(({ ctx, input }) => {
     requirePermission(ctx.tenant, "billing.manage");
     return createCheckoutSession({
       db: ctx.db,
       env: ctx.env,
       restaurantId: ctx.tenant.restaurantId,
       userEmail: ctx.session.user.email,
+      branchId: input.branchId,
+      planCode: input.planCode,
+    });
+  }),
+  changePlan: tenantProcedure.input(planChoiceSchema).mutation(({ ctx, input }) => {
+    requirePermission(ctx.tenant, "billing.manage");
+    return createPlanChangeSession({
+      db: ctx.db,
+      env: ctx.env,
+      restaurantId: ctx.tenant.restaurantId,
       branchId: input.branchId,
       planCode: input.planCode,
     });
