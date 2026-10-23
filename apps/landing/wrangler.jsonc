@@ -3,6 +3,7 @@
   "name": "qmenut-landing",
   "main": "./dist/_worker.js/index.js",
   "assets": {
+    "binding": "ASSETS",
     "directory": "./dist",
   },
   "compatibility_date": "2026-06-16",
@@ -15,6 +16,7 @@
     "production": {
       "name": "qmenut-landing",
       "assets": {
+        "binding": "ASSETS",
         "directory": "./dist",
       },
       "observability": {
