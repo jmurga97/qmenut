@@ -1,11 +1,12 @@
 import { useLayoutEffect, useState } from "react";
 
 import { i18n } from "~/lib/i18n";
+import { useFeature } from "~/shared/hooks/use-can";
 import { buildQrUrl } from "~/shared/services/qr";
 
 import { useQrController } from "./use-qr-controller";
 import { useQrPrint } from "./use-qr-print";
-import { QR_PAPER_SIZES, QR_STYLE_OPTIONS, QR_TABLE_SIZES } from "../constants";
+import { QR_PAPER_SIZES, QR_STYLE_OPTIONS, QR_TABLE_SIZES, QR_TARGET_OPTIONS } from "../constants";
 
 import type { QrPrintBranch } from "../components/qr-print-document";
 import type { QrPrintMode } from "../constants";
@@ -26,6 +27,12 @@ export function useQrPrintController({ branch, host, mode, theme }: QrPrintInput
   const [paperId, setPaperId] = useState("a6");
   const [quantityInput, setQuantityInput] = useState("15");
   const [flyerTargets, setFlyerTargets] = useState<QrTarget[]>(["menu"]);
+  // Loyalty and Google reviews are Business features: Basic only prints the menu QR.
+  const hasLoyalty = useFeature("loyalty");
+  const hasReviews = useFeature("contact.googleReviews");
+  const targetOptions = QR_TARGET_OPTIONS.filter(
+    (option) => (option.id !== "loyalty" || hasLoyalty) && (option.id !== "reviews" || hasReviews),
+  );
   const style = QR_STYLE_OPTIONS.find((option) => option.id === styleId)?.id ?? "plain";
   const tableSize = QR_TABLE_SIZES.find((option) => option.id === sizeId) ?? QR_TABLE_SIZES[0];
   const paper = QR_PAPER_SIZES.find((option) => option.id === paperId) ?? QR_PAPER_SIZES[0];
@@ -95,6 +102,7 @@ export function useQrPrintController({ branch, host, mode, theme }: QrPrintInput
     flyerTargets,
     setFlyerTargets,
     setStyleId,
+    targetOptions,
     tableSize,
     paper,
     quantity,

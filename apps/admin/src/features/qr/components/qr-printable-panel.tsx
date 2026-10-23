@@ -7,7 +7,7 @@ import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 
 import { QrDownloadForm } from "./qr-download-form";
 import { QrPrintDocument } from "./qr-print-document";
-import { QR_PAPER_SIZES, QR_STYLE_OPTIONS, QR_TABLE_SIZES, QR_TARGET_OPTIONS } from "../constants";
+import { QR_PAPER_SIZES, QR_STYLE_OPTIONS, QR_TABLE_SIZES } from "../constants";
 import { useQrPrintController } from "../hooks/use-qr-print-controller";
 
 import type { QrPrintBranch } from "./qr-print-document";
@@ -40,17 +40,20 @@ export function QrPrintablePanel({
     status,
   } = state;
   const title = mode === "tables" ? i18n.t("qr___QR para las mesas") : i18n.t("qr___Folletos y carteles");
+  let intro = i18n.t("qr___El mismo QR, tantas veces como necesites. Imprime en A4 y recorta por las guías.");
+  if (mode === "flyer") {
+    intro =
+      state.targetOptions.length > 1
+        ? i18n.t("qr___Tu carta, las reseñas y la fidelización, juntos o por separado en una misma página.")
+        : i18n.t("qr___Tu carta en una página, lista para imprimir.");
+  }
   return (
     <FormProvider {...controller.form}>
       <div className="admin-qr-editor">
         <section className="admin-card admin-qr-controls" aria-labelledby={`qr-${mode}-title`}>
           <div className="admin-qr-intro">
             <h2 id={`qr-${mode}-title`}>{title}</h2>
-            <p>
-              {mode === "tables"
-                ? i18n.t("qr___El mismo QR, tantas veces como necesites. Imprime en A4 y recorta por las guías.")
-                : i18n.t("qr___Tu carta, las reseñas y la fidelización, juntos o por separado en una misma página.")}
-            </p>
+            <p>{intro}</p>
           </div>
           <QrPrintFields state={state} mode={mode} googlePlaceId={branch.googlePlaceId} />
           <Field
@@ -67,7 +70,9 @@ export function QrPrintablePanel({
               options={[...QR_STYLE_OPTIONS]}
             />
           </Field>
-          {!branch.googlePlaceId && (mode === "flyer" || controller.target === "reviews") ? (
+          {!branch.googlePlaceId &&
+          state.targetOptions.some((option) => option.id === "reviews") &&
+          (mode === "flyer" || controller.target === "reviews") ? (
             <p className="admin-field-hint">
               {i18n.t("qr___Conecta la ficha de Google de esta sucursal para generar el QR de reseñas.")}{" "}
               <Link to="/branch">{i18n.t("qr___Abrir ajustes de sucursal")}</Link>
@@ -147,12 +152,13 @@ function QrPrintFields({
     flyerTargets,
     setFlyerTargets,
     paper,
+    targetOptions,
   } = state;
   return (
     <>
       {mode === "tables" ? (
         <>
-          <FormSelect label={i18n.t("qr___Destino del QR")} name="target" options={QR_TARGET_OPTIONS} />
+          <FormSelect label={i18n.t("qr___Destino del QR")} name="target" options={targetOptions} />
           <Field label={i18n.t("qr___Tamaño de cada QR")}>
             <Select value={sizeId} onValueChange={(value) => value && setSizeId(value)} options={[...QR_TABLE_SIZES]} />
           </Field>
@@ -177,7 +183,7 @@ function QrPrintFields({
         <>
           <fieldset className="admin-qr-destinations">
             <legend>{i18n.t("qr___Qué quieres incluir")}</legend>
-            {QR_TARGET_OPTIONS.map((option) => (
+            {targetOptions.map((option) => (
               <Checkbox
                 key={option.id}
                 label={option.label}
@@ -185,9 +191,11 @@ function QrPrintFields({
                 disabled={option.id === "reviews" && !googlePlaceId}
                 onCheckedChange={(checked) =>
                   setFlyerTargets(
-                    QR_TARGET_OPTIONS.filter((candidate) =>
-                      candidate.id === option.id ? checked : flyerTargets.includes(candidate.id),
-                    ).map((candidate) => candidate.id),
+                    targetOptions
+                      .filter((candidate) =>
+                        candidate.id === option.id ? checked : flyerTargets.includes(candidate.id),
+                      )
+                      .map((candidate) => candidate.id),
                   )
                 }
               />

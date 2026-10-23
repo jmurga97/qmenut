@@ -867,7 +867,8 @@
     "Activa los gráficos de fondo para imprimir el color de marca.": "Turn on background graphics to print the brand colour.",
     "Vista previa de impresión": "Print preview",
     "Vista previa": "Preview",
-    "{{quantity}} QR · A4 · {{pages}} pág.": "{{quantity}} QRs · A4 · {{pages}} pp."
+    "{{quantity}} QR · A4 · {{pages}} pág.": "{{quantity}} QRs · A4 · {{pages}} pp.",
+    "Tu carta en una página, lista para imprimir.": "Your menu on one page, ready to print."
   },
   "theme": {
     "No disponible": "Not available",
