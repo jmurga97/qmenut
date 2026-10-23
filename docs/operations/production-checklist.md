@@ -23,8 +23,8 @@ items need Cloudflare, vendor-account, product, or legal work.
       `DEEPL_API_KEY`. Configure `GOOGLE_PLACES_API_KEY` (Places API (New)) on the API
       before enabling branch address autocomplete or Google reviews. Never set
       `DEV_FIXED_OTP` in production.
-- [x] Replace the Stripe price placeholders, including `STRIPE_PRICE_BASIC` in the
-      production variables.
+- [x] Replace the Stripe price placeholders, including `STRIPE_PRICE_BASIC` and
+      `STRIPE_PRICE_BUSINESS` in the production variables.
 - [x] Confirm and migrate the remote D1 database. Verify that database
       `f3138d43-a32e-46f2-a9d9-b4e777b02d8a` exists in the deployment account, then apply
       every committed migration through `0002_branch_coordinates.sql` remotely with the
@@ -41,9 +41,13 @@ items need Cloudflare, vendor-account, product, or legal work.
 - [x] Replace the mock-backed `/promos` and `/contacto` pages. `use-promos-content.ts` and
       `use-contact-content.ts` still return `MOCK_*` values. Use the existing promotions
       API and effective-price data, and source real branch contact details.
-- [ ] Make plan gating real, or simplify the pricing. `getBranchEntitlement` and
-      `requirePlan` are exported but unused, so the business plan unlocks nothing. Wire
-      them into business-only procedures, or launch with one plan.
+- [x] Make plan gating real. Basic and Business are enforced by `requireFeature` in the
+      API, the public menu payload and the admin (see `docs/domains/billing.md`), and
+      checkout sells both plans with a 14-day trial.
+- [ ] Align Stripe live mode. The production price IDs must be live prices, matched by a
+      live `STRIPE_SECRET_KEY`, a live webhook endpoint and its `STRIPE_WEBHOOK_SECRET`,
+      and a live Customer Portal configuration that allows switching between Basic and
+      Business.
 - [x] Create onboarding subscription state. `create-tenant.ts` now inserts a
       `branch_subscriptions` trial row that matches `branch.planCode`. The Stripe webhook
       sync can replace its provider fields after checkout.

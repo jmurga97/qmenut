@@ -4,8 +4,8 @@ What each plan includes, feature by feature. Prices and the launch offer live in
 pricing ladder; this page only defines scope. Enforcement (entitlements, gating, downgrade
 behaviour) is defined separately and should use the feature keys below.
 
-Status: draft, 22 October 2026. Items marked **(confirm)** are recommendations, not yet
-decided.
+Status: Basic and Business decided, 23 October 2026, and enforced in the app (see
+`docs/domains/billing.md`). Delivery is still a proposal.
 
 ## Plans in one line
 
@@ -25,8 +25,8 @@ decided.
 | Feature                                                    | Key                     | Basic        | Business | Delivery |
 | ---------------------------------------------------------- | ----------------------- | ------------ | -------- | -------- |
 | Menu page: categories, dishes, prices, descriptions        | `menu`                  | ✓            | ✓        | ✓        |
-| Dish photos                                                | `menu.dishPhotos`       | ✓ (confirm)  | ✓        | ✓        |
-| Category images                                            | `menu.categoryImages`   | —            | ✓        | ✓        |
+| Dish photos                                                | `menu.dishPhotos`       | ✓            | ✓        | ✓        |
+| Category images                                            | `menu.categoryImages`   | ✓            | ✓        | ✓        |
 | Variants and extras shown on the dish                      | `menu.variants`         | ✓            | ✓        | ✓        |
 | Allergens and dietary tags                                 | `menu.allergens`        | ✓            | ✓        | ✓        |
 | Sold-out toggle                                            | `menu.availability`     | ✓            | ✓        | ✓        |
@@ -38,10 +38,10 @@ decided.
 | Contact page: Google reviews                               | `contact.googleReviews` | —            | ✓        | ✓        |
 | Legal pages (aviso legal, privacidad)                      | `legal`                 | ✓            | ✓        | ✓        |
 | Languages and translations, locale routes, hreflang        | `languages`             | —            | ✓        | ✓        |
-| VES display price for USD menus                            | `currency.ves`          | ✓ (confirm)  | ✓        | ✓        |
+| VES display price for USD menus                            | `currency.ves`          | ✓            | ✓        | ✓        |
 | Loyalty points page `/puntos`                              | `loyalty`               | —            | ✓        | ✓        |
 | Reservations                                               | `reservations`          | —            | new      | new      |
-| Installable app (branded manifest and icons, offline page) | `pwa`                   | — (confirm)  | ✓        | ✓        |
+| Installable app (branded manifest and icons, offline page) | `pwa`                   | —            | ✓        | ✓        |
 | SEO: title, Open Graph, restaurant JSON-LD, sitemap        | `seo`                   | ✓            | ✓        | ✓        |
 | "Made with QMenut" footer badge                            | `branding.badge`        | always shown | hideable | hideable |
 
@@ -59,20 +59,20 @@ decided.
 
 ### Owner dashboard
 
-| Feature                                            | Key             | Basic                | Business | Delivery |
-| -------------------------------------------------- | --------------- | -------------------- | -------- | -------- |
-| Menu editor (categories, dishes, extras, tags)     | `menu`          | ✓                    | ✓        | ✓        |
-| Branch info: address, hours, socials, legal        | `branch`        | ✓                    | ✓        | ✓        |
-| QR code download and printable QR                  | `qr`            | ✓                    | ✓        | ✓        |
-| Printable PDF menu                                 | `menuPrint`     | — (confirm)          | ✓        | ✓        |
-| Local exchange rate (VES)                          | `exchangeRates` | ✓ if `currency.ves`  | ✓        | ✓        |
-| Promotions editor                                  | `promotions`    | —                    | ✓        | ✓        |
-| Languages and translations                         | `languages`     | —                    | ✓        | ✓        |
-| Loyalty program, insights, staff stamping          | `loyalty`       | —                    | ✓        | ✓        |
-| Analytics                                          | `analytics`     | —                    | ✓        | ✓        |
-| Team: owner, admin and staff roles                 | `users`         | owner only (confirm) | ✓        | ✓        |
-| Several locations under one restaurant (franchise) | `multiBranch`   | — one location       | ✓        | ✓        |
-| Billing                                            | `billing`       | ✓                    | ✓        | ✓        |
+| Feature                                            | Key             | Basic               | Business | Delivery |
+| -------------------------------------------------- | --------------- | ------------------- | -------- | -------- |
+| Menu editor (categories, dishes, extras, tags)     | `menu`          | ✓                   | ✓        | ✓        |
+| Branch info: address, hours, socials, legal        | `branch`        | ✓                   | ✓        | ✓        |
+| QR code download and printable QR                  | `qr`            | ✓                   | ✓        | ✓        |
+| Printable PDF menu                                 | `menuPrint`     | —                   | ✓        | ✓        |
+| Local exchange rate (VES)                          | `exchangeRates` | ✓ if `currency.ves` | ✓        | ✓        |
+| Promotions editor                                  | `promotions`    | —                   | ✓        | ✓        |
+| Languages and translations                         | `languages`     | —                   | ✓        | ✓        |
+| Loyalty program, insights, staff stamping          | `loyalty`       | —                   | ✓        | ✓        |
+| Analytics                                          | `analytics`     | —                   | ✓        | ✓        |
+| Team: owner, admin and staff roles                 | `users`         | owner only          | ✓        | ✓        |
+| Several locations under one restaurant (franchise) | `multiBranch`   | — one location      | ✓        | ✓        |
+| Billing                                            | `billing`       | ✓                   | ✓        | ✓        |
 
 ### Ordering (Delivery add-on)
 
@@ -152,19 +152,19 @@ limit are needed from day one.
 ## Decided
 
 - Payment: card up front with a 14-day trial, for every plan.
+- Dish photos, category images and VES display are in Basic.
+- Team management, the printable PDF menu and the installable app are Business-only. On
+  Basic only the owner can sign in; other members keep their membership but lose access.
+- Time-based schedules are Business-only. On Basic every active category is shown.
+- Downgrading never deletes data: Business content stays stored and is hidden or locked
+  until the restaurant upgrades again.
+- Basic is for one location. A restaurant with several branches cannot choose Basic.
+- Existing tenants were moved to Business when gating launched.
 - Business signs up through the same self-serve flow, starting on a `qmenut.app`
   subdomain.
 - AI menu import (step 6, v2) comes after the plan changes. It is wanted, not dropped.
 
 ## Open decisions
 
-1. Dish photos in Basic. Recommended yes: a menu without photos sells poorly, and the cost
-   is storage only.
-2. VES display in Basic. Recommended yes for Venezuela: a USD menu without bolívares is not
-   usable there, and it would make Basic unsellable in that market.
-3. Team members in Basic. Recommended owner only, or owner plus one staff for the
-   sold-out toggle.
-4. Printable PDF menu and installable app in Basic. Recommended no, both are cheap upgrade
-   reasons.
-5. Pickup add-on versus Delivery: whether pickup stays a separate add-on long term or only
+1. Pickup add-on versus Delivery: whether pickup stays a separate add-on long term or only
    until Delivery ships.
