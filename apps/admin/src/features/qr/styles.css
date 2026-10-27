@@ -236,7 +236,7 @@
 }
 
 .admin-qr-document--colour .admin-qr-flyer {
-  --qr-accent: color-mix(in srgb, var(--qm-on-primary) 78%, var(--qm-primary));
+  --qr-accent: var(--qm-on-primary);
   --qr-muted: color-mix(in srgb, var(--qm-on-primary) 72%, var(--qm-primary));
   --qr-rule: var(--qm-on-primary);
   --qr-hairline: color-mix(in srgb, var(--qm-on-primary) 35%, var(--qm-primary));
@@ -311,7 +311,7 @@
   text-wrap: balance;
 }
 
-/* A single destination reads as a poster: the instruction becomes the headline above the code. */
+/* A single destination reads as a poster: the label becomes the title and the instruction its subtitle, both above the code. */
 .admin-qr-flyer-codes--1 {
   grid-template-columns: minmax(0, 1fr);
   justify-self: center;
@@ -324,11 +324,19 @@
   margin-block-start: calc(var(--qr-unit) * 2);
 }
 
-.admin-qr-flyer-codes--1 p {
+.admin-qr-flyer-codes--1 .admin-qr-flyer-eyebrow {
+  color: var(--qr-text);
   font-family: var(--qm-heading);
-  font-size: calc(var(--qr-unit) * 7);
+  font-size: calc(var(--qr-unit) * 6.5);
   font-weight: var(--qm-hw, 700);
-  line-height: 1.1;
+  letter-spacing: var(--qm-name-ls, normal);
+  line-height: 1.05;
+  text-transform: none;
+  text-wrap: balance;
+}
+
+.admin-qr-flyer-codes--1 p {
+  font-size: calc(var(--qr-unit) * 3.6);
 }
 
 .admin-qr-flyer-codes--3 {

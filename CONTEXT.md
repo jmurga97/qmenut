@@ -183,3 +183,55 @@ _Avoid_: Image processing job, upload status
 The relationship between an uploaded image and the restaurant, branch, and purpose
 that may use it in Qmenut.
 _Avoid_: Processing lifecycle, image publication
+
+## Reservations
+
+**Reservation**:
+A guest's request to hold one table at one branch for one reservation slot. It stays
+pending until restaurant staff accept or decline it, or until its response time ends and
+it is accepted automatically.
+_Avoid_: Booking, table request
+
+**Response time**:
+The period staff have to accept or decline a pending reservation before it is accepted
+automatically. It never runs past the lead time before the slot.
+_Avoid_: Expiry, SLA
+
+**Reservation slot**:
+A start time, chosen by the restaurant, at which a branch takes reservations.
+_Avoid_: Hour, time button, shift
+
+**Slot capacity**:
+The maximum number of reservations a branch takes for one reservation slot, one per
+table, whatever the party size. Pending and accepted reservations both count; a slot that
+has reached it is full.
+_Avoid_: Covers, seats
+
+**Online party limit**:
+The largest party a guest can reserve online at a branch; larger groups contact the
+branch directly.
+_Avoid_: Max covers, group size
+
+**Reservation window**:
+The period in which a reservation slot can be requested: from a set number of days ahead
+until a set lead time before the slot starts.
+_Avoid_: Booking horizon, availability
+
+**Slot closure**:
+A date, or one reservation slot on a date, that staff have closed to online reservations,
+for example for a holiday, a private event, or tables taken by phone.
+_Avoid_: Block, blackout, manual booking
+
+**Acceptance notice**:
+The message telling the guest that staff accepted their reservation.
+_Avoid_: Confirmation
+
+**Attendance check**:
+The message sent shortly before an accepted reservation asking the guest to confirm
+that they will come, or to cancel.
+_Avoid_: Confirmation, reminder
+
+**Unconfirmed reservation**:
+An accepted reservation whose guest has not answered the attendance check by its
+deadline. It still holds its table; staff decide whether to give the table away.
+_Avoid_: No-show, released reservation

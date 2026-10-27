@@ -1,8 +1,8 @@
 import { buildQmThemeVars } from "@qmenut/ui/theme/apply-theme";
 
-import { QR_INSTRUCTIONS, QR_TARGET_OPTIONS } from "../constants";
+import { getQrPrintCopy } from "../constants";
 
-import type { QR_PAPER_SIZES, QR_TABLE_SIZES, QrPrintMode, QrPrintStyle } from "../constants";
+import type { QR_PAPER_SIZES, QR_TABLE_SIZES, QrPrintLanguage, QrPrintMode, QrPrintStyle } from "../constants";
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 import type { CSSProperties } from "react";
 import type { QrSvgMarkup, QrTarget } from "~/shared/services/qr";
@@ -17,6 +17,7 @@ type QrDocumentProps = {
   branch: QrPrintBranch;
   codes: Record<QrTarget, { svg: QrSvgMarkup | null }>;
   host: string;
+  language: QrPrintLanguage;
   logoReady: boolean;
   mode: QrPrintMode;
   paper: (typeof QR_PAPER_SIZES)[number];
@@ -36,8 +37,7 @@ function QrBrand({ branch, logoReady }: { branch: QrPrintBranch; logoReady: bool
   );
 }
 
-function QrCode({ svg, target }: { svg: QrSvgMarkup | null; target: QrTarget }) {
-  const label = QR_TARGET_OPTIONS.find((option) => option.id === target)?.label;
+function QrCode({ label, svg }: { label: string; svg: QrSvgMarkup | null }) {
   return (
     <div
       aria-label={label}
@@ -49,10 +49,11 @@ function QrCode({ svg, target }: { svg: QrSvgMarkup | null; target: QrTarget }) 
 }
 
 export function QrPrintDocument(props: QrDocumentProps) {
-  const { mode, theme, style } = props;
+  const { language, mode, theme, style } = props;
   return (
     <div
       className={`admin-qr-document admin-qr-document--${style}`}
+      lang={language}
       style={theme && style !== "plain" ? buildQmThemeVars(theme) : undefined}
     >
       {mode === "tables" ? <QrTableSheets {...props} /> : <QrFlyer {...props} />}
@@ -60,7 +61,7 @@ export function QrPrintDocument(props: QrDocumentProps) {
   );
 }
 
-function QrTableSheets({ branch, codes, logoReady, quantity, style, tableSize, targets }: QrDocumentProps) {
+function QrTableSheets({ branch, codes, language, logoReady, quantity, style, tableSize, targets }: QrDocumentProps) {
   const capacity = tableSize.columns * tableSize.rows;
   const target = targets[0];
   if (!target) return null;
@@ -79,7 +80,7 @@ function QrTableSheets({ branch, codes, logoReady, quantity, style, tableSize, t
         {Array.from({ length: Math.min(capacity, quantity - page * capacity) }, (_, index) => (
           <div className="admin-qr-table-tile" data-qr-fit key={index}>
             {style === "plain" ? null : <QrBrand branch={branch} logoReady={logoReady} />}
-            <QrCode svg={codes[target].svg} target={target} />
+            <QrCode label={getQrPrintCopy(language)[target].label} svg={codes[target].svg} />
           </div>
         ))}
       </div>
@@ -87,7 +88,8 @@ function QrTableSheets({ branch, codes, logoReady, quantity, style, tableSize, t
   ));
 }
 
-function QrFlyer({ branch, codes, host, logoReady, paper, style, targets, theme }: QrDocumentProps) {
+function QrFlyer({ branch, codes, host, language, logoReady, paper, style, targets, theme }: QrDocumentProps) {
+  const copy = getQrPrintCopy(language);
   return (
     <div
       className="admin-qr-paper admin-qr-flyer"
@@ -104,11 +106,9 @@ function QrFlyer({ branch, codes, host, logoReady, paper, style, targets, theme 
         <div className={`admin-qr-flyer-codes admin-qr-flyer-codes--${targets.length}`}>
           {targets.map((target) => (
             <div className="admin-qr-flyer-target" key={target}>
-              <span className="admin-qr-flyer-eyebrow">
-                {QR_TARGET_OPTIONS.find((option) => option.id === target)?.label}
-              </span>
-              <QrCode svg={codes[target].svg} target={target} />
-              <p>{QR_INSTRUCTIONS[target]}</p>
+              <span className="admin-qr-flyer-eyebrow">{copy[target].label}</span>
+              <QrCode label={copy[target].label} svg={codes[target].svg} />
+              <p>{copy[target].instruction}</p>
             </div>
           ))}
         </div>

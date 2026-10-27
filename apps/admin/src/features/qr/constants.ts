@@ -31,11 +31,22 @@ export const QR_PAPER_SIZES = [
   { id: "a3", label: i18n.t("qr___Póster · A3"), width: 297, height: 420 },
 ] as const;
 
-export const QR_INSTRUCTIONS = {
-  menu: i18n.t("qr___Escanea para ver la carta"),
-  reviews: i18n.t("qr___Comparte tu experiencia en Google"),
-  loyalty: i18n.t("qr___Escanea para acceder a tu tarjeta"),
-};
+// Endonyms: each language is named in itself, whatever the admin's own language.
+export const QR_PRINT_LANGUAGES = [
+  { id: "es", label: "Español" },
+  { id: "en", label: "English" },
+] as const;
 
 export type QrPrintMode = "tables" | "flyer";
 export type QrPrintStyle = (typeof QR_STYLE_OPTIONS)[number]["id"];
+export type QrPrintLanguage = (typeof QR_PRINT_LANGUAGES)[number]["id"];
+
+// Printed copy follows the chosen print language, not the admin UI language.
+export function getQrPrintCopy(language: QrPrintLanguage): Record<QrTarget, { label: string; instruction: string }> {
+  const t = i18n.getFixedT(language);
+  return {
+    menu: { label: t("qr___Carta"), instruction: t("qr___Escanea para ver la carta") },
+    reviews: { label: t("qr___¿Te ha gustado?"), instruction: t("qr___Déjanos una reseña en Google") },
+    loyalty: { label: t("qr___Premios"), instruction: t("qr___Escanea y suma sellos en cada visita") },
+  };
+}

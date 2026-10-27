@@ -812,8 +812,6 @@
     "No se pudo cargar el tema de esta sucursal.": "No se pudo cargar el tema de esta sucursal.",
     "Reintentar": "Reintentar",
     "Escanea para ver la carta": "Escanea para ver la carta",
-    "Comparte tu experiencia en Google": "Comparte tu experiencia en Google",
-    "Escanea para acceder a tu tarjeta": "Escanea para acceder a tu tarjeta",
     "Un QR listo para tu local": "Un QR listo para tu local",
     "Elige una composición con el tema guardado de la sucursal y abre la impresión o guarda un PDF.": "Elige una composición con el tema guardado de la sucursal y abre la impresión o guarda un PDF.",
     "Imprimir / Guardar PDF": "Imprimir / Guardar PDF",
@@ -868,7 +866,12 @@
     "Vista previa de impresión": "Vista previa de impresión",
     "Vista previa": "Vista previa",
     "{{quantity}} QR · A4 · {{pages}} pág.": "{{quantity}} QR · A4 · {{pages}} pág.",
-    "Tu carta en una página, lista para imprimir.": "Tu carta en una página, lista para imprimir."
+    "Tu carta en una página, lista para imprimir.": "Tu carta en una página, lista para imprimir.",
+    "Idioma": "Idioma",
+    "Premios": "Premios",
+    "Escanea y suma sellos en cada visita": "Escanea y suma sellos en cada visita",
+    "¿Te ha gustado?": "¿Te ha gustado?",
+    "Déjanos una reseña en Google": "Déjanos una reseña en Google"
   },
   "theme": {
     "No disponible": "No disponible",

@@ -812,8 +812,6 @@
     "No se pudo cargar el tema de esta sucursal.": "Could not load this branch’s theme.",
     "Reintentar": "Retry",
     "Escanea para ver la carta": "Scan to see the menu",
-    "Comparte tu experiencia en Google": "Share your experience on Google",
-    "Escanea para acceder a tu tarjeta": "Scan to access your card",
     "Un QR listo para tu local": "A QR ready for your premises",
     "Elige una composición con el tema guardado de la sucursal y abre la impresión o guarda un PDF.": "Choose a layout using the branch’s saved theme, then print it or save a PDF.",
     "Imprimir / Guardar PDF": "Print/Save PDF",
@@ -868,7 +866,12 @@
     "Vista previa de impresión": "Print preview",
     "Vista previa": "Preview",
     "{{quantity}} QR · A4 · {{pages}} pág.": "{{quantity}} QRs · A4 · {{pages}} pp.",
-    "Tu carta en una página, lista para imprimir.": "Your menu on one page, ready to print."
+    "Tu carta en una página, lista para imprimir.": "Your menu on one page, ready to print.",
+    "Idioma": "Language",
+    "Premios": "Rewards",
+    "Escanea y suma sellos en cada visita": "Scan to collect stamps on every visit",
+    "¿Te ha gustado?": "Enjoyed it?",
+    "Déjanos una reseña en Google": "Leave us a review on Google"
   },
   "theme": {
     "No disponible": "Not available",

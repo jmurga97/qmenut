@@ -7,7 +7,7 @@ import { FormSelect } from "~/shared/components/forms/adapters/form-select";
 
 import { QrDownloadForm } from "./qr-download-form";
 import { QrPrintDocument } from "./qr-print-document";
-import { QR_PAPER_SIZES, QR_STYLE_OPTIONS, QR_TABLE_SIZES } from "../constants";
+import { QR_PAPER_SIZES, QR_PRINT_LANGUAGES, QR_STYLE_OPTIONS, QR_TABLE_SIZES } from "../constants";
 import { useQrPrintController } from "../hooks/use-qr-print-controller";
 
 import type { QrPrintBranch } from "./qr-print-document";
@@ -117,6 +117,7 @@ export function QrPrintablePanel({
               branch={branch}
               codes={assets.codes}
               host={host}
+              language={state.language}
               logoReady={assets.logoState === "ready"}
               mode={mode}
               paper={paper}
@@ -154,6 +155,8 @@ function QrPrintFields({
     setFlyerTargets,
     paper,
     targetOptions,
+    language,
+    setLanguageId,
   } = state;
   return (
     <>
@@ -207,6 +210,13 @@ function QrPrintFields({
               value={paperId}
               onValueChange={(value) => value && setPaperId(value)}
               options={[...QR_PAPER_SIZES]}
+            />
+          </Field>
+          <Field label={i18n.t("qr___Idioma")}>
+            <Select
+              value={language}
+              onValueChange={(value) => value && setLanguageId(value)}
+              options={[...QR_PRINT_LANGUAGES]}
             />
           </Field>
         </>

@@ -6,7 +6,7 @@ import { buildQrUrl } from "~/shared/services/qr";
 
 import { useQrController } from "./use-qr-controller";
 import { useQrPrint } from "./use-qr-print";
-import { QR_PAPER_SIZES, QR_STYLE_OPTIONS, QR_TABLE_SIZES, QR_TARGET_OPTIONS } from "../constants";
+import { QR_PAPER_SIZES, QR_PRINT_LANGUAGES, QR_STYLE_OPTIONS, QR_TABLE_SIZES, QR_TARGET_OPTIONS } from "../constants";
 
 import type { QrPrintBranch } from "../components/qr-print-document";
 import type { QrPrintMode } from "../constants";
@@ -27,6 +27,7 @@ export function useQrPrintController({ branch, host, mode, theme }: QrPrintInput
   const [paperId, setPaperId] = useState("a6");
   const [quantityInput, setQuantityInput] = useState("15");
   const [flyerTargets, setFlyerTargets] = useState<QrTarget[]>(["menu"]);
+  const [languageId, setLanguageId] = useState<string>(i18n.resolvedLanguage ?? "es");
   // Loyalty and Google reviews are Business features: Basic only prints the menu QR.
   const hasLoyalty = useFeature("loyalty");
   const hasReviews = useFeature("contact.googleReviews");
@@ -34,6 +35,7 @@ export function useQrPrintController({ branch, host, mode, theme }: QrPrintInput
     (option) => (option.id !== "loyalty" || hasLoyalty) && (option.id !== "reviews" || hasReviews),
   );
   const style = QR_STYLE_OPTIONS.find((option) => option.id === styleId)?.id ?? "plain";
+  const language = QR_PRINT_LANGUAGES.find((option) => option.id === languageId)?.id ?? "es";
   const tableSize = QR_TABLE_SIZES.find((option) => option.id === sizeId) ?? QR_TABLE_SIZES[0];
   const paper = QR_PAPER_SIZES.find((option) => option.id === paperId) ?? QR_PAPER_SIZES[0];
   const quantity = Number(quantityInput);
@@ -54,7 +56,7 @@ export function useQrPrintController({ branch, host, mode, theme }: QrPrintInput
     style,
     pageSize: mode === "tables" ? "210mm 297mm" : `${paper.width}mm ${paper.height}mm`,
   });
-  const contentKey = JSON.stringify({ mode, style, tableSize, paper, quantity, targets, branch, theme });
+  const contentKey = JSON.stringify({ mode, style, language, tableSize, paper, quantity, targets, branch, theme });
   const [fit, setFit] = useState({ key: "", fits: false });
   const ready = assets.printReady && (mode !== "tables" || quantityValid);
   useLayoutEffect(() => {
@@ -102,6 +104,8 @@ export function useQrPrintController({ branch, host, mode, theme }: QrPrintInput
     flyerTargets,
     setFlyerTargets,
     setStyleId,
+    language,
+    setLanguageId,
     targetOptions,
     tableSize,
     paper,
