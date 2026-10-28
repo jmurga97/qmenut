@@ -235,3 +235,21 @@ _Avoid_: Confirmation, reminder
 An accepted reservation whose guest has not answered the attendance check by its
 deadline. It still holds its table; staff decide whether to give the table away.
 _Avoid_: No-show, released reservation
+
+## Notifications
+
+**Notification**:
+A notice shown to one restaurant member in the admin panel about something that needs their
+attention, and possibly also delivered to their push devices. Qmenut support accounts never
+receive restaurant notifications.
+_Avoid_: Alert, message
+
+**Announcement**:
+A notification written by Qmenut for restaurants, such as product news, maintenance or an
+upgrade offer, rather than one caused by activity at the restaurant.
+_Avoid_: Broadcast, newsletter, message
+
+**Push device**:
+A phone, tablet or computer on which a member has turned on push notifications; it follows
+one or more of the restaurant's branches and receives pushes only for those.
+_Avoid_: Subscription, endpoint, browser
