@@ -15,3 +15,9 @@ export function getPortalMutationOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
 export function getChangePlanMutationOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
   return trpc.admin.billing.changePlan.mutationOptions({ onSuccess: redirectToBillingUrl });
 }
+export function getPaymentsAccountQueryOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
+  return trpc.admin.payments.account.queryOptions();
+}
+export function getConnectStripeMutationOptions({ trpc }: { trpc: TrpcOptionsProxy }) {
+  return trpc.admin.payments.connect.mutationOptions({ onSuccess: redirectToBillingUrl });
+}

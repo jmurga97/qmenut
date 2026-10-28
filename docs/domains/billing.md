@@ -19,7 +19,7 @@ later. What each plan includes is defined in `docs/sales/plan-features.md`.
 - `packages/db/src/schema/restaurants.ts` defines `branch_subscriptions`, which holds one
   Stripe subscription per branch with a `status` of `trialing`, `active`, `past_due`, or
   `canceled`, and `restaurant_stripe_accounts`, which holds the Stripe Connect account per
-  restaurant.
+  restaurant (see [Payments](payments.md)).
 - `branches.plan_code` holds the branch's effective plan. `syncSubscriptionState` writes it
   (a canceled subscription falls back to `basic`), and every plan check reads it.
 - `PlanCode` comes from `@qmenut/permissions` and is re-exported by

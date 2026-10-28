@@ -74,6 +74,12 @@ const SECTIONS = [
     permission: "users.manage",
     feature: "users",
   },
+  {
+    id: "billing",
+    label: i18n.t("shell___Facturación"),
+    path: "/billing",
+    permission: "billing.manage",
+  },
 ] as const satisfies readonly Section[];
 
 function getCurrentSection(pathname: string): Section | undefined {

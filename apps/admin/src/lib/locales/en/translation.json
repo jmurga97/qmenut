@@ -85,7 +85,8 @@
     "Cerrar sesión": "Sign out",
     "Instalar app": "Install app",
     "Instalar: Compartir → Añadir a inicio": "Install: Share → Add to Home Screen",
-    "Material para imprimir": "Print materials"
+    "Material para imprimir": "Print materials",
+    "Facturación": "Billing"
   },
   "analytics": {
     "Sin datos en este periodo.": "No data in this period.",
@@ -231,7 +232,16 @@
     "Cambiar a {{plan}}": "Switch to {{plan}}",
     "Con varias sucursales, cada una necesita el plan Business.": "With several branches, each one needs the Business plan.",
     "Probar {{plan}} 14 días": "Try {{plan}} for 14 days",
-    "Suscribir {{plan}}": "Subscribe to {{plan}}"
+    "Suscribir {{plan}}": "Subscribe to {{plan}}",
+    "Cobros online": "Online payments",
+    "Sin conectar": "Not connected",
+    "Configuración pendiente": "Setup pending",
+    "Conectado": "Connected",
+    "Stripe ha desactivado los cobros": "Stripe has disabled payments",
+    "Los pagos online llegan directamente a tu cuenta de Stripe. QMenut no cobra comisión.": "Online payments go straight to your own Stripe account. QMenut takes no commission.",
+    "Abrir Stripe ↗": "Open Stripe ↗",
+    "Continuar en Stripe": "Continue in Stripe",
+    "Conectar Stripe": "Connect Stripe"
   },
   "branch": {
     "useBranchForm debe usarse dentro de BranchFormProvider": "useBranchForm must be used inside BranchFormProvider",

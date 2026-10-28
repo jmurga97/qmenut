@@ -64,6 +64,10 @@
       "types": "./src/repositories/billing.repository.ts",
       "import": "./src/repositories/billing.repository.ts"
     },
+    "./repositories/payments.repository": {
+      "types": "./src/repositories/payments.repository.ts",
+      "import": "./src/repositories/payments.repository.ts"
+    },
     "./repositories/public-menu.repository": {
       "types": "./src/repositories/public-menu.repository.ts",
       "import": "./src/repositories/public-menu.repository.ts"

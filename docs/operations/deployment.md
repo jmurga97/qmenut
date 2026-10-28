@@ -527,6 +527,10 @@ In Stripe live mode:
 5. Put the endpoint's live signing secret into the API's `STRIPE_WEBHOOK_SECRET`.
 6. Redeploy the API after changing price IDs, because Wrangler variables are deployed
    configuration.
+7. Enable Connect (Connect → Get started), complete the platform profile, and set the
+   branding that Stripe shows during restaurant onboarding. Without it,
+   `admin.payments.connect` fails. Do the same in test mode for development. Connect
+   adds no secret; it uses `STRIPE_SECRET_KEY` (see [Payments](../domains/payments.md)).
 
 `sync-subscription-state.ts` maps the Stripe price and status into `branch_subscriptions`
 and updates `branches.plan_code`. Unknown prices, and subscriptions without

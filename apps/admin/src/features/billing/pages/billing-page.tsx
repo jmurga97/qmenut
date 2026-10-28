@@ -6,9 +6,12 @@ import { i18n } from "~/lib/i18n";
 import { PageHeader } from "~/shared/components/page-header";
 import { CardSkeleton } from "~/shared/components/state/loading-state";
 
-import { useBillingController } from "../hooks/use-billing-controller";
+import { useBillingController, usePaymentsController } from "../hooks/use-billing-controller";
 
 import type { PlanCode } from "@qmenut/permissions";
+
+// Connected restaurants own a full Stripe account: they sign in to Stripe directly, no login link.
+const STRIPE_DASHBOARD_URL = "https://dashboard.stripe.com";
 
 const STATUS_LABELS: Record<string, string> = {
   trialing: i18n.t("billing___En prueba"),
@@ -19,6 +22,11 @@ const STATUS_LABELS: Record<string, string> = {
 const PLAN_LABELS: Record<PlanCode, string> = {
   basic: i18n.t("billing___Básico"),
   business: i18n.t("billing___Business"),
+};
+const PAYMENTS_STATUS_LABELS = {
+  pending: i18n.t("billing___Configuración pendiente"),
+  connected: i18n.t("billing___Conectado"),
+  disabled: i18n.t("billing___Stripe ha desactivado los cobros"),
 };
 export function BillingPage() {
   return (
@@ -34,6 +42,44 @@ export function BillingPage() {
       >
         <BillingBranches />
       </Suspense>
+      {/* Its own boundary: the account status is a Stripe round trip and must not hold up the plans. */}
+      <Suspense fallback={<CardSkeleton rows={1} />}>
+        <PaymentsCard />
+      </Suspense>
+    </div>
+  );
+}
+
+function PaymentsCard() {
+  const controller = usePaymentsController();
+  const { available, status } = controller.account;
+  if (!available) return null;
+  // A disabled account is still the restaurant's: they resolve it in Stripe, not by onboarding again.
+  const hasAccount = status === "connected" || status === "disabled";
+  return (
+    <div className="admin-page-grid">
+      <section className="admin-card">
+        <h3 className="admin-list-label">{i18n.t("billing___Cobros online")}</h3>
+        <p className="admin-list-meta">{status ? PAYMENTS_STATUS_LABELS[status] : i18n.t("billing___Sin conectar")}</p>
+        <p className="admin-copy">
+          {i18n.t("billing___Los pagos online llegan directamente a tu cuenta de Stripe. QMenut no cobra comisión.")}
+        </p>
+        <div className="admin-topbar-actions">
+          {hasAccount ? (
+            <Button
+              nativeButton={false}
+              render={<a href={STRIPE_DASHBOARD_URL} rel={"noreferrer"} target={"_blank"} />}
+              variant={"ghost"}
+            >
+              {i18n.t("billing___Abrir Stripe ↗")}
+            </Button>
+          ) : (
+            <Button disabled={controller.busy} onClick={controller.connect} variant={"primary"}>
+              {status === "pending" ? i18n.t("billing___Continuar en Stripe") : i18n.t("billing___Conectar Stripe")}
+            </Button>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

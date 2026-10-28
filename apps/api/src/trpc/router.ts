@@ -13,6 +13,7 @@ import { adminTranslationsRouter } from "../modules/admin-translations/admin-tra
 import { adminUsersRouter } from "../modules/admin-users/admin-users.router";
 import { billingRouter } from "../modules/billing/billing.router";
 import { loyaltyRouter } from "../modules/loyalty/loyalty.router";
+import { paymentsRouter } from "../modules/payments/payments.router";
 import { publicMenuRouter } from "../modules/public-menu/public-menu.router";
 import { themeRouter } from "../modules/theme/theme.router";
 
@@ -31,6 +32,7 @@ export const appRouter = router({
     promotions: adminPromotionsRouter,
     theme: themeRouter,
     billing: billingRouter,
+    payments: paymentsRouter,
     loyalty: adminLoyaltyRouter,
     languages: adminTranslationsRouter.languages,
     translations: adminTranslationsRouter.translations,

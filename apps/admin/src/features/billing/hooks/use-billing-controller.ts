@@ -6,6 +6,8 @@ import {
   getBillingOverviewQueryOptions,
   getChangePlanMutationOptions,
   getCheckoutMutationOptions,
+  getConnectStripeMutationOptions,
+  getPaymentsAccountQueryOptions,
   getPortalMutationOptions,
 } from "../api";
 
@@ -22,5 +24,15 @@ export function useBillingController() {
     changePlan: (branchId: string, planCode: PlanCode) => changePlan.mutate({ branchId, planCode }),
     openPortal: () => portal.mutate(),
     subscribe: (branchId: string, planCode: PlanCode) => checkout.mutate({ branchId, planCode }),
+  };
+}
+
+export function usePaymentsController() {
+  const { data: account } = useSuspenseQuery(getPaymentsAccountQueryOptions({ trpc }));
+  const connect = useMutation(getConnectStripeMutationOptions({ trpc }));
+  return {
+    account,
+    busy: connect.isPending,
+    connect: () => connect.mutate(),
   };
 }

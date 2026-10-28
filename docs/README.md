@@ -41,6 +41,7 @@ After that, read feature pages as you need them.
 | [Promotions](domains/promotions.md)         | Promotions and effective pricing.                            | Partial  |
 | [Internationalization](domains/i18n.md)     | Languages and DeepL translations.                            | Partial  |
 | [Billing](domains/billing.md)               | Stripe subscriptions, one per branch.                        | Partial  |
+| [Payments](domains/payments.md)             | Restaurants' own Stripe accounts through Stripe Connect.     | Partial  |
 | [Auth](domains/auth.md)                     | Better Auth email-OTP sign-in.                               | Partial  |
 | [QR codes](domains/qr.md)                   | QR code generation in the admin dashboard.                   | Partial  |
 
