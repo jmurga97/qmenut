@@ -184,6 +184,46 @@ The relationship between an uploaded image and the restaurant, branch, and purpo
 that may use it in Qmenut.
 _Avoid_: Processing lifecycle, image publication
 
+## Loyalty
+
+**Loyalty card**:
+A guest's stamp balance at one restaurant, identified by their email and shared by all of
+its branches.
+_Avoid_: Account, wallet, membership
+
+**Stamp**:
+The loyalty unit a guest collects, usually one per product bought, and spends on rewards.
+_Avoid_: Point, visit
+
+**Venue code**:
+The four-digit code, different for each branch and changing every few minutes, that staff
+read out to prove a guest is at the branch.
+_Avoid_: Branch code, PIN, token
+
+**Stamp request**:
+A guest's claim, made with a branch's venue code, for a number of stamps for what they
+bought on one visit. It stays pending until staff accept it, accept fewer, or decline it,
+or until it has gone unanswered for 12 hours and is accepted automatically.
+_Avoid_: Earn request, stamp claim, pending earn
+
+**Pending stamps**:
+Stamps in a stamp request that staff have not yet accepted. They show on the guest's card
+but cannot be spent.
+_Avoid_: Provisional balance, unconfirmed stamps
+
+**Stamp request limit**:
+The most stamps one stamp request may claim, set by the restaurant.
+_Avoid_: Max per visit, quantity cap
+
+**Reward**:
+Something a guest can get for a set number of stamps, such as a free dish or a discount.
+_Avoid_: Prize, perk
+
+**Redemption**:
+A guest spending stamps on a reward. It stays pending until staff validate it at the
+counter, and the stamps are deducted only then.
+_Avoid_: Claim, stamp request
+
 ## Reservations
 
 **Reservation**:
@@ -235,3 +275,21 @@ _Avoid_: Confirmation, reminder
 An accepted reservation whose guest has not answered the attendance check by its
 deadline. It still holds its table; staff decide whether to give the table away.
 _Avoid_: No-show, released reservation
+
+## Notifications
+
+**Notification**:
+A notice shown to one restaurant member in the admin panel about something that needs their
+attention, and possibly also delivered to their push devices. Qmenut support accounts never
+receive restaurant notifications.
+_Avoid_: Alert, message
+
+**Announcement**:
+A notification written by Qmenut for restaurants, such as product news, maintenance or an
+upgrade offer, rather than one caused by activity at the restaurant.
+_Avoid_: Broadcast, newsletter, message
+
+**Push device**:
+A phone, tablet or computer on which a member has turned on push notifications; it follows
+one or more of the restaurant's branches and receives pushes only for those.
+_Avoid_: Subscription, endpoint, browser

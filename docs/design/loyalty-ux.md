@@ -3,6 +3,10 @@
 This page records the UX decisions for the loyalty program and the reasoning behind them.
 The decisions were locked on 2026-07-08 and revised on 2026-07-10 to remove QR scanning.
 
+> Earning was replaced on 2026-10-28 by stamp requests: see
+> [loyalty-stamp-requests-ux.md](loyalty-stamp-requests-ux.md). The earn mechanic, the 4-hour
+> rate limit and the "no migrations" note below are superseded; the rest still holds.
+
 Customers earn stamps with a rotating venue code: the customer types a four-digit code
 that staff read from the admin application, and the stamp is granted automatically with no
 approval queue. Staff validate redemptions with one tap on a pending row, during the same
