@@ -63,6 +63,18 @@
       },
     },
   ],
+  "queues": {
+    "producers": [{ "binding": "NOTIFICATIONS_QUEUE", "queue": "qmenut-notifications-local" }],
+    "consumers": [
+      {
+        "queue": "qmenut-notifications-local",
+        "max_batch_size": 10,
+        "max_batch_timeout": 1,
+        "max_retries": 5,
+        "dead_letter_queue": "qmenut-notifications-local-dlq",
+      },
+    ],
+  },
   "observability": {
     "enabled": true,
   },
@@ -147,6 +159,18 @@
           },
         },
       ],
+      "queues": {
+        "producers": [{ "binding": "NOTIFICATIONS_QUEUE", "queue": "qmenut-notifications-dev" }],
+        "consumers": [
+          {
+            "queue": "qmenut-notifications-dev",
+            "max_batch_size": 10,
+            "max_batch_timeout": 1,
+            "max_retries": 5,
+            "dead_letter_queue": "qmenut-notifications-dev-dlq",
+          },
+        ],
+      },
       "observability": {
         "enabled": true,
       },
@@ -232,6 +256,18 @@
           },
         },
       ],
+      "queues": {
+        "producers": [{ "binding": "NOTIFICATIONS_QUEUE", "queue": "qmenut-notifications" }],
+        "consumers": [
+          {
+            "queue": "qmenut-notifications",
+            "max_batch_size": 10,
+            "max_batch_timeout": 1,
+            "max_retries": 5,
+            "dead_letter_queue": "qmenut-notifications-dlq",
+          },
+        ],
+      },
       "observability": {
         "enabled": true,
       },

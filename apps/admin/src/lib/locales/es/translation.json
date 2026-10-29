@@ -85,7 +85,8 @@
     "Cerrar sesión": "Cerrar sesión",
     "Instalar app": "Instalar app",
     "Instalar: Compartir → Añadir a inicio": "Instalar: Compartir → Añadir a pantalla de inicio",
-    "Material para imprimir": "Material para imprimir"
+    "Material para imprimir": "Material para imprimir",
+    "Notificaciones": "Notificaciones"
   },
   "analytics": {
     "Sin datos en este periodo.": "Sin datos en este periodo.",
@@ -1033,5 +1034,39 @@
     "Cancelar": "Cancelar",
     "Aplicar": "Aplicar",
     "No se pudo recortar la imagen. Prueba con otra.": "No se pudo recortar la imagen. Prueba con otra."
+  },
+  "notifications": {
+    "Aceptado automáticamente": "Aceptado automáticamente",
+    "Activando…": "Activando…",
+    "Activar en este dispositivo": "Activar en este dispositivo",
+    "Caducado": "Caducado",
+    "Cancelado por el cliente": "Cancelado por el cliente",
+    "Canje pendiente": "Canje pendiente",
+    "Cargando notificaciones": "Cargando notificaciones",
+    "Crea una sucursal para recibir avisos.": "Crea una sucursal para recibir avisos.",
+    "Desactivar": "Desactivar",
+    "En iPhone y iPad, añade el panel a la pantalla de inicio (Compartir → Añadir a inicio) y activa las notificaciones desde allí.": "En iPhone y iPad, añade el panel a la pantalla de inicio (Compartir → Añadir a inicio) y activa las notificaciones desde allí.",
+    "Este dispositivo recibe avisos de las sucursales marcadas.": "Este dispositivo recibe avisos de las sucursales marcadas.",
+    "Este navegador no admite notificaciones push.": "Este navegador no admite notificaciones push.",
+    "Guardar sucursales": "Guardar sucursales",
+    "Instala el panel": "Instala el panel",
+    "Lo que necesita tu atención en esta sucursal, de los últimos 30 días.": "Lo que necesita tu atención en esta sucursal, de los últimos 30 días.",
+    "Marcar todo como leído": "Marcar todo como leído",
+    "No hay notificaciones. Los avisos nuevos aparecerán aquí.": "No hay notificaciones. Los avisos nuevos aparecerán aquí.",
+    "Notificaciones": "Notificaciones",
+    "Notificaciones bloqueadas": "Notificaciones bloqueadas",
+    "Notificaciones en este dispositivo": "Notificaciones en este dispositivo",
+    "Notificaciones, {{count}} sin leer": "Notificaciones, {{count}} sin leer",
+    "Permite las notificaciones de este sitio en los ajustes del navegador y vuelve a intentarlo.": "Permite las notificaciones de este sitio en los ajustes del navegador y vuelve a intentarlo.",
+    "Rechazado": "Rechazado",
+    "Rechazado por {{name}}": "Rechazado por {{name}}",
+    "Recibe un aviso en este dispositivo cuando haya algo que atender.": "Recibe un aviso en este dispositivo cuando haya algo que atender.",
+    "Reintentar": "Reintentar",
+    "Resuelto": "Resuelto",
+    "Sin leer": "Sin leer",
+    "Sucursales": "Sucursales",
+    "Validado": "Validado",
+    "Validado por {{name}}": "Validado por {{name}}",
+    "{{reward}} · {{cost}} sellos": "{{reward}} · {{cost}} sellos"
   }
 }

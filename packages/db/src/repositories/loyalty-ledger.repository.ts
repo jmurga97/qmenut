@@ -1,5 +1,6 @@
 import { and, eq, lt, sql } from "drizzle-orm";
 
+import { markNotificationsHandled } from "./notifications.repository";
 import { customerRestaurants, customerVisits, customers } from "../schema/customers";
 import { loyaltyRedemptions, loyaltyRewards, loyaltyTransactions } from "../schema/loyalty";
 
@@ -16,7 +17,10 @@ interface RestaurantInput {
   restaurantId: string;
 }
 
-interface ExpireStaleRedemptionsInput extends RestaurantInput {
+interface ExpireStaleRedemptionsInput {
+  db: DrizzleDb;
+  /** Omitted by the minute cron, which sweeps every restaurant. */
+  restaurantId?: string;
   olderThanMs: number;
 }
 
@@ -26,18 +30,27 @@ export async function expireStaleRedemptions({
   restaurantId,
   olderThanMs,
 }: ExpireStaleRedemptionsInput): Promise<void> {
-  const cutoff = Date.now() - olderThanMs;
-
-  await db
+  const now = Date.now();
+  const expired = await db
     .update(loyaltyRedemptions)
-    .set({ status: "expired", updatedAt: Date.now() })
+    .set({ status: "expired", updatedAt: now })
     .where(
       and(
-        eq(loyaltyRedemptions.restaurantId, restaurantId),
+        restaurantId ? eq(loyaltyRedemptions.restaurantId, restaurantId) : undefined,
         eq(loyaltyRedemptions.status, "pending"),
-        lt(loyaltyRedemptions.createdAt, cutoff),
+        lt(loyaltyRedemptions.createdAt, now - olderThanMs),
       ),
-    );
+    )
+    .returning({ id: loyaltyRedemptions.id });
+
+  await markNotificationsHandled({
+    db,
+    type: "loyalty.redemption",
+    subjectIds: expired.map((row) => row.id),
+    handledBy: null,
+    outcome: "expired",
+    now,
+  });
 }
 
 const redemptionDetailColumns = {
@@ -97,6 +110,7 @@ export async function findPendingRedemption({
 }
 
 interface CreateRedemptionInput extends RestaurantInput {
+  branchId: string;
   customerId: string;
   rewardId: string;
   cost: number;
@@ -105,6 +119,7 @@ interface CreateRedemptionInput extends RestaurantInput {
 export async function createRedemption({
   db,
   restaurantId,
+  branchId,
   customerId,
   rewardId,
   cost,
@@ -116,7 +131,7 @@ export async function createRedemption({
     id,
     customerId,
     restaurantId,
-    branchId: null,
+    branchId,
     rewardId,
     cost,
     status: "pending",

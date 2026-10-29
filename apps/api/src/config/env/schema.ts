@@ -6,6 +6,12 @@ export interface ServiceWorkerBinding {
   fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 }
 
+/** One push of one notification to one device, so a retry never re-sends to devices that already got it. */
+export interface PushMessage {
+  notificationId: string;
+  deviceId: string;
+}
+
 type ImageContentType = "image/jpeg" | "image/png" | "image/webp";
 
 interface CreateImageWorkerUploadInput {
@@ -124,9 +130,17 @@ export const envSchema = z.object({
   SENTRY_DSN: z.string().trim().optional(),
   GOOGLE_PLACES_API_KEY: optionalSecret,
   NODE_ENV: nodeEnvSchema.default("development"),
+  NOTIFICATIONS_QUEUE: z.custom<Queue<PushMessage>>(
+    (value) => typeof value === "object" && value !== null && typeof (value as { send?: unknown }).send === "function",
+    "El binding NOTIFICATIONS_QUEUE debe implementar send",
+  ),
   POSTHOG_API_HOST: z.url().default("https://eu.posthog.com"),
   POSTHOG_PERSONAL_API_KEY: optionalSecret,
   POSTHOG_PROJECT_ID: optionalSecret,
+  // Push stays off until all three are set; the inbox works without them.
+  VAPID_PUBLIC_KEY: optionalSecret,
+  VAPID_PRIVATE_KEY: optionalSecret,
+  VAPID_SUBJECT: optionalSecret,
 });
 
 export type EnvBindings = z.input<typeof envSchema>;

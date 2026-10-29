@@ -145,6 +145,7 @@ export const adminLoyaltyRouter = router({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       redemptionId: input.redemptionId,
+      rejectedBy: ctx.tenant.membershipId,
     });
   }),
   validateRedemption: loyaltyProcedure.input(validateRedemptionInputSchema).mutation(({ ctx, input }) => {

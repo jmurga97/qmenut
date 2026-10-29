@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { base64UrlDecode, base64UrlEncode } from "../base64url";
+
 export const REDEMPTION_TTL_MS = 15 * 60 * 1000;
 
 const loyaltyTokenPayloadSchema = z.object({
@@ -10,29 +12,6 @@ const loyaltyTokenPayloadSchema = z.object({
 });
 
 export type LoyaltyTokenPayload = z.infer<typeof loyaltyTokenPayloadSchema>;
-
-function base64UrlEncode(bytes: Uint8Array): string {
-  let binary = "";
-
-  for (const byte of bytes) {
-    binary += String.fromCodePoint(byte);
-  }
-
-  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
-}
-
-function base64UrlDecode(value: string): Uint8Array<ArrayBuffer> {
-  const normalized = value.replaceAll("-", "+").replaceAll("_", "/");
-  const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), "=");
-  const binary = atob(padded);
-  const bytes = new Uint8Array(binary.length);
-
-  for (let i = 0; i < binary.length; i += 1) {
-    bytes[i] = binary.codePointAt(i) ?? 0;
-  }
-
-  return bytes;
-}
 
 export function importHmacKey(secret: string): Promise<CryptoKey> {
   return crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [

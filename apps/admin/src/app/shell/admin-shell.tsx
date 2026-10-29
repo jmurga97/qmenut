@@ -5,6 +5,7 @@ import { Outlet, useLocation, useNavigate, useRouter } from "@tanstack/react-rou
 
 import { getListRestaurantsQueryOptions } from "~/features/auth/api";
 import { useSelectRestaurant } from "~/features/auth/hooks/use-select-restaurant";
+import { NotificationBell } from "~/features/notifications/components/notification-bell";
 import { signOut } from "~/lib/auth-client";
 import { FEATURES } from "~/lib/features";
 import { i18n } from "~/lib/i18n";
@@ -115,7 +116,9 @@ export function AdminShell() {
   const setSelectedBranchId = useBranchStore((state) => state.setSelectedBranchId);
   const selectedBranch = resolveSelectedBranch(tenant.branches, selectedBranchId);
   const currentSection = getCurrentSection(location.pathname);
-  const sectionLabel = currentSection?.label ?? i18n.t("shell___Resumen");
+  const sectionLabel =
+    currentSection?.label ??
+    (location.pathname.startsWith("/notifications") ? i18n.t("shell___Notificaciones") : i18n.t("shell___Resumen"));
   const isLocked = (section: Section) =>
     section.feature !== undefined &&
     !isFeatureEnabled({ branches: tenant.branches, selectedBranchId, feature: section.feature });
@@ -142,8 +145,9 @@ export function AdminShell() {
               <li aria-current={"page"}>{sectionLabel}</li>
             </ol>
           </nav>
-          {memberships.length > 1 ? (
-            <div className="admin-topbar-actions">
+          <div className="admin-topbar-actions">
+            {selectedBranch ? <NotificationBell branchId={selectedBranch.id} /> : null}
+            {memberships.length > 1 ? (
               <Select
                 ariaLabel={i18n.t("shell___Restaurante activo")}
                 disabled={selectRestaurant.isPending}
@@ -155,8 +159,8 @@ export function AdminShell() {
                 options={memberships.map((membership) => ({ id: membership.restaurantId, label: membership.name }))}
                 value={tenant.restaurant.id}
               />
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       }
       navigation={

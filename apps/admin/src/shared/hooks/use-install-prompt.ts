@@ -23,14 +23,14 @@ export function captureInstallPrompt(): void {
   window.addEventListener("appinstalled", () => publish(null));
 }
 
-function isStandalone(): boolean {
+export function isStandalone(): boolean {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
     (navigator as Navigator & { standalone?: boolean }).standalone === true
   );
 }
 
-function isIos(): boolean {
+export function isIos(): boolean {
   return (
     /iP(hone|ad|od)/.test(navigator.userAgent) || (/Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
   );

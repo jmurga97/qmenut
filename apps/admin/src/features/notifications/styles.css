@@ -1,0 +1,70 @@
+.notifications-device {
+  padding-block: var(--ming-space-4);
+  border-top: 1px solid var(--border);
+}
+
+.notifications-branches {
+  display: grid;
+  gap: var(--ming-space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.notifications-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notifications-row {
+  display: flex;
+  gap: var(--ming-space-4);
+  align-items: center;
+  justify-content: space-between;
+  inline-size: 100%;
+  padding: var(--ming-space-4) 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.notifications-row-copy {
+  display: grid;
+  gap: var(--ming-space-1);
+  min-inline-size: 0;
+}
+
+.notifications-row-copy small,
+.notifications-row[data-handled="true"] {
+  color: var(--muted-foreground);
+}
+
+.notifications-row[data-unread="false"] strong {
+  font-weight: 400;
+}
+
+.notifications-unread,
+.notification-bell-count {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+}
+
+.notifications-unread::before {
+  display: inline-block;
+  inline-size: 6px;
+  block-size: 6px;
+  margin-inline-end: var(--ming-space-2);
+  background: var(--ming-signal);
+  content: "";
+}
+
+.notification-bell {
+  gap: var(--ming-space-1);
+}

@@ -100,6 +100,21 @@ bunx wrangler secret put STRIPE_SECRET_KEY --env development --cwd apps/api
 bunx wrangler secret put STRIPE_WEBHOOK_SECRET --env development --cwd apps/api
 ```
 
+Staff push notifications need the notifications queue and a VAPID key pair per environment.
+Without the three `VAPID_*` secrets push stays off and the admin hides its push control; the
+inbox still works. Generate a pair (never reuse production's) and set it:
+
+```bash
+bunx wrangler queues create qmenut-notifications-dev
+bunx wrangler queues create qmenut-notifications-dev-dlq
+bun -e 'const k=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},true,["sign"]);const b=(u)=>Buffer.from(u).toString("base64url");console.log("VAPID_PUBLIC_KEY="+b(new Uint8Array(await crypto.subtle.exportKey("raw",k.publicKey))));console.log("VAPID_PRIVATE_KEY="+(await crypto.subtle.exportKey("jwk",k.privateKey)).d)'
+bunx wrangler secret put VAPID_PUBLIC_KEY --env development --cwd apps/api
+bunx wrangler secret put VAPID_PRIVATE_KEY --env development --cwd apps/api
+bunx wrangler secret put VAPID_SUBJECT --env development --cwd apps/api
+```
+
+`VAPID_SUBJECT` is a contact URL for push services, such as `mailto:soporte@qmenut.app`.
+
 Use the same development `THEME_WORKER_TOKEN` value for both Workers. The checked-in
 development Worker variables enable `DEV_FIXED_OTP=true`, so every provisioned account
 uses `000000` without sending email. DeepL, Google Maps Geocoding, and Sentry are optional
@@ -232,7 +247,15 @@ Copy the returned `id` into both production bindings:
 - `apps/web/wrangler.jsonc`, at `env.production.kv_namespaces[0].id`.
 - `apps/tenant-config/wrangler.jsonc`, at `env.production.kv_namespaces[].id`.
 
-The two values must be byte-identical. Leave `preview_id` unchanged: local development and
+Create the staff notifications queue and its dead-letter queue (`apps/api/wrangler.jsonc`
+binds them as `NOTIFICATIONS_QUEUE`):
+
+```bash
+bunx wrangler queues create qmenut-notifications
+bunx wrangler queues create qmenut-notifications-dlq
+```
+
+The two KV values must be byte-identical. Leave `preview_id` unchanged: local development and
 end-to-end tests deliberately share that stable preview namespace in
 `.wrangler-shared/state`.
 
@@ -334,6 +357,16 @@ bunx wrangler secret put POSTHOG_PROJECT_ID --env production --cwd apps/api
 
 ```bash
 bunx wrangler secret put POSTHOG_PERSONAL_API_KEY --env production --cwd apps/api
+```
+
+Generate the production VAPID key pair for staff push notifications and set it with the
+subject. Changing the pair later invalidates every push device, so keep it stable:
+
+```bash
+bun -e 'const k=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},true,["sign"]);const b=(u)=>Buffer.from(u).toString("base64url");console.log("VAPID_PUBLIC_KEY="+b(new Uint8Array(await crypto.subtle.exportKey("raw",k.publicKey))));console.log("VAPID_PRIVATE_KEY="+(await crypto.subtle.exportKey("jwk",k.privateKey)).d)'
+bunx wrangler secret put VAPID_PUBLIC_KEY --env production --cwd apps/api
+bunx wrangler secret put VAPID_PRIVATE_KEY --env production --cwd apps/api
+bunx wrangler secret put VAPID_SUBJECT --env production --cwd apps/api
 ```
 
 Never set `DEV_FIXED_OTP` on the production Worker. `create-auth.ts` ignores it when

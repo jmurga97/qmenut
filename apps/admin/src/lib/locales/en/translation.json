@@ -85,7 +85,8 @@
     "Cerrar sesión": "Sign out",
     "Instalar app": "Install app",
     "Instalar: Compartir → Añadir a inicio": "Install: Share → Add to Home Screen",
-    "Material para imprimir": "Print materials"
+    "Material para imprimir": "Print materials",
+    "Notificaciones": "Notifications"
   },
   "analytics": {
     "Sin datos en este periodo.": "No data in this period.",
@@ -1033,5 +1034,39 @@
     "Cancelar": "Cancel",
     "Aplicar": "Apply",
     "No se pudo recortar la imagen. Prueba con otra.": "Could not crop the image. Try another one."
+  },
+  "notifications": {
+    "Aceptado automáticamente": "Accepted automatically",
+    "Activando…": "Turning on…",
+    "Activar en este dispositivo": "Turn on for this device",
+    "Caducado": "Expired",
+    "Cancelado por el cliente": "Cancelled by the guest",
+    "Canje pendiente": "Redemption waiting",
+    "Cargando notificaciones": "Loading notifications",
+    "Crea una sucursal para recibir avisos.": "Create a branch to get notifications.",
+    "Desactivar": "Turn off",
+    "En iPhone y iPad, añade el panel a la pantalla de inicio (Compartir → Añadir a inicio) y activa las notificaciones desde allí.": "On iPhone and iPad, add the dashboard to your home screen (Share → Add to Home Screen) and turn notifications on from there.",
+    "Este dispositivo recibe avisos de las sucursales marcadas.": "This device gets notified for the checked branches.",
+    "Este navegador no admite notificaciones push.": "This browser does not support push notifications.",
+    "Guardar sucursales": "Save branches",
+    "Instala el panel": "Install the dashboard",
+    "Lo que necesita tu atención en esta sucursal, de los últimos 30 días.": "What needs your attention at this branch, from the last 30 days.",
+    "Marcar todo como leído": "Mark all as read",
+    "No hay notificaciones. Los avisos nuevos aparecerán aquí.": "No notifications. New ones will show up here.",
+    "Notificaciones": "Notifications",
+    "Notificaciones bloqueadas": "Notifications blocked",
+    "Notificaciones en este dispositivo": "Notifications on this device",
+    "Notificaciones, {{count}} sin leer": "Notifications, {{count}} unread",
+    "Permite las notificaciones de este sitio en los ajustes del navegador y vuelve a intentarlo.": "Allow notifications for this site in your browser settings and try again.",
+    "Rechazado": "Rejected",
+    "Rechazado por {{name}}": "Rejected by {{name}}",
+    "Recibe un aviso en este dispositivo cuando haya algo que atender.": "Get notified on this device when something needs your attention.",
+    "Reintentar": "Try again",
+    "Resuelto": "Handled",
+    "Sin leer": "Unread",
+    "Sucursales": "Branches",
+    "Validado": "Validated",
+    "Validado por {{name}}": "Validated by {{name}}",
+    "{{reward}} · {{cost}} sellos": "{{reward}} · {{cost}} stamps"
   }
 }

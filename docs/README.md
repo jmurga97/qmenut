@@ -37,6 +37,7 @@ After that, read feature pages as you need them.
 | [Theming](domains/theming.md)               | Color engine, templates, and per-tenant theme.               | Complete |
 | [Custom domains](domains/custom-domains.md) | Host resolution and the tenant-config Worker.                | Complete |
 | [Loyalty](domains/loyalty.md)               | Points and stamps, rewards, redemptions, and the venue code. | Complete |
+| [Notifications](domains/notifications.md)   | Staff inbox, Web Push devices, and announcements.            | Partial  |
 | [Menu management](domains/menu.md)          | Categories, dishes, variants, and availability.              | Partial  |
 | [Promotions](domains/promotions.md)         | Promotions and effective pricing.                            | Partial  |
 | [Internationalization](domains/i18n.md)     | Languages and DeepL translations.                            | Partial  |
