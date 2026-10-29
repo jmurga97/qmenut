@@ -1,34 +1,40 @@
 import { listBranches } from "@qmenut/db/repositories/admin-branches.repository";
 import { getLoyaltyProgram } from "@qmenut/db/repositories/loyalty-admin.repository";
-import { addStamp } from "@qmenut/db/repositories/loyalty-ledger.repository";
+import { createStampRequest } from "@qmenut/db/repositories/loyalty-ledger.repository";
 import { TRPCError } from "@trpc/server";
 
 import { resolveCard } from "./resolve-card";
 import { verifyVenueCode } from "../../lib/loyalty/venue-code";
+import { emitNotification } from "../notifications/emit-notification";
 
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
-import type { LoyaltyTransactionResult } from "@qmenut/db/models/loyalty";
 
-const EARN_COOLDOWN_MS = 4 * 60 * 60 * 1000;
+const REQUEST_COOLDOWN_MS = 4 * 60 * 60 * 1000;
 
-interface EarnStampInput {
+interface RequestStampsInput {
   db: DrizzleDb;
   env: RuntimeEnv;
   request: Request;
   host?: string;
   cardToken: string;
   venueCode: string;
+  quantity: number;
 }
 
-export async function earnStamp({
+export interface RequestStampsResult {
+  requestId: string;
+}
+
+export async function requestStamps({
   db,
   env,
   request,
   host,
   cardToken,
   venueCode,
-}: EarnStampInput): Promise<LoyaltyTransactionResult> {
+  quantity,
+}: RequestStampsInput): Promise<RequestStampsResult> {
   const { tenant, customerId } = await resolveCard({ db, env, request, host, cardToken });
 
   const program = await getLoyaltyProgram({ db, restaurantId: tenant.restaurantId });
@@ -43,6 +49,10 @@ export async function earnStamp({
     throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Demasiados intentos, espera un momento" });
   }
 
+  if (quantity > program.stampRequestLimit) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Has pedido más sellos de los permitidos" });
+  }
+
   const branches = await listBranches({ db, restaurantId: tenant.restaurantId });
   const matchedBranchId = await verifyVenueCode({
     secret: env.LOYALTY_TOKEN_SECRET,
@@ -55,17 +65,30 @@ export async function earnStamp({
     throw new TRPCError({ code: "BAD_REQUEST", message: "Código incorrecto" });
   }
 
-  const result = await addStamp({
+  const created = await createStampRequest({
     db,
     restaurantId: tenant.restaurantId,
     customerId,
     branchId: matchedBranchId,
-    cooldownMs: EARN_COOLDOWN_MS,
+    quantity,
+    cooldownMs: REQUEST_COOLDOWN_MS,
   });
 
-  if (result === "cooldown") {
-    throw new TRPCError({ code: "CONFLICT", message: "Ya tienes el sello de esta visita" });
+  if (created === "cooldown") {
+    throw new TRPCError({ code: "CONFLICT", message: "Ya pediste sellos en esta visita" });
   }
 
-  return result;
+  await emitNotification({
+    db,
+    env,
+    event: {
+      type: "loyalty.stampRequest",
+      restaurantId: tenant.restaurantId,
+      branchId: matchedBranchId,
+      subjectId: created.id,
+      facts: { quantity },
+    },
+  });
+
+  return { requestId: created.id };
 }

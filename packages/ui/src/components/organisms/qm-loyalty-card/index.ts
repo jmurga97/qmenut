@@ -20,6 +20,11 @@ export class QmLoyaltyCard extends QmElement {
   @property({ type: String }) email = "";
   @property({ type: Number }) balance = 0;
   @property({ type: Number }) target = 0;
+  @property({ type: Number }) pending = 0;
+  @property({ type: String, attribute: "pending-label" }) pendingLabel = "";
+  @property({ type: String, attribute: "cancel-label" }) cancelLabel = "";
+  /** One-time answer to the last stamp request, e.g. "Confirmaron 2 de 3 sellos". */
+  @property({ type: String }) notice = "";
   @property({ type: Number, attribute: "animated-index" }) animatedIndex = -1;
   @property({ type: String, attribute: "progress-label" }) progressLabel = "";
   @property({ type: String, attribute: "grid-label" }) gridLabel = "";
@@ -33,6 +38,7 @@ export class QmLoyaltyCard extends QmElement {
   @property({ type: String, attribute: "redeemed-footer" }) redeemedFooter = "";
 
   private readonly handleStamp = () => this.postEvent({ name: "qm-stamp-request", detail: undefined });
+  private readonly handleCancel = () => this.postEvent({ name: "qm-stamp-cancel", detail: undefined });
 
   render() {
     const target = Math.max(0, Math.floor(this.target));
@@ -64,13 +70,29 @@ export class QmLoyaltyCard extends QmElement {
         <qm-stamp-grid
           .total=${target}
           .filled=${filled}
+          .pending=${this.pending}
           .animatedIndex=${this.animatedIndex}
           .ariaLabel=${this.gridLabel}
         ></qm-stamp-grid>
+        ${this.renderPending()} ${this.notice ? html`<p class="notice" role="status">${this.notice}</p>` : ""}
         ${stampAction}
         <div class="stamp-panel"><slot name="stamp-panel"></slot></div>
         <div class="rewards"><slot name="rewards"></slot></div>
       </article>
+    `;
+  }
+
+  private renderPending() {
+    if (this.pending <= 0) return html``;
+    return html`
+      <div class="pending">
+        <span>${this.pendingLabel}</span>
+        ${
+          this.locked
+            ? ""
+            : html`<qm-button variant="ghost" size="sm" @click=${this.handleCancel}>${this.cancelLabel}</qm-button>`
+        }
+      </div>
     `;
   }
 
@@ -101,6 +123,10 @@ export type QmLoyaltyCardArgs = Partial<
     | "email"
     | "balance"
     | "target"
+    | "pending"
+    | "pendingLabel"
+    | "cancelLabel"
+    | "notice"
     | "animatedIndex"
     | "progressLabel"
     | "gridLabel"

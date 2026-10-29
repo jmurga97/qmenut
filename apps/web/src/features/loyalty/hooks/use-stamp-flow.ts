@@ -5,6 +5,7 @@ import { getLoyaltyMutationOptions } from "~/features/loyalty/api/loyalty-query-
 import { getTrpcErrorCode } from "~/features/loyalty/loyalty-utils";
 
 import type { QmCodeInputStatus } from "@qmenut/ui/components/qm-code-input";
+import type { LoyaltyCard } from "~/features/loyalty/types";
 import type { TrpcOptionsProxy } from "~/lib/trpc-client";
 
 type StampFeedback = Exclude<QmCodeInputStatus, "submitting">;
@@ -14,6 +15,7 @@ interface StampState {
   code: string;
   feedback: StampFeedback;
   open: boolean;
+  quantity: number;
 }
 
 type StampAction =
@@ -21,7 +23,9 @@ type StampAction =
   | { type: "changed"; code: string }
   | { type: "failed"; feedback: Exclude<StampFeedback, "idle"> }
   | { type: "opened" }
-  | { type: "succeeded"; animatedIndex: number }
+  | { type: "outcome"; animatedIndex: number }
+  | { type: "quantity"; quantity: number }
+  | { type: "succeeded" }
   | { type: "throttle-finished" };
 
 const INITIAL_STATE: StampState = {
@@ -29,6 +33,7 @@ const INITIAL_STATE: StampState = {
   code: "",
   feedback: "idle",
   open: false,
+  quantity: 1,
 };
 
 function stampReducer(state: StampState, action: StampAction): StampState {
@@ -46,24 +51,35 @@ function stampReducer(state: StampState, action: StampAction): StampState {
       };
     case "opened":
       return { ...state, open: true };
+    case "outcome":
+      return { ...state, animatedIndex: action.animatedIndex };
+    case "quantity":
+      return { ...state, quantity: action.quantity };
     case "succeeded":
-      return { animatedIndex: action.animatedIndex, code: "", feedback: "idle", open: false };
+      return INITIAL_STATE;
     case "throttle-finished":
       return { ...state, code: "", feedback: "idle" };
   }
 }
 
 interface StampFlowInput {
+  card: LoyaltyCard | null;
   host: string;
+  limit: number;
   refreshCard: () => Promise<void>;
   target: number;
   token: string | null | undefined;
   trpc: TrpcOptionsProxy;
 }
 
-export function useStampFlow({ host, refreshCard, target, token, trpc }: StampFlowInput) {
+export function useStampFlow({ card, host, limit, refreshCard, target, token, trpc }: StampFlowInput) {
   const [state, dispatch] = useReducer(stampReducer, INITIAL_STATE);
-  const mutation = useMutation(getLoyaltyMutationOptions(trpc).earnStamp);
+  const options = getLoyaltyMutationOptions(trpc);
+  const mutation = useMutation(options.requestStamps);
+  const cancelMutation = useMutation(options.cancelStampRequest);
+  const { mutate: dismissOutcome } = useMutation(options.dismissStampOutcome);
+  // The notice outlives the dismissal: it stays until the card is refetched (next open or focus).
+  const dismissedId = useRef<string | null>(null);
   // oxlint-disable-next-line unicorn/no-useless-undefined -- React 19 useRef requires an explicit initial value.
   const animationTimer = useRef<number | undefined>(undefined);
   // oxlint-disable-next-line unicorn/no-useless-undefined -- React 19 useRef requires an explicit initial value.
@@ -77,15 +93,27 @@ export function useStampFlow({ host, refreshCard, target, token, trpc }: StampFl
     [],
   );
 
+  const outcome = card?.lastOutcome ?? null;
+  const balance = card?.card.stampsBalance ?? 0;
+
+  useEffect(() => {
+    if (!outcome || !token || outcome.id === dismissedId.current) return;
+
+    dismissedId.current = outcome.id;
+    dismissOutcome({ host, cardToken: token, requestId: outcome.id });
+    if (outcome.status !== "accepted") return;
+    dispatch({ type: "outcome", animatedIndex: Math.min(balance, target) - 1 });
+    window.clearTimeout(animationTimer.current);
+    animationTimer.current = window.setTimeout(() => dispatch({ type: "animation-finished" }), 800);
+  }, [balance, dismissOutcome, host, outcome, target, token]);
+
   async function submit(nextCode: string): Promise<void> {
     if (!token || mutation.isPending || state.feedback === "throttled") return;
 
     try {
-      const result = await mutation.mutateAsync({ host, cardToken: token, venueCode: nextCode });
-      dispatch({ type: "succeeded", animatedIndex: Math.min(result.newBalance, target) - 1 });
+      await mutation.mutateAsync({ host, cardToken: token, venueCode: nextCode, quantity: state.quantity });
+      dispatch({ type: "succeeded" });
       await refreshCard();
-      window.clearTimeout(animationTimer.current);
-      animationTimer.current = window.setTimeout(() => dispatch({ type: "animation-finished" }), 800);
     } catch (error) {
       const code = getTrpcErrorCode(error);
 
@@ -100,14 +128,31 @@ export function useStampFlow({ host, refreshCard, target, token, trpc }: StampFl
     }
   }
 
+  async function cancel(): Promise<void> {
+    const requestId = card?.pendingRequests[0]?.id;
+    if (!token || !requestId || cancelMutation.isPending) return;
+
+    try {
+      await cancelMutation.mutateAsync({ host, cardToken: token, requestId });
+    } catch {
+      // NOT_FOUND: staff answered meanwhile, and the refresh below shows their answer.
+    }
+    await refreshCard();
+  }
+
   return {
     animatedIndex: state.animatedIndex,
     code: state.code,
+    limit,
     open: state.open,
+    outcome,
+    quantity: state.quantity,
+    cancel,
     networkError: state.feedback === "error" && mutation.isError && !getTrpcErrorCode(mutation.error),
     status: mutation.isPending ? ("submitting" as const) : state.feedback,
     changeCode: (code: string) => dispatch({ type: "changed", code }),
     openPanel: () => dispatch({ type: "opened" }),
+    setQuantity: (quantity: number) => dispatch({ type: "quantity", quantity: Math.min(limit, Math.max(1, quantity)) }),
     submit,
   };
 }

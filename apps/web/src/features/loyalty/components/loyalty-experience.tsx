@@ -236,6 +236,10 @@ function CardState({ loyalty, restaurantName }: { loyalty: CardController; resta
       balance={balance}
       target={loyalty.card.target}
       animatedIndex={loyalty.stamp.animatedIndex}
+      pending={card.pendingStamps}
+      pendingLabel={t("loyalty.card.pending", { count: card.pendingStamps })}
+      cancelLabel={t("loyalty.card.cancelRequest")}
+      notice={loyalty.stamp.notice}
       progressLabel={t("loyalty.card.progress")}
       gridLabel={t("loyalty.card.gridLabel", { count: loyalty.card.target, filled, total: loyalty.card.target })}
       stampLabel={t("loyalty.card.requestStamp")}
@@ -245,6 +249,7 @@ function CardState({ loyalty, restaurantName }: { loyalty: CardController; resta
       redeemedReward={loyalty.card.redeemedReward ?? ""}
       redeemedFooter={t("loyalty.card.redeemedFooter", { balance, total: loyalty.card.target })}
       onQmStampRequest={loyalty.stamp.openPanel}
+      onQmStampCancel={() => void loyalty.stamp.cancel()}
     >
       {loyalty.stamp.open && <StampCode stamp={loyalty.stamp} />}
       {card.rewards.map((reward) => (
@@ -263,8 +268,38 @@ function CardState({ loyalty, restaurantName }: { loyalty: CardController; resta
 function StampCode({ stamp }: { stamp: CardController["stamp"] }) {
   const { t } = useTranslation();
   return (
+    <div slot="stamp-panel" className="loyalty-stamp-request">
+      {stamp.limit > 1 && (
+        <div className="loyalty-quantity" role="group" aria-labelledby="loyalty-quantity-label">
+          <span id="loyalty-quantity-label">{t("loyalty.code.quantityLabel")}</span>
+          <button
+            type="button"
+            aria-label={t("loyalty.code.fewer")}
+            disabled={stamp.quantity <= 1}
+            onClick={() => stamp.setQuantity(stamp.quantity - 1)}
+          >
+            −
+          </button>
+          <output aria-live="polite">{stamp.quantity}</output>
+          <button
+            type="button"
+            aria-label={t("loyalty.code.more")}
+            disabled={stamp.quantity >= stamp.limit}
+            onClick={() => stamp.setQuantity(stamp.quantity + 1)}
+          >
+            +
+          </button>
+        </div>
+      )}
+      <StampCodeInput stamp={stamp} />
+    </div>
+  );
+}
+
+function StampCodeInput({ stamp }: { stamp: CardController["stamp"] }) {
+  const { t } = useTranslation();
+  return (
     <QmCodeInput
-      slot="stamp-panel"
       value={stamp.code}
       status={stamp.status}
       title={t("loyalty.code.title")}

@@ -19,7 +19,16 @@ export const undoInputSchema = z.object({
 export const programInputSchema = z.object({
   isActive: z.boolean(),
   ticketMedio: z.number().int().min(0).nullable(),
+  stampRequestLimit: z.number().int().min(1).max(10),
 });
+
+export const stampRequestInputSchema = z.object({ requestId: z.string().trim().min(1) });
+
+export const acceptStampRequestInputSchema = stampRequestInputSchema.extend({
+  quantity: z.number().int().min(1).max(10),
+});
+
+export const undoStampRequestInputSchema = stampRequestInputSchema.extend({ branchId: z.string().trim().min(1) });
 
 export const listCustomersInputSchema = z.object({
   search: z.string().trim().min(1).max(254).optional(),

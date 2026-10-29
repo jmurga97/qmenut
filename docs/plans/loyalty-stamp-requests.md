@@ -1,6 +1,6 @@
 # Loyalty stamp requests: implementation plan
 
-Status: planned, not started. Branch `feat/loyalty-stamp-requests`, cut from `feat/notifications`.
+Status: implemented on branch `feat/loyalty-stamp-requests`, cut from `feat/notifications`.
 
 This plan implements [loyalty-stamp-requests-ux.md](../design/loyalty-stamp-requests-ux.md) and
 [ADR 0007](../adr/0007-unanswered-stamp-requests-are-accepted.md). Everything else in

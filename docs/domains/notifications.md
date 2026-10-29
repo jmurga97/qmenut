@@ -10,9 +10,9 @@ Staff notifications version 1 is implemented as designed in
 - Implemented: the inbox (bell, badge, `/notifications` page), per-member read state and shared
   handled state, Web Push to devices that follow branches, 30-day retention, and announcements as
   a repository function.
-- Live events: **reward redemption waiting** (`loyalty.redemption`).
-- Not yet: stamp-request events (branch `feat/loyalty-stamp-requests`), reservation events
-  (branch `feat/reservations`), and a tool for writing announcements.
+- Live events: **reward redemption waiting** (`loyalty.redemption`) and **stamp request**
+  (`loyalty.stampRequest`).
+- Not yet: reservation events (branch `feat/reservations`) and a tool for writing announcements.
 
 ## Data model
 
@@ -37,8 +37,14 @@ check: the event map in `apps/api/src/modules/notifications/events.ts` is the so
   notification and its recipients, then queues one `{ notificationId, deviceId }` message per
   device that follows the branch. It never throws.
 - **Handle**: features call `markNotificationsHandled` with an outcome (`validated`, `rejected`,
-  `cancelled`, `expired`). Redemption expiry marks its notifications inside
-  `expireStaleRedemptions`, so every lazy caller and the cron are covered.
+  `cancelled`, `expired`, `accepted`, `autoAccepted`, `declined`). Redemption expiry and stamp
+  request auto-acceptance mark their notifications inside `expireStaleRedemptions` and
+  `acceptOverdueStampRequests`, so every lazy caller and the cron are covered.
+  `reopenNotification` clears the handled state when a subject goes back to waiting.
+- **Push modes** (`events.ts`): `each` sends one push per event, dropped once handled; `never`
+  is inbox only; `branchCount` sends one replaceable push per branch with the number of
+  unhandled notifications of that type, skipped at 0. Its `tag` and `Topic` are per type and
+  branch (`sendWebPush` hashes the topic to fit RFC 8030's 32 characters).
 - **Delivery**: the `queue` handler in `apps/api/src/index.ts` sends queue names starting with
   `qmenut-notifications` to `consumePushMessages` (`notification-jobs.ts`). It skips handled or
   expired notifications, deletes devices on 404/410, retries 429/5xx, and acks other 4xx after
@@ -46,8 +52,9 @@ check: the event map in `apps/api/src/modules/notifications/events.ts` is the so
 - **Web Push**: `apps/api/src/lib/web-push.ts` signs VAPID JWTs and encrypts payloads
   (`aes128gcm`, RFC 8291) with WebCrypto only. Push is off unless `VAPID_PUBLIC_KEY`,
   `VAPID_PRIVATE_KEY` and `VAPID_SUBJECT` are set.
-- **Cron**: the minute cron runs `runNotificationMaintenance`: deletes expired notifications and
-  expires stale redemptions across all restaurants.
+- **Cron**: the minute cron runs `runNotificationMaintenance`: deletes expired notifications,
+  expires stale redemptions and accepts stamp requests unanswered for 12 h, across all
+  restaurants.
 - **tRPC**: `admin.notifications` (`notifications.router.ts`), all plain `tenantProcedure`:
   `list`, `badge`, `markRead`, `markAllRead`, `pushConfig`, `device`, `saveDevice`, `removeDevice`.
 

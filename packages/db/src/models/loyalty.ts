@@ -1,10 +1,11 @@
 export type LoyaltyRewardType = "free_dish" | "percentage_discount" | "special_price";
+export type StampRequestStatus = "accepted" | "cancelled" | "declined" | "pending";
 export type RedemptionStatus = "expired" | "pending" | "rejected" | "validated";
 export type LoyaltyTransactionType = "adjust" | "earn" | "expire" | "redeem";
 
 export interface LoyaltyProgramState {
   isActive: boolean;
-  stampsPerVisit: number;
+  stampRequestLimit: number;
   ticketMedio: number | null;
   type: "points" | "stamps";
 }
@@ -48,4 +49,24 @@ export interface PendingRedemptionRow extends RedemptionDetail {
 export interface LoyaltyTransactionResult {
   newBalance: number;
   transactionId: number;
+}
+
+export interface PendingStampRequestRow {
+  claimedQuantity: number;
+  createdAt: number;
+  email: string;
+  id: string;
+}
+
+export interface HandledStampRequestRow extends PendingStampRequestRow {
+  acceptedQuantity: number | null;
+  autoAccepted: boolean;
+  handledAt: number | null;
+  handledByName: string | null;
+  status: StampRequestStatus;
+}
+
+export interface CardStampRequests {
+  lastOutcome: { accepted: number; claimed: number; id: string; status: "accepted" | "declined" } | null;
+  pendingRequests: Array<{ createdAt: number; id: string; quantity: number }>;
 }

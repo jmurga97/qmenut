@@ -1,6 +1,7 @@
 import { createDb } from "@qmenut/db/client";
-import { expireStaleRedemptions } from "@qmenut/db/repositories/loyalty-ledger.repository";
+import { acceptOverdueStampRequests, expireStaleRedemptions } from "@qmenut/db/repositories/loyalty-ledger.repository";
 import {
+  countUnhandledNotifications,
   deleteExpiredNotifications,
   deletePushDeviceById,
   getPushDelivery,
@@ -29,18 +30,32 @@ async function deliverPush({
   const delivery = await getPushDelivery({ db, ...message.body });
   const config = delivery ? getNotificationEvent(delivery.type) : undefined;
 
-  if (!vapid || !delivery || !config?.pushText || delivery.expiresAt <= Date.now() || delivery.handledAt !== null) {
+  if (!vapid || !delivery || !config?.pushText || delivery.expiresAt <= Date.now()) {
     message.ack();
     return;
   }
 
-  const text = config.pushText({ facts: delivery.facts, branchName: delivery.branchName ?? "" })[
+  const branchCount = config.push === "branchCount" && delivery.branchId !== null;
+  const count = branchCount
+    ? await countUnhandledNotifications({ db, type: delivery.type, branchId: delivery.branchId! })
+    : 1;
+
+  // A per-branch push still goes out while others wait, with the current count.
+  if (branchCount ? count === 0 : delivery.handledAt !== null) {
+    message.ack();
+    return;
+  }
+
+  const text = config.pushText({ facts: delivery.facts, branchName: delivery.branchName ?? "", count })[
     delivery.device.language
   ];
+  // Same tag and Topic per branch: the device and the push service replace the previous push.
+  const tag = branchCount ? `${delivery.type}:${delivery.branchId}` : message.body.notificationId;
   const result = await sendWebPush({
     subscription: delivery.device,
-    payload: JSON.stringify({ ...text, url: config.url, tag: message.body.notificationId }),
+    payload: JSON.stringify({ ...text, url: config.url, tag }),
     vapid,
+    topic: branchCount ? tag : undefined,
   });
 
   if (result.status === 404 || result.status === 410) {
@@ -70,13 +85,17 @@ export async function consumePushMessages(batch: MessageBatch<PushMessage>, env:
   }
 }
 
-/** Minute cron: retention, and expiring redemptions nobody opened so their notifications stop counting. */
+/**
+ * Minute cron: retention, expiring redemptions nobody opened so their notifications stop counting, and
+ * accepting stamp requests nobody answered in 12 h (ADR 0007).
+ */
 export async function runNotificationMaintenance(env: RuntimeEnv): Promise<void> {
   const db = createDb(env.DB);
 
   try {
     await deleteExpiredNotifications({ db });
     await expireStaleRedemptions({ db, olderThanMs: REDEMPTION_TTL_MS });
+    await acceptOverdueStampRequests({ db });
   } catch (error) {
     Sentry.captureException(error, { tags: { module: "notifications-maintenance" } });
   }

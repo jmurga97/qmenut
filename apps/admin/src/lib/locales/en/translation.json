@@ -565,7 +565,6 @@
     "Vista del cliente ·": "Customer View ·",
     "Tu tarjeta": "Your card",
     "{{balance}} de {{target}} sellos": "{{balance}} of {{target}} stamps",
-    "Pedir mi sello": "Order my stamp",
     "sellos": "seals",
     "Eliminar": "Delete",
     "Se eliminará “{{name}}”. Esta acción no se puede deshacer.": "“{{name}}” will be deleted. This action cannot be undone.",
@@ -597,7 +596,29 @@
     "Escribe un nombre para el premio": "Enter a name for the reward",
     "Selecciona un plato": "Select a dish",
     "Indica un porcentaje": "Indicates a percentage",
-    "Indica un precio especial": "Indicates a special price"
+    "Indica un precio especial": "Indicates a special price",
+    "Pedir sellos": "Request stamps",
+    "Solicitudes de sellos ({{count}})": "Stamp requests ({{count}})",
+    "No hay solicitudes esperando. Si nadie responde, se aceptan solas a las 12 h.": "No requests waiting. Requests nobody answers are accepted automatically after 12 h.",
+    "Se acepta sola en {{hours}} h": "Accepted automatically in {{hours}} h",
+    "Sellos a aceptar": "Stamps to accept",
+    "Un sello menos": "One stamp fewer",
+    "Un sello más": "One stamp more",
+    "{{quantity}} de {{claimed}}": "{{quantity}} of {{claimed}}",
+    "Aceptar": "Accept",
+    "Rechazar la solicitud de {{email}}": "Decline the request from {{email}}",
+    "Rechazada": "Declined",
+    "Aceptada sola": "Accepted automatically",
+    "Aceptada {{accepted}} de {{claimed}}": "Accepted {{accepted}} of {{claimed}}",
+    "Aceptada": "Accepted",
+    "Últimas 24 h ({{count}})": "Last 24 h ({{count}})",
+    "{{count}} sellos pedidos a las {{time}}": "{{count}} stamps requested at {{time}}",
+    "Deshacer la solicitud de {{email}}": "Undo the request from {{email}}",
+    "Solicitud de {{email}} rechazada.": "Request from {{email}} declined.",
+    "Máximo de sellos por solicitud": "Maximum stamps per request",
+    "Indica un número entre 1 y 10": "Enter a number from 1 to 10",
+    "Aceptar la solicitud de {{email}}": "Accept the request from {{email}}",
+    "Solicitud de {{email}} aceptada.": "Request from {{email}} accepted."
   },
   "menu": {
     "No se pudo preparar la imagen.": "Could not prepare image.",
@@ -1067,6 +1088,10 @@
     "Sucursales": "Branches",
     "Validado": "Validated",
     "Validado por {{name}}": "Validated by {{name}}",
-    "{{reward}} · {{cost}} sellos": "{{reward}} · {{cost}} stamps"
+    "{{reward}} · {{cost}} sellos": "{{reward}} · {{cost}} stamps",
+    "Solicitud de {{count}} sellos": "Request for {{count}} stamps",
+    "Solicitud de sellos": "Stamp request",
+    "Aceptado": "Accepted",
+    "Aceptado por {{name}}": "Accepted by {{name}}"
   }
 }

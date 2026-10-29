@@ -27,10 +27,11 @@ test("requires current consent before an existing loyalty card can operate", asy
     card: { email: "l***@test.local" },
   });
 
-  const blockedWrite = await callPublicTrpcMutation(request, "loyalty.earnStamp", {
+  const blockedWrite = await callPublicTrpcMutation(request, "loyalty.requestStamps", {
     host: "tapas.localhost",
     cardToken: legacyToken,
     venueCode: "0000",
+    quantity: 1,
   });
   expect(blockedWrite, blockedWrite.body).toMatchObject({ ok: false, status: 403 });
 
@@ -70,9 +71,29 @@ test("runs the diner-to-admin loyalty journey and enforces venue-code throttling
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: /Crear mi tarjeta/ }).click();
   await expect(page.getByText("journey.e2e@test.local")).toBeVisible();
-  await page.getByRole("button", { name: "Pedir mi sello" }).click();
+  await page.getByRole("button", { name: "Pedir sellos" }).click();
+  await page.getByRole("button", { name: "Un sello más" }).click();
+  await page.getByRole("button", { name: "Un sello más" }).click();
   await page.getByLabel("Código de sala de cuatro dígitos").fill(venue.code);
-  await expect(page.getByRole("button", { name: "Canjear" }).first()).toBeVisible();
+  await expect(page.getByText("3 pendientes", { exact: true })).toBeVisible();
+  await page.goto("http://localhost:5174/loyalty", { waitUntil: "domcontentloaded" });
+
+  const stampRequests = await callTrpcQuery(page, "admin.loyalty.pendingStampRequests", { branchId: "branch_tapas" });
+  const stampRequest = getTrpcData<Array<{ email: string; id: string; claimedQuantity: number }>>(stampRequests).find(
+    (entry) => entry.email === "journey.e2e@test.local",
+  );
+  expect(stampRequest?.claimedQuantity).toBe(3);
+  const acceptedStamps = await callTrpcMutation(page, "admin.loyalty.acceptStampRequest", {
+    requestId: stampRequest?.id,
+    quantity: 2,
+  });
+  expect(acceptedStamps, acceptedStamps.body).toMatchObject({ ok: true, status: 200 });
+  const answeredTwice = await callTrpcMutation(page, "admin.loyalty.declineStampRequest", {
+    requestId: stampRequest?.id,
+  });
+  expect(answeredTwice, answeredTwice.body).toMatchObject({ ok: false, status: 409 });
+  await page.goto("http://tapas.localhost:4011/es/puntos?utm_source=qr", { waitUntil: "networkidle" });
+  await expect(page.getByText("Confirmaron 2 de 3 sellos", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Canjear" }).first().click();
   await expect(page.getByText("Esperando confirmación del personal…")).toBeVisible();
 
@@ -118,18 +139,20 @@ test("runs the diner-to-admin loyalty journey and enforces venue-code throttling
   const invalidCodes = ["0000", expired.code, "0001", "0002", "0003"];
 
   for (const venueCode of invalidCodes) {
-    const wrong = await callPublicTrpcMutation(request, "loyalty.earnStamp", {
+    const wrong = await callPublicTrpcMutation(request, "loyalty.requestStamps", {
       host: "tapas.localhost",
       cardToken: throttleToken,
       venueCode,
+      quantity: 1,
     });
     expect(wrong, wrong.body).toMatchObject({ ok: false, status: 400 });
   }
 
-  const limited = await callPublicTrpcMutation(request, "loyalty.earnStamp", {
+  const limited = await callPublicTrpcMutation(request, "loyalty.requestStamps", {
     host: "tapas.localhost",
     cardToken: throttleToken,
     venueCode: "0004",
+    quantity: 1,
   });
   expect(limited, limited.body).toMatchObject({ ok: false, status: 429 });
 });

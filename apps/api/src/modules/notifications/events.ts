@@ -9,11 +9,14 @@ interface PushText {
 
 interface NotificationEventConfig {
   actionable: boolean;
-  /** each: one push per event, dropped once handled. never: inbox only. */
-  push: "each" | "never";
+  /**
+   * each: one push per event, dropped once handled. never: inbox only. branchCount: one replaceable push per
+   * branch carrying how many of this type are waiting there, skipped at 0.
+   */
+  push: "each" | "never" | "branchCount";
   /** Admin path the push opens. */
   url: string;
-  pushText?: (input: { facts: NotificationFacts; branchName: string }) => Record<PushLanguage, PushText>;
+  pushText?: (input: { facts: NotificationFacts; branchName: string; count: number }) => Record<PushLanguage, PushText>;
 }
 
 /** Every notification type. Text in pushes carries no guest personal data. */
@@ -25,6 +28,18 @@ export const NOTIFICATION_EVENTS = {
     pushText: ({ facts, branchName }) => ({
       es: { title: "Canje pendiente", body: `${branchName} · ${facts.rewardName}` },
       en: { title: "Redemption waiting", body: `${branchName} · ${facts.rewardName}` },
+    }),
+  },
+  "loyalty.stampRequest": {
+    actionable: true,
+    push: "branchCount",
+    url: "/loyalty",
+    pushText: ({ branchName, count }) => ({
+      es: {
+        title: "Solicitudes de sellos",
+        body: `${count} ${count === 1 ? "solicitud" : "solicitudes"} de sellos · ${branchName}`,
+      },
+      en: { title: "Stamp requests", body: `${count} stamp ${count === 1 ? "request" : "requests"} · ${branchName}` },
     }),
   },
   announcement: { actionable: false, push: "never", url: "/notifications" },

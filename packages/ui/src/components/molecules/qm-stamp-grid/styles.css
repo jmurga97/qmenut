@@ -30,6 +30,11 @@
   inset: 33%;
 }
 
+.stamp--pending {
+  border-style: solid;
+  border-color: var(--qm-emph, #6d7e6b);
+}
+
 .stamp--new {
   animation: qm-pop 500ms ease-out both;
   box-shadow: 0 0 0 6px color-mix(in oklab, var(--qm-emph, #6d7e6b) 30%, transparent);
@@ -50,6 +55,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .stamp--pending {
+    border-style: solid;
+    border-color: var(--qm-emph, #6d7e6b);
+  }
+
   .stamp--new {
     animation: none;
   }

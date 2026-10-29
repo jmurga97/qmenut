@@ -92,6 +92,13 @@ export function describeNotification(row: NotificationRow): { title: string; det
       url: "/loyalty",
     };
   }
+  if (row.type === "loyalty.stampRequest") {
+    return {
+      title: i18n.t("notifications___Solicitud de sellos"),
+      detail: i18n.t("notifications___Solicitud de {{count}} sellos", { count: facts.quantity }),
+      url: "/loyalty",
+    };
+  }
   return { title: row.type, detail: "", url: null };
 }
 
@@ -101,7 +108,10 @@ export function describeHandled(row: NotificationRow): string | null {
   switch (row.handledOutcome ?? "") {
     case "validated":
       return name ? i18n.t("notifications___Validado por {{name}}", { name }) : i18n.t("notifications___Validado");
+    case "accepted":
+      return name ? i18n.t("notifications___Aceptado por {{name}}", { name }) : i18n.t("notifications___Aceptado");
     case "rejected":
+    case "declined":
       return name ? i18n.t("notifications___Rechazado por {{name}}", { name }) : i18n.t("notifications___Rechazado");
     case "cancelled":
       return i18n.t("notifications___Cancelado por el cliente");

@@ -109,6 +109,42 @@ export async function markNotificationsHandled({
     );
 }
 
+/** The subject went back to waiting (an undone decline): it counts and can be handled again. */
+export async function reopenNotification({
+  db,
+  type,
+  subjectId,
+}: {
+  db: DrizzleDb;
+  type: string;
+  subjectId: string;
+}): Promise<void> {
+  await db
+    .update(notifications)
+    .set({ handledAt: null, handledBy: null, handledOutcome: null })
+    .where(and(eq(notifications.type, type), eq(notifications.subjectId, subjectId)));
+}
+
+/** For per-branch pushes that carry a count: the branch's notifications of this type nobody has handled. */
+export async function countUnhandledNotifications({
+  db,
+  type,
+  branchId,
+  now = Date.now(),
+}: {
+  db: DrizzleDb;
+  type: string;
+  branchId: string;
+  now?: number;
+}): Promise<number> {
+  const row = await db.get<{ count: number }>(sql`
+    SELECT count(*) AS count FROM notifications
+    WHERE type = ${type} AND branch_id = ${branchId} AND handled_at IS NULL AND expires_at > ${now}
+  `);
+
+  return row?.count ?? 0;
+}
+
 interface InboxScope {
   db: DrizzleDb;
   membershipId: string;
@@ -240,6 +276,7 @@ export async function listPushTargetIds({
 
 export interface PushDelivery {
   type: string;
+  branchId: string | null;
   facts: NotificationFacts;
   branchName: string | null;
   handledAt: number | null;
@@ -259,6 +296,7 @@ export async function getPushDelivery({
 }): Promise<PushDelivery | null> {
   const row = await db.get<{
     type: string;
+    branch_id: string | null;
     facts_json: string;
     branch_name: string | null;
     handled_at: number | null;
@@ -269,7 +307,7 @@ export async function getPushDelivery({
     auth: string;
     language: PushLanguage;
   }>(sql`
-    SELECT n.type, n.facts_json, b.name AS branch_name, n.handled_at, n.expires_at,
+    SELECT n.type, n.branch_id, n.facts_json, b.name AS branch_name, n.handled_at, n.expires_at,
       d.id AS device_id, d.endpoint, d.p256dh, d.auth, d.language
     FROM notifications n
     JOIN push_devices d ON d.id = ${deviceId}
@@ -283,6 +321,7 @@ export async function getPushDelivery({
 
   return {
     type: row.type,
+    branchId: row.branch_id,
     facts: JSON.parse(row.facts_json) as NotificationFacts,
     branchName: row.branch_name,
     handledAt: row.handled_at,

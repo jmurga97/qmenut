@@ -160,7 +160,7 @@ test("derives loyalty availability and invalidates public SEO when the program i
 }) => {
   const programResponse = await callTrpcQuery(page, "admin.loyalty.getProgram");
   const original = getTrpcData<{
-    program: { isActive: boolean; ticketMedio: number | null };
+    program: { isActive: boolean; ticketMedio: number | null; stampRequestLimit: number };
     rewards: Array<{
       cost: number;
       description: string | null;
@@ -233,6 +233,7 @@ test("derives loyalty availability and invalidates public SEO when the program i
     const disabled = await callTrpcMutation(page, "admin.loyalty.saveProgram", {
       isActive: false,
       ticketMedio: original.program.ticketMedio,
+      stampRequestLimit: original.program.stampRequestLimit,
     });
     expect(disabled, disabled.body).toMatchObject({ ok: true, status: 200 });
     await expect.poll(() => getContentVersion(request, "tapas.localhost")).not.toBe(versionBeforeDisable);
@@ -273,7 +274,7 @@ test("derives loyalty availability and invalidates public SEO when the program i
   } finally {
     const restoredProgram = await callTrpcQuery(page, "admin.loyalty.getProgram");
     const current = getTrpcData<{
-      program: { isActive: boolean; ticketMedio: number | null };
+      program: { isActive: boolean; ticketMedio: number | null; stampRequestLimit: number };
       rewards: Array<{ id: string }>;
     }>(restoredProgram);
 
@@ -302,7 +303,7 @@ test("derives loyalty availability and invalidates public SEO when the program i
     await callPublicTrpc(request, "menu.publicData", { host: "tapas.localhost" }),
   );
   const restoredState = getTrpcData<{
-    program: { isActive: boolean; ticketMedio: number | null };
+    program: { isActive: boolean; ticketMedio: number | null; stampRequestLimit: number };
     rewards: Array<{ id: string; isActive: boolean }>;
   }>(await callTrpcQuery(page, "admin.loyalty.getProgram"));
   expect(after.publicFeatures.loyalty).toBe(original.rewards.length > 0 && original.program.isActive);

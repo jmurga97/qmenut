@@ -58,6 +58,23 @@ header h2 {
   font-size: var(--qm-text-lg, 15px);
   font-weight: 900;
 }
+.pending {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 9px;
+  color: var(--qm-muted, #777);
+  font-size: var(--qm-text-xs, 11px);
+}
+.notice {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8);
+  border-radius: var(--qm-radius, 0px);
+  color: var(--qm-ink, #1c1815);
+  font-size: var(--qm-text-sm, 12px);
+}
 .stamp-action {
   width: 100%;
   margin-top: 15px;

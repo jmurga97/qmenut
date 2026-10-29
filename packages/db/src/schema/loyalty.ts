@@ -119,3 +119,37 @@ export const loyaltyRedemptions = sqliteTable(
     check("loyalty_redemptions_status", sql`${table.status} IN ('pending', 'validated', 'rejected', 'expired')`),
   ],
 );
+
+export const loyaltyStampRequests = sqliteTable(
+  "loyalty_stamp_requests",
+  {
+    id: text("id").primaryKey(),
+    customerId: text("customer_id")
+      .notNull()
+      .references(() => customers.id, { onDelete: "cascade" }),
+    restaurantId: text("restaurant_id")
+      .notNull()
+      .references(() => restaurants.id, { onDelete: "cascade" }),
+    branchId: text("branch_id").references(() => branches.id, { onDelete: "set null" }),
+    claimedQuantity: integer("claimed_quantity").notNull(),
+    acceptedQuantity: integer("accepted_quantity"),
+    status: text("status", { enum: ["pending", "accepted", "declined", "cancelled"] })
+      .notNull()
+      .default("pending"),
+    autoAccepted: integer("auto_accepted", { mode: "boolean" }).notNull().default(false),
+    handledBy: text("handled_by").references(() => restaurantUsers.id, { onDelete: "set null" }),
+    handledAt: integer("handled_at"),
+    transactionId: integer("transaction_id"),
+    visitId: integer("visit_id"),
+    outcomeSeenAt: integer("outcome_seen_at"),
+    createdAt: integer("created_at").notNull().default(epochMilliseconds),
+    updatedAt: integer("updated_at").notNull().default(epochMilliseconds),
+  },
+  (table) => [
+    index("idx_loyalty_stamp_requests_branch").on(table.restaurantId, table.branchId, table.status, table.createdAt),
+    index("idx_loyalty_stamp_requests_customer").on(table.customerId, table.restaurantId, table.createdAt),
+    index("idx_loyalty_stamp_requests_status").on(table.status, table.createdAt),
+    check("loyalty_stamp_requests_claimed", sql`${table.claimedQuantity} BETWEEN 1 AND 10`),
+    check("loyalty_stamp_requests_status", sql`${table.status} IN ('pending', 'accepted', 'declined', 'cancelled')`),
+  ],
+);

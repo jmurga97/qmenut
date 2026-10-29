@@ -18,7 +18,7 @@ interface SendWebPushInput {
   subscription: PushSubscriptionKeys;
   payload: string;
   vapid: VapidKeys;
-  /** Replaces an undelivered push with the same topic at the push service. */
+  /** Replaces an undelivered push with the same topic at the push service. Any string: it is hashed to fit RFC 8030. */
   topic?: string;
   ttlSeconds?: number;
 }
@@ -155,7 +155,11 @@ export async function sendWebPush({
     Urgency: "high",
   };
 
-  if (topic) headers.Topic = topic;
+  // RFC 8030 caps Topic at 32 base64url characters.
+  if (topic) {
+    const digest = await crypto.subtle.digest("SHA-256", encoder.encode(topic));
+    headers.Topic = base64UrlEncode(new Uint8Array(digest)).slice(0, 32);
+  }
 
   const response = await fetch(subscription.endpoint, { method: "POST", headers, body });
   const retryAfter = Number(response.headers.get("Retry-After"));

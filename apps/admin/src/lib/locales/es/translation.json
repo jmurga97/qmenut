@@ -565,7 +565,6 @@
     "Vista del cliente ·": "Vista del cliente ·",
     "Tu tarjeta": "Tu tarjeta",
     "{{balance}} de {{target}} sellos": "{{balance}} de {{target}} sellos",
-    "Pedir mi sello": "Pedir mi sello",
     "sellos": "sellos",
     "Eliminar": "Eliminar",
     "Se eliminará “{{name}}”. Esta acción no se puede deshacer.": "Se eliminará “{{name}}”. Esta acción no se puede deshacer.",
@@ -597,7 +596,29 @@
     "Escribe un nombre para el premio": "Escribe un nombre para el premio",
     "Selecciona un plato": "Selecciona un plato",
     "Indica un porcentaje": "Indica un porcentaje",
-    "Indica un precio especial": "Indica un precio especial"
+    "Indica un precio especial": "Indica un precio especial",
+    "Pedir sellos": "Pedir sellos",
+    "Solicitudes de sellos ({{count}})": "Solicitudes de sellos ({{count}})",
+    "No hay solicitudes esperando. Si nadie responde, se aceptan solas a las 12 h.": "No hay solicitudes esperando. Si nadie responde, se aceptan solas a las 12 h.",
+    "Se acepta sola en {{hours}} h": "Se acepta sola en {{hours}} h",
+    "Sellos a aceptar": "Sellos a aceptar",
+    "Un sello menos": "Un sello menos",
+    "Un sello más": "Un sello más",
+    "{{quantity}} de {{claimed}}": "{{quantity}} de {{claimed}}",
+    "Aceptar": "Aceptar",
+    "Rechazar la solicitud de {{email}}": "Rechazar la solicitud de {{email}}",
+    "Rechazada": "Rechazada",
+    "Aceptada sola": "Aceptada sola",
+    "Aceptada {{accepted}} de {{claimed}}": "Aceptada {{accepted}} de {{claimed}}",
+    "Aceptada": "Aceptada",
+    "Últimas 24 h ({{count}})": "Últimas 24 h ({{count}})",
+    "{{count}} sellos pedidos a las {{time}}": "{{count}} sellos pedidos a las {{time}}",
+    "Deshacer la solicitud de {{email}}": "Deshacer la solicitud de {{email}}",
+    "Solicitud de {{email}} rechazada.": "Solicitud de {{email}} rechazada.",
+    "Máximo de sellos por solicitud": "Máximo de sellos por solicitud",
+    "Indica un número entre 1 y 10": "Indica un número entre 1 y 10",
+    "Aceptar la solicitud de {{email}}": "Aceptar la solicitud de {{email}}",
+    "Solicitud de {{email}} aceptada.": "Solicitud de {{email}} aceptada."
   },
   "menu": {
     "No se pudo preparar la imagen.": "No se pudo preparar la imagen.",
@@ -1067,6 +1088,10 @@
     "Sucursales": "Sucursales",
     "Validado": "Validado",
     "Validado por {{name}}": "Validado por {{name}}",
-    "{{reward}} · {{cost}} sellos": "{{reward}} · {{cost}} sellos"
+    "{{reward}} · {{cost}} sellos": "{{reward}} · {{cost}} sellos",
+    "Solicitud de {{count}} sellos": "Solicitud de {{count}} sellos",
+    "Solicitud de sellos": "Solicitud de sellos",
+    "Aceptado": "Aceptado",
+    "Aceptado por {{name}}": "Aceptado por {{name}}"
   }
 }

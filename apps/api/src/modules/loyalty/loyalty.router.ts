@@ -2,8 +2,9 @@ import { z } from "zod";
 
 import { acceptConsent } from "./accept-consent";
 import { cancelRedemption } from "./cancel-redemption";
+import { cancelStampRequest } from "./cancel-stamp-request";
 import { createCard } from "./create-card";
-import { earnStamp } from "./earn-stamp";
+import { dismissStampOutcome } from "./dismiss-stamp-outcome";
 import { getCard } from "./get-card";
 import { getLoyaltyProgramForClient } from "./get-loyalty-program";
 import { getRedemptionStatus } from "./get-redemption-status";
@@ -11,12 +12,14 @@ import {
   acceptConsentInputSchema,
   cardTokenInputSchema,
   createCardInputSchema,
-  earnStampInputSchema,
   hostInputSchema,
   redemptionInputSchema,
   requestRedemptionInputSchema,
+  requestStampsInputSchema,
+  stampRequestInputSchema,
 } from "./loyalty-input.schema";
 import { requestRedemption } from "./request-redemption";
+import { requestStamps } from "./request-stamps";
 import { publicProcedure, router } from "../../trpc/trpc";
 
 const programInputSchema = hostInputSchema
@@ -54,14 +57,35 @@ export const loyaltyRouter = router({
       cardToken: input.cardToken,
     }),
   ),
-  earnStamp: publicProcedure.input(earnStampInputSchema).mutation(({ ctx, input }) =>
-    earnStamp({
+  requestStamps: publicProcedure.input(requestStampsInputSchema).mutation(({ ctx, input }) =>
+    requestStamps({
       db: ctx.db,
       env: ctx.env,
       request: ctx.request,
       host: input.host,
       cardToken: input.cardToken,
       venueCode: input.venueCode,
+      quantity: input.quantity,
+    }),
+  ),
+  cancelStampRequest: publicProcedure.input(stampRequestInputSchema).mutation(({ ctx, input }) =>
+    cancelStampRequest({
+      db: ctx.db,
+      env: ctx.env,
+      request: ctx.request,
+      host: input.host,
+      cardToken: input.cardToken,
+      requestId: input.requestId,
+    }),
+  ),
+  dismissStampOutcome: publicProcedure.input(stampRequestInputSchema).mutation(({ ctx, input }) =>
+    dismissStampOutcome({
+      db: ctx.db,
+      env: ctx.env,
+      request: ctx.request,
+      host: input.host,
+      cardToken: input.cardToken,
+      requestId: input.requestId,
     }),
   ),
   requestRedemption: publicProcedure.input(requestRedemptionInputSchema).mutation(({ ctx, input }) =>

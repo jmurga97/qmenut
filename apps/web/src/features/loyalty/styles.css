@@ -89,3 +89,43 @@
     border-color: var(--qm-ink, #1c1815);
   }
 }
+
+.loyalty-stamp-request {
+  display: grid;
+  gap: 14px;
+}
+
+.loyalty-quantity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--qm-ink, #1c1815);
+  font-size: var(--qm-text-sm, 12px);
+  font-weight: var(--qm-hw, 700);
+}
+
+.loyalty-quantity span {
+  flex: 1;
+}
+
+.loyalty-quantity button {
+  width: 44px;
+  height: 44px;
+  border: var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8);
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-card, #fff);
+  color: inherit;
+  font: inherit;
+  font-size: var(--qm-text-lg, 15px);
+}
+
+.loyalty-quantity button:disabled {
+  opacity: 0.4;
+}
+
+.loyalty-quantity output {
+  min-width: 2ch;
+  font-size: var(--qm-text-lg, 15px);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}

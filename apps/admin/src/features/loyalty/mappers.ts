@@ -35,6 +35,7 @@ export function toLoyaltyProgramFormValues(data: Loyalty.LoyaltyProgramResponse)
   return {
     isActive: data.program?.isActive ?? false,
     averageTicket: formatMoneyInput(data.program?.ticketMedio),
+    stampRequestLimit: String(data.program?.stampRequestLimit ?? 3),
     rewards: data.rewards.map((reward) => toRewardFormValues(reward)),
   };
 }
@@ -42,6 +43,7 @@ export function toLoyaltyProgramInput(values: Loyalty.LoyaltyProgramFormValues) 
   return {
     isActive: values.isActive,
     ticketMedio: values.averageTicket === "" ? null : parseMoneyInput(values.averageTicket),
+    stampRequestLimit: Number(values.stampRequestLimit),
   };
 }
 export function toRewardInput(values: Loyalty.RewardFormValues) {
