@@ -86,7 +86,8 @@
     "Instalar app": "Instalar app",
     "Instalar: Compartir → Añadir a inicio": "Instalar: Compartir → Añadir a pantalla de inicio",
     "Material para imprimir": "Material para imprimir",
-    "Notificaciones": "Notificaciones"
+    "Notificaciones": "Notificaciones",
+    "Mensajería": "Mensajería"
   },
   "analytics": {
     "Sin datos en este periodo.": "Sin datos en este periodo.",
@@ -1093,5 +1094,23 @@
     "Solicitud de sellos": "Solicitud de sellos",
     "Aceptado": "Aceptado",
     "Aceptado por {{name}}": "Aceptado por {{name}}"
+  },
+  "messaging": {
+    "Enviar plantilla": "Enviar plantilla",
+    "Plantilla": "Plantilla",
+    "Teléfono (E.164)": "Teléfono (E.164)",
+    "Cliente": "Cliente",
+    "Restaurante": "Restaurante",
+    "Fecha": "Fecha",
+    "Hora": "Hora",
+    "Personas": "Personas",
+    "Enviar": "Enviar",
+    "Conversación": "Conversación",
+    "Conversaciones": "Conversaciones",
+    "La ventana de 24 h está cerrada: solo se pueden enviar plantillas.": "La ventana de 24 h está cerrada: solo se pueden enviar plantillas.",
+    "Respuesta": "Respuesta",
+    "Responder": "Responder",
+    "Mensajería": "Mensajería",
+    "MSG_WORKER no está configurado en este entorno.": "MSG_WORKER no está configurado en este entorno."
   }
 }

@@ -132,6 +132,12 @@
           "binding": "THEME_WORKER",
           "service": "qmenut-tenant-config-dev",
         },
+        {
+          "binding": "MSG_WORKER",
+          "service": "ming-msg-worker",
+          "entrypoint": "MessagingRpc",
+          "remote": true,
+        },
       ],
       "ratelimits": [
         {
@@ -169,6 +175,12 @@
             "max_retries": 5,
             "dead_letter_queue": "qmenut-notifications-dev-dlq",
           },
+          {
+            "queue": "ming-msg-events-qmenut-dev",
+            "max_batch_size": 10,
+            "max_retries": 3,
+            "dead_letter_queue": "ming-msg-events-qmenut-dev-dlq",
+          },
         ],
       },
       "observability": {
@@ -182,6 +194,7 @@
         "STRIPE_PRICE_BASIC": "price_1U120eEnGfbzQ006un87QMk4",
         "STRIPE_PRICE_BUSINESS": "price_1UTdrtEnGfbzQ006IAt889AX",
         "NODE_ENV": "development",
+        "MSG_PRODUCT_ID": "qmenut-dev",
         "DEV_FIXED_OTP": "true",
         "SENTRY_DSN": "https://b201dd7421ecf64b6b7c2f073bae0cf0@o4511851717394432.ingest.de.sentry.io/4511956009943120",
       },
@@ -229,6 +242,12 @@
           "binding": "THEME_WORKER",
           "service": "qmenut-tenant-config",
         },
+        {
+          "binding": "MSG_WORKER",
+          "service": "ming-msg-worker",
+          "entrypoint": "MessagingRpc",
+          "remote": true,
+        },
       ],
       "ratelimits": [
         {
@@ -266,6 +285,12 @@
             "max_retries": 5,
             "dead_letter_queue": "qmenut-notifications-dlq",
           },
+          {
+            "queue": "ming-msg-events-qmenut",
+            "max_batch_size": 10,
+            "max_retries": 3,
+            "dead_letter_queue": "ming-msg-events-qmenut-dlq",
+          },
         ],
       },
       "observability": {
@@ -282,6 +307,7 @@
         "NODE_ENV": "production",
         "SENTRY_DSN": "https://b201dd7421ecf64b6b7c2f073bae0cf0@o4511851717394432.ingest.de.sentry.io/4511956009943120",
         "DEV_FIXED_OTP": "false",
+        "MSG_PRODUCT_ID": "qmenut",
       },
     },
   },

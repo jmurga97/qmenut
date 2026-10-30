@@ -7,6 +7,7 @@ import { adminExchangeRatesRouter } from "../modules/admin-exchange-rates/admin-
 import { adminImagesRouter } from "../modules/admin-images/admin-images.router";
 import { adminLoyaltyRouter } from "../modules/admin-loyalty/admin-loyalty.router";
 import { adminMenuRouter } from "../modules/admin-menu/admin-menu.router";
+import { adminMessagingRouter } from "../modules/admin-messaging/admin-messaging.router";
 import { adminPromotionsRouter } from "../modules/admin-promotions/admin-promotions.router";
 import { adminTenantRouter } from "../modules/admin-tenant/admin-tenant.router";
 import { adminTranslationsRouter } from "../modules/admin-translations/admin-translations.router";
@@ -37,6 +38,7 @@ export const appRouter = router({
     languages: adminTranslationsRouter.languages,
     translations: adminTranslationsRouter.translations,
     users: adminUsersRouter,
+    messaging: adminMessagingRouter,
   }),
 });
 

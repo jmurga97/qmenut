@@ -86,7 +86,8 @@
     "Instalar app": "Install app",
     "Instalar: Compartir → Añadir a inicio": "Install: Share → Add to Home Screen",
     "Material para imprimir": "Print materials",
-    "Notificaciones": "Notifications"
+    "Notificaciones": "Notifications",
+    "Mensajería": "Messaging"
   },
   "analytics": {
     "Sin datos en este periodo.": "No data in this period.",
@@ -1093,5 +1094,23 @@
     "Solicitud de sellos": "Stamp request",
     "Aceptado": "Accepted",
     "Aceptado por {{name}}": "Accepted by {{name}}"
+  },
+  "messaging": {
+    "Enviar plantilla": "Send template",
+    "Plantilla": "Template",
+    "Teléfono (E.164)": "Phone (E.164)",
+    "Cliente": "Customer",
+    "Restaurante": "Restaurant",
+    "Fecha": "Date",
+    "Hora": "Time",
+    "Personas": "Guests",
+    "Enviar": "Send",
+    "Conversación": "Conversation",
+    "Conversaciones": "Conversations",
+    "La ventana de 24 h está cerrada: solo se pueden enviar plantillas.": "The 24 h window is closed: only templates can be sent.",
+    "Respuesta": "Reply",
+    "Responder": "Reply",
+    "Mensajería": "Messaging",
+    "MSG_WORKER no está configurado en este entorno.": "MSG_WORKER is not configured in this environment."
   }
 }

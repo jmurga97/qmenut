@@ -1,7 +1,7 @@
 import { AppShell, Select } from "@jmurga97/components";
-import { can } from "@qmenut/permissions";
+import { can, isInternalSupportEmail } from "@qmenut/permissions";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { Outlet, useLocation, useNavigate, useRouter } from "@tanstack/react-router";
+import { Outlet, useLocation, useNavigate, useRouteContext, useRouter } from "@tanstack/react-router";
 
 import { getListRestaurantsQueryOptions } from "~/features/auth/api";
 import { useSelectRestaurant } from "~/features/auth/hooks/use-select-restaurant";
@@ -35,6 +35,7 @@ interface Section {
   path: string;
   permission?: Permission;
   feature?: PlanFeature;
+  internalOnly?: boolean;
 }
 
 const SECTIONS = [
@@ -75,6 +76,7 @@ const SECTIONS = [
     permission: "users.manage",
     feature: "users",
   },
+  { id: "messaging", label: i18n.t("shell___Mensajería"), path: "/messaging", internalOnly: true },
 ] as const satisfies readonly Section[];
 
 function getCurrentSection(pathname: string): Section | undefined {
@@ -82,14 +84,16 @@ function getCurrentSection(pathname: string): Section | undefined {
 }
 
 interface NavigationInput {
+  isInternalSupport: boolean;
   pathname: string;
   roleCode: Parameters<typeof can>[0];
   isLocked: (section: Section) => boolean;
 }
 
-function getNavigationItems({ pathname, roleCode, isLocked }: NavigationInput): NavListItem[] {
+function getNavigationItems({ isInternalSupport, pathname, roleCode, isLocked }: NavigationInput): NavListItem[] {
   return SECTIONS.filter((section) => section.id !== "analytics" || FEATURES.analytics)
     .filter((section) => !("permission" in section) || can(roleCode, section.permission))
+    .filter((section) => !("internalOnly" in section) || isInternalSupport)
     .map((section) => ({
       current: section.path === "/" ? pathname === "/" : pathname.startsWith(section.path),
       // Locked sections stay visible so owners can see what Business adds.
@@ -105,6 +109,8 @@ export function AdminShell() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const location = useLocation();
+  const { session } = useRouteContext({ from: "/_auth" });
+  const isInternalSupport = isInternalSupportEmail(session?.user.email ?? "");
   const { data: tenant } = useSuspenseQuery(getTenantQueryOptions({ trpc }));
   const { data: memberships } = useSuspenseQuery(getListRestaurantsQueryOptions({ trpc }));
   const selectRestaurant = useSelectRestaurant();
@@ -167,7 +173,12 @@ export function AdminShell() {
         <AdminSidebar
           disabled={editorBusy}
           branches={tenant.branches}
-          items={getNavigationItems({ pathname: location.pathname, roleCode: tenant.roleCode, isLocked })}
+          items={getNavigationItems({
+            isInternalSupport,
+            pathname: location.pathname,
+            roleCode: tenant.roleCode,
+            isLocked,
+          })}
           onIntent={(href) => void router.preloadRoute({ to: href })}
           onBranchChange={(branchId) => {
             if (isEditorBusy()) return;

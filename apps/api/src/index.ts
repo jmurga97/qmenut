@@ -9,6 +9,7 @@ import { jsonResponse } from "@/http/json";
 import { publishPendingImages } from "@/modules/admin-images/image-finalization";
 import { runAnalyticsDailyJob } from "@/modules/analytics/digest/run-analytics-daily-job";
 import { handleStripeWebhook } from "@/modules/billing/handle-stripe-webhook";
+import { handleMessagingEvents } from "@/modules/messaging/handle-messaging-events";
 import { consumePushMessages, runNotificationMaintenance } from "@/modules/notifications/notification-jobs";
 import { createContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/router";
@@ -103,6 +104,8 @@ export default Sentry.withSentry(
     async queue(batch: MessageBatch<unknown>, rawEnv: EnvBindings): Promise<void> {
       if (batch.queue.startsWith("qmenut-notifications")) {
         await consumePushMessages(batch as MessageBatch<PushMessage>, parseEnv(rawEnv));
+      } else if (batch.queue.startsWith("ming-msg-events-")) {
+        await handleMessagingEvents(batch, rawEnv);
       }
     },
   },

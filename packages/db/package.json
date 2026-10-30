@@ -48,6 +48,10 @@
       "types": "./src/repositories/loyalty-insights.repository.ts",
       "import": "./src/repositories/loyalty-insights.repository.ts"
     },
+    "./repositories/messaging-events.repository": {
+      "types": "./src/repositories/messaging-events.repository.ts",
+      "import": "./src/repositories/messaging-events.repository.ts"
+    },
     "./repositories/notifications.repository": {
       "types": "./src/repositories/notifications.repository.ts",
       "import": "./src/repositories/notifications.repository.ts"

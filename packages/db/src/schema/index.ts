@@ -7,6 +7,7 @@ export * from "./exchange-rates";
 export * from "./images";
 export * from "./loyalty";
 export * from "./menu";
+export * from "./messaging";
 export * from "./notifications";
 export * from "./promotions";
 export * from "./restaurants";
