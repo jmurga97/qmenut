@@ -26,14 +26,19 @@ interface PublicInput {
   host?: string;
 }
 
-/** The plan, the restaurant's switch and at least one slot: the same gate as the public tab. */
-async function resolveBookingTenant({ db, request, host }: PublicInput): Promise<PublicTenant> {
+async function resolveReservationTenant({ db, request, host }: PublicInput): Promise<PublicTenant> {
   const tenant = await resolveTenantFromRequest({ db, request, host });
+  if (!tenant) throw new TRPCError({ code: "NOT_FOUND", message: "Sucursal no encontrada" });
+  return tenant;
+}
+
+/** Only new bookings need the plan, the branch's switch and at least one weekly slot. */
+async function resolveBookingTenant(input: PublicInput): Promise<PublicTenant> {
+  const tenant = await resolveReservationTenant(input);
 
   if (
-    !tenant ||
     !hasFeature([tenant.planCode], "reservations") ||
-    !(await isReservationsOpen({ db, branchId: tenant.branchId }))
+    !(await isReservationsOpen({ db: input.db, branchId: tenant.branchId }))
   ) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Esta sucursal no acepta reservas" });
   }
@@ -129,7 +134,7 @@ export async function getGuestReservations({
   email,
   ...input
 }: PublicInput & { email: string }): Promise<GuestReservation[]> {
-  const tenant = await resolveBookingTenant(input);
+  const tenant = await resolveReservationTenant(input);
   await throttle({ ...input, tenant });
   await acceptOverdueReservations({ db: input.db, env: input.env, branchId: tenant.branchId });
 
@@ -141,7 +146,7 @@ export async function cancelPublicReservation({
   reservationId,
   ...input
 }: PublicInput & { email: string; reservationId: string }): Promise<void> {
-  const tenant = await resolveBookingTenant(input);
+  const tenant = await resolveReservationTenant(input);
   await throttle({ ...input, tenant });
 
   const cancelled = await cancelGuestReservation({ db: input.db, branchId: tenant.branchId, email, reservationId });

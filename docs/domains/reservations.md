@@ -49,7 +49,9 @@ The WhatsApp transport's events are stored in `messaging_events`
   happen.
 - **Public router** `reservations` (`modules/reservations/reservations.router.ts`, handlers in
   `public-reservations.ts`), all `publicProcedure` on the tenant host: `availability`, `create`,
-  `byEmail` and `cancel`. The gate is the plan feature, the branch's switch and at least one slot.
+  `byEmail` and `cancel`. Availability and creation require the plan feature, the branch's switch
+  and at least one slot. Existing guests can still look up and cancel reservations after bookings
+  are switched off, slots are removed or the branch downgrades.
   `create`, `byEmail` and `cancel` go through the `RESERVATION_LIMITER` rate limit (10 a minute per
   branch and IP), because they send emails to, or reveal reservations for, any address typed in.
 - **Admin router** `admin.reservations` (`modules/admin-reservations/admin-reservations.router.ts`),
@@ -59,19 +61,21 @@ The WhatsApp transport's events are stored in `messaging_events`
   it bumps the branch's public content version), `closures`, `addClosure` and `removeClosure`.
 - **Automatic acceptance**: `acceptOverdueReservations` (`accept-overdue-reservations.ts`) is the
   one entry point. The cron and every read that shows pending reservations (`day`, `pendingCount`,
-  `byEmail`) call it, so a request is never shown pending past `respond_by`.
+  `byEmail`) call it. Staff accept and decline also settle overdue requests first, and their database
+  update cannot answer a pending request past `respond_by`.
 - **Lifecycle cron**: `runReservationJobs` (`reservation-jobs.ts`) runs in the minute cron next to
   the notification jobs. Steps, each isolated: accept overdue requests, send due attendance checks
   through `MSG_WORKER` (logged and skipped when the binding is missing), mark checked and unanswered
   reservations `unconfirmed` past the deadline, handle unconfirmed notifications whose slot started,
-  and anonymize reservations 90 days after their slot.
+  and anonymize reservations 90 days after their slot. Display names sent to WhatsApp are normalized
+  to one line and capped at its 60-character parameter limit; full stored names are preserved.
 - **WhatsApp answers**: the `queue` handler sends `ming-msg-events-*` batches to
   `handleMessagingEvents` (`modules/messaging/handle-messaging-events.ts`). A `confirm` button
   confirms an accepted or unconfirmed reservation; `cancel` cancels it as the guest.
 - **Emails and notifications**: `announceReservations` (`reservation-messages.ts`) is called after
   each change commits and never throws. It loads the reservation, its branch and the restaurant's
   active owners (never support accounts), sends the emails through `EMAIL_WORKER`, emits or handles
-  the notifications:
+  the notifications. Message reads and notification updates are chunked below D1's parameter limit:
 
 | Event                      | Emails (template)                                              | Notifications                                                                                          |
 | -------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |

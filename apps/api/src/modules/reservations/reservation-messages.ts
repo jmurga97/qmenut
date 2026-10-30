@@ -216,8 +216,10 @@ export async function announceReservations({
   }
 
   try {
-    const messages = await listReservationMessages({ db, reservationIds });
-    await Promise.all(messages.map((message) => announce({ db, env, message, event })));
+    for (let index = 0; index < reservationIds.length; index += 50) {
+      const messages = await listReservationMessages({ db, reservationIds: reservationIds.slice(index, index + 50) });
+      await Promise.all(messages.map((message) => announce({ db, env, message, event })));
+    }
   } catch (error) {
     Sentry.captureException(error, { tags: { module: "reservation-messages", kind: event.kind } });
   }

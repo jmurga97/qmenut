@@ -51,11 +51,19 @@ async function deliverPush({
   ];
   // Same tag and Topic per branch: the device and the push service replace the previous push.
   const tag = branchCount ? `${delivery.type}:${delivery.branchId}` : message.body.notificationId;
+  const url = new URL(
+    typeof config.url === "function" ? config.url(delivery.facts) : config.url,
+    "https://admin.internal",
+  );
+  if (delivery.branchId) {
+    url.searchParams.set("branchId", delivery.branchId);
+    url.searchParams.set("restaurantId", delivery.restaurantId);
+  }
   const result = await sendWebPush({
     subscription: delivery.device,
     payload: JSON.stringify({
       ...text,
-      url: typeof config.url === "function" ? config.url(delivery.facts) : config.url,
+      url: url.pathname + url.search,
       tag,
     }),
     vapid,

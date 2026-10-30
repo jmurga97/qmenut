@@ -48,10 +48,12 @@ check: the event map in `apps/api/src/modules/notifications/events.ts` is the so
   unhandled notifications of that type, skipped at 0. Its `tag` and `Topic` are per type and
   branch (`sendWebPush` hashes the topic to fit RFC 8030's 32 characters). An event's `url` is the
   admin path the push opens; it can be built from the facts (reservations open their slot's day).
+  Push links carry the restaurant and branch; the admin checks access, selects that branch, then
+  consumes those target parameters so later manual branch changes are preserved.
 - **Delivery**: the `queue` handler in `apps/api/src/index.ts` sends queue names starting with
   `qmenut-notifications` to `consumePushMessages` (`notification-jobs.ts`). It skips handled or
-  expired notifications, deletes devices on 404/410, retries 429/5xx, and acks other 4xx after
-  reporting them. Exhausted retries go to the `-dlq` queue.
+  expired notifications, rechecks active membership and current admin eligibility, deletes devices on
+  404/410, retries 429/5xx, and acks other 4xx after reporting them. Exhausted retries go to the `-dlq` queue.
 - **Web Push**: `apps/api/src/lib/web-push.ts` signs VAPID JWTs and encrypts payloads
   (`aes128gcm`, RFC 8291) with WebCrypto only. Push is off unless `VAPID_PUBLIC_KEY`,
   `VAPID_PRIVATE_KEY` and `VAPID_SUBJECT` are set.

@@ -211,55 +211,6 @@ export async function listPendingRedemptions({ db, restaurantId }: RestaurantInp
 export const STAMP_REQUEST_AUTO_ACCEPT_MS = 12 * 60 * 60 * 1000;
 const STAMP_REQUEST_BATCH = 50;
 
-interface WriteEarnInput extends RestaurantInput {
-  customerId: string;
-  branchId: string | null;
-  points: number;
-  /** The request time: stamps and the visit are dated when the guest asked, not when staff answered. */
-  at: number;
-}
-
-async function writeEarn({
-  db,
-  restaurantId,
-  customerId,
-  branchId,
-  points,
-  at,
-}: WriteEarnInput): Promise<{ transactionId: number; visitId: number | null }> {
-  const now = Date.now();
-  const earn = db
-    .insert(loyaltyTransactions)
-    .values({ customerId, restaurantId, branchId, type: "earn", points, reasonCode: "stamp_request", createdAt: at })
-    .returning({ id: loyaltyTransactions.id });
-  const balance = db
-    .update(customerRestaurants)
-    .set({
-      stampsBalance: sql`${customerRestaurants.stampsBalance} + ${points}`,
-      lastVisitAt: sql`MAX(COALESCE(${customerRestaurants.lastVisitAt}, 0), ${at})`,
-      firstVisitAt: sql`MIN(COALESCE(${customerRestaurants.firstVisitAt}, ${at}), ${at})`,
-      updatedAt: now,
-    })
-    .where(and(eq(customerRestaurants.customerId, customerId), eq(customerRestaurants.restaurantId, restaurantId)));
-
-  // customer_visits needs a branch; a request whose branch was hard-deleted still earns its stamps.
-  if (!branchId) {
-    const [[transaction]] = await db.batch([earn, balance]);
-    return { transactionId: transaction.id, visitId: null };
-  }
-
-  const [[transaction], , [visit]] = await db.batch([
-    earn,
-    balance,
-    db
-      .insert(customerVisits)
-      .values({ customerId, restaurantId, branchId, source: "direct", createdAt: at })
-      .returning({ id: customerVisits.id }),
-  ]);
-
-  return { transactionId: transaction.id, visitId: visit.id };
-}
-
 interface CreateStampRequestInput extends RestaurantInput {
   customerId: string;
   branchId: string;
@@ -314,59 +265,65 @@ export async function acceptStampRequest({
   quantity,
   handledBy,
 }: AcceptStampRequestInput): Promise<boolean> {
+  const pending = and(
+    eq(loyaltyStampRequests.id, requestId),
+    restaurantId ? eq(loyaltyStampRequests.restaurantId, restaurantId) : undefined,
+    eq(loyaltyStampRequests.status, "pending"),
+    quantity === null ? undefined : gte(loyaltyStampRequests.claimedQuantity, quantity),
+  );
+  const request = await db.select().from(loyaltyStampRequests).where(pending).get();
+  if (!request) return false;
+
   const now = Date.now();
-  const [request] = await db
-    .update(loyaltyStampRequests)
+  const points = quantity ?? request.claimedQuantity;
+  const reasonCode = `stamp_request:${requestId}`;
+  const stillPending = sql`EXISTS ${db.select({ id: loyaltyStampRequests.id }).from(loyaltyStampRequests).where(pending)}`;
+  const earn = db.insert(loyaltyTransactions).select(sql`
+    SELECT NULL, customer_id, restaurant_id, branch_id, 'earn', ${points}, ${reasonCode}, NULL, NULL, created_at
+    FROM loyalty_stamp_requests WHERE ${pending}
+  `);
+  const balance = db
+    .update(customerRestaurants)
     .set({
-      status: "accepted",
-      acceptedQuantity: quantity ?? sql`${loyaltyStampRequests.claimedQuantity}`,
-      autoAccepted: handledBy === null,
-      handledBy,
-      handledAt: now,
+      stampsBalance: sql`${customerRestaurants.stampsBalance} + ${points}`,
+      lastVisitAt: sql`MAX(COALESCE(${customerRestaurants.lastVisitAt}, 0), ${request.createdAt})`,
+      firstVisitAt: sql`MIN(COALESCE(${customerRestaurants.firstVisitAt}, ${request.createdAt}), ${request.createdAt})`,
       updatedAt: now,
     })
     .where(
       and(
-        eq(loyaltyStampRequests.id, requestId),
-        restaurantId ? eq(loyaltyStampRequests.restaurantId, restaurantId) : undefined,
-        eq(loyaltyStampRequests.status, "pending"),
-        quantity === null ? undefined : gte(loyaltyStampRequests.claimedQuantity, quantity),
+        eq(customerRestaurants.customerId, request.customerId),
+        eq(customerRestaurants.restaurantId, request.restaurantId),
+        stillPending,
       ),
-    )
-    .returning({
-      customerId: loyaltyStampRequests.customerId,
-      restaurantId: loyaltyStampRequests.restaurantId,
-      branchId: loyaltyStampRequests.branchId,
-      acceptedQuantity: loyaltyStampRequests.acceptedQuantity,
-      createdAt: loyaltyStampRequests.createdAt,
-    });
+    );
+  const visit = db.insert(customerVisits).select(sql`
+    SELECT NULL, customer_id, restaurant_id, branch_id, 'direct', created_at
+    FROM loyalty_stamp_requests WHERE ${pending} AND branch_id IS NOT NULL
+  `);
+  const complete = db
+    .update(loyaltyStampRequests)
+    .set({
+      status: "accepted",
+      acceptedQuantity: points,
+      autoAccepted: handledBy === null,
+      handledBy,
+      handledAt: now,
+      updatedAt: now,
+      transactionId: sql`(SELECT id FROM ${loyaltyTransactions} WHERE ${loyaltyTransactions.reasonCode} = ${reasonCode}
+      AND ${loyaltyTransactions.restaurantId} = ${request.restaurantId} ORDER BY id DESC LIMIT 1)`,
+      visitId:
+        request.branchId === null
+          ? null
+          : sql`(SELECT MAX(id) FROM ${customerVisits}
+      WHERE ${customerVisits.customerId} = ${request.customerId} AND ${customerVisits.restaurantId} = ${request.restaurantId}
+        AND ${customerVisits.branchId} = ${request.branchId} AND ${customerVisits.createdAt} = ${request.createdAt})`,
+    })
+    .where(pending);
 
-  if (!request) return false;
-
-  try {
-    const earn = await writeEarn({
-      db,
-      restaurantId: request.restaurantId,
-      customerId: request.customerId,
-      branchId: request.branchId,
-      points: request.acceptedQuantity!,
-      at: request.createdAt,
-    });
-
-    await db
-      .update(loyaltyStampRequests)
-      .set({ transactionId: earn.transactionId, visitId: earn.visitId })
-      .where(eq(loyaltyStampRequests.id, requestId));
-  } catch (error) {
-    await db
-      .update(loyaltyStampRequests)
-      .set({ ...REOPENED_REQUEST, updatedAt: Date.now() })
-      .where(eq(loyaltyStampRequests.id, requestId));
-
-    throw error;
-  }
-
-  return true;
+  // Every write checks pending until the last statement; a failed batch rolls the entire credit back.
+  const results = await db.batch([earn, balance, visit, complete]);
+  return results[3].meta.changes === 1;
 }
 
 const REOPENED_REQUEST = {

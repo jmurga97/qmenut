@@ -132,7 +132,8 @@ export const adminReservationsRouter = router({
     return countPendingReservations({ db: ctx.db, branchId: input.branchId });
   }),
   accept: tenantProcedure.input(reservationInputSchema).mutation(async ({ ctx, input }) => {
-    await resolveReservation(ctx, input.reservationId);
+    const reservation = await resolveReservation(ctx, input.reservationId);
+    await acceptOverdueReservations({ db: ctx.db, env: ctx.env, branchId: reservation.branchId });
     const row = await answerReservation({
       db: ctx.db,
       reservationId: input.reservationId,
@@ -149,7 +150,8 @@ export const adminReservationsRouter = router({
     });
   }),
   decline: tenantProcedure.input(reservationInputSchema).mutation(async ({ ctx, input }) => {
-    await resolveReservation(ctx, input.reservationId);
+    const reservation = await resolveReservation(ctx, input.reservationId);
+    await acceptOverdueReservations({ db: ctx.db, env: ctx.env, branchId: reservation.branchId });
     const row = await answerReservation({
       db: ctx.db,
       reservationId: input.reservationId,

@@ -30,27 +30,38 @@ export function ReservationExperience() {
   const { locale, effectiveLocale } = useRouteContext({ from: "/{-$locale}" });
   const { data: menu } = useSuspenseQuery(getPublicMenuQueryOptions({ host, locale, trpc }));
   const guest = useGuestReservations({ host, trpc });
+  return (
+    <div className="reservations-stack">
+      {menu?.publicFeatures.reservations ? (
+        <BookingExperience guest={guest} countryCode={menu.countryCode} />
+      ) : (
+        <UnavailableState />
+      )}
+      <GuestReservationsSection guest={guest} locale={effectiveLocale} />
+    </div>
+  );
+}
+
+function BookingExperience({ guest, countryCode }: { guest: GuestReservations; countryCode: string }) {
+  const trpc = useAppTrpc();
+  const { host } = useTenantContext();
+  const { locale, effectiveLocale } = useRouteContext({ from: "/{-$locale}" });
   const booking = useBookingFlow({
     host,
     trpc,
     language: effectiveLocale,
     initialMonth: currentMonth(),
-    defaultPrefix: getDefaultPhonePrefix(menu?.countryCode ?? ""),
+    defaultPrefix: getDefaultPhonePrefix(countryCode),
     rememberedEmail: guest.email,
     onSent: guest.remember,
   });
 
-  if (!menu?.publicFeatures.reservations) return <UnavailableState />;
-
   return (
-    <div className="reservations-stack">
-      <BookingSection
-        booking={booking}
-        locale={effectiveLocale}
-        privacyHref={locale ? `/${locale}/privacidad` : "/privacidad"}
-      />
-      <GuestReservationsSection guest={guest} locale={effectiveLocale} />
-    </div>
+    <BookingSection
+      booking={booking}
+      locale={effectiveLocale}
+      privacyHref={locale ? `/${locale}/privacidad` : "/privacidad"}
+    />
   );
 }
 

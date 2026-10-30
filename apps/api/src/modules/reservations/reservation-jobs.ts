@@ -22,12 +22,16 @@ import type { AttendanceCheck } from "@qmenut/db/repositories/reservations.repos
 
 const ATTENDANCE_TEMPLATE = "reservation_attendance";
 
+function templateName(value: string): string {
+  return value.replaceAll(/\s+/g, " ").trim().slice(0, 60);
+}
+
 function formatTemplateData(check: AttendanceCheck): Record<string, string> {
   const [, month, day] = check.slotDate.split("-");
 
   return {
-    customerName: check.guestName ?? "",
-    restaurantName: check.branchName,
+    customerName: templateName(check.guestName ?? "") || "Cliente",
+    restaurantName: templateName(check.branchName) || "Restaurante",
     date: `${day}/${month}`,
     time: formatMinute(check.slotMinute),
     partySize: String(check.partySize),

@@ -21,9 +21,25 @@ interface NewNotification {
 }
 
 /** Members who can open the admin right now: mirrors tenantProcedure's Basic gate, never support accounts. */
-function insertRecipients(db: DrizzleDb, notificationFilter: SQL) {
+function recipientEligibility(): SQL {
   const usersPlanCodes = PLAN_CODES.filter((planCode) => hasFeature([planCode], "users"));
+  return sql`
+    ru.is_active = 1 AND r.deleted_at IS NULL
+    AND lower(u.email) NOT IN (${sql.join(
+      INTERNAL_SUPPORT_EMAILS.map((email) => sql`${email}`),
+      sql`, `,
+    )})
+    AND (ru.role_code = 'owner' OR EXISTS (
+      SELECT 1 FROM branches b WHERE b.restaurant_id = r.id AND b.deleted_at IS NULL
+        AND b.plan_code IN (${sql.join(
+          usersPlanCodes.map((planCode) => sql`${planCode}`),
+          sql`, `,
+        )})
+    ))
+  `;
+}
 
+function insertRecipients(db: DrizzleDb, notificationFilter: SQL) {
   return db.run(sql`
     INSERT OR IGNORE INTO notification_recipients (notification_id, membership_id)
     SELECT n.id, ru.id
@@ -32,22 +48,7 @@ function insertRecipients(db: DrizzleDb, notificationFilter: SQL) {
     JOIN users u ON u.id = ru.user_id
     JOIN restaurants r ON r.id = n.restaurant_id
     WHERE ${notificationFilter}
-      AND ru.is_active = 1 AND r.deleted_at IS NULL
-      AND lower(u.email) NOT IN (${sql.join(
-        INTERNAL_SUPPORT_EMAILS.map((email) => sql`${email}`),
-        sql`, `,
-      )})
-      AND (
-        ru.role_code = 'owner'
-        OR EXISTS (
-          SELECT 1 FROM branches b
-          WHERE b.restaurant_id = r.id AND b.deleted_at IS NULL
-            AND b.plan_code IN (${sql.join(
-              usersPlanCodes.map((planCode) => sql`${planCode}`),
-              sql`, `,
-            )})
-        )
-      )
+      AND ${recipientEligibility()}
   `);
 }
 
@@ -101,12 +102,14 @@ export async function markNotificationsHandled({
 }): Promise<void> {
   if (subjectIds.length === 0) return;
 
-  await db
-    .update(notifications)
-    .set({ handledAt: now, handledBy, handledOutcome: outcome })
-    .where(
-      and(eq(notifications.type, type), inArray(notifications.subjectId, subjectIds), isNull(notifications.handledAt)),
-    );
+  // Leave room for the update values and event type under D1's 100-parameter limit.
+  for (let index = 0; index < subjectIds.length; index += 50) {
+    const ids = subjectIds.slice(index, index + 50);
+    await db
+      .update(notifications)
+      .set({ handledAt: now, handledBy, handledOutcome: outcome })
+      .where(and(eq(notifications.type, type), inArray(notifications.subjectId, ids), isNull(notifications.handledAt)));
+  }
 }
 
 /** The subject went back to waiting (an undone decline): it counts and can be handled again. */
@@ -275,6 +278,7 @@ export async function listPushTargetIds({
 }
 
 export interface PushDelivery {
+  restaurantId: string;
   type: string;
   branchId: string | null;
   facts: NotificationFacts;
@@ -295,6 +299,7 @@ export async function getPushDelivery({
   deviceId: string;
 }): Promise<PushDelivery | null> {
   const row = await db.get<{
+    restaurant_id: string;
     type: string;
     branch_id: string | null;
     facts_json: string;
@@ -307,19 +312,25 @@ export async function getPushDelivery({
     auth: string;
     language: PushLanguage;
   }>(sql`
-    SELECT n.type, n.branch_id, n.facts_json, b.name AS branch_name, n.handled_at, n.expires_at,
+    SELECT n.restaurant_id, n.type, n.branch_id, n.facts_json, b.name AS branch_name, n.handled_at, n.expires_at,
       d.id AS device_id, d.endpoint, d.p256dh, d.auth, d.language
     FROM notifications n
     JOIN push_devices d ON d.id = ${deviceId}
     JOIN notification_recipients nr ON nr.notification_id = n.id AND nr.membership_id = d.membership_id
+    JOIN restaurant_users ru ON ru.id = d.membership_id AND ru.restaurant_id = n.restaurant_id
+    JOIN users u ON u.id = ru.user_id
+    JOIN restaurants r ON r.id = ru.restaurant_id
     LEFT JOIN branches b ON b.id = n.branch_id
     WHERE n.id = ${notificationId}
+      AND ${recipientEligibility()}
+      AND (b.id IS NULL OR b.deleted_at IS NULL)
       AND EXISTS (SELECT 1 FROM json_each(d.branch_ids) WHERE json_each.value = n.branch_id)
   `);
 
   if (!row) return null;
 
   return {
+    restaurantId: row.restaurant_id,
     type: row.type,
     branchId: row.branch_id,
     facts: JSON.parse(row.facts_json) as NotificationFacts,
