@@ -1,6 +1,11 @@
 import { getCardState } from "@qmenut/db/repositories/customers.repository";
 import { getLoyaltyProgram, listRewards } from "@qmenut/db/repositories/loyalty-admin.repository";
-import { expireStaleRedemptions, findPendingRedemption } from "@qmenut/db/repositories/loyalty-ledger.repository";
+import {
+  acceptOverdueStampRequests,
+  expireStaleRedemptions,
+  findPendingRedemption,
+  getCardStampRequests,
+} from "@qmenut/db/repositories/loyalty-ledger.repository";
 import { TRPCError } from "@trpc/server";
 
 import { maskEmail } from "./mask-email";
@@ -9,7 +14,7 @@ import { REDEMPTION_TTL_MS } from "../../lib/loyalty/token";
 
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
-import type { CustomerCardState, LoyaltyRewardView } from "@qmenut/db/models/loyalty";
+import type { CardStampRequests, CustomerCardState, LoyaltyRewardView } from "@qmenut/db/models/loyalty";
 
 interface GetCardInput {
   db: DrizzleDb;
@@ -31,11 +36,13 @@ export interface PendingRedemptionForClient {
   rewardName: string;
 }
 
-export interface GetCardResult {
+export interface GetCardResult extends CardStampRequests {
   card: CustomerCardState;
   /** True when the card is view-only until the customer re-accepts the current privacy policy. */
   consentRequired: boolean;
   pendingRedemption: PendingRedemptionForClient | null;
+  /** Claimed but not accepted yet: shown on the card, never spendable. */
+  pendingStamps: number;
   programActive: boolean;
   rewards: CardRewardView[];
 }
@@ -51,12 +58,14 @@ export async function getCard({ db, env, request, host, cardToken }: GetCardInpu
   });
 
   await expireStaleRedemptions({ db, restaurantId: tenant.restaurantId, olderThanMs: REDEMPTION_TTL_MS });
+  await acceptOverdueStampRequests({ db, restaurantId: tenant.restaurantId });
 
-  const [card, program, rewards, pending] = await Promise.all([
+  const [card, program, rewards, pending, stampRequests] = await Promise.all([
     getCardState({ db, customerId, restaurantId: tenant.restaurantId }),
     getLoyaltyProgram({ db, restaurantId: tenant.restaurantId }),
     listRewards({ db, restaurantId: tenant.restaurantId, includeInactive: false }),
     findPendingRedemption({ db, restaurantId: tenant.restaurantId, customerId }),
+    getCardStampRequests({ db, restaurantId: tenant.restaurantId, customerId }),
   ]);
 
   if (!card) {
@@ -84,5 +93,7 @@ export async function getCard({ db, env, request, host, cardToken }: GetCardInpu
     rewards: rewardViews,
     programActive: program?.isActive ?? false,
     pendingRedemption,
+    ...stampRequests,
+    pendingStamps: stampRequests.pendingRequests.reduce((sum, request) => sum + request.quantity, 0),
   };
 }

@@ -19,7 +19,11 @@ export function getLoyaltyProgramQueryOptions({ host, trpc, locale }: LoyaltyPro
 }
 
 export function getLoyaltyCardQueryOptions({ cardToken, host, trpc }: LoyaltyCardQueryOptionsInput) {
-  return trpc.loyalty.getCard.queryOptions({ host, cardToken });
+  // Staff can answer hours later: refresh whenever the guest comes back, no polling.
+  return trpc.loyalty.getCard.queryOptions(
+    { host, cardToken },
+    { refetchOnMount: "always", refetchOnWindowFocus: "always" },
+  );
 }
 
 export function getRedemptionStatusQueryOptions({
@@ -37,7 +41,9 @@ export function getLoyaltyMutationOptions(trpc: TrpcOptionsProxy) {
     acceptConsent: trpc.loyalty.acceptConsent.mutationOptions({ networkMode: "always" }),
     cancelRedemption: trpc.loyalty.cancelRedemption.mutationOptions({ networkMode: "always" }),
     createCard: trpc.loyalty.createCard.mutationOptions({ networkMode: "always" }),
-    earnStamp: trpc.loyalty.earnStamp.mutationOptions({ networkMode: "always" }),
+    cancelStampRequest: trpc.loyalty.cancelStampRequest.mutationOptions({ networkMode: "always" }),
+    dismissStampOutcome: trpc.loyalty.dismissStampOutcome.mutationOptions({ networkMode: "always" }),
+    requestStamps: trpc.loyalty.requestStamps.mutationOptions({ networkMode: "always" }),
     requestRedemption: trpc.loyalty.requestRedemption.mutationOptions({ networkMode: "always" }),
   };
 }

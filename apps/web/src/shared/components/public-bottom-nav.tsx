@@ -1,6 +1,6 @@
 import { QmNavBar } from "@qmenut/ui/components/qm-nav-bar/react";
 import { QmTab } from "@qmenut/ui/components/qm-tab/react";
-import { Gift, Phone, Tag, UtensilsCrossed } from "@qmenut/ui/icons";
+import { Calendar, Gift, Phone, Tag, UtensilsCrossed } from "@qmenut/ui/icons";
 import { useNavigate, useRouter, useRouterState, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
@@ -10,9 +10,10 @@ const NAV_ICON_STROKE_WIDTH = 1.9;
 interface PublicBottomNavProps {
   showHighlights: boolean;
   showLoyalty: boolean;
+  showReservations: boolean;
 }
 
-export function PublicBottomNav({ showHighlights, showLoyalty }: PublicBottomNavProps) {
+export function PublicBottomNav({ showHighlights, showLoyalty, showReservations }: PublicBottomNavProps) {
   const navigate = useNavigate();
   const router = useRouter();
   const search = useSearch({ from: "/{-$locale}" });
@@ -32,6 +33,14 @@ export function PublicBottomNav({ showHighlights, showLoyalty }: PublicBottomNav
   function preloadContact() {
     void router.preloadRoute({
       to: "/{-$locale}/contacto",
+      params: (prev) => prev,
+      search,
+    });
+  }
+
+  function preloadReservations() {
+    void router.preloadRoute({
+      to: "/{-$locale}/reservar",
       params: (prev) => prev,
       search,
     });
@@ -66,6 +75,19 @@ export function PublicBottomNav({ showHighlights, showLoyalty }: PublicBottomNav
         >
           <Tag slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
           {t("common.navigation.destacados")}
+        </QmTab>
+      ) : null}
+      {showReservations ? (
+        <QmTab
+          value="/reservar"
+          active={routeId === "/{-$locale}/reservar"}
+          onPointerEnter={preloadReservations}
+          onFocus={preloadReservations}
+          onTouchStart={preloadReservations}
+          onQmSelect={() => void navigate({ to: "/{-$locale}/reservar", params: (prev) => prev, search })}
+        >
+          <Calendar slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
+          {t("common.navigation.reservations")}
         </QmTab>
       ) : null}
       <QmTab

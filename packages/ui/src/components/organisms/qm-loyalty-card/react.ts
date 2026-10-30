@@ -12,5 +12,8 @@ export const QmLoyaltyCard = createComponent({
   tagName: QM_LOYALTY_CARD_TAG_NAME,
   elementClass: QmLoyaltyCardElement,
   displayName: "QmLoyaltyCard",
-  events: { onQmStampRequest: "qm-stamp-request" as EventName<CustomEvent<void>> },
+  events: {
+    onQmStampRequest: "qm-stamp-request" as EventName<CustomEvent<void>>,
+    onQmStampCancel: "qm-stamp-cancel" as EventName<CustomEvent<void>>,
+  },
 });

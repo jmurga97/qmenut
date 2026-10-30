@@ -1,13 +1,19 @@
-import { and, eq, lt, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
 
+import { markNotificationsHandled } from "./notifications.repository";
+import { users } from "../schema/auth";
 import { customerRestaurants, customerVisits, customers } from "../schema/customers";
-import { loyaltyRedemptions, loyaltyRewards, loyaltyTransactions } from "../schema/loyalty";
+import { loyaltyRedemptions, loyaltyRewards, loyaltyStampRequests, loyaltyTransactions } from "../schema/loyalty";
+import { restaurantUsers } from "../schema/restaurants";
 
 import type { DrizzleDb } from "../client";
 import type {
+  CardStampRequests,
+  HandledStampRequestRow,
   LoyaltyTransactionResult,
   LoyaltyTransactionType,
   PendingRedemptionRow,
+  PendingStampRequestRow,
   RedemptionDetail,
 } from "../models/loyalty";
 
@@ -16,7 +22,10 @@ interface RestaurantInput {
   restaurantId: string;
 }
 
-interface ExpireStaleRedemptionsInput extends RestaurantInput {
+interface ExpireStaleRedemptionsInput {
+  db: DrizzleDb;
+  /** Omitted by the minute cron, which sweeps every restaurant. */
+  restaurantId?: string;
   olderThanMs: number;
 }
 
@@ -26,18 +35,27 @@ export async function expireStaleRedemptions({
   restaurantId,
   olderThanMs,
 }: ExpireStaleRedemptionsInput): Promise<void> {
-  const cutoff = Date.now() - olderThanMs;
-
-  await db
+  const now = Date.now();
+  const expired = await db
     .update(loyaltyRedemptions)
-    .set({ status: "expired", updatedAt: Date.now() })
+    .set({ status: "expired", updatedAt: now })
     .where(
       and(
-        eq(loyaltyRedemptions.restaurantId, restaurantId),
+        restaurantId ? eq(loyaltyRedemptions.restaurantId, restaurantId) : undefined,
         eq(loyaltyRedemptions.status, "pending"),
-        lt(loyaltyRedemptions.createdAt, cutoff),
+        lt(loyaltyRedemptions.createdAt, now - olderThanMs),
       ),
-    );
+    )
+    .returning({ id: loyaltyRedemptions.id });
+
+  await markNotificationsHandled({
+    db,
+    type: "loyalty.redemption",
+    subjectIds: expired.map((row) => row.id),
+    handledBy: null,
+    outcome: "expired",
+    now,
+  });
 }
 
 const redemptionDetailColumns = {
@@ -97,6 +115,7 @@ export async function findPendingRedemption({
 }
 
 interface CreateRedemptionInput extends RestaurantInput {
+  branchId: string;
   customerId: string;
   rewardId: string;
   cost: number;
@@ -105,6 +124,7 @@ interface CreateRedemptionInput extends RestaurantInput {
 export async function createRedemption({
   db,
   restaurantId,
+  branchId,
   customerId,
   rewardId,
   cost,
@@ -116,7 +136,7 @@ export async function createRedemption({
     id,
     customerId,
     restaurantId,
-    branchId: null,
+    branchId,
     rewardId,
     cost,
     status: "pending",
@@ -188,64 +208,435 @@ export async function listPendingRedemptions({ db, restaurantId }: RestaurantInp
     .all();
 }
 
-interface AddStampInput extends RestaurantInput {
+export const STAMP_REQUEST_AUTO_ACCEPT_MS = 12 * 60 * 60 * 1000;
+const STAMP_REQUEST_BATCH = 50;
+
+interface CreateStampRequestInput extends RestaurantInput {
   customerId: string;
   branchId: string;
+  quantity: number;
   cooldownMs: number;
 }
 
-export async function addStamp({
+/** Race-safe cooldown: one request per card per window, whatever its outcome; cancelled ones don't count. */
+export async function createStampRequest({
   db,
   restaurantId,
   customerId,
   branchId,
+  quantity,
   cooldownMs,
-}: AddStampInput): Promise<"cooldown" | LoyaltyTransactionResult> {
+}: CreateStampRequestInput): Promise<"cooldown" | { id: string; createdAt: number }> {
+  const id = crypto.randomUUID();
   const now = Date.now();
-  const cutoff = now - cooldownMs;
-  const customerRestaurantFilter = and(
-    eq(customerRestaurants.customerId, customerId),
-    eq(customerRestaurants.restaurantId, restaurantId),
-  );
 
   const insert = await db.run(sql`
-    INSERT INTO loyalty_transactions
-      (customer_id, restaurant_id, branch_id, type, points, reason_code, created_at)
-    SELECT ${customerId}, ${restaurantId}, ${branchId}, 'earn', 1, 'venue_code', ${now}
+    INSERT INTO loyalty_stamp_requests
+      (id, customer_id, restaurant_id, branch_id, claimed_quantity, status, auto_accepted, created_at, updated_at)
+    SELECT ${id}, ${customerId}, ${restaurantId}, ${branchId}, ${quantity}, 'pending', 0, ${now}, ${now}
     WHERE NOT EXISTS (
       SELECT 1
-      FROM loyalty_transactions
+      FROM loyalty_stamp_requests
       WHERE customer_id = ${customerId}
         AND restaurant_id = ${restaurantId}
-        AND type = 'earn'
-        AND created_at >= ${cutoff}
+        AND status <> 'cancelled'
+        AND created_at >= ${now - cooldownMs}
     )
   `);
 
-  if (insert.meta.changes !== 1) {
-    return "cooldown";
+  return insert.meta.changes === 1 ? { id, createdAt: now } : "cooldown";
+}
+
+interface AcceptStampRequestInput {
+  db: DrizzleDb;
+  requestId: string;
+  /** Omitted by the cron, which accepts every restaurant's overdue requests. */
+  restaurantId?: string;
+  /** Null accepts the claimed quantity. */
+  quantity: number | null;
+  /** Null when accepted automatically. */
+  handledBy: string | null;
+}
+
+export async function acceptStampRequest({
+  db,
+  requestId,
+  restaurantId,
+  quantity,
+  handledBy,
+}: AcceptStampRequestInput): Promise<boolean> {
+  const pending = and(
+    eq(loyaltyStampRequests.id, requestId),
+    restaurantId ? eq(loyaltyStampRequests.restaurantId, restaurantId) : undefined,
+    eq(loyaltyStampRequests.status, "pending"),
+    quantity === null ? undefined : gte(loyaltyStampRequests.claimedQuantity, quantity),
+  );
+  const request = await db.select().from(loyaltyStampRequests).where(pending).get();
+  if (!request) return false;
+
+  const now = Date.now();
+  const points = quantity ?? request.claimedQuantity;
+  const reasonCode = `stamp_request:${requestId}`;
+  const stillPending = sql`EXISTS ${db.select({ id: loyaltyStampRequests.id }).from(loyaltyStampRequests).where(pending)}`;
+  const earn = db.insert(loyaltyTransactions).select(sql`
+    SELECT NULL, customer_id, restaurant_id, branch_id, 'earn', ${points}, ${reasonCode}, NULL, NULL, created_at
+    FROM loyalty_stamp_requests WHERE ${pending}
+  `);
+  const balance = db
+    .update(customerRestaurants)
+    .set({
+      stampsBalance: sql`${customerRestaurants.stampsBalance} + ${points}`,
+      lastVisitAt: sql`MAX(COALESCE(${customerRestaurants.lastVisitAt}, 0), ${request.createdAt})`,
+      firstVisitAt: sql`MIN(COALESCE(${customerRestaurants.firstVisitAt}, ${request.createdAt}), ${request.createdAt})`,
+      updatedAt: now,
+    })
+    .where(
+      and(
+        eq(customerRestaurants.customerId, request.customerId),
+        eq(customerRestaurants.restaurantId, request.restaurantId),
+        stillPending,
+      ),
+    );
+  const visit = db.insert(customerVisits).select(sql`
+    SELECT NULL, customer_id, restaurant_id, branch_id, 'direct', created_at
+    FROM loyalty_stamp_requests WHERE ${pending} AND branch_id IS NOT NULL
+  `);
+  const complete = db
+    .update(loyaltyStampRequests)
+    .set({
+      status: "accepted",
+      acceptedQuantity: points,
+      autoAccepted: handledBy === null,
+      handledBy,
+      handledAt: now,
+      updatedAt: now,
+      transactionId: sql`(SELECT id FROM ${loyaltyTransactions} WHERE ${loyaltyTransactions.reasonCode} = ${reasonCode}
+      AND ${loyaltyTransactions.restaurantId} = ${request.restaurantId} ORDER BY id DESC LIMIT 1)`,
+      visitId:
+        request.branchId === null
+          ? null
+          : sql`(SELECT MAX(id) FROM ${customerVisits}
+      WHERE ${customerVisits.customerId} = ${request.customerId} AND ${customerVisits.restaurantId} = ${request.restaurantId}
+        AND ${customerVisits.branchId} = ${request.branchId} AND ${customerVisits.createdAt} = ${request.createdAt})`,
+    })
+    .where(pending);
+
+  // Every write checks pending until the last statement; a failed batch rolls the entire credit back.
+  const results = await db.batch([earn, balance, visit, complete]);
+  return results[3].meta.changes === 1;
+}
+
+const REOPENED_REQUEST = {
+  status: "pending",
+  acceptedQuantity: null,
+  autoAccepted: false,
+  handledBy: null,
+  handledAt: null,
+  outcomeSeenAt: null,
+} as const;
+
+interface DeclineStampRequestInput extends RestaurantInput {
+  requestId: string;
+  handledBy: string;
+}
+
+export async function declineStampRequest({
+  db,
+  restaurantId,
+  requestId,
+  handledBy,
+}: DeclineStampRequestInput): Promise<boolean> {
+  const now = Date.now();
+  const result = await db
+    .update(loyaltyStampRequests)
+    .set({ status: "declined", handledBy, handledAt: now, updatedAt: now })
+    .where(
+      and(
+        eq(loyaltyStampRequests.id, requestId),
+        eq(loyaltyStampRequests.restaurantId, restaurantId),
+        eq(loyaltyStampRequests.status, "pending"),
+      ),
+    )
+    .run();
+
+  return result.meta.changes === 1;
+}
+
+interface CancelStampRequestInput extends RestaurantInput {
+  customerId: string;
+  requestId: string;
+}
+
+export async function cancelStampRequest({
+  db,
+  restaurantId,
+  customerId,
+  requestId,
+}: CancelStampRequestInput): Promise<boolean> {
+  const now = Date.now();
+  const result = await db
+    .update(loyaltyStampRequests)
+    .set({ status: "cancelled", handledAt: now, updatedAt: now })
+    .where(
+      and(
+        eq(loyaltyStampRequests.id, requestId),
+        eq(loyaltyStampRequests.restaurantId, restaurantId),
+        eq(loyaltyStampRequests.customerId, customerId),
+        eq(loyaltyStampRequests.status, "pending"),
+      ),
+    )
+    .run();
+
+  return result.meta.changes === 1;
+}
+
+interface AcceptOverdueStampRequestsInput {
+  db: DrizzleDb;
+  /** Omitted by the minute cron, which sweeps every restaurant. */
+  restaurantId?: string;
+  now?: number;
+}
+
+async function acceptEach(db: DrizzleDb, requests: Array<{ id: string }>): Promise<string[]> {
+  const accepted: string[] = [];
+
+  for (const { id } of requests) {
+    if (await acceptStampRequest({ db, requestId: id, quantity: null, handledBy: null })) accepted.push(id);
   }
 
-  await db.batch([
-    db
-      .update(customerRestaurants)
-      .set({
-        stampsBalance: sql`${customerRestaurants.stampsBalance} + 1`,
-        lastVisitAt: now,
-        firstVisitAt: sql`COALESCE(${customerRestaurants.firstVisitAt}, ${now})`,
-        updatedAt: now,
-      })
-      .where(customerRestaurantFilter),
-    db.insert(customerVisits).values({ customerId, restaurantId, branchId, source: "direct", createdAt: now }),
-  ]);
+  return accepted;
+}
 
-  const balanceRow = await db
-    .select({ stampsBalance: customerRestaurants.stampsBalance })
-    .from(customerRestaurants)
-    .where(customerRestaurantFilter)
+/** ADR 0007: unanswered requests are accepted at the claimed quantity, even if the program was turned off since. */
+export async function acceptOverdueStampRequests({
+  db,
+  restaurantId,
+  now = Date.now(),
+}: AcceptOverdueStampRequestsInput): Promise<void> {
+  for (;;) {
+    const overdue = await db
+      .select({ id: loyaltyStampRequests.id })
+      .from(loyaltyStampRequests)
+      .where(
+        and(
+          restaurantId ? eq(loyaltyStampRequests.restaurantId, restaurantId) : undefined,
+          eq(loyaltyStampRequests.status, "pending"),
+          lt(loyaltyStampRequests.createdAt, now - STAMP_REQUEST_AUTO_ACCEPT_MS),
+        ),
+      )
+      .orderBy(loyaltyStampRequests.createdAt)
+      .limit(STAMP_REQUEST_BATCH)
+      .all();
+
+    await markNotificationsHandled({
+      db,
+      type: "loyalty.stampRequest",
+      subjectIds: await acceptEach(db, overdue),
+      handledBy: null,
+      outcome: "autoAccepted",
+      now,
+    });
+
+    if (overdue.length < STAMP_REQUEST_BATCH) return;
+  }
+}
+
+interface StampRequestInput extends RestaurantInput {
+  requestId: string;
+}
+
+/** Undo from the admin. An acceptance becomes a decline (back to pending, the cron would accept it again at once). */
+export async function undoStampRequest({
+  db,
+  restaurantId,
+  requestId,
+  handledBy,
+  branchId,
+}: StampRequestInput & { handledBy: string; branchId: string }): Promise<
+  "notFound" | "spent" | "reopened" | "declined"
+> {
+  const request = await db
+    .select({
+      status: loyaltyStampRequests.status,
+      transactionId: loyaltyStampRequests.transactionId,
+      visitId: loyaltyStampRequests.visitId,
+      handledBy: loyaltyStampRequests.handledBy,
+      handledAt: loyaltyStampRequests.handledAt,
+    })
+    .from(loyaltyStampRequests)
+    .where(and(eq(loyaltyStampRequests.id, requestId), eq(loyaltyStampRequests.restaurantId, restaurantId)))
     .get();
+  const requestFilter = (status: "accepted" | "declined") =>
+    and(eq(loyaltyStampRequests.id, requestId), eq(loyaltyStampRequests.status, status));
 
-  return { transactionId: Number(insert.meta.last_row_id), newBalance: balanceRow?.stampsBalance ?? 0 };
+  // A decline is reopened only if it was never accepted: an undone acceptance stays declined.
+  if (request?.status === "declined" && request.transactionId === null) {
+    const reopened = await db
+      .update(loyaltyStampRequests)
+      .set({ ...REOPENED_REQUEST, updatedAt: Date.now() })
+      .where(requestFilter("declined"))
+      .run();
+
+    return reopened.meta.changes === 1 ? "reopened" : "notFound";
+  }
+
+  if (request?.status !== "accepted" || request.transactionId === null) return "notFound";
+
+  const now = Date.now();
+  const flip = await db
+    .update(loyaltyStampRequests)
+    .set({ status: "declined", handledBy, handledAt: now, outcomeSeenAt: null, updatedAt: now })
+    .where(requestFilter("accepted"))
+    .run();
+
+  if (flip.meta.changes !== 1) return "notFound";
+
+  const transaction = await findTransaction({ db, restaurantId, transactionId: request.transactionId });
+
+  try {
+    if (transaction && !(await hasCompensation({ db, restaurantId, transactionId: transaction.id }))) {
+      await compensateTransaction({ db, restaurantId, transaction, branchId });
+    }
+  } catch {
+    // The stamps_balance >= 0 CHECK aborted the compensation: the guest already spent them.
+    await db
+      .update(loyaltyStampRequests)
+      .set({ status: "accepted", handledBy: request.handledBy, handledAt: request.handledAt, updatedAt: Date.now() })
+      .where(requestFilter("declined"));
+
+    return "spent";
+  }
+
+  if (request.visitId !== null) {
+    await db.delete(customerVisits).where(eq(customerVisits.id, request.visitId));
+  }
+
+  return "declined";
+}
+
+interface BranchStampRequestsInput extends RestaurantInput {
+  branchId: string;
+}
+
+export async function listPendingStampRequests({
+  db,
+  restaurantId,
+  branchId,
+}: BranchStampRequestsInput): Promise<PendingStampRequestRow[]> {
+  return db
+    .select({
+      id: loyaltyStampRequests.id,
+      email: customers.email,
+      claimedQuantity: loyaltyStampRequests.claimedQuantity,
+      createdAt: loyaltyStampRequests.createdAt,
+    })
+    .from(loyaltyStampRequests)
+    .innerJoin(customers, eq(customers.id, loyaltyStampRequests.customerId))
+    .where(
+      and(
+        eq(loyaltyStampRequests.restaurantId, restaurantId),
+        eq(loyaltyStampRequests.branchId, branchId),
+        eq(loyaltyStampRequests.status, "pending"),
+      ),
+    )
+    .orderBy(loyaltyStampRequests.createdAt)
+    .all();
+}
+
+export async function listHandledStampRequests({
+  db,
+  restaurantId,
+  branchId,
+  since,
+}: BranchStampRequestsInput & { since: number }): Promise<HandledStampRequestRow[]> {
+  return db
+    .select({
+      id: loyaltyStampRequests.id,
+      email: customers.email,
+      status: loyaltyStampRequests.status,
+      claimedQuantity: loyaltyStampRequests.claimedQuantity,
+      acceptedQuantity: loyaltyStampRequests.acceptedQuantity,
+      autoAccepted: loyaltyStampRequests.autoAccepted,
+      handledAt: loyaltyStampRequests.handledAt,
+      handledByName: users.name,
+      createdAt: loyaltyStampRequests.createdAt,
+    })
+    .from(loyaltyStampRequests)
+    .innerJoin(customers, eq(customers.id, loyaltyStampRequests.customerId))
+    .leftJoin(restaurantUsers, eq(restaurantUsers.id, loyaltyStampRequests.handledBy))
+    .leftJoin(users, eq(users.id, restaurantUsers.userId))
+    .where(
+      and(
+        eq(loyaltyStampRequests.restaurantId, restaurantId),
+        eq(loyaltyStampRequests.branchId, branchId),
+        inArray(loyaltyStampRequests.status, ["accepted", "declined"]),
+        gte(loyaltyStampRequests.handledAt, since),
+      ),
+    )
+    .orderBy(desc(loyaltyStampRequests.handledAt))
+    .all();
+}
+
+interface CustomerStampRequestsInput extends RestaurantInput {
+  customerId: string;
+}
+
+export async function getCardStampRequests({
+  db,
+  restaurantId,
+  customerId,
+}: CustomerStampRequestsInput): Promise<CardStampRequests> {
+  const customerFilter = and(
+    eq(loyaltyStampRequests.customerId, customerId),
+    eq(loyaltyStampRequests.restaurantId, restaurantId),
+  );
+  const pendingQuery = db
+    .select({
+      id: loyaltyStampRequests.id,
+      quantity: loyaltyStampRequests.claimedQuantity,
+      createdAt: loyaltyStampRequests.createdAt,
+    })
+    .from(loyaltyStampRequests)
+    .where(and(customerFilter, eq(loyaltyStampRequests.status, "pending")))
+    .orderBy(loyaltyStampRequests.createdAt)
+    .all();
+  const latestQuery = db
+    .select({
+      id: loyaltyStampRequests.id,
+      status: loyaltyStampRequests.status,
+      claimed: loyaltyStampRequests.claimedQuantity,
+      accepted: loyaltyStampRequests.acceptedQuantity,
+      outcomeSeenAt: loyaltyStampRequests.outcomeSeenAt,
+    })
+    .from(loyaltyStampRequests)
+    .where(and(customerFilter, inArray(loyaltyStampRequests.status, ["accepted", "declined"])))
+    .orderBy(desc(loyaltyStampRequests.handledAt))
+    .get();
+  const [pending, latest] = await Promise.all([pendingQuery, latestQuery]);
+  const lastOutcome =
+    latest && latest.outcomeSeenAt === null && latest.status !== "pending" && latest.status !== "cancelled"
+      ? { id: latest.id, status: latest.status, claimed: latest.claimed, accepted: latest.accepted ?? 0 }
+      : null;
+
+  return { pendingRequests: pending, lastOutcome };
+}
+
+export async function dismissStampOutcome({
+  db,
+  restaurantId,
+  customerId,
+  requestId,
+}: CustomerStampRequestsInput & { requestId: string }): Promise<void> {
+  await db
+    .update(loyaltyStampRequests)
+    .set({ outcomeSeenAt: Date.now() })
+    .where(
+      and(
+        eq(loyaltyStampRequests.id, requestId),
+        eq(loyaltyStampRequests.customerId, customerId),
+        eq(loyaltyStampRequests.restaurantId, restaurantId),
+      ),
+    );
 }
 
 interface ValidateRedemptionInput extends RestaurantInput {

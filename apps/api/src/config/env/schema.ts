@@ -6,6 +6,12 @@ export interface ServiceWorkerBinding {
   fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 }
 
+/** One push of one notification to one device, so a retry never re-sends to devices that already got it. */
+export interface PushMessage {
+  notificationId: string;
+  deviceId: string;
+}
+
 type ImageContentType = "image/jpeg" | "image/png" | "image/webp";
 
 interface CreateImageWorkerUploadInput {
@@ -42,6 +48,22 @@ export interface ExchangeRateWorkerBinding {
   getLatestRates(input: { currencies?: Array<"USD" | "EUR"> }): Promise<unknown>;
 }
 
+export const MSG_PRODUCT_IDS = ["qmenut", "qmenut-dev"] as const;
+
+export type MsgProductId = (typeof MSG_PRODUCT_IDS)[number];
+
+export interface MsgWorkerBinding {
+  send(input: {
+    productId: MsgProductId;
+    idempotencyKey: string;
+    templateId: string;
+    to: string;
+    ref: string;
+    data: Record<string, string>;
+  }): Promise<unknown>;
+  reply(input: { productId: MsgProductId; conversationId: string; text: string }): Promise<unknown>;
+}
+
 const nodeEnvSchema = z.enum(["development", "test", "production"]);
 
 function serviceWorkerBindingSchema(binding: string) {
@@ -59,6 +81,15 @@ const imageWorkerBindingSchema = z.custom<ImageWorkerBinding>(
     typeof (value as { createUpload?: unknown }).createUpload === "function" &&
     typeof (value as { getUpload?: unknown }).getUpload === "function",
   "El binding de servicio IMAGE_WORKER debe implementar createUpload y getUpload",
+);
+
+const msgWorkerBindingSchema = z.custom<MsgWorkerBinding>(
+  (value) =>
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { send?: unknown }).send === "function" &&
+    typeof (value as { reply?: unknown }).reply === "function",
+  "El binding de servicio MSG_WORKER debe implementar send y reply",
 );
 
 const exchangeRateWorkerBindingSchema = z.custom<ExchangeRateWorkerBinding>(
@@ -108,6 +139,9 @@ export const envSchema = z.object({
   EMAIL_WORKER: serviceWorkerBindingSchema("EMAIL_WORKER"),
   IMAGE_WORKER: imageWorkerBindingSchema,
   EXCHANGE_RATE_WORKER: exchangeRateWorkerBindingSchema.optional(),
+  // Absent in local wrangler dev on purpose: messaging features log and skip without it.
+  MSG_WORKER: msgWorkerBindingSchema.optional(),
+  MSG_PRODUCT_ID: z.enum(MSG_PRODUCT_IDS).default("qmenut-dev"),
   THEME_WORKER: serviceWorkerBindingSchema("THEME_WORKER"),
   THEME_WORKER_TOKEN: z.string().min(1),
   LOYALTY_TOKEN_SECRET: z.string().min(1),
@@ -115,6 +149,11 @@ export const envSchema = z.object({
     (value) =>
       typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",
     "El binding LOYALTY_CODE_LIMITER debe implementar limit",
+  ),
+  RESERVATION_LIMITER: z.custom<RateLimit>(
+    (value) =>
+      typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",
+    "El binding RESERVATION_LIMITER debe implementar limit",
   ),
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
@@ -124,9 +163,17 @@ export const envSchema = z.object({
   SENTRY_DSN: z.string().trim().optional(),
   GOOGLE_PLACES_API_KEY: optionalSecret,
   NODE_ENV: nodeEnvSchema.default("development"),
+  NOTIFICATIONS_QUEUE: z.custom<Queue<PushMessage>>(
+    (value) => typeof value === "object" && value !== null && typeof (value as { send?: unknown }).send === "function",
+    "El binding NOTIFICATIONS_QUEUE debe implementar send",
+  ),
   POSTHOG_API_HOST: z.url().default("https://eu.posthog.com"),
   POSTHOG_PERSONAL_API_KEY: optionalSecret,
   POSTHOG_PROJECT_ID: optionalSecret,
+  // Push stays off until all three are set; the inbox works without them.
+  VAPID_PUBLIC_KEY: optionalSecret,
+  VAPID_PRIVATE_KEY: optionalSecret,
+  VAPID_SUBJECT: optionalSecret,
 });
 
 export type EnvBindings = z.input<typeof envSchema>;

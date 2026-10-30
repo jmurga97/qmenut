@@ -197,6 +197,14 @@
       "types": "./src/components/molecules/qm-social-links/react.ts",
       "import": "./src/components/molecules/qm-social-links/react.ts"
     },
+    "./components/qm-calendar": {
+      "types": "./src/components/molecules/qm-calendar/index.ts",
+      "import": "./src/components/molecules/qm-calendar/index.ts"
+    },
+    "./components/qm-calendar/react": {
+      "types": "./src/components/molecules/qm-calendar/react.ts",
+      "import": "./src/components/molecules/qm-calendar/react.ts"
+    },
     "./components/qm-code-input": {
       "types": "./src/components/molecules/qm-code-input/index.ts",
       "import": "./src/components/molecules/qm-code-input/index.ts"

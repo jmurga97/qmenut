@@ -9,6 +9,7 @@ import { TRPCError } from "@trpc/server";
 
 import { resolveCard } from "./resolve-card";
 import { REDEMPTION_TTL_MS } from "../../lib/loyalty/token";
+import { emitNotification } from "../notifications/emit-notification";
 
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
@@ -67,9 +68,22 @@ export async function requestRedemption({
   const redemptionId = await createRedemption({
     db,
     restaurantId: tenant.restaurantId,
+    branchId: tenant.branchId,
     customerId,
     rewardId,
     cost: reward.cost,
+  });
+
+  await emitNotification({
+    db,
+    env,
+    event: {
+      type: "loyalty.redemption",
+      restaurantId: tenant.restaurantId,
+      branchId: tenant.branchId,
+      subjectId: redemptionId,
+      facts: { rewardName: reward.name, cost: reward.cost },
+    },
   });
 
   return { redemptionId, expiresAt: createdAt + REDEMPTION_TTL_MS };

@@ -41,6 +41,7 @@ export interface AnalyticsEventPayloads {
   google_reviews_loaded: { rating_count: number; review_count: number };
   /** Carga atribuible a un enlace QR (utm_source=qr); no equivale a escaneo ni visitante único. */
   qr_visit: Record<string, never>;
+  reservations_view: Record<string, never>;
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventPayloads;

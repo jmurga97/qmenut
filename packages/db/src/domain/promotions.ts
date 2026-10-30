@@ -1,3 +1,5 @@
+import { getLocalDayAndMinute } from "./local-time";
+
 export interface PromotionLike {
   endsAt: number | null;
   isRecurring: boolean;
@@ -14,16 +16,6 @@ export interface PromotionCandidateLike extends PromotionLike {
   promotionId: string;
 }
 
-const ISO_DAY: Record<string, number> = {
-  Mon: 1,
-  Tue: 2,
-  Wed: 3,
-  Thu: 4,
-  Fri: 5,
-  Sat: 6,
-  Sun: 7,
-};
-
 export function parseRecurringDays(value: string | null): number[] {
   return (
     value
@@ -31,26 +23,6 @@ export function parseRecurringDays(value: string | null): number[] {
       .map((day) => Number(day.trim()))
       .filter((day) => Number.isSafeInteger(day) && day >= 1 && day <= 7) ?? []
   );
-}
-
-function getLocalDayAndMinute({ nowMs, timeZone }: { nowMs: number; timeZone: string }): {
-  isoDay: number;
-  minute: number;
-} {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    weekday: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(new Date(nowMs));
-  const getPart = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "";
-  const hour = Number(getPart("hour")) % 24;
-
-  return {
-    isoDay: ISO_DAY[getPart("weekday")] ?? 1,
-    minute: hour * 60 + Number(getPart("minute")),
-  };
 }
 
 function isMinuteInWindow({

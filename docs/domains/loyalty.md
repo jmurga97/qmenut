@@ -7,11 +7,14 @@ redeem rewards, and how staff validate a redemption in the restaurant.
 
 Complete and wired end to end, covering the schema, the public API, the admin API, and
 both user interfaces. A restaurant runs one loyalty program, based either on points or on
-stamps, defines rewards, and lets customers redeem them. Staff validate redemptions in
-person using a rotating venue code, so no scanner or camera is required.
+stamps, defines rewards, and lets customers redeem them. Guests earn stamps with stamp
+requests that staff accept, and staff validate redemptions in person. A rotating venue code
+proves presence, so no scanner or camera is required.
 
-The design reasoning is in [Loyalty UX](../design/loyalty-ux.md). Those decisions were
-locked on 2026-07-08 and revised on 2026-07-10 to remove QR scanning.
+The design reasoning is in [Loyalty UX](../design/loyalty-ux.md), locked on 2026-07-08 and
+revised on 2026-07-10 to remove QR scanning. Earning was redesigned on 2026-10-28 in
+[Loyalty stamp requests UX](../design/loyalty-stamp-requests-ux.md) and
+[ADR 0007](../adr/0007-unanswered-stamp-requests-are-accepted.md).
 
 ## Data model
 
@@ -19,8 +22,10 @@ The program and its rewards are defined in `packages/db/src/schema/loyalty.ts`:
 
 - `loyalty_programs` (`loyalty.ts:3`) holds one row per restaurant, with `restaurantId`
   as the primary key. `type` is either `points` or `stamps`. The row also holds
-  `pointsPerCurrencyUnit`, `pointsPerVisit`, `stampsPerVisit`, and an optional
-  `rulesJson`.
+  `pointsPerCurrencyUnit`, `pointsPerVisit`, `stampsPerVisit` (fixed at 1 and no longer
+  read), and an optional `rulesJson`. `rulesJson` holds `ticketMedio` and
+  `stampRequestLimit` (default 3, clamped to 1–10 on read), parsed in
+  `loyalty-admin.repository.ts`.
 - `loyalty_rewards` (`loyalty.ts:15`) holds `cost`, in points or stamps, and `type`. The
   type is `percentage_discount` with a `percentage`, `free_dish` with a `freeDishId`, or
   `special_price` with a `specialPrice`.
@@ -30,6 +35,11 @@ The program and its rewards are defined in `packages/db/src/schema/loyalty.ts`:
 - `loyalty_redemptions` (`loyalty.ts:52`) is the redemption state machine: `pending` moves
   to `validated`, `rejected`, or `expired`. It also records `validatedBy` and
   `validatedAt`.
+- `loyalty_stamp_requests` is the earning state machine: `pending` moves to `accepted`
+  (by staff, possibly at a lower `acceptedQuantity`, or automatically with
+  `autoAccepted`), `declined`, or `cancelled` by the guest. `claimedQuantity` is 1–10.
+  Acceptance stores the `transactionId` and `visitId` it wrote, for undo, and
+  `outcomeSeenAt` records when the guest dismissed the one-time outcome notice.
 
 Customers and balances are defined in `packages/db/src/schema/customers.ts`:
 
@@ -68,18 +78,44 @@ signup flow before they can be used.
 | -------------------------------------- | --------------------------------------------------------------------------------------- |
 | `program`                              | Returns the active program and its rewards for the tenant.                              |
 | `createCard`                           | Creates or links a card for an email after explicit privacy consent (`create-card.ts`). |
-| `getCard`                              | Returns the card, its balance, and its history (`get-card.ts`).                         |
-| `earnStamp`                            | Earns a stamp or points, gated by the venue code (`earn-stamp.ts`).                     |
+| `getCard`                              | Returns the card, its balance, pending stamps and the last unseen outcome.              |
+| `requestStamps`                        | Creates a stamp request, gated by the venue code (`request-stamps.ts`).                 |
+| `cancelStampRequest`                   | Cancels the guest's pending stamp request.                                              |
+| `dismissStampOutcome`                  | Marks the outcome notice as seen, so it shows once.                                     |
 | `requestRedemption`                    | Opens a `pending` redemption (`request-redemption.ts`).                                 |
 | `cancelRedemption`, `redemptionStatus` | Cancel or poll a redemption.                                                            |
 
 ### Admin router
 
 The admin router is `admin.loyalty.*` in `apps/api/src/modules/admin-loyalty/`, built on
-`tenantProcedure`. It covers program configuration (`getProgram` and `saveProgram`),
-reward CRUD (`createReward`, `updateReward`, and `deleteReward`), daily operations
-(`venueCode`, `pendingRedemptions`, `validateRedemption`, `rejectRedemption`, and `undo`),
-and insights (`summary`, `customers`, `visitsChart`, and `loyaltyReturn`).
+`featureProcedure("loyalty")` plus a permission per procedure. It covers program
+configuration (`getProgram` and `saveProgram`), reward CRUD (`createReward`,
+`updateReward`, and `deleteReward`), daily operations (`venueCode`, `pendingRedemptions`,
+`validateRedemption`, `rejectRedemption`, and `undo`), stamp requests
+(`pendingStampRequests`, `acceptStampRequest`, `declineStampRequest`,
+`handledStampRequests`, and `undoStampRequest`, in `stamp-requests.ts`), and insights
+(`summary`, `customers`, and `visitsChart`).
+
+### Stamp requests
+
+- One request per card every 4 hours, counted from the previous request whatever its
+  outcome; a cancelled request does not count. The check is one race-safe
+  `INSERT … SELECT … WHERE NOT EXISTS` in `createStampRequest`. A guest inside the window
+  gets `CONFLICT` "Ya pediste sellos en esta visita".
+- `LOYALTY_CODE_LIMITER` allows 5 code attempts per minute per card, successes included.
+- The quantity must not exceed the program's `stampRequestLimit` (`BAD_REQUEST`).
+- Each request emits a `loyalty.stampRequest` notification for its branch. Its push mode
+  is `branchCount`: one replaceable push per branch with the count of unhandled requests,
+  using the same `tag` and Web Push `Topic`.
+- Staff accept (`1 ≤ quantity ≤ claimed`) or decline; a second answer gets `CONFLICT`.
+  Acceptance writes the `earn` transaction, the balance and one `customer_visits` row,
+  all dated at the request time.
+- A request pending for 12 hours is accepted at the claimed quantity (ADR 0007), by the
+  minute cron and lazily by `getCard` and `pendingStampRequests`
+  (`acceptOverdueStampRequests`). It runs even after the program is turned off.
+- Undoing an acceptance writes a compensating `adjust`, deletes the visit and sets the
+  request to `declined`; it is refused with "Los sellos ya se han canjeado" when the
+  balance would go negative. Undoing a decline (from the toast) returns it to `pending`.
 
 ### The venue code
 
@@ -91,7 +127,7 @@ nothing is stored. The implementation is `apps/api/src/lib/loyalty/venue-code.ts
   `restaurantId:branchId:windowIndex` with a signing secret and takes four digits from it.
   The window is three minutes (`VENUE_CODE_WINDOW_MS`, `venue-code.ts:3`). Staff read the
   current code from the admin application.
-- `verifyVenueCode` (`venue-code.ts:83`) runs when a customer types a code to earn. It
+- `verifyVenueCode` (`venue-code.ts:83`) runs when a customer types a code to request stamps. It
   accepts the current window and the previous one, which absorbs clock skew and slow
   typing, and returns the matching branch ID. Because the code is derived from the secret,
   verification needs no storage.
@@ -114,19 +150,20 @@ The admin interface is in `apps/admin`. The routes are `_auth.loyalty.tsx` for t
 `_auth.loyalty.index.tsx` for operations, `_auth.loyalty.program.tsx`, and
 `_auth.loyalty.insights.tsx`. The feature directory is `apps/admin/src/features/loyalty/`.
 
-## Example: earning a stamp in the restaurant
+## Example: earning stamps in the restaurant
 
 1. The diner opens the menu, taps the loyalty card at `/puntos`, accepts the privacy policy,
    and signs up with an email address. `loyalty.createCard` records the consent version and
    stores a card token in `localStorage`.
-2. The diner asks for a stamp, and staff read the current four-digit code from the admin
-   operations screen (`admin.loyalty.venueCode`, backed by `getVenueCode`).
+2. The diner taps "Pedir sellos", picks how many, and staff read the current four-digit code
+   from the admin operations screen (`admin.loyalty.venueCode`, backed by `getVenueCode`).
 3. The diner types the code, and the client calls
-   `loyalty.earnStamp({ host, cardToken, venueCode })`.
-4. `earn-stamp.ts` calls `verifyVenueCode(...)` (`venue-code.ts:83`). A code from the
-   current or previous three-minute window is valid and returns the branch ID.
-5. An `earn` row is written to `loyalty_transactions`, and the balance in
-   `customer_restaurants` is incremented. There is no approval queue.
+   `loyalty.requestStamps({ host, cardToken, venueCode, quantity })`.
+4. `request-stamps.ts` calls `verifyVenueCode(...)`, which returns the branch, and
+   `createStampRequest` stores a `pending` request. The card shows the stamps as pending.
+5. Staff accept it, possibly fewer, under "Solicitudes de sellos" on the operations screen,
+   or decline it; unanswered, it is accepted after 12 hours. The next time the card opens
+   it fills in and shows the outcome once.
 
 ## Example: redeeming a reward
 
@@ -163,7 +200,6 @@ The admin interface is in `apps/admin`. The routes are `_auth.loyalty.tsx` for t
 - Presence is proven by the venue code, not by a scanner. The code is stateless and
   derived from the signing secret, so there is nothing to store, but the secret must be
   configured and must stay out of the client bundle.
-- Earning is granted automatically and redemption is validated by staff. There is no
-  approval queue for earning, because the code is the gate.
-- A nearly empty `apps/web/src/features/fidelity/` directory also exists. The live feature
-  is `features/loyalty/`.
+- Earning goes through stamp requests: the code proves presence and staff approve the
+  quantity. Staff cannot grant stamps without a request, and the guest is not notified
+  by email or push when staff answer.

@@ -68,6 +68,12 @@ function LoyaltyProgramContent({ branchId }: { branchId: string }) {
               label={i18n.t("loyalty___Ticket medio")}
               name={"averageTicket"}
             />
+            <FormTextInput<LoyaltyProgramFormValues>
+              inputMode={"numeric"}
+              label={i18n.t("loyalty___Máximo de sellos por solicitud")}
+              name={"stampRequestLimit"}
+              type={"number"}
+            />
             <FormActions
               busy={loyalty.saveProgramBusy}
               onSubmit={() => void loyalty.saveProgram()}
@@ -107,7 +113,7 @@ function LoyaltyProgramContent({ branchId }: { branchId: string }) {
               balance: loyalty.previewBalance,
               target: loyalty.target,
             })}
-            stampLabel={i18n.t("loyalty___Pedir mi sello")}
+            stampLabel={i18n.t("loyalty___Pedir sellos")}
           >
             {loyalty.activeRewards.map((reward) => (
               <p key={reward.id} slot={"rewards"}>

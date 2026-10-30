@@ -11,23 +11,32 @@ interface RestaurantInput {
   restaurantId: string;
 }
 
+const DEFAULT_STAMP_REQUEST_LIMIT = 3;
+const MAX_STAMP_REQUEST_LIMIT = 10;
+
 interface LoyaltyProgramRules {
   ticketMedio: number | null;
+  stampRequestLimit: number;
 }
 
 function parseRules(rulesJson: string | null): LoyaltyProgramRules {
-  if (!rulesJson) {
-    return { ticketMedio: null };
-  }
+  let parsed: Partial<LoyaltyProgramRules> = {};
 
   try {
-    const parsed: unknown = JSON.parse(rulesJson);
-    const ticketMedio = (parsed as Partial<LoyaltyProgramRules>).ticketMedio;
-
-    return { ticketMedio: typeof ticketMedio === "number" ? ticketMedio : null };
+    parsed = rulesJson ? (JSON.parse(rulesJson) as Partial<LoyaltyProgramRules>) : {};
   } catch {
-    return { ticketMedio: null };
+    // Unreadable rules fall back to the defaults below.
   }
+
+  const { ticketMedio, stampRequestLimit } = parsed;
+
+  return {
+    ticketMedio: typeof ticketMedio === "number" ? ticketMedio : null,
+    stampRequestLimit:
+      typeof stampRequestLimit === "number"
+        ? Math.min(MAX_STAMP_REQUEST_LIMIT, Math.max(1, Math.floor(stampRequestLimit)))
+        : DEFAULT_STAMP_REQUEST_LIMIT,
+  };
 }
 
 export async function getLoyaltyProgram({ db, restaurantId }: RestaurantInput): Promise<LoyaltyProgramState | null> {
@@ -35,7 +44,6 @@ export async function getLoyaltyProgram({ db, restaurantId }: RestaurantInput): 
     .select({
       type: loyaltyPrograms.type,
       isActive: loyaltyPrograms.isActive,
-      stampsPerVisit: loyaltyPrograms.stampsPerVisit,
       rulesJson: loyaltyPrograms.rulesJson,
     })
     .from(loyaltyPrograms)
@@ -51,9 +59,8 @@ export async function getLoyaltyProgram({ db, restaurantId }: RestaurantInput): 
   return { ...rest, ...parseRules(rulesJson) };
 }
 
-interface SaveLoyaltyProgramInput extends RestaurantInput {
+interface SaveLoyaltyProgramInput extends RestaurantInput, LoyaltyProgramRules {
   isActive: boolean;
-  ticketMedio: number | null;
 }
 
 /** v1 is stamps-only: type and stampsPerVisit are fixed, points columns stay zeroed. */
@@ -62,9 +69,10 @@ export async function saveLoyaltyProgram({
   restaurantId,
   isActive,
   ticketMedio,
+  stampRequestLimit,
 }: SaveLoyaltyProgramInput): Promise<void> {
   const now = Date.now();
-  const rulesJson = JSON.stringify({ ticketMedio } satisfies LoyaltyProgramRules);
+  const rulesJson = JSON.stringify({ ticketMedio, stampRequestLimit } satisfies LoyaltyProgramRules);
 
   await db
     .insert(loyaltyPrograms)

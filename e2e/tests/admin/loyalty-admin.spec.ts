@@ -9,24 +9,31 @@ interface RedemptionResult {
   redemptionId: string;
 }
 
-async function createStampedCard(
-  request: Parameters<typeof callPublicTrpcMutation>[0],
-  email: string,
-  venueCode: string,
-): Promise<string> {
+interface StampedCardInput {
+  page: Parameters<typeof callTrpcMutation>[0];
+  request: Parameters<typeof callPublicTrpcMutation>[0];
+  email: string;
+  venueCode: string;
+}
+
+/** Creates a card, requests one stamp and accepts it as staff. */
+async function createStampedCard({ page, request, email, venueCode }: StampedCardInput) {
   const card = await callPublicTrpcMutation(request, "loyalty.createCard", {
     consentAccepted: true,
     host: "tapas.localhost",
     email,
   });
   const cardToken = getTrpcData<CardResult>(card).cardToken;
-  const stamp = await callPublicTrpcMutation(request, "loyalty.earnStamp", {
+  const stamp = await callPublicTrpcMutation(request, "loyalty.requestStamps", {
     host: "tapas.localhost",
     cardToken,
     venueCode,
+    quantity: 1,
   });
-  expect(stamp, stamp.body).toMatchObject({ ok: true, status: 200 });
-  return cardToken;
+  const { requestId } = getTrpcData<{ requestId: string }>(stamp);
+  const accepted = await callTrpcMutation(page, "admin.loyalty.acceptStampRequest", { requestId, quantity: 1 });
+  expect(accepted, accepted.body).toMatchObject({ ok: true, status: 200 });
+  return { cardToken, requestId };
 }
 
 test("requires privacy consent before creating a loyalty card", async ({ request }) => {
@@ -46,12 +53,13 @@ test("requires privacy consent before creating a loyalty card", async ({ request
 
 test("covers loyalty program, reward, operations, and insights procedures", async ({ page, request }) => {
   const programResponse = await callTrpcQuery(page, "admin.loyalty.getProgram");
-  const originalProgram = getTrpcData<{ program: { isActive: boolean; ticketMedio: number | null } }>(
-    programResponse,
-  ).program;
+  const originalProgram = getTrpcData<{
+    program: { isActive: boolean; ticketMedio: number | null; stampRequestLimit: number };
+  }>(programResponse).program;
   const savedProgram = await callTrpcMutation(page, "admin.loyalty.saveProgram", {
     isActive: true,
     ticketMedio: 2500,
+    stampRequestLimit: 3,
   });
   expect(savedProgram, savedProgram.body).toMatchObject({ ok: true, status: 200 });
 
@@ -79,7 +87,12 @@ test("covers loyalty program, reward, operations, and insights procedures", asyn
   expect(venueCode.expiresAt).toBeGreaterThan(Date.now());
   expect(venueCode.expiresAt - Date.now()).toBeLessThanOrEqual(180_000);
 
-  const validateToken = await createStampedCard(request, "loyalty-admin.e2e@test.local", venueCode.code);
+  const { cardToken: validateToken } = await createStampedCard({
+    page,
+    request,
+    email: "loyalty-admin.e2e@test.local",
+    venueCode: venueCode.code,
+  });
   const requested = await callPublicTrpcMutation(request, "loyalty.requestRedemption", {
     host: "tapas.localhost",
     cardToken: validateToken,
@@ -100,7 +113,12 @@ test("covers loyalty program, reward, operations, and insights procedures", asyn
   });
   expect(undone, undone.body).toMatchObject({ ok: true, status: 200 });
 
-  const rejectToken = await createStampedCard(request, "loyalty-reject.e2e@test.local", venueCode.code);
+  const { cardToken: rejectToken } = await createStampedCard({
+    page,
+    request,
+    email: "loyalty-reject.e2e@test.local",
+    venueCode: venueCode.code,
+  });
   const rejectRequest = await callPublicTrpcMutation(request, "loyalty.requestRedemption", {
     host: "tapas.localhost",
     cardToken: rejectToken,
@@ -109,6 +127,22 @@ test("covers loyalty program, reward, operations, and insights procedures", asyn
   const rejectId = getTrpcData<RedemptionResult>(rejectRequest).redemptionId;
   const rejected = await callTrpcMutation(page, "admin.loyalty.rejectRedemption", { redemptionId: rejectId });
   expect(rejected, rejected.body).toMatchObject({ ok: true, status: 200 });
+
+  const { requestId: undoneRequestId } = await createStampedCard({
+    page,
+    request,
+    email: "loyalty-undo.e2e@test.local",
+    venueCode: venueCode.code,
+  });
+  const handled = await callTrpcQuery(page, "admin.loyalty.handledStampRequests", { branchId: "branch_tapas" });
+  expect(getTrpcData<Array<{ id: string; canUndo: boolean }>>(handled)).toContainEqual(
+    expect.objectContaining({ id: undoneRequestId, canUndo: true }),
+  );
+  const undoneRequest = await callTrpcMutation(page, "admin.loyalty.undoStampRequest", {
+    requestId: undoneRequestId,
+    branchId: "branch_tapas",
+  });
+  expect(getTrpcData<{ status: string }>(undoneRequest).status).toBe("declined");
 
   const now = Date.now();
   const insights = await Promise.all([

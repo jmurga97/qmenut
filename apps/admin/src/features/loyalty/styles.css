@@ -135,6 +135,31 @@
   align-items: center;
 }
 
+.loyalty-stepper {
+  display: inline-flex;
+  gap: var(--ming-space-2);
+  align-items: center;
+}
+
+.loyalty-stepper output {
+  min-width: 4.5rem;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: var(--admin-text-caption);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.loyalty-handled summary {
+  padding: var(--ming-space-3) 0;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: var(--admin-text-caption);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
 .loyalty-empty-list {
   display: grid;
   min-height: 9rem;

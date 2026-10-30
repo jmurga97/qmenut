@@ -9,10 +9,13 @@ import { jsonResponse } from "@/http/json";
 import { publishPendingImages } from "@/modules/admin-images/image-finalization";
 import { runAnalyticsDailyJob } from "@/modules/analytics/digest/run-analytics-daily-job";
 import { handleStripeWebhook } from "@/modules/billing/handle-stripe-webhook";
+import { handleMessagingEvents } from "@/modules/messaging/handle-messaging-events";
+import { consumePushMessages, runNotificationMaintenance } from "@/modules/notifications/notification-jobs";
+import { runReservationJobs } from "@/modules/reservations/reservation-jobs";
 import { createContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/router";
 
-import type { EnvBindings, RuntimeEnv } from "@/config/env/schema";
+import type { EnvBindings, PushMessage, RuntimeEnv } from "@/config/env/schema";
 
 export { ImageMaintenanceRpc } from "@/modules/admin-images/image-maintenance.rpc";
 
@@ -94,7 +97,19 @@ export default Sentry.withSentry(
     scheduled(controller: ScheduledController, rawEnv: EnvBindings, ctx: ExecutionContext): void {
       // Cron diario de producción: sincroniza PostHog → D1 y despacha el digest quincenal.
       if (controller.cron === "45 4 * * *") ctx.waitUntil(handleScheduledAnalytics(rawEnv));
-      else ctx.waitUntil(publishPendingImages(parseEnv(rawEnv)));
+      else {
+        const env = parseEnv(rawEnv);
+        ctx.waitUntil(
+          Promise.allSettled([publishPendingImages(env), runNotificationMaintenance(env), runReservationJobs(env)]),
+        );
+      }
+    },
+    async queue(batch: MessageBatch<unknown>, rawEnv: EnvBindings): Promise<void> {
+      if (batch.queue.startsWith("qmenut-notifications")) {
+        await consumePushMessages(batch as MessageBatch<PushMessage>, parseEnv(rawEnv));
+      } else if (batch.queue.startsWith("ming-msg-events-")) {
+        await handleMessagingEvents(batch, parseEnv(rawEnv));
+      }
     },
   },
 );

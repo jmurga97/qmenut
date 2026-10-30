@@ -68,6 +68,7 @@ export function PublicPageShell({ children, template, tenant, theme }: PublicPag
         <PublicBottomNav
           showHighlights={tenant.publicFeatures.highlights}
           showLoyalty={tenant.publicFeatures.loyalty}
+          showReservations={tenant.publicFeatures.reservations}
         />
       </div>
     </div>

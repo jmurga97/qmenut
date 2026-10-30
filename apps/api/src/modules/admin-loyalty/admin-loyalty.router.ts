@@ -6,10 +6,13 @@ import {
 } from "@qmenut/db/repositories/loyalty-admin.repository";
 
 import {
+  acceptStampRequestInputSchema,
   listCustomersInputSchema,
   programInputSchema,
   rejectRedemptionInputSchema,
+  stampRequestInputSchema,
   undoInputSchema,
+  undoStampRequestInputSchema,
   validateRedemptionInputSchema,
   venueCodeInputSchema,
   visitsChartInputSchema,
@@ -20,6 +23,13 @@ import { pendingRedemptions } from "./pending-redemptions";
 import { rejectRedemption } from "./reject-redemption";
 import { createRewardSchema, rewardIdInputSchema, updateRewardSchema } from "./reward-input.schema";
 import { saveReward } from "./save-reward";
+import {
+  acceptStampRequest,
+  declineStampRequest,
+  handledStampRequests,
+  pendingStampRequests,
+  undoStampRequest,
+} from "./stamp-requests";
 import { undoLoyaltyAction } from "./undo-loyalty-action";
 import { validateRedemption } from "./validate-redemption";
 import { bumpPublicContentVersionForRestaurant } from "../../lib/public-content-version";
@@ -78,6 +88,7 @@ export const adminLoyaltyRouter = router({
       restaurantId: ctx.tenant.restaurantId,
       isActive: input.isActive,
       ticketMedio: input.ticketMedio,
+      stampRequestLimit: input.stampRequestLimit,
     });
 
     await bumpPublicContentVersionForRestaurant({
@@ -145,6 +156,7 @@ export const adminLoyaltyRouter = router({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       redemptionId: input.redemptionId,
+      rejectedBy: ctx.tenant.membershipId,
     });
   }),
   validateRedemption: loyaltyProcedure.input(validateRedemptionInputSchema).mutation(({ ctx, input }) => {
@@ -163,6 +175,43 @@ export const adminLoyaltyRouter = router({
       db: ctx.db,
       restaurantId: ctx.tenant.restaurantId,
       transactionId: input.transactionId,
+      branchId: input.branchId,
+    });
+  }),
+  pendingStampRequests: loyaltyProcedure.input(venueCodeInputSchema).query(({ ctx, input }) => {
+    requirePermission(ctx.tenant, "loyalty.operate");
+    return pendingStampRequests({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, branchId: input.branchId });
+  }),
+  handledStampRequests: loyaltyProcedure.input(venueCodeInputSchema).query(({ ctx, input }) => {
+    requirePermission(ctx.tenant, "loyalty.operate");
+    return handledStampRequests({ db: ctx.db, restaurantId: ctx.tenant.restaurantId, branchId: input.branchId });
+  }),
+  acceptStampRequest: loyaltyProcedure.input(acceptStampRequestInputSchema).mutation(({ ctx, input }) => {
+    requirePermission(ctx.tenant, "loyalty.operate");
+    return acceptStampRequest({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      requestId: input.requestId,
+      membershipId: ctx.tenant.membershipId,
+      quantity: input.quantity,
+    });
+  }),
+  declineStampRequest: loyaltyProcedure.input(stampRequestInputSchema).mutation(({ ctx, input }) => {
+    requirePermission(ctx.tenant, "loyalty.operate");
+    return declineStampRequest({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      requestId: input.requestId,
+      membershipId: ctx.tenant.membershipId,
+    });
+  }),
+  undoStampRequest: loyaltyProcedure.input(undoStampRequestInputSchema).mutation(({ ctx, input }) => {
+    requirePermission(ctx.tenant, "loyalty.operate");
+    return undoStampRequest({
+      db: ctx.db,
+      restaurantId: ctx.tenant.restaurantId,
+      requestId: input.requestId,
+      membershipId: ctx.tenant.membershipId,
       branchId: input.branchId,
     });
   }),

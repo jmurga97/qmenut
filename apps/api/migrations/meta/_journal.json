@@ -92,6 +92,34 @@
       "when": 1792665888410,
       "tag": "0012_grandfather_business_plan",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1793217367393,
+      "tag": "0013_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1793272855889,
+      "tag": "0014_loyalty_stamp_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1793355810436,
+      "tag": "0015_messaging_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1793360391063,
+      "tag": "0016_reservations",
+      "breakpoints": true
     }
   ]
 }

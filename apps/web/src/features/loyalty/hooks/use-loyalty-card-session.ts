@@ -3,7 +3,8 @@ import { useCallback, useEffect } from "react";
 
 import { getLoyaltyCardQueryOptions } from "~/features/loyalty/api/loyalty-query-options";
 import { useLoyaltyCardToken } from "~/features/loyalty/hooks/use-loyalty-card-token";
-import { getLoyaltyTarget, getTrpcErrorCode } from "~/features/loyalty/loyalty-utils";
+import { getLoyaltyTarget } from "~/features/loyalty/loyalty-utils";
+import { getTrpcErrorCode } from "~/lib/trpc-client";
 
 import type { PendingRedemption } from "~/features/loyalty/types";
 import type { TrpcOptionsProxy } from "~/lib/trpc-client";

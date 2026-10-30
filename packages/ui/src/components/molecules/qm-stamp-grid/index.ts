@@ -19,6 +19,10 @@ export class QmStampGrid extends QmElement {
   @property({ type: Number })
   filled = 0;
 
+  /** Claimed, not yet accepted: outlined slots right after the filled ones. */
+  @property({ type: Number })
+  pending = 0;
+
   @property({ type: Number, attribute: "animated-index" })
   animatedIndex = -1;
 
@@ -28,6 +32,7 @@ export class QmStampGrid extends QmElement {
   render() {
     const total = Math.max(0, Math.floor(this.total));
     const filled = Math.min(total, Math.max(0, Math.floor(this.filled)));
+    const pendingEnd = Math.min(total, filled + Math.max(0, Math.floor(this.pending)));
 
     return html`
       <div class="grid" role="img" aria-label=${this.ariaLabel} style=${`--qm-stamp-count:${Math.max(total, 1)}`}>
@@ -35,7 +40,7 @@ export class QmStampGrid extends QmElement {
           { length: total },
           (_, index) => html`
             <span
-              class=${`stamp ${index < filled ? "stamp--filled" : ""} ${index === this.animatedIndex ? "stamp--new" : ""}`}
+              class=${`stamp ${stampState({ index, filled, pendingEnd })} ${index === this.animatedIndex ? "stamp--new" : ""}`}
               aria-hidden="true"
             ></span>
           `,
@@ -45,13 +50,20 @@ export class QmStampGrid extends QmElement {
   }
 }
 
+function stampState({ index, filled, pendingEnd }: { index: number; filled: number; pendingEnd: number }): string {
+  if (index < filled) return "stamp--filled";
+  return index < pendingEnd ? "stamp--pending" : "";
+}
+
 export function defineQmStampGrid() {
   if (!customElements.get(QM_STAMP_GRID_TAG_NAME)) {
     customElements.define(QM_STAMP_GRID_TAG_NAME, QmStampGrid);
   }
 }
 
-export type QmStampGridArgs = Partial<Pick<QmStampGrid, "total" | "filled" | "animatedIndex" | "ariaLabel">>;
+export type QmStampGridArgs = Partial<
+  Pick<QmStampGrid, "total" | "filled" | "pending" | "animatedIndex" | "ariaLabel">
+>;
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -12,12 +12,22 @@ import { useAppTrpc } from "~/shared/hooks/use-app-trpc";
 import { useTenantContext } from "~/shared/hooks/use-tenant-context";
 
 import type { QmCodeInputStatus } from "@qmenut/ui/components/qm-code-input";
+import type { LoyaltyCard } from "~/features/loyalty/types";
 
 function getCodeMessage(status: QmCodeInputStatus, t: ReturnType<typeof useTranslation>["t"]): string {
   if (status === "throttled") return t("loyalty.code.throttled");
   if (status === "already") return t("loyalty.code.already");
   if (status === "error") return t("loyalty.code.invalid");
   return "";
+}
+
+function getOutcomeNotice(outcome: LoyaltyCard["lastOutcome"], t: ReturnType<typeof useTranslation>["t"]): string {
+  if (!outcome) return "";
+  if (outcome.status === "declined") return t("loyalty.card.outcomeDeclined");
+  if (outcome.accepted < outcome.claimed) {
+    return t("loyalty.card.outcomePartial", { accepted: outcome.accepted, count: outcome.claimed });
+  }
+  return t("loyalty.card.outcomeAccepted", { count: outcome.accepted });
 }
 
 export function useLoyaltyController() {
@@ -36,7 +46,9 @@ export function useLoyaltyController() {
     trpc,
   });
   const stampFlow = useStampFlow({
+    card: session.card,
     host,
+    limit: program?.program.stampRequestLimit ?? 1,
     trpc,
     refreshCard: session.refreshCard,
     target: session.target,
@@ -72,11 +84,16 @@ export function useLoyaltyController() {
   const stamp = {
     animatedIndex: stampFlow.animatedIndex,
     code: stampFlow.code,
+    limit: stampFlow.limit,
     message: stampFlow.networkError ? t("loyalty.code.networkError") : getCodeMessage(stampFlow.status, t),
+    notice: getOutcomeNotice(stampFlow.outcome, t),
     open: stampFlow.open,
+    quantity: stampFlow.quantity,
     status: stampFlow.status,
+    cancel: stampFlow.cancel,
     changeCode: stampFlow.changeCode,
     openPanel: stampFlow.openPanel,
+    setQuantity: stampFlow.setQuantity,
     submit: stampFlow.submit,
   };
   const redemption = {

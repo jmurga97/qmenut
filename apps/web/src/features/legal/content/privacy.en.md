@@ -18,6 +18,7 @@ The **QMenut** platform ({{operatorLegalName}}, tax ID {{operatorLegalTaxId}}) p
 - **Technical connection data:** the IP address and basic browser data are processed temporarily to serve the page securely (abuse prevention and error logging). They are not used to create profiles.
 - **Google reviews (when enabled):** public reviews are requested from Google when you approach that section. QMenut does not store their content. The IP address is used transiently to limit abusive requests, without creating profiles.
 - **Loyalty programme (when enabled):** if the establishment enables its points programme and you choose to participate, your email will be processed to create and manage your card, points, and benefits. Your name and date of birth are not requested. Participation requires expressly accepting this policy at registration.
+- **Reservations, when enabled:** if you request a reservation, your name, phone number and email are processed together with the date, time and party size to manage it: to tell you the establishment's answer by email and, before the time, to send you a WhatsApp message to confirm or cancel your attendance. You only receive messages about your own reservation, never advertising. Anyone who types the email used into this website can see and cancel the reservation; every cancellation is notified to that email.
 
 ## 4. Cookie-free analytics
 
@@ -28,6 +29,7 @@ To understand which dishes and sections attract the most interest, **PostHog** (
 - Technical data and anonymous analytics: legitimate interest in security and service improvement (Article 6(1)(f) GDPR).
 - Loading public Google reviews: legitimate interest in providing information about the establishment’s public reputation (Article 6(1)(f) GDPR).
 - Loyalty programme: the participant’s express consent (Article 6(1)(a) GDPR), which may be withdrawn by requesting removal.
+- Reservations: managing the reservation you request (Article 6(1)(b) GDPR). The checkbox in the last step also records your agreement to receive WhatsApp messages about that reservation.
 
 ## 6. Recipients and processors
 
@@ -37,6 +39,7 @@ Data is not disclosed to third parties except where legally required. The follow
 - Cloudflare, Inc. — hosting and content delivery network.
 - PostHog EU — anonymous, cookie-free analytics (data hosted in the EU).
 - Google LLC — provider of public Google Maps reviews when the establishment enables this feature.
+- Meta Platforms Ireland Ltd. (WhatsApp Business) — the message to confirm or cancel attendance at a reservation, when the establishment enables reservations.
 - Email delivery provider — transactional messages (e.g. access codes).
 
 Payments by the establishment to the platform are handled by Stripe and do not affect visitors’ menu data.
@@ -47,6 +50,8 @@ Reviews are fetched by the server and are not stored in the digital menu. If you
 
 The identifier used to rate-limit review requests is retained only for the technical rate-limit window. The email, programme relationship, and consent record are kept while you participate or until you request removal, without prejudice to legal retention obligations.
 
+A reservation's contact data (name, phone number and email) is anonymised 90 days after the reserved date; only the date, time and party size are kept, with nothing that identifies you.
+
 ## 8. Your rights
 
 You may exercise your rights of access, rectification, erasure, objection, restriction of processing, and data portability by writing to the controller and proving your identity. If you believe the processing is not compliant, you may lodge a complaint with the Spanish Data Protection Agency (www.aepd.es).
@@ -55,7 +60,7 @@ You may exercise your rights of access, rectification, erasure, objection, restr
 
 ## 9. Cookies and storage technologies
 
-This website **does not use cookies** or equivalent technologies for advertising or tracking. When you register for loyalty, your card token is stored in the browser’s `localStorage`, associated with the establishment’s domain, so the card remains available on that device. Your selected language may also be stored in `localStorage`; one-time language detection and some installation states use `sessionStorage`. Analytics is kept in memory only. These technical technologies support functions you requested and their treatment should be reviewed under Article 22(2) of the LSSI-CE.
+This website **does not use cookies** or equivalent technologies for advertising or tracking. When you register for loyalty, your card token is stored in the browser’s `localStorage`, associated with the establishment’s domain, so the card remains available on that device. Your selected language may also be stored in `localStorage`; one-time language detection and some installation states use `sessionStorage`. Analytics is kept in memory only. If you make or look up a reservation, the email used is stored in the browser's `localStorage` to show your reservations on that device. These technical technologies support functions you requested and their treatment should be reviewed under Article 22(2) of the LSSI-CE.
 
 ## 10. Changes to this policy
 

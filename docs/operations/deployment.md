@@ -62,6 +62,16 @@ therefore calls the deployed shared image worker and creates real staging object
 and optimized objects in the shared qmenut buckets. Do not add upload E2E coverage until the suite
 has an isolated local worker or fake service binding.
 
+`EMAIL_WORKER` is `remote: true` in the same way: local `wrangler dev` and the E2E API send real
+emails through the deployed `ming-email-worker`. Reservation requests, answers and cancellations
+email the guest and the restaurant's owners, so book locally only with addresses you own. To read
+the payloads instead, run the API from a copy of `wrangler.jsonc` without `remote: true` on
+`EMAIL_WORKER` next to a local Worker named `ming-email-worker` that logs its requests.
+
+`MSG_WORKER` (WhatsApp, [ADR 0003](../adr/0003-whatsapp-through-ming-msg-worker.md)) is bound only
+in `development` and `production`. Local `wrangler dev` has no binding on purpose: attendance checks
+are logged and skipped, and the support-only `/messaging` console reports it as not configured.
+
 ### Provision development resources
 
 The development D1 and KV resources are already represented in source with these IDs:
@@ -98,6 +108,29 @@ bunx wrangler secret put THEME_WORKER_TOKEN --env development --cwd apps/tenant-
 bunx wrangler secret put LOYALTY_TOKEN_SECRET --env development --cwd apps/api
 bunx wrangler secret put STRIPE_SECRET_KEY --env development --cwd apps/api
 bunx wrangler secret put STRIPE_WEBHOOK_SECRET --env development --cwd apps/api
+```
+
+Staff push notifications need the notifications queue and a VAPID key pair per environment.
+Without the three `VAPID_*` secrets push stays off and the admin hides its push control; the
+inbox still works. Generate a pair (never reuse production's) and set it:
+
+```bash
+bunx wrangler queues create qmenut-notifications-dev
+bunx wrangler queues create qmenut-notifications-dev-dlq
+bun -e 'const k=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},true,["sign"]);const b=(u)=>Buffer.from(u).toString("base64url");console.log("VAPID_PUBLIC_KEY="+b(new Uint8Array(await crypto.subtle.exportKey("raw",k.publicKey))));console.log("VAPID_PRIVATE_KEY="+(await crypto.subtle.exportKey("jwk",k.privateKey)).d)'
+bunx wrangler secret put VAPID_PUBLIC_KEY --env development --cwd apps/api
+bunx wrangler secret put VAPID_PRIVATE_KEY --env development --cwd apps/api
+bunx wrangler secret put VAPID_SUBJECT --env development --cwd apps/api
+```
+
+`VAPID_SUBJECT` is a contact URL for push services, such as `mailto:soporte@qmenut.app`.
+
+Reservations' WhatsApp answers arrive on `ming-msg-events-qmenut-dev`. Create it and its DLQ if
+the `ming-msg-worker` deploy has not:
+
+```bash
+bunx wrangler queues create ming-msg-events-qmenut-dev
+bunx wrangler queues create ming-msg-events-qmenut-dev-dlq
 ```
 
 Use the same development `THEME_WORKER_TOKEN` value for both Workers. The checked-in
@@ -204,6 +237,18 @@ You need all of the following:
 - A PostHog EU project.
 - `ming-email-worker` deployed in the same Cloudflare account. The API's `EMAIL_WORKER`
   binding is remote and does not resolve across accounts.
+- `ming-msg-worker` deployed in the same Cloudflare account for reservations' WhatsApp
+  attendance check: its D1, `QMENUT_PHONE_NUMBER_ID`, its three secrets, and the queues
+  `ming-msg-events-qmenut` and `ming-msg-events-qmenut-dev`, each with a `-dlq`. The API binds it
+  as `MSG_WORKER` and consumes the events queue of its environment (`MSG_PRODUCT_ID` is `qmenut` or
+  `qmenut-dev`).
+- Meta approval of the `reservation_attendance` WhatsApp template, with _Confirm_ and _Cancel_
+  quick-reply buttons whose ids are `confirm` and `cancel`.
+- The reservation email templates in `ming-email-worker`: `reservation-received`,
+  `reservation-new-request`, `reservation-accepted`, `reservation-declined` and
+  `reservation-cancelled`. Each takes a `locale` and an `audience` (`guest` or `owner`) in `data`;
+  [Reservations](../domains/reservations.md#backend) lists the fields. Until they exist, those
+  emails are not delivered.
 - `ming-image-worker` deployed in the same Cloudflare account with its D1, Images binding,
   processing Queue/DLQ, qmenut R2 buckets, S3 signing credentials, event notification, CORS,
   lifecycle rule, and `media.qmenut.app` custom domain. The API's `IMAGE_WORKER` binding is
@@ -232,7 +277,26 @@ Copy the returned `id` into both production bindings:
 - `apps/web/wrangler.jsonc`, at `env.production.kv_namespaces[0].id`.
 - `apps/tenant-config/wrangler.jsonc`, at `env.production.kv_namespaces[].id`.
 
-The two values must be byte-identical. Leave `preview_id` unchanged: local development and
+Create the staff notifications queue and its dead-letter queue (`apps/api/wrangler.jsonc`
+binds them as `NOTIFICATIONS_QUEUE`):
+
+```bash
+bunx wrangler queues create qmenut-notifications
+bunx wrangler queues create qmenut-notifications-dlq
+```
+
+Create the WhatsApp events queues if the `ming-msg-worker` deploy has not (the API consumes them;
+`ming-msg-worker` produces):
+
+```bash
+bunx wrangler queues create ming-msg-events-qmenut
+bunx wrangler queues create ming-msg-events-qmenut-dlq
+```
+
+The public reservation endpoints use the `RESERVATION_LIMITER` rate limit, namespace `1004` in
+production and `2004` in development. Like the other limiters it needs no provisioning.
+
+The two KV values must be byte-identical. Leave `preview_id` unchanged: local development and
 end-to-end tests deliberately share that stable preview namespace in
 `.wrangler-shared/state`.
 
@@ -334,6 +398,16 @@ bunx wrangler secret put POSTHOG_PROJECT_ID --env production --cwd apps/api
 
 ```bash
 bunx wrangler secret put POSTHOG_PERSONAL_API_KEY --env production --cwd apps/api
+```
+
+Generate the production VAPID key pair for staff push notifications and set it with the
+subject. Changing the pair later invalidates every push device, so keep it stable:
+
+```bash
+bun -e 'const k=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},true,["sign"]);const b=(u)=>Buffer.from(u).toString("base64url");console.log("VAPID_PUBLIC_KEY="+b(new Uint8Array(await crypto.subtle.exportKey("raw",k.publicKey))));console.log("VAPID_PRIVATE_KEY="+(await crypto.subtle.exportKey("jwk",k.privateKey)).d)'
+bunx wrangler secret put VAPID_PUBLIC_KEY --env production --cwd apps/api
+bunx wrangler secret put VAPID_PRIVATE_KEY --env production --cwd apps/api
+bunx wrangler secret put VAPID_SUBJECT --env production --cwd apps/api
 ```
 
 Never set `DEV_FIXED_OTP` on the production Worker. `create-auth.ts` ignores it when

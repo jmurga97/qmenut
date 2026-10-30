@@ -32,8 +32,9 @@ remembered in `localStorage`, and on another device anyone can type the email to
 The guest can cancel until the slot starts.
 
 The tab appears only when the plan includes reservations, the restaurant turned them on,
-and at least one slot exists. Otherwise `/reservar` shows an unavailable state with
-`noindex,nofollow`, like the rewards tab. Times are in the restaurant's timezone.
+and at least one slot exists. Otherwise `/reservar` shows an unavailable booking state with
+`noindex,nofollow`; lookup and cancellation of existing reservations stay available, including
+following a plan downgrade. Times are in the restaurant's timezone.
 
 ## Lifecycle
 

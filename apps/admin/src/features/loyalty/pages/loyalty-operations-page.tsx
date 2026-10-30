@@ -1,4 +1,5 @@
 import { PendingRedemptionsPanel } from "~/features/loyalty/components/pending-redemptions-panel";
+import { StampRequestsPanel } from "~/features/loyalty/components/stamp-requests-panel";
 import { VenueCodeCard } from "~/features/loyalty/components/venue-code-card";
 import { i18n } from "~/lib/i18n";
 import { NoBranchState } from "~/shared/components/state/no-branch-state";
@@ -20,6 +21,7 @@ function LoyaltyOperationsContent({ branchId }: { branchId: string }) {
         description={i18n.t("loyalty___Cambia automáticamente. No hace falta tocar nada.")}
         heading={i18n.t("loyalty___Código de esta sucursal")}
       />
+      <StampRequestsPanel branchId={branchId} />
       <PendingRedemptionsPanel branchId={branchId} titleId={"loyalty-redemptions-title"} />
     </>
   );

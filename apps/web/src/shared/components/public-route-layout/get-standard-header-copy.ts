@@ -8,6 +8,8 @@ export function getStandardHeaderCopy(routeId: string | undefined, t: TFunction)
       return { subtitle: t("contact.page.subtitle"), title: t("contact.page.title") };
     case "/{-$locale}/puntos":
       return { subtitle: t("loyalty.page.subtitle"), title: t("loyalty.page.title") };
+    case "/{-$locale}/reservar":
+      return { subtitle: t("reservations.page.subtitle"), title: t("reservations.page.title") };
     case "/{-$locale}/aviso-legal":
       return { subtitle: t("legal.legalNotice.subtitle"), title: t("legal.legalNotice.title") };
     case "/{-$locale}/privacidad":

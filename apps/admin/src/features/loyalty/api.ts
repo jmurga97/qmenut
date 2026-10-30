@@ -13,6 +13,12 @@ export function getVenueCodeQueryOptions({ branchId, trpc }: ApiContext & { bran
 export function getPendingRedemptionsQueryOptions({ trpc }: ApiContext) {
   return trpc.admin.loyalty.pendingRedemptions.queryOptions();
 }
+export function getPendingStampRequestsQueryOptions({ branchId, trpc }: ApiContext & { branchId: string }) {
+  return trpc.admin.loyalty.pendingStampRequests.queryOptions({ branchId });
+}
+export function getHandledStampRequestsQueryOptions({ branchId, trpc }: ApiContext & { branchId: string }) {
+  return trpc.admin.loyalty.handledStampRequests.queryOptions({ branchId });
+}
 export function getLoyaltySummaryQueryOptions({ trpc }: ApiContext) {
   return trpc.admin.loyalty.insights.summary.queryOptions();
 }
@@ -37,11 +43,14 @@ export function getLoyaltyVisitsQueryOptions({ from, to, trpc }: ApiContext & { 
 export function getLoyaltyMutationOptions({ queryClient, trpc }: MutationContext) {
   const options = { onSettled: () => queryClient.invalidateQueries({ queryKey: trpc.admin.loyalty.pathKey() }) };
   return {
+    acceptStampRequest: trpc.admin.loyalty.acceptStampRequest.mutationOptions(options),
     createReward: trpc.admin.loyalty.createReward.mutationOptions(options),
+    declineStampRequest: trpc.admin.loyalty.declineStampRequest.mutationOptions(options),
     deleteReward: trpc.admin.loyalty.deleteReward.mutationOptions(options),
     reject: trpc.admin.loyalty.rejectRedemption.mutationOptions(options),
     saveProgram: trpc.admin.loyalty.saveProgram.mutationOptions(options),
     undo: trpc.admin.loyalty.undo.mutationOptions(options),
+    undoStampRequest: trpc.admin.loyalty.undoStampRequest.mutationOptions(options),
     updateReward: trpc.admin.loyalty.updateReward.mutationOptions(options),
     validate: trpc.admin.loyalty.validateRedemption.mutationOptions(options),
   };

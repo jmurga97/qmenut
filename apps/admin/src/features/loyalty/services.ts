@@ -11,7 +11,17 @@ export function formatRelativeAge(createdAt: number, now: number): string {
     style: "short",
   });
   if (elapsedSeconds < 60) return relativeTime.format(-elapsedSeconds, "second");
-  return relativeTime.format(-Math.floor(elapsedSeconds / 60), "minute");
+  if (elapsedSeconds < 3600) return relativeTime.format(-Math.floor(elapsedSeconds / 60), "minute");
+  return relativeTime.format(-Math.floor(elapsedSeconds / 3600), "hour");
+}
+
+/** "18:42": staff match a stamp request against the till. */
+export function formatClockTime(value: number): string {
+  return new Intl.DateTimeFormat(i18n.resolvedLanguage ?? "es", { timeStyle: "short" }).format(value);
+}
+
+export function formatHoursLeft(remainingMs: number): number {
+  return Math.max(1, Math.ceil(remainingMs / 3_600_000));
 }
 export function formatCountdown(remainingMs: number): string {
   const seconds = Math.ceil(remainingMs / 1000);

@@ -1,11 +1,13 @@
 :host {
   display: inline-block;
+  max-width: 100%;
 }
 
 button {
   display: inline-flex;
   align-items: center;
   min-width: 0;
+  max-width: 100%;
   min-height: var(--qm-touch-min, 44px);
   flex-direction: column;
   justify-content: center;
@@ -18,7 +20,7 @@ button {
   font-weight: 800;
   letter-spacing: 0.4px;
   text-transform: uppercase;
-  padding: 5px clamp(4px, 2.5vw, 12px);
+  padding: 5px clamp(4px, 1.6vw, 12px);
   border-radius: var(--qm-nav-active-radius, 0px);
   color: var(--qm-nav-muted, #8c857b);
   border-bottom: 2px solid transparent;

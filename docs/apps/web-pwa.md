@@ -5,7 +5,9 @@ restaurant name, the theme colors, and the best available icon. Offline mode kee
 previously visited menu documents readable without caching customer or loyalty API
 responses.
 
-The admin dashboard and the marketing site are not installable. Push notifications,
+The marketing site is not installable. The admin dashboard is installable and has its own
+push-only service worker for staff notifications (see
+[Notifications](../domains/notifications.md)). For the public menu, push notifications,
 background sync, offline ordering, and offline photos are out of scope.
 
 ## Manifest and icons

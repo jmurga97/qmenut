@@ -1,4 +1,5 @@
 import { getPublicMenu as findPublicMenu } from "@qmenut/db/repositories/public-menu.repository";
+import { isReservationsOpen } from "@qmenut/db/repositories/reservations.repository";
 import { getRestaurantLanguageInfo } from "@qmenut/db/repositories/restaurant-languages.repository";
 import { hasFeature } from "@qmenut/permissions";
 
@@ -26,7 +27,7 @@ interface GetPublicMenuInput {
 
 export type PublicMenuPayload = PublicMenuData & {
   language: PublicMenuLanguage;
-  publicFeatures: PublicLoyaltyFeatures & { highlights: boolean; pwa: boolean };
+  publicFeatures: PublicLoyaltyFeatures & { highlights: boolean; pwa: boolean; reservations: boolean };
   tagline: string;
 };
 
@@ -74,7 +75,7 @@ export async function getPublicMenu({
       : defaultLanguage;
   const translatedTexts =
     effective === defaultLanguage ? undefined : publicTranslationMap(languageTexts(content, effective));
-  const [data, publicFeatures] = await Promise.all([
+  const [data, publicFeatures, reservations] = await Promise.all([
     findPublicMenu({
       applySchedules: can("menu.schedules"),
       db,
@@ -85,6 +86,7 @@ export async function getPublicMenu({
       translatedTexts,
     }),
     can("loyalty") ? getPublicLoyaltyFeatures({ db, restaurantId: tenant.restaurantId }) : { loyalty: false },
+    can("reservations") && isReservationsOpen({ db, branchId: tenant.branchId }),
   ]);
 
   if (!data) {
@@ -117,6 +119,6 @@ export async function getPublicMenu({
       effective,
       requested,
     },
-    publicFeatures: { ...publicFeatures, highlights: can("highlights"), pwa: can("pwa") },
+    publicFeatures: { ...publicFeatures, highlights: can("highlights"), pwa: can("pwa"), reservations },
   };
 }

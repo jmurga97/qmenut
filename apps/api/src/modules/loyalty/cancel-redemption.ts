@@ -2,6 +2,7 @@ import { cancelRedemption as cancelRedemptionRow } from "@qmenut/db/repositories
 import { TRPCError } from "@trpc/server";
 
 import { resolveCard } from "./resolve-card";
+import { resolveNotifications } from "../notifications/emit-notification";
 
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
@@ -30,6 +31,14 @@ export async function cancelRedemption({
   if (!cancelled) {
     throw new TRPCError({ code: "NOT_FOUND", message: "No hay ningún canje pendiente que cancelar" });
   }
+
+  await resolveNotifications({
+    db,
+    type: "loyalty.redemption",
+    subjectIds: [redemptionId],
+    handledBy: null,
+    outcome: "cancelled",
+  });
 
   return { ok: true };
 }

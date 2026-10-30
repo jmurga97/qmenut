@@ -1,6 +1,6 @@
 import { expect, test } from "../../fixtures/test";
 import { expectNoSeriousA11yViolations } from "../../helpers/a11y";
-import { card, earnStamp, LOYALTY_URL, requestReward, signup } from "../../helpers/loyalty";
+import { card, earnStamp, LOYALTY_URL, requestReward, requestStamps, signup } from "../../helpers/loyalty";
 import { callPublicTrpc, callPublicTrpcMutation, callTrpcQuery, getTrpcData } from "../../helpers/trpc";
 
 test("diner and staff complete a redemption through their screens @critical", async ({ diner, staff }) => {
@@ -50,17 +50,17 @@ test("restores a pending redemption after reload and reopening storage", async (
   }
 });
 
-test("rejects another stamp during the visit cooldown", async ({ diner, staff }) => {
+test("rejects another stamp request during the visit cooldown", async ({ diner, staff }) => {
   await signup(diner);
   await earnStamp({ diner, staff });
   await expect.poll(async () => (await card(diner)).card.stampsBalance).toBe(1);
   await diner.reload();
-  await earnStamp({ diner, staff });
-  await expect(diner.getByText("Ya tienes el sello de esta visita", { exact: true })).toBeVisible();
-  expect((await card(diner)).card.stampsBalance).toBe(1);
+  await requestStamps({ diner, staff });
+  await expect(diner.getByText("Ya pediste sellos en esta visita", { exact: true })).toBeVisible();
+  expect(await card(diner)).toMatchObject({ card: { stampsBalance: 1 }, pendingStamps: 0 });
 });
 
-test("does not confirm a stamp without a network connection", async ({ diner, staff }) => {
+test("does not send a stamp request without a network connection", async ({ diner, staff }) => {
   await signup(diner);
   await staff.goto("/loyalty");
   const code = staff.locator("strong").filter({ hasText: "Código actual:" });
@@ -68,7 +68,7 @@ test("does not confirm a stamp without a network connection", async ({ diner, st
   const digits = (await code.innerText()).match(/\d{4}/)![0];
   await diner.context().setOffline(true);
   try {
-    await diner.getByRole("button", { name: "Pedir mi sello" }).click();
+    await diner.getByRole("button", { name: "Pedir sellos" }).click();
     await diner.getByLabel("Código de sala de cuatro dígitos").fill(digits);
     await expect(
       diner.getByText("No se pudo conectar. Comprueba tu conexión y vuelve a introducir el código."),
@@ -78,9 +78,10 @@ test("does not confirm a stamp without a network connection", async ({ diner, st
   } finally {
     await diner.context().setOffline(false);
   }
-  expect((await card(diner)).card.stampsBalance).toBe(0);
+  expect((await card(diner)).pendingStamps).toBe(0);
   await diner.getByLabel("Código de sala de cuatro dígitos").fill(digits);
-  await expect.poll(async () => (await card(diner)).card.stampsBalance).toBe(1);
+  await expect.poll(async () => (await card(diner)).pendingStamps).toBe(1);
+  expect((await card(diner)).card.stampsBalance).toBe(0);
 });
 
 test("insufficient balance cannot redeem, exact balance can", async ({ diner, staff }) => {

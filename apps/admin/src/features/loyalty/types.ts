@@ -74,6 +74,10 @@ export const rewardFormSchema = z
 export const loyaltyProgramFormSchema = z.object({
   isActive: z.boolean(),
   averageTicket: optionalMoneySchema,
+  stampRequestLimit: z
+    .string()
+    .trim()
+    .regex(/^(?:10|[1-9])$/, i18n.t("loyalty___Indica un número entre 1 y 10")),
   rewards: z.array(rewardFormSchema),
 });
 export type CustomerSort = z.infer<typeof customerSortSchema>;
@@ -85,6 +89,8 @@ export type SortDirection = z.infer<typeof sortDirectionSchema>;
 export type VisitsPeriod = (typeof VISIT_PERIODS)[number];
 export type LoyaltyProgramResponse = RouterOutputs["admin"]["loyalty"]["getProgram"];
 export type PendingRedemption = RouterOutputs["admin"]["loyalty"]["pendingRedemptions"][number];
+export type PendingStampRequest = RouterOutputs["admin"]["loyalty"]["pendingStampRequests"][number];
+export type HandledStampRequest = RouterOutputs["admin"]["loyalty"]["handledStampRequests"][number];
 export type LoyaltyCustomer = RouterOutputs["admin"]["loyalty"]["insights"]["customers"]["rows"][number];
 export type LoyaltyVisitsPoint = RouterOutputs["admin"]["loyalty"]["insights"]["visitsChart"][number];
 export type DishGroup = { label: string; options: Array<{ id: string; label: string }> };

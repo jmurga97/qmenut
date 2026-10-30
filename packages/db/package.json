@@ -48,6 +48,18 @@
       "types": "./src/repositories/loyalty-insights.repository.ts",
       "import": "./src/repositories/loyalty-insights.repository.ts"
     },
+    "./repositories/messaging-events.repository": {
+      "types": "./src/repositories/messaging-events.repository.ts",
+      "import": "./src/repositories/messaging-events.repository.ts"
+    },
+    "./repositories/reservations.repository": {
+      "types": "./src/repositories/reservations.repository.ts",
+      "import": "./src/repositories/reservations.repository.ts"
+    },
+    "./repositories/notifications.repository": {
+      "types": "./src/repositories/notifications.repository.ts",
+      "import": "./src/repositories/notifications.repository.ts"
+    },
     "./repositories/restaurant-languages.repository": {
       "types": "./src/repositories/restaurant-languages.repository.ts",
       "import": "./src/repositories/restaurant-languages.repository.ts"
@@ -103,6 +115,10 @@
     "./repositories/translations.repository": {
       "types": "./src/repositories/translations.repository.ts",
       "import": "./src/repositories/translations.repository.ts"
+    },
+    "./domain/local-time": {
+      "types": "./src/domain/local-time.ts",
+      "import": "./src/domain/local-time.ts"
     },
     "./domain/promotions": {
       "types": "./src/domain/promotions.ts",
