@@ -52,6 +52,10 @@
       "types": "./src/repositories/messaging-events.repository.ts",
       "import": "./src/repositories/messaging-events.repository.ts"
     },
+    "./repositories/reservations.repository": {
+      "types": "./src/repositories/reservations.repository.ts",
+      "import": "./src/repositories/reservations.repository.ts"
+    },
     "./repositories/notifications.repository": {
       "types": "./src/repositories/notifications.repository.ts",
       "import": "./src/repositories/notifications.repository.ts"
@@ -111,6 +115,10 @@
     "./repositories/translations.repository": {
       "types": "./src/repositories/translations.repository.ts",
       "import": "./src/repositories/translations.repository.ts"
+    },
+    "./domain/local-time": {
+      "types": "./src/domain/local-time.ts",
+      "import": "./src/domain/local-time.ts"
     },
     "./domain/promotions": {
       "types": "./src/domain/promotions.ts",
