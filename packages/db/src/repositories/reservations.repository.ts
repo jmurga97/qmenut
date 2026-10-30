@@ -430,7 +430,7 @@ export async function answerReservation({
   const [row] = await db
     .update(reservations)
     .set({ status, handledBy, handledAt: now, updatedAt: now })
-    .where(and(eq(reservations.id, reservationId), eq(reservations.status, "pending"), gt(reservations.respondBy, now)))
+    .where(and(eq(reservations.id, reservationId), eq(reservations.status, "pending")))
     .returning();
 
   return row ?? null;
@@ -495,13 +495,7 @@ export async function saveReservationSettings({
     return;
   }
 
-  // Three parameters per slot; keep every insert below D1's 100-parameter limit.
-  const inserts = Array.from({ length: Math.ceil(slots.length / 33) }, (_, index) =>
-    db
-      .insert(reservationSlots)
-      .values(slots.slice(index * 33, (index + 1) * 33).map((slot) => ({ ...slot, branchId }))),
-  );
-  await db.batch([upsert, clear, ...inserts]);
+  await db.batch([upsert, clear, db.insert(reservationSlots).values(slots.map((slot) => ({ ...slot, branchId })))]);
 }
 
 export type ReservationClosure = Pick<typeof reservationClosures.$inferSelect, "id" | "date" | "startMinute">;
@@ -724,16 +718,6 @@ export async function listReservationMessages({
   reservationIds: string[];
 }): Promise<ReservationMessage[]> {
   if (reservationIds.length === 0) return [];
-
-  if (reservationIds.length > 50) {
-    const messages: ReservationMessage[] = [];
-    for (let index = 0; index < reservationIds.length; index += 50) {
-      messages.push(
-        ...(await listReservationMessages({ db, reservationIds: reservationIds.slice(index, index + 50) })),
-      );
-    }
-    return messages;
-  }
 
   const rows = await db
     .select({
