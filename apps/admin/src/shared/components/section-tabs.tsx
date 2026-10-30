@@ -13,7 +13,12 @@ export function SectionTabs({ ariaLabel, tabs }: { ariaLabel: string; tabs: read
   return (
     <nav aria-label={ariaLabel} className="admin-section-tabs">
       {tabs.map((tab) => (
-        <Link activeOptions={{ exact: tab.exact }} className="admin-section-tab" key={tab.to} to={tab.to}>
+        <Link
+          activeOptions={{ exact: tab.exact, includeSearch: false }}
+          className="admin-section-tab"
+          key={tab.to}
+          to={tab.to}
+        >
           {tab.label}
         </Link>
       ))}

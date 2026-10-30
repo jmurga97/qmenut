@@ -9,6 +9,7 @@ import { adminLoyaltyRouter } from "../modules/admin-loyalty/admin-loyalty.route
 import { adminMenuRouter } from "../modules/admin-menu/admin-menu.router";
 import { adminMessagingRouter } from "../modules/admin-messaging/admin-messaging.router";
 import { adminPromotionsRouter } from "../modules/admin-promotions/admin-promotions.router";
+import { adminReservationsRouter } from "../modules/admin-reservations/admin-reservations.router";
 import { adminTenantRouter } from "../modules/admin-tenant/admin-tenant.router";
 import { adminTranslationsRouter } from "../modules/admin-translations/admin-translations.router";
 import { adminUsersRouter } from "../modules/admin-users/admin-users.router";
@@ -36,6 +37,7 @@ export const appRouter = router({
     theme: themeRouter,
     billing: billingRouter,
     loyalty: adminLoyaltyRouter,
+    reservations: adminReservationsRouter,
     notifications: notificationsRouter,
     languages: adminTranslationsRouter.languages,
     translations: adminTranslationsRouter.translations,

@@ -6,6 +6,7 @@ import { Outlet, useLocation, useNavigate, useRouteContext, useRouter } from "@t
 import { getListRestaurantsQueryOptions } from "~/features/auth/api";
 import { useSelectRestaurant } from "~/features/auth/hooks/use-select-restaurant";
 import { NotificationBell } from "~/features/notifications/components/notification-bell";
+import { usePendingReservationsCount } from "~/features/reservations/hooks/use-pending-reservations-count";
 import { signOut } from "~/lib/auth-client";
 import { FEATURES } from "~/lib/features";
 import { i18n } from "~/lib/i18n";
@@ -60,6 +61,13 @@ const SECTIONS = [
     path: "/loyalty",
     feature: "loyalty",
   },
+  {
+    id: "reservations",
+    label: i18n.t("shell___Reservas"),
+    path: "/reservations",
+    permission: "reservations.manage",
+    feature: "reservations",
+  },
   { id: "theme", label: i18n.t("shell___Tema"), path: "/theme", feature: "theme" },
   {
     id: "languages",
@@ -88,9 +96,17 @@ interface NavigationInput {
   pathname: string;
   roleCode: Parameters<typeof can>[0];
   isLocked: (section: Section) => boolean;
+  /** NavListItem has no badge: the count of reservation requests rides in the label. */
+  pendingReservations: number;
 }
 
-function getNavigationItems({ isInternalSupport, pathname, roleCode, isLocked }: NavigationInput): NavListItem[] {
+function getNavigationItems({
+  isInternalSupport,
+  pathname,
+  roleCode,
+  isLocked,
+  pendingReservations,
+}: NavigationInput): NavListItem[] {
   return SECTIONS.filter((section) => section.id !== "analytics" || FEATURES.analytics)
     .filter((section) => !("permission" in section) || can(roleCode, section.permission))
     .filter((section) => !("internalOnly" in section) || isInternalSupport)
@@ -100,7 +116,10 @@ function getNavigationItems({ isInternalSupport, pathname, roleCode, isLocked }:
       description: isLocked(section) ? "Business" : undefined,
       href: section.path,
       id: section.id,
-      label: section.label,
+      label:
+        section.id === "reservations" && pendingReservations > 0
+          ? `${section.label} (${pendingReservations})`
+          : section.label,
     }));
 }
 
@@ -128,6 +147,12 @@ export function AdminShell() {
   const isLocked = (section: Section) =>
     section.feature !== undefined &&
     !isFeatureEnabled({ branches: tenant.branches, selectedBranchId, feature: section.feature });
+  const pendingReservations = usePendingReservationsCount({
+    branchId: selectedBranch?.id,
+    enabled:
+      can(tenant.roleCode, "reservations.manage") &&
+      isFeatureEnabled({ branches: tenant.branches, selectedBranchId, feature: "reservations" }),
+  });
   async function selectNavigation(selectedId: string) {
     const section = SECTIONS.find((item) => item.id === selectedId);
     await navigate({ to: section?.path ?? "/" });
@@ -178,6 +203,7 @@ export function AdminShell() {
             pathname: location.pathname,
             roleCode: tenant.roleCode,
             isLocked,
+            pendingReservations,
           })}
           onIntent={(href) => void router.preloadRoute({ to: href })}
           onBranchChange={(branchId) => {

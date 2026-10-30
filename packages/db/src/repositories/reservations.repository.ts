@@ -1,4 +1,4 @@
-import { and, asc, between, count, eq, gt, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, between, count, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
 
 import { addDays, getLocalDayAndMinute, getWeekday, localToUtc } from "../domain/local-time";
 import { reservationClosures, reservationSettings, reservationSlots, reservations } from "../schema/reservations";
@@ -362,4 +362,178 @@ export async function cancelGuestReservation({
     .returning();
 
   return row ?? null;
+}
+
+interface RestaurantBranchInput extends BranchInput {
+  restaurantId: string;
+}
+
+/** One day's reservations for staff, every status, with the guest's contact details. */
+export async function listDayReservations({
+  db,
+  branchId,
+  date,
+}: BranchInput & { date: string }): Promise<ReservationRow[]> {
+  return db
+    .select()
+    .from(reservations)
+    .where(and(eq(reservations.branchId, branchId), eq(reservations.slotDate, date)))
+    .orderBy(asc(reservations.slotMinute), asc(reservations.createdAt))
+    .all();
+}
+
+export async function countPendingReservations({ db, branchId }: BranchInput): Promise<number> {
+  const [row] = await db
+    .select({ pending: count() })
+    .from(reservations)
+    .where(and(eq(reservations.branchId, branchId), eq(reservations.status, "pending")));
+
+  return row.pending;
+}
+
+export async function findReservation({
+  db,
+  restaurantId,
+  reservationId,
+}: {
+  db: DrizzleDb;
+  restaurantId: string;
+  reservationId: string;
+}): Promise<ReservationRow | null> {
+  const row = await db
+    .select()
+    .from(reservations)
+    .where(and(eq(reservations.id, reservationId), eq(reservations.restaurantId, restaurantId)))
+    .get();
+
+  return row ?? null;
+}
+
+interface StaffTransitionInput {
+  db: DrizzleDb;
+  reservationId: string;
+  handledBy: string;
+  now?: number;
+}
+
+/** Accept or decline a pending request. Null when another device or the automatic acceptance answered first. */
+export async function answerReservation({
+  db,
+  reservationId,
+  handledBy,
+  status,
+  now = Date.now(),
+}: StaffTransitionInput & { status: "accepted" | "declined" }): Promise<ReservationRow | null> {
+  const [row] = await db
+    .update(reservations)
+    .set({ status, handledBy, handledAt: now, updatedAt: now })
+    .where(and(eq(reservations.id, reservationId), eq(reservations.status, "pending")))
+    .returning();
+
+  return row ?? null;
+}
+
+/** Staff cancel any reservation that still holds a table, frees it. Null when it no longer does. */
+export async function cancelReservationByStaff({
+  db,
+  reservationId,
+  handledBy,
+  now = Date.now(),
+}: StaffTransitionInput): Promise<ReservationRow | null> {
+  const [row] = await db
+    .update(reservations)
+    .set({ status: "cancelled", cancelledBy: "staff", handledBy, handledAt: now, updatedAt: now })
+    .where(and(eq(reservations.id, reservationId), inArray(reservations.status, HOLDING_STATUSES)))
+    .returning();
+
+  return row ?? null;
+}
+
+export type ReservationSettingsValues = Omit<ReservationSettingsRow, "branchId" | "restaurantId" | "updatedAt">;
+
+export interface ReservationSlot {
+  weekday: number;
+  startMinute: number;
+}
+
+export async function getReservationSettings({
+  db,
+  branchId,
+}: BranchInput): Promise<{ settings: ReservationSettingsRow | null; slots: ReservationSlot[] }> {
+  const settingsQuery = db.select().from(reservationSettings).where(eq(reservationSettings.branchId, branchId)).get();
+  const slotsQuery = db
+    .select({ weekday: reservationSlots.weekday, startMinute: reservationSlots.startMinute })
+    .from(reservationSlots)
+    .where(eq(reservationSlots.branchId, branchId))
+    .orderBy(asc(reservationSlots.weekday), asc(reservationSlots.startMinute))
+    .all();
+  const [settings, slots] = await Promise.all([settingsQuery, slotsQuery]);
+
+  return { settings: settings ?? null, slots };
+}
+
+/** Settings and the weekly slots in one batch, so the public gate never sees half of a save. */
+export async function saveReservationSettings({
+  db,
+  restaurantId,
+  branchId,
+  values,
+  slots,
+}: RestaurantBranchInput & { values: ReservationSettingsValues; slots: ReservationSlot[] }): Promise<void> {
+  const now = Date.now();
+  const upsert = db
+    .insert(reservationSettings)
+    .values({ ...values, branchId, restaurantId, updatedAt: now })
+    .onConflictDoUpdate({ target: reservationSettings.branchId, set: { ...values, updatedAt: now } });
+  const clear = db.delete(reservationSlots).where(eq(reservationSlots.branchId, branchId));
+
+  if (slots.length === 0) {
+    await db.batch([upsert, clear]);
+    return;
+  }
+
+  await db.batch([upsert, clear, db.insert(reservationSlots).values(slots.map((slot) => ({ ...slot, branchId })))]);
+}
+
+export type ReservationClosure = Pick<typeof reservationClosures.$inferSelect, "id" | "date" | "startMinute">;
+
+/** Today's and future closures; past ones stay for the record but drop out of the list. */
+export async function listUpcomingClosures({
+  db,
+  branchId,
+  fromDate,
+}: BranchInput & { fromDate: string }): Promise<ReservationClosure[]> {
+  return db
+    .select({
+      id: reservationClosures.id,
+      date: reservationClosures.date,
+      startMinute: reservationClosures.startMinute,
+    })
+    .from(reservationClosures)
+    .where(and(eq(reservationClosures.branchId, branchId), gte(reservationClosures.date, fromDate)))
+    .orderBy(asc(reservationClosures.date), asc(reservationClosures.startMinute))
+    .all();
+}
+
+/** False when that day or slot is already closed. */
+export async function addClosure({
+  db,
+  branchId,
+  date,
+  startMinute,
+  createdBy,
+}: BranchInput & { date: string; startMinute: number | null; createdBy: string }): Promise<boolean> {
+  const result = await db
+    .insert(reservationClosures)
+    .values({ id: crypto.randomUUID(), branchId, date, startMinute, createdBy })
+    .onConflictDoNothing()
+    .run();
+
+  return result.meta.changes === 1;
+}
+
+export async function removeClosure({ db, branchId, closureId }: BranchInput & { closureId: string }): Promise<void> {
+  await db
+    .delete(reservationClosures)
+    .where(and(eq(reservationClosures.id, closureId), eq(reservationClosures.branchId, branchId)));
 }
