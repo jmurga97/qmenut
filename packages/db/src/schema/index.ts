@@ -10,5 +10,6 @@ export * from "./menu";
 export * from "./messaging";
 export * from "./notifications";
 export * from "./promotions";
+export * from "./reservations";
 export * from "./restaurants";
 export * from "./translations";

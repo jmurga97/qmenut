@@ -28,7 +28,8 @@ export type Permission =
   | "billing.manage"
   | "analytics.read"
   | "exchangeRates.write"
-  | "users.manage";
+  | "users.manage"
+  | "reservations.manage";
 
 const ROLE_PERMISSIONS: Record<RestaurantRoleCode, readonly Permission[]> = {
   owner: [
@@ -45,6 +46,7 @@ const ROLE_PERMISSIONS: Record<RestaurantRoleCode, readonly Permission[]> = {
     "billing.manage",
     "analytics.read",
     "users.manage",
+    "reservations.manage",
   ],
   admin: [
     "menu.write",
@@ -58,8 +60,9 @@ const ROLE_PERMISSIONS: Record<RestaurantRoleCode, readonly Permission[]> = {
     "loyalty.operate",
     "analytics.read",
     "exchangeRates.write",
+    "reservations.manage",
   ],
-  staff: ["menu.write", "menu.toggleDishAvailability", "loyalty.operate", "exchangeRates.write"],
+  staff: ["menu.write", "menu.toggleDishAvailability", "loyalty.operate", "exchangeRates.write", "reservations.manage"],
 };
 
 export function can(role: RestaurantRoleCode, permission: Permission): boolean {
@@ -84,7 +87,8 @@ export type PlanFeature =
   | "menuPrint"
   | "analytics"
   | "users"
-  | "multiBranch";
+  | "multiBranch"
+  | "reservations";
 
 const PLAN_FEATURES: Record<PlanCode, readonly PlanFeature[]> = {
   basic: [],
@@ -102,6 +106,7 @@ const PLAN_FEATURES: Record<PlanCode, readonly PlanFeature[]> = {
     "analytics",
     "users",
     "multiBranch",
+    "reservations",
   ],
 };
 
