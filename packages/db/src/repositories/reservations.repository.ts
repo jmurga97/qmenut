@@ -1,4 +1,4 @@
-import { and, asc, between, count, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, between, count, eq, gt, gte, inArray, isNotNull, isNull, lt, lte, sql } from "drizzle-orm";
 
 import { addDays, getLocalDayAndMinute, getWeekday, localToUtc } from "../domain/local-time";
 import { reservationClosures, reservationSettings, reservationSlots, reservations } from "../schema/reservations";
@@ -536,4 +536,152 @@ export async function removeClosure({ db, branchId, closureId }: BranchInput & {
   await db
     .delete(reservationClosures)
     .where(and(eq(reservationClosures.id, closureId), eq(reservationClosures.branchId, branchId)));
+}
+
+const ATTENDANCE_BATCH = 50;
+const ANONYMIZE_AFTER_MS = 90 * 24 * 60 * 60 * 1000;
+
+export interface AttendanceCheck {
+  id: string;
+  guestName: string | null;
+  guestPhone: string;
+  slotDate: string;
+  slotMinute: number;
+  partySize: number;
+  branchName: string;
+}
+
+/**
+ * Accepted reservations inside their branch's check window: from `check_before` until `check_deadline` before
+ * the slot. One accepted after the window opened is sent at once; one accepted after the deadline is skipped.
+ */
+export async function listAttendanceChecksDue({
+  db,
+  now = Date.now(),
+}: {
+  db: DrizzleDb;
+  now?: number;
+}): Promise<AttendanceCheck[]> {
+  const rows = await db
+    .select({
+      id: reservations.id,
+      guestName: reservations.guestName,
+      guestPhone: reservations.guestPhone,
+      slotDate: reservations.slotDate,
+      slotMinute: reservations.slotMinute,
+      partySize: reservations.partySize,
+      branchName: branches.name,
+    })
+    .from(reservations)
+    .innerJoin(reservationSettings, eq(reservationSettings.branchId, reservations.branchId))
+    .innerJoin(branches, eq(branches.id, reservations.branchId))
+    .where(
+      and(
+        eq(reservations.status, "accepted"),
+        isNull(reservations.checkSentAt),
+        isNotNull(reservations.guestPhone),
+        sql`${reservations.startsAt} - ${reservationSettings.checkBeforeMinutes} * ${MINUTE_MS} <= ${now}`,
+        sql`${reservations.startsAt} - ${reservationSettings.checkDeadlineMinutes} * ${MINUTE_MS} > ${now}`,
+      ),
+    )
+    .orderBy(asc(reservations.startsAt))
+    .limit(ATTENDANCE_BATCH)
+    .all();
+
+  return rows.flatMap((row) => (row.guestPhone ? [{ ...row, guestPhone: row.guestPhone }] : []));
+}
+
+/** Claims the check before sending, so overlapping cron runs can't both send it. */
+export async function claimAttendanceCheck({
+  db,
+  reservationId,
+  now = Date.now(),
+}: {
+  db: DrizzleDb;
+  reservationId: string;
+  now?: number;
+}): Promise<boolean> {
+  const result = await db
+    .update(reservations)
+    .set({ checkSentAt: now, updatedAt: now })
+    .where(and(eq(reservations.id, reservationId), isNull(reservations.checkSentAt)))
+    .run();
+
+  return result.meta.changes === 1;
+}
+
+/** Gives the check back to the next run after a send that may succeed if retried. */
+export async function releaseAttendanceCheck({ db, reservationId }: { db: DrizzleDb; reservationId: string }) {
+  await db
+    .update(reservations)
+    .set({ checkSentAt: null, updatedAt: Date.now() })
+    .where(eq(reservations.id, reservationId));
+}
+
+/** Checked, unanswered and past the deadline: still holds its table, flagged for staff. */
+export async function markUnconfirmedReservations({
+  db,
+  now = Date.now(),
+}: {
+  db: DrizzleDb;
+  now?: number;
+}): Promise<ReservationRow[]> {
+  return db
+    .update(reservations)
+    .set({ status: "unconfirmed", updatedAt: now })
+    .where(
+      and(
+        eq(reservations.status, "accepted"),
+        isNotNull(reservations.checkSentAt),
+        sql`${reservations.startsAt} - (
+          SELECT ${reservationSettings.checkDeadlineMinutes} FROM ${reservationSettings}
+          WHERE ${reservationSettings.branchId} = ${reservations.branchId}
+        ) * ${MINUTE_MS} <= ${now}`,
+      ),
+    )
+    .returning();
+}
+
+/** The guest's answer to the attendance check. Null when the reservation can no longer take it. */
+export async function answerAttendanceCheck({
+  db,
+  reservationId,
+  answer,
+  now = Date.now(),
+}: {
+  db: DrizzleDb;
+  reservationId: string;
+  answer: "confirm" | "cancel";
+  now?: number;
+}): Promise<ReservationRow | null> {
+  const update =
+    answer === "confirm"
+      ? db
+          .update(reservations)
+          .set({ status: "confirmed", updatedAt: now })
+          .where(and(eq(reservations.id, reservationId), inArray(reservations.status, ["accepted", "unconfirmed"])))
+      : db
+          .update(reservations)
+          .set({ status: "cancelled", cancelledBy: "guest", updatedAt: now })
+          .where(
+            and(
+              eq(reservations.id, reservationId),
+              inArray(reservations.status, HOLDING_STATUSES),
+              gt(reservations.startsAt, now),
+            ),
+          );
+  const [row] = await update.returning();
+
+  return row ?? null;
+}
+
+/** Contact data goes 90 days after the slot; date, time and party size stay for the restaurant's numbers. */
+export async function anonymizeOldReservations({ db, now = Date.now() }: { db: DrizzleDb; now?: number }) {
+  const result = await db
+    .update(reservations)
+    .set({ guestName: null, guestPhone: null, guestEmail: null, anonymizedAt: now, updatedAt: now })
+    .where(and(isNull(reservations.anonymizedAt), lt(reservations.startsAt, now - ANONYMIZE_AFTER_MS)))
+    .run();
+
+  return result.meta.changes;
 }

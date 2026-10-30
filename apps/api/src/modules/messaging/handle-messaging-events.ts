@@ -1,9 +1,11 @@
 import { createDb } from "@qmenut/db/client";
 import { insertMessagingEvent } from "@qmenut/db/repositories/messaging-events.repository";
+import { answerAttendanceCheck } from "@qmenut/db/repositories/reservations.repository";
 import * as Sentry from "@sentry/cloudflare";
 import { z } from "zod";
 
 import type { EnvBindings } from "../../config/env/schema";
+import type { DrizzleDb } from "@qmenut/db/client";
 import type { NewMessagingEvent } from "@qmenut/db/repositories/messaging-events.repository";
 
 // Contract v1 of ming-msg-worker queue events.
@@ -51,6 +53,15 @@ function toRow(event: QueueEvent): NewMessagingEvent {
   }
 }
 
+const ATTENDANCE_ANSWERS = new Set(["confirm", "cancel"]);
+
+/** The attendance check's quick replies; ref is the reservation id (the console's own ref matches none). */
+async function applyAnswer({ db, event }: { db: DrizzleDb; event: QueueEvent }): Promise<void> {
+  if (event.type !== "button" || !ATTENDANCE_ANSWERS.has(event.buttonId)) return;
+
+  await answerAttendanceCheck({ db, reservationId: event.ref, answer: event.buttonId as "confirm" | "cancel" });
+}
+
 export async function handleMessagingEvents(batch: MessageBatch, rawEnv: EnvBindings): Promise<void> {
   const db = createDb(rawEnv.DB);
 
@@ -65,6 +76,8 @@ export async function handleMessagingEvents(batch: MessageBatch, rawEnv: EnvBind
 
     try {
       await insertMessagingEvent({ db, event: toRow(event) });
+      // Redeliveries are harmless: the answer only applies while the reservation is in a status that takes it.
+      await applyAnswer({ db, event });
       message.ack();
     } catch (error) {
       Sentry.captureException(error, { tags: { module: "messaging-events" } });

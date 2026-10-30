@@ -11,6 +11,7 @@ import { runAnalyticsDailyJob } from "@/modules/analytics/digest/run-analytics-d
 import { handleStripeWebhook } from "@/modules/billing/handle-stripe-webhook";
 import { handleMessagingEvents } from "@/modules/messaging/handle-messaging-events";
 import { consumePushMessages, runNotificationMaintenance } from "@/modules/notifications/notification-jobs";
+import { runReservationJobs } from "@/modules/reservations/reservation-jobs";
 import { createContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/router";
 
@@ -98,7 +99,9 @@ export default Sentry.withSentry(
       if (controller.cron === "45 4 * * *") ctx.waitUntil(handleScheduledAnalytics(rawEnv));
       else {
         const env = parseEnv(rawEnv);
-        ctx.waitUntil(Promise.allSettled([publishPendingImages(env), runNotificationMaintenance(env)]));
+        ctx.waitUntil(
+          Promise.allSettled([publishPendingImages(env), runNotificationMaintenance(env), runReservationJobs(env)]),
+        );
       }
     },
     async queue(batch: MessageBatch<unknown>, rawEnv: EnvBindings): Promise<void> {
