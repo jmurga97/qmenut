@@ -108,6 +108,7 @@ function getNavigationItems({
   pendingReservations,
 }: NavigationInput): NavListItem[] {
   return SECTIONS.filter((section) => section.id !== "analytics" || FEATURES.analytics)
+    .filter((section) => section.id !== "reservations" || FEATURES.reservations)
     .filter((section) => !("permission" in section) || can(roleCode, section.permission))
     .filter((section) => !("internalOnly" in section) || isInternalSupport)
     .map((section) => ({
@@ -150,6 +151,7 @@ export function AdminShell() {
   const pendingReservations = usePendingReservationsCount({
     branchId: selectedBranch?.id,
     enabled:
+      FEATURES.reservations &&
       can(tenant.roleCode, "reservations.manage") &&
       isFeatureEnabled({ branches: tenant.branches, selectedBranchId, feature: "reservations" }),
   });
