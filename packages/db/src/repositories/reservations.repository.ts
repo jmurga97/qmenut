@@ -1,8 +1,11 @@
+import { isInternalSupportEmail } from "@qmenut/permissions";
 import { and, asc, between, count, eq, gt, gte, inArray, isNotNull, isNull, lt, lte, sql } from "drizzle-orm";
 
 import { addDays, getLocalDayAndMinute, getWeekday, localToUtc } from "../domain/local-time";
+import { users } from "../schema/auth";
+import { notifications } from "../schema/notifications";
 import { reservationClosures, reservationSettings, reservationSlots, reservations } from "../schema/reservations";
-import { branches, restaurants } from "../schema/tenancy";
+import { branches, restaurants, restaurantUsers } from "../schema/tenancy";
 
 import type { DrizzleDb } from "../client";
 
@@ -684,4 +687,92 @@ export async function anonymizeOldReservations({ db, now = Date.now() }: { db: D
     .run();
 
   return result.meta.changes;
+}
+
+/** What the reservation emails and notifications need, for one or more reservations. */
+export interface ReservationMessage extends Pick<
+  ReservationRow,
+  | "id"
+  | "restaurantId"
+  | "branchId"
+  | "slotDate"
+  | "slotMinute"
+  | "partySize"
+  | "guestName"
+  | "guestPhone"
+  | "guestEmail"
+  | "guestLanguage"
+> {
+  branchName: string;
+  branchPhone: string | null;
+  restaurantName: string;
+  /** Active owners, never support accounts. */
+  ownerEmails: string[];
+}
+
+export async function listReservationMessages({
+  db,
+  reservationIds,
+}: {
+  db: DrizzleDb;
+  reservationIds: string[];
+}): Promise<ReservationMessage[]> {
+  if (reservationIds.length === 0) return [];
+
+  const rows = await db
+    .select({
+      id: reservations.id,
+      restaurantId: reservations.restaurantId,
+      branchId: reservations.branchId,
+      slotDate: reservations.slotDate,
+      slotMinute: reservations.slotMinute,
+      partySize: reservations.partySize,
+      guestName: reservations.guestName,
+      guestPhone: reservations.guestPhone,
+      guestEmail: reservations.guestEmail,
+      guestLanguage: reservations.guestLanguage,
+      branchName: branches.name,
+      branchPhone: branches.phone,
+      restaurantName: restaurants.name,
+    })
+    .from(reservations)
+    .innerJoin(branches, eq(branches.id, reservations.branchId))
+    .innerJoin(restaurants, eq(restaurants.id, reservations.restaurantId))
+    .where(inArray(reservations.id, reservationIds))
+    .all();
+  const restaurantIds = [...new Set(rows.map((row) => row.restaurantId))];
+  const owners = await db
+    .select({ restaurantId: restaurantUsers.restaurantId, email: users.email })
+    .from(restaurantUsers)
+    .innerJoin(users, eq(users.id, restaurantUsers.userId))
+    .where(
+      and(
+        inArray(restaurantUsers.restaurantId, restaurantIds),
+        eq(restaurantUsers.roleCode, "owner"),
+        eq(restaurantUsers.isActive, true),
+      ),
+    )
+    .all();
+
+  return rows.map((row) => ({
+    ...row,
+    ownerEmails: owners
+      .filter((owner) => owner.restaurantId === row.restaurantId && !isInternalSupportEmail(owner.email))
+      .map((owner) => owner.email),
+  }));
+}
+
+/** Unconfirmed notifications whose slot has started: nothing is left for staff to chase. */
+export async function handleStartedUnconfirmedNotifications({ db, now = Date.now() }: { db: DrizzleDb; now?: number }) {
+  await db
+    .update(notifications)
+    .set({ handledAt: now, handledBy: null, handledOutcome: "expired" })
+    .where(
+      and(
+        eq(notifications.type, "reservation.unconfirmed"),
+        isNull(notifications.handledAt),
+        sql`EXISTS (SELECT 1 FROM ${reservations} WHERE ${reservations.id} = ${notifications.subjectId}
+          AND ${reservations.startsAt} <= ${now})`,
+      ),
+    );
 }

@@ -80,3 +80,8 @@ export function addDays(date: string, days: number): string {
 export function getWeekday(date: string): number {
   return new Date(`${date}T00:00:00Z`).getUTCDay();
 }
+
+/** Minute after midnight as "HH:MM". */
+export function formatMinute(minute: number): string {
+  return `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
+}

@@ -21,6 +21,7 @@ import { router, tenantProcedure } from "../../trpc/trpc";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
 import { requirePermission } from "../admin-tenant/require-permission";
 import { acceptOverdueReservations } from "../reservations/accept-overdue-reservations";
+import { announceReservations } from "../reservations/reservation-messages";
 
 import type { TenantContext } from "../../trpc/trpc";
 import type { DrizzleDb } from "@qmenut/db/client";
@@ -113,7 +114,7 @@ const ANSWERED = new TRPCError({ code: "CONFLICT", message: "Otra persona ya res
 export const adminReservationsRouter = router({
   day: tenantProcedure.input(dayInputSchema).query(async ({ ctx, input }) => {
     await assertReservationsBranch(ctx, input.branchId);
-    await acceptOverdueReservations({ db: ctx.db, branchId: input.branchId });
+    await acceptOverdueReservations({ db: ctx.db, env: ctx.env, branchId: input.branchId });
 
     const today = await getRestaurantToday(ctx);
     const date = input.date ?? today;
@@ -126,7 +127,7 @@ export const adminReservationsRouter = router({
   }),
   pendingCount: tenantProcedure.input(branchInputSchema).query(async ({ ctx, input }) => {
     await assertReservationsBranch(ctx, input.branchId);
-    await acceptOverdueReservations({ db: ctx.db, branchId: input.branchId });
+    await acceptOverdueReservations({ db: ctx.db, env: ctx.env, branchId: input.branchId });
 
     return countPendingReservations({ db: ctx.db, branchId: input.branchId });
   }),
@@ -139,6 +140,13 @@ export const adminReservationsRouter = router({
       status: "accepted",
     });
     if (!row) throw ANSWERED;
+
+    await announceReservations({
+      db: ctx.db,
+      env: ctx.env,
+      reservationIds: [row.id],
+      event: { kind: "accepted", handledBy: ctx.tenant.membershipId, automatic: false },
+    });
   }),
   decline: tenantProcedure.input(reservationInputSchema).mutation(async ({ ctx, input }) => {
     await resolveReservation(ctx, input.reservationId);
@@ -149,15 +157,34 @@ export const adminReservationsRouter = router({
       status: "declined",
     });
     if (!row) throw ANSWERED;
+
+    await announceReservations({
+      db: ctx.db,
+      env: ctx.env,
+      reservationIds: [row.id],
+      event: { kind: "declined", handledBy: ctx.tenant.membershipId },
+    });
   }),
   cancel: tenantProcedure.input(reservationInputSchema).mutation(async ({ ctx, input }) => {
-    await resolveReservation(ctx, input.reservationId);
+    const reservation = await resolveReservation(ctx, input.reservationId);
     const row = await cancelReservationByStaff({
       db: ctx.db,
       reservationId: input.reservationId,
       handledBy: ctx.tenant.membershipId,
     });
     if (!row) throw new TRPCError({ code: "CONFLICT", message: "Esta reserva ya no ocupa mesa" });
+
+    await announceReservations({
+      db: ctx.db,
+      env: ctx.env,
+      reservationIds: [row.id],
+      event: {
+        kind: "cancelled",
+        by: "staff",
+        handledBy: ctx.tenant.membershipId,
+        wasAccepted: reservation.status !== "pending",
+      },
+    });
   }),
   settings: tenantProcedure.input(branchInputSchema).query(async ({ ctx, input }) => {
     await assertReservationsBranch(ctx, input.branchId);

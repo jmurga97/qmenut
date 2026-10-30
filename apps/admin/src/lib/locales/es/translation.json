@@ -1094,7 +1094,14 @@
     "Solicitud de {{count}} sellos": "Solicitud de {{count}} sellos",
     "Solicitud de sellos": "Solicitud de sellos",
     "Aceptado": "Aceptado",
-    "Aceptado por {{name}}": "Aceptado por {{name}}"
+    "Aceptado por {{name}}": "Aceptado por {{name}}",
+    "Nueva solicitud de reserva": "Nueva solicitud de reserva",
+    "Reserva cancelada": "Reserva cancelada",
+    "Reserva sin confirmar": "Reserva sin confirmar",
+    "{{day}} · {{time}} · {{count}} personas": "{{day}} · {{time}} · {{count}} personas",
+    "Cancelado": "Cancelado",
+    "Cancelado por {{name}}": "Cancelado por {{name}}",
+    "Confirmado por el cliente": "Confirmado por el cliente"
   },
   "messaging": {
     "Enviar plantilla": "Enviar plantilla",

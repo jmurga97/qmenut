@@ -53,7 +53,11 @@ async function deliverPush({
   const tag = branchCount ? `${delivery.type}:${delivery.branchId}` : message.body.notificationId;
   const result = await sendWebPush({
     subscription: delivery.device,
-    payload: JSON.stringify({ ...text, url: config.url, tag }),
+    payload: JSON.stringify({
+      ...text,
+      url: typeof config.url === "function" ? config.url(delivery.facts) : config.url,
+      tag,
+    }),
     vapid,
     topic: branchCount ? tag : undefined,
   });

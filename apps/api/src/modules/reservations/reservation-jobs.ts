@@ -1,8 +1,10 @@
 import { createDb } from "@qmenut/db/client";
+import { formatMinute } from "@qmenut/db/domain/local-time";
 import { insertMessagingEvent } from "@qmenut/db/repositories/messaging-events.repository";
 import {
   anonymizeOldReservations,
   claimAttendanceCheck,
+  handleStartedUnconfirmedNotifications,
   listAttendanceChecksDue,
   markUnconfirmedReservations,
   releaseAttendanceCheck,
@@ -11,6 +13,7 @@ import * as Sentry from "@sentry/cloudflare";
 import { TRPCError } from "@trpc/server";
 
 import { acceptOverdueReservations } from "./accept-overdue-reservations";
+import { announceReservations } from "./reservation-messages";
 import { sendTemplate } from "../messaging/msg-worker.client";
 
 import type { MsgProductId, MsgWorkerBinding, RuntimeEnv } from "../../config/env/schema";
@@ -21,14 +24,12 @@ const ATTENDANCE_TEMPLATE = "reservation_attendance";
 
 function formatTemplateData(check: AttendanceCheck): Record<string, string> {
   const [, month, day] = check.slotDate.split("-");
-  const hours = String(Math.floor(check.slotMinute / 60)).padStart(2, "0");
-  const minutes = String(check.slotMinute % 60).padStart(2, "0");
 
   return {
     customerName: check.guestName ?? "",
     restaurantName: check.branchName,
     date: `${day}/${month}`,
-    time: `${hours}:${minutes}`,
+    time: formatMinute(check.slotMinute),
     partySize: String(check.partySize),
   };
 }
@@ -97,8 +98,12 @@ async function runStep(step: string, run: () => Promise<unknown>): Promise<void>
 export async function runReservationJobs(env: RuntimeEnv): Promise<void> {
   const db = createDb(env.DB);
 
-  await runStep("accept", () => acceptOverdueReservations({ db }));
+  await runStep("accept", () => acceptOverdueReservations({ db, env }));
   await runStep("attendance", () => sendAttendanceChecks({ db, env }));
-  await runStep("unconfirmed", () => markUnconfirmedReservations({ db }));
+  await runStep("unconfirmed", async () => {
+    const rows = await markUnconfirmedReservations({ db });
+    await announceReservations({ db, env, reservationIds: rows.map((row) => row.id), event: { kind: "unconfirmed" } });
+  });
+  await runStep("slotStarted", () => handleStartedUnconfirmedNotifications({ db }));
   await runStep("anonymize", () => anonymizeOldReservations({ db }));
 }

@@ -1,3 +1,5 @@
+import { formatMinute } from "@qmenut/db/domain/local-time";
+
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { VapidKeys } from "../../lib/web-push";
 import type { NotificationFacts, PushLanguage } from "@qmenut/db/repositories/notifications.repository";
@@ -15,8 +17,36 @@ interface NotificationEventConfig {
    */
   push: "each" | "never" | "branchCount";
   /** Admin path the push opens. */
-  url: string;
+  url: string | ((facts: NotificationFacts) => string);
   pushText?: (input: { facts: NotificationFacts; branchName: string; count: number }) => Record<PushLanguage, PushText>;
+}
+
+const PARTY_WORDS: Record<PushLanguage, [one: string, many: string]> = {
+  es: ["persona", "personas"],
+  en: ["guest", "guests"],
+};
+
+/** "vie 21:00 · 4 personas" from a reservation's facts, in the device's language. */
+function describeReservation(facts: NotificationFacts, language: PushLanguage): string {
+  const weekday = new Intl.DateTimeFormat(language, { weekday: "short", timeZone: "UTC" }).format(
+    new Date(`${facts.slotDate}T00:00:00Z`),
+  );
+  const guests = Number(facts.partySize);
+  const [one, many] = PARTY_WORDS[language];
+
+  return `${weekday} ${formatMinute(Number(facts.slotMinute))} · ${guests} ${guests === 1 ? one : many}`;
+}
+
+function reservationPush(titles: Record<PushLanguage, string>): NotificationEventConfig {
+  return {
+    actionable: true,
+    push: "each",
+    url: (facts) => `/reservations?date=${facts.slotDate}`,
+    pushText: ({ facts, branchName }) => ({
+      es: { title: titles.es, body: `${branchName} · ${describeReservation(facts, "es")}` },
+      en: { title: titles.en, body: `${branchName} · ${describeReservation(facts, "en")}` },
+    }),
+  };
 }
 
 /** Every notification type. Text in pushes carries no guest personal data. */
@@ -42,6 +72,12 @@ export const NOTIFICATION_EVENTS = {
       en: { title: "Stamp requests", body: `${count} stamp ${count === 1 ? "request" : "requests"} · ${branchName}` },
     }),
   },
+  "reservation.requested": reservationPush({ es: "Nueva solicitud de reserva", en: "New reservation request" }),
+  "reservation.cancelled": {
+    ...reservationPush({ es: "Reserva cancelada", en: "Reservation cancelled" }),
+    actionable: false,
+  },
+  "reservation.unconfirmed": reservationPush({ es: "Reserva sin confirmar", en: "Unconfirmed reservation" }),
   announcement: { actionable: false, push: "never", url: "/notifications" },
 } as const satisfies Record<string, NotificationEventConfig>;
 

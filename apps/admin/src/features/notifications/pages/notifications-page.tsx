@@ -39,7 +39,7 @@ function NotificationsInbox({ branchId, branchName }: { branchId: string; branch
     if (row.readAt === null) markRead.mutate({ ids: [row.id] });
     const { url } = services.describeNotification(row);
     if (!url) return;
-    if (url.startsWith("/")) void navigate({ to: url });
+    if (url.startsWith("/")) void navigate({ href: url });
     else window.open(url, "_blank", "noopener,noreferrer");
   }
 

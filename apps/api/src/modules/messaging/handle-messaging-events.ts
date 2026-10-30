@@ -4,7 +4,10 @@ import { answerAttendanceCheck } from "@qmenut/db/repositories/reservations.repo
 import * as Sentry from "@sentry/cloudflare";
 import { z } from "zod";
 
-import type { EnvBindings } from "../../config/env/schema";
+import { resolveNotifications } from "../notifications/emit-notification";
+import { announceReservations, wasAccepted } from "../reservations/reservation-messages";
+
+import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { NewMessagingEvent } from "@qmenut/db/repositories/messaging-events.repository";
 
@@ -56,14 +59,35 @@ function toRow(event: QueueEvent): NewMessagingEvent {
 const ATTENDANCE_ANSWERS = new Set(["confirm", "cancel"]);
 
 /** The attendance check's quick replies; ref is the reservation id (the console's own ref matches none). */
-async function applyAnswer({ db, event }: { db: DrizzleDb; event: QueueEvent }): Promise<void> {
+async function applyAnswer({ db, env, event }: { db: DrizzleDb; env: RuntimeEnv; event: QueueEvent }) {
   if (event.type !== "button" || !ATTENDANCE_ANSWERS.has(event.buttonId)) return;
 
-  await answerAttendanceCheck({ db, reservationId: event.ref, answer: event.buttonId as "confirm" | "cancel" });
+  const answer = event.buttonId as "confirm" | "cancel";
+  const row = await answerAttendanceCheck({ db, reservationId: event.ref, answer });
+  if (!row) return;
+
+  if (answer === "confirm") {
+    await resolveNotifications({
+      db,
+      type: "reservation.unconfirmed",
+      subjectIds: [row.id],
+      handledBy: null,
+      outcome: "confirmed",
+    });
+    return;
+  }
+
+  // The same emails and notifications as a cancellation from /reservar.
+  await announceReservations({
+    db,
+    env,
+    reservationIds: [row.id],
+    event: { kind: "cancelled", by: "guest", handledBy: null, wasAccepted: wasAccepted(row) },
+  });
 }
 
-export async function handleMessagingEvents(batch: MessageBatch, rawEnv: EnvBindings): Promise<void> {
-  const db = createDb(rawEnv.DB);
+export async function handleMessagingEvents(batch: MessageBatch, env: RuntimeEnv): Promise<void> {
+  const db = createDb(env.DB);
 
   for (const message of batch.messages) {
     const event = parseEvent(message.body);
@@ -77,7 +101,7 @@ export async function handleMessagingEvents(batch: MessageBatch, rawEnv: EnvBind
     try {
       await insertMessagingEvent({ db, event: toRow(event) });
       // Redeliveries are harmless: the answer only applies while the reservation is in a status that takes it.
-      await applyAnswer({ db, event });
+      await applyAnswer({ db, env, event });
       message.ack();
     } catch (error) {
       Sentry.captureException(error, { tags: { module: "messaging-events" } });

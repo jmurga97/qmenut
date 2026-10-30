@@ -11,6 +11,7 @@ import { hasFeature } from "@qmenut/permissions";
 import { TRPCError } from "@trpc/server";
 
 import { acceptOverdueReservations } from "./accept-overdue-reservations";
+import { announceReservations, wasAccepted } from "./reservation-messages";
 import { resolveTenantFromRequest } from "../tenant/resolve-tenant";
 
 import type { RuntimeEnv } from "../../config/env/schema";
@@ -115,6 +116,12 @@ export async function createPublicReservation({
   if (result === "full") throw new TRPCError({ code: "CONFLICT", message: "Esa hora ya no tiene mesas libres" });
   if (result === "unavailable") throw new TRPCError({ code: "BAD_REQUEST", message: "Esa hora no se puede reservar" });
 
+  await announceReservations({
+    db: input.db,
+    env: input.env,
+    reservationIds: [result.id],
+    event: { kind: "requested" },
+  });
   return { id: result.id, startsAt: result.startsAt };
 }
 
@@ -124,7 +131,7 @@ export async function getGuestReservations({
 }: PublicInput & { email: string }): Promise<GuestReservation[]> {
   const tenant = await resolveBookingTenant(input);
   await throttle({ ...input, tenant });
-  await acceptOverdueReservations({ db: input.db, branchId: tenant.branchId });
+  await acceptOverdueReservations({ db: input.db, env: input.env, branchId: tenant.branchId });
 
   return listGuestReservations({ db: input.db, branchId: tenant.branchId, email });
 }
@@ -140,4 +147,11 @@ export async function cancelPublicReservation({
   const cancelled = await cancelGuestReservation({ db: input.db, branchId: tenant.branchId, email, reservationId });
 
   if (!cancelled) throw new TRPCError({ code: "NOT_FOUND", message: "Esta reserva ya no se puede cancelar" });
+
+  await announceReservations({
+    db: input.db,
+    env: input.env,
+    reservationIds: [cancelled.id],
+    event: { kind: "cancelled", by: "guest", handledBy: null, wasAccepted: wasAccepted(cancelled) },
+  });
 }

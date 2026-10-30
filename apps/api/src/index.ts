@@ -108,7 +108,7 @@ export default Sentry.withSentry(
       if (batch.queue.startsWith("qmenut-notifications")) {
         await consumePushMessages(batch as MessageBatch<PushMessage>, parseEnv(rawEnv));
       } else if (batch.queue.startsWith("ming-msg-events-")) {
-        await handleMessagingEvents(batch, rawEnv);
+        await handleMessagingEvents(batch, parseEnv(rawEnv));
       }
     },
   },
