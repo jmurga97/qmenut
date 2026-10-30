@@ -150,6 +150,11 @@ export const envSchema = z.object({
       typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",
     "El binding LOYALTY_CODE_LIMITER debe implementar limit",
   ),
+  RESERVATION_LIMITER: z.custom<RateLimit>(
+    (value) =>
+      typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",
+    "El binding RESERVATION_LIMITER debe implementar limit",
+  ),
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
   STRIPE_PRICE_BASIC: z.string().min(1),

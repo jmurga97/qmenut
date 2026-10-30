@@ -4,7 +4,7 @@ import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alte
 import { createServerTrpcCaller } from "~/lib/trpc-client";
 import { resolveSsrTenantHost } from "~/server/tenant-host";
 
-const ROUTE_PATHS = ["/", "/contacto", "/destacados", "/puntos", "/aviso-legal", "/privacidad"] as const;
+const ROUTE_PATHS = ["/", "/contacto", "/destacados", "/puntos", "/reservar", "/aviso-legal", "/privacidad"] as const;
 const CONTENT_VERSION_KEY_PREFIX = "menuVersion:";
 
 function escapeXml(value: string): string {
@@ -44,6 +44,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const publicRoutePaths = ROUTE_PATHS.filter(
           (path) =>
             (path !== "/puntos" || data.publicFeatures.loyalty) &&
+            (path !== "/reservar" || data.publicFeatures.reservations) &&
             (path !== "/destacados" || data.publicFeatures.highlights),
         );
         const urlEntries = publicRoutePaths.map((path) => {

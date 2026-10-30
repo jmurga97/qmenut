@@ -16,6 +16,7 @@ import { billingRouter } from "../modules/billing/billing.router";
 import { loyaltyRouter } from "../modules/loyalty/loyalty.router";
 import { notificationsRouter } from "../modules/notifications/notifications.router";
 import { publicMenuRouter } from "../modules/public-menu/public-menu.router";
+import { reservationsRouter } from "../modules/reservations/reservations.router";
 import { themeRouter } from "../modules/theme/theme.router";
 
 export const appRouter = router({
@@ -23,6 +24,7 @@ export const appRouter = router({
   health: healthRouter,
   menu: publicMenuRouter,
   loyalty: loyaltyRouter,
+  reservations: reservationsRouter,
   admin: router({
     analytics: adminAnalyticsRouter,
     tenant: adminTenantRouter,

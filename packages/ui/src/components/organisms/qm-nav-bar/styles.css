@@ -17,3 +17,9 @@
   backdrop-filter: var(--qm-nav-backdrop, none);
   -webkit-backdrop-filter: var(--qm-nav-backdrop, none);
 }
+
+/* Tabs keep their natural width and only shrink when they don't fit; labels then ellipsize. */
+.bar ::slotted(*) {
+  flex: 0 1 auto;
+  min-width: 0;
+}

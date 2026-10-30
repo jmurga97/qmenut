@@ -12,6 +12,7 @@ export interface PublicTenant {
     highlights: boolean;
     loyalty: boolean;
     pwa: boolean;
+    reservations: boolean;
   };
   secondary: string;
   template: QmTemplateName;

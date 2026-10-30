@@ -5,6 +5,7 @@ const PUBLIC_TRANSITION_ROUTE_IDS = new Set([
   "/{-$locale}/contacto",
   "/{-$locale}/destacados",
   "/{-$locale}/puntos",
+  "/{-$locale}/reservar",
 ]);
 
 export function PublicRouteContentTransition() {

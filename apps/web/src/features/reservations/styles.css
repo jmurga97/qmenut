@@ -1,0 +1,265 @@
+/* ===== Reservations ===== */
+
+.reservations-page {
+  width: min(100%, 520px);
+  margin: 0 auto;
+  padding-bottom: 12px;
+}
+
+.reservations-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.reservations-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: var(--qm-surface-border, var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8));
+  border-radius: var(--qm-surface-radius, var(--qm-radius, 0px));
+  background: var(--qm-surface-bg, var(--qm-card, #fff));
+  box-shadow: var(--qm-surface-shadow, var(--qm-card-shadow, none));
+  color: var(--qm-ink, #1c1815);
+}
+
+.reservations-card h2,
+.reservations-card p {
+  margin: 0;
+}
+
+.reservations-card h2 {
+  font-family: var(--qm-heading, serif);
+  font-size: var(--qm-text-xl, 17px);
+  font-weight: var(--qm-hw, 700);
+}
+
+.reservations-muted {
+  color: var(--qm-muted, #777);
+  font-size: var(--qm-text-sm, 12px);
+}
+
+.reservations-muted a {
+  color: inherit;
+}
+
+.reservations-error {
+  color: var(--qm-emph, var(--qm-ink, #1c1815));
+  font-size: var(--qm-text-sm, 12px);
+  font-weight: var(--qm-hw, 700);
+}
+
+.reservations-label {
+  font-size: var(--qm-text-sm, 12px);
+  font-weight: var(--qm-hw, 700);
+}
+
+.reservations-card h2:focus {
+  outline: none;
+}
+
+.reservations-label::first-letter,
+.reservations-when::first-letter {
+  text-transform: uppercase;
+}
+
+.reservations-group {
+  display: grid;
+  gap: 8px;
+}
+
+.reservations-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+
+.reservations-option,
+.reservations-primary,
+.reservations-secondary {
+  min-height: 44px;
+  padding: 0 14px;
+  border: var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8);
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-card, #fff);
+  color: inherit;
+  font: inherit;
+  font-size: var(--qm-text-sm, 13px);
+  font-weight: var(--qm-hw, 700);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.reservations-option:disabled {
+  color: var(--qm-muted, #777);
+  text-decoration: line-through;
+  opacity: 0.6;
+  cursor: default;
+}
+
+.reservations-option[aria-pressed="true"],
+.reservations-primary {
+  border-color: var(--qm-primary, #333);
+  background: var(--qm-primary, #333);
+  color: var(--qm-on-primary, #fff);
+}
+
+.reservations-primary:disabled,
+.reservations-secondary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.reservations-back,
+.reservations-link {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--qm-emph, var(--qm-secondary, #555));
+  font: inherit;
+  font-size: var(--qm-text-sm, 12px);
+  font-weight: var(--qm-hw, 700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.reservations-back::before {
+  content: "‹ ";
+}
+
+.reservations-form {
+  display: grid;
+  gap: 14px;
+}
+
+.reservations-field {
+  display: grid;
+  gap: 6px;
+  font-size: var(--qm-text-sm, 12px);
+  font-weight: var(--qm-hw, 700);
+}
+
+.reservations-field input,
+.reservations-phone input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8);
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-card, #fff);
+  color: var(--qm-ink, #1c1815);
+  /* 16px keeps iOS from zooming into the field. */
+  font: inherit;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.reservations-field input[aria-invalid="true"] {
+  border-color: var(--qm-emph, var(--qm-ink, #1c1815));
+}
+
+.reservations-phone {
+  display: grid;
+  grid-template-columns: 5.5em minmax(0, 1fr);
+  gap: 8px;
+}
+
+.reservations-summary {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.reservations-summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--qm-text-sm, 13px);
+}
+
+.reservations-summary dt {
+  color: var(--qm-muted, #777);
+}
+
+.reservations-summary dd {
+  margin: 0;
+  font-weight: var(--qm-hw, 700);
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+.reservations-summary dd::first-letter {
+  text-transform: uppercase;
+}
+
+.reservations-consent {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  font-size: var(--qm-text-sm, 12px);
+}
+
+.reservations-consent input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--qm-primary, #333);
+}
+
+.reservations-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reservations-list li {
+  display: grid;
+  gap: 6px;
+  padding: 12px 0;
+  border-top: var(--qm-bw, 1px) solid var(--qm-hairline, #d8d3c8);
+}
+
+.reservations-list li > div:first-child {
+  display: grid;
+  gap: 2px;
+  font-size: var(--qm-text-sm, 13px);
+}
+
+.reservations-list strong::first-letter {
+  text-transform: uppercase;
+}
+
+.reservations-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--qm-text-sm, 12px);
+}
+
+.reservations-option:focus-visible,
+.reservations-primary:focus-visible,
+.reservations-secondary:focus-visible,
+.reservations-back:focus-visible,
+.reservations-link:focus-visible,
+.reservations-field input:focus-visible,
+.reservations-phone input:focus-visible {
+  outline: 2px solid var(--qm-primary, #333);
+  outline-offset: 2px;
+}
+
+.reservations-loading {
+  height: 360px;
+  border-radius: var(--qm-radius, 0px);
+  background: var(--qm-ph, var(--qm-fill, #eee));
+}
+
+@media (prefers-contrast: more) {
+  .reservations-card {
+    border-color: var(--qm-ink, #1c1815);
+  }
+}

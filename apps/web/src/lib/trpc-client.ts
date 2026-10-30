@@ -105,3 +105,12 @@ export function createTrpcOptionsProxy(queryClient: QueryClient): TrpcOptionsPro
 export function createServerTrpcCaller() {
   return createRawTrpcClient();
 }
+
+interface TrpcErrorLike {
+  data?: { code?: string };
+}
+
+/** The tRPC error code of a failed call; undefined for network errors. */
+export function getTrpcErrorCode(error: unknown): string | undefined {
+  return (error as TrpcErrorLike | undefined)?.data?.code;
+}

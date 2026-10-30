@@ -16,6 +16,7 @@ import type { QmSectionNum, QmSectionNumArgs } from "./components/atoms/qm-secti
 import type { QmSkeleton, QmSkeletonArgs } from "./components/atoms/qm-skeleton";
 import type { QmTab, QmTabArgs } from "./components/atoms/qm-tab";
 import type { QmWordmark, QmWordmarkArgs } from "./components/atoms/qm-wordmark";
+import type { QmCalendar, QmCalendarArgs } from "./components/molecules/qm-calendar";
 import type { QmCategoryNav, QmCategoryNavArgs } from "./components/molecules/qm-category-nav";
 import type { QmCodeInput, QmCodeInputArgs } from "./components/molecules/qm-code-input";
 import type { QmDishRow, QmDishRowArgs } from "./components/molecules/qm-dish-row";
@@ -87,6 +88,7 @@ declare module "react/jsx-runtime" {
       "qm-featured": GenericWebComponent<QmFeaturedArgs, QmFeatured>;
       "qm-location": GenericWebComponent<QmLocationArgs, QmLocation>;
       "qm-map": GenericWebComponent<QmMapArgs, QmMap>;
+      "qm-calendar": GenericWebComponent<QmCalendarArgs, QmCalendar>;
       "qm-code-input": GenericWebComponent<QmCodeInputArgs, QmCodeInput>;
       "qm-promo": GenericWebComponent<QmPromoArgs, QmPromo>;
       "qm-reward-row": GenericWebComponent<QmRewardRowArgs, QmRewardRow>;

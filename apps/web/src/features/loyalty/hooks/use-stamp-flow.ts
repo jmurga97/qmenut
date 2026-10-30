@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useEffect, useReducer, useRef } from "react";
 
 import { getLoyaltyMutationOptions } from "~/features/loyalty/api/loyalty-query-options";
-import { getTrpcErrorCode } from "~/features/loyalty/loyalty-utils";
+import { getTrpcErrorCode } from "~/lib/trpc-client";
 
 import type { QmCodeInputStatus } from "@qmenut/ui/components/qm-code-input";
 import type { LoyaltyCard } from "~/features/loyalty/types";

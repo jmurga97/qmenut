@@ -1,6 +1,6 @@
 # Reservations v1: implementation plan
 
-Status: in progress — Phases 0 (messaging skeleton), 1 (feature, permission, schema) and 2 (booking core) done. Branch `feat/reservations`, cut from `feat/loyalty-stamp-requests`.
+Status: in progress — Phases 0 (messaging skeleton), 1 (feature, permission, schema), 2 (booking core) and 3 (public API and `/reservar`) done. Branch `feat/reservations`, cut from `feat/loyalty-stamp-requests`.
 
 This plan implements [reservations-ux.md](../design/reservations-ux.md) and ADRs
 [0003](../adr/0003-whatsapp-through-ming-msg-worker.md),

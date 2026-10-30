@@ -1,8 +1,8 @@
-import { and, between, count, eq, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, between, count, eq, gt, inArray, lte, sql } from "drizzle-orm";
 
 import { addDays, getLocalDayAndMinute, getWeekday, localToUtc } from "../domain/local-time";
 import { reservationClosures, reservationSettings, reservationSlots, reservations } from "../schema/reservations";
-import { restaurants } from "../schema/tenancy";
+import { branches, restaurants } from "../schema/tenancy";
 
 import type { DrizzleDb } from "../client";
 
@@ -256,4 +256,110 @@ export async function acceptOverdueReservations({
       ),
     )
     .returning();
+}
+
+/** The public gate: turned on and at least one weekly slot. The plan check stays with the caller. */
+export async function isReservationsOpen({ db, branchId }: BranchInput): Promise<boolean> {
+  const row = await db
+    .select({ branchId: reservationSettings.branchId })
+    .from(reservationSettings)
+    .innerJoin(reservationSlots, eq(reservationSlots.branchId, reservationSettings.branchId))
+    .where(and(eq(reservationSettings.branchId, branchId), eq(reservationSettings.isEnabled, true)))
+    .limit(1)
+    .get();
+
+  return row !== undefined;
+}
+
+export interface BookingInfo {
+  timeZone: string;
+  onlinePartyLimit: number;
+  windowDays: number;
+  /** Free text from the branch: larger groups are asked to call. */
+  phone: string | null;
+}
+
+export async function getBookingInfo({ db, branchId }: BranchInput): Promise<BookingInfo | null> {
+  const row = await db
+    .select({
+      timeZone: restaurants.timezone,
+      onlinePartyLimit: reservationSettings.onlinePartyLimit,
+      windowDays: reservationSettings.windowDays,
+      phone: branches.phone,
+    })
+    .from(reservationSettings)
+    .innerJoin(restaurants, eq(restaurants.id, reservationSettings.restaurantId))
+    .innerJoin(branches, eq(branches.id, reservationSettings.branchId))
+    .where(eq(reservationSettings.branchId, branchId))
+    .get();
+
+  return row ?? null;
+}
+
+export type GuestReservation = Pick<
+  ReservationRow,
+  "id" | "slotDate" | "slotMinute" | "startsAt" | "partySize" | "status" | "cancelledBy"
+>;
+
+interface GuestReservationsInput extends BranchInput {
+  email: string;
+  now?: number;
+}
+
+/** ADR 0004: the email alone opens them. Past slots and anonymized rows drop out on their own. */
+export async function listGuestReservations({
+  db,
+  branchId,
+  email,
+  now = Date.now(),
+}: GuestReservationsInput): Promise<GuestReservation[]> {
+  const guestEmail = email.trim().toLowerCase();
+
+  return db
+    .select({
+      id: reservations.id,
+      slotDate: reservations.slotDate,
+      slotMinute: reservations.slotMinute,
+      startsAt: reservations.startsAt,
+      partySize: reservations.partySize,
+      status: reservations.status,
+      cancelledBy: reservations.cancelledBy,
+    })
+    .from(reservations)
+    .where(
+      and(eq(reservations.branchId, branchId), eq(reservations.guestEmail, guestEmail), gt(reservations.startsAt, now)),
+    )
+    .orderBy(asc(reservations.startsAt))
+    .limit(20)
+    .all();
+}
+
+interface CancelGuestReservationInput extends GuestReservationsInput {
+  reservationId: string;
+}
+
+/** Guests cancel until the slot starts. Returns the cancelled row for the emails, or null. */
+export async function cancelGuestReservation({
+  db,
+  branchId,
+  email,
+  reservationId,
+  now = Date.now(),
+}: CancelGuestReservationInput): Promise<ReservationRow | null> {
+  const guestEmail = email.trim().toLowerCase();
+  const [row] = await db
+    .update(reservations)
+    .set({ status: "cancelled", cancelledBy: "guest", updatedAt: now })
+    .where(
+      and(
+        eq(reservations.id, reservationId),
+        eq(reservations.branchId, branchId),
+        eq(reservations.guestEmail, guestEmail),
+        inArray(reservations.status, HOLDING_STATUSES),
+        gt(reservations.startsAt, now),
+      ),
+    )
+    .returning();
+
+  return row ?? null;
 }
