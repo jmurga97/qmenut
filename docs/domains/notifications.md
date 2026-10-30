@@ -10,9 +10,11 @@ Staff notifications version 1 is implemented as designed in
 - Implemented: the inbox (bell, badge, `/notifications` page), per-member read state and shared
   handled state, Web Push to devices that follow branches, 30-day retention, and announcements as
   a repository function.
-- Live events: **reward redemption waiting** (`loyalty.redemption`) and **stamp request**
-  (`loyalty.stampRequest`).
-- Not yet: reservation events (branch `feat/reservations`) and a tool for writing announcements.
+- Live events: **reward redemption waiting** (`loyalty.redemption`), **stamp request**
+  (`loyalty.stampRequest`), and the reservation events **new request** (`reservation.requested`),
+  **cancelled by the guest** (`reservation.cancelled`) and **unconfirmed**
+  (`reservation.unconfirmed`); see [Reservations](reservations.md).
+- Not yet: a tool for writing announcements.
 
 ## Data model
 
@@ -37,14 +39,15 @@ check: the event map in `apps/api/src/modules/notifications/events.ts` is the so
   notification and its recipients, then queues one `{ notificationId, deviceId }` message per
   device that follows the branch. It never throws.
 - **Handle**: features call `markNotificationsHandled` with an outcome (`validated`, `rejected`,
-  `cancelled`, `expired`, `accepted`, `autoAccepted`, `declined`). Redemption expiry and stamp
+  `cancelled`, `cancelledByStaff`, `confirmed`, `expired`, `accepted`, `autoAccepted`, `declined`). Redemption expiry and stamp
   request auto-acceptance mark their notifications inside `expireStaleRedemptions` and
   `acceptOverdueStampRequests`, so every lazy caller and the cron are covered.
   `reopenNotification` clears the handled state when a subject goes back to waiting.
 - **Push modes** (`events.ts`): `each` sends one push per event, dropped once handled; `never`
   is inbox only; `branchCount` sends one replaceable push per branch with the number of
   unhandled notifications of that type, skipped at 0. Its `tag` and `Topic` are per type and
-  branch (`sendWebPush` hashes the topic to fit RFC 8030's 32 characters).
+  branch (`sendWebPush` hashes the topic to fit RFC 8030's 32 characters). An event's `url` is the
+  admin path the push opens; it can be built from the facts (reservations open their slot's day).
 - **Delivery**: the `queue` handler in `apps/api/src/index.ts` sends queue names starting with
   `qmenut-notifications` to `consumePushMessages` (`notification-jobs.ts`). It skips handled or
   expired notifications, deletes devices on 404/410, retries 429/5xx, and acks other 4xx after

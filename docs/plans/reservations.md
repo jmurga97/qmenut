@@ -1,6 +1,6 @@
 # Reservations v1: implementation plan
 
-Status: in progress — Phases 0 (messaging skeleton), 1 (feature, permission, schema), 2 (booking core), 3 (public API and `/reservar`), 4 (admin), 5 (lifecycle jobs) and 6 (emails and notifications; the five templates still have to ship in `ming-email-worker`) done. Branch `feat/reservations`, cut from `feat/loyalty-stamp-requests`.
+Status: implemented — Phases 0–7 done (docs in [reservations.md](../domains/reservations.md)). External prerequisites still open: the five templates in `ming-email-worker`, the English `reservation_attendance` template, and the `ming-msg-worker` deploy. Branch `feat/reservations`, cut from `feat/loyalty-stamp-requests`.
 
 This plan implements [reservations-ux.md](../design/reservations-ux.md) and ADRs
 [0003](../adr/0003-whatsapp-through-ming-msg-worker.md),

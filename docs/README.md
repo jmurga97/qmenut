@@ -31,19 +31,20 @@ After that, read feature pages as you need them.
 
 ### Domains
 
-| Page                                        | Description                                                  | Status   |
-| ------------------------------------------- | ------------------------------------------------------------ | -------- |
-| [Multi-tenancy](domains/multi-tenancy.md)   | Restaurant and branch model, and tenant isolation.           | Complete |
-| [Theming](domains/theming.md)               | Color engine, templates, and per-tenant theme.               | Complete |
-| [Custom domains](domains/custom-domains.md) | Host resolution and the tenant-config Worker.                | Complete |
-| [Loyalty](domains/loyalty.md)               | Points and stamps, rewards, redemptions, and the venue code. | Complete |
-| [Notifications](domains/notifications.md)   | Staff inbox, Web Push devices, and announcements.            | Partial  |
-| [Menu management](domains/menu.md)          | Categories, dishes, variants, and availability.              | Partial  |
-| [Promotions](domains/promotions.md)         | Promotions and effective pricing.                            | Partial  |
-| [Internationalization](domains/i18n.md)     | Languages and DeepL translations.                            | Partial  |
-| [Billing](domains/billing.md)               | Stripe subscriptions, one per branch.                        | Partial  |
-| [Auth](domains/auth.md)                     | Better Auth email-OTP sign-in.                               | Partial  |
-| [QR codes](domains/qr.md)                   | QR code generation in the admin dashboard.                   | Partial  |
+| Page                                        | Description                                                   | Status   |
+| ------------------------------------------- | ------------------------------------------------------------- | -------- |
+| [Multi-tenancy](domains/multi-tenancy.md)   | Restaurant and branch model, and tenant isolation.            | Complete |
+| [Theming](domains/theming.md)               | Color engine, templates, and per-tenant theme.                | Complete |
+| [Custom domains](domains/custom-domains.md) | Host resolution and the tenant-config Worker.                 | Complete |
+| [Loyalty](domains/loyalty.md)               | Points and stamps, rewards, redemptions, and the venue code.  | Complete |
+| [Notifications](domains/notifications.md)   | Staff inbox, Web Push devices, and announcements.             | Partial  |
+| [Reservations](domains/reservations.md)     | Booking requests, the admin section, WhatsApp checks, emails. | Complete |
+| [Menu management](domains/menu.md)          | Categories, dishes, variants, and availability.               | Partial  |
+| [Promotions](domains/promotions.md)         | Promotions and effective pricing.                             | Partial  |
+| [Internationalization](domains/i18n.md)     | Languages and DeepL translations.                             | Partial  |
+| [Billing](domains/billing.md)               | Stripe subscriptions, one per branch.                         | Partial  |
+| [Auth](domains/auth.md)                     | Better Auth email-OTP sign-in.                                | Partial  |
+| [QR codes](domains/qr.md)                   | QR code generation in the admin dashboard.                    | Partial  |
 
 ### Applications
 
@@ -60,6 +61,9 @@ The marketing site, `apps/landing`, is covered in [Architecture](architecture.md
 | Page                                                             | Description                                                | Status   |
 | ---------------------------------------------------------------- | ---------------------------------------------------------- | -------- |
 | [Loyalty UX](design/loyalty-ux.md)                               | Loyalty UX decisions and the reasoning behind them.        | Complete |
+| [Stamp requests UX](design/loyalty-stamp-requests-ux.md)         | Guest stamp requests and how staff answer them.            | Complete |
+| [Notifications UX](design/notifications-ux.md)                   | Staff inbox, push, and which events notify.                | Complete |
+| [Reservations UX](design/reservations-ux.md)                     | Booking flow, statuses, messages, and the admin section.   | Complete |
 | [Restaurant intake](operations/onboarding-intake.md)             | Data to collect before onboarding a restaurant (Spanish).  | Complete |
 | [Branch address maps](operations/branch-geocoding.md)            | Leaflet maps, Places API (New) autocomplete, key handling. | Complete |
 | [Database migrations](operations/database-migrations.md)         | Drizzle schema to generated SQL to D1.                     | Complete |
