@@ -40,7 +40,6 @@ const dishValue: QmDishRowValue = {
   desc: "Leche de tigre y camote",
   price: "12 €",
   oldPrice: "15 €",
-  comboLabel: "Combo",
   tag: "Picante",
   featured: true,
   photo: true,
@@ -55,7 +54,6 @@ const featuredValue: QmFeaturedValue = {
   desc: "Ají amarillo y lima",
   price: "14 €",
   oldPrice: "17 €",
-  comboLabel: "Combo",
   tag: "Nuevo",
   secondaryTag: "Favorito",
   photo: true,
@@ -73,7 +71,6 @@ describe("menu molecules", () => {
     expect(shadowQuery(row, '[part="desc"]').textContent).toContain("Leche de tigre");
     expect(shadowQuery<QmBadge>(row, "qm-badge").text).toBe("Picante");
     expect(shadowQuery<QmBadge>(row, "qm-badge").className).toContain("tag--featured");
-    expect(shadowQuery<QmBadge>(row, '[part="combo-label"]').text).toBe("Combo");
     expect(shadowQuery<QmPrice>(row, "qm-price").value).toBe("12 €");
 
     const image = shadowQuery<HTMLImageElement>(row, "img");
@@ -83,7 +80,7 @@ describe("menu molecules", () => {
     expect(image.hasAttribute("srcset")).toBe(false);
     expect(image.hasAttribute("sizes")).toBe(false);
 
-    row.value = { ...dishValue, comboLabel: undefined, photo: false, tag: undefined };
+    row.value = { ...dishValue, photo: false, tag: undefined };
     await update(row);
     expect(row.renderRoot.querySelector('[part="photo"]')).toBeNull();
     expect(row.renderRoot.querySelector("qm-badge")).toBeNull();
@@ -94,9 +91,8 @@ describe("menu molecules", () => {
     featured.value = featuredValue;
     await update(featured);
 
-    expect(featured.renderRoot.querySelectorAll("qm-badge")).toHaveLength(3);
+    expect(featured.renderRoot.querySelectorAll("qm-badge")).toHaveLength(2);
     expect(shadowQuery<QmBadge>(featured, '[part="tag"]').text).toBe("Nuevo");
-    expect(shadowQuery<QmBadge>(featured, '[part="combo-label"]').text).toBe("Combo");
     expect(shadowQuery<QmBadge>(featured, '[part="secondary-tag"]').text).toBe("Favorito");
     expect(shadowQuery<QmPrice>(featured, "qm-price").oldValue).toBe("17 €");
 
@@ -106,7 +102,6 @@ describe("menu molecules", () => {
 
     featured.value = {
       ...featuredValue,
-      comboLabel: undefined,
       tag: undefined,
       secondaryTag: undefined,
       photoUrl: undefined,
@@ -169,7 +164,7 @@ describe("contact and promotion molecules", () => {
     const promo = await mount(document.createElement(QM_PROMO_TAG_NAME));
     const value: QmPromoValue = {
       discount: "-30%",
-      name: "Combo pareja",
+      name: "Cena para dos",
       desc: "Dos platos y bebida",
       price: "24 €",
       oldPrice: "30 €",
@@ -179,7 +174,7 @@ describe("contact and promotion molecules", () => {
     await update(promo);
 
     expect(shadowQuery(promo, '[part="discount"]').textContent).toContain("-30%");
-    expect(shadowQuery(promo, '[part="name"]').textContent).toBe("Combo pareja");
+    expect(shadowQuery(promo, '[part="name"]').textContent).toBe("Cena para dos");
     expect(shadowQuery(promo, '[part="vigencia"]').textContent).toBe("Válido L-J");
     expect(shadowQuery<QmPrice>(promo, "qm-price").oldValue).toBe("30 €");
   });

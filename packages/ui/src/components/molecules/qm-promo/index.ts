@@ -11,8 +11,8 @@ export const QM_PROMO_TAG_NAME = "qm-promo";
 const componentStyles = createComponentStyles(componentStylesText);
 
 /**
- * Promo/combo card: a solid discount block, name, description, validity window, and price —
- * e.g. "−30% · Combo pareja · Válido L-J". The discount block is a solid `--qm-primary`
+ * Promotion card: a solid discount block, name, description, validity window, and price —
+ * e.g. "−30% · Cena para dos · Válido L-J". The discount block is a solid `--qm-primary`
  * rectangle, a different visual contract than `qm-badge`'s outline/pill styles, so it's
  * bespoke markup rather than a wrapped atom. Reuses `qm-price` for price; see `qm-featured`
  * for the accepted font-size trade-off from that atom having no size override.

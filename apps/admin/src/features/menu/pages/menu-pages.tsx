@@ -294,7 +294,6 @@ type DishEditorController = ReturnType<typeof useDishEditorController>;
 
 function DishFields({ controller }: { controller: DishEditorController }) {
   const { control } = useFormContext<DishFormValues>();
-  const comboEnabled = useWatch({ control, name: "comboEnabled" });
   const variantsEnabled = useWatch({ control, name: "variantsEnabled" });
   return (
     <>
@@ -339,25 +338,6 @@ function DishFields({ controller }: { controller: DishEditorController }) {
       </section>
       <DishVariantsSection />
       <section className="admin-editor-section">
-        <h2 className={"ming-section__title"}>{i18n.t("menu___Combo")}</h2>
-        <FormCheckbox<DishFormValues> label={i18n.t("menu___Vender como combo")} name={"comboEnabled"} />
-        {comboEnabled ? (
-          <>
-            <FormTextInput<DishFormValues>
-              inputMode={"decimal"}
-              label={i18n.t("menu___Precio total del combo")}
-              name={"comboPrice"}
-            />
-            <FormTextarea<DishFormValues>
-              label={i18n.t("menu___Descripción del combo")}
-              maxLength={2000}
-              name={"comboDescription"}
-              rows={3}
-            />
-          </>
-        ) : null}
-      </section>
-      <section className="admin-editor-section">
         <h2 className={"ming-section__title"}>{i18n.t("menu___Etiquetas, alérgenos y extras")}</h2>
         <FormChipGroup<DishFormValues>
           label={i18n.t("menu___Etiquetas")}
@@ -387,7 +367,7 @@ function DishVariantsSection() {
     <section className="admin-editor-section">
       <h2 className={"ming-section__title"}>{i18n.t("menu___Variantes de precio")}</h2>
       <FormCheckbox<DishFormValues>
-        label={i18n.t("menu___Este plato tiene variantes (tamaños)")}
+        label={i18n.t("menu___Este plato tiene variantes de precio")}
         name={"variantsEnabled"}
       />
       {enabled ? (

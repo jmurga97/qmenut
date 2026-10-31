@@ -51,7 +51,6 @@ export function MenuSection({ index, onSelectDish, section, showDishPhotos }: Me
             >
               <QmDishRow
                 value={{
-                  comboLabel: dish.comboLabel,
                   desc: dish.desc,
                   name: dish.name,
                   oldPrice: dish.oldPrice,

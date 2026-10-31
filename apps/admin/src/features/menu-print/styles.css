@@ -377,12 +377,6 @@
   font-weight: 700;
 }
 
-.menu-print-dish__combo-price {
-  font-weight: 600;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
 .menu-print-qr {
   position: absolute;
   right: 0;

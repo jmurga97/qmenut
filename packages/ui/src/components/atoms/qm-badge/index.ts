@@ -10,7 +10,7 @@ export const QM_BADGE_TAG_NAME = "qm-badge";
 const componentStyles = createComponentStyles(componentStylesText);
 
 /**
- * Discount/combo badge (e.g. "−30%", "2×1"). Consumes the theme engine's `--qm-badge-*`
+ * Discount badge (e.g. "−30%", "2×1"). Consumes the theme engine's `--qm-badge-*`
  * token group directly — those are already expanded per-template `badgeShape` in
  * `theme/apply-theme.ts`, so this atom never hardcodes a color split itself.
  */

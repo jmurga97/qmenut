@@ -41,7 +41,6 @@ function sanitizeCategories(categories: PublicCategory[], can: PlanCheck): Publi
     dishes: category.dishes.map((dish) => ({
       ...dish,
       availabilityWindows: can("menu.schedules") ? dish.availabilityWindows : [],
-      comboDescription: sanitizeNullableDescription(dish.comboDescription),
       description: sanitizeNullableDescription(dish.description),
       isFeatured: can("highlights") && dish.isFeatured,
       isRecommended: can("highlights") && dish.isRecommended,

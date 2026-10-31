@@ -221,14 +221,6 @@ export function mapPublicDishes({
       value: {
         id: row.id,
         categoryId: row.categoryId,
-        comboDescription: translateField({
-          entityId: row.id,
-          fallback: row.comboDescription,
-          field: "comboDescription",
-          translationsByEntity,
-        }),
-        comboEnabled: row.comboEnabled,
-        comboPrice: row.comboPrice,
         name: translateField({ entityId: row.id, fallback: row.name, field: "name", translationsByEntity }),
         description: translateField({
           entityId: row.id,

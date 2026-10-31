@@ -352,10 +352,6 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
   gap: var(--ming-space-2);
 }
-.admin-combo-fields {
-  display: grid;
-  gap: var(--ming-space-4);
-}
 .admin-choice-grid .admin-form-checkbox {
   min-block-size: 2.75rem;
   padding-inline: var(--ming-space-3);

@@ -46,12 +46,6 @@ export const dishFormSchema = z
       .string()
       .trim()
       .min(1, { message: i18n.t("menu___Elige una categoría") }),
-    comboDescription: z
-      .string()
-      .trim()
-      .max(2000, { message: i18n.t("menu___La descripción no puede superar 2.000 caracteres") }),
-    comboEnabled: z.boolean(),
-    comboPrice: z.string().trim(),
     description: z.string().trim(),
     extraIngredientIds: z.array(z.string()),
     isActive: z.boolean(),
@@ -76,22 +70,6 @@ export const dishFormSchema = z
       addVariantIssues({ context, values });
     } else if (!moneyInputSchema.safeParse(values.price).success) {
       context.addIssue({ code: "custom", message: i18n.t("shared___Introduce un importe válido"), path: ["price"] });
-    }
-    if (!values.comboEnabled) return;
-
-    if (!moneyInputSchema.safeParse(values.comboPrice).success) {
-      context.addIssue({
-        code: "custom",
-        message: i18n.t("menu___El precio del combo es obligatorio"),
-        path: ["comboPrice"],
-      });
-    }
-    if (!values.comboDescription) {
-      context.addIssue({
-        code: "custom",
-        message: i18n.t("menu___La descripción del combo es obligatoria"),
-        path: ["comboDescription"],
-      });
     }
   });
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;

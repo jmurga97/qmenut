@@ -9,7 +9,6 @@ test("switches branches and publishes an edit only to the selected branch", asyn
   const dishId = "dish_her_callos";
   const before = getTrpcData<{
     name: string;
-    comboDescription: string | null;
     description: string | null;
     imageUrl: string | null;
     categoryId: string;
@@ -26,7 +25,6 @@ test("switches branches and publishes an edit only to the selected branch", asyn
         dishId,
         data: {
           ...before,
-          comboDescription: before.comboDescription ?? undefined,
           description: before.description ?? undefined,
           imageUrl: before.imageUrl ?? undefined,
         },

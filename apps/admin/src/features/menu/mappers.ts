@@ -1,5 +1,5 @@
 import { i18n } from "~/lib/i18n";
-import { formatMoneyInput, moneyInputSchema, parseMoneyInput } from "~/shared/services/money";
+import { formatMoneyInput, parseMoneyInput } from "~/shared/services/money";
 import { hhmmToMinutes, minutesToHHMM } from "~/shared/services/week-time";
 
 import type { CategoryFormValues, DishDetail, DishFormValues } from "./types";
@@ -30,9 +30,6 @@ export function toDishFormValues(dish: DishDetail | null): DishFormValues {
   return {
     allergenIds: dish?.allergenIds ?? [],
     categoryId: dish?.categoryId ?? "",
-    comboDescription: dish?.comboDescription ?? "",
-    comboEnabled: dish?.comboEnabled ?? false,
-    comboPrice: formatMoneyInput(dish?.comboPrice),
     description: dish?.description ?? "",
     extraIngredientIds: dish?.extraIngredientIds ?? [],
     isActive: dish?.isActive ?? true,
@@ -80,9 +77,6 @@ export function toDishInput({
 }) {
   return {
     categoryId: values.categoryId,
-    comboDescription: values.comboDescription || undefined,
-    comboEnabled: values.comboEnabled,
-    comboPrice: moneyInputSchema.safeParse(values.comboPrice).success ? parseMoneyInput(values.comboPrice) : null,
     description: values.description || undefined,
     imageUrl: imageUrl ?? undefined,
     imageUploadId,

@@ -18,7 +18,6 @@ const ENTITY_LABELS: Record<string, string> = {
   reward: i18n.t("shared___Recompensa"),
 };
 const FIELD_LABELS: Record<string, string> = {
-  comboDescription: i18n.t("shared___Descripción del combo"),
   description: i18n.t("shared___Descripción"),
   name: i18n.t("shared___Nombre"),
   tagline: i18n.t("shared___Eslogan"),

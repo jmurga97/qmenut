@@ -54,7 +54,6 @@ async function loadTranslationRows({ branchId, db, restaurantId }: BranchInput) 
           categoryId: dishes.categoryId,
           name: dishes.name,
           description: dishes.description,
-          comboDescription: dishes.comboDescription,
         })
         .from(dishes)
         .where(dishFilter)
@@ -113,7 +112,6 @@ export async function collectTranslatableTexts(input: BranchInput): Promise<Tran
   const dishTexts = (row: (typeof dishRows)[number]): TranslatableText[] => [
     { entityId: row.id, entityType: "dish", field: "name", text: row.name },
     { entityId: row.id, entityType: "dish", field: "description", text: row.description ?? "" },
-    { entityId: row.id, entityType: "dish", field: "comboDescription", text: row.comboDescription ?? "" },
     ...(groupsByDish.get(row.id) ?? []).flatMap((group): TranslatableText[] => [
       { dishId: row.id, entityId: group.id, entityType: "variant_group", field: "name", text: group.name },
       ...(optionsByGroup.get(group.id) ?? []).map((option): TranslatableText => ({

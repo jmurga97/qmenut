@@ -27,13 +27,6 @@ export function PrintDishRow({ dish }: { dish: PrintDish }) {
           </div>
         ) : null}
         {dish.description ? <p>{dish.description}</p> : null}
-        {dish.combo ? (
-          <p className={"menu-print-dish__detail"}>
-            <strong>{i18n.t("menuPrint___Combo:")}</strong> {dish.combo.description}
-            {dish.combo.description ? " · " : ""}
-            <span className={"menu-print-dish__combo-price"}>{dish.combo.price}</span>
-          </p>
-        ) : null}
         {dish.details.map((detail, index) => (
           <p className={"menu-print-dish__detail"} key={index}>
             {detail}

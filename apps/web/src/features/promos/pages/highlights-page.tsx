@@ -67,7 +67,6 @@ export function HighlightsPage() {
         <div className="highlights-featured-frame">
           <QmFeatured
             value={{
-              comboLabel: content.featured.comboLabel,
               desc: content.featured.desc,
               name: content.featured.name,
               oldPrice: content.featured.oldPrice,

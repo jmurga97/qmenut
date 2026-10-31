@@ -144,7 +144,6 @@ FROM (
     UNION ALL SELECT 'category', id, 'description', description FROM categories WHERE restaurant_id = 'rest_fine'
     UNION ALL SELECT 'dish', id, 'name', name FROM dishes WHERE restaurant_id = 'rest_fine'
     UNION ALL SELECT 'dish', id, 'description', description FROM dishes WHERE restaurant_id = 'rest_fine'
-    UNION ALL SELECT 'dish', id, 'comboDescription', combo_description FROM dishes WHERE restaurant_id = 'rest_fine'
   )
   UNION ALL SELECT * FROM (
     SELECT 'promotion', id, 'name', name FROM promotions WHERE restaurant_id = 'rest_fine'

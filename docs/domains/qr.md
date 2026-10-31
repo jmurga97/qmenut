@@ -50,7 +50,7 @@ branch theme; it does not create a PDF endpoint or persist print settings.
 - Folded A4 landscape: exterior panels **4 | 1**, interior **2 | 3**, duplex along
   the short edge. Each panel has a 10 mm inset; portrait pages have 12 mm margins.
 - The menu uses the restaurant's default language, source currency and base prices,
-  with descriptions, allergens, combos, variants and extras. Dish/category photos
+  with descriptions, allergens, variants and extras. Dish/category photos
   and temporary promotions are omitted; the branch logo is retained when available.
 - The shared theme engine supplies colors and fonts. Text is measured after the fonts
   load; dishes stay whole and category headings repeat across columns or panels.

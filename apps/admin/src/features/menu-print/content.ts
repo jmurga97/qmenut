@@ -13,7 +13,6 @@ export interface PrintDish {
   isFeatured: boolean;
   isRecommended: boolean;
   allergens: { code: string }[];
-  combo: { description: string; price: string } | null;
 }
 export interface PrintCategory {
   id: string;
@@ -60,10 +59,6 @@ function mapDish(dish: MenuData["categories"][number]["dishes"][number], currenc
     isFeatured: dish.isFeatured,
     isRecommended: dish.isRecommended,
     allergens: dish.allergens,
-    combo:
-      dish.comboEnabled && dish.comboPrice !== null
-        ? { description: toPrintText(dish.comboDescription), price: money(dish.comboPrice) }
-        : null,
   };
 }
 
