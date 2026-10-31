@@ -1,203 +1,98 @@
 # Loyalty
 
-This page describes the rewards program: how diners earn points or stamps, how they
-redeem rewards, and how staff validate a redemption in the restaurant.
-
-## Status
-
-Complete and wired end to end, covering the schema, the public API, the admin API, and
-both user interfaces. A restaurant runs one loyalty program, based either on points or on
-stamps, defines rewards, and lets customers redeem them. Guests earn stamps with stamp
-requests that staff accept, and staff validate redemptions in person. A rotating venue code
-proves presence, so no scanner or camera is required.
-
-Design reasoning: [Loyalty UX](../design/loyalty-ux.md) and
-[ADR 0007](../adr/0007-unanswered-stamp-requests-are-accepted.md).
+One stamps program per restaurant (`points` mode exists in the schema but is dormant). Guests prove presence with a rotating venue code, claim stamps with a stamp request, staff confirm. Redemptions are validated by staff at the counter. Plan feature: `loyalty`. UX and reasoning: [Loyalty UX](../design/loyalty-ux.md), [ADR 0007](../adr/0007-unanswered-stamp-requests-are-accepted.md).
 
 ## Data model
 
-The program and its rewards are defined in `packages/db/src/schema/loyalty.ts`:
+```mermaid
+erDiagram
+  restaurants ||--o| loyalty_programs : "1 per restaurant"
+  loyalty_programs ||--o{ loyalty_rewards : ""
+  customers ||--o{ customer_restaurants : "card + balances + consent"
+  customer_restaurants ||--o{ loyalty_stamp_requests : earning
+  customer_restaurants ||--o{ loyalty_redemptions : spending
+  customer_restaurants ||--o{ loyalty_transactions : ledger
+  customer_restaurants ||--o{ customer_visits : insights
+```
 
-- `loyalty_programs` (`loyalty.ts:3`) holds one row per restaurant, with `restaurantId`
-  as the primary key. `type` is either `points` or `stamps`. The row also holds
-  `pointsPerCurrencyUnit`, `pointsPerVisit`, `stampsPerVisit` (fixed at 1 and no longer
-  read), and an optional `rulesJson`. `rulesJson` holds `ticketMedio` and
-  `stampRequestLimit` (default 3, clamped to 1–10 on read), parsed in
-  `loyalty-admin.repository.ts`.
-- `loyalty_rewards` (`loyalty.ts:15`) holds `cost`, in points or stamps, and `type`. The
-  type is `percentage_discount` with a `percentage`, `free_dish` with a `freeDishId`, or
-  `special_price` with a `specialPrice`.
-- `loyalty_transactions` (`loyalty.ts:35`) is the ledger. `type` is `earn`, `redeem`,
-  `adjust`, or `expire`. `points` is signed, and `redemptionId` and `orderId` are
-  optional.
-- `loyalty_redemptions` (`loyalty.ts:52`) is the redemption state machine: `pending` moves
-  to `validated`, `rejected`, or `expired`. It also records `validatedBy` and
-  `validatedAt`.
-- `loyalty_stamp_requests` is the earning state machine: `pending` moves to `accepted`
-  (by staff, possibly at a lower `acceptedQuantity`, or automatically with
-  `autoAccepted`), `declined`, or `cancelled` by the guest. `claimedQuantity` is 1–10.
-  Acceptance stores the `transactionId` and `visitId` it wrote, for undo, and
-  `outcomeSeenAt` records when the guest dismissed the one-time outcome notice.
+| Table                    | Key facts                                                                                                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `loyalty_programs`       | PK `restaurantId`. `rulesJson` holds `ticketMedio` and `stampRequestLimit` (default 3, clamped 1–10). `stampsPerVisit` is unused.                            |
+| `loyalty_rewards`        | `cost` + `type`: `percentage_discount` (`percentage`), `free_dish` (`freeDishId`), `special_price` (`specialPrice`).                                         |
+| `loyalty_transactions`   | Ledger: `earn`, `redeem`, `adjust`, `expire`; signed amount.                                                                                                 |
+| `loyalty_stamp_requests` | `pending → accepted / declined / cancelled`. `claimedQuantity`, `acceptedQuantity`, `autoAccepted`, `transactionId` + `visitId` (for undo), `outcomeSeenAt`. |
+| `loyalty_redemptions`    | `pending → validated / rejected / expired`, `validatedBy`, `validatedAt`.                                                                                    |
+| `customers`              | Unique `email`. No password.                                                                                                                                 |
+| `customer_restaurants`   | PK `(customerId, restaurantId)`: balances, first/last visit, consent version (`loyalty-v1`) and date.                                                        |
 
-Customers and balances are defined in `packages/db/src/schema/customers.ts`:
+Schema: `packages/db/src/schema/loyalty.ts`, `customers.ts`.
 
-- `customers` (`customers.ts:3`) identifies a customer by email, which is unique. There is
-  no password.
-- `customer_restaurants` (`customers.ts:12`) holds per-restaurant balances,
-  `pointsBalance` and `stampsBalance`, the first and last visit timestamps, and the
-  version/date of the loyalty privacy consent. The current server version is `loyalty-v1`;
-  the migration does not backfill existing relations. Its primary key is
-  `(customerId, restaurantId)`.
-- `customer_visits` (`customers.ts:30`) is the visit log. Its `source` is `qr`, `direct`,
-  `domain`, or `order`, and it is used for insights.
+## Stamp request flow
 
-## Backend
+```mermaid
+sequenceDiagram
+  participant G as Guest (/puntos)
+  participant A as qmenut-api
+  participant S as Staff (Fidelidad)
+  S->>A: admin.loyalty.venueCode → "4832"
+  S-->>G: reads code aloud
+  G->>A: loyalty.requestStamps({ host, cardToken, venueCode, quantity })
+  A->>A: LOYALTY_CODE_LIMITER · verifyVenueCode → branch · 4 h rule · ≤ limit
+  A->>A: insert pending + emit loyalty.stampRequest
+  alt staff answer
+    S->>A: acceptStampRequest({ quantity ≤ claimed }) / declineStampRequest
+  else 12 h unanswered
+    A->>A: acceptOverdueStampRequests (minute cron + lazy reads)
+  end
+  A->>A: earn transaction + balance + customer_visits (dated at request time)
+  G->>A: getCard → filled stamps + one-time outcome
+```
 
-There are two routers: a public one for the customer and an admin one for the operator.
+| Rule                   | Where / how                                                                                                                                                     |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| One request per 4 h    | Race-safe `INSERT … SELECT … WHERE NOT EXISTS` in `createStampRequest`. Cancelled ones don't count. `CONFLICT` "Ya pediste sellos en esta visita".              |
+| 5 code attempts / min  | `LOYALTY_CODE_LIMITER`, per card, successes included.                                                                                                           |
+| Quantity ≤ limit       | `BAD_REQUEST` otherwise.                                                                                                                                        |
+| Second staff answer    | `CONFLICT`.                                                                                                                                                     |
+| Auto-accept after 12 h | Also after the program is turned off (the guest earned them while it was on).                                                                                   |
+| Undo an acceptance     | Compensating `adjust`, visit deleted, request → `declined`. Refused if stamps were spent ("Los sellos ya se han canjeado"). Undo a decline → back to `pending`. |
+| Notification           | `loyalty.stampRequest`, push mode `branchCount` (one replaceable push per branch with the count).                                                               |
 
-### Public router
+## Venue code
 
-The public router is `loyalty.*` in `apps/api/src/modules/loyalty/`. Every procedure is a
-`publicProcedure` (`loyalty.router.ts:18`). The customer is identified by an opaque card
-token held in `localStorage`, and every call carries the tenant `host`.
+`apps/api/src/lib/loyalty/venue-code.ts`. Stateless, TOTP-style:
 
-The public menu contract also exposes `publicFeatures.loyalty`. The API derives it from the
-real program state (`isActive`) and the count of active, non-deleted rewards. The public
-layout hides the loyalty tab when this capability is false, while direct `/puntos` links
-remain available and render the existing unavailable state with `noindex,nofollow`.
+- `getVenueCode`: HMAC(`restaurantId:branchId:windowIndex`) → 4 digits, 3-minute window.
+- `verifyVenueCode`: accepts current + previous window, returns the matching branch.
 
-`createCard` requires `consentAccepted: true`. The server records the current consent version
-and timestamp in `customer_restaurants`; repeating the same registration keeps the balance and
-the original timestamp, while a newer policy version updates the consent. Card reads and
-operations reject tokens whose relation has no current consent, so older cards return to the
-signup flow before they can be used.
+## Card and consent
 
-| Procedure                              | Description                                                                             |
-| -------------------------------------- | --------------------------------------------------------------------------------------- |
-| `program`                              | Returns the active program and its rewards for the tenant.                              |
-| `createCard`                           | Creates or links a card for an email after explicit privacy consent (`create-card.ts`). |
-| `getCard`                              | Returns the card, its balance, pending stamps and the last unseen outcome.              |
-| `requestStamps`                        | Creates a stamp request, gated by the venue code (`request-stamps.ts`).                 |
-| `cancelStampRequest`                   | Cancels the guest's pending stamp request.                                              |
-| `dismissStampOutcome`                  | Marks the outcome notice as seen, so it shows once.                                     |
-| `requestRedemption`                    | Opens a `pending` redemption (`request-redemption.ts`).                                 |
-| `cancelRedemption`, `redemptionStatus` | Cancel or poll a redemption.                                                            |
+- Identity is an opaque signed card token in `localStorage`; every public call also carries `host`.
+- `createCard` requires `consentAccepted: true` and stores the consent version + date. Re-registering keeps the balance; a newer policy version updates consent. Tokens without current consent go back to signup.
+- `publicFeatures.loyalty` (program active + at least one active reward) shows or hides the tab. `/puntos` still renders an unavailable `noindex` state.
 
-### Admin router
+## API
 
-The admin router is `admin.loyalty.*` in `apps/api/src/modules/admin-loyalty/`, built on
-`featureProcedure("loyalty")` plus a permission per procedure. It covers program
-configuration (`getProgram` and `saveProgram`), reward CRUD (`createReward`,
-`updateReward`, and `deleteReward`), daily operations (`venueCode`, `pendingRedemptions`,
-`validateRedemption`, `rejectRedemption`, and `undo`), stamp requests
-(`pendingStampRequests`, `acceptStampRequest`, `declineStampRequest`,
-`handledStampRequests`, and `undoStampRequest`, in `stamp-requests.ts`), and insights
-(`summary`, `customers`, and `visitsChart`).
+| Router                                                         | Procedures                                                                                                                                                                                                                                                                                                               |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `loyalty.*` (public)                                           | `program`, `createCard`, `getCard`, `requestStamps`, `cancelStampRequest`, `dismissStampOutcome`, `requestRedemption`, `cancelRedemption`, `redemptionStatus`                                                                                                                                                            |
+| `admin.loyalty.*` (`featureProcedure("loyalty")` + permission) | `getProgram`, `saveProgram`, `createReward`, `updateReward`, `deleteReward`, `venueCode`, `pendingRedemptions`, `validateRedemption`, `rejectRedemption`, `undo`, `pendingStampRequests`, `acceptStampRequest`, `declineStampRequest`, `handledStampRequests`, `undoStampRequest`, `summary`, `customers`, `visitsChart` |
 
-### Stamp requests
-
-- One request per card every 4 hours, counted from the previous request whatever its
-  outcome; a cancelled request does not count. The check is one race-safe
-  `INSERT … SELECT … WHERE NOT EXISTS` in `createStampRequest`. A guest inside the window
-  gets `CONFLICT` "Ya pediste sellos en esta visita".
-- `LOYALTY_CODE_LIMITER` allows 5 code attempts per minute per card, successes included.
-- The quantity must not exceed the program's `stampRequestLimit` (`BAD_REQUEST`).
-- Each request emits a `loyalty.stampRequest` notification for its branch. Its push mode
-  is `branchCount`: one replaceable push per branch with the count of unhandled requests,
-  using the same `tag` and Web Push `Topic`.
-- Staff accept (`1 ≤ quantity ≤ claimed`) or decline; a second answer gets `CONFLICT`.
-  Acceptance writes the `earn` transaction, the balance and one `customer_visits` row,
-  all dated at the request time.
-- A request pending for 12 hours is accepted at the claimed quantity (ADR 0007), by the
-  minute cron and lazily by `getCard` and `pendingStampRequests`
-  (`acceptOverdueStampRequests`). It runs even after the program is turned off.
-- Undoing an acceptance writes a compensating `adjust`, deletes the visit and sets the
-  request to `declined`; it is refused with "Los sellos ya se han canjeado" when the
-  balance would go negative. Undoing a decline (from the toast) returns it to `pending`.
-
-### The venue code
-
-The venue code proves that the customer is physically in the restaurant without using a
-scanner. It is a rotating four-digit code in the style of TOTP, and it is stateless:
-nothing is stored. The implementation is `apps/api/src/lib/loyalty/venue-code.ts`.
-
-- `getVenueCode` (`venue-code.ts:36`) computes an HMAC of
-  `restaurantId:branchId:windowIndex` with a signing secret and takes four digits from it.
-  The window is three minutes (`VENUE_CODE_WINDOW_MS`, `venue-code.ts:3`). Staff read the
-  current code from the admin application.
-- `verifyVenueCode` (`venue-code.ts:83`) runs when a customer types a code to request stamps. It
-  accepts the current window and the previous one, which absorbs clock skew and slow
-  typing, and returns the matching branch ID. Because the code is derived from the secret,
-  verification needs no storage.
-
-Ledger writes go through `packages/db/src/repositories/loyalty-ledger.repository.ts`.
-Admin and insight reads go through `loyalty-admin.repository.ts` and
-`loyalty-insights.repository.ts`. `customers.repository.ts` owns the customer and balance
-rows.
-
-## Frontend
-
-The public interface is in `apps/web`. The route is
-`apps/web/src/app/routes/{-$locale}.puntos.tsx`, and the feature directory is
-`apps/web/src/features/loyalty/`, which contains `loyalty-page`, `loyalty-experience`,
-`use-loyalty-controller`, and `loyalty-query-options`. It is wired to the live tRPC API.
-The card components live in `packages/ui`: `qm-loyalty-card`, `qm-loyalty-signup`,
-`qm-redeem-wait`, `qm-stamp-grid`, and `qm-reward-row`.
-
-The admin interface is in `apps/admin`. The routes are `_auth.loyalty.tsx` for the layout,
-`_auth.loyalty.index.tsx` for operations, `_auth.loyalty.program.tsx`, and
-`_auth.loyalty.insights.tsx`. The feature directory is `apps/admin/src/features/loyalty/`.
-
-## Example: earning stamps in the restaurant
-
-1. The diner opens the menu, taps the loyalty card at `/puntos`, accepts the privacy policy,
-   and signs up with an email address. `loyalty.createCard` records the consent version and
-   stores a card token in `localStorage`.
-2. The diner taps "Pedir sellos", picks how many, and staff read the current four-digit code
-   from the admin operations screen (`admin.loyalty.venueCode`, backed by `getVenueCode`).
-3. The diner types the code, and the client calls
-   `loyalty.requestStamps({ host, cardToken, venueCode, quantity })`.
-4. `request-stamps.ts` calls `verifyVenueCode(...)`, which returns the branch, and
-   `createStampRequest` stores a `pending` request. The card shows the stamps as pending.
-5. Staff accept it, possibly fewer, under "Solicitudes de sellos" on the operations screen,
-   or decline it; unanswered, it is accepted after 12 hours. The next time the card opens
-   it fills in and shows the outcome once.
-
-## Example: redeeming a reward
-
-1. The diner picks a reward, and `loyalty.requestRedemption` creates a `pending` row in
-   `loyalty_redemptions`.
-2. The row appears on the staff operations screen through
-   `admin.loyalty.pendingRedemptions`.
-3. During the same conversation, staff tap the row. `admin.loyalty.validateRedemption`
-   moves it to `validated`, records `validatedBy` and `validatedAt`, and writes a `redeem`
-   ledger row. `rejectRedemption` declines it instead, and `undo` reverses a recent
-   action.
+Repositories: `loyalty-ledger.repository.ts` (writes), `loyalty-admin.repository.ts`, `loyalty-insights.repository.ts`, `customers.repository.ts`.
 
 ## Key files
 
-| Concern                                        | Path                                                                                                |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Program, reward, ledger, and redemption schema | `packages/db/src/schema/loyalty.ts`                                                                 |
-| Customer and balance schema                    | `packages/db/src/schema/customers.ts`                                                               |
-| Public loyalty router                          | `apps/api/src/modules/loyalty/loyalty.router.ts`                                                    |
-| Public handlers                                | `apps/api/src/modules/loyalty/*.ts`                                                                 |
-| Admin loyalty router and handlers              | `apps/api/src/modules/admin-loyalty/`                                                               |
-| Venue code                                     | `apps/api/src/lib/loyalty/venue-code.ts`, `token.ts`                                                |
-| Ledger, admin, and insight repositories        | `packages/db/src/repositories/loyalty-*.repository.ts`, `customers.repository.ts`                   |
-| Public UI                                      | `apps/web/src/features/loyalty/`, `apps/web/src/app/routes/{-$locale}.puntos.tsx`                   |
-| Admin UI                                       | `apps/admin/src/features/loyalty/`, `apps/admin/src/app/routes/_auth.loyalty.*.tsx`                 |
-| Loyalty card components                        | `packages/ui/src/components/organisms/qm-loyalty-*`, `.../molecules/qm-stamp-grid`, `qm-reward-row` |
-| Design reasoning                               | `docs/design/loyalty-ux.md`                                                                         |
+| Concern            | Path                                                                                                      |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| Public API         | `apps/api/src/modules/loyalty/`                                                                           |
+| Admin API          | `apps/api/src/modules/admin-loyalty/` (`stamp-requests.ts`)                                               |
+| Venue code / token | `apps/api/src/lib/loyalty/venue-code.ts`, `token.ts`                                                      |
+| Public UI          | `apps/web/src/features/loyalty/`, route `{-$locale}.puntos.tsx`                                           |
+| Admin UI           | `apps/admin/src/features/loyalty/`, routes `_auth.loyalty.*.tsx`                                          |
+| Lit components     | `packages/ui`: `qm-loyalty-card`, `qm-loyalty-signup`, `qm-redeem-wait`, `qm-stamp-grid`, `qm-reward-row` |
 
 ## Limitations
 
-- Email is the only identity. There is no password and no verification.
-  `customers.email` is the key across restaurants, and balances are per customer and
-  restaurant.
-- Presence is proven by the venue code, not by a scanner. The code is stateless and
-  derived from the signing secret, so there is nothing to store, but the secret must be
-  configured and must stay out of the client bundle.
-- Earning goes through stamp requests: the code proves presence and staff approve the
-  quantity. Staff cannot grant stamps without a request, and the guest is not notified
-  by email or push when staff answer.
+- Email is unverified; anyone who knows it can see the card (earning still needs the code).
+- `LOYALTY_TOKEN_SECRET` must be set and never reach a client bundle.
+- Staff can't grant stamps without a request; guests aren't notified when staff answer.

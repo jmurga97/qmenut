@@ -1,122 +1,52 @@
-# Custom domains and tenant resolution
+# Custom domains
 
-This page describes how an incoming request is resolved to a branch, and how the API
-owns writes to the per-tenant KV namespace.
+A branch **is** its host. `branches.customDomain` holds it; resolution is an exact match. No subdomains, slugs or wildcards. The URL path only carries an optional `{-$locale}`.
 
-## Status
+```mermaid
+sequenceDiagram
+  participant B as Browser
+  participant W as qmenut-web
+  participant KV as TENANT_THEME
+  participant A as qmenut-api
+  participant D as D1
+  B->>W: GET https://carta.barlatasca.com/
+  W->>W: resolveSsrTenantHost → "carta.barlatasca.com"
+  W->>KV: get(host) → theme
+  W->>A: API_WORKER menu.publicData({ host })
+  A->>D: resolveTenantByHost → { branchId, restaurantId }
+  A->>D: menu rows filtered by both IDs
+  A-->>W: menu
+  W-->>B: themed HTML
+```
 
-Complete at the application level. A branch is identified by its host, stored in
-`branches.customDomain`. There is no subdomain or path-slug scheme; resolution is a direct
-host-to-branch lookup. The remaining work is Cloudflare-level provisioning, such as routes
-and certificates for a new domain, which is operational configuration rather than source
-code.
+## Rules
 
-## The routing key
+- Every host goes through `normalizeTenantHost` (lowercase, trim, strip protocol/port/path), on both read and write sides, so the KV key and the D1 lookup always agree.
+- **Web** (`apps/web/src/server/tenant-host.ts`): `Host` is the only production source. `X-Forwarded-Host` is never trusted (tenant confusion, cache poisoning). In dev only, bare `localhost`/LAN IPs fall back to `VITE_PUBLIC_MENU_HOST` or `fine.localhost`.
+- **API** (`apps/api/src/modules/tenant/resolve-tenant.ts`): an explicit `host` input wins, else the request host.
+- **Reverse lookup** for admin writes: `resolveBranchHost` authorizes the branch and returns its domain; `PRECONDITION_FAILED` when it has none. `resolveBranchHostOrNull` is for cache invalidation.
+- **No match → `null`.** There is no default tenant; new public entry points must handle it.
 
-A tenant, which is a branch, is identified by its host.
-`branches.customDomain` (`packages/db/src/schema/branches.ts:13`) holds the hostname, and
-resolution is an exact match against it. The URL path carries only an optional
-`{-$locale}` segment for internationalization
-(`apps/web/src/app/routes/{-$locale}.*`); it never carries tenant identity.
+## TENANT_THEME KV
 
-Every host is first passed through `normalizeTenantHost`
-(`packages/db/src/domain/tenant.ts:22`), which lowercases and trims the value, strips the
-protocol, port, and path with `URL`, and returns the bare hostname. The read and write
-sides both use it, so the KV key and the D1 lookup always agree.
+| Key                  | Value                                                           | Written by                 |
+| -------------------- | --------------------------------------------------------------- | -------------------------- |
+| `{host}`             | Full `QmTenantThemeConfig` ([Theming](theming.md))              | `putTheme`                 |
+| `menuVersion:{host}` | `Date.now()`; public content version (all content, legacy name) | `bumpPublicContentVersion` |
 
-## Resolution in the API
+- Only `apps/api/src/lib/theme/tenant-theme-store.ts` touches it (lint-enforced). Web reads it with a read-only type.
+- api and web bind the **same** namespace ID per environment and the same local `preview_id`.
 
-The API resolvers are in `apps/api/src/modules/tenant/resolve-tenant.ts`:
+## Adding a domain
 
-- `getRequestHostname(request)` (`resolve-tenant.ts:7`) prefers the `x-forwarded-host`
-  header, then `host`, then the URL hostname, and strips the port.
-- `resolveRequestTenantHost({ host, request })` (`resolve-tenant.ts:24`) lets a caller
-  pass an explicit, normalized `host`, and otherwise falls back to the request.
-- `resolveTenantFromRequest(...)` (`resolve-tenant.ts:34`) combines the two and calls
-  `resolveTenantByHost` (`packages/db/src/repositories/tenant.repository.ts:14`), the D1
-  lookup that returns `{ branchId, restaurantId }` for an active, non-deleted branch.
-- `apps/api/src/modules/public-menu/resolve-public-tenant.ts` is the thin public wrapper
-  used by the menu router.
-
-The admin sometimes needs the reverse: the host for a given branch, for example to write
-to KV. `resolveBranchHost({ restaurantId, branchId })`
-(`apps/api/src/modules/admin-tenant/resolve-branch-host.ts`) authorizes the branch through
-`assertBranchAccess` and returns its `customDomain`. It throws `PRECONDITION_FAILED` when
-the branch has no domain yet. `resolveBranchHostOrNull` is the non-throwing variant used
-by cache-invalidation callers.
-
-## Resolution in the web application
-
-`resolveSsrTenantHost()` (`apps/web/src/server/tenant-host.ts`) runs inside TanStack
-Start. It reads `getRequestHost()`, normalizes it, and uses the result as the only
-production tenant source. In development only, bare `localhost` and LAN IP addresses fall
-back to `VITE_PUBLIC_MENU_HOST` or to the seeded `fine.localhost` host. Tenant-shaped
-hosts such as `tapas.localhost` continue through the normal `Host` header path.
-
-The outer edge-cache wrapper uses `resolveRequestTenantHost(request)` instead, because the
-TanStack request context does not exist at that point. Neither resolver trusts
-`X-Forwarded-Host`, which prevents tenant confusion and cache poisoning.
-
-`apps/web/wrangler.jsonc` binds `TENANT_THEME` as a KV namespace and `API_WORKER` as a
-service binding to `qmenut-api`. There is no tenant-pinning Worker variable.
-
-## Writing the tenant-theme KV
-
-The API is the only writer of the `TENANT_THEME` KV namespace. All reads and writes go
-through `apps/api/src/lib/theme/tenant-theme-store.ts`:
-
-- `putTheme` passes the config through `resolveTenantThemeConfig` before storing it, so KV
-  always holds a complete configuration and readers never receive a partial one.
-- `getTheme` normalizes on read without rewriting KV.
-- `bumpPublicContentVersion` stores `Date.now()` under `menuVersion:{host}`, the
-  cache-invalidation signal.
-
-A `no-restricted-properties` lint rule rejects `TENANT_THEME` anywhere else in the API, and
-the web Worker types the binding as read-only (`apps/web/src/server/worker-env.d.ts`).
-
-Note: `menuVersion` is a legacy key name. It represents all public-content changes, not
-only menu rows. See [Performance and caching](../operations/performance-and-caching.md).
-
-## Why the KV namespace ID is duplicated
-
-`apps/web/wrangler.jsonc` and `apps/api/wrangler.jsonc` bind the same KV namespace
-deliberately. Locally the web Worker persists into the API's `apps/api/.wrangler/state`,
-which is keyed by the namespace preview ID, so local development and end-to-end tests use
-the same `preview_id` while production uses the real shared `id`. If you create a new KV
-namespace, update the `id` in both configuration files.
-
-## Example: from a request to a tenant
-
-1. A request for `https://carta.barlatasca.com/` reaches `apps/web`.
-2. `resolveSsrTenantHost` (`tenant-host.ts`) reads the `Host` header and passes it to
-   `normalizeTenantHost`, which returns `carta.barlatasca.com`.
-3. `getTenantContext` reads `TENANT_THEME["carta.barlatasca.com"]` for the theme.
-4. For menu data, the web Worker calls the API through `API_WORKER`, and
-   `resolveTenantByHost` matches `branches.customDomain = "carta.barlatasca.com"` and
-   returns `{ branchId, restaurantId }`.
-5. Menu rows are read filtered by both IDs. See [Multi-tenancy](multi-tenancy.md).
+Cloudflare-side, not in code: attach the exact hostname to `qmenut-web` as a custom domain. See [Deployment](../operations/deployment.md#domains).
 
 ## Key files
 
-| Concern                                    | Path                                                        |
-| ------------------------------------------ | ----------------------------------------------------------- |
-| Host normalization and `ResolvedTenant`    | `packages/db/src/domain/tenant.ts`                          |
-| Host to branch and restaurant lookup in D1 | `packages/db/src/repositories/tenant.repository.ts`         |
-| API-side request to host to tenant         | `apps/api/src/modules/tenant/resolve-tenant.ts`             |
-| Public wrapper                             | `apps/api/src/modules/public-menu/resolve-public-tenant.ts` |
-| Branch to host lookup                      | `apps/api/src/modules/admin-tenant/resolve-branch-host.ts`  |
-| Web host resolution during rendering       | `apps/web/src/server/tenant-host.ts`                        |
-| Web Worker bindings and variables          | `apps/web/wrangler.jsonc`                                   |
-| Tenant-theme KV store                      | `apps/api/src/lib/theme/tenant-theme-store.ts`              |
-
-## Limitations
-
-- Cloudflare provisioning is not in source control. Attaching a new `customDomain` to a
-  route and issuing its TLS certificate is deployment configuration. Attach each new
-  custom domain to the single `qmenut-web` Worker. See
-  [Deployment](../operations/deployment.md).
-- There is no subdomain or slug fallback. If a host has no matching active branch,
-  resolution returns `null`; there is no default tenant. New public entry points must
-  handle the `null` case.
-- Changing the production KV ID requires editing two files. Keep the shared `preview_id`
-  stable so local theme state continues to be shared.
+| Concern            | Path                                                                                            |
+| ------------------ | ----------------------------------------------------------------------------------------------- |
+| Normalize / lookup | `packages/db/src/domain/tenant.ts`, `.../repositories/tenant.repository.ts`                     |
+| API resolution     | `apps/api/src/modules/tenant/resolve-tenant.ts`, `modules/public-menu/resolve-public-tenant.ts` |
+| Branch → host      | `apps/api/src/modules/admin-tenant/resolve-branch-host.ts`                                      |
+| Web resolution     | `apps/web/src/server/tenant-host.ts`                                                            |
+| KV store           | `apps/api/src/lib/theme/tenant-theme-store.ts`                                                  |

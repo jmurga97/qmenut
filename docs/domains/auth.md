@@ -1,77 +1,45 @@
 # Auth
 
-This page describes how staff sign in. Authentication uses Better Auth with passwordless
-email OTP. Sign-up is disabled: the owner provisions accounts from the Users panel, and the
-person then signs in with an emailed one-time code.
+Better Auth, passwordless email OTP, **sign-up disabled**: owners provision accounts in the Users panel. Auth says who you are; [Multi-tenancy](multi-tenancy.md) says which restaurant and role.
 
-This page is partial. It states the purpose, the structure, and the key files, but does
-not yet contain a full walkthrough.
+```mermaid
+sequenceDiagram
+  participant U as Admin login
+  participant A as qmenut-api /api/auth/*
+  participant E as ming-email-worker
+  U->>A: email
+  A->>E: OTP (EMAIL_WORKER)
+  U->>A: OTP
+  A-->>U: session cookie
+  alt more than one restaurant
+    U->>A: admin.auth.selectRestaurant (re-checks membership)
+  end
+  U->>U: /_auth routes
+```
 
-Authentication determines who the user is. Authorization determines which tenant and role
-they have, and is described in [Multi-tenancy](multi-tenancy.md).
+## Facts
 
-## Status
+- Server: `packages/auth/src/index.ts` (`emailOTP` plugin, Drizzle SQLite adapter, `usePlural`, base path `/api/auth`, `disableSignUp`). Built per request in `apps/api/src/auth/create-auth.ts`.
+- Tuning (OTP length, expiry, attempts, session expiry): `packages/auth/src/store.ts`.
+- Session has an extra field `activeRestaurantId`, written only by `admin.auth.selectRestaurant`.
+- Client: `createEmailOtpAuthClient` (`credentials: include`), wrapped in `apps/admin/src/lib/auth-client.ts`.
+- `protectedProcedure` reads the session via `ctx.getSession()`.
+- Admin and API share the `qmenut.app` site for cookies (see [Deployment](../operations/deployment.md#domains)).
 
-Complete.
+## Fixed OTP
 
-## How it works
+`DEV_FIXED_OTP=true` lets every provisioned account sign in with `000000` and sends no email (local, E2E, dev Worker). `create-auth.ts` ignores it in production. **Never set it in production.**
 
-- Server setup. `packages/auth/src/index.ts` configures Better Auth with the `emailOTP`
-  plugin and the Drizzle adapter for SQLite with `usePlural`, a base path of `/api/auth`,
-  and `disableSignUp: true`.
-- OTP delivery. Codes are sent through the Cloudflare `EMAIL_WORKER` service binding by
-  `createEmailWorkerOtpSender`. With `DEV_FIXED_OTP=true`, every provisioned account signs in
-  with the fixed OTP `000000` and no email is sent: `apps/api/src/auth/create-auth.ts` registers
-  a wildcard entry that `packages/auth/src/index.ts` resolves for any address. The local, test,
-  and deployed development environments enable this flag; production ignores it.
-- Configuration. `packages/auth/src/store.ts` sets the OTP length, expiry, attempt limit,
-  and session expiry. The session schema is `packages/db/src/schema/auth.ts`.
-- Active restaurant. The session carries an `activeRestaurantId` additional field
-  (`packages/auth/src/index.ts`, column added to `sessions` in the same schema). It is
-  written only through the `admin.auth.selectRestaurant` tRPC procedure, which re-checks
-  membership before updating the session row; see [Multi-tenancy](multi-tenancy.md).
-- Client. `packages/auth/src/client.ts` exports `createEmailOtpAuthClient`, which sets
-  `credentials: include`. `apps/admin/src/lib/auth-client.ts` wraps it with the base URL
-  and `signOut`.
-- API mounting. `apps/api/src/index.ts` routes `/api/auth/*` to the Better Auth handler,
-  and `apps/api/src/auth/create-auth.ts` builds that handler per request.
-- tRPC integration. `protectedProcedure` in `apps/api/src/trpc/trpc.ts` reads the session
-  through `ctx.getSession()`.
+## Accounts
 
-## Frontend
-
-The sign-in page is `apps/admin/src/features/auth/pages/login-page.tsx`, a two-step flow
-that collects the email address and then the OTP. Its route is
-`apps/admin/src/app/routes/login.tsx`. When the account belongs to more than one
-restaurant, sign-in continues on
-`apps/admin/src/app/routes/select-restaurant.tsx`, which stores the choice in the
-session before entering the dashboard. Protected routes are gated by
-`apps/admin/src/app/routes/_auth.tsx`, which redirects to the selector when no tenant
-resolves for the session.
+- Owners create users + memberships from `apps/admin/src/features/users/`. The invitation email is informational; if it fails, the account stays and can be resent.
+- Support accounts (`INTERNAL_SUPPORT_ACCOUNTS`) are protected `admin` members, hidden from the Users list.
 
 ## Key files
 
-| Concern                    | Path                                                                           |
-| -------------------------- | ------------------------------------------------------------------------------ |
-| Better Auth server         | `packages/auth/src/index.ts`, `apps/api/src/auth/create-auth.ts`               |
-| Auth store and tuning      | `packages/auth/src/store.ts`                                                   |
-| Session schema             | `packages/db/src/schema/auth.ts`                                               |
-| Auth client                | `packages/auth/src/client.ts`, `apps/admin/src/lib/auth-client.ts`             |
-| API mount point            | `apps/api/src/index.ts` (`/api/auth/*`)                                        |
-| Session in tRPC            | `apps/api/src/trpc/trpc.ts` (`protectedProcedure`)                             |
-| Restaurant switching       | `apps/api/src/trpc/routers/auth.ts`, `apps/admin/src/features/auth/`           |
-| Sign-in UI and route guard | `apps/admin/src/features/auth/`, `apps/admin/src/app/routes/{login,_auth}.tsx` |
-
-## Limitations
-
-- Sign-up is disabled by design. The owner provisions a user account and its
-  `restaurant_users` membership from `apps/admin/src/features/users/`; no public registration
-  flow exists.
-- An invitation email is informational: it links to the panel and explains the OTP flow. A
-  failed invitation does not roll back the account or membership; the owner can resend it from
-  the Users panel.
-- Tenant creation provisions the internal support accounts `murgapja@gmail.com` and
-  `mariagabrielaronca@gmail.com` as protected `admin` memberships. They can sign in and select
-  any restaurant where they are provisioned, but they are intentionally omitted from the Users
-  list and cannot be managed through that panel.
-- Never set `DEV_FIXED_OTP` on the production Worker.
+| Concern        | Path                                                                                      |
+| -------------- | ----------------------------------------------------------------------------------------- |
+| Server         | `packages/auth/src/index.ts`, `apps/api/src/auth/create-auth.ts`                          |
+| Session schema | `packages/db/src/schema/auth.ts`                                                          |
+| Switching      | `apps/api/src/trpc/routers/auth.ts`                                                       |
+| UI and guard   | `apps/admin/src/features/auth/`, routes `login.tsx`, `select-restaurant.tsx`, `_auth.tsx` |

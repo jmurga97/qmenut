@@ -35,11 +35,11 @@ Note: `menuVersion` is a legacy name, kept to avoid migrating existing KV entrie
 previously generated keys. It represents all public-content changes, not only menu rows.
 
 Only `GET` requests to `CACHEABLE_ROUTES` are eligible. A leading locale segment is
-removed before matching, so `/en/promos` follows the `/promos` policy.
+removed before matching, so `/en/destacados` follows the `/destacados` policy.
 
 | Route after locale removal                                                      | Fresh edge TTL | Stale window |
 | ------------------------------------------------------------------------------- | -------------: | -----------: |
-| `/`, `/promos`                                                                  |     15 minutes |     24 hours |
+| `/`, `/destacados`                                                              |     15 minutes |     24 hours |
 | `/contacto`, `/puntos`, `/aviso-legal`, `/privacidad`                           |       24 hours |     24 hours |
 | `/robots.txt`, `/sitemap.xml`                                                   |       24 hours |     24 hours |
 | `/offline`                                                                      |       24 hours |     24 hours |

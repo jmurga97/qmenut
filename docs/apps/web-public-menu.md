@@ -11,10 +11,8 @@ tRPC over D1 supplies its content. See [Custom domains](../domains/custom-domain
 
 ## Status
 
-Complete for the menu and loyalty pages. The promotions and contact pages are still
-mock-backed: `use-promos-content.ts` and `use-contact-content.ts` map `MOCK_*` constants,
-even though the promotions API and the effective-price view exist. USD-source menus can
-also expose a restaurant-selected VES display rate.
+Complete. Every page reads live data from `menu.publicData`. USD-source menus can also
+expose a restaurant-selected VES display rate.
 
 ## Worker entry point and rendering errors
 
