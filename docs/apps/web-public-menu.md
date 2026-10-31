@@ -31,9 +31,7 @@ Keep this order. The comment in `server.ts` is deliberate: TanStack converts man
 rendering exceptions into 5xx responses before the outer Worker wrapper can observe the
 exception, so the entry point also captures returned 5xx responses.
 
-There is no `apps/web/src/server/sentry.ts`. Its per-request `wrapRequestHandler`
-workaround was needed when Nitro owned the top-level export. The Cloudflare Vite plugin
-allows the Worker itself to be wrapped with `Sentry.withSentry`.
+The Worker itself is wrapped with `Sentry.withSentry`.
 
 `@lit-labs/ssr-react/enable-lit-ssr.js` must remain the first import in both the server
 and the client entry points. The server build uses its Node export to patch React element

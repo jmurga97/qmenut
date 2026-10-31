@@ -19,8 +19,8 @@ object that contains every template field plus the tenant's own choices, so a re
 never needs the template catalog to render a page. The shape is `QmTenantThemeConfig`
 (`packages/ui/src/theme/tenant-theme-config.ts:13`).
 
-Only the `apps/tenant-config` Worker writes to that namespace; see
-[Custom domains](custom-domains.md). The web application reads from it directly.
+Only the API writes to that namespace, through
+`apps/api/src/lib/theme/tenant-theme-store.ts`; see [Custom domains](custom-domains.md). The web application reads from it directly.
 
 ## Theme system files
 
@@ -118,7 +118,7 @@ active override and maps `Cmd+1` through `Cmd+5`, or `Ctrl+1` through `Ctrl+5`, 
 templates in that order. `useTemplateSelection` gives the override priority over the
 tenant's KV template. The parameter has no effect in production.
 
-Each template has a seed file at `apps/tenant-config/seed/*.localhost.json`. The
+Each template has a seed file at `apps/api/seed/tenant-theme/*.localhost.json`. The
 end-to-end suite exercises all five hosts, and `e2e/tests/web/templates.spec.ts` provides
 platform-scoped visual snapshots when the `visual` project is enabled. See
 [Testing](../operations/testing.md).
@@ -142,9 +142,9 @@ The save path is in `apps/api/src/modules/theme/theme.router.ts`:
 2. `requirePermission(ctx.tenant, "theme.write")` runs (`theme.router.ts:41`).
 3. `resolveBranchHost({ restaurantId, branchId })` finds the branch's `customDomain`,
    which is the KV key, and authorizes the branch at the same time.
-4. `putTheme(...)` (`apps/api/src/lib/theme/theme-worker-client.ts`) writes to KV through
-   the tenant-config Worker over the `THEME_WORKER` binding. That Worker normalizes the
-   body, so KV always stores a complete configuration.
+4. `putTheme(...)` (`apps/api/src/lib/theme/tenant-theme-store.ts`) normalizes the body
+   with `resolveTenantThemeConfig` and writes it to the `TENANT_THEME` binding, so KV
+   always stores a complete configuration.
 5. `bumpPublicContentVersionForBranch(...)` increments the public-content version so
    caches are invalidated (`apps/api/src/lib/public-content-version.ts`).
 
@@ -154,7 +154,7 @@ The save path is in `apps/api/src/modules/theme/theme.router.ts`:
 
 1. The owner sets the primary color to `#A23A28` in the admin editor and saves.
 2. `admin.theme.save` runs the permission check, calls `resolveBranchHost`, and calls
-   `putTheme`. The tenant-config Worker runs `resolveTenantThemeConfig` and writes the
+   `putTheme`, which runs `resolveTenantThemeConfig` and writes the
    complete object to `TENANT_THEME[host]`. The content version is incremented.
 3. A diner loads the menu, and `getTenantContext` reads `TENANT_THEME[host]`.
 4. `buildQmThemeVars` calls `qmColorEngine.derive(...)`. `#A23A28` is chroma-clamped to
@@ -176,14 +176,14 @@ The save path is in `apps/api/src/modules/theme/theme.router.ts`:
 | Web: apply the theme                 | `apps/web/src/app/routes/__root.tsx`, `apps/web/src/shared/components/public-page-shell.tsx` |
 | Admin editor                         | `apps/admin/src/features/theme/`, `apps/admin/src/app/routes/_auth.theme.tsx`                |
 | Theme API (`save` and `get`)         | `apps/api/src/modules/theme/theme.router.ts`                                                 |
-| KV writer client                     | `apps/api/src/lib/theme/theme-worker-client.ts`                                              |
+| KV store (only writer)               | `apps/api/src/lib/theme/tenant-theme-store.ts`                                               |
 
 ## Limitations
 
 - Colors are CSS `color-mix` and `oklch` strings, not hex values. Do not resolve them in
   code that expects hex; the browser is meant to perform the mixing.
-- There is one writer. Never write to `TENANT_THEME` from the API directly. Always go
-  through the tenant-config Worker so that normalization and the token check apply.
+- There is one writer. Never touch `TENANT_THEME` in the API outside
+  `tenant-theme-store.ts`, so normalization always applies; lint enforces it.
 - The KV key is the normalized host. A branch without a `customDomain` has nowhere to
   store its theme, and `resolveBranchHost` throws `PRECONDITION_FAILED` in that case. See
   [Custom domains](custom-domains.md).

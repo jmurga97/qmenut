@@ -46,7 +46,7 @@ Los cambios deben respetar estos límites:
 | Moneda de una operación histórica | Snapshot obligatorio en pedido o pago                        |
 | Tasa pública elegida              | Tabla asociada al restaurante en Qmenut D1                   |
 | Referencia de mercado             | Ming Exchange Rate Worker y su propia D1                     |
-| Tema publicado                    | Tenant Theme KV, escrito por `tenant-config`                 |
+| Tema publicado                    | Tenant Theme KV, escrito por la API                          |
 | Borrador del preview              | Estado local del formulario; no se persiste antes de Guardar |
 | Capacidades públicas              | Derivadas del estado real de cada módulo                     |
 | Consentimiento de fidelización    | Cliente + restaurante + versión + fecha en Qmenut D1         |

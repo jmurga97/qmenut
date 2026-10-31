@@ -19,7 +19,7 @@ their email already does (ADR 0004), so it adds no access the email didn't give.
 page and never changes the reservation itself: email security scanners open every link, and a
 confirming GET would mark most corporate inboxes confirmed.
 
-Supersedes [ADR 0005](0005-unanswered-reservations-are-accepted.md).
+Supersedes ADR 0005 (staff answer reservations; unanswered ones are accepted), now deleted.
 
 ## Considered Options
 

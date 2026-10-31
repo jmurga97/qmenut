@@ -1,33 +1,10 @@
 # Testing
 
-The browser suite runs locally against the same multi-Worker topology used in production.
-There is no CI workflow, and deployment is manual.
+No CI. Unit tests: `bun run test` (`packages/ui`). Browser tests: Playwright in `e2e/`, against the real multi-Worker stack. Don't add tests unless asked (`AGENTS.md`).
 
-As stated in `AGENTS.md`, do not add tests unless you are asked to.
+Coverage matrix and test-writing rules (Spanish): [e2e/README.md](../../e2e/README.md).
 
-## Layout
-
-```text
-e2e/
-├── fixtures/test.ts            authenticated role fixtures
-├── helpers/
-│   ├── a11y.ts                 axe setup/assertions
-│   ├── trpc.ts                 typed HTTP helpers
-│   └── tenant-config.ts        direct local tenant-config helpers
-├── setup/auth.setup.ts         owner OTP login and storage state
-└── tests/
-    ├── admin/                  dashboard behavior, permissions, and accessibility
-    ├── web/                    public pages, SEO, templates, isolation, and accessibility
-    └── cross/                  admin-to-public invalidation and loyalty journeys
-```
-
-`e2e/fixtures/test.ts` extends Playwright with authenticated owner, admin, staff, and
-second-tenant contexts. Tests run serially in a single worker because they intentionally
-share the local D1 and KV state.
-
-## Host setup
-
-Install Chromium once, then map every seeded tenant hostname to loopback:
+## Setup (once)
 
 ```bash
 bunx playwright install chromium
@@ -37,95 +14,63 @@ bunx playwright install chromium
 echo "127.0.0.1 tapas.localhost fine.localhost cafe.localhost her.localhost fast.localhost" | sudo tee -a /etc/hosts
 ```
 
-The `/etc/hosts` entry is required. Playwright exercises one production build of the web
-Worker on port `4011` and changes only the request `Host` header to select a tenant.
-Without operating-system-level resolution, those requests never reach the Worker.
+The hosts entry is mandatory: one web build serves every tenant and tests only change `Host`.
 
-Run the suite from the repository root:
+## Run
+
+```bash
+bun run dev:kill
+```
 
 ```bash
 bun run test:e2e
 ```
 
-## Playwright projects
-
-`e2e/playwright.config.ts` defines the following projects:
-
-| Project       | Browser, device, and scope                                                                                        |
-| ------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `setup`       | Desktop Chrome. Signs in to admin and writes `.auth/admin.json`.                                                  |
-| `admin`       | Desktop Chrome with stored owner authentication. Runs `tests/admin`.                                              |
-| `web`         | Pixel 7 at `http://tapas.localhost:4011`. Runs the mobile public tests, excluding the desktop and template specs. |
-| `web-desktop` | Desktop Chrome. Runs `desktop-*.spec.ts`.                                                                         |
-| `visual`      | Pixel 7. Runs the conditional template snapshots.                                                                 |
-| `cross`       | Desktop Chrome with stored authentication. Runs the admin-to-public journeys.                                     |
-
-All projects depend on `setup`. The `visual` project is registered when `CI` is truthy or
-when `E2E_VISUAL=1` is set.
-
-## Local stack and reset
-
-Playwright starts four servers:
-
-1. The API Worker on port `8787`, with deterministic test-only variables.
-2. The tenant-config Worker on port `8788`, sharing the persisted KV namespace.
-3. The admin Vite application on port `5174`.
-4. A production build of the public web Worker on port `4011`.
-
-To reset local state, run:
-
-```bash
-bun run --cwd e2e reset
+```mermaid
+flowchart LR
+  reset["reset-local-state.sh<br/>wipe D1 + KV · migrate · seed SQL · seed 5 themes"] --> servers
+  subgraph servers[Playwright webServer]
+    api["API :8787<br/>always started"]
+    admin["Admin :5174<br/>always started"]
+    web["Web prod build :4011<br/>reused if running"]
+  end
+  servers --> run[projects run serially, 1 worker] --> cleanup[cleanup SQL<br/>even on failure]
 ```
 
-That command runs `e2e/scripts/reset-local-state.sh`, which clears local D1 data, KV keys,
-Playwright artifacts, and the public cache when its Worker is stopped. It reapplies pending
-Drizzle migrations, seeds the public menu and end-to-end rows, and seeds the five KV themes.
-When the public Worker is already running, a fresh content version bypasses its old cache.
-Playwright reuses running development servers and starts any missing E2E servers. The suite's
-wrapper runs cleanup SQL afterward, because product deletes are soft deletes by design.
+Stop `bun run dev` first: API and admin ports must be free. Web persists into `apps/api/.wrangler/state`, so it sees the same KV.
 
-Two environment variables affect a run:
+## Projects
 
-| Variable             | Effect                                                                                                                                    |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `E2E_VISUAL=1`       | Registers the visual template project locally.                                                                                            |
-| `DEV_FIXED_OTP=true` | Fixes OTP `000000` for every provisioned account; no email is sent. Supplied by the local and E2E API scripts and the development Worker. |
+| Project            | Device          | Scope                                        |
+| ------------------ | --------------- | -------------------------------------------- |
+| `setup`            | Desktop Chrome  | OTP sign-in → `.auth/admin.json`             |
+| `admin`            | Desktop Chrome  | `tests/admin`                                |
+| `web`              | Pixel 7         | `tests/web` (mobile)                         |
+| `web-desktop`      | Desktop Chrome  | `desktop-*.spec.ts`                          |
+| `cross`            | Desktop Chrome  | `tests/cross` (admin → public journeys)      |
+| `critical-webkit`  | iPhone 13       | `@critical` only                             |
+| `critical-firefox` | Desktop Firefox | `@critical` only                             |
+| `visual`           | Pixel 7         | Template snapshots; only with `E2E_VISUAL=1` |
 
-Never configure `DEV_FIXED_OTP` on the production Worker. `create-auth.ts` only accepts
-the fixed OTP when `NODE_ENV` is `development` or `test`.
+## Identities
 
-## Fixed identities
+Every provisioned account uses OTP `000000` while `DEV_FIXED_OTP=true` (local, E2E, dev Worker; never production).
 
-When `DEV_FIXED_OTP=true`, every provisioned account signs in with `000000`; the table
-lists the seeded identities used by the suites.
-
-| Identity                | Role                       | OTP      |
-| ----------------------- | -------------------------- | -------- |
-| `e2e@test.local`        | Tapas owner and setup user | `000000` |
-| `staff.e2e@test.local`  | Tapas staff                | `000000` |
-| `admin.e2e@test.local`  | Tapas admin                | `000000` |
-| `owner.fine@test.local` | Fine tenant owner          | `000000` |
-
-These addresses and codes are local test fixtures. They are not deployable credentials.
+| Email                   | Role        |
+| ----------------------- | ----------- |
+| `e2e@test.local`        | Tapas owner |
+| `admin.e2e@test.local`  | Tapas admin |
+| `staff.e2e@test.local`  | Tapas staff |
+| `owner.fine@test.local` | Fine owner  |
 
 ## Visual snapshots
 
-Snapshot paths include the platform:
-
-```text
-{testDir}/snapshots/{testFilePath}/{platform}/{arg}{ext}
-```
-
-Browser rendering differs across operating systems, so macOS and Linux baselines are not
-interchangeable. Since the workflow-dispatch job was removed, the supported baseline is
-macOS, generated locally. If Linux baselines become necessary, run the complete `visual`
-project in a pinned Linux container and commit that platform directory. Do not copy or
-rename macOS images as Linux baselines.
+Baselines are per OS (`snapshots/{test}/{platform}/`). Supported baseline: macOS, generated locally. For Linux, run the whole `visual` project in a pinned container; never rename macOS images.
 
 ```bash
 E2E_VISUAL=1 bun run test:e2e -- --project=visual
 ```
 
-Changing templates, fonts, or browser versions can legitimately require a new baseline.
-Inspect the diffs before you accept them.
+## Not covered
+
+Real email delivery, remote image processing and payments. `EMAIL_WORKER` and `IMAGE_WORKER` are `remote: true` even locally: bookings email real guests and uploads hit the shared buckets, so don't add upload E2E until there is a local fake.

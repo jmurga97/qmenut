@@ -2,8 +2,7 @@
 
 The public menu Worker combines tenant-scoped Cloudflare edge caching, a short browser
 cache contract, and immutable hashed assets. The implementation is
-`apps/web/src/server/edge-cache.ts`. Cache invalidation crosses the API and tenant-config
-Workers.
+`apps/web/src/server/edge-cache.ts`. Cache invalidation is written by the API Worker.
 
 ## Cache layers
 
@@ -83,15 +82,14 @@ Four correctness rules must not be weakened:
 ```text
 admin write
   → API mutation
-  → THEME_WORKER service binding
-  → PUT /tenants/:host/menu-version
+  → TENANT_THEME KV binding
   → Date.now() stored at menuVersion:{host}
   → next public request computes a new edge key
   → MISS, then HIT
 ```
 
 `apps/api/src/lib/public-content-version.ts` resolves the branch or restaurant to a host
-and calls tenant-config. The write is best-effort, so a content mutation does not fail
+and bumps its version through `tenant-theme-store.ts`. The write is best-effort, so a content mutation does not fail
 only because cache invalidation is unavailable. Operational monitoring should still
 surface the logged error.
 

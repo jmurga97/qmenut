@@ -1,240 +1,179 @@
 # Architecture
 
-This page describes the contents of the monorepo, the five Cloudflare Workers that run
-the system, the data layer, and the path a request takes through them.
+Bun `1.4.0` monorepo run by Turbo. Everything runs on Cloudflare Workers; there is no other server.
 
-Read this page before the other pages, then read
-[Multi-tenancy](domains/multi-tenancy.md).
+## System
 
-## Monorepo layout
+```mermaid
+flowchart LR
+  diner([Diner]) -->|tenant domain| web
+  owner([Owner / staff]) --> admin
+  visitor([Visitor]) --> landing
 
-The repository is a Bun `1.3.6` workspace run by Turbo (`turbo.json`). The root
-`package.json` declares the workspace globs: `apps/*`, `packages/*`, and `e2e`.
+  subgraph qmenut
+    web["apps/web<br/>qmenut-web<br/>SSR, Host → tenant"]
+    admin["apps/admin<br/>qmenut-admin<br/>static SPA"]
+    api["apps/api<br/>qmenut-api<br/>tRPC · auth · webhooks"]
+    landing["apps/landing<br/>qmenut-landing<br/>Astro SSR"]
+  end
 
-### Applications
+  web -->|API_WORKER binding| api
+  admin -->|tRPC + session cookie| api
+  web -. reads .-> kv[(TENANT_THEME KV)]
+  api -->|only writer| kv
+  api --> d1[(D1)]
+  api --> q[[NOTIFICATIONS_QUEUE]]
 
-| Directory            | Package                 | Description                                                                                                                                                                         |
-| -------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/api`           | `@qmenut/api`           | The backend, running as a Cloudflare Worker. Serves tRPC at `/trpc`, Better Auth at `/api/auth/*`, and Stripe webhooks. Uses Drizzle over D1. Entry point: `apps/api/src/index.ts`. |
-| `apps/web`           | `@qmenut/web`           | The public menu that diners see. React 19, Vite, and TanStack Start, server-rendered on a Cloudflare Worker through `@cloudflare/vite-plugin`.                                      |
-| `apps/admin`         | `@qmenut/admin`         | The owner dashboard. A React 19 and Vite SPA that uses TanStack Router, deployed as a static-asset Worker with an SPA fallback.                                                     |
-| `apps/tenant-config` | `@qmenut/tenant-config` | A small Worker that owns write access to the `TENANT_THEME` KV namespace. Entry point: `apps/tenant-config/src/index.ts`.                                                           |
-| `apps/landing`       | `@qmenut/landing`       | The marketing site. Astro 5 with SSR, deployed with `apps/landing/wrangler.jsonc`. It is the only application with its own `deploy` script.                                         |
+  subgraph ming[Shared ming-* Workers, same account]
+    email[ming-email-worker]
+    image[ming-image-worker]
+    fx[ming-exchange-rate-worker]
+  end
+  api -->|EMAIL_WORKER| email
+  api -->|IMAGE_WORKER RPC| image
+  api -->|EXCHANGE_RATE_WORKER| fx
+  image --> r2[(R2 qmenut-media)]
+```
 
-### Packages
+| Worker           | Reads / writes                                                                                       |
+| ---------------- | ---------------------------------------------------------------------------------------------------- |
+| `qmenut-web`     | One Worker for every tenant domain. Reads `TENANT_THEME` directly, everything else via `API_WORKER`. |
+| `qmenut-api`     | Only Worker that touches D1 and writes `TENANT_THEME` (`src/lib/theme/tenant-theme-store.ts`).       |
+| `qmenut-admin`   | Static assets with SPA fallback. Calls `api.qmenut.app` cross-origin with cookies.                   |
+| `qmenut-landing` | Standalone marketing site. Production only.                                                          |
 
-| Directory              | Description                                                                                                                       |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/db`          | Drizzle ORM: the schema (split by domain), models, mappers, domain logic, and the repository layer that performs all data access. |
-| `packages/auth`        | Better Auth setup for email OTP over Drizzle. Exports a server entry point and `./client`.                                        |
-| `packages/permissions` | Role and permission logic (`ROLE_CODES` and permission checks), with no dependencies.                                             |
-| `packages/ui`          | Shared UI: Lit web components, React wrappers, and the theme system in `theme/`. Used by web, admin, api, and tenant-config.      |
+Rules:
 
-## The Workers
+- **Host is the tenant.** `branches.customDomain` ↔ request `Host`. No path, slug or wildcard. See [Custom domains](domains/custom-domains.md).
+- **Browsers never call the API from a tenant domain cross-origin.** They hit same-origin `/trpc`, which `qmenut-web` proxies through `API_WORKER`.
+- **One KV writer.** Lint (`no-restricted-properties`) rejects `TENANT_THEME` outside the store; web types the binding read-only.
+- **Same KV `preview_id` in api and web.** Locally, web persists into `apps/api/.wrangler/state`, keyed by that ID.
 
-The system runs entirely on Cloudflare. There is no separate server. Five Workers are
-connected by service bindings and one shared KV namespace.
+## API Worker
+
+`apps/api/src/index.ts` exports three handlers, wrapped in `Sentry.withSentry`:
+
+```mermaid
+flowchart TD
+  fetch[fetch] --> o{path}
+  o -->|OPTIONS| cors[CORS preflight]
+  o -->|"/health"| h["status: ok"]
+  o -->|"POST /webhooks/stripe"| s[handleStripeWebhook]
+  o -->|"/api/auth/*"| ba[Better Auth]
+  o -->|"/trpc"| t[appRouter]
+
+  sched[scheduled] -->|"45 4 * * * (prod)"| an[PostHog → D1 analytics + digest]
+  sched -->|"* * * * *"| min[image outbox · notification maintenance · reservation jobs]
+
+  queue[queue] -->|"qmenut-notifications*"| push[Web Push delivery]
+  queue -->|"ming-msg-events-*"| msg[WhatsApp events]
+```
+
+A fresh context and Drizzle client are built per request (`createContext`). Never keep either in module scope.
+
+### tRPC
+
+`apps/api/src/trpc/router.ts`:
 
 ```text
-                 diners                         restaurant owners
-                   │                                   │
-                   ▼                                   ▼
-        ┌───────────────────┐               ┌───────────────────┐
-        │  apps/web (SSR)   │               │   apps/admin      │
-        │  qmenut-web       │               │   (static SPA)    │
-        │  Host → tenant    │               └─────────┬─────────┘
-        └─────────┬─────────┘                         │ tRPC over HTTPS
-      reads       │  API_WORKER (service binding)     │ (cookies: session)
-   TENANT_THEME   │                                   ▼
-     KV directly  │      ┌───────────────────────────────────────────┐
-                  └─────►│                 apps/api  (qmenut-api)     │◄── EMAIL_WORKER
-                         │  /trpc · /api/auth/* · /webhooks/stripe   │◄── IMAGE_WORKER
-                         └───────┬───────────────────────────┬───────┘
-                                 │ D1 (DB binding)            │ THEME_WORKER
-                                 ▼                            ▼
-                           ┌───────────┐          ┌─────────────────────────┐
-                           │  D1 (SQL) │          │  apps/tenant-config     │
-                           └───────────┘          │  writes TENANT_THEME KV │
-                                                  └───────────┬─────────────┘
-                                                              │ (same KV namespace id)
-                                                              ▼
-                                                     ┌───────────────────┐
-                                                     │  TENANT_THEME KV  │◄── apps/web reads here
-                                                     └───────────────────┘
-
-        marketing visitors
-                │
-                ▼
-        ┌───────────────────┐       External services
-        │  apps/landing     │       ┌───────────────────┐  ┌───────────────────┐
-        │  qmenut-landing   │       │ ming-email-worker │  │ ming-image-worker │
-        │  standalone SSR   │       │ (EMAIL_WORKER)    │  │ (IMAGE_WORKER)    │
-        └───────────────────┘       └───────────────────┘  └─────────┬─────────┘
-                                                                  R2 + Queue + Images
+appRouter
+├─ auth · health
+├─ menu · loyalty · reservations          public (diners)
+└─ admin.*                                tenantProcedure
+   analytics · tenant · menu · branches · exchangeRates · images · promotions · theme
+   billing · loyalty · reservations · notifications · languages · translations · users · messaging
 ```
 
-The relationships between Workers are as follows:
+| Procedure            | Gate                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------- |
+| `publicProcedure`    | None. Tenant comes from the host.                                                      |
+| `protectedProcedure` | Better Auth session.                                                                   |
+| `tenantProcedure`    | Session + active membership → `ctx.tenant = { membershipId, restaurantId, roleCode }`. |
 
-- Web to API. During server-side rendering, the web Worker calls the API through the
-  `API_WORKER` service binding, which stays in-process and makes no network hop.
-  Browsers call same-origin `/trpc`, and the web Worker proxies those requests through
-  the same binding. See `apps/web/src/app/server.ts` and
-  `apps/web/src/lib/trpc-client.ts`.
-- Web to KV. The web Worker reads the tenant theme directly from the `TENANT_THEME` KV
-  binding at render time (`apps/web/src/server/tenant-theme.ts`).
-- API to tenant-config. The API never writes to KV directly. Theme writes go through the
-  `THEME_WORKER` service binding to `apps/tenant-config`, which is the only writer and
-  normalizer of `TENANT_THEME`. See [Custom domains](domains/custom-domains.md) and
-  [Theming](domains/theming.md).
-- API to image Worker. Authenticated image negotiation and polling call `createUpload` and
-  `getUpload` through the private `IMAGE_WORKER` RPC service binding. Browser bytes go directly
-  to a signed private R2 staging object; the Queue-driven image Worker writes the public WebP
-  result to `qmenut-media`. qmenut saves a URL only after revalidating the upload's tenant/branch
-  ownership and exact manifest URL. See [Image uploads](operations/image-uploads.md).
-- Shared KV ID. `apps/web/wrangler.jsonc` and `apps/tenant-config/wrangler.jsonc` bind
-  the same KV namespace ID. Local storage under
-  `--persist-to ../../.wrangler-shared/state` is keyed by ID, so both Workers must
-  declare the same value for local development and end-to-end tests to share state.
+Clients never send a `restaurantId`. Branch-scoped mutations call `assertBranchAccess` (returns `NOT_FOUND`, not `FORBIDDEN`) and `requirePermission`. See [Multi-tenancy](domains/multi-tenancy.md).
 
-## The API Worker
+Module layout: `apps/api/src/modules/<domain>/` → `*.router.ts`, one file per use case, `*-input.schema.ts` (Zod). Infra singletons (Stripe, plan catalog, KV store) live in `apps/api/src/lib/`. Clients import the `AppRouter` type from `@qmenut/api/router`.
 
-`apps/api/src/index.ts` exports a single native `fetch` handler that dispatches by path.
-There is no framework router. The handler is wrapped in `Sentry.withSentry` and routes
-requests as follows:
+## Data
 
-| Request                 | Handling                                                                |
-| ----------------------- | ----------------------------------------------------------------------- |
-| `OPTIONS`               | CORS preflight, through `applyCorsHeaders` and `createOptionsResponse`. |
-| `/health`               | Returns `{ status: "ok" }`.                                             |
-| `POST /webhooks/stripe` | `handleStripeWebhook`. See [Billing](domains/billing.md).               |
-| `/api/auth/*`           | The Better Auth handler. See [Auth](domains/auth.md).                   |
-| `/trpc`                 | `fetchRequestHandler` with `appRouter` and a per-request context.       |
+- **D1 + Drizzle.** `createDb(d1)` in `packages/db/src/client.ts`, one per request.
+- **Schema** in `packages/db/src/schema/`, reachable only through the barrel `index.ts` (Drizzle Kit ignores anything else).
+- **Repositories** in `packages/db/src/repositories/*.repository.ts` take input objects and always filter by `restaurantId` and/or `branchId`.
+- **Money** is integer minor units. **Time** is integer epoch ms.
+- **Migrations**: schema → `db:generate` → SQL in `apps/api/migrations/` → Wrangler applies. See [Database migrations](operations/database-migrations.md).
 
-A fresh context, including a fresh Drizzle client, is built for each request through
-`createContext({ env, request })` (`apps/api/src/index.ts:45`). Never hold either in a
-module-level variable.
-
-### tRPC composition
-
-`apps/api/src/trpc/router.ts` assembles the API:
-
-```ts
-appRouter = {
-  auth,
-  health,
-  menu, // public menu (public-menu module)
-  loyalty, // public customer loyalty
-  admin: { tenant, menu, branches, images, promotions, theme, billing, loyalty, languages, translations },
-};
+```mermaid
+erDiagram
+  restaurants ||--o{ branches : has
+  restaurants ||--o{ restaurant_users : "membership + role"
+  users ||--o{ restaurant_users : ""
+  branches ||--o{ categories : ""
+  categories ||--o{ dishes : ""
+  branches ||--o| branch_subscriptions : Stripe
+  restaurants ||--o{ customer_restaurants : "loyalty card"
+  customers ||--o{ customer_restaurants : ""
 ```
 
-Three procedure types are defined in `apps/api/src/trpc/trpc.ts`:
+## Code layers
 
-| Procedure            | Description                                                                                                                                                              |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `publicProcedure`    | No authentication. Used by the public menu and customer loyalty.                                                                                                         |
-| `protectedProcedure` | Requires a Better Auth session.                                                                                                                                          |
-| `tenantProcedure`    | Extends `protectedProcedure` and loads the user's restaurant membership into `ctx.tenant = { membershipId, restaurantId, roleCode }`. Every `admin.*` procedure uses it. |
+Each app's `src/` follows the same layers. Oxlint's `boundaries` plugin fails the build on a wrong edge.
 
-`tenantProcedure` is the basis of tenant isolation. See
-[Multi-tenancy](domains/multi-tenancy.md).
+```mermaid
+flowchart TD
+  app["app/<br/>routes · bootstrap · composition"] --> features
+  app --> shared
+  app --> lib
+  features["features/&lt;name&gt;/<br/>one vertical slice"] --> shared
+  features --> lib
+  shared["shared/<br/>used by ≥ 2 features"] --> lib
+  lib["lib/<br/>clients, contracts"] --> packages
+  shared --> packages
+  features --> packages["packages/*"]
+```
 
-Per-module code lives in `apps/api/src/modules/<domain>/` and contains a `*.router.ts`,
-one handler file per use case, and a `*-input.schema.ts` that holds the Zod inputs.
-Infrastructure providers, such as Stripe, the plan catalog, and the theme-worker client,
-are singletons in `apps/api/src/lib/`.
+- A feature never imports another feature. Two features need the same thing → move it to `shared/<domain>/`.
+- A page that stitches several features belongs in `app/`.
+- A real exception is a named policy in `.oxlintrc.jsonc`, never an inline `oxlint-disable`.
+- `packages/*` never import `apps/*`. `apps/web/src/server/` holds SSR-only code.
 
-The `AppRouter` type is re-exported to clients through `@qmenut/api/router`, declared in
-the `exports` map of `apps/api/package.json`. This gives admin and web end-to-end type
-safety.
+## Packages
 
-## Data layer
+| Package                | Contents                                                                                |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| `packages/db`          | Schema, repositories, models, mappers, domain logic.                                    |
+| `packages/auth`        | Better Auth (email OTP) over Drizzle. Server entry + `./client`.                        |
+| `packages/permissions` | `ROLE_CODES`, permission checks, plan feature keys. No dependencies.                    |
+| `packages/ui`          | Lit web components, React wrappers, theme engine (`theme/`). See its `CONTRIBUTING.md`. |
 
-- ORM. Drizzle with the D1 driver. `packages/db/src/client.ts` exports `createDb(d1)`,
-  which creates one Drizzle instance per request over the `DB` binding.
-- Schema. Split by domain in `packages/db/src/schema/`: `auth.ts`, `tenancy.ts`
-  (restaurants, branches, memberships, subscriptions, and languages), `menu.ts`,
-  `translations.ts`, `promotions.ts`, `customers.ts`, `loyalty.ts`, `billing.ts`,
-  `campaigns.ts`, `ordering.ts`, `analytics.ts`, and `operations.ts`. All of them are
-  reachable from the single barrel file `schema/index.ts`; `restaurants.ts` and
-  `branches.ts` re-export from `tenancy.ts`. Drizzle Kit reads only that barrel, so a
-  table that is not reachable from it is not managed.
-- Data access. The repository layer in `packages/db/src/repositories/*.repository.ts`
-  takes input objects and always filters by `restaurantId` or branch. Models, mappers,
-  and domain logic sit alongside it in `models/`, `mappers/`, and `domain/`.
-- Money. Prices and other monetary values are stored as integers in minor units (cents).
+## Tooling
 
-Migrations are code-first from `packages/db/src/schema/`. Drizzle Kit compares the schema
-with the committed snapshots in `apps/api/migrations/meta/` and generates SQL through
-`db:generate`. Wrangler applies the generated files through `db:migrate` or
-`db:migrate:local`. `db:check` fails when a schema change has no generated migration.
+| Concern    | Tool                                                                                                   |
+| ---------- | ------------------------------------------------------------------------------------------------------ |
+| Packages   | Bun workspaces, `bun.lock`. No npm/pnpm/yarn.                                                          |
+| Tasks      | Turbo: `dev`, `build`, `check` (`tsc --noEmit` + `db:check`), `lint`.                                  |
+| Format     | Oxfmt (`.oxfmtrc.jsonc`). Prettier only for `apps/landing/**/*.astro`.                                 |
+| Lint       | Oxlint, type-aware, `--deny-warnings` (`.oxlintrc.jsonc`). Negative fixtures: `bun run lint:fixtures`. |
+| Unit tests | `bun test packages/ui`.                                                                                |
+| E2E        | Playwright in `e2e/`. No CI. See [Testing](operations/testing.md).                                     |
+| Deploy     | `bun run deploy --development \| --production`. See [Deployment](operations/deployment.md).            |
 
-The history starts at the squashed `0000_baseline.sql`, which contains 44 tables, the
-managed `v_dish_promotion_prices` view, and the immutable allergen and system-tag
-catalog. D1 records applied migrations in its own `d1_migrations` table; there is no
-`__drizzle_migrations` runtime table. For the full workflow, see
-[Database migrations](operations/database-migrations.md).
+## Local ports
 
-## Build and tooling
-
-- Package manager. Bun, with `bun.lock`. Do not use pnpm or yarn.
-- Task runner. Turbo tasks: `build`, `dev` (persistent and uncached), `check`
-  (`tsc --noEmit`), and `lint`. The common commands are `bun run dev`, `bun run build`,
-  `bun run check`, and `bun run lint`.
-- TypeScript. A strict base configuration in the root `tsconfig.json`
-  (`moduleResolution: bundler`, `noEmit`) that every application and package extends.
-- Lint and format. Flat ESLint config in `eslint.config.js`, plus Prettier. `AGENTS.md`
-  documents the conventions, including snake-case filenames, type-only imports, one
-  barrel per module, early returns instead of deep nesting, and object parameters
-  instead of long positional parameter lists.
-
-## Deployment
-
-Each Worker has its own Wrangler configuration: `apps/api/wrangler.jsonc`,
-`apps/web/wrangler.jsonc`, `apps/tenant-config/wrangler.jsonc`,
-`apps/admin/wrangler.jsonc`, and `apps/landing/wrangler.jsonc`.
-
-One `qmenut-web` Worker serves every tenant domain through Cloudflare custom domains. In
-production, the request `Host` header is the only tenant selector. Development values
-stay at the top level of each configuration file. Production values and non-inheritable
-bindings are repeated under `[env.production]`. Deploys are manual, and secrets stay in
-platform configuration.
-
-For the complete procedure, see [Deployment](operations/deployment.md). For the routing
-model, see [Custom domains](domains/custom-domains.md).
-
-## Testing
-
-Playwright end-to-end tests live in `e2e/` and run locally with `bun run test:e2e`. There
-is no CI workflow. The reset script clears local D1 and KV data and reseeds it before
-Playwright reuses running development servers or starts missing E2E Workers. Tests
-select a tenant with the `Host` header. End-to-end authentication uses `e2e@test.local`
-with the fixed OTP `000000`, supplied through `DEV_FIXED_OTP`. Local, test, and the deployed
-development environment enable it; production ignores it and must never configure it.
-As stated in `AGENTS.md`, do not add tests unless you are asked to.
-
-Local end-to-end runs require `tapas.localhost`, `fine.localhost`, `cafe.localhost`,
-`her.localhost`, and `fast.localhost` to resolve to `127.0.0.1` in `/etc/hosts`. This is
-mandatory because one production build of the web Worker serves every tenant and the
-tests change only the `Host` header.
-
-`E2E_VISUAL=1` registers the mobile template snapshot project.
-Snapshot baselines include the platform in their path. Generate Linux baselines in a
-Linux container, or treat the snapshots as macOS-only. See
-[Testing](operations/testing.md).
+| Port | Process                     |
+| ---- | --------------------------- |
+| 8787 | API                         |
+| 5173 | Web (Vite dev)              |
+| 4011 | Web (production build, E2E) |
+| 5174 | Admin                       |
+| 4321 | Landing                     |
 
 ## Key files
 
-| Concern                      | Path                            |
-| ---------------------------- | ------------------------------- |
-| API entry point and dispatch | `apps/api/src/index.ts`         |
-| tRPC router composition      | `apps/api/src/trpc/router.ts`   |
-| Procedure types              | `apps/api/src/trpc/trpc.ts`     |
-| Per-request context          | `apps/api/src/trpc/context.ts`  |
-| Drizzle client factory       | `packages/db/src/client.ts`     |
-| Schema, split by domain      | `packages/db/src/schema/`       |
-| Repositories                 | `packages/db/src/repositories/` |
-| Migrations                   | `apps/api/migrations/`          |
-| Drizzle Kit configuration    | `apps/api/drizzle.config.ts`    |
-| Worker configurations        | `apps/*/wrangler.jsonc`         |
-| Code conventions             | `AGENTS.md`                     |
+| Concern             | Path                                                       |
+| ------------------- | ---------------------------------------------------------- |
+| API entry           | `apps/api/src/index.ts`                                    |
+| Router / procedures | `apps/api/src/trpc/router.ts`, `apps/api/src/trpc/trpc.ts` |
+| Web SSR entry       | `apps/web/src/app/server.ts`                               |
+| Schema / repos      | `packages/db/src/schema/`, `packages/db/src/repositories/` |
+| Worker config       | `apps/*/wrangler.jsonc`                                    |
+| Deploy orchestrator | `scripts/deploy.ts`                                        |

@@ -5,9 +5,7 @@
 Reservations version 1 is implemented as designed in
 [reservations-ux.md](../design/reservations-ux.md) and ADRs
 [0004](../adr/0004-reservation-access-by-email-alone.md) and
-[0008](../adr/0008-reservations-are-booked-and-confirmed-by-email.md). The original plan is
-[docs/plans/reservations.md](../plans/reservations.md); ADR 0008 replaced its staff answers and
-WhatsApp check. Terms follow the _Reservations_ section of [CONTEXT.md](../../CONTEXT.md).
+[0008](../adr/0008-reservations-are-booked-and-confirmed-by-email.md). Terms follow the _Reservations_ section of [CONTEXT.md](../../CONTEXT.md).
 
 - Implemented: instant booking on `/reservar` (calendar, slot, party size, contact), guest
   confirmation and cancellation by email or manage link, the admin section (Day, Settings,

@@ -11,9 +11,7 @@ stamps, defines rewards, and lets customers redeem them. Guests earn stamps with
 requests that staff accept, and staff validate redemptions in person. A rotating venue code
 proves presence, so no scanner or camera is required.
 
-The design reasoning is in [Loyalty UX](../design/loyalty-ux.md), locked on 2026-07-08 and
-revised on 2026-07-10 to remove QR scanning. Earning was redesigned on 2026-10-28 in
-[Loyalty stamp requests UX](../design/loyalty-stamp-requests-ux.md) and
+Design reasoning: [Loyalty UX](../design/loyalty-ux.md) and
 [ADR 0007](../adr/0007-unanswered-stamp-requests-are-accepted.md).
 
 ## Data model

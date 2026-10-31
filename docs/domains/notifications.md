@@ -4,8 +4,7 @@
 
 Staff notifications version 1 is implemented as designed in
 [notifications-ux.md](../design/notifications-ux.md) and
-[ADR 0006](../adr/0006-notifications-through-cloudflare-queues.md), with the plan in
-[docs/plans/notifications.md](../plans/notifications.md).
+[ADR 0006](../adr/0006-notifications-through-cloudflare-queues.md).
 
 - Implemented: the inbox (bell, badge, `/notifications` page), per-member read state and shared
   handled state, Web Push to devices that follow branches, 30-day retention, and announcements as

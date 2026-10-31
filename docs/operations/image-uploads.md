@@ -2,23 +2,26 @@
 
 Qmenut owns image ownership and publication. The private `ming-image-worker` owns
 upload jobs, signed URLs, processing, attempts, failures, output variants and their
-canonical manifests in its own D1 database. It already serves multiple products;
-no new worker database or replacement RPC contract is needed for this iteration.
+canonical manifests in its own D1 database.
 
-## Review of the interrupted plan
+```mermaid
+sequenceDiagram
+  participant B as Admin browser
+  participant A as qmenut-api
+  participant M as ming-image-worker
+  participant R as R2
+  B->>A: admin.images.createUpload (purpose, branch)
+  A->>M: createUpload via IMAGE_WORKER (preset, opaque externalId)
+  M-->>B: presigned PUT URL (through A)
+  B->>R: PUT bytes to qmenut-image-staging
+  R-->>M: object-create → processing queue → WebP variants in qmenut-media
+  B->>A: save form (uploadId) — atomic, idempotent
+  Note over A: minute cron reads image_assignments outbox
+  A->>M: getUpload, verify fingerprint + preset
+  A->>A: copy manifest → image_variants, publish URL
+```
 
-Commit `aec4430` introduced durable `image_assignments`, form-save idempotency,
-background publication through a second queue, and global browser transfers. The current editor flow removes that global
-coordinator and waits for transfer before saving, while optimization stays asynchronous.
-
-This iteration keeps the atomic saves and revision protection, adds local upload
-ownership, and removes Qmenut's publication queue and dispatch calls from form saves.
-A minute cron reads the existing D1 outbox directly. Ming's processing queue remains
-unchanged. This trades roughly one minute of publication latency for fewer moving
-parts; backlogs can take longer. Batch RPC, callbacks, worker contract renaming and
-historical upload tracking are deferred until needed. Ming also records accepted retries
-as queued and makes repeated retry requests idempotent; the processing-attempt check
-prevents a late acceptance write from overwriting a newer processing result.
+Saves wait for the byte transfer; optimization and publication are asynchronous (≈1 minute via the cron outbox).
 
 ## Durable records and responsibilities
 
@@ -105,7 +108,7 @@ request or retry is also surfaced. This deadline does not cancel the Ming job.
 Files are not persisted in browser storage. Closing before the save confirmation
 can lose the draft, but closing after it cannot interrupt transfers: they are already
 received. Optimized but unreferenced output cleanup and backfilling old external
-images remain outside this iteration.
+images are not implemented.
 
 ## Worker contract and authorization
 
@@ -158,11 +161,7 @@ The policy must match `ming-image-worker/examples/qmenut-staging-cors.json`.
 Local and E2E configurations use the remote shared image binding, so regular upload
 E2E tests are not isolated. Use a fake binding for failure checks.
 
-Apply migrations through `0004_image_upload_ownership.sql` before deploying this API.
-The migration adds only the ownership table; 0002/0003 and their snapshots are unchanged.
-Development uses `* * * * *`; production keeps that cron alongside the existing
-`45 4 * * *` analytics schedule. No Qmenut image queue needs provisioning. Existing
-queue resources, if provisioned for the interrupted plan, are not deleted by this change.
+Publication runs on the API minute cron (`* * * * *`); there is no qmenut image queue.
 For local Wrangler, trigger the scheduled handler with `--test-scheduled` and
 `/__scheduled?cron=*+*+*+*+*`; local cron events do not run automatically.
 
@@ -171,36 +170,3 @@ four purposes and three file types, PUT completion followed by closing the tab,
 public URLs, actual dimensions/MIME/cache headers, catalogue, responsive delivery
 and invalidation. Local validation alone does not establish that R2 notifications,
 CORS or the currently deployed shared worker are configured correctly.
-
-## Local verification, 2026-09-06
-
-With Bun 1.3.6, Qmenut type checks/build and the five migrations applied to isolated
-local D1 pass. Temporary SQLite checks through the actual publication/save functions
-cover ownership and purpose isolation, previous-image preservation, worker outage,
-gallery ordering, upload-reference retention, cache retries, stale revisions, deletion,
-save replay and transaction rollback. No new test suite is added to the repositories.
-
-Ming's existing ten RPC tests pass. A temporary service/repository check also covers
-cross-product reads/retries, queued retry acceptance, idempotent replay, enqueue failure
-and a newer processing attempt overtaking the acceptance write. Its type check and
-dry-run build pass. Repository-wide lint still has unrelated pre-existing findings;
-changed image files are checked separately.
-
-Neither repository has been deployed in this iteration. Remote migration application,
-real R2/Images processing and browser/public-menu smoke checks remain the next development
-validation step. Deploy Ming's retry correction before the Qmenut API and admin.
-
-## Editor simplification verification, 2026-09-07
-
-Bun 1.3.6 monorepo checks, the admin build, and lint/format checks for changed
-frontend files pass. Temporary Playwright checks exercise the actual category
-controller and shared upload code against a local HTTP receiver and simulated
-control RPCs: real byte progress, withheld PUT acknowledgement, double submission,
-route locking, save replay with the same operation ID, partial transfer failures,
-three concurrent logo/gallery uploads, queued-job recovery, timeout and abort.
-The persistent panel survives reload and switches from pending to applied. Mobile
-dark-mode layout and an axe check of the form also pass. No new test suite is added.
-
-These checks do not upload to Ming or establish the deployed staging CORS policy,
-R2 notifications, or remote processing/publication health. A real development smoke
-remains necessary when deploying this change.

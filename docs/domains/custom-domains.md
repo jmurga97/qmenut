@@ -1,7 +1,7 @@
 # Custom domains and tenant resolution
 
-This page describes how an incoming request is resolved to a branch, and how the
-standalone `tenant-config` Worker owns the per-tenant KV namespace.
+This page describes how an incoming request is resolved to a branch, and how the API
+owns writes to the per-tenant KV namespace.
 
 ## Status
 
@@ -60,46 +60,30 @@ TanStack request context does not exist at that point. Neither resolver trusts
 `apps/web/wrangler.jsonc` binds `TENANT_THEME` as a KV namespace and `API_WORKER` as a
 service binding to `qmenut-api`. There is no tenant-pinning Worker variable.
 
-## The tenant-config Worker
+## Writing the tenant-theme KV
 
-`apps/tenant-config` is a small standalone Worker and the only writer of the
-`TENANT_THEME` KV namespace. Its entry point, `apps/tenant-config/src/index.ts`, routes
-REST requests with regular expressions and uses no framework.
+The API is the only writer of the `TENANT_THEME` KV namespace. All reads and writes go
+through `apps/api/src/lib/theme/tenant-theme-store.ts`:
 
-| Route                         | Methods          | Description                                                                                 |
-| ----------------------------- | ---------------- | ------------------------------------------------------------------------------------------- |
-| `/tenants/:host/theme`        | GET, PUT, DELETE | Theme CRUD. `GET` is open; `PUT` and `DELETE` require authorization.                        |
-| `/tenants/:host/menu-version` | GET, PUT         | Cache-invalidation signal. `PUT` stores `Date.now()` under the KV key `menuVersion:{host}`. |
-| `/health`                     | GET              | Health check.                                                                               |
+- `putTheme` passes the config through `resolveTenantThemeConfig` before storing it, so KV
+  always holds a complete configuration and readers never receive a partial one.
+- `getTheme` normalizes on read without rewriting KV.
+- `bumpPublicContentVersion` stores `Date.now()` under `menuVersion:{host}`, the
+  cache-invalidation signal.
 
-Three details are worth knowing:
-
-- Authorization. Writes require an `Authorization: Bearer <THEME_WORKER_TOKEN>` header
-  (`index.ts:21`, `isAuthorized`). Both sides are SHA-256 digested and compared with
-  `crypto.subtle.timingSafeEqual`, so the comparison runs in constant time. The local
-  token is `dev-token`.
-- Normalization. A `PUT` body must contain a valid `template` (`index.ts:33`,
-  `parseThemeBody`). The body is then passed through `resolveTenantThemeConfig` and
-  re-serialized, so KV always stores a complete configuration object and readers never
-  receive a partial one.
-- Host handling. The host from the path is decoded and passed through
-  `normalizeTenantHost` (`index.ts:144`).
-
-The API reaches this Worker through its `THEME_WORKER` service binding; see
-[Theming](theming.md). The web application does not go through it and reads the KV
-namespace directly.
+A `no-restricted-properties` lint rule rejects `TENANT_THEME` anywhere else in the API, and
+the web Worker types the binding as read-only (`apps/web/src/server/worker-env.d.ts`).
 
 Note: `menuVersion` is a legacy key name. It represents all public-content changes, not
 only menu rows. See [Performance and caching](../operations/performance-and-caching.md).
 
 ## Why the KV namespace ID is duplicated
 
-`apps/web/wrangler.jsonc` and `apps/tenant-config/wrangler.jsonc` bind the same KV
-namespace deliberately. Cloudflare's local storage,
-`--persist-to ../../.wrangler-shared/state`, is keyed by the namespace preview ID, so
-local development and end-to-end tests use the same `preview_id` while production uses the
-real shared `id`. If you create a new KV namespace, update the production `id` in both
-configuration files.
+`apps/web/wrangler.jsonc` and `apps/api/wrangler.jsonc` bind the same KV namespace
+deliberately. Locally the web Worker persists into the API's `apps/api/.wrangler/state`,
+which is keyed by the namespace preview ID, so local development and end-to-end tests use
+the same `preview_id` while production uses the real shared `id`. If you create a new KV
+namespace, update the `id` in both configuration files.
 
 ## Example: from a request to a tenant
 
@@ -123,8 +107,7 @@ configuration files.
 | Branch to host lookup                      | `apps/api/src/modules/admin-tenant/resolve-branch-host.ts`  |
 | Web host resolution during rendering       | `apps/web/src/server/tenant-host.ts`                        |
 | Web Worker bindings and variables          | `apps/web/wrangler.jsonc`                                   |
-| Tenant-config Worker                       | `apps/tenant-config/src/index.ts`                           |
-| Tenant-config Worker configuration         | `apps/tenant-config/wrangler.jsonc`                         |
+| Tenant-theme KV store                      | `apps/api/src/lib/theme/tenant-theme-store.ts`              |
 
 ## Limitations
 
