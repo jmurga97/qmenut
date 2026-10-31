@@ -1,5 +1,5 @@
 import { expect, test } from "../../fixtures/test";
-import { getContentVersion } from "../../helpers/tenant-config";
+import { getContentVersion } from "../../helpers/tenant-theme-kv";
 
 import type { APIRequestContext } from "@playwright/test";
 
@@ -40,7 +40,7 @@ test("publishes an admin dish rename through versioned SSR cache invalidation", 
   const updatedName = `Croquetas sincronizadas ${Date.now()}`;
 
   await expectCachedMenu(request, originalName);
-  const versionBeforeUpdate = await getContentVersion(request, "tapas.localhost");
+  const versionBeforeUpdate = await getContentVersion("tapas.localhost");
 
   await page.goto("/menu", { waitUntil: "domcontentloaded" });
   await page.getByRole("link", { name: originalName }).click();
@@ -50,7 +50,7 @@ test("publishes an admin dish rename through versioned SSR cache invalidation", 
 
   try {
     await expect
-      .poll(() => getContentVersion(request, "tapas.localhost"), {
+      .poll(() => getContentVersion("tapas.localhost"), {
         message: "the admin mutation should bump the tenant public-content version",
         timeout: 10_000,
       })
@@ -64,7 +64,7 @@ test("publishes an admin dish rename through versioned SSR cache invalidation", 
 
     await expectCachedMenu(request, updatedName);
   } finally {
-    const versionBeforeRestore = await getContentVersion(request, "tapas.localhost");
+    const versionBeforeRestore = await getContentVersion("tapas.localhost");
     await page.goto("/menu", { waitUntil: "domcontentloaded" });
     const updatedLink = page.getByRole("link", { name: updatedName });
 
@@ -80,7 +80,7 @@ test("publishes an admin dish rename through versioned SSR cache invalidation", 
       await expect(page.getByRole("link", { name: originalName })).toBeVisible();
 
       await expect
-        .poll(() => getContentVersion(request, "tapas.localhost"), {
+        .poll(() => getContentVersion("tapas.localhost"), {
           message: "restoring seeded data should bump the public-content version",
           timeout: 10_000,
         })

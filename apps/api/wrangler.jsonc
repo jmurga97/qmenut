@@ -14,6 +14,15 @@
       "migrations_dir": "migrations",
     },
   ],
+  // Only writer of TENANT_THEME (apps/web reads it). The web Worker persists local state into
+  // this Worker's .wrangler/state, so both see the same preview_id namespace.
+  "kv_namespaces": [
+    {
+      "binding": "TENANT_THEME",
+      "id": "0f5d31e6c4a94b0f8a2d7c1b3e9f6a01",
+      "preview_id": "0f5d31e6c4a94b0f8a2d7c1b3e9f6a01",
+    },
+  ],
   "services": [
     {
       "binding": "EMAIL_WORKER",
@@ -31,10 +40,6 @@
       "service": "ming-exchange-rate-worker",
       "entrypoint": "ExchangeRateRpc",
       "remote": true,
-    },
-    {
-      "binding": "THEME_WORKER",
-      "service": "qmenut-tenant-config",
     },
   ],
   "ratelimits": [
@@ -118,6 +123,12 @@
           "migrations_dir": "migrations",
         },
       ],
+      "kv_namespaces": [
+        {
+          "binding": "TENANT_THEME",
+          "id": "d85019d6ce874b2abdedeb95a91736a3",
+        },
+      ],
       "services": [
         {
           "binding": "EMAIL_WORKER",
@@ -135,10 +146,6 @@
           "service": "ming-exchange-rate-worker",
           "entrypoint": "ExchangeRateRpc",
           "remote": true,
-        },
-        {
-          "binding": "THEME_WORKER",
-          "service": "qmenut-tenant-config-dev",
         },
       ],
       "ratelimits": [
@@ -230,6 +237,12 @@
           "migrations_dir": "migrations",
         },
       ],
+      "kv_namespaces": [
+        {
+          "binding": "TENANT_THEME",
+          "id": "48d5fae2045240cfae007bdd790c64f6",
+        },
+      ],
       "services": [
         {
           "binding": "EMAIL_WORKER",
@@ -247,10 +260,6 @@
           "service": "ming-exchange-rate-worker",
           "entrypoint": "ExchangeRateRpc",
           "remote": true,
-        },
-        {
-          "binding": "THEME_WORKER",
-          "service": "qmenut-tenant-config",
         },
       ],
       "ratelimits": [

@@ -1,5 +1,5 @@
 import { expect, test } from "../../fixtures/test";
-import { getContentVersion, getTenantTheme } from "../../helpers/tenant-config";
+import { getContentVersion, getTenantTheme } from "../../helpers/tenant-theme-kv";
 import { selectMingOption } from "../../helpers/form-controls";
 import { callTrpcMutation } from "../../helpers/trpc";
 
@@ -16,9 +16,9 @@ function writableTheme(theme: Record<string, unknown>) {
   };
 }
 
-test("publishes a normalized theme through tenant-config and the public worker", async ({ page, request }) => {
-  const original = await getTenantTheme(request, "tapas.localhost");
-  const versionBeforeDraft = await getContentVersion(request, "tapas.localhost");
+test("publishes a normalized theme through the API and the public worker", async ({ page }) => {
+  const original = await getTenantTheme("tapas.localhost");
+  const versionBeforeDraft = await getContentVersion("tapas.localhost");
   await page.goto("/");
   await selectMingOption(page, "Sucursal activa", "Bar La Tasca");
   await page.goto("/theme");
@@ -87,14 +87,14 @@ test("publishes a normalized theme through tenant-config and the public worker",
   await expect(headingFont).toHaveText("Playfair Display");
   await expect(bodyFont).toHaveText("DM Sans");
 
-  expect(await getTenantTheme(request, "tapas.localhost")).toEqual(original);
-  expect(await getContentVersion(request, "tapas.localhost")).toBe(versionBeforeDraft);
+  expect(await getTenantTheme("tapas.localhost")).toEqual(original);
+  expect(await getContentVersion("tapas.localhost")).toBe(versionBeforeDraft);
 
   await page.getByText("Guardar tema", { exact: true }).click();
   await expect(page.getByText("Tema guardado.")).toBeVisible();
 
   try {
-    const stored = await getTenantTheme(request, "tapas.localhost");
+    const stored = await getTenantTheme("tapas.localhost");
     expect(stored).toMatchObject({
       template: "fast",
       primary: "#D13A2F",
@@ -108,7 +108,7 @@ test("publishes a normalized theme through tenant-config and the public worker",
     expect(stored.layout).toBeTruthy();
     expect(stored.heading).toBeTruthy();
     expect(stored.body).toBeTruthy();
-    await expect.poll(() => getContentVersion(request, "tapas.localhost")).not.toBe(versionBeforeDraft);
+    await expect.poll(() => getContentVersion("tapas.localhost")).not.toBe(versionBeforeDraft);
 
     await page.goto(`http://tapas.localhost:4011/?theme=${Date.now()}`);
     const shell = page.locator(".home-shell");

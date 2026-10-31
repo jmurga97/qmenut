@@ -1,5 +1,5 @@
 /**
- * Negative fixtures for the lint migration (docs/operations/lint-migration.md).
+ * Negative lint fixtures for the architecture boundaries (docs/architecture.md#code-layers).
  *
  * Writes temporary files into the real source tree (so boundaries classifies them with the
  * real element model), runs oxlint on them, and asserts each fails with the expected rule.

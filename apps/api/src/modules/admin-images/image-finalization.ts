@@ -8,7 +8,7 @@ import { and, eq, exists, isNull, lte, not, or, sql } from "drizzle-orm";
 
 import { buildImageVariantCatalogEntries } from "./image-variant-catalog";
 import { getImageUpload } from "./image-worker.client";
-import { bumpPublicContentVersion } from "../../lib/theme/theme-worker-client";
+import { bumpPublicContentVersion } from "../../lib/theme/tenant-theme-store";
 
 import type { VerifiedImageManifest } from "./image-worker.client";
 import type { RuntimeEnv } from "../../config/env/schema";

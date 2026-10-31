@@ -51,7 +51,8 @@ export default defineConfig({
   plugins: [
     cloudflare({
       viteEnvironment: { name: "ssr" },
-      persistState: { path: "../../.wrangler-shared/state" },
+      // Shares the API Worker's local state so both see the same TENANT_THEME namespace.
+      persistState: { path: "../api/.wrangler/state" },
     }),
     tanstackStart({
       srcDirectory: "src/app",

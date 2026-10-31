@@ -2,7 +2,7 @@ import { isBodyFontId, isHeadingFontId, QM_FONT_IDS } from "@qmenut/ui/theme/fon
 import { z } from "zod";
 
 import { requireFeature } from "../../lib/billing/entitlement";
-import { bumpPublicContentVersion, getTheme, putTheme } from "../../lib/theme/theme-worker-client";
+import { bumpPublicContentVersion, getTheme, putTheme } from "../../lib/theme/tenant-theme-store";
 import { router, tenantProcedure } from "../../trpc/trpc";
 import { requirePermission } from "../admin-tenant/require-permission";
 import { resolveBranchHost } from "../admin-tenant/resolve-branch-host";

@@ -4,7 +4,7 @@ import { listTranslationLocks } from "@qmenut/db/repositories/translations.repos
 import { translations } from "@qmenut/db/schema/translations";
 import { eq } from "drizzle-orm";
 
-import { getTheme } from "../../lib/theme/theme-worker-client";
+import { getTheme } from "../../lib/theme/tenant-theme-store";
 
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";

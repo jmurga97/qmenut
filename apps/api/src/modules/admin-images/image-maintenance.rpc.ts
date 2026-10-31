@@ -6,7 +6,7 @@ import { z } from "zod";
 import { buildImageVariantCatalogEntries } from "./image-variant-catalog";
 import { uploadManifestSchema } from "./image-worker.client";
 import { parseEnv } from "../../config/env";
-import { bumpPublicContentVersion } from "../../lib/theme/theme-worker-client";
+import { bumpPublicContentVersion } from "../../lib/theme/tenant-theme-store";
 
 import type { EnvBindings } from "../../config/env/schema";
 

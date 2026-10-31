@@ -5,8 +5,7 @@
 // There is one deployed qmenut-web worker. Each tenant domain is attached to it as a Cloudflare
 // custom domain, and the request Host header resolves the tenant.
 //
-// `preview_id` is the stable local namespace key and must MATCH apps/tenant-config. Replace the
-// placeholder production `id` in both configs after provisioning TENANT_THEME in Cloudflare.
+// TENANT_THEME ids must MATCH apps/api/wrangler.jsonc, the only writer; this Worker only reads.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "qmenut-web",
@@ -30,7 +29,7 @@
   "vars": {
     "ALLOW_INDEXING": "false",
     // Local `vite dev` uses this top-level env; the 24h HTML edge cache persists to
-    // .wrangler-shared/state and would otherwise hide every UI edit until it expires.
+    // apps/api/.wrangler/state and would otherwise hide every UI edit until it expires.
     "DISABLE_EDGE_CACHE": "true",
     "SENTRY_DSN": "",
   },

@@ -9,7 +9,7 @@ import { mapStripeStatus } from "./map-stripe-status";
 import { entitledPlanCode } from "../../lib/billing/entitlement";
 import { planCodeFor } from "../../lib/billing/plan-catalog";
 import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
-import { getTheme, putTheme } from "../../lib/theme/theme-worker-client";
+import { getTheme, putTheme } from "../../lib/theme/tenant-theme-store";
 
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";

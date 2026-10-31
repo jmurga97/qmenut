@@ -11,10 +11,10 @@
   "env": {
     "builtin": true,
   },
-  // Architecture model (docs/operations/lint-migration.md): app → features/shared/lib; features
+  // Architecture model (docs/architecture.md#code-layers): app → features/shared/lib; features
   // only import themselves, shared, lib and packages; shared/lib never reach back up into
   // app/features; packages never import apps. Boundary violations fail lint, including
-  // the pre-commit hook; see docs/operations/boundaries-cleanup.md.
+  // the pre-commit hook.
   "jsPlugins": ["eslint-plugin-boundaries"],
   "settings": {
     // Required by the boundaries jsPlugin: without a resolver, `~/` aliases are treated as
@@ -36,12 +36,10 @@
         "partialMatch": false,
       },
       { "type": "worker", "pattern": "apps/api/src/**", "partialMatch": false },
-      { "type": "worker", "pattern": "apps/tenant-config/src/**", "partialMatch": false },
       { "type": "shared", "pattern": "apps/*/src/shared/**", "capture": ["appName"], "partialMatch": false },
       { "type": "lib", "pattern": "apps/*/src/lib/**", "capture": ["appName"], "partialMatch": false },
       { "type": "server", "pattern": "apps/*/src/server/**", "capture": ["appName"], "partialMatch": false },
       { "type": "worker", "pattern": "apps/api/src/**", "partialMatch": false },
-      { "type": "worker", "pattern": "apps/tenant-config/src/**", "partialMatch": false },
       { "type": "assets", "pattern": "apps/*/src/assets/**", "capture": ["appName"], "partialMatch": false },
       { "type": "package", "pattern": "packages/*/src/**", "capture": ["pkgName"], "partialMatch": false },
       { "type": "e2e", "pattern": "e2e/**", "partialMatch": false },
@@ -744,7 +742,7 @@
         "unicorn/prefer-structured-clone": "error",
         "unicorn/prefer-ternary": "error",
         // Off: misfires on synchronous zod builder chains (`.catch(...)`, `.or(...)` in schema
-        // definitions) — see docs/operations/lint-migration.md rule diff.
+        // definitions).
         "unicorn/prefer-top-level-await": "off",
         "unicorn/prefer-type-error": "error",
         "unicorn/relative-url-style": "error",
@@ -979,7 +977,7 @@
     {
       // react-hook-form's `field` and controller objects are ref-shaped, so react/refs flags every
       // property read off them. apps/admin is not compiled by React Compiler, so the rule stays off
-      // there; it remains an error in apps/web (was warn pre-migration, diff approved in lint-migration.md).
+      // there; it remains an error in apps/web (was warn pre-migration).
       "files": ["apps/admin/src/**/*.{ts,tsx}"],
       "rules": {
         "react/refs": "off",
@@ -1097,6 +1095,21 @@
       "env": {
         "browser": true,
       },
+    },
+    // Single writer of the tenant-theme KV: every API write goes through the store, which
+    // normalizes themes. apps/web types the binding as read-only.
+    {
+      "files": ["apps/api/src/**/*.ts"],
+      "rules": {
+        "no-restricted-properties": [
+          "error",
+          { "property": "TENANT_THEME", "message": "Use lib/theme/tenant-theme-store.ts." },
+        ],
+      },
+    },
+    {
+      "files": ["apps/api/src/lib/theme/tenant-theme-store.ts", "apps/api/src/config/env/schema.ts"],
+      "rules": { "no-restricted-properties": "off" },
     },
   ],
 }

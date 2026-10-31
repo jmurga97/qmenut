@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 rm -rf "$ROOT_DIR/e2e/.auth" "$ROOT_DIR/e2e/test-results" "$ROOT_DIR/e2e/playwright-report"
 if ! lsof -nP -iTCP:4011 -sTCP:LISTEN -t >/dev/null 2>&1; then
-  rm -rf "$ROOT_DIR/.wrangler-shared/state/v3/cache"
+  rm -rf "$ROOT_DIR/apps/api/.wrangler/state/v3/cache"
 fi
 
 CI=true bun run --cwd "$ROOT_DIR/apps/api" db:migrate:local
@@ -41,18 +41,18 @@ bun run --cwd "$ROOT_DIR/apps/api" db:seed seed/seed-e2e.sql
 kv_file="$(mktemp)"
 trap 'rm -f "$kv_file"' EXIT
 (
-  cd "$ROOT_DIR/apps/tenant-config"
-  bun run --silent wrangler kv key list --binding TENANT_THEME --preview --local --persist-to ../../.wrangler-shared/state > "$kv_file"
+  cd "$ROOT_DIR/apps/api"
+  bun run --silent wrangler kv key list --binding TENANT_THEME --preview --local > "$kv_file"
   bun -e 'const keys = (await Bun.file(process.argv[1]).json()).map(({ name }) => name); await Bun.write(process.argv[1], JSON.stringify(keys))' "$kv_file"
   if [[ "$(cat "$kv_file")" != "[]" ]]; then
-    bun run wrangler kv bulk delete "$kv_file" --force --binding TENANT_THEME --preview --local --persist-to ../../.wrangler-shared/state
+    bun run wrangler kv bulk delete "$kv_file" --force --binding TENANT_THEME --preview --local
   fi
 )
-bun run --cwd "$ROOT_DIR/apps/tenant-config" seed:local
+bun run --cwd "$ROOT_DIR/apps/api" kv:seed:local
 
 # A new version makes any cached public pages from an already-running Worker unreachable.
 bun -e 'const version = crypto.randomUUID(); const keys = ["tapas", "fine", "cafe", "her", "fast"].map(host => ({ key: `menuVersion:${host}.localhost`, value: version })); await Bun.write(process.argv[1], JSON.stringify(keys))' "$kv_file"
 (
-  cd "$ROOT_DIR/apps/tenant-config"
-  bun run wrangler kv bulk put "$kv_file" --binding TENANT_THEME --preview --local --persist-to ../../.wrangler-shared/state
+  cd "$ROOT_DIR/apps/api"
+  bun run wrangler kv bulk put "$kv_file" --binding TENANT_THEME --preview --local
 )

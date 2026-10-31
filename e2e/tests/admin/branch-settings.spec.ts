@@ -1,5 +1,5 @@
 import { expect, test } from "../../fixtures/test";
-import { getContentVersion } from "../../helpers/tenant-config";
+import { getContentVersion } from "../../helpers/tenant-theme-kv";
 import { callTrpcMutation, callTrpcQuery, getTrpcData } from "../../helpers/trpc";
 
 interface BranchSettings {
@@ -54,7 +54,7 @@ test("saves complete branch settings and invalidates every hosted branch", async
   const current = getTrpcData<BranchSettings>(currentResponse);
   const hosts = ["tapas.localhost", "her.localhost", "fast.localhost"];
   const versions = new Map(
-    await Promise.all(hosts.map(async (host) => [host, await getContentVersion(request, host)] as const)),
+    await Promise.all(hosts.map(async (host) => [host, await getContentVersion(host)] as const)),
   );
   const suffix = Date.now();
   const updated: BranchSettings = {
@@ -79,7 +79,7 @@ test("saves complete branch settings and invalidates every hosted branch", async
 
   try {
     for (const host of hosts) {
-      await expect.poll(() => getContentVersion(request, host)).not.toBe(versions.get(host));
+      await expect.poll(() => getContentVersion(host)).not.toBe(versions.get(host));
     }
 
     const contact = await request.get(`http://tapas.localhost:4011/contacto?branch=${suffix}`);

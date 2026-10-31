@@ -18,7 +18,7 @@ bun run test:e2e
 
 Los hosts `tapas.localhost`, `fine.localhost`, `cafe.localhost`, `her.localhost` y
 `fast.localhost` deben resolver a `127.0.0.1` (ver `AGENTS.md`). El comando reinicia D1/KV
-**locales**, prepara las cuentas OTP y arranca API, tenant-config, admin y el Worker
+**locales**, prepara las cuentas OTP y arranca API, admin y el Worker
 público compilado. Finalmente ejecuta la limpieza SQL, también si falla Playwright.
 
 ```bash
@@ -33,8 +33,8 @@ cd e2e
 bunx --no-install playwright test --list
 ```
 
-Playwright reutiliza automáticamente los servicios de desarrollo ya arrancados y levanta
-los que falten. El reset limpia D1/KV en el mismo almacenamiento local e invalida la caché
+Playwright arranca siempre su propia API (8787) y admin (5174), así que hay que parar
+`bun run dev` antes (`bun run dev:kill`); el Worker público se reutiliza si ya corre. El reset limpia D1/KV en el mismo almacenamiento local e invalida la caché
 pública sin detener los Workers. Las capturas visuales siguen siendo
 optativas con `E2E_VISUAL=1` o `CI`; sus baselines dependen del sistema operativo.
 

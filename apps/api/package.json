@@ -19,6 +19,7 @@
     "db:check": "drizzle-kit check --config drizzle.config.ts && bun scripts/check-db-migrations.ts",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:seed": "wrangler d1 execute DB --local --file",
+    "kv:seed:local": "wrangler kv key put tapas.localhost --path seed/tenant-theme/tapas.localhost.json --binding TENANT_THEME --preview --local && wrangler kv key put fine.localhost --path seed/tenant-theme/fine.localhost.json --binding TENANT_THEME --preview --local && wrangler kv key put cafe.localhost --path seed/tenant-theme/cafe.localhost.json --binding TENANT_THEME --preview --local && wrangler kv key put her.localhost --path seed/tenant-theme/her.localhost.json --binding TENANT_THEME --preview --local && wrangler kv key put fast.localhost --path seed/tenant-theme/fast.localhost.json --binding TENANT_THEME --preview --local",
     "db:cleanup:e2e": "wrangler d1 execute DB --local --file ../../e2e/seed/cleanup-e2e.sql"
   },
   "dependencies": {

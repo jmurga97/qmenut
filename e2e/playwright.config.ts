@@ -29,12 +29,6 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: "bun run --cwd ../apps/tenant-config dev",
-      url: "http://localhost:8788/health",
-      reuseExistingServer: true,
-      timeout: 120_000,
-    },
-    {
       command: "VITE_PUBLIC_MENU_PORT=4011 bun run --cwd ../apps/admin dev",
       url: "http://localhost:5174",
       // The dev admin previews the public menu on 5173, not on the E2E worker at 4011.
@@ -43,7 +37,7 @@ export default defineConfig({
     },
     {
       command:
-        "VITE_ADMIN_ORIGIN=http://localhost:5174 bun run --cwd ../apps/web build && bun run --cwd ../apps/web wrangler dev --config dist/server/wrangler.json --port 4011 --persist-to ../../.wrangler-shared/state --var DISABLE_EDGE_CACHE:false",
+        "VITE_ADMIN_ORIGIN=http://localhost:5174 bun run --cwd ../apps/web build && bun run --cwd ../apps/web wrangler dev --config dist/server/wrangler.json --port 4011 --persist-to ../api/.wrangler/state --var DISABLE_EDGE_CACHE:false",
       url: "http://tapas.localhost:4011/robots.txt",
       reuseExistingServer: true,
       timeout: 180_000,

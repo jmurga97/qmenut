@@ -1,5 +1,5 @@
 import { expect, test } from "../../fixtures/test";
-import { getContentVersion, getTenantTheme } from "../../helpers/tenant-config";
+import { getContentVersion, getTenantTheme } from "../../helpers/tenant-theme-kv";
 import { callPublicTrpc, callTrpcMutation, callTrpcQuery, getTrpcData } from "../../helpers/trpc";
 
 import type { APIRequestContext, Page } from "@playwright/test";
@@ -15,10 +15,10 @@ async function expectInvalidation({ host, mutate, request, url }: InvalidationIn
   const first = await request.get(url);
   expect(first.ok(), await first.text()).toBe(true);
   await expect.poll(async () => (await request.get(url)).headers()["x-qmenut-cache"]).toBe("HIT");
-  const version = await getContentVersion(request, host);
+  const version = await getContentVersion(host);
   const result = await mutate();
   expect(result, result.body).toMatchObject({ ok: true, status: 200 });
-  await expect.poll(() => getContentVersion(request, host)).not.toBe(version);
+  await expect.poll(() => getContentVersion(host)).not.toBe(version);
 
   const invalidated = await request.get(url);
   expect(invalidated.ok(), await invalidated.text()).toBe(true);
@@ -89,7 +89,7 @@ test("invalidates versioned public caches for theme, promotion, branch, and lang
   request,
 }) => {
   const stamp = Date.now();
-  const herTheme = await getTenantTheme(request, "her.localhost");
+  const herTheme = await getTenantTheme("her.localhost");
   await expectInvalidation({
     host: "her.localhost",
     request,
@@ -185,7 +185,7 @@ test("derives loyalty availability and invalidates public SEO when the program i
   await request.get(loyaltyUrl);
   await expect.poll(async () => (await request.get(loyaltyUrl)).headers()["x-qmenut-cache"]).toBe("HIT");
 
-  const versionBeforeDisable = await getContentVersion(request, "tapas.localhost");
+  const versionBeforeDisable = await getContentVersion("tapas.localhost");
 
   try {
     for (const reward of original.rewards.filter((entry) => entry.isActive)) {
@@ -236,8 +236,8 @@ test("derives loyalty availability and invalidates public SEO when the program i
       stampRequestLimit: original.program.stampRequestLimit,
     });
     expect(disabled, disabled.body).toMatchObject({ ok: true, status: 200 });
-    await expect.poll(() => getContentVersion(request, "tapas.localhost")).not.toBe(versionBeforeDisable);
-    const versionAfterDisable = await getContentVersion(request, "tapas.localhost");
+    await expect.poll(() => getContentVersion("tapas.localhost")).not.toBe(versionBeforeDisable);
+    const versionAfterDisable = await getContentVersion("tapas.localhost");
 
     const disabledMenu = await callPublicTrpc(request, "menu.publicData", { host: "tapas.localhost" });
     expect(getTrpcData<{ publicFeatures: { loyalty: boolean } }>(disabledMenu).publicFeatures.loyalty).toBe(false);
@@ -264,7 +264,7 @@ test("derives loyalty availability and invalidates public SEO when the program i
 
     const reenabled = await callTrpcMutation(page, "admin.loyalty.saveProgram", original.program);
     expect(reenabled, reenabled.body).toMatchObject({ ok: true, status: 200 });
-    await expect.poll(() => getContentVersion(request, "tapas.localhost")).not.toBe(versionAfterDisable);
+    await expect.poll(() => getContentVersion("tapas.localhost")).not.toBe(versionAfterDisable);
 
     const restoredMenu = await callPublicTrpc(request, "menu.publicData", { host: "tapas.localhost" });
     expect(getTrpcData<{ publicFeatures: { loyalty: boolean } }>(restoredMenu).publicFeatures.loyalty).toBe(true);

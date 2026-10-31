@@ -100,10 +100,6 @@ try {
     await run(["bun", join(opsDirectory, "scripts/apply-db-migrations.ts"), environment, ...flags], rootDirectory);
   });
 
-  await step("Deploy tenant-config", async () => {
-    await run(["bunx", "wrangler", "deploy", "--env", environment], appDirectory("tenant-config"));
-  });
-
   await step("Deploy api", async () => {
     await run(["bunx", "wrangler", "deploy", "--env", environment], appDirectory("api"));
   });

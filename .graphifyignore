@@ -14,11 +14,9 @@ bun.lock
 
 # Raw SQL migrations (schema history, not app logic)
 apps/api/migrations/*.sql
-apps/tenant-config/migrations/*.sql
 
 # Seed data
 apps/api/seed/**
-apps/tenant-config/seed/**
 e2e/seed/**
 
 # Playwright/e2e artifacts and snapshots (also mostly gitignored already)

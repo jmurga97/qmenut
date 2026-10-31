@@ -5,6 +5,7 @@ declare namespace Cloudflare {
     API_WORKER?: Fetcher;
     DISABLE_EDGE_CACHE?: string;
     SENTRY_DSN?: string;
-    TENANT_THEME?: KVNamespace;
+    // Read-only here: apps/api is the only writer.
+    TENANT_THEME?: Pick<KVNamespace, "get">;
   }
 }

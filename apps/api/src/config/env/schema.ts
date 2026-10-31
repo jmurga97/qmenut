@@ -142,8 +142,10 @@ export const envSchema = z.object({
   // Absent in local wrangler dev on purpose: messaging features log and skip without it.
   MSG_WORKER: msgWorkerBindingSchema.optional(),
   MSG_PRODUCT_ID: z.enum(MSG_PRODUCT_IDS).default("qmenut-dev"),
-  THEME_WORKER: serviceWorkerBindingSchema("THEME_WORKER"),
-  THEME_WORKER_TOKEN: z.string().min(1),
+  TENANT_THEME: z.custom<KVNamespace>(
+    (value) => typeof value === "object" && value !== null && typeof (value as { put?: unknown }).put === "function",
+    "El binding TENANT_THEME debe implementar put",
+  ),
   LOYALTY_TOKEN_SECRET: z.string().min(1),
   LOYALTY_CODE_LIMITER: z.custom<RateLimit>(
     (value) =>

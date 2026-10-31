@@ -1,94 +1,73 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
+Start with [docs/README.md](docs/README.md) → [docs/architecture.md](docs/architecture.md). Product vocabulary: [CONTEXT.md](CONTEXT.md).
 
-This is a Bun monorepo orchestrated with Turbo. Application code lives under `apps/*`:
+## Layout
 
-- `apps/web`: React 19 + Vite + TanStack Router frontend. Routes and app entry points are in `apps/web/src/app`; generated route files such as `route-tree.gen.ts` should not be edited manually.
-- `apps/api`: Cloudflare Worker backend with native fetch dispatch, tRPC at `/trpc`, Better Auth at `/api/auth/*`, and Drizzle over D1. Source is in `apps/api/src`, Wrangler config in `apps/api/wrangler.jsonc`, and database migrations live in `apps/api/migrations`.
-- `apps/admin`: React 19 + Vite owner dashboard SPA, deployed as a static-asset Worker.
-- `apps/tenant-config`: Cloudflare Worker that owns writes to the shared tenant-theme KV namespace.
-- `apps/landing`: Astro 5 SSR marketing site.
-- `scripts/deploy.ts`: root deploy orchestrator. Per-environment build-time variables live in its environment map.
-- `packages`: shared workspace packages used by multiple apps, including `auth`, `db`, `permissions`, and `ui`. The API dispatches requests natively from `apps/api/src/index.ts`.
-- Tenant-onboarding, remote migrations, and database rebuild tooling lives in the separate `qmenut-ops` repository; QMenut does not import it.
+Bun `1.4.0` monorepo, Turbo. All Workers on Cloudflare.
 
-Generated output such as `apps/web/dist`, `.wrangler`, `.turbo`, and `node_modules` should stay out of source changes.
+| Path                | What                                                                                                                                                                              |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/api`          | tRPC `/trpc`, Better Auth `/api/auth/*`, Stripe webhook, crons, queues. Drizzle over D1. Only writer of `TENANT_THEME` KV (`src/lib/theme/tenant-theme-store.ts`, lint-enforced). |
+| `apps/web`          | Public menu. React 19 + TanStack Start, SSR on one Worker for every tenant (Host = tenant). Don't edit `route-tree.gen.ts`.                                                       |
+| `apps/admin`        | Owner dashboard. React 19 + Vite SPA on a static-asset Worker.                                                                                                                    |
+| `apps/landing`      | Astro 5 SSR marketing site.                                                                                                                                                       |
+| `packages/*`        | `db` (schema, repositories), `auth`, `permissions`, `ui` (Lit components + theme engine).                                                                                         |
+| `e2e/`              | Playwright.                                                                                                                                                                       |
+| `scripts/deploy.ts` | Deploy orchestrator; per-environment build vars live in its map.                                                                                                                  |
+| `../qmenut-ops`     | Separate repo: tenant onboarding, remote migrations, DB rebuild. Never imported.                                                                                                  |
 
-## Build, Test, and Development Commands
+Keep `dist`, `.wrangler`, `.turbo`, `node_modules` out of changes.
 
-Use Bun `1.4.0` as declared in `package.json`.
+## Commands
 
-- `bun install`: install workspace dependencies from `bun.lock`.
-- `bun run dev`: run Turbo development tasks for all apps.
-- `bun run build`: build all workspaces; web uses Vite, the Workers generate Wrangler types and type-check.
-- `bun run check`: run TypeScript `tsc --noEmit` checks through Turbo.
-- `bun run test`: run unit tests (`bun test packages/ui`: the UI package — theme engine and the public-web list elements).
-- `bun run test:e2e`: run the Playwright E2E suite.
-- `bun run lint`: Oxfmt format check, Prettier for `apps/landing/**/*.astro`, and Oxlint (type-aware, `--deny-warnings`). Architecture boundary violations are errors — see [docs/operations/lint-migration.md](docs/operations/lint-migration.md).
-- `bun run lint:fixtures`: negative fixtures; oxlint must flag each with the expected rule.
-- `bun run format`: apply formatting (Oxfmt + scoped Prettier).
-- `bun run deploy --development` or `bun run deploy --production`: full pipeline — preflight, unit and E2E tests, build, D1 migrations, and deploy of every Worker (landing only in production). The environment flag is mandatory; production migrations are auto-confirmed. Tenant lifecycle, remote migration, and database rebuild commands still run from `qmenut-ops`.
+| Command                                      | Does                                                                                         |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `bun install`                                | Install from `bun.lock`. Never npm/pnpm/yarn.                                                |
+| `bun run dev` / `bun run dev:kill`           | Start / stop all dev servers.                                                                |
+| `bun run build`                              | Build all; Workers run `wrangler types` + `tsc`.                                             |
+| `bun run check`                              | `tsc --noEmit` everywhere + `db:check`.                                                      |
+| `bun run lint`                               | Oxfmt check, Prettier (`apps/landing/**/*.astro` only), Oxlint type-aware `--deny-warnings`. |
+| `bun run lint:fixtures`                      | Boundary rules must still flag their negative fixtures.                                      |
+| `bun run format`                             | Apply Oxfmt + scoped Prettier.                                                               |
+| `bun run test`                               | Unit tests (`packages/ui`).                                                                  |
+| `bun run test:e2e`                           | Playwright. See [docs/operations/testing.md](docs/operations/testing.md).                    |
+| `bun run db:generate -- --name <change>`     | Generate a migration from the schema.                                                        |
+| `bun run deploy --development\|--production` | Preflight → tests → build → D1 migrations → deploy. Flag is mandatory.                       |
 
-For app-specific work, run commands in the package, for example `bun run --cwd apps/web dev` or `bun run --cwd apps/api dev`.
+Per app: `bun run --cwd apps/<app> <script>`.
 
-## Database Migration Workflow
+## Database
 
-The TypeScript schema in `packages/db/src/schema/` is the source of truth for D1. After
-changing it, run `bun run db:generate -- --name <change_name>` and commit
-the generated SQL plus `apps/api/migrations/meta/` together. Use
-`db:generate:custom` only for data migrations or DDL that Drizzle Kit cannot generate.
+- Source of truth: `packages/db/src/schema/`, reachable from the barrel `index.ts` only.
+- Change schema → `bun run db:generate -- --name <change>` → commit schema + SQL + `apps/api/migrations/meta/` together.
+- `db:generate:custom` only for data migrations or DDL Drizzle can't generate.
+- Never: `drizzle-kit push`, `wrangler d1 migrations create`, hand-written DDL, editing an applied migration, `DROP TABLE` on a parent table.
+- Full guide: [docs/operations/database-migrations.md](docs/operations/database-migrations.md).
 
-Wrangler remains the migration executor (`db:migrate:local` locally; the remote migration wrapper lives in `qmenut-ops` and production additionally takes `--confirm-production`). Do not use
-`drizzle-kit push`, `wrangler d1 migrations create`, hand-author normal DDL migrations,
-or edit a migration after it has been applied. `bun run check` verifies that the schema
-matches the latest committed Drizzle snapshot. Drizzle Kit reads only the barrel
-`packages/db/src/schema/index.ts`; a table that is not reachable from it is not managed.
-The full workflow, the SQLite gotchas, and the production preflight are in
-[docs/operations/database-migrations.md](docs/operations/database-migrations.md).
+## Code style
 
-## Coding Style & Naming Conventions
+- ES modules. Oxfmt: 2 spaces, semicolons, double quotes, trailing commas, 120 columns.
+- Oxlint: type-only imports, ordered imports, exhaustive switches, `===`, unused vars only as `_name`.
+- Layers `app → features → shared → lib → packages` are lint errors when crossed. A feature never imports another feature. See [code layers](docs/architecture.md#code-layers).
+- Files in snake case (`util_types.ts`). React components `PascalCase`, functions/variables `camelCase`, routes follow TanStack Router conventions.
+- Do not rewrite lint rules in `.oxlintrc.jsonc` unless asked.
+- `max-params` error → pass one object.
+- Prefer early returns over nesting (`max-depth`).
+- One barrel per module or package, no more.
 
-Write TypeScript as ES modules. Oxfmt enforces 2-space indentation, semicolons, double quotes, trailing commas, and a 120-character line width (`.oxfmtrc.jsonc`; Prettier covers only `apps/landing/**/*.astro`). Oxlint (`.oxlintrc.jsonc`) requires type-only imports, ordered imports, exhaustive switch checks, strict equality, and no unused variables except names prefixed with `_`. Architecture boundaries (app/features/shared/lib/packages) are enforced as errors by Oxlint's boundaries plugin — run `bun run lint` after moving code between layers.
+## Testing
 
-Use `PascalCase` for React components, `camelCase` for functions and variables, and route filenames that match TanStack Router conventions.
+**DO NOT IMPLEMENT EARLY TESTS IF IM NOT ASKING FOR IT.**
 
-The files are created using snake case (util-types.ts)
-Do not rewrite lint rules in `.oxlintrc.jsonc` if im not asking for it
-If lint indicates an error in max-params, prefer passing an object instead more params
-Prefer early return pattern to avoid issues with max-depth
-Avoid barrel imports for everything. Just one barrel for a whole module or package
+E2E needs the tenant hosts in `/etc/hosts` and `bun run dev` stopped (Playwright starts its own API :8787 and admin :5174; it reuses web :4011). Sign in as `e2e@test.local`, OTP `000000` (`DEV_FIXED_OTP`: local, E2E and dev Worker only, never production).
 
-## Testing Guidelines
+## Commits and PRs
 
-DO NOT IMPLEMENT EARLY TESTS IF IM NOT ASKING FOR IT.
+- Short imperative subjects (`Add worker health response`). Focused commits.
+- PRs: summary, verification commands, linked issues, screenshots for UI changes. Call out Wrangler config, migration or generated-file changes.
 
-Playwright E2E tests live in `e2e/`. Install Chromium once with
-`bunx playwright install chromium`. Before running them locally, map every seeded
-tenant host to loopback in `/etc/hosts`:
+## Security
 
-```bash
-echo "127.0.0.1 tapas.localhost fine.localhost cafe.localhost her.localhost fast.localhost" | sudo tee -a /etc/hosts
-```
-
-Then run `bun run test:e2e`. The test reset
-clears and reseeds local D1 and shared tenant-theme KV data. Playwright always starts its own
-API (8787) and admin (5174) with E2E values, so stop `bun run dev` first (`bun run dev:kill`; `deploy` runs it first); tenant-config and the
-public menu worker are reused when already running. The public menu runs as one worker
-with the tenant selected by the Host header. E2E auth uses `e2e@test.local` with OTP `000000`.
-The `DEV_FIXED_OTP` flag enables `000000` for provisioned accounts in local, test, and
-the deployed development worker; it must never be configured in production.
-Set `E2E_VISUAL=1` to register the OS-sensitive template snapshot
-project locally; generate Linux baselines by running the visual project in a Linux container.
-
-## Commit & Pull Request Guidelines
-
-Git history is not available in this checkout, so use concise, imperative commit subjects such as `Add worker health response` or `Fix router route export`. Keep commits focused.
-
-Pull requests should include a short summary, verification commands, linked issues, and screenshots for visible frontend changes. Call out Wrangler config, migration, or generated-file changes.
-
-## Security & Configuration Tips
-
-Do not commit secrets or local Cloudflare state. Keep environment-specific values in local Wrangler configuration or platform-managed secrets, and document any required variables in the relevant app README or PR description.
-
-The admin enforces Trusted Types (`require-trusted-types-for 'script'` in `apps/admin/public/_headers`). Never assign raw strings to `innerHTML`/`outerHTML`/`srcdoc` or use `dangerouslySetInnerHTML` there; use DOM APIs or a named policy added to the `trusted-types` allowlist (see `shared/services/qr.ts`). Check new dependencies too: disable any runtime style/HTML injection they do (e.g. `react-easy-crop` → `disableAutomaticStylesInjection` + import its CSS).
+- No secrets or local Cloudflare state in git. Secrets go through `wrangler secret put`.
+- Admin enforces Trusted Types (`apps/admin/public/_headers`). Never assign strings to `innerHTML`/`outerHTML`/`srcdoc` or use `dangerouslySetInnerHTML`; use DOM APIs or a named policy in the `trusted-types` allowlist (see `shared/services/qr.ts`). New dependencies must not inject styles/HTML at runtime (e.g. `react-easy-crop` → `disableAutomaticStylesInjection` + import its CSS).

@@ -1,6 +1,6 @@
 import { listBranches } from "@qmenut/db/repositories/admin-branches.repository";
 
-import { bumpPublicContentVersion as bumpThemePublicContentVersion } from "./theme/theme-worker-client";
+import { bumpPublicContentVersion as bumpThemePublicContentVersion } from "./theme/tenant-theme-store";
 import { resolveBranchHostOrNull } from "../modules/admin-tenant/resolve-branch-host";
 
 import type { RuntimeEnv } from "../config/env/schema";
