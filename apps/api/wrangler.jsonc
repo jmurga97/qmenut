@@ -140,12 +140,6 @@
           "binding": "THEME_WORKER",
           "service": "qmenut-tenant-config-dev",
         },
-        {
-          "binding": "MSG_WORKER",
-          "service": "ming-msg-worker",
-          "entrypoint": "MessagingRpc",
-          "remote": true,
-        },
       ],
       "ratelimits": [
         {
@@ -257,12 +251,6 @@
         {
           "binding": "THEME_WORKER",
           "service": "qmenut-tenant-config",
-        },
-        {
-          "binding": "MSG_WORKER",
-          "service": "ming-msg-worker",
-          "entrypoint": "MessagingRpc",
-          "remote": true,
         },
       ],
       "ratelimits": [
