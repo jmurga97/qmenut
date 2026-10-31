@@ -20,7 +20,7 @@ function ssrNodeConditions(): Plugin {
     name: "qmenut:ssr-node-conditions",
     resolveId(source) {
       if (source === "cloudflare:workers" && this.environment.name === "client") {
-        // Rollup resolves dynamic imports before eliminating import.meta.env.SSR branches.
+        // The bundler resolves dynamic imports before eliminating import.meta.env.SSR branches.
         return { id: source, external: true };
       }
     },
@@ -86,27 +86,21 @@ export default defineConfig({
     },
   },
   build: {
+    // Preserve the Vite 7 browser baseline for guests on older phones.
+    target: ["chrome107", "edge107", "firefox104", "safari16"],
     sourcemap: true,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) return;
-          const packagePath = id.slice(id.lastIndexOf("node_modules/") + "node_modules/".length);
-          const isPackage = (name: string) => packagePath === name || packagePath.startsWith(`${name}/`);
-
-          if (
-            isPackage("react") ||
-            isPackage("react-dom") ||
-            isPackage("scheduler") ||
-            isPackage("use-sync-external-store")
-          ) {
-            return "vendor-react";
-          }
-          if (id.includes("@tanstack") || id.includes("@trpc")) return "vendor-data";
-          if (id.includes("i18next")) return "vendor-i18n";
-          if (id.includes("culori") || id.includes("lit-html") || id.includes("@lit")) {
-            return "vendor-ui";
-          }
+        codeSplitting: {
+          groups: [
+            {
+              name: "vendor-react",
+              test: /node_modules\/(?:react|react-dom|scheduler|use-sync-external-store)\//,
+            },
+            { name: "vendor-data", test: /node_modules\/(?:@tanstack|@trpc)\// },
+            { name: "vendor-i18n", test: /node_modules\/[^/]*i18next[^/]*\// },
+            { name: "vendor-ui", test: /node_modules\/(?:culori|lit-html|@lit|@lit-labs)\// },
+          ],
         },
       },
     },

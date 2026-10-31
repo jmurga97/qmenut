@@ -1,12 +1,13 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "qmenut-landing",
-  "main": "./dist/_worker.js/index.js",
+  "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",
   },
   "compatibility_date": "2026-06-16",
+  "compatibility_flags": ["nodejs_compat"],
   "observability": {
     "enabled": true,
   },

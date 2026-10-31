@@ -11,7 +11,7 @@ Bun `1.4.0` monorepo, Turbo. All Workers on Cloudflare.
 | `apps/api`          | tRPC `/trpc`, Better Auth `/api/auth/*`, Stripe webhook, crons, queues. Drizzle over D1. Only writer of `TENANT_THEME` KV (`src/lib/theme/tenant-theme-store.ts`, lint-enforced). |
 | `apps/web`          | Public menu. React 19 + TanStack Start, SSR on one Worker for every tenant (Host = tenant). Don't edit `route-tree.gen.ts`.                                                       |
 | `apps/admin`        | Owner dashboard. React 19 + Vite SPA on a static-asset Worker.                                                                                                                    |
-| `apps/landing`      | Astro 5 SSR marketing site.                                                                                                                                                       |
+| `apps/landing`      | Astro 7 SSR marketing site.                                                                                                                                                       |
 | `packages/*`        | `db` (schema, repositories), `auth`, `permissions`, `ui` (Lit components + theme engine).                                                                                         |
 | `e2e/`              | Playwright.                                                                                                                                                                       |
 | `scripts/deploy.ts` | Deploy orchestrator; per-environment build vars live in its map.                                                                                                                  |

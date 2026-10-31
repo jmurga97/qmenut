@@ -126,8 +126,8 @@ try {
 
   if (environment === "production") {
     await step("Deploy landing", async () => {
-      await run(["bun", "run", "build"], appDirectory("landing"));
-      await run(["bunx", "wrangler", "deploy", "--env", "production"], appDirectory("landing"));
+      await run(["bun", "run", "build"], appDirectory("landing"), { CLOUDFLARE_ENV: "production" });
+      await run(["bunx", "wrangler", "deploy"], appDirectory("landing"), { CLOUDFLARE_ENV: "production" });
     });
   }
 

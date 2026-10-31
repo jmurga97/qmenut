@@ -3,7 +3,8 @@ import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
 
 export default defineConfig({
-  adapter: cloudflare(),
+  adapter: cloudflare({ imageService: "passthrough" }),
   output: "server",
+  session: false,
   integrations: [react()],
 });

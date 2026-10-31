@@ -23,29 +23,26 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "~": path.resolve(__dirname, "./src"),
+      "~": path.resolve(import.meta.dirname, "./src"),
     },
   },
   build: {
     outDir: "dist",
+    // Preserve the Vite 7 browser baseline while replacing the bundler.
+    target: ["chrome107", "edge107", "firefox104", "safari16"],
     sourcemap: true,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) return;
-          if (
-            id.includes("react-dom") ||
-            id.includes("/react/") ||
-            id.includes("/scheduler/") ||
-            id.includes("use-sync-external-store")
-          ) {
-            return "vendor-react";
-          }
-          if (id.includes("@tanstack") || id.includes("@trpc")) return "vendor-data";
-          if (id.includes("/zod/") || id.includes("react-hook-form") || id.includes("@hookform")) {
-            return "vendor-forms";
-          }
-          if (id.includes("/zustand/")) return "vendor-state";
+        codeSplitting: {
+          groups: [
+            {
+              name: "vendor-react",
+              test: /node_modules\/(?:react|react-dom|scheduler|use-sync-external-store)\//,
+            },
+            { name: "vendor-data", test: /node_modules\/(?:@tanstack|@trpc)\// },
+            { name: "vendor-forms", test: /node_modules\/(?:zod|react-hook-form|@hookform)\// },
+            { name: "vendor-state", test: /node_modules\/zustand\// },
+          ],
         },
       },
     },

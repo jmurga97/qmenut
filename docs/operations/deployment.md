@@ -127,6 +127,17 @@ bun run --cwd apps/web wrangler deploy
 
 No `--env` on the deploy. The explicit empty `VITE_API_BASE_URL` overrides a local `apps/web/.env`.
 
+The Astro landing uses the same build-time environment selection. Its generated config is
+`apps/landing/dist/server/wrangler.json`:
+
+```bash
+CLOUDFLARE_ENV=production bun run --cwd apps/landing build
+bun run --cwd apps/landing wrangler deploy
+```
+
+Do not pass `--env` to the landing deploy after building. The landing does not use Astro sessions or
+Cloudflare Images, so the adapter does not provision their bindings.
+
 ## Domains
 
 | Hostname                       | Target                                                         |
