@@ -68,7 +68,7 @@ Platform terms when Places content is displayed without a Google map.
 Set the secret on the production API Worker:
 
 ```bash
-bunx wrangler secret put GOOGLE_PLACES_API_KEY --env production --cwd apps/api
+bun run --cwd apps/api wrangler secret put GOOGLE_PLACES_API_KEY --env production
 ```
 
 Deploy in this order:

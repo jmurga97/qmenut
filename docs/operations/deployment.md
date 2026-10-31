@@ -2,6 +2,8 @@
 
 Product commands run from this repo; tenant and remote-DB commands run from the sibling `../qmenut-ops`.
 
+> Run Wrangler as `bun run --cwd apps/<app> wrangler …`. It is installed only inside each app (pinned 4.151.3). From the repo root, `bunx wrangler` can't find it, downloads `wrangler@latest` instead, and crashes (`Cannot find module 'blake3-wasm'`); its `--cwd` flag applies too late to help.
+
 ## One command
 
 ```bash
@@ -40,7 +42,7 @@ flowchart LR
 
 ## Prerequisites
 
-- `qmenut.app` active as a Cloudflare zone; `bunx wrangler login` on the target account.
+- `qmenut.app` active as a Cloudflare zone; `bun run --cwd apps/api wrangler login` on the target account.
 - In the **same account** (service bindings do not cross accounts):
   - `ming-email-worker`, with the reservation templates `reservation-booked`, `reservation-reminder`, `reservation-cancelled` (each takes `locale` and `manageUrl`). Deploy it before the API.
   - `ming-image-worker`, with the qmenut policy, buckets, notification, CORS and lifecycle (below).
@@ -53,12 +55,12 @@ flowchart LR
 Replace `<sfx>` with nothing for production or `-dev` for development.
 
 ```bash
-bunx wrangler d1 create qmenut-db<sfx>
-bunx wrangler kv namespace create TENANT_THEME<sfx>
-bunx wrangler queues create qmenut-notifications<sfx>
-bunx wrangler queues create qmenut-notifications<sfx>-dlq
-bunx wrangler queues create ming-msg-events-qmenut<sfx>
-bunx wrangler queues create ming-msg-events-qmenut<sfx>-dlq
+bun run --cwd apps/api wrangler d1 create qmenut-db<sfx>
+bun run --cwd apps/api wrangler kv namespace create TENANT_THEME<sfx>
+bun run --cwd apps/api wrangler queues create qmenut-notifications<sfx>
+bun run --cwd apps/api wrangler queues create qmenut-notifications<sfx>-dlq
+bun run --cwd apps/api wrangler queues create ming-msg-events-qmenut<sfx>
+bun run --cwd apps/api wrangler queues create ming-msg-events-qmenut<sfx>-dlq
 ```
 
 Copy the returned IDs into `apps/api/wrangler.jsonc` (D1, KV) and `apps/web/wrangler.jsonc` (KV). Leave the shared local `preview_id` unchanged.
@@ -78,7 +80,7 @@ Attach `qmenut-media` to `media.qmenut.app` as a public R2 domain. Keep staging 
 ## Secrets (API only)
 
 ```bash
-bunx wrangler secret put <NAME> --env <environment> --cwd apps/api
+bun run --cwd apps/api wrangler secret put <NAME> --env <environment>
 ```
 
 | Secret                                                   | Notes                                                                                               |
@@ -120,7 +122,7 @@ CLOUDFLARE_ENV=production VITE_API_BASE_URL='' bun run --cwd apps/web build
 ```
 
 ```bash
-bunx wrangler deploy --cwd apps/web
+bun run --cwd apps/web wrangler deploy
 ```
 
 No `--env` on the deploy. The explicit empty `VITE_API_BASE_URL` overrides a local `apps/web/.env`.
@@ -196,11 +198,11 @@ curl -s -D - -o /dev/null https://TENANT_DOMAIN/
 ## Rollback
 
 ```bash
-bunx wrangler deployments list --name qmenut-api
+bun run --cwd apps/api wrangler deployments list --name qmenut-api
 ```
 
 ```bash
-bunx wrangler rollback --name qmenut-api
+bun run --cwd apps/api wrangler rollback --name qmenut-api
 ```
 
 Same for `qmenut-web`, `qmenut-admin`, `qmenut-landing`. A Worker rollback does **not** revert D1: fix schema with a new compensating migration. `ming-image-worker` rolls back from its own repo; keep its qmenut policy backward-compatible.

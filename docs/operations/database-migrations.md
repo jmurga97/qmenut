@@ -73,7 +73,7 @@ Never edit, rename, reorder or delete one. D1 keys on the filename, so a rename 
 Databases: `qmenut-db` (prod), `qmenut-db-dev` (dev). IDs in `apps/api/wrangler.jsonc`.
 
 ```bash
-bunx wrangler d1 migrations list DB --remote --env production --cwd apps/api
+bun run --cwd apps/api wrangler d1 migrations list DB --remote --env production
 ```
 
 ```bash

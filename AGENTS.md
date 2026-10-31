@@ -35,7 +35,7 @@ Keep `dist`, `.wrangler`, `.turbo`, `node_modules` out of changes.
 | `bun run db:generate -- --name <change>`     | Generate a migration from the schema.                                                        |
 | `bun run deploy --development\|--production` | Preflight → tests → build → D1 migrations → deploy. Flag is mandatory.                       |
 
-Per app: `bun run --cwd apps/<app> <script>`.
+Per app: `bun run --cwd apps/<app> <script>`. Wrangler too: `bun run --cwd apps/api wrangler …` (never `bunx wrangler` from the root: it fetches a broken `wrangler@latest`).
 
 ## Database
 
