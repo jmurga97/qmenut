@@ -45,11 +45,14 @@ async function handleRequest(request: Request, env: RuntimeEnv): Promise<Respons
   }
 
   if (url.pathname.startsWith(TRPC_ENDPOINT)) {
-    const response = await fetchRequestHandler({
+    return fetchRequestHandler({
       endpoint: TRPC_ENDPOINT,
       req: request,
       router: appRouter,
       createContext: () => createContext({ env, request }),
+      // Reviews are rate-limited per visitor; a batched response containing them must never be cached.
+      responseMeta: ({ paths }) =>
+        paths?.includes("menu.googleReviews") ? { headers: { "Cache-Control": "no-store" } } : {},
       onError: ({ error, path, type }) => {
         // Expected 4xx-class TRPCErrors (UNAUTHORIZED, NOT_FOUND…) are not incidents.
         if (error.code === "INTERNAL_SERVER_ERROR") {
@@ -59,13 +62,6 @@ async function handleRequest(request: Request, env: RuntimeEnv): Promise<Respons
         }
       },
     });
-    if (url.pathname.includes("menu.googleReviews")) {
-      const headers = new Headers(response.headers);
-      headers.set("Cache-Control", "no-store");
-      headers.set("Pragma", "no-cache");
-      return new Response(response.body, { headers, status: response.status, statusText: response.statusText });
-    }
-    return response;
   }
 
   return jsonResponse({ error: "No encontrado" }, { status: 404 });
