@@ -1,7 +1,8 @@
 import { addDays, getLocalDayAndMinute } from "@qmenut/db/domain/local-time";
 import {
-  cancelGuestReservation,
+  answerGuestReservation,
   createReservation,
+  findGuestEmail,
   getAvailability,
   getBookingInfo,
   isReservationsOpen,
@@ -10,8 +11,7 @@ import {
 import { hasFeature } from "@qmenut/permissions";
 import { TRPCError } from "@trpc/server";
 
-import { acceptOverdueReservations } from "./accept-overdue-reservations";
-import { announceReservations, wasAccepted } from "./reservation-messages";
+import { announceReservations } from "./reservation-messages";
 import { resolveTenantFromRequest } from "../tenant/resolve-tenant";
 
 import type { RuntimeEnv } from "../../config/env/schema";
@@ -125,7 +125,7 @@ export async function createPublicReservation({
     db: input.db,
     env: input.env,
     reservationIds: [result.id],
-    event: { kind: "requested" },
+    event: { kind: "booked" },
   });
   return { id: result.id, startsAt: result.startsAt };
 }
@@ -136,27 +136,42 @@ export async function getGuestReservations({
 }: PublicInput & { email: string }): Promise<GuestReservation[]> {
   const tenant = await resolveReservationTenant(input);
   await throttle({ ...input, tenant });
-  await acceptOverdueReservations({ db: input.db, env: input.env, branchId: tenant.branchId });
 
   return listGuestReservations({ db: input.db, branchId: tenant.branchId, email });
 }
 
-export async function cancelPublicReservation({
-  email,
+/** ADR 0008: the manage link carries the reservation id; it opens that guest's reservations like their email does. */
+export async function getEmailFromLink({
   reservationId,
   ...input
-}: PublicInput & { email: string; reservationId: string }): Promise<void> {
+}: PublicInput & { reservationId: string }): Promise<{ email: string }> {
   const tenant = await resolveReservationTenant(input);
   await throttle({ ...input, tenant });
 
-  const cancelled = await cancelGuestReservation({ db: input.db, branchId: tenant.branchId, email, reservationId });
+  const email = await findGuestEmail({ db: input.db, branchId: tenant.branchId, reservationId });
+  if (!email) throw new TRPCError({ code: "NOT_FOUND", message: "Este enlace ya no es válido" });
 
-  if (!cancelled) throw new TRPCError({ code: "NOT_FOUND", message: "Esta reserva ya no se puede cancelar" });
+  return { email };
+}
 
-  await announceReservations({
-    db: input.db,
-    env: input.env,
-    reservationIds: [cancelled.id],
-    event: { kind: "cancelled", by: "guest", handledBy: null, wasAccepted: wasAccepted(cancelled) },
-  });
+export async function answerPublicReservation({
+  email,
+  reservationId,
+  answer,
+  ...input
+}: PublicInput & { email: string; reservationId: string; answer: "confirm" | "cancel" }): Promise<void> {
+  const tenant = await resolveReservationTenant(input);
+  await throttle({ ...input, tenant });
+
+  const row = await answerGuestReservation({ db: input.db, branchId: tenant.branchId, email, reservationId, answer });
+  if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Esta reserva ya no se puede cambiar" });
+
+  if (answer === "cancel") {
+    await announceReservations({
+      db: input.db,
+      env: input.env,
+      reservationIds: [row.id],
+      event: { kind: "cancelled", by: "guest" },
+    });
+  }
 }

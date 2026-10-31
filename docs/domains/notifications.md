@@ -11,9 +11,9 @@ Staff notifications version 1 is implemented as designed in
   handled state, Web Push to devices that follow branches, 30-day retention, and announcements as
   a repository function.
 - Live events: **reward redemption waiting** (`loyalty.redemption`), **stamp request**
-  (`loyalty.stampRequest`), and the reservation events **new request** (`reservation.requested`),
-  **cancelled by the guest** (`reservation.cancelled`) and **unconfirmed**
-  (`reservation.unconfirmed`); see [Reservations](reservations.md).
+  (`loyalty.stampRequest`), and the informational reservation events **new reservation**
+  (`reservation.booked`) and **cancelled by the guest** (`reservation.cancelled`); see
+  [Reservations](reservations.md).
 - Not yet: a tool for writing announcements.
 
 ## Data model

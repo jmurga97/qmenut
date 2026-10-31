@@ -71,8 +71,9 @@ export const Route = createFileRoute("/{-$locale}")({
     // unprefixed (default-language) URL rather than serving a mismatched locale.
     if (requested !== undefined && language && language.effective !== requested) {
       const rest = location.pathname.replace(new RegExp(`^/${requested}`, "i"), "");
+      const hash = location.hash ? `#${encodeURI(location.hash)}` : "";
 
-      redirect({ href: rest || "/", throw: true });
+      redirect({ href: `${rest || "/"}${location.searchStr}${hash}`, throw: true });
     }
 
     const effectiveLocale = language?.effective ?? requested ?? DEFAULT_LOCALE;

@@ -1,6 +1,8 @@
 # Reservations v1: implementation plan
 
-Status: implemented — Phases 0–7 done (docs in [reservations.md](../domains/reservations.md)). External prerequisites still open: the five templates in `ming-email-worker`, the English `reservation_attendance` template, and the `ming-msg-worker` deploy. Branch `feat/reservations`, cut from `feat/loyalty-stamp-requests`.
+Status: implemented, then simplified by [ADR 0008](../adr/0008-reservations-are-booked-and-confirmed-by-email.md)
+(instant booking, email reminder with a manage link, no staff answers or WhatsApp check); the current
+behaviour is in [reservations.md](../domains/reservations.md). Original status: Phases 0–7 done (docs in [reservations.md](../domains/reservations.md)). External prerequisites still open: the five templates in `ming-email-worker`, the English `reservation_attendance` template, and the `ming-msg-worker` deploy. Branch `feat/reservations`, cut from `feat/loyalty-stamp-requests`.
 
 This plan implements [reservations-ux.md](../design/reservations-ux.md) and ADRs
 [0003](../adr/0003-whatsapp-through-ming-msg-worker.md),

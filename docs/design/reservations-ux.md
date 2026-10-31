@@ -1,16 +1,16 @@
 # Reservations UX design
 
-This page records the decisions for reservations version 1, settled on 2026-10-23. Terms
-follow the _Reservations_ section of [CONTEXT.md](../../CONTEXT.md). Related decisions:
-[ADR 0003](../adr/0003-whatsapp-through-ming-msg-worker.md),
+This page records the decisions for reservations version 1, settled on 2026-10-23 and simplified
+on 2026-10-31 when WhatsApp became unavailable. Terms follow the _Reservations_ section of
+[CONTEXT.md](../../CONTEXT.md). Related decisions:
 [ADR 0004](../adr/0004-reservation-access-by-email-alone.md) and
-[ADR 0005](../adr/0005-unanswered-reservations-are-accepted.md).
+[ADR 0008](../adr/0008-reservations-are-booked-and-confirmed-by-email.md).
 
 ## Principles
 
 - Simplicity and UX come first, for the guest and for staff.
+- Optimistic: a booked guest is expected. Confirming is information for staff, never a condition.
 - Every branch is independent: its own slots, capacity, settings and reservation list.
-- Staff keep control, but their silence never leaves a guest without an answer.
 - Business plan only (`reservations` plan feature, following each branch's plan), off by
   default until the restaurant turns it on.
 
@@ -24,76 +24,75 @@ follow the _Reservations_ section of [CONTEXT.md](../../CONTEXT.md). Related dec
    with the branch phone.
 3. **Contact.** Name, phone (E.164, country defaulting to the restaurant's) and email, all
    required.
-4. **Review.** A summary, a required checkbox agreeing to receive messages about this
-   reservation by WhatsApp and email (linked to `/privacidad`), and _Send request_.
+4. **Review.** A summary, a required checkbox agreeing to receive emails about this
+   reservation (linked to `/privacidad`), and _Book_. The reservation is made at once.
 
 Afterwards the same route shows the guest's reservations at that branch: the email is
 remembered in `localStorage`, and on another device anyone can type the email to see them.
-The guest can cancel until the slot starts.
+The manage link in the emails (`/reservar?reserva=<id>`) opens the same list on any device.
+Each upcoming reservation can be confirmed (while pending) or cancelled until its slot starts.
+Opening the link never confirms by itself, because email scanners open links.
 
 The tab appears only when the plan includes reservations, the restaurant turned them on,
 and at least one slot exists. Otherwise `/reservar` shows an unavailable booking state with
-`noindex,nofollow`; lookup and cancellation of existing reservations stay available, including
-following a plan downgrade. Times are in the restaurant's timezone.
+`noindex,nofollow`; lookup, confirmation and cancellation of existing reservations stay
+available, including following a plan downgrade. Times are in the restaurant's timezone.
 
 ## Lifecycle
 
-- **Pending**: holds a table. Staff accept or decline it within the response time, or it
-  is accepted automatically.
-- **Accepted**: holds a table. The attendance check is sent 2 h before the slot (right
-  away if accepted later than that; skipped if accepted after the deadline).
-- **Confirmed**: the guest tapped _Confirm_ in WhatsApp.
-- **Unconfirmed**: no answer by the deadline (45 min before). Still holds the table;
-  highlighted for staff, who may cancel it.
-- **Declined / Cancelled**: frees the table. Guests cancel from `/reservar` or the
-  WhatsApp _Cancel_ button; staff cancel from admin.
+- **Pending** (shown as _not confirmed_): booked, holds a table, the guest is expected.
+- **Confirmed**: the guest tapped _Confirm_; holds a table.
+- **Cancelled**: frees the table. Guests cancel from `/reservar`; staff cancel from admin.
 
-Slot capacity counts pending, accepted, confirmed and unconfirmed reservations; one
-reservation is one table, whatever the party size.
+Nothing happens on its own to a pending reservation. Slot capacity counts pending and confirmed
+reservations; one reservation counts as one, whatever the party size.
+
+## Slot capacity without table sync
+
+Restaurants assign tables on the night, so the online book is not a floor plan. Slot capacity is
+a pacing cap, the way other reservation products limit bookings per interval: the restaurant sets
+it below its real tables, walk-ins and phone bookings fill the rest, and staff close a slot when
+the room fills up. There is nothing else to keep in sync.
 
 ## Messages
 
-| Event                                | Channel                    | To                                        |
-| ------------------------------------ | -------------------------- | ----------------------------------------- |
-| Request received                     | Email                      | Guest                                     |
-| New request                          | Email                      | Owners (never support accounts)           |
-| Accepted (by staff or automatically) | Email                      | Guest                                     |
-| Declined                             | Email, with branch phone   | Guest                                     |
-| Cancelled (by anyone)                | Email                      | Guest; owners too if it had been accepted |
-| Attendance check                     | WhatsApp, Confirm / Cancel | Guest                                     |
+| Event                        | Guest email | Staff notification (inbox and push) |
+| ---------------------------- | ----------- | ----------------------------------- |
+| Booked                       | Booked      | New reservation                     |
+| Reminder time, still pending | Reminder    | —                                   |
+| Guest confirms               | —           | —                                   |
+| Guest cancels                | Cancelled   | Reservation cancelled               |
+| Staff cancel                 | Cancelled   | —                                   |
 
-Emails use the guest's site language. The attendance check uses the `es` or `en`
-template, falling back to `es`.
+Every guest email carries the manage link and uses the guest's site language. A reservation
+booked after its reminder time gets no reminder: its booking email is minutes old. Owners get no
+reservation emails; neither notification asks staff for an answer. Every cancellation emails the
+guest, so a cancellation by someone who knew the email does not go unnoticed (ADR 0004).
 
 ## Admin
 
-A _Reservations_ section (permission `reservations.manage` for owner, admin and staff) with
-a pending-count badge in the nav:
+A _Reservations_ section (permission `reservations.manage` for owner, admin and staff):
 
-- **Today**: pick a day; reservations grouped by slot, pending and unconfirmed first, each
-  row expanding to the contact details; Accept, Decline and Cancel. Refreshes about every
-  minute while open.
-- **Settings**: on/off, reservation slots per weekday (with "copy to all days"), slot
-  capacity, online party limit, reservation window, lead time, response time and
-  attendance check timing.
+- **Day**: pick a day; reservations grouped by slot with how many are held and how many people,
+  not-confirmed ones first, each row expanding to the contact details; Cancel, which emails the
+  guest. Refreshes about every minute while open.
+- **Settings**: on/off, reservation slots per weekday (with "copy to all days"), online
+  reservations per slot, online party limit, reservation window, lead time and reminder time.
 - **Closures**: close a date or a single slot.
 
-Defaults: lead time 2 h, window 30 days ahead, response time 12 h, attendance check sent
-2 h before with a 45 min deadline, online party limit 8. The restaurant sets its slots and
-slot capacity.
+Defaults: lead time 2 h, window 30 days ahead, reminder 24 h before, online party limit 8. The
+restaurant sets its slots and slot capacity.
 
 ## Data protection
 
-Contacting the guest about their own reservation needs no marketing consent; the review
-step's checkbox covers Meta's WhatsApp opt-in. Guest contact data is anonymized 90 days
-after the slot.
+Contacting the guest about their own reservation needs no marketing consent. Guest contact data
+is anonymized 90 days after the slot.
 
 ## Not in version 1
 
 - Table maps and meal durations (capacity is counted per slot).
 - Entering phone bookings by hand (staff use slot closures).
 - Loyalty links, points or stamps for attending.
-- A free-text WhatsApp agent.
+- WhatsApp messages, until the Meta account is available (ADR 0003).
+- Marking arrivals or no-shows.
 - A "few left" calendar state.
-- Push and in-admin notifications: designed separately as a generic staff notifications
-  feature, with new reservation requests as its first event.

@@ -1,5 +1,8 @@
 # Unanswered reservations are accepted automatically
 
+Superseded by [ADR 0008](0008-reservations-are-booked-and-confirmed-by-email.md): reservations
+are booked at once and staff no longer answer them.
+
 Staff accept or decline each reservation, but a reservation nobody answers within the
 branch's response time (12 hours by default, never past the lead time before the slot) is
 accepted automatically. A reservation can only be requested while its slot has a free table,

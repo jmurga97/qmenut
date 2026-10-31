@@ -227,24 +227,20 @@ _Avoid_: Claim, stamp request
 ## Reservations
 
 **Reservation**:
-A guest's request to hold one table at one branch for one reservation slot. It stays
-pending until restaurant staff accept or decline it, or until its response time ends and
-it is accepted automatically.
+A guest's hold on one table at one branch for one reservation slot. It is booked as soon
+as the guest sends it and stays pending (not confirmed) until the guest confirms it; pending
+and confirmed reservations both hold the table until the guest or staff cancel it.
 _Avoid_: Booking, table request
-
-**Response time**:
-The period staff have to accept or decline a pending reservation before it is accepted
-automatically. It never runs past the lead time before the slot.
-_Avoid_: Expiry, SLA
 
 **Reservation slot**:
 A start time, chosen by the restaurant, at which a branch takes reservations.
 _Avoid_: Hour, time button, shift
 
 **Slot capacity**:
-The maximum number of reservations a branch takes for one reservation slot, one per
-table, whatever the party size. Pending and accepted reservations both count; a slot that
-has reached it is full.
+The maximum number of online reservations a branch takes for one reservation slot,
+whatever the party size. The restaurant sets it below its tables to leave room for walk-ins
+and phone bookings. Pending and confirmed reservations both count; a slot that has reached
+it is full.
 _Avoid_: Covers, seats
 
 **Online party limit**:
@@ -253,7 +249,7 @@ branch directly.
 _Avoid_: Max covers, group size
 
 **Reservation window**:
-The period in which a reservation slot can be requested: from a set number of days ahead
+The period in which a reservation slot can be booked: from a set number of days ahead
 until a set lead time before the slot starts.
 _Avoid_: Booking horizon, availability
 
@@ -262,18 +258,19 @@ A date, or one reservation slot on a date, that staff have closed to online rese
 for example for a holiday, a private event, or tables taken by phone.
 _Avoid_: Block, blackout, manual booking
 
-**Acceptance notice**:
-The message telling the guest that staff accepted their reservation.
-_Avoid_: Confirmation
+**Manage link**:
+The link in a guest's reservation emails that opens their reservations on `/reservar`,
+where one tap confirms or cancels. Opening it changes nothing by itself.
+_Avoid_: Confirmation link, magic link
 
-**Attendance check**:
-The message sent shortly before an accepted reservation asking the guest to confirm
-that they will come, or to cancel.
-_Avoid_: Confirmation, reminder
+**Reminder**:
+The email sent a set time before the slot of a pending reservation, with the manage link.
+Reservations booked after that time get none.
+_Avoid_: Attendance check, confirmation request
 
 **Unconfirmed reservation**:
-An accepted reservation whose guest has not answered the attendance check by its
-deadline. It still holds its table; staff decide whether to give the table away.
+A pending reservation: the guest has not confirmed it. It still holds its table and the
+guest is expected; staff decide whether to call or give the table away.
 _Avoid_: No-show, released reservation
 
 ## Notifications

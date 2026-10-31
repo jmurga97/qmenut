@@ -32,14 +32,8 @@ export const reservationSettingsFormSchema = z
     onlinePartyLimit: wholeNumber(1, 50),
     windowDays: wholeNumber(1, 365),
     leadTimeHours: wholeNumber(0, 168),
-    responseTimeHours: wholeNumber(1, 168),
-    checkBeforeHours: wholeNumber(1, 48),
-    checkDeadlineMinutes: wholeNumber(0, 2880),
+    checkBeforeHours: wholeNumber(1, 72),
     slots: z.array(slotFormSchema),
-  })
-  .refine((values) => Number(values.checkDeadlineMinutes) < Number(values.checkBeforeHours) * 60, {
-    message: i18n.t("reservations___El plazo para confirmar debe acabar después de enviar la confirmación"),
-    path: ["checkDeadlineMinutes"],
   })
   .refine((values) => !values.isEnabled || values.slots.length > 0, {
     message: i18n.t("reservations___Añade al menos una hora para activar las reservas"),

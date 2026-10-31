@@ -20,7 +20,7 @@ La plataforma **QMenut** presta el servicio tecnológico de la carta digital y a
 - **Datos técnicos de conexión:** la dirección IP y datos básicos del navegador se procesan de forma transitoria para servir la página de forma segura, prevenir abusos y registrar errores. No se usan para elaborar perfiles.
 - **Reseñas de Google, cuando se activen:** las reseñas públicas se solicitan a Google al acercarte a esa sección. QMenut no guarda su contenido. La dirección IP se utiliza transitoriamente para limitar solicitudes abusivas.
 - **Programa de fidelización, cuando se active:** si decides participar, se tratará tu email para crear y gestionar tu tarjeta, puntos y ventajas. No se solicitan nombre ni fecha de nacimiento. La participación requiere aceptar expresamente esta política en el momento del registro.
-- **Reservas, cuando se activen:** si solicitas una reserva, se tratan tu nombre, teléfono y email junto con la fecha, la hora y el número de personas para gestionarla: avisarte por email de la respuesta del establecimiento y, antes de la hora, enviarte por WhatsApp un mensaje para confirmar o cancelar tu asistencia. Solo recibirás mensajes sobre tu propia reserva, nunca publicidad. Quien escriba en esta web el email usado puede ver y cancelar la reserva; cada cancelación se avisa a ese email.
+- **Reservas, cuando se activen:** si haces una reserva, se tratan tu nombre, teléfono y email junto con la fecha, la hora y el número de personas para gestionarla: enviarte por email la confirmación y, antes de la hora, un recordatorio con un enlace para confirmar o cancelar tu asistencia. Solo recibirás mensajes sobre tu propia reserva, nunca publicidad. Quien escriba en esta web el email usado, o abra el enlace de esos emails, puede ver, confirmar y cancelar la reserva; cada cancelación se avisa a ese email.
 
 ## 4. Analítica sin cookies
 
@@ -31,7 +31,7 @@ Para conocer qué platos y secciones despiertan más interés se utiliza **PostH
 - Datos técnicos, seguridad y analítica anónima: la base jurídica aplicable al funcionamiento seguro y la mejora del servicio.
 - Carga de reseñas públicas de Google: la base jurídica aplicable a la información sobre la reputación pública del establecimiento.
 - Programa de fidelización: tu consentimiento expreso, que puedes retirar solicitando la baja.
-- Reservas: la gestión de la reserva que solicitas y tu conformidad, recogida en la casilla del último paso, para recibir por WhatsApp los mensajes sobre esa reserva.
+- Reservas: la gestión de la reserva que haces y tu conformidad, recogida en la casilla del último paso, para recibir por email los mensajes sobre esa reserva.
 
 ## 6. Destinatarios y proveedores
 
@@ -41,7 +41,6 @@ Los datos no se ceden a terceros salvo obligación legal. Prestan servicios como
 - Cloudflare, Inc. — alojamiento y red de distribución de contenidos.
 - PostHog — analítica anónima sin cookies.
 - Google LLC — reseñas públicas de Google Maps cuando el establecimiento activa esta función.
-- Meta Platforms Ireland Ltd. (WhatsApp Business) — mensaje para confirmar o cancelar la asistencia a una reserva, cuando el establecimiento activa las reservas.
 - Proveedor de envío de email — mensajes transaccionales, como códigos de acceso.
 
 Las reseñas se obtienen desde el servidor y no se guardan en la carta digital. Si abres un enlace a Google Maps, abandonarás este sitio y se aplicarán la [Política de Privacidad de Google](https://policies.google.com/privacy) y sus condiciones correspondientes.
@@ -68,4 +67,4 @@ Este sitio no utiliza cookies ni tecnologías equivalentes con fines publicitari
 
 Esta política puede actualizarse para reflejar cambios normativos o del servicio. La versión vigente estará siempre publicada en esta página.
 
-<p class="legal-updated">Última actualización: 28 de agosto de 2026.</p>
+<p class="legal-updated">Última actualización: 31 de octubre de 2026.</p>

@@ -1,5 +1,9 @@
 # WhatsApp reservation messages go through ming-msg-worker, not the Meta MCP
 
+On hold: reservations no longer send WhatsApp messages while the Meta account is unavailable
+([ADR 0008](0008-reservations-are-booked-and-confirmed-by-email.md) moved the attendance check to
+an email reminder). The transport and the support console stay as described here.
+
 Reservation messages (the attendance check and its Confirm/Cancel replies) are sent and
 received at runtime through `ming-msg-worker`, the product-agnostic Ming messaging service
 that calls the WhatsApp Cloud API with a system-user token. Meta's WhatsApp Business Tools

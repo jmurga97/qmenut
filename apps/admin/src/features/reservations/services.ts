@@ -9,33 +9,21 @@ import type {
 } from "~/features/reservations/types";
 
 export const STATUS_LABELS: Record<ReservationStatus, string> = {
-  pending: i18n.t("reservations___Pendiente"),
-  accepted: i18n.t("reservations___Aceptada"),
+  pending: i18n.t("reservations___Sin confirmar"),
   confirmed: i18n.t("reservations___Confirmada"),
-  unconfirmed: i18n.t("reservations___Sin confirmar"),
-  declined: i18n.t("reservations___Rechazada"),
   cancelled: i18n.t("reservations___Cancelada"),
 };
 
 export const STATUS_TONES = {
   pending: "warning",
-  accepted: "neutral",
   confirmed: "success",
-  unconfirmed: "error",
-  declined: "neutral",
   cancelled: "neutral",
 } as const satisfies Record<ReservationStatus, "neutral" | "success" | "warning" | "error">;
 
-const HOLDING = new Set<ReservationStatus>(["pending", "accepted", "confirmed", "unconfirmed"]);
-// Rows that need staff first: requests to answer, then guests who didn't confirm.
-const STATUS_ORDER: Record<ReservationStatus, number> = {
-  pending: 0,
-  unconfirmed: 1,
-  accepted: 2,
-  confirmed: 3,
-  declined: 4,
-  cancelled: 5,
-};
+// Both hold a table (ADR 0008): an unconfirmed guest is still expected.
+const HOLDING = new Set<ReservationStatus>(["pending", "confirmed"]);
+// Guests who didn't confirm first, so staff see who may not come.
+const STATUS_ORDER: Record<ReservationStatus, number> = { pending: 0, confirmed: 1, cancelled: 2 };
 
 export function holdsTable(status: ReservationStatus): boolean {
   return HOLDING.has(status);
@@ -44,6 +32,7 @@ export function holdsTable(status: ReservationStatus): boolean {
 export interface SlotGroup {
   minute: number;
   held: number;
+  people: number;
   reservations: StaffReservation[];
 }
 
@@ -53,11 +42,16 @@ export function groupBySlot(reservations: StaffReservation[]): SlotGroup[] {
     groups.set(reservation.slotMinute, [...(groups.get(reservation.slotMinute) ?? []), reservation]);
   }
 
-  return [...groups.entries()].map(([minute, rows]) => ({
-    minute,
-    held: rows.filter((row) => holdsTable(row.status)).length,
-    reservations: rows.toSorted((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]),
-  }));
+  return [...groups.entries()].map(([minute, rows]) => {
+    const holding = rows.filter((row) => holdsTable(row.status));
+
+    return {
+      minute,
+      held: holding.length,
+      people: holding.reduce((total, row) => total + row.partySize, 0),
+      reservations: rows.toSorted((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]),
+    };
+  });
 }
 
 export function shiftDate(date: string, days: number): string {
@@ -87,9 +81,7 @@ export function toSettingsFormValues({ settings, slots }: ReservationSettingsDat
     onlinePartyLimit: String(settings.onlinePartyLimit),
     windowDays: String(settings.windowDays),
     leadTimeHours: String(Math.round(settings.leadTimeMinutes / 60)),
-    responseTimeHours: String(Math.round(settings.responseTimeMinutes / 60)),
     checkBeforeHours: String(Math.round(settings.checkBeforeMinutes / 60)),
-    checkDeadlineMinutes: String(settings.checkDeadlineMinutes),
     slots: slots.map((slot) => ({ weekday: slot.weekday, time: minutesToHHMM(slot.startMinute) })),
   };
 }
@@ -104,9 +96,7 @@ export function toSettingsInput(branchId: string, values: ReservationSettingsFor
     onlinePartyLimit: Number(values.onlinePartyLimit),
     windowDays: Number(values.windowDays),
     leadTimeMinutes: Number(values.leadTimeHours) * 60,
-    responseTimeMinutes: Number(values.responseTimeHours) * 60,
     checkBeforeMinutes: Number(values.checkBeforeHours) * 60,
-    checkDeadlineMinutes: Number(values.checkDeadlineMinutes),
     slots: [...unique.values()].map((slot) => ({ weekday: slot.weekday, startMinute: hhmmToMinutes(slot.time) })),
   };
 }

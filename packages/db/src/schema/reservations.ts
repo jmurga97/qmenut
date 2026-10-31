@@ -22,9 +22,8 @@ export const reservationSettings = sqliteTable(
     onlinePartyLimit: integer("online_party_limit").notNull().default(8),
     windowDays: integer("window_days").notNull().default(30),
     leadTimeMinutes: integer("lead_time_minutes").notNull().default(120),
-    responseTimeMinutes: integer("response_time_minutes").notNull().default(720),
-    checkBeforeMinutes: integer("check_before_minutes").notNull().default(120),
-    checkDeadlineMinutes: integer("check_deadline_minutes").notNull().default(45),
+    // When the reminder email goes out, before the slot.
+    checkBeforeMinutes: integer("check_before_minutes").notNull().default(1440),
     updatedAt: integer("updated_at").notNull().default(epochMilliseconds),
   },
   (table) => [
@@ -95,17 +94,12 @@ export const reservations = sqliteTable(
     guestPhone: text("guest_phone"),
     guestEmail: text("guest_email"),
     guestLanguage: text("guest_language").notNull(),
-    status: text("status", {
-      enum: ["pending", "accepted", "confirmed", "unconfirmed", "declined", "cancelled"],
-    })
+    // ADR 0008: booked as pending (not confirmed by the guest yet); both pending and confirmed hold a table.
+    status: text("status", { enum: ["pending", "confirmed", "cancelled"] })
       .notNull()
       .default("pending"),
-    autoAccepted: integer("auto_accepted", { mode: "boolean" }).notNull().default(false),
     cancelledBy: text("cancelled_by", { enum: ["guest", "staff"] }),
-    handledBy: text("handled_by").references(() => restaurantUsers.id, { onDelete: "set null" }),
-    handledAt: integer("handled_at"),
-    // ADR 0005: min(created_at + response time, starts_at - lead time).
-    respondBy: integer("respond_by").notNull(),
+    // When the reminder email was claimed for sending.
     checkSentAt: integer("check_sent_at"),
     consentAt: integer("consent_at").notNull(),
     anonymizedAt: integer("anonymized_at"),
@@ -115,13 +109,9 @@ export const reservations = sqliteTable(
   (table) => [
     index("idx_reservations_slot").on(table.branchId, table.slotDate, table.slotMinute, table.status),
     index("idx_reservations_guest").on(table.branchId, table.guestEmail),
-    index("idx_reservations_respond_by").on(table.status, table.respondBy),
     index("idx_reservations_starts_at").on(table.status, table.startsAt),
     check("reservations_party_size", sql`${table.partySize} >= 1`),
-    check(
-      "reservations_status",
-      sql`${table.status} IN ('pending', 'accepted', 'confirmed', 'unconfirmed', 'declined', 'cancelled')`,
-    ),
+    check("reservations_status", sql`${table.status} IN ('pending', 'confirmed', 'cancelled')`),
     check("reservations_cancelled_by", sql`${table.cancelledBy} IS NULL OR ${table.cancelledBy} IN ('guest', 'staff')`),
   ],
 );

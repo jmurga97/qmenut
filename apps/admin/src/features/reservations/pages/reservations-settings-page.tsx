@@ -42,36 +42,26 @@ function SettingsForm({ branchId }: { branchId: string }) {
             name={"isEnabled"}
           />
           <div className={"reservations-settings-grid"}>
-            <NumberField label={i18n.t("reservations___Mesas por hora")} name={"slotCapacity"} />
+            <NumberField label={i18n.t("reservations___Reservas online por hora")} name={"slotCapacity"} />
             <NumberField label={i18n.t("reservations___Máximo de personas por reserva")} name={"onlinePartyLimit"} />
             <NumberField
               label={i18n.t("reservations___Días que se puede reservar por adelantado")}
               name={"windowDays"}
             />
             <NumberField label={i18n.t("reservations___Antelación mínima (horas)")} name={"leadTimeHours"} />
-          </div>
-          <p className={"admin-copy"}>
-            {i18n.t(
-              "reservations___Cada reserva ocupa una mesa, sea cual sea el número de personas. A partir del máximo, la carta invita a llamar.",
-            )}
-          </p>
-        </fieldset>
-        <fieldset className={"admin-card"} aria-labelledby={"reservations-answers-title"}>
-          <h2 id={"reservations-answers-title"}>{i18n.t("reservations___Respuesta y confirmación")}</h2>
-          <div className={"reservations-settings-grid"}>
-            <NumberField label={i18n.t("reservations___Tiempo para responder (horas)")} name={"responseTimeHours"} />
             <NumberField
-              label={i18n.t("reservations___Enviar la confirmación por WhatsApp (horas antes)")}
+              label={i18n.t("reservations___Recordatorio por email (horas antes)")}
               name={"checkBeforeHours"}
             />
-            <NumberField
-              label={i18n.t("reservations___Plazo para confirmar (minutos antes)")}
-              name={"checkDeadlineMinutes"}
-            />
           </div>
           <p className={"admin-copy"}>
             {i18n.t(
-              "reservations___Si nadie responde a tiempo, la solicitud se acepta sola. Si el cliente no confirma por WhatsApp, la reserva se marca sin confirmar y mantiene su mesa.",
+              "reservations___Cada reserva cuenta como una, sea cual sea el número de personas; a partir del máximo, la carta invita a llamar. Deja mesas para quien llega sin reservar y cierra una hora cuando se llene la sala.",
+            )}
+          </p>
+          <p className={"admin-copy"}>
+            {i18n.t(
+              "reservations___La reserva queda hecha al momento. El cliente recibe un email y un recordatorio con un enlace para confirmar o cancelar; si no confirma, mantiene su mesa.",
             )}
           </p>
         </fieldset>

@@ -20,7 +20,7 @@ The **QMenut** platform provides the digital-menu technology and hosting service
 - **Technical connection data:** the IP address and basic browser data are processed temporarily to serve the page securely, prevent abuse, and log errors. They are not used to create profiles.
 - **Google reviews, when enabled:** public reviews are requested from Google when you approach that section. QMenut does not store their content. The IP address is used transiently to rate-limit abusive requests.
 - **Loyalty programme, when enabled:** if you choose to participate, your email will be processed to create and manage your card, points, and benefits. Your name and date of birth are not requested. Participation requires expressly accepting this policy at registration.
-- **Reservations, when enabled:** if you request a reservation, your name, phone number and email are processed together with the date, time and party size to manage it: to tell you the establishment's answer by email and, before the time, to send you a WhatsApp message to confirm or cancel your attendance. You only receive messages about your own reservation, never advertising. Anyone who types the email used into this website can see and cancel the reservation; every cancellation is notified to that email.
+- **Reservations, when enabled:** if you make a reservation, your name, phone number and email are processed together with the date, time and party size to manage it: to email you its confirmation and, before the time, a reminder with a link to confirm or cancel your attendance. You only receive messages about your own reservation, never advertising. Anyone who types the email used into this website, or opens the link in those emails, can see, confirm and cancel the reservation; every cancellation is notified to that email.
 
 ## 4. Cookie-free analytics
 
@@ -31,7 +31,7 @@ To understand which dishes and sections attract the most interest, **PostHog** i
 - Technical data, security, and anonymous analytics: the legal basis applicable to secure operation and service improvement.
 - Loading public Google reviews: the legal basis applicable to providing information about the establishment’s public reputation.
 - Loyalty programme: your express consent, which you may withdraw by requesting removal.
-- Reservations: managing the reservation you request, and your agreement, recorded by the checkbox in the last step, to receive WhatsApp messages about that reservation.
+- Reservations: managing the reservation you make, and your agreement, recorded by the checkbox in the last step, to receive emails about that reservation.
 
 ## 6. Recipients and providers
 
@@ -41,7 +41,6 @@ Data is not disclosed to third parties except where legally required. The follow
 - Cloudflare, Inc. — hosting and content delivery network.
 - PostHog — anonymous, cookie-free analytics.
 - Google LLC — public Google Maps reviews when the establishment enables this feature.
-- Meta Platforms Ireland Ltd. (WhatsApp Business) — the message to confirm or cancel attendance at a reservation, when the establishment enables reservations.
 - Email delivery provider — transactional messages such as access codes.
 
 Reviews are fetched by the server and are not stored in the digital menu. If you open a Google Maps link, you will leave this website and the [Google Privacy Policy](https://policies.google.com/privacy) and its relevant terms will apply.
@@ -68,4 +67,4 @@ This website does not use cookies or equivalent technologies for advertising or 
 
 This policy may be updated to reflect regulatory or service changes. The current version will always be published on this page.
 
-<p class="legal-updated">Last updated: 28 August 2026.</p>
+<p class="legal-updated">Last updated: 31 October 2026.</p>

@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 import {
-  cancelPublicReservation,
+  answerPublicReservation,
   createPublicReservation,
+  getEmailFromLink,
   getGuestReservations,
   getPublicAvailability,
 } from "./public-reservations";
@@ -35,9 +36,10 @@ const createInputSchema = hostInputSchema.extend({
     .regex(/^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/),
 });
 
+const reservationIdSchema = z.string().trim().min(1).max(64);
 const byEmailInputSchema = hostInputSchema.extend({ email: emailSchema });
-
-const cancelInputSchema = byEmailInputSchema.extend({ reservationId: z.string().trim().min(1) });
+const linkInputSchema = hostInputSchema.extend({ reservationId: reservationIdSchema });
+const answerInputSchema = byEmailInputSchema.extend({ reservationId: reservationIdSchema });
 
 export const reservationsRouter = router({
   availability: publicProcedure
@@ -51,9 +53,18 @@ export const reservationsRouter = router({
   byEmail: publicProcedure
     .input(byEmailInputSchema)
     .query(({ ctx, input }) => getGuestReservations({ db: ctx.db, env: ctx.env, request: ctx.request, ...input })),
-  cancel: publicProcedure
-    .input(cancelInputSchema)
+  // A query that changes nothing: email scanners open links, so confirming takes the guest's tap.
+  emailFromLink: publicProcedure
+    .input(linkInputSchema)
+    .query(({ ctx, input }) => getEmailFromLink({ db: ctx.db, env: ctx.env, request: ctx.request, ...input })),
+  confirm: publicProcedure
+    .input(answerInputSchema)
     .mutation(({ ctx, input }) =>
-      cancelPublicReservation({ db: ctx.db, env: ctx.env, request: ctx.request, ...input }),
+      answerPublicReservation({ db: ctx.db, env: ctx.env, request: ctx.request, ...input, answer: "confirm" }),
+    ),
+  cancel: publicProcedure
+    .input(answerInputSchema)
+    .mutation(({ ctx, input }) =>
+      answerPublicReservation({ db: ctx.db, env: ctx.env, request: ctx.request, ...input, answer: "cancel" }),
     ),
 });

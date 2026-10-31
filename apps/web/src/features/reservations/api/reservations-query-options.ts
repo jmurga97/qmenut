@@ -25,10 +25,19 @@ export function getGuestReservationsQueryOptions({ host, email, trpc }: Reservat
   return trpc.reservations.byEmail.queryOptions({ host, email }, { refetchOnWindowFocus: "always" });
 }
 
+export function getEmailFromLinkQueryOptions({
+  host,
+  reservationId,
+  trpc,
+}: ReservationsQueryInput & { reservationId: string }) {
+  return trpc.reservations.emailFromLink.queryOptions({ host, reservationId }, { staleTime: Infinity, retry: false });
+}
+
 // Fail offline writes immediately so reconnecting cannot silently submit an old request.
 export function getReservationMutationOptions(trpc: TrpcOptionsProxy) {
   return {
     cancel: trpc.reservations.cancel.mutationOptions({ networkMode: "always" }),
+    confirm: trpc.reservations.confirm.mutationOptions({ networkMode: "always" }),
     create: trpc.reservations.create.mutationOptions({ networkMode: "always" }),
   };
 }

@@ -24,10 +24,8 @@ function formatPeople(count: number): string {
   return count === 1 ? i18n.t("reservations___1 persona") : i18n.t("reservations___{{count}} personas", { count });
 }
 
-function formatTables(count: number): string {
-  return count === 1
-    ? i18n.t("reservations___1 mesa ocupada")
-    : i18n.t("reservations___{{count}} mesas ocupadas", { count });
+function formatHeld(count: number): string {
+  return count === 1 ? i18n.t("reservations___1 reserva") : i18n.t("reservations___{{count}} reservas", { count });
 }
 
 export function ReservationsDayPage() {
@@ -124,8 +122,9 @@ function SlotSection({
         {formatSlot(group.minute)}
         <span>
           {capacity === null
-            ? formatTables(group.held)
-            : i18n.t("reservations___{{held}} de {{capacity}} mesas", { held: group.held, capacity })}
+            ? formatHeld(group.held)
+            : i18n.t("reservations___{{held}} de {{capacity}} reservas", { held: group.held, capacity })}
+          {` · ${formatPeople(group.people)}`}
         </span>
       </h3>
       <ul className={"reservations-list"}>
@@ -155,11 +154,7 @@ function ReservationRow({ day, reservation }: { day: ReservationDayState; reserv
           <strong>{name}</strong>
           <span>{formatPeople(reservation.partySize)}</span>
         </button>
-        <Badge tone={STATUS_TONES[reservation.status]}>
-          {reservation.autoAccepted && reservation.status === "accepted"
-            ? i18n.t("reservations___Aceptada sola")
-            : STATUS_LABELS[reservation.status]}
-        </Badge>
+        <Badge tone={STATUS_TONES[reservation.status]}>{STATUS_LABELS[reservation.status]}</Badge>
       </div>
       {open ? (
         <dl className={"reservations-row-details"} id={detailsId}>
@@ -191,30 +186,6 @@ function RowActions({
   name: string;
   reservation: StaffReservation;
 }) {
-  if (reservation.status === "pending") {
-    return (
-      <div className={"reservations-row-actions"}>
-        <Button
-          aria-label={i18n.t("reservations___Aceptar la reserva de {{name}}", { name })}
-          disabled={day.actionBusy}
-          onClick={() => day.accept(reservation)}
-          size={"sm"}
-          variant={"primary"}
-        >
-          {i18n.t("reservations___Aceptar")}
-        </Button>
-        <Button
-          aria-label={i18n.t("reservations___Rechazar la reserva de {{name}}", { name })}
-          disabled={day.actionBusy}
-          onClick={() => day.askToConfirm({ action: "decline", reservation })}
-          size={"sm"}
-          variant={"secondary"}
-        >
-          {i18n.t("reservations___Rechazar")}
-        </Button>
-      </div>
-    );
-  }
   if (!holdsTable(reservation.status)) return null;
 
   return (
@@ -222,7 +193,7 @@ function RowActions({
       <Button
         aria-label={i18n.t("reservations___Cancelar la reserva de {{name}}", { name })}
         disabled={day.actionBusy}
-        onClick={() => day.askToConfirm({ action: "cancel", reservation })}
+        onClick={() => day.askToConfirm(reservation)}
         size={"sm"}
         variant={"ghost"}
       >
@@ -233,30 +204,19 @@ function RowActions({
 }
 
 function ConfirmDialog({ day }: { day: ReservationDayState }) {
-  if (!day.confirmation) return null;
-  const { action, reservation } = day.confirmation;
+  const reservation = day.confirmation;
+  if (!reservation) return null;
   const name = reservation.guestName ?? i18n.t("reservations___Cliente anónimo");
   const when = `${formatLongDate(reservation.slotDate)} · ${formatSlot(reservation.slotMinute)}`;
-  const decline = action === "decline";
 
   return (
     <ConfirmAction
       cancelLabel={i18n.t("reservations___Volver")}
-      confirmLabel={decline ? i18n.t("reservations___Rechazar reserva") : i18n.t("reservations___Cancelar reserva")}
-      message={
-        decline
-          ? i18n.t("reservations___{{name}} pidió mesa para el {{when}}. La mesa queda libre y no se puede deshacer.", {
-              name,
-              when,
-            })
-          : i18n.t(
-              "reservations___La reserva de {{name}} para el {{when}} se cancela y la mesa queda libre. No se puede deshacer.",
-              {
-                name,
-                when,
-              },
-            )
-      }
+      confirmLabel={i18n.t("reservations___Cancelar reserva")}
+      message={i18n.t(
+        "reservations___La reserva de {{name}} para el {{when}} se cancela, la mesa queda libre y el cliente recibe un email. No se puede deshacer.",
+        { name, when },
+      )}
       onCancel={day.closeConfirmation}
       onConfirm={day.confirm}
       onOpenChange={(open) => {
@@ -264,9 +224,7 @@ function ConfirmDialog({ day }: { day: ReservationDayState }) {
       }}
       open
       pending={day.actionBusy}
-      title={
-        decline ? i18n.t("reservations___¿Rechazar esta reserva?") : i18n.t("reservations___¿Cancelar esta reserva?")
-      }
+      title={i18n.t("reservations___¿Cancelar esta reserva?")}
     />
   );
 }

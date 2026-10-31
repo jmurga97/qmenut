@@ -37,9 +37,10 @@ function describeReservation(facts: NotificationFacts, language: PushLanguage): 
   return `${weekday} ${formatMinute(Number(facts.slotMinute))} · ${guests} ${guests === 1 ? one : many}`;
 }
 
+/** Reservations need no answer from staff (ADR 0008): news in the inbox, with a push for the day's plan. */
 function reservationPush(titles: Record<PushLanguage, string>): NotificationEventConfig {
   return {
-    actionable: true,
+    actionable: false,
     push: "each",
     url: (facts) => `/reservations?date=${facts.slotDate}`,
     pushText: ({ facts, branchName }) => ({
@@ -72,12 +73,8 @@ export const NOTIFICATION_EVENTS = {
       en: { title: "Stamp requests", body: `${count} stamp ${count === 1 ? "request" : "requests"} · ${branchName}` },
     }),
   },
-  "reservation.requested": reservationPush({ es: "Nueva solicitud de reserva", en: "New reservation request" }),
-  "reservation.cancelled": {
-    ...reservationPush({ es: "Reserva cancelada", en: "Reservation cancelled" }),
-    actionable: false,
-  },
-  "reservation.unconfirmed": reservationPush({ es: "Reserva sin confirmar", en: "Unconfirmed reservation" }),
+  "reservation.booked": reservationPush({ es: "Nueva reserva", en: "New reservation" }),
+  "reservation.cancelled": reservationPush({ es: "Reserva cancelada", en: "Reservation cancelled" }),
   announcement: { actionable: false, push: "never", url: "/notifications" },
 } as const satisfies Record<string, NotificationEventConfig>;
 

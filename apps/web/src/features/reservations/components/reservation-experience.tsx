@@ -1,6 +1,6 @@
 import { QmCalendar } from "@qmenut/ui/components/qm-calendar/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouteContext } from "@tanstack/react-router";
+import { useRouteContext, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -29,7 +29,8 @@ export function ReservationExperience() {
   const { host } = useTenantContext();
   const { locale, effectiveLocale } = useRouteContext({ from: "/{-$locale}" });
   const { data: menu } = useSuspenseQuery(getPublicMenuQueryOptions({ host, locale, trpc }));
-  const guest = useGuestReservations({ host, trpc });
+  const { reserva } = useSearch({ from: "/{-$locale}/reservar" });
+  const guest = useGuestReservations({ host, trpc, linkId: reserva });
   return (
     <div className="reservations-stack">
       {menu?.publicFeatures.reservations ? (
@@ -387,16 +388,37 @@ function SentStep({ booking }: { booking: BookingFlow }) {
   );
 }
 
-const HOLDING = new Set(["pending", "accepted", "confirmed", "unconfirmed"]);
+const HOLDING = new Set(["pending", "confirmed"]);
 
 function GuestReservationsSection({ guest, locale }: { guest: GuestReservations; locale: string }) {
   const { t } = useTranslation();
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
+  if (guest.linkLoading) {
+    return (
+      <section className="reservations-card" aria-labelledby="reservations-list-title" aria-busy="true">
+        <h2 id="reservations-list-title">{t("reservations.list.title")}</h2>
+        <p className="reservations-muted" role="status">
+          {t("reservations.loading")}
+        </p>
+      </section>
+    );
+  }
+
   if (!guest.email) {
     return (
       <section className="reservations-card" aria-labelledby="reservations-list-title">
         <h2 id="reservations-list-title">{t("reservations.list.title")}</h2>
+        {guest.linkFailed ? (
+          <>
+            <p className="reservations-error" role="alert">
+              {t("reservations.list.linkError")}
+            </p>
+            <button type="button" className="reservations-secondary" onClick={guest.retryLink}>
+              {t("reservations.list.retry")}
+            </button>
+          </>
+        ) : null}
         <form
           className="reservations-form"
           onSubmit={(event) => {
@@ -440,9 +462,9 @@ function GuestReservationsSection({ guest, locale }: { guest: GuestReservations;
       {!guest.loading && !guest.loadFailed && guest.reservations.length === 0 ? (
         <p className="reservations-muted">{t("reservations.list.empty")}</p>
       ) : null}
-      {guest.cancelError ? (
+      {guest.actionError ? (
         <p className="reservations-error" role="alert">
-          {t("reservations.list.cancelError")}
+          {t("reservations.list.actionError")}
         </p>
       ) : null}
       <ul className="reservations-list">
@@ -458,9 +480,25 @@ function GuestReservationsSection({ guest, locale }: { guest: GuestReservations;
               </span>
             </div>
             {HOLDING.has(reservation.status) && confirmingId !== reservation.id ? (
-              <button type="button" className="reservations-link" onClick={() => setConfirmingId(reservation.id)}>
-                {t("reservations.list.cancel")}
-              </button>
+              <div className="reservations-confirm">
+                {reservation.status === "pending" ? (
+                  <button
+                    type="button"
+                    className="reservations-secondary"
+                    disabled={guest.confirmingId === reservation.id}
+                    onClick={() => void guest.confirm(reservation.id)}
+                  >
+                    {t(
+                      guest.confirmingId === reservation.id
+                        ? "reservations.list.confirming"
+                        : "reservations.list.confirm",
+                    )}
+                  </button>
+                ) : null}
+                <button type="button" className="reservations-link" onClick={() => setConfirmingId(reservation.id)}>
+                  {t("reservations.list.cancel")}
+                </button>
+              </div>
             ) : null}
             {confirmingId === reservation.id && HOLDING.has(reservation.status) ? (
               <div className="reservations-confirm" role="group" aria-label={t("reservations.list.cancelQuestion")}>

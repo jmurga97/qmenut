@@ -93,7 +93,7 @@ function getBookingError(error: unknown): BookingError {
 interface BookingFlowInput {
   host: string;
   trpc: TrpcOptionsProxy;
-  /** The site language: emails and the WhatsApp check use it. */
+  /** The site language: the emails and their manage link use it. */
   language: string;
   initialMonth: string;
   defaultPrefix: string;

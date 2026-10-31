@@ -63,14 +63,15 @@ and optimized objects in the shared qmenut buckets. Do not add upload E2E covera
 has an isolated local worker or fake service binding.
 
 `EMAIL_WORKER` is `remote: true` in the same way: local `wrangler dev` and the E2E API send real
-emails through the deployed `ming-email-worker`. Reservation requests, answers and cancellations
-email the guest and the restaurant's owners, so book locally only with addresses you own. To read
+emails through the deployed `ming-email-worker`. Reservation bookings, reminders and cancellations
+email the guest, so book locally only with addresses you own. To read
 the payloads instead, run the API from a copy of `wrangler.jsonc` without `remote: true` on
 `EMAIL_WORKER` next to a local Worker named `ming-email-worker` that logs its requests.
 
-`MSG_WORKER` (WhatsApp, [ADR 0003](../adr/0003-whatsapp-through-ming-msg-worker.md)) is bound only
-in `development` and `production`. Local `wrangler dev` has no binding on purpose: attendance checks
-are logged and skipped, and the support-only `/messaging` console reports it as not configured.
+`MSG_WORKER` (WhatsApp, [ADR 0003](../adr/0003-whatsapp-through-ming-msg-worker.md), on hold) only
+serves the support-only `/messaging` console; reservations send no WhatsApp messages
+([ADR 0008](../adr/0008-reservations-are-booked-and-confirmed-by-email.md)). Local `wrangler dev`
+has no binding on purpose, and the console reports it as not configured.
 
 ### Provision development resources
 
@@ -125,8 +126,8 @@ bunx wrangler secret put VAPID_SUBJECT --env development --cwd apps/api
 
 `VAPID_SUBJECT` is a contact URL for push services, such as `mailto:soporte@qmenut.app`.
 
-Reservations' WhatsApp answers arrive on `ming-msg-events-qmenut-dev`. Create it and its DLQ if
-the `ming-msg-worker` deploy has not:
+The `/messaging` console's WhatsApp events arrive on `ming-msg-events-qmenut-dev`. Create it and
+its DLQ if the `ming-msg-worker` deploy has not:
 
 ```bash
 bunx wrangler queues create ming-msg-events-qmenut-dev
@@ -237,18 +238,14 @@ You need all of the following:
 - A PostHog EU project.
 - `ming-email-worker` deployed in the same Cloudflare account. The API's `EMAIL_WORKER`
   binding is remote and does not resolve across accounts.
-- `ming-msg-worker` deployed in the same Cloudflare account for reservations' WhatsApp
-  attendance check: its D1, `QMENUT_PHONE_NUMBER_ID`, its three secrets, and the queues
-  `ming-msg-events-qmenut` and `ming-msg-events-qmenut-dev`, each with a `-dlq`. The API binds it
-  as `MSG_WORKER` and consumes the events queue of its environment (`MSG_PRODUCT_ID` is `qmenut` or
-  `qmenut-dev`).
-- Meta approval of the `reservation_attendance` WhatsApp template, with _Confirm_ and _Cancel_
-  quick-reply buttons whose ids are `confirm` and `cancel`.
-- The reservation email templates in `ming-email-worker`: `reservation-received`,
-  `reservation-new-request`, `reservation-accepted`, `reservation-declined` and
-  `reservation-cancelled`. Each takes a `locale` and an `audience` (`guest` or `owner`) in `data`;
-  [Reservations](../domains/reservations.md#backend) lists the fields. Until they exist, those
-  emails are not delivered.
+- `ming-msg-worker`, only for the `/messaging` console while WhatsApp is on hold: its D1,
+  `QMENUT_PHONE_NUMBER_ID`, its three secrets, and the queues `ming-msg-events-qmenut` and
+  `ming-msg-events-qmenut-dev`, each with a `-dlq`. The API binds it as `MSG_WORKER` and consumes
+  the events queue of its environment (`MSG_PRODUCT_ID` is `qmenut` or `qmenut-dev`).
+- The reservation email templates in `ming-email-worker`: `reservation-booked`,
+  `reservation-reminder` and `reservation-cancelled`, all to the guest, each with a `locale` and
+  a `manageUrl` in `data`; [Reservations](../domains/reservations.md#backend) lists the fields.
+  Deploy the matching email worker before the API so its template validation accepts these emails.
 - `ming-image-worker` deployed in the same Cloudflare account with its D1, Images binding,
   processing Queue/DLQ, qmenut R2 buckets, S3 signing credentials, event notification, CORS,
   lifecycle rule, and `media.qmenut.app` custom domain. The API's `IMAGE_WORKER` binding is

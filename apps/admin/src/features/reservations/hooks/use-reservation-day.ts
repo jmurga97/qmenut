@@ -8,12 +8,6 @@ import { trpc } from "~/lib/trpc";
 
 import type { StaffReservation } from "~/features/reservations/types";
 
-/** A decline or cancel waits for ConfirmAction; accepting doesn't, since the guest can still cancel. */
-export interface PendingConfirmation {
-  action: "decline" | "cancel";
-  reservation: StaffReservation;
-}
-
 export function useReservationDay({ branchId, date }: { branchId: string; date?: string }) {
   const queryClient = useQueryClient();
   const dayQuery = useQuery({
@@ -23,34 +17,18 @@ export function useReservationDay({ branchId, date }: { branchId: string; date?:
     refetchOnWindowFocus: true,
   });
   const options = api.getReservationMutationOptions({ queryClient, trpc });
-  const acceptMutation = useMutation(options.accept);
-  const declineMutation = useMutation(options.decline);
   const cancelMutation = useMutation(options.cancel);
-  const [confirmation, setConfirmation] = useState<PendingConfirmation | null>(null);
-
-  function accept(reservation: StaffReservation) {
-    acceptMutation.mutate(
-      { reservationId: reservation.id },
-      {
-        onSuccess: () =>
-          toast.success(i18n.t("reservations___Reserva de {{name}} aceptada.", { name: reservation.guestName })),
-      },
-    );
-  }
+  // The reservation waiting for ConfirmAction before it is cancelled.
+  const [confirmation, setConfirmation] = useState<StaffReservation | null>(null);
 
   function confirm() {
     if (!confirmation) return;
-    const { action, reservation } = confirmation;
-    const mutation = action === "decline" ? declineMutation : cancelMutation;
-    const message =
-      action === "decline"
-        ? i18n.t("reservations___Reserva de {{name}} rechazada.", { name: reservation.guestName })
-        : i18n.t("reservations___Reserva de {{name}} cancelada.", { name: reservation.guestName });
 
-    mutation.mutate(
-      { reservationId: reservation.id },
+    cancelMutation.mutate(
+      { reservationId: confirmation.id },
       {
-        onSuccess: () => toast.success(message),
+        onSuccess: () =>
+          toast.success(i18n.t("reservations___Reserva de {{name}} cancelada.", { name: confirmation.guestName })),
         onSettled: () => setConfirmation(null),
       },
     );
@@ -58,8 +36,7 @@ export function useReservationDay({ branchId, date }: { branchId: string; date?:
 
   return {
     dayQuery,
-    accept,
-    actionBusy: acceptMutation.isPending || declineMutation.isPending || cancelMutation.isPending,
+    actionBusy: cancelMutation.isPending,
     confirmation,
     askToConfirm: setConfirmation,
     closeConfirmation: () => setConfirmation(null),

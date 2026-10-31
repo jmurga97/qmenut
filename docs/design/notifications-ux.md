@@ -12,18 +12,20 @@ stamp request flow is being designed separately for loyalty.
 - Push is for things that need action. If a phone buzzes, there is something to do.
 - Every plan has it, with no plan feature key. Events exist only where their feature exists.
 - Email is not a channel of this feature. Each feature keeps its own emails (for example
-  the reservation emails to owners).
+  the reservation emails to guests).
 
 ## Events
 
-| Event                                   | Actionable: handled when                                | Push                       |
-| --------------------------------------- | ------------------------------------------------------- | -------------------------- |
-| New reservation request                 | Accepted, declined, accepted automatically or cancelled | One per request            |
-| Accepted reservation cancelled by guest | No                                                      | One per cancellation       |
-| Reservation unconfirmed                 | Staff cancel it, or its slot starts                     | One per reservation        |
-| Reward redemption waiting               | Validated or expired                                    | One per redemption         |
-| Stamp request                           | Accepted or declined                                    | One per branch, with count |
-| Announcement                            | No                                                      | Never                      |
+| Event                          | Actionable: handled when | Push                       |
+| ------------------------------ | ------------------------ | -------------------------- |
+| New reservation                | No                       | One per reservation        |
+| Reservation cancelled by guest | No                       | One per cancellation       |
+| Reward redemption waiting      | Validated or expired     | One per redemption         |
+| Stamp request                  | Accepted or declined     | One per branch, with count |
+| Announcement                   | No                       | Never                      |
+
+Reservation pushes are the exception to "push needs action" ([ADR 0008](../adr/0008-reservations-are-booked-and-confirmed-by-email.md)):
+nothing waits for staff, but a booking or a freed table for tonight changes the plan for service.
 
 Stamp requests share one replaceable push per branch ("3 stamp requests waiting · Tapas
 Centro"), so a busy café does not buzz eighty times a day. The inbox still shows each request
@@ -65,7 +67,7 @@ that date passes.
   (iOS 16.4 and later). Outside the installed app, the control explains how to add it to the
   home screen instead.
 - A push shows the event, the branch and the facts needed to act, with no guest personal
-  data. For example: "New reservation request · Tapas Centro · Fri 21:00 · 4 people".
+  data. For example: "New reservation · Tapas Centro · Fri 21:00 · 4 people".
   Tapping it opens the item in the admin, and the guest's details show there after sign-in.
 - A push uses the admin language the device had when push was turned on.
 - There are no other preferences in version 1.

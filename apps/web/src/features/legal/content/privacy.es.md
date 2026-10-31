@@ -18,7 +18,7 @@ La plataforma **QMenut** ({{operatorLegalName}}, NIF {{operatorLegalTaxId}}) pre
 - **Datos técnicos de conexión:** la dirección IP y datos básicos del navegador se procesan de forma transitoria para servir la página de forma segura (prevención de abuso, registro de errores). No se usan para elaborar perfiles.
 - **Reseñas de Google (cuando se activen):** las reseñas públicas se solicitan a Google al acercarte a esa sección. QMenut no guarda su contenido. La dirección IP se utiliza de forma transitoria para limitar solicitudes abusivas, sin crear perfiles.
 - **Programa de fidelidad (cuando se active):** si el establecimiento activa su programa de puntos y decides participar, se tratará tu email para crear y gestionar tu tarjeta, puntos y ventajas. No se solicitan nombre ni fecha de nacimiento. La participación requiere aceptar expresamente esta política en el momento del registro.
-- **Reservas, cuando se activen:** si solicitas una reserva, se tratan tu nombre, teléfono y email junto con la fecha, la hora y el número de personas para gestionarla: avisarte por email de la respuesta del establecimiento y, antes de la hora, enviarte por WhatsApp un mensaje para confirmar o cancelar tu asistencia. Solo recibirás mensajes sobre tu propia reserva, nunca publicidad. Quien escriba en esta web el email usado puede ver y cancelar la reserva; cada cancelación se avisa a ese email.
+- **Reservas, cuando se activen:** si haces una reserva, se tratan tu nombre, teléfono y email junto con la fecha, la hora y el número de personas para gestionarla: enviarte por email la confirmación y, antes de la hora, un recordatorio con un enlace para confirmar o cancelar tu asistencia. Solo recibirás mensajes sobre tu propia reserva, nunca publicidad. Quien escriba en esta web el email usado, o abra el enlace de esos emails, puede ver, confirmar y cancelar la reserva; cada cancelación se avisa a ese email.
 
 ## 4. Analítica sin cookies
 
@@ -29,7 +29,7 @@ Para conocer qué platos y secciones despiertan más interés se utiliza **PostH
 - Datos técnicos y analítica anónima: interés legítimo en la seguridad y mejora del servicio (art. 6.1.f RGPD).
 - Carga de reseñas públicas de Google: interés legítimo en informar sobre la reputación pública del establecimiento (art. 6.1.f RGPD).
 - Programa de fidelidad: consentimiento expreso del participante (art. 6.1.a RGPD), que puede retirarse solicitando la baja.
-- Reservas: la gestión de la reserva que solicitas (art. 6.1.b RGPD). La casilla del último paso recoge además tu conformidad para recibir por WhatsApp los mensajes sobre esa reserva.
+- Reservas: la gestión de la reserva que haces (art. 6.1.b RGPD). La casilla del último paso recoge además tu conformidad para recibir por email los mensajes sobre esa reserva.
 
 ## 6. Destinatarios y encargados
 
@@ -39,7 +39,6 @@ No se ceden datos a terceros salvo obligación legal. Prestan servicios como enc
 - Cloudflare, Inc. — alojamiento y red de distribución de contenidos.
 - PostHog EU — analítica anónima sin cookies (datos alojados en la UE).
 - Google LLC — proveedor de las reseñas públicas de Google Maps cuando el establecimiento activa esta función.
-- Meta Platforms Ireland Ltd. (WhatsApp Business) — mensaje para confirmar o cancelar la asistencia a una reserva, cuando el establecimiento activa las reservas.
 - Proveedor de envío de email — mensajes transaccionales (p. ej. códigos de acceso).
 
 Los pagos del establecimiento a la plataforma se gestionan con Stripe y no afectan a los datos de los visitantes de la carta.
@@ -66,4 +65,4 @@ Este sitio **no utiliza cookies** ni tecnologías equivalentes con fines publici
 
 Esta política puede actualizarse para reflejar cambios normativos o del servicio. La versión vigente estará siempre publicada en esta página.
 
-<p class="legal-updated">Última actualización: 28 de agosto de 2026.</p>
+<p class="legal-updated">Última actualización: 31 de octubre de 2026.</p>

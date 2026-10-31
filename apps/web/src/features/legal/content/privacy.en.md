@@ -18,7 +18,7 @@ The **QMenut** platform ({{operatorLegalName}}, tax ID {{operatorLegalTaxId}}) p
 - **Technical connection data:** the IP address and basic browser data are processed temporarily to serve the page securely (abuse prevention and error logging). They are not used to create profiles.
 - **Google reviews (when enabled):** public reviews are requested from Google when you approach that section. QMenut does not store their content. The IP address is used transiently to limit abusive requests, without creating profiles.
 - **Loyalty programme (when enabled):** if the establishment enables its points programme and you choose to participate, your email will be processed to create and manage your card, points, and benefits. Your name and date of birth are not requested. Participation requires expressly accepting this policy at registration.
-- **Reservations, when enabled:** if you request a reservation, your name, phone number and email are processed together with the date, time and party size to manage it: to tell you the establishment's answer by email and, before the time, to send you a WhatsApp message to confirm or cancel your attendance. You only receive messages about your own reservation, never advertising. Anyone who types the email used into this website can see and cancel the reservation; every cancellation is notified to that email.
+- **Reservations, when enabled:** if you make a reservation, your name, phone number and email are processed together with the date, time and party size to manage it: to email you its confirmation and, before the time, a reminder with a link to confirm or cancel your attendance. You only receive messages about your own reservation, never advertising. Anyone who types the email used into this website, or opens the link in those emails, can see, confirm and cancel the reservation; every cancellation is notified to that email.
 
 ## 4. Cookie-free analytics
 
@@ -29,7 +29,7 @@ To understand which dishes and sections attract the most interest, **PostHog** (
 - Technical data and anonymous analytics: legitimate interest in security and service improvement (Article 6(1)(f) GDPR).
 - Loading public Google reviews: legitimate interest in providing information about the establishment’s public reputation (Article 6(1)(f) GDPR).
 - Loyalty programme: the participant’s express consent (Article 6(1)(a) GDPR), which may be withdrawn by requesting removal.
-- Reservations: managing the reservation you request (Article 6(1)(b) GDPR). The checkbox in the last step also records your agreement to receive WhatsApp messages about that reservation.
+- Reservations: managing the reservation you make (Article 6(1)(b) GDPR). The checkbox in the last step also records your agreement to receive emails about that reservation.
 
 ## 6. Recipients and processors
 
@@ -39,7 +39,6 @@ Data is not disclosed to third parties except where legally required. The follow
 - Cloudflare, Inc. — hosting and content delivery network.
 - PostHog EU — anonymous, cookie-free analytics (data hosted in the EU).
 - Google LLC — provider of public Google Maps reviews when the establishment enables this feature.
-- Meta Platforms Ireland Ltd. (WhatsApp Business) — the message to confirm or cancel attendance at a reservation, when the establishment enables reservations.
 - Email delivery provider — transactional messages (e.g. access codes).
 
 Payments by the establishment to the platform are handled by Stripe and do not affect visitors’ menu data.
@@ -66,4 +65,4 @@ This website **does not use cookies** or equivalent technologies for advertising
 
 This policy may be updated to reflect regulatory or service changes. The current version will always be published on this page.
 
-<p class="legal-updated">Last updated: 28 August 2026.</p>
+<p class="legal-updated">Last updated: 31 October 2026.</p>

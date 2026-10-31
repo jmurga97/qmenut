@@ -127,6 +127,20 @@
       "when": 1793391763654,
       "tag": "0017_replace_dish_combos",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1793444290550,
+      "tag": "0018_booked_reservations_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1793444307689,
+      "tag": "0019_booked_reservations",
+      "breakpoints": true
     }
   ]
 }

@@ -1,11 +1,8 @@
-import { isInternalSupportEmail } from "@qmenut/permissions";
-import { and, asc, between, count, eq, gt, gte, inArray, isNotNull, isNull, lt, lte, sql } from "drizzle-orm";
+import { and, asc, between, count, eq, gt, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 
 import { addDays, getLocalDayAndMinute, getWeekday, localToUtc } from "../domain/local-time";
-import { users } from "../schema/auth";
-import { notifications } from "../schema/notifications";
 import { reservationClosures, reservationSettings, reservationSlots, reservations } from "../schema/reservations";
-import { branches, restaurants, restaurantUsers } from "../schema/tenancy";
+import { branches, restaurants } from "../schema/tenancy";
 
 import type { DrizzleDb } from "../client";
 
@@ -13,7 +10,7 @@ export type ReservationRow = typeof reservations.$inferSelect;
 export type ReservationSettingsRow = typeof reservationSettings.$inferSelect;
 
 /** Statuses that keep a table: one reservation is one table, whatever the party size. */
-export const HOLDING_STATUSES = ["pending", "accepted", "confirmed", "unconfirmed"] as const;
+export const HOLDING_STATUSES = ["pending", "confirmed"] as const;
 
 const MINUTE_MS = 60_000;
 
@@ -174,20 +171,20 @@ export async function createReservation({
   guestEmail,
   guestLanguage,
   now = Date.now(),
-}: CreateReservationInput): Promise<"unavailable" | "full" | Pick<ReservationRow, "id" | "startsAt" | "respondBy">> {
+}: CreateReservationInput): Promise<"unavailable" | "full" | Pick<ReservationRow, "id" | "startsAt">> {
   const context = await getBookingContext({ db, branchId });
   if (!context?.settings.isEnabled || partySize > context.settings.onlinePartyLimit) return "unavailable";
 
   const { settings, timeZone } = context;
   const window = getBookingWindow(context, now);
   const startsAt = localToUtc({ date, minute, timeZone });
-  const latestAnswer = startsAt - settings.leadTimeMinutes * MINUTE_MS;
 
-  if (date < window.first || date > window.last || now > latestAnswer) return "unavailable";
+  if (date < window.first || date > window.last || now > startsAt - settings.leadTimeMinutes * MINUTE_MS) {
+    return "unavailable";
+  }
 
+  // ADR 0008: booked at once as pending; the id doubles as the secret in the guest's manage link.
   const id = crypto.randomUUID();
-  // ADR 0005: staff answer within the response time, and always before the lead time starts.
-  const respondBy = Math.min(now + settings.responseTimeMinutes * MINUTE_MS, latestAnswer);
   const holding = sql.join(
     HOLDING_STATUSES.map((status) => sql`${status}`),
     sql`, `,
@@ -196,10 +193,10 @@ export async function createReservation({
   const insert = await db.run(sql`
     INSERT INTO reservations
       (id, restaurant_id, branch_id, slot_date, slot_minute, starts_at, party_size, guest_name, guest_phone,
-       guest_email, guest_language, status, auto_accepted, respond_by, consent_at, created_at, updated_at)
+       guest_email, guest_language, status, consent_at, created_at, updated_at)
     SELECT ${id}, ${settings.restaurantId}, ${branchId}, ${date}, ${minute}, ${startsAt}, ${partySize},
-      ${guestName.trim()}, ${guestPhone}, ${guestEmail.trim().toLowerCase()}, ${guestLanguage}, 'pending', 0,
-      ${respondBy}, ${now}, ${now}, ${now}
+      ${guestName.trim()}, ${guestPhone}, ${guestEmail.trim().toLowerCase()}, ${guestLanguage}, 'pending',
+      ${now}, ${now}, ${now}
     WHERE EXISTS (
         SELECT 1 FROM reservation_slots
         WHERE branch_id = ${branchId} AND weekday = ${getWeekday(date)} AND start_minute = ${minute}
@@ -214,7 +211,7 @@ export async function createReservation({
       ) < (SELECT slot_capacity FROM reservation_settings WHERE branch_id = ${branchId} AND is_enabled = 1)
   `);
 
-  if (insert.meta.changes === 1) return { id, startsAt, respondBy };
+  if (insert.meta.changes === 1) return { id, startsAt };
 
   // Tell a slot that filled up apart from one that was never bookable (no such slot, closed, turned off).
   const [held] = await db
@@ -230,35 +227,6 @@ export async function createReservation({
     );
 
   return held.tables >= settings.slotCapacity ? "full" : "unavailable";
-}
-
-interface AcceptOverdueReservationsInput {
-  db: DrizzleDb;
-  /** Omitted by the minute cron, which sweeps every branch. */
-  branchId?: string;
-  now?: number;
-}
-
-/**
- * ADR 0005: a request nobody answered by `respond_by` is accepted. Reads that show pending reservations call this
- * as well as the cron; every caller sends the "accepted" email and handles the notification for the rows returned.
- */
-export async function acceptOverdueReservations({
-  db,
-  branchId,
-  now = Date.now(),
-}: AcceptOverdueReservationsInput): Promise<ReservationRow[]> {
-  return db
-    .update(reservations)
-    .set({ status: "accepted", autoAccepted: true, handledAt: now, updatedAt: now })
-    .where(
-      and(
-        branchId ? eq(reservations.branchId, branchId) : undefined,
-        eq(reservations.status, "pending"),
-        lte(reservations.respondBy, now),
-      ),
-    )
-    .returning();
 }
 
 /** The public gate: turned on and at least one weekly slot. The plan check stays with the caller. */
@@ -337,34 +305,57 @@ export async function listGuestReservations({
     .all();
 }
 
-interface CancelGuestReservationInput extends GuestReservationsInput {
+interface AnswerGuestReservationInput extends GuestReservationsInput {
   reservationId: string;
+  answer: "confirm" | "cancel";
 }
 
-/** Guests cancel until the slot starts. Returns the cancelled row for the emails, or null. */
-export async function cancelGuestReservation({
+/** Guests confirm a pending reservation or cancel a held one until the slot starts. Null when it can't take it. */
+export async function answerGuestReservation({
   db,
   branchId,
   email,
   reservationId,
+  answer,
   now = Date.now(),
-}: CancelGuestReservationInput): Promise<ReservationRow | null> {
+}: AnswerGuestReservationInput): Promise<ReservationRow | null> {
   const guestEmail = email.trim().toLowerCase();
+  const takesAnswer =
+    answer === "confirm" ? eq(reservations.status, "pending") : inArray(reservations.status, HOLDING_STATUSES);
   const [row] = await db
     .update(reservations)
-    .set({ status: "cancelled", cancelledBy: "guest", updatedAt: now })
+    .set(
+      answer === "confirm"
+        ? { status: "confirmed", updatedAt: now }
+        : { status: "cancelled", cancelledBy: "guest", updatedAt: now },
+    )
     .where(
       and(
         eq(reservations.id, reservationId),
         eq(reservations.branchId, branchId),
         eq(reservations.guestEmail, guestEmail),
-        inArray(reservations.status, HOLDING_STATUSES),
+        takesAnswer,
         gt(reservations.startsAt, now),
       ),
     )
     .returning();
 
   return row ?? null;
+}
+
+/** The email behind a manage link (ADR 0008), so the page can open that guest's reservations. */
+export async function findGuestEmail({
+  db,
+  branchId,
+  reservationId,
+}: BranchInput & { reservationId: string }): Promise<string | null> {
+  const row = await db
+    .select({ email: reservations.guestEmail })
+    .from(reservations)
+    .where(and(eq(reservations.id, reservationId), eq(reservations.branchId, branchId)))
+    .get();
+
+  return row?.email ?? null;
 }
 
 interface RestaurantBranchInput extends BranchInput {
@@ -385,15 +376,6 @@ export async function listDayReservations({
     .all();
 }
 
-export async function countPendingReservations({ db, branchId }: BranchInput): Promise<number> {
-  const [row] = await db
-    .select({ pending: count() })
-    .from(reservations)
-    .where(and(eq(reservations.branchId, branchId), eq(reservations.status, "pending")));
-
-  return row.pending;
-}
-
 export async function findReservation({
   db,
   restaurantId,
@@ -412,40 +394,19 @@ export async function findReservation({
   return row ?? null;
 }
 
-interface StaffTransitionInput {
-  db: DrizzleDb;
-  reservationId: string;
-  handledBy: string;
-  now?: number;
-}
-
-/** Accept or decline a pending request. Null when another device or the automatic acceptance answered first. */
-export async function answerReservation({
-  db,
-  reservationId,
-  handledBy,
-  status,
-  now = Date.now(),
-}: StaffTransitionInput & { status: "accepted" | "declined" }): Promise<ReservationRow | null> {
-  const [row] = await db
-    .update(reservations)
-    .set({ status, handledBy, handledAt: now, updatedAt: now })
-    .where(and(eq(reservations.id, reservationId), eq(reservations.status, "pending")))
-    .returning();
-
-  return row ?? null;
-}
-
 /** Staff cancel any reservation that still holds a table, frees it. Null when it no longer does. */
 export async function cancelReservationByStaff({
   db,
   reservationId,
-  handledBy,
   now = Date.now(),
-}: StaffTransitionInput): Promise<ReservationRow | null> {
+}: {
+  db: DrizzleDb;
+  reservationId: string;
+  now?: number;
+}): Promise<ReservationRow | null> {
   const [row] = await db
     .update(reservations)
-    .set({ status: "cancelled", cancelledBy: "staff", handledBy, handledAt: now, updatedAt: now })
+    .set({ status: "cancelled", cancelledBy: "staff", updatedAt: now })
     .where(and(eq(reservations.id, reservationId), inArray(reservations.status, HOLDING_STATUSES)))
     .returning();
 
@@ -541,141 +502,36 @@ export async function removeClosure({ db, branchId, closureId }: BranchInput & {
     .where(and(eq(reservationClosures.id, closureId), eq(reservationClosures.branchId, branchId)));
 }
 
-const ATTENDANCE_BATCH = 50;
+const REMINDER_BATCH = 50;
 const ANONYMIZE_AFTER_MS = 90 * 24 * 60 * 60 * 1000;
 
-export interface AttendanceCheck {
-  id: string;
-  guestName: string | null;
-  guestPhone: string;
-  slotDate: string;
-  slotMinute: number;
-  partySize: number;
-  branchName: string;
-}
-
 /**
- * Accepted reservations inside their branch's check window: from `check_before` until `check_deadline` before
- * the slot. One accepted after the window opened is sent at once; one accepted after the deadline is skipped.
+ * Claims the pending reservations whose reminder window opened, so overlapping cron runs can't both send it.
+ * One booked inside the window is skipped: its booking email is only minutes old.
  */
-export async function listAttendanceChecksDue({
-  db,
-  now = Date.now(),
-}: {
-  db: DrizzleDb;
-  now?: number;
-}): Promise<AttendanceCheck[]> {
-  const rows = await db
-    .select({
-      id: reservations.id,
-      guestName: reservations.guestName,
-      guestPhone: reservations.guestPhone,
-      slotDate: reservations.slotDate,
-      slotMinute: reservations.slotMinute,
-      partySize: reservations.partySize,
-      branchName: branches.name,
-    })
+export async function claimDueReminders({ db, now = Date.now() }: { db: DrizzleDb; now?: number }): Promise<string[]> {
+  const windowOpens = sql`${reservations.startsAt} - ${reservationSettings.checkBeforeMinutes} * ${MINUTE_MS}`;
+  const due = db
+    .select({ id: reservations.id })
     .from(reservations)
     .innerJoin(reservationSettings, eq(reservationSettings.branchId, reservations.branchId))
-    .innerJoin(branches, eq(branches.id, reservations.branchId))
     .where(
       and(
-        eq(reservations.status, "accepted"),
+        eq(reservations.status, "pending"),
         isNull(reservations.checkSentAt),
-        isNotNull(reservations.guestPhone),
-        sql`${reservations.startsAt} - ${reservationSettings.checkBeforeMinutes} * ${MINUTE_MS} <= ${now}`,
-        sql`${reservations.startsAt} - ${reservationSettings.checkDeadlineMinutes} * ${MINUTE_MS} > ${now}`,
+        gt(reservations.startsAt, now),
+        sql`${windowOpens} <= ${now}`,
+        sql`${reservations.createdAt} < ${windowOpens}`,
       ),
     )
-    .orderBy(asc(reservations.startsAt))
-    .limit(ATTENDANCE_BATCH)
-    .all();
-
-  return rows.flatMap((row) => (row.guestPhone ? [{ ...row, guestPhone: row.guestPhone }] : []));
-}
-
-/** Claims the check before sending, so overlapping cron runs can't both send it. */
-export async function claimAttendanceCheck({
-  db,
-  reservationId,
-  now = Date.now(),
-}: {
-  db: DrizzleDb;
-  reservationId: string;
-  now?: number;
-}): Promise<boolean> {
-  const result = await db
+    .limit(REMINDER_BATCH);
+  const rows = await db
     .update(reservations)
     .set({ checkSentAt: now, updatedAt: now })
-    .where(and(eq(reservations.id, reservationId), isNull(reservations.checkSentAt)))
-    .run();
+    .where(and(inArray(reservations.id, due), isNull(reservations.checkSentAt)))
+    .returning({ id: reservations.id });
 
-  return result.meta.changes === 1;
-}
-
-/** Gives the check back to the next run after a send that may succeed if retried. */
-export async function releaseAttendanceCheck({ db, reservationId }: { db: DrizzleDb; reservationId: string }) {
-  await db
-    .update(reservations)
-    .set({ checkSentAt: null, updatedAt: Date.now() })
-    .where(eq(reservations.id, reservationId));
-}
-
-/** Checked, unanswered and past the deadline: still holds its table, flagged for staff. */
-export async function markUnconfirmedReservations({
-  db,
-  now = Date.now(),
-}: {
-  db: DrizzleDb;
-  now?: number;
-}): Promise<ReservationRow[]> {
-  return db
-    .update(reservations)
-    .set({ status: "unconfirmed", updatedAt: now })
-    .where(
-      and(
-        eq(reservations.status, "accepted"),
-        isNotNull(reservations.checkSentAt),
-        sql`${reservations.startsAt} - (
-          SELECT ${reservationSettings.checkDeadlineMinutes} FROM ${reservationSettings}
-          WHERE ${reservationSettings.branchId} = ${reservations.branchId}
-        ) * ${MINUTE_MS} <= ${now}`,
-      ),
-    )
-    .returning();
-}
-
-/** The guest's answer to the attendance check. Null when the reservation can no longer take it. */
-export async function answerAttendanceCheck({
-  db,
-  reservationId,
-  answer,
-  now = Date.now(),
-}: {
-  db: DrizzleDb;
-  reservationId: string;
-  answer: "confirm" | "cancel";
-  now?: number;
-}): Promise<ReservationRow | null> {
-  const update =
-    answer === "confirm"
-      ? db
-          .update(reservations)
-          .set({ status: "confirmed", updatedAt: now })
-          .where(and(eq(reservations.id, reservationId), inArray(reservations.status, ["accepted", "unconfirmed"])))
-      : db
-          .update(reservations)
-          .set({ status: "cancelled", cancelledBy: "guest", updatedAt: now })
-          .where(
-            and(
-              eq(reservations.id, reservationId),
-              inArray(reservations.status, HOLDING_STATUSES),
-              gt(reservations.startsAt, now),
-            ),
-          );
-  const [row] = await update.returning();
-
-  return row ?? null;
+  return rows.map((row) => row.id);
 }
 
 /** Contact data goes 90 days after the slot; date, time and party size stay for the restaurant's numbers. */
@@ -699,15 +555,14 @@ export interface ReservationMessage extends Pick<
   | "slotMinute"
   | "partySize"
   | "guestName"
-  | "guestPhone"
   | "guestEmail"
   | "guestLanguage"
 > {
   branchName: string;
   branchPhone: string | null;
+  /** The public site the manage link points at; null before the branch has a domain. */
+  branchHost: string | null;
   restaurantName: string;
-  /** Active owners, never support accounts. */
-  ownerEmails: string[];
 }
 
 export async function listReservationMessages({
@@ -719,7 +574,7 @@ export async function listReservationMessages({
 }): Promise<ReservationMessage[]> {
   if (reservationIds.length === 0) return [];
 
-  const rows = await db
+  return db
     .select({
       id: reservations.id,
       restaurantId: reservations.restaurantId,
@@ -728,11 +583,11 @@ export async function listReservationMessages({
       slotMinute: reservations.slotMinute,
       partySize: reservations.partySize,
       guestName: reservations.guestName,
-      guestPhone: reservations.guestPhone,
       guestEmail: reservations.guestEmail,
       guestLanguage: reservations.guestLanguage,
       branchName: branches.name,
       branchPhone: branches.phone,
+      branchHost: branches.customDomain,
       restaurantName: restaurants.name,
     })
     .from(reservations)
@@ -740,39 +595,4 @@ export async function listReservationMessages({
     .innerJoin(restaurants, eq(restaurants.id, reservations.restaurantId))
     .where(inArray(reservations.id, reservationIds))
     .all();
-  const restaurantIds = [...new Set(rows.map((row) => row.restaurantId))];
-  const owners = await db
-    .select({ restaurantId: restaurantUsers.restaurantId, email: users.email })
-    .from(restaurantUsers)
-    .innerJoin(users, eq(users.id, restaurantUsers.userId))
-    .where(
-      and(
-        inArray(restaurantUsers.restaurantId, restaurantIds),
-        eq(restaurantUsers.roleCode, "owner"),
-        eq(restaurantUsers.isActive, true),
-      ),
-    )
-    .all();
-
-  return rows.map((row) => ({
-    ...row,
-    ownerEmails: owners
-      .filter((owner) => owner.restaurantId === row.restaurantId && !isInternalSupportEmail(owner.email))
-      .map((owner) => owner.email),
-  }));
-}
-
-/** Unconfirmed notifications whose slot has started: nothing is left for staff to chase. */
-export async function handleStartedUnconfirmedNotifications({ db, now = Date.now() }: { db: DrizzleDb; now?: number }) {
-  await db
-    .update(notifications)
-    .set({ handledAt: now, handledBy: null, handledOutcome: "expired" })
-    .where(
-      and(
-        eq(notifications.type, "reservation.unconfirmed"),
-        isNull(notifications.handledAt),
-        sql`EXISTS (SELECT 1 FROM ${reservations} WHERE ${reservations.id} = ${notifications.subjectId}
-          AND ${reservations.startsAt} <= ${now})`,
-      ),
-    );
 }

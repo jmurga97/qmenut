@@ -76,9 +76,8 @@ export function getAdminLanguage(): "es" | "en" {
 }
 
 const RESERVATION_TITLES: Record<string, () => string> = {
-  "reservation.requested": () => i18n.t("notifications___Nueva solicitud de reserva"),
+  "reservation.booked": () => i18n.t("notifications___Nueva reserva"),
   "reservation.cancelled": () => i18n.t("notifications___Reserva cancelada"),
-  "reservation.unconfirmed": () => i18n.t("notifications___Reserva sin confirmar"),
 };
 
 /** "vie, 21 nov · 21:00 · 4 personas", without guest data. */
@@ -143,10 +142,6 @@ export function describeHandled(row: NotificationRow): string | null {
       return name ? i18n.t("notifications___Rechazado por {{name}}", { name }) : i18n.t("notifications___Rechazado");
     case "cancelled":
       return i18n.t("notifications___Cancelado por el cliente");
-    case "cancelledByStaff":
-      return name ? i18n.t("notifications___Cancelado por {{name}}", { name }) : i18n.t("notifications___Cancelado");
-    case "confirmed":
-      return i18n.t("notifications___Confirmado por el cliente");
     case "expired":
       return i18n.t("notifications___Caducado");
     case "autoAccepted":

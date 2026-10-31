@@ -69,7 +69,7 @@ Status: Basic and Business decided, 23 October 2026, and enforced in the app (se
 | Promotions editor                                  | `promotions`    | —                   | ✓        | ✓        |
 | Languages and translations                         | `languages`     | —                   | ✓        | ✓        |
 | Loyalty program, insights, staff stamping          | `loyalty`       | —                   | ✓        | ✓        |
-| Reservations: requests, slots and closures         | `reservations`  | —                   | new      | new      |
+| Reservations: bookings, slots and closures         | `reservations`  | —                   | new      | new      |
 | Analytics                                          | `analytics`     | —                   | ✓        | ✓        |
 | Team: owner, admin and staff roles                 | `users`         | owner only          | ✓        | ✓        |
 | Several locations under one restaurant (franchise) | `multiBranch`   | — one location      | ✓        | ✓        |
