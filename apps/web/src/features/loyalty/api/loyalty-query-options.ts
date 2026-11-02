@@ -1,5 +1,7 @@
 import type { TrpcOptionsProxy } from "~/lib/trpc-client";
 
+const STAMP_POLL_INTERVAL_MS = 15_000;
+
 interface LoyaltyProgramQueryOptionsInput {
   host: string;
   trpc: TrpcOptionsProxy;
@@ -19,10 +21,17 @@ export function getLoyaltyProgramQueryOptions({ host, trpc, locale }: LoyaltyPro
 }
 
 export function getLoyaltyCardQueryOptions({ cardToken, host, trpc }: LoyaltyCardQueryOptionsInput) {
-  // Staff can answer hours later: refresh whenever the guest comes back, no polling.
+  // Poll only while stamps await staff and the tab is visible; otherwise refresh when the guest comes back.
   return trpc.loyalty.getCard.queryOptions(
     { host, cardToken },
-    { refetchOnMount: "always", refetchOnWindowFocus: "always" },
+    {
+      refetchInterval: (query) => {
+        const hidden = typeof document !== "undefined" && document.visibilityState !== "visible";
+        return !hidden && (query.state.data?.pendingStamps ?? 0) > 0 ? STAMP_POLL_INTERVAL_MS : false;
+      },
+      refetchOnMount: "always",
+      refetchOnWindowFocus: "always",
+    },
   );
 }
 
