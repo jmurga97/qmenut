@@ -64,6 +64,43 @@ export interface MsgWorkerBinding {
   reply(input: { productId: MsgProductId; conversationId: string; text: string }): Promise<unknown>;
 }
 
+export const CAMPAIGN_PRODUCT_IDS = ["qmenut", "qmenut-dev"] as const;
+
+export type CampaignResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: { code: string; message: string; retryable: boolean } };
+
+export interface CampaignLead {
+  email: string;
+  name: string | null;
+  recipientId: string;
+  offerUrl: string;
+}
+
+interface CampaignOffer {
+  productId: (typeof CAMPAIGN_PRODUCT_IDS)[number];
+  rewardCents: number;
+  templateVersion: number;
+}
+
+/** ming-email-worker `CampaignRpc`: Instantly campaigns rendered from controlled templates. */
+export interface EmailCampaignsBinding {
+  preview(input: CampaignOffer): Promise<CampaignResult<{ subject: string; html: string }>>;
+  sendTest(input: CampaignOffer & { to: string; offerUrl: string }): Promise<CampaignResult<null>>;
+  createCampaign(input: CampaignOffer & { name: string }): Promise<CampaignResult<{ campaignId: string }>>;
+  addLeads(input: {
+    productId: CampaignOffer["productId"];
+    campaignId: string;
+    leads: CampaignLead[];
+  }): Promise<CampaignResult<{ createdIndexes: number[] }>>;
+  setCampaignState(input: {
+    productId: CampaignOffer["productId"];
+    campaignId: string;
+    state: "active" | "paused";
+  }): Promise<CampaignResult<null>>;
+  suppress(input: { productId: CampaignOffer["productId"]; emails: string[] }): Promise<CampaignResult<null>>;
+}
+
 const nodeEnvSchema = z.enum(["development", "test", "production"]);
 
 function serviceWorkerBindingSchema(binding: string) {
@@ -99,6 +136,25 @@ const exchangeRateWorkerBindingSchema = z.custom<ExchangeRateWorkerBinding>(
     typeof (value as { getLatestRates?: unknown }).getLatestRates === "function",
   "El binding de servicio EXCHANGE_RATE_WORKER debe implementar getLatestRates",
 );
+
+const emailCampaignsBindingSchema = z.custom<EmailCampaignsBinding>(
+  (value) =>
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { createCampaign?: unknown }).createCampaign === "function",
+  "El binding de servicio EMAIL_CAMPAIGNS debe implementar createCampaign",
+);
+
+const emailListSchema = z
+  .string()
+  .trim()
+  .optional()
+  .transform((value) =>
+    (value ?? "")
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean),
+  );
 
 // An empty value disables an optional provider, so `--var KEY:` can switch one off over .dev.vars.
 const optionalSecret = z
@@ -137,6 +193,23 @@ export const envSchema = z.object({
     error: "El binding DB es obligatorio",
   }),
   EMAIL_WORKER: serviceWorkerBindingSchema("EMAIL_WORKER"),
+  // Absent locally on purpose: simulated delivery never calls it, and previews say it is missing.
+  EMAIL_CAMPAIGNS: emailCampaignsBindingSchema.optional(),
+  CAMPAIGN_PRODUCT_ID: z.enum(CAMPAIGN_PRODUCT_IDS).default("qmenut-dev"),
+  // "simulate" marks campaign recipients as sent and logs referral links instead of emailing them.
+  REFERRAL_DELIVERY: z.enum(["simulate", "live"]).default("simulate"),
+  REFERRALS_APP_URL: z.url(),
+  REFERRAL_LIMITER: z.custom<RateLimit>(
+    (value) =>
+      typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",
+    "El binding REFERRAL_LIMITER debe implementar limit",
+  ),
+  // Lab: Cloudflare Access application plus the explicit staff allowlist. Both are required to enter.
+  ACCESS_TEAM_DOMAIN: optionalSecret,
+  ACCESS_LAB_AUD: optionalSecret,
+  LAB_STAFF_EMAILS: emailListSchema,
+  // Local wrangler dev only (passed with --var); ignored when NODE_ENV is production.
+  LAB_DEV_STAFF_EMAIL: optionalSecret,
   IMAGE_WORKER: imageWorkerBindingSchema,
   EXCHANGE_RATE_WORKER: exchangeRateWorkerBindingSchema.optional(),
   // Absent in local wrangler dev on purpose: messaging features log and skip without it.

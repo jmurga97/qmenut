@@ -4,6 +4,8 @@ import { initTRPC, TRPCError } from "@trpc/server";
 
 import { hasPlanFeature, requireFeature } from "../lib/billing/entitlement";
 import { syncTranslationsAfterSave } from "../modules/admin-translations/sync-translations";
+import { resolveStaffEmail } from "../modules/lab/staff-access";
+import { resolveParticipant } from "../modules/referrals/participant-session";
 
 import type { TrpcContext } from "./context";
 import type { RestaurantRoleCode } from "@qmenut/db/repositories/restaurant-users.repository";
@@ -81,3 +83,23 @@ export function featureProcedure(feature: PlanFeature) {
     return next();
   });
 }
+
+/** QMenut staff behind Cloudflare Access plus the LAB_STAFF_EMAILS allowlist. Restaurant membership grants nothing here. */
+export const labProcedure = t.procedure.use(async ({ ctx, next }) => {
+  const staffEmail = await resolveStaffEmail({ env: ctx.env, request: ctx.request });
+  if (!staffEmail) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Acceso restringido al equipo de QMenut" });
+  }
+
+  return next({ ctx: { ...ctx, staffEmail } });
+});
+
+/** Referral participant from the private session cookie; every query filters by `ctx.participant.id`. */
+export const participantProcedure = t.procedure.use(async ({ ctx, next }) => {
+  const session = await resolveParticipant({ db: ctx.db, request: ctx.request });
+  if (!session) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Tu sesión expiró. Pide un nuevo enlace de acceso." });
+  }
+
+  return next({ ctx: { ...ctx, ...session } });
+});

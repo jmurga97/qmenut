@@ -1,0 +1,4 @@
+/*
+  Content-Security-Policy: require-trusted-types-for 'script'; trusted-types 'none'; frame-ancestors 'none'
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow

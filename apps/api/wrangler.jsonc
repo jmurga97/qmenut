@@ -30,6 +30,12 @@
       "remote": true,
     },
     {
+      "binding": "EMAIL_CAMPAIGNS",
+      "service": "ming-email-worker",
+      "entrypoint": "CampaignRpc",
+      "remote": true,
+    },
+    {
       "binding": "IMAGE_WORKER",
       "service": "ming-image-worker",
       "entrypoint": "ImageRpc",
@@ -68,6 +74,14 @@
       },
     },
     {
+      "name": "REFERRAL_LIMITER",
+      "namespace_id": "1005",
+      "simple": {
+        "limit": 10,
+        "period": 60,
+      },
+    },
+    {
       "name": "RESERVATION_LIMITER",
       "namespace_id": "1004",
       "simple": {
@@ -101,6 +115,12 @@
     "STRIPE_PRICE_BUSINESS": "price_1UTdrtEnGfbzQ006IAt889AX",
     "NODE_ENV": "production",
     "SENTRY_DSN": "",
+    // Local: simulated campaign sending and referral links printed to the API log.
+    "REFERRAL_DELIVERY": "simulate",
+    "REFERRALS_APP_URL": "http://localhost:5176",
+    "CAMPAIGN_PRODUCT_ID": "qmenut-dev",
+    // Matches LAB_DEV_STAFF_EMAIL, which only the local `dev` script sets.
+    "LAB_STAFF_EMAILS": "lab@qmenut.local",
   },
   // Wrangler named environments do not inherit vars, D1, services, rate limits, or
   // observability. Keep name unchanged so service bindings continue to resolve qmenut-api.
@@ -133,6 +153,12 @@
         {
           "binding": "EMAIL_WORKER",
           "service": "ming-email-worker",
+          "remote": true,
+        },
+        {
+          "binding": "EMAIL_CAMPAIGNS",
+          "service": "ming-email-worker",
+          "entrypoint": "CampaignRpc",
           "remote": true,
         },
         {
@@ -174,6 +200,14 @@
           },
         },
         {
+          "name": "REFERRAL_LIMITER",
+          "namespace_id": "2005",
+          "simple": {
+            "limit": 10,
+            "period": 60,
+          },
+        },
+        {
           "name": "RESERVATION_LIMITER",
           "namespace_id": "2004",
           "simple": {
@@ -198,6 +232,12 @@
             "max_retries": 3,
             "dead_letter_queue": "ming-msg-events-qmenut-dev-dlq",
           },
+          {
+            "queue": "ming-email-events-qmenut-dev",
+            "max_batch_size": 25,
+            "max_retries": 5,
+            "dead_letter_queue": "ming-email-events-qmenut-dev-dlq",
+          },
         ],
       },
       "observability": {
@@ -213,6 +253,13 @@
         "NODE_ENV": "development",
         "MSG_PRODUCT_ID": "qmenut-dev",
         "DEV_FIXED_OTP": "true",
+        "REFERRAL_DELIVERY": "simulate",
+        "REFERRALS_APP_URL": "https://referidos.dev.qmenut.app",
+        "CAMPAIGN_PRODUCT_ID": "qmenut-dev",
+        // Cloudflare Access application for lab.dev.qmenut.app; empty keeps Lab closed.
+        "ACCESS_TEAM_DOMAIN": "",
+        "ACCESS_LAB_AUD": "",
+        "LAB_STAFF_EMAILS": "",
         "SENTRY_DSN": "https://b201dd7421ecf64b6b7c2f073bae0cf0@o4511851717394432.ingest.de.sentry.io/4511956009943120",
       },
     },
@@ -247,6 +294,12 @@
         {
           "binding": "EMAIL_WORKER",
           "service": "ming-email-worker",
+          "remote": true,
+        },
+        {
+          "binding": "EMAIL_CAMPAIGNS",
+          "service": "ming-email-worker",
+          "entrypoint": "CampaignRpc",
           "remote": true,
         },
         {
@@ -288,6 +341,14 @@
           },
         },
         {
+          "name": "REFERRAL_LIMITER",
+          "namespace_id": "1005",
+          "simple": {
+            "limit": 10,
+            "period": 60,
+          },
+        },
+        {
           "name": "RESERVATION_LIMITER",
           "namespace_id": "1004",
           "simple": {
@@ -312,6 +373,12 @@
             "max_retries": 3,
             "dead_letter_queue": "ming-msg-events-qmenut-dlq",
           },
+          {
+            "queue": "ming-email-events-qmenut",
+            "max_batch_size": 25,
+            "max_retries": 5,
+            "dead_letter_queue": "ming-email-events-qmenut-dlq",
+          },
         ],
       },
       "observability": {
@@ -329,6 +396,13 @@
         "SENTRY_DSN": "https://b201dd7421ecf64b6b7c2f073bae0cf0@o4511851717394432.ingest.de.sentry.io/4511956009943120",
         "DEV_FIXED_OTP": "false",
         "MSG_PRODUCT_ID": "qmenut",
+        "REFERRAL_DELIVERY": "live",
+        "REFERRALS_APP_URL": "https://referidos.qmenut.app",
+        "CAMPAIGN_PRODUCT_ID": "qmenut",
+        // Cloudflare Access application for lab.qmenut.app; empty keeps Lab closed.
+        "ACCESS_TEAM_DOMAIN": "",
+        "ACCESS_LAB_AUD": "",
+        "LAB_STAFF_EMAILS": "",
       },
     },
   },

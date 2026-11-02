@@ -12,14 +12,17 @@ export interface TrpcContext {
   env: RuntimeEnv;
   getSession: () => ReturnType<Auth["api"]["getSession"]>;
   request: Request;
+  /** Response headers, for the referral session cookie. */
+  resHeaders: Headers;
 }
 
 interface CreateContextInput {
   env: RuntimeEnv;
   request: Request;
+  resHeaders: Headers;
 }
 
-export function createContext({ env, request }: CreateContextInput): TrpcContext {
+export function createContext({ env, request, resHeaders }: CreateContextInput): TrpcContext {
   const db = createDb(env.DB);
   const auth = createAuth({ db, env });
 
@@ -29,5 +32,6 @@ export function createContext({ env, request }: CreateContextInput): TrpcContext
     env,
     getSession: () => auth.api.getSession({ headers: request.headers }),
     request,
+    resHeaders,
   };
 }

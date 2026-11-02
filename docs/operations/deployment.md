@@ -2,7 +2,7 @@
 
 Product commands run from this repo; tenant and remote-DB commands run from the sibling `../qmenut-ops`.
 
-> Run Wrangler as `bun run --cwd apps/<app> wrangler …`. It is installed only inside each app (pinned 4.151.3). From the repo root, `bunx wrangler` can't find it, downloads `wrangler@latest` instead, and crashes (`Cannot find module 'blake3-wasm'`); its `--cwd` flag applies too late to help.
+> Run Wrangler as `bun run --cwd apps/<app> wrangler …`. It is installed only inside each app, pinned in its `package.json`. From the repo root, `bunx wrangler` can't find it, downloads `wrangler@latest` instead, and crashes (`Cannot find module 'blake3-wasm'`); its `--cwd` flag applies too late to help.
 
 ## One command
 
@@ -18,7 +18,7 @@ bun run deploy --production
 flowchart LR
   pre[Preflight<br/>qmenut-ops config check] --> unit[Unit tests] --> e2e[E2E] --> build[Build] --> check[Type check]
   check --> mig[D1 migrations<br/>Time Travel bookmark +<br/>row-count guard]
-  mig --> api[Deploy api] --> web[Deploy web] --> admin[Deploy admin] --> landing[Deploy landing<br/>prod only]
+  mig --> api[Deploy api] --> web[Deploy web] --> admin[Deploy admin] --> lab[Deploy lab] --> referrals[Deploy referrals] --> landing[Deploy landing<br/>prod only]
 ```
 
 - The environment flag is mandatory. The first failing step stops everything.
@@ -27,24 +27,27 @@ flowchart LR
 
 ## Environments
 
-| Worker  | Development (`--env development`)           | Production (`--env production`)        |
-| ------- | ------------------------------------------- | -------------------------------------- |
-| API     | `qmenut-api-dev` · `api.dev.qmenut.app`     | `qmenut-api` · `api.qmenut.app`        |
-| Web     | `qmenut-web-dev` · `dev.qmenut.app`         | `qmenut-web` · each tenant domain      |
-| Admin   | `qmenut-admin-dev` · `admin.dev.qmenut.app` | `qmenut-admin` · `admin.qmenut.app`    |
-| Landing | —                                           | `qmenut-landing` · `qmenut.app`, `www` |
-| D1      | `qmenut-db-dev`                             | `qmenut-db`                            |
+| Worker    | Development (`--env development`)                   | Production (`--env production`)             |
+| --------- | --------------------------------------------------- | ------------------------------------------- |
+| API       | `qmenut-api-dev` · `api.dev.qmenut.app`             | `qmenut-api` · `api.qmenut.app`             |
+| Web       | `qmenut-web-dev` · `dev.qmenut.app`                 | `qmenut-web` · each tenant domain           |
+| Admin     | `qmenut-admin-dev` · `admin.dev.qmenut.app`         | `qmenut-admin` · `admin.qmenut.app`         |
+| Lab       | `qmenut-lab-dev` · `lab.dev.qmenut.app`             | `qmenut-lab` · `lab.qmenut.app`             |
+| Referrals | `qmenut-referrals-dev` · `referidos.dev.qmenut.app` | `qmenut-referrals` · `referidos.qmenut.app` |
+| Landing   | —                                                   | `qmenut-landing` · `qmenut.app`, `www`      |
+| D1        | `qmenut-db-dev`                                     | `qmenut-db`                                 |
 
 - Top-level Wrangler config = local dev. Named environments **do not inherit** vars, D1, KV, services, queues, rate limits or observability, so each block repeats them and pins `name` (otherwise you get `qmenut-api-production` and broken bindings).
 - Resource IDs live in `apps/*/wrangler.jsonc`. The `TENANT_THEME` `id` must be identical in api and web for each environment.
-- Rate limiters need no provisioning: namespaces `1001–1004` (prod), `2001–2004` (dev).
+- Rate limiters need no provisioning: namespaces `1001–1005` (prod), `2001–2005` (dev).
+- Development keeps `REFERRAL_DELIVERY=simulate`: batches are marked sent and referral links are logged by the API instead of emailed. Production is `live`.
 - Development sets `DEV_FIXED_OTP=true` (OTP `000000`) and `ALLOW_INDEXING=false` (noindex everywhere).
 
 ## Prerequisites
 
 - `qmenut.app` active as a Cloudflare zone; `bun run --cwd apps/api wrangler login` on the target account.
 - In the **same account** (service bindings do not cross accounts):
-  - `ming-email-worker`, with the reservation templates `reservation-booked`, `reservation-reminder`, `reservation-cancelled` (each takes `locale` and `manageUrl`). Deploy it before the API.
+  - `ming-email-worker`, with the reservation templates `reservation-booked`, `reservation-reminder`, `reservation-cancelled` (each takes `locale` and `manageUrl`), the `referral-access` template, the `CampaignRpc` entrypoint and its `email-hooks.qmenut.app` webhook route. Deploy it before the API.
   - `ming-image-worker`, with the qmenut policy, buckets, notification, CORS and lifecycle (below).
   - `ming-exchange-rate-worker`.
   - `ming-msg-worker` only for the `/messaging` console (WhatsApp is on hold, [ADR 0003](../adr/0003-whatsapp-through-ming-msg-worker.md)).
@@ -61,6 +64,8 @@ bun run --cwd apps/api wrangler queues create qmenut-notifications<sfx>
 bun run --cwd apps/api wrangler queues create qmenut-notifications<sfx>-dlq
 bun run --cwd apps/api wrangler queues create ming-msg-events-qmenut<sfx>
 bun run --cwd apps/api wrangler queues create ming-msg-events-qmenut<sfx>-dlq
+bun run --cwd apps/api wrangler queues create ming-email-events-qmenut<sfx>
+bun run --cwd apps/api wrangler queues create ming-email-events-qmenut<sfx>-dlq
 ```
 
 Copy the returned IDs into `apps/api/wrangler.jsonc` (D1, KV) and `apps/web/wrangler.jsonc` (KV). Leave the shared local `preview_id` unchanged.
@@ -144,6 +149,9 @@ Cloudflare Images, so the adapter does not provision their bindings.
 | ------------------------------ | -------------------------------------------------------------- |
 | `api.qmenut.app`               | `qmenut-api` (declared; `workers_dev = false`)                 |
 | `admin.qmenut.app`             | `qmenut-admin`                                                 |
+| `lab.qmenut.app`               | `qmenut-lab`, behind Cloudflare Access (below)                 |
+| `referidos.qmenut.app`         | `qmenut-referrals`                                             |
+| `email-hooks.qmenut.app`       | `ming-email-worker`, Instantly webhooks only                   |
 | `qmenut.app`, `www.qmenut.app` | `qmenut-landing`                                               |
 | `media.qmenut.app`             | R2 `qmenut-media` (not a Worker)                               |
 | each `branches.customDomain`   | `qmenut-web` → Settings › Domains & Routes › Add custom domain |
@@ -171,6 +179,28 @@ bun run --cwd ../qmenut-ops tenant:load-content -- --file demo-tenants/tapas.con
 
 Never clone production D1 into development (sessions, live Stripe refs, customer data). Recreate tenants from fixtures. Extra dev tenants get their own hostname (`cafe.dev.qmenut.app`) attached to `qmenut-web-dev`.
 
+## Lab access (Cloudflare Access)
+
+Lab has no login of its own. Per environment:
+
+1. Zero Trust › Access › Applications › Self-hosted: `lab.qmenut.app` (or `lab.dev.qmenut.app`), login method **One-time PIN**, policy _Allow_ for the staff emails.
+2. Copy the team domain (`<team>.cloudflareaccess.com`) and the application **AUD tag** into `ACCESS_TEAM_DOMAIN` and `ACCESS_LAB_AUD` in that environment's API `vars`.
+3. Set `LAB_STAFF_EMAILS` (comma-separated) in the same block. The API checks the Access JWT signature, audience and expiry, then this allowlist; an empty value or a missing Access setting keeps Lab closed.
+
+Locally the API's `dev` script passes `LAB_DEV_STAFF_EMAIL=lab@qmenut.local`, which the top-level `LAB_STAFF_EMAILS` allows. It is ignored when `NODE_ENV` is production.
+
+## Instantly (referral campaigns)
+
+Needs an Instantly plan with API and webhooks (Hyper Growth or above) and sending mailboxes connected in the workspace. From `../ming-email-worker`:
+
+```bash
+bunx wrangler queues create ming-email-events-qmenut
+bunx wrangler secret put INSTANTLY_API_KEY_QMENUT
+bunx wrangler secret put INSTANTLY_WEBHOOK_SECRET
+```
+
+Put the mailboxes in `INSTANTLY_ACCOUNTS_QMENUT` (`wrangler.toml`). In Instantly create a webhook for all events to `https://email-hooks.qmenut.app/webhooks/instantly/qmenut` with header `Authorization: Bearer <INSTANTLY_WEBHOOK_SECRET>`. Details: [Referral campaigns](../domains/referrals.md).
+
 ## Stripe
 
 1. Create Basic and Business recurring prices → `STRIPE_PRICE_BASIC` / `STRIPE_PRICE_BUSINESS` in the API `vars`.
@@ -181,10 +211,10 @@ Never clone production D1 into development (sessions, live Stripe refs, customer
 
 ## Crons
 
-| Schedule     | Env       | Job                                                                       |
-| ------------ | --------- | ------------------------------------------------------------------------- |
-| `* * * * *`  | dev, prod | Image publication outbox, notification maintenance, reservation reminders |
-| `45 4 * * *` | prod      | PostHog → D1 aggregates (last 3 days), 15-day owner digest email          |
+| Schedule     | Env       | Job                                                                                                                              |
+| ------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `* * * * *`  | dev, prod | Image publication outbox, notification maintenance, reservation reminders, referral batch preparation and expired referral links |
+| `45 4 * * *` | prod      | PostHog → D1 aggregates (last 3 days), 15-day owner digest email                                                                 |
 
 The digest is at-least-once (no idempotency in the email worker) and has no unsubscribe yet.
 

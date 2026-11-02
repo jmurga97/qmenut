@@ -14,9 +14,11 @@ import { adminTenantRouter } from "../modules/admin-tenant/admin-tenant.router";
 import { adminTranslationsRouter } from "../modules/admin-translations/admin-translations.router";
 import { adminUsersRouter } from "../modules/admin-users/admin-users.router";
 import { billingRouter } from "../modules/billing/billing.router";
+import { labRouter } from "../modules/lab/lab.router";
 import { loyaltyRouter } from "../modules/loyalty/loyalty.router";
 import { notificationsRouter } from "../modules/notifications/notifications.router";
 import { publicMenuRouter } from "../modules/public-menu/public-menu.router";
+import { referralsRouter } from "../modules/referrals/referrals.router";
 import { reservationsRouter } from "../modules/reservations/reservations.router";
 import { themeRouter } from "../modules/theme/theme.router";
 
@@ -26,6 +28,9 @@ export const appRouter = router({
   menu: publicMenuRouter,
   loyalty: loyaltyRouter,
   reservations: reservationsRouter,
+  // QMenut staff only (Cloudflare Access); restaurant memberships grant nothing here.
+  lab: labRouter,
+  referrals: referralsRouter,
   admin: router({
     analytics: adminAnalyticsRouter,
     tenant: adminTenantRouter,

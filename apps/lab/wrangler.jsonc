@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "qmenut-lab",
+  "main": "src/server/worker.ts",
+  "compatibility_date": "2026-06-16",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/trpc/*"],
+  },
+  "services": [{ "binding": "API_WORKER", "service": "qmenut-api" }],
+  // Named environments inherit neither assets nor services. Cloudflare Access (email OTP plus the
+  // staff policy) protects each custom domain; see docs/operations/deployment.md.
+  "env": {
+    "development": {
+      "name": "qmenut-lab-dev",
+      "routes": [{ "pattern": "lab.dev.qmenut.app", "custom_domain": true }],
+      "assets": {
+        "directory": "./dist",
+        "binding": "ASSETS",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": ["/trpc/*"],
+      },
+      "services": [{ "binding": "API_WORKER", "service": "qmenut-api-dev" }],
+      "observability": { "enabled": true },
+    },
+    "production": {
+      "name": "qmenut-lab",
+      "routes": [{ "pattern": "lab.qmenut.app", "custom_domain": true }],
+      "assets": {
+        "directory": "./dist",
+        "binding": "ASSETS",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": ["/trpc/*"],
+      },
+      "services": [{ "binding": "API_WORKER", "service": "qmenut-api" }],
+      "observability": { "enabled": true },
+    },
+  },
+}

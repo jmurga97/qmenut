@@ -48,16 +48,16 @@ function subscribe(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
+function install(): void {
+  const prompt = deferredPrompt;
+  if (!prompt) return;
+  // The event is single-use, whatever the user answers.
+  publish(null);
+  void prompt.prompt();
+}
+
 export function useInstallPrompt(): { install: () => void; mode: InstallMode } {
   const mode = useSyncExternalStore(subscribe, getMode);
-
-  function install(): void {
-    const prompt = deferredPrompt;
-    if (!prompt) return;
-    // The event is single-use, whatever the user answers.
-    publish(null);
-    void prompt.prompt();
-  }
 
   return { install, mode };
 }

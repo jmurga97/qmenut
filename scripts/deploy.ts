@@ -124,6 +124,14 @@ try {
     await run(["bunx", "wrangler", "deploy", "--env", environment], appDirectory("admin"));
   });
 
+  // Same-origin SPAs: their Workers proxy /trpc to the API through a service binding, so no API URL is baked in.
+  for (const app of ["lab", "referrals"]) {
+    await step(`Deploy ${app}`, async () => {
+      await run(["bun", "run", "build"], appDirectory(app));
+      await run(["bunx", "wrangler", "deploy", "--env", environment], appDirectory(app));
+    });
+  }
+
   if (environment === "production") {
     await step("Deploy landing", async () => {
       await run(["bun", "run", "build"], appDirectory("landing"), { CLOUDFLARE_ENV: "production" });

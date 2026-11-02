@@ -9,6 +9,8 @@ import { jsonResponse } from "@/http/json";
 import { publishPendingImages } from "@/modules/admin-images/image-finalization";
 import { runAnalyticsDailyJob } from "@/modules/analytics/digest/run-analytics-daily-job";
 import { handleStripeWebhook } from "@/modules/billing/handle-stripe-webhook";
+import { runReferralJobs } from "@/modules/lab/campaign-jobs";
+import { handleEmailEvents } from "@/modules/lab/email-events";
 import { handleMessagingEvents } from "@/modules/messaging/handle-messaging-events";
 import { consumePushMessages, runNotificationMaintenance } from "@/modules/notifications/notification-jobs";
 import { runReservationJobs } from "@/modules/reservations/reservation-jobs";
@@ -49,7 +51,7 @@ async function handleRequest(request: Request, env: RuntimeEnv): Promise<Respons
       endpoint: TRPC_ENDPOINT,
       req: request,
       router: appRouter,
-      createContext: () => createContext({ env, request }),
+      createContext: ({ resHeaders }) => createContext({ env, request, resHeaders }),
       // Reviews are rate-limited per visitor; a batched response containing them must never be cached.
       responseMeta: ({ paths }) =>
         paths?.includes("menu.googleReviews") ? { headers: { "Cache-Control": "no-store" } } : {},
@@ -79,7 +81,20 @@ export default Sentry.withSentry(
   (rawEnv: EnvBindings) => ({
     dsn: rawEnv.SENTRY_DSN || undefined,
     environment: rawEnv.NODE_ENV ?? "development",
-    sendDefaultPii: false,
+    dataCollection: {
+      userInfo: false,
+      cookies: false,
+      httpHeaders: {
+        request: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] },
+        response: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] },
+      },
+      httpBodies: [],
+      urlQueryParams: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] },
+      genAI: { inputs: false, outputs: false },
+      databaseQueryData: false,
+      queues: false,
+      graphQL: { document: false, variables: false },
+    },
     tracesSampleRate: 0,
   }),
   {
@@ -96,7 +111,12 @@ export default Sentry.withSentry(
       else {
         const env = parseEnv(rawEnv);
         ctx.waitUntil(
-          Promise.allSettled([publishPendingImages(env), runNotificationMaintenance(env), runReservationJobs(env)]),
+          Promise.allSettled([
+            publishPendingImages(env),
+            runNotificationMaintenance(env),
+            runReservationJobs(env),
+            runReferralJobs(env),
+          ]),
         );
       }
     },
@@ -105,6 +125,8 @@ export default Sentry.withSentry(
         await consumePushMessages(batch as MessageBatch<PushMessage>, parseEnv(rawEnv));
       } else if (batch.queue.startsWith("ming-msg-events-")) {
         await handleMessagingEvents(batch, parseEnv(rawEnv));
+      } else if (batch.queue.startsWith("ming-email-events-")) {
+        await handleEmailEvents(batch, parseEnv(rawEnv));
       }
     },
   },

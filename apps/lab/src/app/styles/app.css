@@ -1,0 +1,61 @@
+/* Lab-specific layout. Ming tokens only. */
+.lab-sidebar-identity {
+  display: grid;
+  gap: var(--ming-space-1);
+  overflow-wrap: anywhere;
+}
+
+.lab-form {
+  display: grid;
+  max-width: var(--ming-page-narrow);
+  gap: var(--ming-space-4);
+}
+
+.lab-form-row {
+  display: grid;
+  gap: var(--ming-space-4);
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
+.lab-identity {
+  display: grid;
+  gap: var(--ming-space-1);
+}
+
+.lab-identity span {
+  color: var(--muted-foreground);
+}
+
+.lab-reward {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.lab-preview {
+  width: 100%;
+  min-height: 24rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.lab-file {
+  max-width: 100%;
+  font: inherit;
+}
+
+.lab-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--ming-space-2);
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+}
+
+.lab-identity {
+  overflow-wrap: anywhere;
+}

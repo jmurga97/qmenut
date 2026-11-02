@@ -1,8 +1,9 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { cloudflare } from "@cloudflare/vite-plugin";
+import babel from "@rolldown/plugin-babel";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import react from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 import type { Plugin } from "vite";
@@ -63,10 +64,12 @@ export default defineConfig({
     }),
     react({
       include: /\/apps\/web\/src\/.*\.[jt]sx?$/,
-      babel: {
-        plugins: process.env.QMENUT_REACT_COMPILER === "0" ? [] : [["babel-plugin-react-compiler", {}]],
-      },
     }),
+    process.env.QMENUT_REACT_COMPILER !== "0" &&
+      babel({
+        presets: [reactCompilerPreset()],
+        include: /\/apps\/web\/src\/.*\.[jt]sx?$/,
+      }),
     ssrNodeConditions(),
   ],
   resolve: {
