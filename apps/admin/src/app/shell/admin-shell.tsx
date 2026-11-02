@@ -100,7 +100,12 @@ interface NavigationInput {
 function getNavigationItems({ isInternalSupport, pathname, roleCode, isLocked }: NavigationInput): NavListItem[] {
   return SECTIONS.filter((section) => section.id !== "analytics" || FEATURES.analytics)
     .filter((section) => section.id !== "reservations" || FEATURES.reservations)
-    .filter((section) => !("permission" in section) || can(roleCode, section.permission))
+    .filter(
+      (section) =>
+        !("permission" in section) ||
+        can(roleCode, section.permission) ||
+        (section.permission === "users.manage" && isInternalSupport),
+    )
     .filter((section) => !("internalOnly" in section) || isInternalSupport)
     .map((section) => ({
       current: section.path === "/" ? pathname === "/" : pathname.startsWith(section.path),

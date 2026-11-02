@@ -7,15 +7,15 @@ import {
   updateRestaurantUserRole,
 } from "@qmenut/db/repositories/admin-users.repository";
 import { getRestaurantById } from "@qmenut/db/repositories/restaurants.repository";
-import { isInternalSupportEmail } from "@qmenut/permissions";
+import { canManageUsers, isInternalSupportEmail } from "@qmenut/permissions";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { sendUserInviteEmail } from "./send-user-invite-email";
 import { featureProcedure, router } from "../../trpc/trpc";
-import { requirePermission } from "../admin-tenant/require-permission";
 
 import type { UserInviteSendResult } from "./send-user-invite-email";
+import type { TenantContext } from "../../trpc/trpc";
 
 const manageableRoleSchema = z.enum(["admin", "staff"]);
 const membershipIdSchema = z.object({ membershipId: z.string().trim().min(1) });
@@ -29,6 +29,12 @@ const setActiveSchema = membershipIdSchema.extend({ isActive: z.boolean() });
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
+}
+
+function requireUsersManager(ctx: { tenant: TenantContext; session: { user: { email: string } } }): void {
+  if (!canManageUsers(ctx.tenant.roleCode, ctx.session.user.email)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "El rol no tiene permisos suficientes" });
+  }
 }
 
 function assertEditableMembership(roleCode: string, email: string): void {
@@ -109,12 +115,12 @@ const usersProcedure = featureProcedure("users");
 
 export const adminUsersRouter = router({
   list: usersProcedure.query(async ({ ctx }) => {
-    requirePermission(ctx.tenant, "users.manage");
+    requireUsersManager(ctx);
     return listRestaurantUsers({ db: ctx.db, restaurantId: ctx.tenant.restaurantId });
   }),
 
   create: usersProcedure.input(createUserSchema).mutation(async ({ ctx, input }) => {
-    requirePermission(ctx.tenant, "users.manage");
+    requireUsersManager(ctx);
     const email = normalizeEmail(input.email);
     if (isInternalSupportEmail(email)) {
       throw new TRPCError({ code: "FORBIDDEN", message: "El correo está reservado para soporte interno" });
@@ -154,7 +160,7 @@ export const adminUsersRouter = router({
   }),
 
   updateRole: usersProcedure.input(updateRoleSchema).mutation(async ({ ctx, input }) => {
-    requirePermission(ctx.tenant, "users.manage");
+    requireUsersManager(ctx);
     const membership = await getRestaurantUser({
       db: ctx.db,
       membershipId: input.membershipId,
@@ -174,7 +180,7 @@ export const adminUsersRouter = router({
   }),
 
   setActive: usersProcedure.input(setActiveSchema).mutation(async ({ ctx, input }) => {
-    requirePermission(ctx.tenant, "users.manage");
+    requireUsersManager(ctx);
     if (!input.isActive && input.membershipId === ctx.tenant.membershipId) {
       throw new TRPCError({ code: "FORBIDDEN", message: "No puedes desactivar tu propia membresía" });
     }
@@ -197,7 +203,7 @@ export const adminUsersRouter = router({
   }),
 
   resendInvite: usersProcedure.input(membershipIdSchema).mutation(async ({ ctx, input }) => {
-    requirePermission(ctx.tenant, "users.manage");
+    requireUsersManager(ctx);
     const membership = await getRestaurantUser({
       db: ctx.db,
       membershipId: input.membershipId,

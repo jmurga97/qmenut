@@ -69,6 +69,11 @@ export function can(role: RestaurantRoleCode, permission: Permission): boolean {
   return ROLE_PERMISSIONS[role].includes(permission);
 }
 
+/** Internal support manages a restaurant's members like its owner, without the owner's other rights. */
+export function canManageUsers(role: RestaurantRoleCode, email: string): boolean {
+  return can(role, "users.manage") || isInternalSupportEmail(email);
+}
+
 export const PLAN_CODES = ["basic", "business"] as const;
 
 export type PlanCode = (typeof PLAN_CODES)[number];
