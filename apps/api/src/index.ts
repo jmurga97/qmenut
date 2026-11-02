@@ -49,7 +49,7 @@ async function handleRequest(request: Request, env: RuntimeEnv): Promise<Respons
       endpoint: TRPC_ENDPOINT,
       req: request,
       router: appRouter,
-      createContext: () => createContext({ env, request }),
+      createContext: ({ resHeaders }) => createContext({ env, request, resHeaders }),
       // Reviews are rate-limited per visitor; a batched response containing them must never be cached.
       responseMeta: ({ paths }) =>
         paths?.includes("menu.googleReviews") ? { headers: { "Cache-Control": "no-store" } } : {},

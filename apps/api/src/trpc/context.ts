@@ -17,9 +17,10 @@ export interface TrpcContext {
 interface CreateContextInput {
   env: RuntimeEnv;
   request: Request;
+  resHeaders: Headers;
 }
 
-export function createContext({ env, request }: CreateContextInput): TrpcContext {
+export function createContext({ env, request, resHeaders }: CreateContextInput): TrpcContext {
   const db = createDb(env.DB);
   const auth = createAuth({ db, env });
 
@@ -27,7 +28,14 @@ export function createContext({ env, request }: CreateContextInput): TrpcContext
     auth,
     db,
     env,
-    getSession: () => auth.api.getSession({ headers: request.headers }),
+    // A renewal also moves D1's expiry, so a dropped Set-Cookie would leave the browser cookie on its old date.
+    getSession: async () => {
+      const { headers, response } = await auth.api.getSession({ headers: request.headers, returnHeaders: true });
+      headers.forEach((value, name) => {
+        if (name === "set-cookie") resHeaders.append(name, value);
+      });
+      return response;
+    },
     request,
   };
 }
