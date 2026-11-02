@@ -1,5 +1,5 @@
 ---
-import { LinkButton } from "../components/link-button";
+import Faq from "../components/faq.astro";
 import PlanCards from "../components/plan-cards.astro";
 import BaseLayout from "../layouts/base-layout.astro";
 import { START_PATH } from "../lib/content";
@@ -7,7 +7,7 @@ import { START_PATH } from "../lib/content";
 // Scope mirrors docs/sales/plan-features.md and packages/permissions. Delivery includes Business.
 type Cell = "yes" | "no" | "soon";
 
-const CELL_LABEL: Record<Cell, string> = { yes: "Incluido", no: "—", soon: "Próximamente" };
+const CELL_LABEL: Record<Cell, string> = { yes: "✓", no: "—", soon: "Próximamente" };
 
 const GROUPS: { title: string; rows: [string, Cell, Cell][] }[] = [
   {
@@ -65,97 +65,52 @@ const GROUPS: { title: string; rows: [string, Cell, Cell][] }[] = [
 
 // Delivery is Business plus ordering, so its column repeats Business and marks ordering as coming soon.
 const deliveryCell = (groupTitle: string, business: Cell): Cell => (groupTitle === "Pedidos" ? "soon" : business);
-
-const FAQ = [
-  {
-    question: "¿Cómo funciona la prueba?",
-    answer:
-      "14 días en cualquier plan. Te pedimos la tarjeta al empezar y no se cobra nada hasta que termina la prueba.",
-  },
-  {
-    question: "¿Puedo cambiar de plan?",
-    answer: "Sí. Puedes pasar de Basic a Business cuando quieras, sin perder nada de lo que ya tienes publicado.",
-  },
-  {
-    question: "¿Qué pasa si cancelo?",
-    answer: "Puedes pedir la exportación de tus datos y la transferencia de tu dominio sin coste adicional.",
-  },
-  {
-    question: "¿De quién es el dominio?",
-    answer: "Tuyo. En Business está incluido mientras tengas la suscripción.",
-  },
-];
 ---
 
 <BaseLayout
   title="Precios · QMenut"
   description="Basic 15 USD y Business 55 USD al mes, con 14 días de prueba. Delivery, próximamente."
 >
-  <div class="landing">
-    <section class="container hero" aria-labelledby="precios-title">
-      <p class="section-mark">Precios</p>
-      <h1 class="pixel-title" id="precios-title">
-        Un precio fijo cada mes
-      </h1>
-      <p class="lede">14 días de prueba en cualquier plan. Cancela cuando quieras.</p>
-      <PlanCards />
-      <LinkButton href={START_PATH} size="lg">
-        Prueba 14 días
-      </LinkButton>
-    </section>
+  <section class="container hero">
+    <h1>Un precio fijo cada mes</h1>
+    <PlanCards />
+    <a class="button" href={START_PATH}>
+      Prueba 14 días
+    </a>
+  </section>
 
-    <section class="container section" aria-labelledby="comparar-title">
-      <div class="section__header">
-        <p class="section-mark">Comparar</p>
-        <h2 class="pixel-heading" id="comparar-title">
-          Qué incluye cada plan
-        </h2>
-      </div>
-      <div class="compare-scroll" role="region" aria-labelledby="comparar-title" tabindex="0">
+  <section class="container section">
+    <h2 id="comparar">Qué incluye cada plan</h2>
+    <div class="table-scroll" role="region" aria-labelledby="comparar" tabindex="0">
+      <table class="compare">
+        <thead>
+          <tr>
+            <td></td>
+            <th scope="col">Basic</th>
+            <th scope="col">Business</th>
+            <th scope="col">Delivery</th>
+          </tr>
+        </thead>
         {GROUPS.map((group) => (
-          <table class="compare">
-            <caption>{group.title}</caption>
-            <thead>
+          <tbody>
+            <tr>
+              <th scope="colgroup" colspan="4">
+                {group.title}
+              </th>
+            </tr>
+            {group.rows.map(([feature, basic, business]) => (
               <tr>
-                <th scope="col">Funcionalidad</th>
-                <th scope="col">Basic</th>
-                <th scope="col">Business</th>
-                <th scope="col">Delivery</th>
+                <th scope="row">{feature}</th>
+                {[basic, business, deliveryCell(group.title, business)].map((cell) => (
+                  <td data-included={String(cell === "yes")}>{CELL_LABEL[cell]}</td>
+                ))}
               </tr>
-            </thead>
-            <tbody>
-              {group.rows.map(([feature, basic, business]) => {
-                const delivery = deliveryCell(group.title, business);
-                return (
-                  <tr>
-                    <th scope="row">{feature}</th>
-                    {[basic, business, delivery].map((cell) => (
-                      <td data-included={String(cell === "yes")}>{CELL_LABEL[cell]}</td>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+            ))}
+          </tbody>
         ))}
-      </div>
-    </section>
+      </table>
+    </div>
+  </section>
 
-    <section class="container section" aria-labelledby="faq-title">
-      <div class="section__header">
-        <p class="section-mark">Facturación</p>
-        <h2 class="pixel-heading" id="faq-title">
-          Preguntas sobre el pago
-        </h2>
-      </div>
-      <div class="faq">
-        {FAQ.map((item) => (
-          <details name="faq">
-            <summary>{item.question}</summary>
-            <p>{item.answer}</p>
-          </details>
-        ))}
-      </div>
-    </section>
-  </div>
+  <Faq />
 </BaseLayout>

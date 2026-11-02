@@ -17,7 +17,10 @@ for scope, [`playbook-comercial.md`](./playbook-comercial.md) for claims we neve
   Launch promotions are never published; they are offered at the owner's discretion.
 - Delivery is shown as **coming soon** and gets its own prominent section: it is the
   biggest gain the product will offer.
-- Reservations are listed as a Business feature with a "Próximamente" badge until shipped.
+- No eyebrows, ledes under headings, badges or index numbers: one heading and its content per
+  section. Plan scope lives on `/precios`; the home names a plan in the copy only where it
+  matters (the domain). Reservations stay off the home until shipped; `/precios` marks them
+  "Próximamente".
 - Every sign-up CTA points to one generic page (`/empezar`) until self-serve sign-up exists.
 - The five demo tenants are linked so visitors can see the look and feel.
 - No privacy or "no cookies" claims on the landing.

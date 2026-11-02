@@ -1,10 +1,8 @@
 ---
 import "../styles/fonts.css";
 import "@jmurga97/components/styles.css";
-import "../styles/layout.css";
 import "../styles/landing.css";
 
-import { LinkButton } from "../components/link-button";
 import { ADMIN_URL, START_PATH } from "../lib/content";
 
 interface Props {
@@ -34,30 +32,19 @@ const { title, description } = Astro.props;
       Saltar al contenido
     </a>
     <header class="site-nav">
-      <div class="site-nav__inner">
+      <div class="container">
         <a class="brand" href="/">
-          <span class="brand__mark" aria-hidden="true"></span>
-          <span>QMenut</span>
+          QMenut
         </a>
         <nav aria-label="Principal">
-          <ul class="site-nav__links">
-            <li>
-              <a href="/#funcionalidades">Funcionalidades</a>
-            </li>
-            <li>
-              <a href="/#demos">Demos</a>
-            </li>
-            <li>
-              <a href="/precios">Precios</a>
-            </li>
-            <li>
-              <a href={ADMIN_URL}>Entrar</a>
-            </li>
-          </ul>
+          <a href="/#funcionalidades">Funcionalidades</a>
+          <a href="/#demos">Demos</a>
+          <a href="/precios">Precios</a>
+          <a href={ADMIN_URL}>Entrar</a>
         </nav>
-        <LinkButton href={START_PATH} variant="secondary" size="sm">
+        <a class="button button--small" href={START_PATH}>
           Prueba 14 días
-        </LinkButton>
+        </a>
       </div>
     </header>
 
@@ -65,65 +52,15 @@ const { title, description } = Astro.props;
       <slot />
     </main>
 
-    <footer class="site-footer">
-      <div class="site-footer__inner">
-        <div class="site-footer__brand">
-          <a class="brand" href="/">
-            <span class="brand__mark" aria-hidden="true"></span>
-            <span>QMenut</span>
-          </a>
-          <p>La presencia digital de tu restaurante, a la altura de lo que sirves.</p>
-        </div>
-        <nav class="site-footer__column" aria-labelledby="footer-producto">
-          <p class="ming-eyebrow" id="footer-producto">
-            Producto
-          </p>
-          <ul>
-            <li>
-              <a href="/#funcionalidades">Funcionalidades</a>
-            </li>
-            <li>
-              <a href="/#demos">Demos</a>
-            </li>
-            <li>
-              <a href="/#delivery">Delivery</a>
-            </li>
-            <li>
-              <a href="/precios">Precios</a>
-            </li>
-          </ul>
-        </nav>
-        <nav class="site-footer__column" aria-labelledby="footer-cuenta">
-          <p class="ming-eyebrow" id="footer-cuenta">
-            Cuenta
-          </p>
-          <ul>
-            <li>
-              <a href={START_PATH}>Empezar</a>
-            </li>
-            <li>
-              <a href={ADMIN_URL}>Entrar</a>
-            </li>
-          </ul>
-        </nav>
-        <nav class="site-footer__column" aria-labelledby="footer-legal">
-          <p class="ming-eyebrow" id="footer-legal">
-            Legal
-          </p>
-          <ul>
-            <li>
-              <a href="/aviso-legal">Aviso legal</a>
-            </li>
-            <li>
-              <a href="/privacidad">Privacidad</a>
-            </li>
-            <li>
-              <a href="/condiciones">Condiciones</a>
-            </li>
-          </ul>
-        </nav>
-      </div>
-      <p class="site-footer__legal">© {new Date().getFullYear()} QMenut</p>
+    <footer class="container site-footer">
+      <span>© {new Date().getFullYear()} QMenut</span>
+      <nav aria-label="Pie de página">
+        <a href="/precios">Precios</a>
+        <a href={ADMIN_URL}>Entrar</a>
+        <a href="/aviso-legal">Aviso legal</a>
+        <a href="/privacidad">Privacidad</a>
+        <a href="/condiciones">Condiciones</a>
+      </nav>
     </footer>
   </body>
 </html>

@@ -20,18 +20,8 @@ const { title, intro } = Astro.props;
 ---
 
 <BaseLayout title={`${title} · QMenut`} description={intro}>
-  <div class="landing">
-    <section class="container page-intro" aria-labelledby="legal-title">
-      <p class="section-mark">Legal</p>
-      <h1 class="pixel-heading" id="legal-title">
-        {title}
-      </h1>
-      <p class="lede">{intro}</p>
-    </section>
-    <div class="container legal-body">
-      <div class="ming-prose">
-        <p>Este texto está en preparación.</p>
-      </div>
-    </div>
-  </div>
+  <section class="container hero">
+    <h1>{title}</h1>
+    <p>Este texto está en preparación.</p>
+  </section>
 </BaseLayout>

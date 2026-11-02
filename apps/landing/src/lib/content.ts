@@ -4,19 +4,18 @@ export const START_PATH = "/empezar";
 export const ADMIN_URL = "https://admin.qmenut.app";
 
 export const DEMOS = [
-  { slug: "fine", name: "Alta cocina", href: "https://fine.dev.qmenut.app" },
-  { slug: "her", name: "Cocina de herencia", href: "https://her.dev.qmenut.app" },
-  { slug: "fast", name: "Fast casual", href: "https://fast.dev.qmenut.app" },
-  { slug: "cafe", name: "Cafetería", href: "https://cafe.dev.qmenut.app" },
-  { slug: "tapas", name: "Bar de tapas", href: "https://tapas.dev.qmenut.app" },
+  { name: "Alta cocina", href: "https://fine.dev.qmenut.app" },
+  { name: "Cocina de herencia", href: "https://her.dev.qmenut.app" },
+  { name: "Fast casual", href: "https://fast.dev.qmenut.app" },
+  { name: "Cafetería", href: "https://cafe.dev.qmenut.app" },
+  { name: "Bar de tapas", href: "https://tapas.dev.qmenut.app" },
 ] as const;
 
+// A null price means the plan is not on sale yet.
 export const PLANS = [
   {
-    code: "basic",
     name: "Basic",
     price: "15 USD",
-    summary: "Un menú digital sencillo con tu logo y tu portada.",
     highlights: [
       "Menú con fotos, variantes y alérgenos",
       "Contacto, mapa y horarios",
@@ -24,23 +23,62 @@ export const PLANS = [
     ],
   },
   {
-    code: "business",
     name: "Business",
     price: "55 USD",
-    summary: "Todo QMenut: tu dominio, tu marca, idiomas, fidelización y analítica.",
     highlights: [
+      "Todo lo de Basic",
       "Tu propio dominio incluido",
       "Cinco estilos y los colores de tu marca",
       "Idiomas, puntos y analítica",
     ],
   },
   {
-    code: "delivery",
     name: "Delivery",
     price: null,
-    summary: "Pedidos para recoger y a domicilio desde tu propio canal, sobre Business.",
-    highlights: ["Pedidos y pago online", "Bandeja de pedidos", "Tus repartidores, más adelante"],
+    highlights: ["Todo lo de Business", "Pedidos y pago online", "Bandeja de pedidos"],
   },
 ] as const;
 
-export type PlanCode = (typeof PLANS)[number]["code"];
+export const FAQ = [
+  {
+    question: "¿Tengo que quitar la carta en papel?",
+    answer:
+      "No. QMenut está donde se decide a qué restaurante ir: en el móvil, antes de llegar. En la mesa puedes seguir ofreciendo tu carta impresa.",
+  },
+  {
+    question: "Ya estoy en Instagram y en Google, ¿para qué lo necesito?",
+    answer:
+      "Instagram y Google ayudan a que te descubran. QMenut completa ese descubrimiento con un menú actualizado y legible para buscadores, sin que nadie tenga que buscar precios entre publicaciones antiguas.",
+  },
+  {
+    question: "¿No me basta con un PDF?",
+    answer:
+      "Un PDF hay que ampliarlo, recorrerlo página a página y volver a subirlo cada vez que cambia un precio. Y ni Google ni los asistentes de IA pueden leer bien sus platos.",
+  },
+  {
+    question: "¿Mis clientes tienen que descargar una app?",
+    answer: "No. Tu menú se abre en el navegador del móvil.",
+  },
+  {
+    question: "¿Cómo funciona la prueba?",
+    answer:
+      "Tienes 14 días para probar cualquier plan. Te pedimos la tarjeta al empezar y no se cobra nada hasta que termina la prueba.",
+  },
+  {
+    question: "¿Puedo pasar de Basic a Business?",
+    answer: "Sí, cuando quieras y sin perder nada de lo que ya tienes publicado.",
+  },
+  {
+    question: "¿Qué pasa si cancelo?",
+    answer: "Puedes pedir la exportación de tus datos y la transferencia de tu dominio sin coste adicional.",
+  },
+  {
+    question: "¿De quién es el dominio?",
+    answer:
+      "Tuyo. En Business el dominio está incluido mientras tengas la suscripción, y si un día te vas, puedes llevártelo.",
+  },
+  {
+    question: "¿Tiene pedidos o delivery?",
+    answer: "Todavía no. Los pedidos para recoger y a domicilio llegarán pronto como una ampliación de Business.",
+  },
+] as const;

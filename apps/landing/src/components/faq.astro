@@ -1,0 +1,15 @@
+---
+import { FAQ } from "../lib/content";
+---
+
+<section class="container section">
+  <h2>Preguntas frecuentes</h2>
+  <div class="faq">
+    {FAQ.map((item) => (
+      <details name="faq">
+        <summary>{item.question}</summary>
+        <p>{item.answer}</p>
+      </details>
+    ))}
+  </div>
+</section>
