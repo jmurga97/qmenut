@@ -70,7 +70,6 @@ export async function getOverview({ db }: Pick<TrpcContext, "db">) {
       referrals: total("referrals"),
       purchases: total("approved"),
     },
-    providerClicks: total("clicked"),
     money: { owedCents: total("owedCents"), paidCents: total("paidCents"), revenueCents: total("revenueCents") },
     groups,
   };

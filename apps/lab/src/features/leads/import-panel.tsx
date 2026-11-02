@@ -86,16 +86,10 @@ export function ImportPanel() {
 
   return (
     <section aria-labelledby="import-title" className="ming-section">
-      <div>
-        <h2 className="ming-section__title" id="import-title">
-          Importar contactos
-        </h2>
-        <p className="ming-section__description">
-          CSV con columna email o correo (y opcionalmente name o nombre), o un arreglo JSON. Hasta {count(MAX_LEADS)}{" "}
-          contactos por archivo.
-        </p>
-      </div>
-      <Field error={fileError} invalid={Boolean(fileError)} label="Archivo">
+      <h2 className="ming-section__title" id="import-title">
+        Importar
+      </h2>
+      <Field error={fileError} invalid={Boolean(fileError)} label="CSV o JSON">
         <input
           accept=".csv,.json,text/csv,application/json"
           className="lab-file"
@@ -111,20 +105,19 @@ export function ImportPanel() {
             title={preview.fileName}
             stats={[
               { id: "new", label: "Nuevos", value: count(fresh) },
-              { id: "existing", label: "Ya importados", value: count(preview.existing.size) },
-              { id: "duplicates", label: "Repetidos en el archivo", value: count(preview.parsed.duplicates) },
-              { id: "invalid", label: "Correos inválidos", value: count(preview.parsed.invalid.length) },
+              { id: "existing", label: "Existentes", value: count(preview.existing.size) },
+              { id: "duplicates", label: "Repetidos", value: count(preview.parsed.duplicates) },
+              { id: "invalid", label: "Inválidos", value: count(preview.parsed.invalid.length) },
             ]}
           />
           {preview.parsed.invalid.length > 0 ? (
             <InlineMessage
               message={`Se omitirán: ${preview.parsed.invalid.slice(0, 8).join(", ")}${preview.parsed.invalid.length > 8 ? "…" : ""}`}
-              title="Correos inválidos"
               tone="warning"
             />
           ) : null}
           <div className="lab-form">
-            <Field hint="Identifica el origen al filtrar contactos." label="Etiqueta de importación">
+            <Field label="Etiqueta">
               <Input maxLength={80} onValueChange={setLabel} value={label} />
             </Field>
             <div className="ming-cluster">

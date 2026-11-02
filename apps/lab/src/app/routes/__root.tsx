@@ -12,6 +12,7 @@ const AREAS = [
   { id: "campaigns", label: "Envíos", href: "/campaigns" },
   { id: "referrals", label: "Referidos", href: "/referrals" },
   { id: "payouts", label: "Pagos", href: "/payouts" },
+  { id: "announcements", label: "Avisos", href: "/announcements" },
 ] as const;
 
 const MOBILE = "(max-width: 56rem)";
@@ -53,20 +54,9 @@ function LabShell() {
       navigation={
         <SidebarNav
           ariaLabel="Navegación del Lab"
-          header={
-            <div className="lab-sidebar-identity">
-              <p className="ming-eyebrow">QMenut Lab</p>
-              <span>{me.data.email}</span>
-            </div>
-          }
+          header={<p className="ming-eyebrow">QMenut Lab</p>}
           items={AREAS.map((item) => ({ ...item, current: item.id === area.id }))}
-          footer={
-            me.data.delivery === "live" ? (
-              <StatusText label="Envío real por Instantly" tone="success" />
-            ) : (
-              <StatusText label="Envío simulado" tone="warning" />
-            )
-          }
+          footer={me.data.delivery === "live" ? null : <StatusText label="Envío simulado" tone="warning" />}
           onNavigate={(id) => {
             const target = AREAS.find((item) => item.id === id);
             if (target) void navigate({ to: target.href });

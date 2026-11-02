@@ -6,6 +6,7 @@ import { Outlet, useLocation, useNavigate, useRouteContext, useRouter } from "@t
 import { getListRestaurantsQueryOptions } from "~/features/auth/api";
 import { useSelectRestaurant } from "~/features/auth/hooks/use-select-restaurant";
 import { NotificationBell } from "~/features/notifications/components/notification-bell";
+import { PushDevicePrompt } from "~/features/notifications/components/push-device-prompt";
 import { signOut } from "~/lib/auth-client";
 import { FEATURES } from "~/lib/features";
 import { i18n } from "~/lib/i18n";
@@ -161,6 +162,7 @@ export function AdminShell() {
           </nav>
           <div className="admin-topbar-actions">
             {selectedBranch ? <NotificationBell branchId={selectedBranch.id} /> : null}
+            {selectedBranch && !isInternalSupport ? <PushDevicePrompt selectedBranchId={selectedBranch.id} /> : null}
             {memberships.length > 1 ? (
               <Select
                 ariaLabel={i18n.t("shell___Restaurante activo")}

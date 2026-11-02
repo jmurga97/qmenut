@@ -25,6 +25,12 @@ export function NotificationBell({ branchId }: { branchId: string }) {
     return () => navigator.serviceWorker.removeEventListener("message", refresh);
   }, [queryClient]);
 
+  // Installed app: mirror the count on the home-screen / dock icon. Unsupported browsers just skip it.
+  useEffect(() => {
+    if (!("setAppBadge" in navigator)) return;
+    void (count > 0 ? navigator.setAppBadge(count) : navigator.clearAppBadge()).catch(() => null);
+  }, [count]);
+
   return (
     <Button
       aria-label={

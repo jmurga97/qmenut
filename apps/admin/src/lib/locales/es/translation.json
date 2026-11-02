@@ -84,11 +84,16 @@
     "Ver carta ↗": "Ver carta ↗",
     "Cerrar sesión": "Cerrar sesión",
     "Instalar app": "Instalar app",
-    "Instalar: Compartir → Añadir a inicio": "Instalar: Compartir → Añadir a pantalla de inicio",
     "Material para imprimir": "Material para imprimir",
     "Notificaciones": "Notificaciones",
     "Mensajería": "Mensajería",
-    "Reservas": "Reservas"
+    "Reservas": "Reservas",
+    "Instalar QMenut": "Instalar QMenut",
+    "Se abre como una app y recibe notificaciones en este dispositivo.": "Se abre como una app y recibe notificaciones en este dispositivo.",
+    "Toca Compartir y luego «Añadir a pantalla de inicio».": "Toca Compartir y luego «Añadir a pantalla de inicio».",
+    "En la barra de menús, elige Archivo → «Añadir al Dock».": "En la barra de menús, elige Archivo → «Añadir al Dock».",
+    "Abre el menú del navegador y elige «Instalar app» o «Añadir a pantalla de inicio». En ordenador también aparece un icono de instalar en la barra de direcciones.": "Abre el menú del navegador y elige «Instalar app» o «Añadir a pantalla de inicio». En ordenador también aparece un icono de instalar en la barra de direcciones.",
+    "Entendido": "Entendido"
   },
   "analytics": {
     "Sin datos en este periodo.": "Sin datos en este periodo.",
@@ -1088,7 +1093,12 @@
     "Aceptado por {{name}}": "Aceptado por {{name}}",
     "Reserva cancelada": "Reserva cancelada",
     "{{day}} · {{time}} · {{count}} personas": "{{day}} · {{time}} · {{count}} personas",
-    "Nueva reserva": "Nueva reserva"
+    "Nueva reserva": "Nueva reserva",
+    "¿Activar notificaciones en este dispositivo?": "¿Activar notificaciones en este dispositivo?",
+    "Ahora no": "Ahora no",
+    "Enviar prueba": "Enviar prueba",
+    "Prueba enviada. Debería llegar en unos segundos.": "Prueba enviada. Debería llegar en unos segundos.",
+    "No se pudo enviar. Desactiva y vuelve a activar las notificaciones.": "No se pudo enviar. Desactiva y vuelve a activar las notificaciones."
   },
   "messaging": {
     "Enviar plantilla": "Enviar plantilla",

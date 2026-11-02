@@ -29,5 +29,6 @@ export function getNotificationMutationOptions(context: MutationContext) {
     markRead: trpc.admin.notifications.markRead.mutationOptions(options),
     removeDevice: trpc.admin.notifications.removeDevice.mutationOptions(options),
     saveDevice: trpc.admin.notifications.saveDevice.mutationOptions(options),
+    sendTestPush: trpc.admin.notifications.sendTestPush.mutationOptions(options),
   };
 }

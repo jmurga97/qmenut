@@ -19,8 +19,8 @@ const ENGAGEMENT_LABELS: Record<Engagement, string> = {
   not_invited: "Sin invitar",
   invited: "Asignado",
   sent: "Enviado",
-  clicked: "Clic en el correo",
-  visited: "Visitó la oferta",
+  clicked: "Clic",
+  visited: "Visitó",
   replied: "Respondió",
   registered: "Registrado",
 };
@@ -112,11 +112,7 @@ export function LeadsPage() {
 
   return (
     <>
-      <PageHeader
-        eyebrow="Audiencia"
-        title="Contactos"
-        description="Cada contacto recibe una sola invitación. Las bajas y los rebotes nunca vuelven a un lote."
-      />
+      <PageHeader title="Contactos" />
       <ImportPanel />
       <section aria-labelledby="leads-title" className="ming-section">
         <h2 className="ming-section__title" id="leads-title">
@@ -162,8 +158,8 @@ export function LeadsPage() {
           ariaLabel="Contactos importados"
           columns={columns}
           density="compact"
-          emptyState="Ningún contacto coincide. Cambia los filtros o importa un archivo."
-          error={leads.error ? "No se pudieron cargar los contactos. Reintenta en unos segundos." : undefined}
+          emptyState="Sin resultados."
+          error={leads.error ? "No se pudieron cargar los contactos." : undefined}
           getRowId={(lead) => lead.id}
           loading={leads.isPending}
           loadingLabel="Cargando contactos…"
@@ -208,7 +204,7 @@ export function LeadsPage() {
       <ConfirmAction
         cancelLabel="Cancelar"
         confirmLabel="Dar de baja"
-        message={`${unsubscribing?.email ?? ""} no recibirá más invitaciones y se añadirá a la lista de bloqueo de Instantly. No se puede deshacer.`}
+        message={`${unsubscribing?.email ?? ""} no recibirá más invitaciones. No se puede deshacer.`}
         onConfirm={() => unsubscribing && unsubscribe.mutate({ leadId: unsubscribing.id })}
         onOpenChange={(open) => {
           if (!open) setUnsubscribing(null);

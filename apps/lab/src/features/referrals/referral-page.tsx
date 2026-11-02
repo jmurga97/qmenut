@@ -56,7 +56,7 @@ function ApproveForm({ detail }: { detail: Detail }) {
   const approve = useMutation(
     trpc.lab.referrals.approve.mutationOptions({
       onSuccess: () => {
-        toast.success("Referido aprobado. La recompensa queda pendiente de pago.");
+        toast.success("Referido aprobado.");
         return refresh();
       },
     }),
@@ -86,10 +86,10 @@ function ApproveForm({ detail }: { detail: Detail }) {
         });
       }}
     >
-      <Field hint="Busca el restaurante ya incorporado a QMenut." label="Buscar restaurante">
+      <Field label="Buscar restaurante">
         <SearchField clearLabel="Borrar búsqueda" onClear={() => setQuery("")} onValueChange={setQuery} value={query} />
       </Field>
-      <Field label="Restaurante vinculado">
+      <Field label="Restaurante">
         <Select
           onValueChange={setRestaurantId}
           options={options}
@@ -98,19 +98,19 @@ function ApproveForm({ detail }: { detail: Detail }) {
         />
       </Field>
       <div className="lab-form-row">
-        <Field hint="QMenut Business anual: $468." label="Monto del pago (USD)">
+        <Field label="Monto (USD)">
           <Input defaultValue="468" inputMode="decimal" name="amount" pattern="\d+([.,]\d{1,2})?" required />
         </Field>
         <Field label="Fecha del pago">
           <Input defaultValue={TODAY} max={TODAY} name="date" required type="date" />
         </Field>
       </div>
-      <Field hint="Factura de Stripe o referencia de la transferencia." label="Referencia del pago">
+      <Field label="Referencia">
         <Input maxLength={120} minLength={3} name="reference" required />
       </Field>
       <div>
         <Button disabled={approve.isPending} type="submit">
-          {approve.isPending ? "Aprobando…" : `Aprobar recompensa de ${usd(detail.referral.rewardCents)}`}
+          {approve.isPending ? "Aprobando…" : `Aprobar ${usd(detail.referral.rewardCents)}`}
         </Button>
       </div>
     </form>
@@ -129,12 +129,12 @@ function RejectForm({ referralId }: { referralId: string }) {
         reject.mutate({ referralId, reason: formText(event.currentTarget, "reason") });
       }}
     >
-      <Field hint="El participante verá este motivo." label="Motivo del rechazo">
+      <Field label="Motivo para el participante">
         <Textarea maxLength={300} minLength={3} name="reason" required rows={3} />
       </Field>
       <div>
         <Button disabled={reject.isPending} type="submit" variant="destructive">
-          {reject.isPending ? "Rechazando…" : "Rechazar referido"}
+          {reject.isPending ? "Rechazando…" : "Rechazar"}
         </Button>
       </div>
     </form>
@@ -163,12 +163,12 @@ function NotesForm({ detail }: { detail: Detail }) {
         });
       }}
     >
-      <Field hint="Solo visibles para el equipo." label="Notas internas">
+      <Field label="Notas internas">
         <Textarea defaultValue={detail.referral.notes ?? ""} maxLength={2000} name="notes" rows={4} />
       </Field>
       <div>
         <Button disabled={save.isPending} type="submit" variant="secondary">
-          {save.isPending ? "Guardando…" : "Guardar notas"}
+          {save.isPending ? "Guardando…" : "Guardar"}
         </Button>
       </div>
     </form>
@@ -176,17 +176,17 @@ function NotesForm({ detail }: { detail: Detail }) {
 }
 
 function Duplicates({ detail }: { detail: Detail }) {
-  if (detail.duplicates.length === 0) return <p>No hay otras presentaciones con este nombre o teléfono.</p>;
-
   return (
-    <div className="ming-stack">
+    <section aria-labelledby="duplicates-title" className="ming-section">
+      <h2 className="ming-section__title" id="duplicates-title">
+        Duplicados
+      </h2>
       <InlineMessage
         message={
           detail.isFirstIntroduction
-            ? "Esta es la primera presentación: tiene prioridad sobre las demás."
-            : "Hay una presentación anterior del mismo restaurante. Resuelve cuál es válida antes de aprobar."
+            ? "Esta es la primera presentación: tiene prioridad."
+            : "Hay una presentación anterior. Resuelve cuál es válida antes de aprobar."
         }
-        title="Posible duplicado"
         tone="warning"
       />
       <ul className="ming-stack ming-stack--tight">
@@ -199,7 +199,7 @@ function Duplicates({ detail }: { detail: Detail }) {
           </li>
         ))}
       </ul>
-    </div>
+    </section>
   );
 }
 
@@ -227,17 +227,16 @@ export function ReferralPage({ referralId }: { referralId: string }) {
             </Button>
           ) : null
         }
-        description={
-          <span className="ming-cluster">
+        status={
+          <>
             <Badge tone={REFERRAL_STATUS[referral.status].tone}>{REFERRAL_STATUS[referral.status].label}</Badge>
             {referral.status === "approved" ? (
               <Badge tone={PAYOUT_STATUS[referral.payoutStatus].tone}>
                 {PAYOUT_STATUS[referral.payoutStatus].label}
               </Badge>
             ) : null}
-          </span>
+          </>
         }
-        eyebrow="Referido"
         title={referral.restaurantName}
       />
       <div className="ming-split">
@@ -273,24 +272,19 @@ export function ReferralPage({ referralId }: { referralId: string }) {
             <dd>{participant.email}</dd>
             <dt>Celular</dt>
             <dd>{participant.phone}</dd>
-            <dt>Recompensa fija</dt>
+            <dt>Recompensa</dt>
             <dd>{`${usd(referral.rewardCents)} · ${participant.recipientId ? "invitación" : "registro público"}`}</dd>
           </dl>
         </section>
       </div>
-      <section aria-labelledby="duplicates-title" className="ming-section">
-        <h2 className="ming-section__title" id="duplicates-title">
-          Duplicados
-        </h2>
-        <Duplicates detail={detail.data} />
-      </section>
+      {detail.data.duplicates.length > 0 ? <Duplicates detail={detail.data} /> : null}
       {referral.status === "approved" ? (
         <section aria-labelledby="payment-title" className="ming-section">
           <h2 className="ming-section__title" id="payment-title">
             Compra calificada
           </h2>
           <dl className="ming-data">
-            <dt>Restaurante en QMenut</dt>
+            <dt>Restaurante</dt>
             <dd>{detail.data.linkedRestaurantName ?? "—"}</dd>
             <dt>Monto</dt>
             <dd>{usd(referral.paymentCents ?? 0)}</dd>

@@ -52,7 +52,7 @@ export function CampaignsPage() {
       <DailySchedulePanel />
       <ParticipantsList />
       <details className="ming-section">
-        <summary>Historial y campañas manuales</summary>
+        <summary>Campañas manuales</summary>
         <section aria-labelledby="new-campaign-title" className="ming-section">
           <h2 className="ming-section__title" id="new-campaign-title">
             Nueva campaña
@@ -66,7 +66,7 @@ export function CampaignsPage() {
             }}
           >
             <Field label="Nombre">
-              <Input maxLength={80} minLength={2} name="name" placeholder="Referidos Caracas 2026" required />
+              <Input maxLength={80} minLength={2} name="name" required />
             </Field>
             <div>
               <Button disabled={create.isPending} type="submit">
@@ -82,8 +82,8 @@ export function CampaignsPage() {
           <ResourceTable
             ariaLabel="Campañas de referidos"
             columns={columns}
-            emptyState="Aún no hay campañas. Crea la primera para preparar sus lotes."
-            error={campaigns.error ? "No se pudieron cargar las campañas. Reintenta en unos segundos." : undefined}
+            emptyState="Sin campañas."
+            error={campaigns.error ? "No se pudieron cargar las campañas." : undefined}
             getRowId={(campaign) => campaign.id}
             loading={campaigns.isPending}
             loadingLabel="Cargando campañas…"

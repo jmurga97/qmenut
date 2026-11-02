@@ -66,11 +66,7 @@ export function ReferralsPage() {
 
   return (
     <>
-      <PageHeader
-        eyebrow="Revisión"
-        title="Referidos"
-        description="Restaurantes presentados por participantes verificados. La primera presentación válida tiene prioridad."
-      />
+      <PageHeader title="Referidos" />
       <section aria-label="Lista de referidos" className="ming-section">
         <div className="ming-toolbar">
           <SearchField
@@ -95,8 +91,8 @@ export function ReferralsPage() {
         <ResourceTable
           ariaLabel="Referidos"
           columns={columns}
-          emptyState="No hay referidos con estos filtros."
-          error={referrals.error ? "No se pudieron cargar los referidos. Reintenta en unos segundos." : undefined}
+          emptyState="Sin referidos."
+          error={referrals.error ? "No se pudieron cargar los referidos." : undefined}
           getRowId={(referral) => referral.id}
           loading={referrals.isPending}
           loadingLabel="Cargando referidos…"

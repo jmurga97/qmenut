@@ -4,23 +4,12 @@ import { errorMessage } from "~/lib/query-client";
 
 import type { ReactNode } from "react";
 
-export function PageHeader({
-  eyebrow,
-  title,
-  description,
-  actions,
-}: {
-  eyebrow: string;
-  title: ReactNode;
-  description?: ReactNode;
-  actions?: ReactNode;
-}) {
+export function PageHeader({ title, status, actions }: { title: string; status?: ReactNode; actions?: ReactNode }) {
   return (
     <header className="ming-page-header">
       <div className="ming-page-header__title">
-        <p className="ming-eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
-        {description ? <p>{description}</p> : null}
+        {status ? <div className="ming-cluster">{status}</div> : null}
       </div>
       {actions ? <div className="ming-page-header__actions">{actions}</div> : null}
     </header>

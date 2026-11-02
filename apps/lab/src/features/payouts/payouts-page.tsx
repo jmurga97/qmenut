@@ -66,7 +66,6 @@ function PayForm({ payout, onDone }: { payout: Payout; onDone: () => void }) {
       },
     }),
   );
-  const rateNumber = Number(rate.replace(",", "."));
 
   return (
     <form
@@ -79,12 +78,10 @@ function PayForm({ payout, onDone }: { payout: Payout; onDone: () => void }) {
         markPaid.mutate({ referralId: payout.id, vesCents, rate: rate.replace(",", "."), reference });
       }}
     >
-      <p>{`Recompensa de ${usd(payout.rewardCents)} para ${payout.participantName} por ${payout.restaurantName}.`}</p>
-      {payout.payoutBank ? null : (
-        <InlineMessage message="El participante aún no cargó sus datos de Pago Móvil." tone="warning" />
-      )}
+      <h3>{`${payout.participantName} · ${payout.restaurantName} · ${usd(payout.rewardCents)}`}</h3>
+      {payout.payoutBank ? null : <InlineMessage message="Sin datos de Pago Móvil." tone="warning" />}
       <div className="lab-form-row">
-        <Field hint="Bolívares por dólar." label="Tasa de cambio">
+        <Field label="Bs. por USD">
           <Input
             inputMode="decimal"
             onValueChange={(value) => {
@@ -98,11 +95,11 @@ function PayForm({ payout, onDone }: { payout: Payout; onDone: () => void }) {
             value={rate}
           />
         </Field>
-        <Field hint={rateNumber > 0 ? `${usd(payout.rewardCents)} × ${rate}` : undefined} label="Monto pagado (Bs.)">
+        <Field label="Monto pagado (Bs.)">
           <Input inputMode="decimal" onValueChange={setAmount} pattern="\d+([.,]\d{1,2})?" required value={amount} />
         </Field>
       </div>
-      <Field label="Referencia del Pago Móvil">
+      <Field label="Referencia">
         <Input maxLength={120} minLength={3} name="reference" required />
       </Field>
       <div className="ming-cluster">
@@ -120,15 +117,11 @@ function PayForm({ payout, onDone }: { payout: Payout; onDone: () => void }) {
 export function PayoutsPage() {
   const payouts = useQuery(trpc.lab.payouts.list.queryOptions());
   const [paying, setPaying] = useState<Payout | null>(null);
-  const error = payouts.error ? "No se pudieron cargar los pagos. Reintenta en unos segundos." : undefined;
+  const error = payouts.error ? "No se pudieron cargar los pagos." : undefined;
 
   return (
     <>
-      <PageHeader
-        eyebrow="Recompensas"
-        title="Pagos"
-        description="Pagos manuales por Pago Móvil. Cada recompensa aprobada se paga una sola vez."
-      />
+      <PageHeader title="Pagos" />
       <section aria-labelledby="pending-title" className="ming-section">
         <h2 className="ming-section__title" id="pending-title">
           Por pagar
@@ -137,7 +130,7 @@ export function PayoutsPage() {
           actionsLabel="Acciones"
           ariaLabel="Recompensas aprobadas sin pagar"
           columns={pendingColumns}
-          emptyState="No hay recompensas pendientes de pago."
+          emptyState="Nada por pagar."
           error={error}
           getRowId={(payout) => payout.id}
           loading={payouts.isPending}
@@ -154,13 +147,13 @@ export function PayoutsPage() {
       </section>
       <section aria-labelledby="paid-title" className="ming-section">
         <h2 className="ming-section__title" id="paid-title">
-          Historial de pagos
+          Pagados
         </h2>
         <ResourceTable
           ariaLabel="Recompensas pagadas"
           columns={paidColumns}
           density="compact"
-          emptyState="Aún no hay pagos registrados."
+          emptyState="Sin pagos."
           error={error}
           getRowId={(payout) => payout.id}
           loading={payouts.isPending}

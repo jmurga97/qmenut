@@ -45,16 +45,18 @@ flowchart LR
 - `emitNotification` never throws.
 - Minute cron `runNotificationMaintenance`: delete expired notifications, expire stale redemptions, auto-accept 12 h stamp requests.
 - `apps/api/src/lib/web-push.ts`: VAPID JWT + RFC 8291 encryption with WebCrypto only. Push is off unless all three `VAPID_*` secrets exist.
-- `admin.notifications.*` (`tenantProcedure`): `list`, `badge`, `markRead`, `markAllRead`, `pushConfig`, `device`, `saveDevice`, `removeDevice`.
+- `admin.notifications.*` (`tenantProcedure`): `list`, `badge`, `markRead`, `markAllRead`, `pushConfig`, `device`, `saveDevice`, `removeDevice`, `sendTestPush` (sent directly, not queued).
 
 ## Frontend
 
 - `apps/admin/src/features/notifications/`: bell, page, push control, `services.ts` (renders text from type + facts in the admin language).
 - `apps/admin/public/sw.js`: push and click handlers only, registered through the Trusted Types policy `qmenut-service-worker`.
 - iPhone/iPad: push works only in the installed admin; the control explains how to install.
+- `push-device-prompt.tsx`, mounted in the shell: in the installed app, asks to turn push on when it is off (14-day snooze in `localStorage`). Its `usePushDevice` also resaves the device when the admin language changed.
+- The bell mirrors its count with `navigator.setAppBadge` where supported.
 
 ## Limitations
 
-- Push control lives only on the notifications page.
-- Announcements: `publishAnnouncement` exists, no UI calls it.
+- In a browser tab the push control lives only on the notifications page.
+- Announcements: published from Lab `/announcements` to every restaurant, one Spanish text for both admin languages, inbox only.
 - No automated push test (encryption verified by a decrypt round trip).

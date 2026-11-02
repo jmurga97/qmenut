@@ -28,8 +28,8 @@ type HistoryEntry = BatchDetail["history"][number];
 const ACTION_LABELS: Record<string, string> = {
   created: "Lote creado",
   test_sent: "Prueba enviada",
-  launched: "Lote lanzado: audiencia, recompensa y plantilla congeladas",
-  sending: "Subida completa, campaña activa en Instantly",
+  launched: "Lanzado",
+  sending: "Enviando",
   simulated: "Envío simulado",
   paused: "Pausado",
   resumed: "Reanudado",
@@ -175,31 +175,22 @@ export function BatchPage({ batchId }: { batchId: string }) {
     <>
       <PageHeader
         actions={<BatchActions detail={detail.data} onLaunch={() => setConfirmLaunch(true)} />}
-        description={
+        status={
           <Badge tone={BATCH_STATUS[batch.status].tone}>
             {draft && batch.scheduledAt ? "Programado" : BATCH_STATUS[batch.status].label}
           </Badge>
         }
-        eyebrow={campaignName}
-        title={`Lote ${batch.position}`}
+        title={`${campaignName} · lote ${batch.position}`}
       />
       {batch.lastError ? (
-        <InlineMessage
-          message={`${batch.lastError} Se reintenta cada minuto mientras el lote esté en preparación.`}
-          title="La preparación se detuvo"
-          tone="error"
-        />
+        <InlineMessage message={batch.lastError} title="La preparación se detuvo" tone="error" />
       ) : null}
       <div className="ming-split">
         <section aria-labelledby="offer-title" className="ming-section">
           <h2 className="ming-section__title" id="offer-title">
-            {draft ? "Oferta (se congela al lanzar)" : "Oferta congelada"}
+            Oferta
           </h2>
           <p className="lab-reward">{usd(batch.rewardCents)}</p>
-          <p>
-            Por cada restaurante que contrate QMenut Business anual. Cada invitado conserva este monto en todos sus
-            referidos, aunque el lote se reintente o se pause.
-          </p>
           <dl className="ming-data">
             <dt>Destinatarios</dt>
             <dd>{count(audience)}</dd>
@@ -210,16 +201,10 @@ export function BatchPage({ batchId }: { batchId: string }) {
               </>
             ) : null}
             <dt>Plantilla</dt>
-            <dd>{batch.templateVersion ? `referral-invite v${batch.templateVersion}` : "Versión actual al lanzar"}</dd>
+            <dd>{batch.templateVersion ? `v${batch.templateVersion}` : "Actual"}</dd>
             <dt>Lanzado</dt>
             <dd>{batch.launchedAt ? `${dateTime(batch.launchedAt)} · ${batch.launchedBy ?? ""}` : "—"}</dd>
           </dl>
-          {draft ? (
-            <InlineMessage
-              message={`Se tomarán los ${count(audience)} contactos más antiguos sin invitar, activos y no registrados (hay ${count(eligibleLeads ?? 0)} disponibles). El ritmo lo fijan los límites diarios de cada buzón en Instantly.`}
-              tone="info"
-            />
-          ) : null}
         </section>
         <section aria-labelledby="preview-title" className="ming-section">
           <h2 className="ming-section__title" id="preview-title">
@@ -235,11 +220,11 @@ export function BatchPage({ batchId }: { batchId: string }) {
             stats={[
               {
                 id: "enrolled",
-                label: "Subidos a Instantly",
+                label: "Subidos",
                 value: `${count(stats.enrolled)} / ${count(batch.recipientCount)}`,
               },
               { id: "sent", label: "Enviados", value: count(stats.sent) },
-              { id: "clicked", label: "Clics del proveedor", value: count(stats.clicked) },
+              { id: "clicked", label: "Clics", value: count(stats.clicked) },
               { id: "visited", label: "Visitas", value: count(stats.visited) },
               { id: "replied", label: "Respuestas", value: count(stats.replied) },
             ]}
@@ -250,7 +235,7 @@ export function BatchPage({ batchId }: { batchId: string }) {
               { id: "registered", label: "Verificados", value: count(stats.registered) },
               { id: "referrals", label: "Referidos", value: count(stats.referrals) },
               { id: "approved", label: "Compras", value: count(stats.approved) },
-              { id: "failed", label: "No entregables", value: count(stats.failed + stats.bounced) },
+              { id: "failed", label: "No entregados", value: count(stats.failed + stats.bounced) },
               { id: "unsubscribed", label: "Bajas", value: count(stats.unsubscribed) },
             ]}
           />
@@ -259,13 +244,13 @@ export function BatchPage({ batchId }: { batchId: string }) {
       {draft ? null : (
         <section aria-labelledby="failures-title" className="ming-section">
           <h2 className="ming-section__title" id="failures-title">
-            Fallos, rebotes y bajas
+            No entregados
           </h2>
           <ResourceTable
             ariaLabel="Destinatarios no entregados"
             columns={failureColumns}
             density="compact"
-            emptyState="Sin fallos por ahora."
+            emptyState="Sin fallos."
             getRowId={(failure) => failure.id}
             responsive="stacked"
             rows={failures}
@@ -288,7 +273,7 @@ export function BatchPage({ batchId }: { batchId: string }) {
       <ConfirmAction
         cancelLabel="Cancelar"
         confirmLabel="Lanzar lote"
-        message={`Se congelarán ${count(audience)} destinatarios con una recompensa de ${usd(batch.rewardCents)} y la plantilla actual. No se puede deshacer.`}
+        message={`${count(audience)} destinatarios · ${usd(batch.rewardCents)} por restaurante. No se puede deshacer.`}
         onConfirm={() => launch.mutate({ batchId })}
         onOpenChange={setConfirmLaunch}
         open={confirmLaunch}

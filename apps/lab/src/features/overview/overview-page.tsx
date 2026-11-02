@@ -27,13 +27,13 @@ const columns: ResourceTableColumn<Group>[] = [
   { id: "approved", header: "Compras", align: "end", render: (group) => count(group.approved) },
   {
     id: "rate",
-    header: "Compras / enviados",
+    header: "Conversión",
     align: "end",
     render: (group) => (group.source === "invited" ? percent(group.approved, group.sent) : "—"),
   },
   { id: "owed", header: "Por pagar", align: "end", render: (group) => usd(group.owedCents) },
   { id: "paid", header: "Pagado", align: "end", render: (group) => usd(group.paidCents) },
-  { id: "revenue", header: "Ingresos atribuidos", align: "end", render: (group) => usd(group.revenueCents) },
+  { id: "revenue", header: "Ingresos", align: "end", render: (group) => usd(group.revenueCents) },
 ];
 
 export function OverviewPage() {
@@ -43,23 +43,18 @@ export function OverviewPage() {
 
   return (
     <>
-      <PageHeader
-        eyebrow="Referidos"
-        title="Resumen"
-        description="Del correo enviado a la compra anual, por grupo de recompensa."
-      />
+      <PageHeader title="Resumen" />
       {overview.error ? <InlineMessage message={errorMessage(overview.error)} tone="error" /> : null}
       <div className="ming-grid">
         <OverviewPanel
           title="Embudo"
-          description={`Clics del proveedor: ${count(data?.providerClicks ?? 0)}, aparte de las visitas.`}
           loading={loading}
           stats={[
-            { id: "sent", label: "Correos enviados", value: count(data?.funnel.sent ?? 0) },
+            { id: "sent", label: "Enviados", value: count(data?.funnel.sent ?? 0) },
             { id: "visited", label: "Visitas", value: count(data?.funnel.visited ?? 0) },
-            { id: "participants", label: "Participantes verificados", value: count(data?.funnel.participants ?? 0) },
+            { id: "participants", label: "Verificados", value: count(data?.funnel.participants ?? 0) },
             { id: "referrals", label: "Referidos", value: count(data?.funnel.referrals ?? 0) },
-            { id: "purchases", label: "Compras anuales", value: count(data?.funnel.purchases ?? 0) },
+            { id: "purchases", label: "Compras", value: count(data?.funnel.purchases ?? 0) },
           ]}
         />
         <OverviewPanel
@@ -68,19 +63,19 @@ export function OverviewPage() {
           stats={[
             { id: "owed", label: "Por pagar", value: usd(data?.money.owedCents ?? 0) },
             { id: "paid", label: "Pagado", value: usd(data?.money.paidCents ?? 0) },
-            { id: "revenue", label: "Ingresos atribuidos", value: usd(data?.money.revenueCents ?? 0) },
+            { id: "revenue", label: "Ingresos", value: usd(data?.money.revenueCents ?? 0) },
           ]}
         />
       </div>
       <section aria-labelledby="groups-title" className="ming-section">
         <h2 className="ming-section__title" id="groups-title">
-          Grupos de recompensa
+          Por recompensa
         </h2>
         <ResourceTable
           ariaLabel="Comparación por grupo de recompensa"
           columns={columns}
           density="compact"
-          emptyState="Aún no hay lotes lanzados ni participantes."
+          emptyState="Sin datos."
           getRowId={(group) => `${group.source}:${group.rewardCents}`}
           loading={loading}
           loadingLabel="Cargando grupos…"

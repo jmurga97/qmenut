@@ -74,10 +74,10 @@ All email goes through `ming-email-worker`: `referral-access` on the transaction
 
 ## Frontend
 
-| App                                                  | Routes                                                                                                                                |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/lab` (`lab.qmenut.app`, port 5175)             | `/` overview · `/leads` import + list · `/campaigns`, `/campaigns/$id` · `/batches/$id` · `/referrals`, `/referrals/$id` · `/payouts` |
-| `apps/referrals` (`referidos.qmenut.app`, port 5176) | `/` public offer · `/i/$code` invitation · `/acceso` link exchange and request · `/mis-referidos` private page                        |
+| App                                                  | Routes                                                                                                                                                   |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/lab` (`lab.qmenut.app`, port 5175)             | `/` overview · `/leads` import + list · `/campaigns`, `/campaigns/$id` · `/batches/$id` · `/referrals`, `/referrals/$id` · `/payouts` · `/announcements` |
+| `apps/referrals` (`referidos.qmenut.app`, port 5176) | `/` public offer · `/i/$code` invitation · `/acceso` link exchange and request · `/mis-referidos` private page                                           |
 
 Both are Vite SPAs whose Worker serves the assets and proxies `/trpc` to the API through a service binding (Vite's proxy locally), so no API origin or CORS is involved.
 

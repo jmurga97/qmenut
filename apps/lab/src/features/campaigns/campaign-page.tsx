@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 
 import { trpc } from "~/lib/trpc";
 import { formText } from "~/shared/form";
-import { count, toCents, usd } from "~/shared/format";
+import { count, toCents } from "~/shared/format";
 import { PageHeader, PageState } from "~/shared/page";
 
 import { batchColumns } from "./batch-columns";
@@ -29,22 +29,13 @@ export function CampaignPage({ campaignId }: { campaignId: string }) {
 
   return (
     <>
-      <PageHeader
-        eyebrow="Campaña"
-        title={campaign.data.campaign.name}
-        description={`${count(assigned)} de ${count(maxRecipients)} destinatarios asignados · ${count(eligibleLeads)} contactos sin invitar.`}
-      />
+      <PageHeader title={campaign.data.campaign.name} />
       <section aria-labelledby="new-batch-title" className="ming-section">
-        <div>
-          <h2 className="ming-section__title" id="new-batch-title">
-            {`Nuevo lote ${batches.length + 1}`}
-          </h2>
-          <p className="ming-section__description">
-            Valores sugeridos para este lote. El lote toma los contactos más antiguos sin invitar al lanzarse.
-          </p>
-        </div>
+        <h2 className="ming-section__title" id="new-batch-title">
+          {`Nuevo lote ${batches.length + 1}`}
+        </h2>
         {full ? (
-          <InlineMessage message="La campaña ya reparte 50.000 destinatarios." tone="info" />
+          <InlineMessage message={`Campaña completa: ${count(maxRecipients)} destinatarios.`} tone="info" />
         ) : (
           <form
             className="lab-form"
@@ -59,7 +50,7 @@ export function CampaignPage({ campaignId }: { campaignId: string }) {
             }}
           >
             <div className="lab-form-row">
-              <Field hint={`Máximo ${count(maxRecipients - assigned)}.`} label="Destinatarios">
+              <Field label={`Destinatarios · ${count(eligibleLeads)} sin invitar`}>
                 <Input
                   defaultValue={nextBatch.size}
                   inputMode="numeric"
@@ -70,7 +61,7 @@ export function CampaignPage({ campaignId }: { campaignId: string }) {
                   type="number"
                 />
               </Field>
-              <Field hint={`Sugerido: ${usd(nextBatch.rewardCents)} por restaurante.`} label="Recompensa (USD)">
+              <Field label="Recompensa (USD)">
                 <Input
                   defaultValue={nextBatch.rewardCents / 100}
                   inputMode="decimal"
@@ -82,7 +73,7 @@ export function CampaignPage({ campaignId }: { campaignId: string }) {
             </div>
             <div>
               <Button disabled={create.isPending} type="submit">
-                {create.isPending ? "Creando…" : "Crear lote en borrador"}
+                {create.isPending ? "Creando…" : "Crear lote"}
               </Button>
             </div>
           </form>
@@ -96,7 +87,7 @@ export function CampaignPage({ campaignId }: { campaignId: string }) {
           ariaLabel="Lotes de la campaña"
           columns={batchColumns}
           density="compact"
-          emptyState="Aún no hay lotes. Crea el primero con los valores sugeridos."
+          emptyState="Sin lotes."
           getRowId={(batch) => batch.id}
           onRowActivate={(batch) => void navigate({ to: "/batches/$batchId", params: { batchId: batch.id } })}
           refetching={campaign.isRefetching}

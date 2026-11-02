@@ -29,7 +29,7 @@ export const batchColumns: ResourceTableColumn<Batch>[] = [
   },
   {
     id: "progress",
-    header: "Subidos a Instantly",
+    header: "Subidos",
     align: "end",
     render: (batch) => (batch.stats ? `${count(batch.stats.enrolled)} / ${count(batch.recipientCount)}` : "—"),
   },

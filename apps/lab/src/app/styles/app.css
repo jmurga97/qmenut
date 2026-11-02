@@ -1,10 +1,4 @@
 /* Lab-specific layout. Ming tokens only. */
-.lab-sidebar-identity {
-  display: grid;
-  gap: var(--ming-space-1);
-  overflow-wrap: anywhere;
-}
-
 .lab-form {
   display: grid;
   max-width: var(--ming-page-narrow);
@@ -20,6 +14,7 @@
 .lab-identity {
   display: grid;
   gap: var(--ming-space-1);
+  overflow-wrap: anywhere;
 }
 
 .lab-identity span {
@@ -54,8 +49,4 @@
   gap: var(--ming-space-2);
   color: var(--muted-foreground);
   font-family: var(--font-mono);
-}
-
-.lab-identity {
-  overflow-wrap: anywhere;
 }

@@ -1,3 +1,4 @@
+import { listAnnouncements, publishAnnouncement } from "@qmenut/db/repositories/notifications.repository";
 import { z } from "zod";
 
 import { getDailySchedule, setDailySchedulePaused, startDailySchedule } from "./campaign-schedule";
@@ -135,6 +136,16 @@ const scheduleRouter = router({
     .input(schedulePauseInput)
     .mutation(({ ctx, input }) => setDailySchedulePaused({ ...ctx, ...input })),
 });
+const announcementText = z.object({ title: z.string().trim().min(2).max(80), body: z.string().trim().min(2).max(500) });
+
+// ponytail: one text for both admin languages; add an English pair when English-speaking restaurants exist.
+const announcementsRouter = router({
+  list: labProcedure.query(({ ctx }) => listAnnouncements(ctx.db)),
+  publish: labProcedure
+    .input(announcementText)
+    .mutation(({ ctx, input }) => publishAnnouncement({ db: ctx.db, audience: {}, text: { es: input, en: input } })),
+});
+
 const participantsRouter = router({
   list: labProcedure.input(participantsListInput).query(({ ctx, input }) => listParticipants({ db: ctx.db, ...input })),
 });
@@ -149,4 +160,5 @@ export const labRouter = router({
   batches: batchesRouter,
   referrals: referralsRouter,
   payouts: payoutsRouter,
+  announcements: announcementsRouter,
 });
