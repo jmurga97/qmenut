@@ -400,8 +400,8 @@
         "REFERRALS_APP_URL": "https://referidos.qmenut.app",
         "CAMPAIGN_PRODUCT_ID": "qmenut",
         // Cloudflare Access application for lab.qmenut.app; empty keeps Lab closed.
-        "ACCESS_TEAM_DOMAIN": "",
-        "ACCESS_LAB_AUD": "",
+        "ACCESS_TEAM_DOMAIN": "murga-ing.cloudflareaccess.com",
+        "ACCESS_LAB_AUD": "059620ced34012f2af750af9617fde8d08f7f75f475f29aea90ecab14c1b6e0f",
         "LAB_STAFF_EMAILS": "juanmurga97@gmail.com,murgapja@pm.me,mariagabrielaroncal@gmail.com",
       },
     },
