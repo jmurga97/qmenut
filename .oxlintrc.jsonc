@@ -806,7 +806,12 @@
       "jsPlugins": [{ "name": "x-import", "specifier": "eslint-plugin-import" }, "eslint-plugin-sonarjs"],
     },
     {
-      "files": ["apps/admin/src/**/*.{ts,tsx}", "apps/web/src/**/*.{ts,tsx}"],
+      "files": [
+        "apps/admin/src/**/*.{ts,tsx}",
+        "apps/web/src/**/*.{ts,tsx}",
+        "apps/lab/src/**/*.{ts,tsx}",
+        "apps/referrals/src/**/*.{ts,tsx}",
+      ],
       "rules": {
         "react/display-name": "error",
         "react/jsx-key": "error",
@@ -985,7 +990,12 @@
       "plugins": ["react"],
     },
     {
-      "files": ["apps/admin/src/app/routes/**/*.{ts,tsx}", "apps/web/src/app/routes/**/*.{ts,tsx}"],
+      "files": [
+        "apps/admin/src/app/routes/**/*.{ts,tsx}",
+        "apps/web/src/app/routes/**/*.{ts,tsx}",
+        "apps/lab/src/app/routes/**/*.{ts,tsx}",
+        "apps/referrals/src/app/routes/**/*.{ts,tsx}",
+      ],
       "rules": {
         "unicorn/filename-case": "off",
         "react/only-export-components": "off",

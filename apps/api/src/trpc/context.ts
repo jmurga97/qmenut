@@ -12,6 +12,8 @@ export interface TrpcContext {
   env: RuntimeEnv;
   getSession: () => ReturnType<Auth["api"]["getSession"]>;
   request: Request;
+  /** Response headers, for the referral session cookie. */
+  resHeaders: Headers;
 }
 
 interface CreateContextInput {
@@ -37,5 +39,6 @@ export function createContext({ env, request, resHeaders }: CreateContextInput):
       return response;
     },
     request,
+    resHeaders,
   };
 }

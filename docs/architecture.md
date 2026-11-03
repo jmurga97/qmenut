@@ -13,12 +13,16 @@ flowchart LR
   subgraph qmenut
     web["apps/web<br/>qmenut-web<br/>SSR, Host → tenant"]
     admin["apps/admin<br/>qmenut-admin<br/>static SPA"]
+    lab["apps/lab<br/>qmenut-lab<br/>staff SPA, Access"]
+    referrals["apps/referrals<br/>qmenut-referrals<br/>public SPA"]
     api["apps/api<br/>qmenut-api<br/>tRPC · auth · webhooks"]
     landing["apps/landing<br/>qmenut-landing<br/>Astro SSR"]
   end
 
   web -->|API_WORKER binding| api
   admin -->|tRPC + session cookie| api
+  lab -->|API_WORKER binding| api
+  referrals -->|API_WORKER binding| api
   web -. reads .-> kv[(TENANT_THEME KV)]
   api -->|only writer| kv
   api --> d1[(D1)]
@@ -35,12 +39,14 @@ flowchart LR
   image --> r2[(R2 qmenut-media)]
 ```
 
-| Worker           | Reads / writes                                                                                       |
-| ---------------- | ---------------------------------------------------------------------------------------------------- |
-| `qmenut-web`     | One Worker for every tenant domain. Reads `TENANT_THEME` directly, everything else via `API_WORKER`. |
-| `qmenut-api`     | Only Worker that touches D1 and writes `TENANT_THEME` (`src/lib/theme/tenant-theme-store.ts`).       |
-| `qmenut-admin`   | Static assets with SPA fallback. Calls `api.qmenut.app` cross-origin with cookies.                   |
-| `qmenut-landing` | Standalone marketing site. Production only.                                                          |
+| Worker             | Reads / writes                                                                                              |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `qmenut-web`       | One Worker for every tenant domain. Reads `TENANT_THEME` directly, everything else via `API_WORKER`.        |
+| `qmenut-api`       | Only Worker that touches D1 and writes `TENANT_THEME` (`src/lib/theme/tenant-theme-store.ts`).              |
+| `qmenut-admin`     | Static assets with SPA fallback. Calls `api.qmenut.app` cross-origin with cookies.                          |
+| `qmenut-lab`       | Staff SPA behind Cloudflare Access; proxies `/trpc` to the API. [Referral campaigns](domains/referrals.md). |
+| `qmenut-referrals` | Public referral SPA; proxies `/trpc` to the API.                                                            |
+| `qmenut-landing`   | Standalone marketing site. Production only.                                                                 |
 
 Rules:
 
@@ -79,6 +85,8 @@ A fresh context and Drizzle client are built per request (`createContext`). Neve
 appRouter
 ├─ auth · health
 ├─ menu · loyalty · reservations          public (diners)
+├─ referrals                              public + participantProcedure
+├─ lab.*                                  labProcedure (Cloudflare Access + staff allowlist)
 └─ admin.*                                tenantProcedure
    analytics · tenant · menu · branches · exchangeRates · images · promotions · theme
    billing · loyalty · reservations · notifications · languages · translations · users · messaging
@@ -165,6 +173,8 @@ flowchart TD
 | 5173 | Web (Vite dev)              |
 | 4011 | Web (production build, E2E) |
 | 5174 | Admin                       |
+| 5175 | Lab                         |
+| 5176 | Referrals                   |
 | 4321 | Landing                     |
 
 ## Key files

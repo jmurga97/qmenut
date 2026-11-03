@@ -1,0 +1,35 @@
+{
+  "name": "@qmenut/referrals",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5176",
+    "build": "vite build",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^7.0.0",
+    "@jmurga97/components": "2.0.4",
+    "@qmenut/api": "workspace:*",
+    "@tanstack/react-query": "^5.105.0",
+    "@tanstack/react-router": "^1.170.46",
+    "@trpc/client": "11.22.1",
+    "@trpc/server": "11.22.1",
+    "@trpc/tanstack-react-query": "11.22.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-hook-form": "^7.91.0",
+    "sonner": "^2.0.8",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tanstack/router-plugin": "^1.168.48",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "7.0.2",
+    "vite": "^8.3.5",
+    "wrangler": "4.156.0"
+  }
+}

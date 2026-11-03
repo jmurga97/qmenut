@@ -58,8 +58,13 @@ that date passes.
 
 ## Push devices
 
-- The inbox page and the user menu have a _Notifications on this device_ control. The
-  browser asks for permission only after the member taps it, never on its own.
+- The inbox page has a _Notifications on this device_ control. The browser asks for
+  permission only after the member taps it, never on its own.
+- In the installed app, when push is off on that device, a dialog offers the same control on
+  start. Reinstalling (on iOS each install has its own storage and permission) drops push
+  without telling anyone, so the app asks. "Not now" stops it asking for 14 days. It never
+  shows in a browser tab, to support accounts, or when permission is blocked.
+- Once push is on, _Send a test_ pushes a notification to that device right away.
 - When turning push on, the member chooses which branches the device follows. The default is
   the branch currently selected. The bar tablet follows its branch, and the owner's phone
   can follow all of them. Turning it off, or changing the branches, affects only that device.
@@ -69,7 +74,9 @@ that date passes.
 - A push shows the event, the branch and the facts needed to act, with no guest personal
   data. For example: "New reservation · Tapas Centro · Fri 21:00 · 4 people".
   Tapping it opens the item in the admin, and the guest's details show there after sign-in.
-- A push uses the admin language the device had when push was turned on.
+- A push uses the device's admin language. It is saved when push is turned on and updated
+  when the admin opens in a different language.
+- In the installed app, the icon badge shows the bell's count where the platform supports it.
 - There are no other preferences in version 1.
 
 ## Announcements

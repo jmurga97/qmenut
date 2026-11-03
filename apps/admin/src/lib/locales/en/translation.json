@@ -84,11 +84,16 @@
     "Ver carta ↗": "View menu ↗",
     "Cerrar sesión": "Sign out",
     "Instalar app": "Install app",
-    "Instalar: Compartir → Añadir a inicio": "Install: Share → Add to Home Screen",
     "Material para imprimir": "Print materials",
     "Notificaciones": "Notifications",
     "Mensajería": "Messaging",
-    "Reservas": "Reservations"
+    "Reservas": "Reservations",
+    "Instalar QMenut": "Install QMenut",
+    "Se abre como una app y recibe notificaciones en este dispositivo.": "Opens like an app and receives notifications on this device.",
+    "Toca Compartir y luego «Añadir a pantalla de inicio».": "Tap Share, then “Add to Home Screen”.",
+    "En la barra de menús, elige Archivo → «Añadir al Dock».": "In the menu bar, choose File → “Add to Dock”.",
+    "Abre el menú del navegador y elige «Instalar app» o «Añadir a pantalla de inicio». En ordenador también aparece un icono de instalar en la barra de direcciones.": "Open the browser menu and choose “Install app” or “Add to Home Screen”. On a computer there is also an install icon in the address bar.",
+    "Entendido": "Got it"
   },
   "analytics": {
     "Sin datos en este periodo.": "No data in this period.",
@@ -1088,7 +1093,12 @@
     "Aceptado por {{name}}": "Accepted by {{name}}",
     "Reserva cancelada": "Reservation cancelled",
     "{{day}} · {{time}} · {{count}} personas": "{{day}} · {{time}} · {{count}} guests",
-    "Nueva reserva": "New reservation"
+    "Nueva reserva": "New reservation",
+    "¿Activar notificaciones en este dispositivo?": "Turn on notifications on this device?",
+    "Ahora no": "Not now",
+    "Enviar prueba": "Send a test",
+    "Prueba enviada. Debería llegar en unos segundos.": "Test sent. It should arrive in a few seconds.",
+    "No se pudo enviar. Desactiva y vuelve a activar las notificaciones.": "Could not send it. Turn notifications off and on again."
   },
   "messaging": {
     "Enviar plantilla": "Send template",

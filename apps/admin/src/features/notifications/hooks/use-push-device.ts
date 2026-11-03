@@ -23,11 +23,25 @@ export function usePushDevice() {
   const options = api.getNotificationMutationOptions({ queryClient, trpc });
   const saveDevice = useMutation(options.saveDevice);
   const removeDevice = useMutation(options.removeDevice);
+  const sendTestPush = useMutation(options.sendTestPush);
   const [working, setWorking] = useState(false);
 
   useEffect(() => {
     if (support === "supported") void services.getCurrentSubscription().then(setSubscription);
   }, [support]);
+
+  // Pushes are written in the language saved with the device; follow the admin when the browser's changes.
+  const savedLanguage = deviceQuery.data?.language;
+  const followedBranchIds = deviceQuery.data?.branchIds;
+  const resaveDevice = saveDevice.mutate;
+  useEffect(() => {
+    if (!subscription || !savedLanguage || !followedBranchIds || savedLanguage === services.getAdminLanguage()) return;
+    resaveDevice({
+      ...services.getSubscriptionKeys(subscription),
+      branchIds: followedBranchIds,
+      language: services.getAdminLanguage(),
+    });
+  }, [subscription, savedLanguage, followedBranchIds, resaveDevice]);
 
   async function turnOn(branchIds: string[]) {
     const publicKey = configQuery.data?.publicKey;
@@ -82,9 +96,15 @@ export function usePushDevice() {
     return deviceQuery.data?.branchIds ? "on" : "off";
   }
 
+  function sendTest() {
+    if (subscription) sendTestPush.mutate({ endpoint: subscription.endpoint });
+  }
+
   return {
     busy: working || saveDevice.isPending || removeDevice.isPending,
-    followedBranchIds: deviceQuery.data?.branchIds ?? null,
+    followedBranchIds: followedBranchIds ?? null,
+    sendTest,
+    test: { pending: sendTestPush.isPending, sent: sendTestPush.isSuccess, failed: sendTestPush.isError },
     status: getStatus(),
     turnOff,
     turnOn,

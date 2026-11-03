@@ -4,7 +4,8 @@ interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<unknown>;
 }
 
-type InstallMode = "hidden" | "ios" | "prompt";
+type InstallMode = "hidden" | "manual" | "prompt";
+export type InstallSteps = "ios" | "macSafari" | "browserMenu";
 
 const listeners = new Set<() => void>();
 let deferredPrompt: BeforeInstallPromptEvent | null = null;
@@ -39,8 +40,19 @@ export function isIos(): boolean {
 function getMode(): InstallMode {
   if (isStandalone()) return "hidden";
   if (deferredPrompt) return "prompt";
-  // iOS never fires `beforeinstallprompt`; the user has to follow the manual steps.
-  return isIos() ? "ios" : "hidden";
+  // Desktop Firefox cannot install sites, so there are no steps to show.
+  if (/Firefox/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent)) return "hidden";
+  // Only Chromium fires `beforeinstallprompt`, and Brave often holds it back: the browser menu still installs.
+  return "manual";
+}
+
+export function getInstallSteps(): InstallSteps {
+  if (isIos()) return "ios";
+  const agent = navigator.userAgent;
+  // Brave and every other Chromium browser also say "Safari"; only real Safari lacks the Chromium tokens.
+  return /Macintosh/.test(agent) && /Safari/.test(agent) && !/Chrome|Chromium|CriOS|Edg|Firefox/.test(agent)
+    ? "macSafari"
+    : "browserMenu";
 }
 
 function subscribe(listener: () => void): () => void {
@@ -48,16 +60,16 @@ function subscribe(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
+function install(): void {
+  const prompt = deferredPrompt;
+  if (!prompt) return;
+  // The event is single-use, whatever the user answers.
+  publish(null);
+  void prompt.prompt();
+}
+
 export function useInstallPrompt(): { install: () => void; mode: InstallMode } {
   const mode = useSyncExternalStore(subscribe, getMode);
-
-  function install(): void {
-    const prompt = deferredPrompt;
-    if (!prompt) return;
-    // The event is single-use, whatever the user answers.
-    publish(null);
-    void prompt.prompt();
-  }
 
   return { install, mode };
 }

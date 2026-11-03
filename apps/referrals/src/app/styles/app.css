@@ -1,0 +1,49 @@
+/* Referrals: one narrow column on every width. Ming tokens only. */
+.ref-main {
+  padding: var(--ming-space-6) var(--ming-space-4) var(--ming-space-7);
+}
+
+.ref-topbar {
+  display: flex;
+  max-width: var(--ming-page-narrow);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ming-space-4);
+  margin-inline: auto;
+  padding: var(--ming-space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.ref-form {
+  display: grid;
+  gap: var(--ming-space-4);
+}
+
+.ref-fieldset {
+  display: grid;
+  gap: var(--ming-space-4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ref-note {
+  color: var(--muted-foreground);
+}
+
+.ref-steps,
+.ref-rules {
+  display: grid;
+  gap: var(--ming-space-2);
+  margin: 0;
+  padding-inline-start: var(--ming-space-5);
+}
+
+.ref-identity {
+  display: grid;
+  gap: var(--ming-space-1);
+}
+
+.ref-identity span {
+  color: var(--muted-foreground);
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "qmenut-referrals",
+  "main": "src/server/worker.ts",
+  "compatibility_date": "2026-06-16",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/trpc/*"],
+  },
+  "services": [{ "binding": "API_WORKER", "service": "qmenut-api" }],
+  // Named environments inherit neither assets nor services. Public: participants authenticate with
+  // emailed single-use links that the API exchanges for a session cookie.
+  "env": {
+    "development": {
+      "name": "qmenut-referrals-dev",
+      "routes": [{ "pattern": "referidos.dev.qmenut.app", "custom_domain": true }],
+      "assets": {
+        "directory": "./dist",
+        "binding": "ASSETS",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": ["/trpc/*"],
+      },
+      "services": [{ "binding": "API_WORKER", "service": "qmenut-api-dev" }],
+      "observability": { "enabled": true },
+    },
+    "production": {
+      "name": "qmenut-referrals",
+      "routes": [{ "pattern": "referidos.qmenut.app", "custom_domain": true }],
+      "assets": {
+        "directory": "./dist",
+        "binding": "ASSETS",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": ["/trpc/*"],
+      },
+      "services": [{ "binding": "API_WORKER", "service": "qmenut-api" }],
+      "observability": { "enabled": true },
+    },
+  },
+}

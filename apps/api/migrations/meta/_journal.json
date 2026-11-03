@@ -141,6 +141,20 @@
       "when": 1793444307689,
       "tag": "0019_booked_reservations",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1793547843901,
+      "tag": "0020_referral_campaigns",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1793609723387,
+      "tag": "0021_daily_referral_schedule",
+      "breakpoints": true
     }
   ]
 }

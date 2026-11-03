@@ -39,6 +39,9 @@ flowchart LR
 
 Stop `bun run dev` first: API and admin ports must be free. Web persists into `apps/api/.wrangler/state`, so it sees the same KV.
 
+The API and web `dev` scripts share `.wrangler-shared/dev-registry` so Wrangler and the Cloudflare Vite plugin
+can connect their local service bindings.
+
 ## Projects
 
 | Project            | Device          | Scope                                        |

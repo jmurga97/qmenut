@@ -370,7 +370,16 @@ export async function upsertPushDevice({
     .onConflictDoUpdate({ target: pushDevices.endpoint, set: values });
 }
 
-export async function getPushDeviceBranchIds({
+export interface StoredPushDevice {
+  id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  language: PushLanguage;
+  branchIds: string[];
+}
+
+export async function getPushDevice({
   db,
   membershipId,
   endpoint,
@@ -378,14 +387,21 @@ export async function getPushDeviceBranchIds({
   db: DrizzleDb;
   membershipId: string;
   endpoint: string;
-}): Promise<string[] | null> {
+}): Promise<StoredPushDevice | null> {
   const row = await db
-    .select({ branchIds: pushDevices.branchIds })
+    .select({
+      id: pushDevices.id,
+      endpoint: pushDevices.endpoint,
+      p256dh: pushDevices.p256dh,
+      auth: pushDevices.auth,
+      language: pushDevices.language,
+      branchIds: pushDevices.branchIds,
+    })
     .from(pushDevices)
     .where(and(eq(pushDevices.endpoint, endpoint), eq(pushDevices.membershipId, membershipId)))
     .get();
 
-  return row ? (JSON.parse(row.branchIds) as string[]) : null;
+  return row ? { ...row, branchIds: JSON.parse(row.branchIds) as string[] } : null;
 }
 
 export async function removePushDevice({
@@ -422,7 +438,7 @@ interface AnnouncementInput {
 
 /**
  * Fans an announcement out at write time: one notification per targeted restaurant, all branches,
- * never pushed. For the future Qmenut ops dashboard; restaurants never write announcements.
+ * never pushed. Published from Lab; restaurants never write announcements.
  */
 export async function publishAnnouncement({ db, audience, text, url, endsAt }: AnnouncementInput): Promise<string> {
   const announcementId = crypto.randomUUID();
@@ -452,4 +468,29 @@ export async function publishAnnouncement({ db, audience, text, url, endsAt }: A
   await insertRecipients(db, sql`n.id LIKE ${idPattern}`);
 
   return announcementId;
+}
+
+/** Announcements still within retention, newest first, with how many members read each one. */
+export async function listAnnouncements(db: DrizzleDb) {
+  const rows = await db.all<{
+    id: string;
+    facts_json: string;
+    created_at: number;
+    restaurants: number;
+    recipients: number;
+    read: number;
+  }>(sql`
+    SELECT substr(n.id, 1, instr(n.id, ':') - 1) AS id, n.facts_json, min(n.created_at) AS created_at,
+      count(DISTINCT n.id) AS restaurants, count(nr.membership_id) AS recipients, count(nr.read_at) AS read
+    FROM notifications n
+    LEFT JOIN notification_recipients nr ON nr.notification_id = n.id
+    WHERE n.type = 'announcement'
+    GROUP BY 1
+    ORDER BY created_at DESC
+  `);
+
+  return rows.map(({ facts_json, created_at, ...row }) => {
+    const facts = JSON.parse(facts_json) as NotificationFacts;
+    return { ...row, title: String(facts.titleEs ?? ""), body: String(facts.bodyEs ?? ""), createdAt: created_at };
+  });
 }
