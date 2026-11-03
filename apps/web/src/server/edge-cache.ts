@@ -51,6 +51,8 @@ function buildCacheKey({ host, pathname, version }: BuildCacheKeyInput): Request
   const keyUrl = new URL(`https://${host}${pathname}`);
 
   keyUrl.searchParams.set(LEGACY_CONTENT_VERSION_QUERY_PARAM, version ?? "none");
+  // Cached HTML links the hashed assets of the build that rendered it, and a deploy deletes those.
+  keyUrl.searchParams.set("build", env.CF_VERSION_METADATA?.id ?? "none");
 
   return new Request(keyUrl.href);
 }

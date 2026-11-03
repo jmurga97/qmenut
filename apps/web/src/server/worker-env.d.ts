@@ -3,6 +3,7 @@ declare namespace Cloudflare {
   interface Env {
     ALLOW_INDEXING?: string;
     API_WORKER?: Fetcher;
+    CF_VERSION_METADATA?: WorkerVersionMetadata;
     DISABLE_EDGE_CACHE?: string;
     SENTRY_DSN?: string;
     // Read-only here: apps/api is the only writer.
