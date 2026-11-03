@@ -402,7 +402,7 @@
         // Cloudflare Access application for lab.qmenut.app; empty keeps Lab closed.
         "ACCESS_TEAM_DOMAIN": "",
         "ACCESS_LAB_AUD": "",
-        "LAB_STAFF_EMAILS": "",
+        "LAB_STAFF_EMAILS": "juanmurga97@gmail.com,murgapja@pm.me,mariagabrielaroncal@gmail.com",
       },
     },
   },
