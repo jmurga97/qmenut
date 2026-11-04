@@ -185,6 +185,17 @@
     gap: var(--ming-space-7);
     padding-block: calc(var(--landing-section) * 1.5) var(--landing-section);
   }
+  .hero-copy {
+    display: grid;
+    gap: var(--ming-space-4);
+  }
+  .hero-subtitle {
+    max-width: 40rem;
+    font-family: "Geist", sans-serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.45;
+  }
 
   .section {
     display: grid;
@@ -263,10 +274,23 @@
     background: var(--primary);
     color: var(--foreground);
   }
+  .delivery-heading {
+    display: grid;
+    justify-items: start;
+    gap: var(--ming-space-4);
+  }
+  .tag {
+    justify-self: start;
+    padding: var(--ming-space-2) var(--ming-space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--ming-radius-control);
+    font-size: 0.875rem;
+    line-height: 1;
+  }
 
   /* ---- Plans ------------------------------------------------------------------------ */
   .plans {
-    --columns: 3;
+    --columns: 2;
   }
   .plans > li {
     gap: var(--ming-space-5);
@@ -365,11 +389,8 @@
 
 @media (max-width: 56rem) {
   @layer landing {
-    .site-nav nav {
+    .site-nav nav:not(.country-nav) {
       display: none;
-    }
-    .site-nav .button {
-      margin-inline-start: auto;
     }
     .grid {
       --columns: 2;

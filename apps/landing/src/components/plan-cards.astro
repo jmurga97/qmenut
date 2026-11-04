@@ -1,20 +1,26 @@
 ---
-import { PLANS } from "../lib/content";
+import type { MarketId } from "../lib/markets";
+import { markets } from "../lib/markets";
+interface Props {
+  market: MarketId;
+}
+const { market } = Astro.props;
+const content = markets[market];
+const format = new Intl.NumberFormat(market === "es" ? "es-ES" : "es-VE", {
+  style: "currency",
+  currency: content.currency,
+  maximumFractionDigits: 0,
+});
 ---
 
 <ul class="grid plans">
-  {PLANS.map((plan) => (
+  {content.plans.map((plan) => (
     <li class:list={{ featured: plan.name === "Business" }}>
       <h3>{plan.name}</h3>
-      {plan.price ? (
-        <p class="figure">
-          {plan.price} <small>/ mes</small>
-        </p>
-      ) : (
-        <p class="figure">
-          <small>Próximamente</small>
-        </p>
-      )}
+      <p>{plan.description}</p>
+      <p class="figure">
+        {format.format(plan.price)} <small>/ mes · impuestos aparte</small>
+      </p>
       <ul>
         {plan.highlights.map((item) => (
           <li>{item}</li>

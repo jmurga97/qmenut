@@ -2,15 +2,19 @@
 import "../styles/fonts.css";
 import "@jmurga97/components/styles.css";
 import "../styles/landing.css";
-
-import { ADMIN_URL, START_PATH } from "../lib/content";
-
+import type { MarketId } from "../lib/markets";
+import { adminUrl, markets } from "../lib/markets";
 interface Props {
   title: string;
   description: string;
+  market?: MarketId;
+  page?: "" | "precios" | "empezar";
+  neutral?: boolean;
+  noindex?: boolean;
 }
-
-const { title, description } = Astro.props;
+const { title, description, market, page = "", neutral = false, noindex = false } = Astro.props;
+const path = market ? `/${market}/${page}` : "/";
+const url = (path: string) => new URL(path, "https://qmenut.app").href;
 ---
 
 <!doctype html>
@@ -22,6 +26,15 @@ const { title, description } = Astro.props;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    {noindex && <meta name="robots" content="noindex" />}
+    {(market || neutral) && <link rel="canonical" href={url(path)} />}
+    {market && (
+      <>
+        <link rel="alternate" hreflang="es-ES" href={url(`/es/${page}`)} />
+        <link rel="alternate" hreflang="es-VE" href={url(`/ve/${page}`)} />
+        <link rel="alternate" hreflang="x-default" href={url("/")} />
+      </>
+    )}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preload" href="/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/GeistPixel-Line.woff2" as="font" type="font/woff2" crossorigin />
@@ -33,30 +46,36 @@ const { title, description } = Astro.props;
     </a>
     <header class="site-nav">
       <div class="container">
-        <a class="brand" href="/">
-          QMenut
+        <a class="brand" href={market ? `/${market}/` : "/"}>
+          Qmenut
         </a>
         <nav aria-label="Principal">
-          <a href="/#funcionalidades">Funcionalidades</a>
-          <a href="/#demos">Demos</a>
-          <a href="/precios">Precios</a>
-          <a href={ADMIN_URL}>Entrar</a>
+          {market && (
+            <>
+              <a href={`/${market}/#funcionalidades`}>Funcionalidades</a>
+              <a href={`/${market}/#demos`}>Demos</a>
+              <a href={`/${market}/precios`}>Precios</a>
+            </>
+          )}
+          <a href={adminUrl}>Entrar</a>
         </nav>
-        <a class="button button--small" href={START_PATH}>
-          Prueba 14 días
-        </a>
+        <nav aria-label="País" class="country-nav">
+          {(["es", "ve"] as const).map((id) => (
+            <a href={`/${id}/${page}`} aria-current={market === id ? "page" : undefined}>
+              {markets[id].country}
+            </a>
+          ))}
+        </nav>
       </div>
     </header>
-
     <main id="contenido">
       <slot />
     </main>
-
     <footer class="container site-footer">
-      <span>© {new Date().getFullYear()} QMenut</span>
+      <span>© {new Date().getFullYear()} Qmenut</span>
       <nav aria-label="Pie de página">
-        <a href="/precios">Precios</a>
-        <a href={ADMIN_URL}>Entrar</a>
+        {market && <a href={`/${market}/precios`}>Precios</a>}
+        <a href={adminUrl}>Entrar</a>
         <a href="/aviso-legal">Aviso legal</a>
         <a href="/privacidad">Privacidad</a>
         <a href="/condiciones">Condiciones</a>

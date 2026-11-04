@@ -1,187 +1,26 @@
 ---
-import Faq from "../components/faq.astro";
-import PlanCards from "../components/plan-cards.astro";
 import BaseLayout from "../layouts/base-layout.astro";
-import { DEMOS, START_PATH } from "../lib/content";
+import { marketFromRequest } from "../lib/markets";
 
-const RESTAURANT_BUSINESS = "https://www.restaurantbusinessonline.com/technology/customers-really-dont-qr-code-menus";
-
-// At the table first, then before going. ponytail: the last two still need their primary sources
-// (docs/sales/landing-content.md to-dos).
-const STATS = [
-  { figure: "88%", text: "prefiere la carta en papel cuando se sienta a la mesa.", source: RESTAURANT_BUSINESS },
-  { figure: "66%", text: "no quiere sacar el móvil nada más sentarse.", source: RESTAURANT_BUSINESS },
-  { figure: "83%", text: "mira el menú en el móvil antes de salir.", source: null },
-  { figure: "77%", text: "visita la web del restaurante antes de decidir.", source: null },
-];
-
-// Reservations stay off this page until they ship; /precios lists them as coming soon.
-const SECTIONS: { id?: string; title: string; features: [string, string][] }[] = [
-  {
-    id: "funcionalidades",
-    title: "Si no te pueden leer, no existes",
-    features: [
-      [
-        "Legible para Google y la IA",
-        "Un PDF, una foto del menú o un post de Instagram no le dicen nada a Google ni a ChatGPT. En QMenut cada plato, precio y horario se publica en un formato que entienden y pueden recomendar.",
-      ],
-      [
-        "Tu propia dirección",
-        "Comparte tu menú desde el primer día en turestaurante.qmenut.app. Con Business, en turestaurante.com: el dominio está incluido y, si un día te vas, se va contigo.",
-      ],
-      ["Turistas que te entienden", "Publica tu menú en varios idiomas, y Google muestra a cada visitante el suyo."],
-      ["Reseñas en el momento justo", "Tus reseñas de Google y tu galería de fotos, justo cuando deciden si venir."],
-    ],
-  },
-  {
-    title: "Que se vea como tu restaurante, no como una plantilla",
-    features: [
-      [
-        "Un menú pensado para el móvil",
-        "Fotos, variantes, extras y alérgenos: menos preguntas al personal y más confianza para quien tiene alergias.",
-      ],
-      ["Dólares y bolívares", "Tus precios en dólares, y en bolívares a la tasa que tú decidas."],
-      ["Tu marca, en cada plato", "Cinco estilos, los colores y las tipografías de tu marca, sin el sello de QMenut."],
-      ["Destacados y promociones", "Dirige la atención a tu especialidad, a lo nuevo o a lo que más margen te deja."],
-    ],
-  },
-  {
-    title: "Una razón para volver",
-    features: [
-      ["Puntos de fidelización", "Tus clientes suman visitas y canjean recompensas, sin app ni tarjeta de cartón."],
-      ["En la pantalla de inicio", "Tus clientes habituales instalan tu menú como una app y te tienen siempre a mano."],
-    ],
-  },
-  {
-    title: "¿Cambió un precio? ¿Se acabó un plato? Diez segundos y listo",
-    features: [
-      [
-        "Tu panel, tus cambios",
-        "Edita precios, oculta un plato agotado o actualiza tus horarios cuando quieras, sin reimprimir nada.",
-      ],
-      [
-        "Tu carta en papel sigue en la mesa",
-        "Imprime tu código QR y tu carta en PDF, siempre al día. QMenut acompaña a tu carta, no la sustituye.",
-      ],
-      ["Menús por horario", "Desayuno, comida y cena cambian solos a su hora."],
-      [
-        "Tu equipo y tus locales",
-        "Tu equipo marca platos agotados sin ver la facturación. Gestiona todos tus locales desde un mismo sitio.",
-      ],
-    ],
-  },
-  {
-    title: "Señales, no suposiciones",
-    features: [
-      [
-        "Qué platos interesan",
-        "Descubre qué se consulta más, en qué idiomas y cuántos tocan para llamar o ver cómo llegar.",
-      ],
-      ["Un resumen en tu correo", "La actividad de tu menú llega a tu bandeja, sin tener que entrar al panel."],
-    ],
-  },
-];
-
-const DELIVERY: [string, string][] = [
-  ["El cliente es tuyo", "Sus datos, su relación y su próxima visita se quedan contigo."],
-  ["Tu marca, no la de un marketplace", "Piden en tu canal, con tu imagen y tu menú."],
-  ["Cuota fija", "Pagas una cuota, no un porcentaje de cada pedido."],
-  ["Cobro y bandeja de pedidos", "Pago online en tu cuenta y cada pedido con su estado."],
-];
+// Visitors from a known market skip the chooser; crawlers and everyone else still see it.
+const market = marketFromRequest(Astro.request);
+if (market) return Astro.redirect(`/${market}/`, 302);
 ---
 
 <BaseLayout
-  title="QMenut · La presencia digital de tu restaurante"
-  description="Tu menú, tu marca y tu dominio en un canal propio que Google y la IA entienden. Para que te elijan antes de llegar y vuelvan después."
+  title="Qmenut · Elige tu país"
+  description="Descubre Qmenut para tu restaurante en España o Venezuela."
+  neutral
 >
   <section class="container hero">
-    <h1>La presencia digital de tu restaurante, a la altura de lo que sirves</h1>
+    <h1>Tu restaurante en Qmenut</h1>
+    <p>Elige tu país para conocer los planes y funcionalidades.</p>
     <div class="actions">
-      <a class="button" href={START_PATH}>
-        Prueba 14 días
+      <a class="button" href="/es/">
+        España
       </a>
-      <a class="text-link" href="#demos">
-        Ver demos
-      </a>
-    </div>
-  </section>
-
-  <section class="container section">
-    <h2>Nadie quiere mirar el móvil en la mesa. Todos lo miran antes de ir.</h2>
-    <ul class="grid">
-      {STATS.map((stat) => (
-        <li>
-          <p class="figure">{stat.figure}</p>
-          {stat.source ? <a href={stat.source}>{stat.text}</a> : <p>{stat.text}</p>}
-        </li>
-      ))}
-    </ul>
-  </section>
-
-  {SECTIONS.map((section) => (
-    <section class="container section" id={section.id}>
-      <h2>{section.title}</h2>
-      <ul class="grid">
-        {section.features.map(([title, body]) => (
-          <li>
-            <h3>{title}</h3>
-            <p>{body}</p>
-          </li>
-        ))}
-      </ul>
-    </section>
-  ))}
-
-  <section class="container section" id="demos">
-    <h2>Mira cómo se ve</h2>
-    <ul class="demos">
-      {DEMOS.map((demo) => (
-        <li>
-          <a href={demo.href}>
-            {demo.name}
-            <span aria-hidden="true">↗</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  </section>
-
-  <section class="container section">
-    <div class="delivery">
-      <h2>Muy pronto, tus pedidos en tu propio canal</h2>
-      <ul class="grid">
-        {DELIVERY.map(([title, body]) => (
-          <li>
-            <h3>{title}</h3>
-            <p>{body}</p>
-          </li>
-        ))}
-      </ul>
-      <a class="text-link" href={START_PATH}>
-        Quiero enterarme primero
-      </a>
-    </div>
-  </section>
-
-  <section class="container section">
-    <h2>Ya funciona en Nisia Café + Bocatas, en Valencia</h2>
-    <p>
-      Su menú vive en <a href="https://nisiacafeteria.com">nisiacafeteria.com</a>, y Google lee cada plato, cada precio
-      y cada horario directamente de él.
-    </p>
-  </section>
-
-  <Faq />
-
-  <section class="container section">
-    <h2>Precios</h2>
-    <PlanCards />
-    <div class="actions">
-      <a class="button" href={START_PATH}>
-        Prueba 14 días
-      </a>
-      <a class="text-link" href="/precios">
-        Comparar planes
+      <a class="text-link" href="/ve/">
+        Venezuela
       </a>
     </div>
   </section>

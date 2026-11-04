@@ -1,0 +1,90 @@
+---
+import Faq from "../../components/faq.astro";
+import PlanCards from "../../components/plan-cards.astro";
+import BaseLayout from "../../layouts/base-layout.astro";
+import { demos, markets } from "../../lib/markets";
+import type { MarketId } from "../../lib/markets";
+const market = Astro.params.market as MarketId;
+if (!Object.hasOwn(markets, market)) return new Response(null, { status: 404 });
+const content = markets[market];
+---
+
+<BaseLayout market={market} title={`${content.hero} · Qmenut`} description={content.description}>
+  <section class="container hero">
+    <hgroup class="hero-copy">
+      <h1>{content.hero}</h1>
+      <p class="hero-subtitle">{content.subtitle}</p>
+    </hgroup>
+    <div class="actions">
+      <a class="button" href={content.whatsapp.contact}>
+        Escríbenos por WhatsApp
+      </a>
+      <a class="text-link" href={`/${market}/precios`}>
+        Ver planes
+      </a>
+      <a class="text-link" href="#demos">
+        Ver demos
+      </a>
+    </div>
+  </section>
+  {content.sections.map((section, index) => (
+    <section class="container section" id={index === 0 ? "funcionalidades" : undefined}>
+      <h2>{section.title}</h2>
+      <ul class="grid">
+        {section.features.map(([title, body, plan]) => (
+          <li>
+            {plan && <span class="tag">{plan}</span>}
+            <h3>{title}</h3>
+            <p>{body}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+  <section class="container section" id="demos">
+    <h2>Mira cómo se ve</h2>
+    <ul class="demos">
+      {demos.map((demo) => (
+        <li>
+          <a href={demo.href}>
+            {demo.name}
+            <span aria-hidden="true">↗</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+  <section class="container section">
+    <div class="delivery">
+      <div class="delivery-heading">
+        <span class="tag">En desarrollo</span>
+        <h2>{content.delivery.title}</h2>
+      </div>
+      <p>{content.delivery.body}</p>
+      <a class="text-link" href={content.whatsapp.waitlist}>
+        Avísame cuando esté
+      </a>
+    </div>
+  </section>
+  <section class="container section">
+    <h2>Planes para tu restaurante</h2>
+    <PlanCards market={market} />
+    <div class="actions">
+      <a class="button" href={`/${market}/precios`}>
+        Comparar planes
+      </a>
+    </div>
+  </section>
+  <Faq market={market} />
+  <section class="container section">
+    <h2>{content.hero}</h2>
+    <div class="actions">
+      <a class="button" href={content.whatsapp.contact}>
+        Escríbenos por WhatsApp
+      </a>
+      <a class="text-link" href={`/${market}/precios`}>
+        Comparar planes
+      </a>
+    </div>
+  </section>
+</BaseLayout>

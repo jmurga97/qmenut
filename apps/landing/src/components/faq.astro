@@ -1,14 +1,19 @@
 ---
-import { FAQ } from "../lib/content";
+import type { MarketId } from "../lib/markets";
+import { markets } from "../lib/markets";
+interface Props {
+  market: MarketId;
+}
+const { market } = Astro.props;
 ---
 
 <section class="container section">
   <h2>Preguntas frecuentes</h2>
   <div class="faq">
-    {FAQ.map((item) => (
+    {markets[market].faq.map(([question, answer]) => (
       <details name="faq">
-        <summary>{item.question}</summary>
-        <p>{item.answer}</p>
+        <summary>{question}</summary>
+        <p>{answer}</p>
       </details>
     ))}
   </div>

@@ -1,14 +1,5 @@
 ---
-import BaseLayout from "../layouts/base-layout.astro";
+import { marketFromRequest } from "../lib/markets";
 
-// ponytail: placeholder until self-serve sign-up exists; every sign-up CTA lands here.
+return Astro.redirect(`/${marketFromRequest(Astro.request) ?? "ve"}/empezar`, 302);
 ---
-
-<BaseLayout title="Empezar · QMenut" description="Crea el menú digital de tu restaurante con QMenut.">
-  <section class="container hero">
-    <h1>Muy pronto podrás crear tu menú aquí</h1>
-    <a class="button" href="/#demos">
-      Ver demos
-    </a>
-  </section>
-</BaseLayout>

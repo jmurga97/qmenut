@@ -1,0 +1,50 @@
+---
+import Faq from "../../components/faq.astro";
+import PlanCards from "../../components/plan-cards.astro";
+import BaseLayout from "../../layouts/base-layout.astro";
+import { markets } from "../../lib/markets";
+import type { MarketId } from "../../lib/markets";
+const market = Astro.params.market as MarketId;
+if (!Object.hasOwn(markets, market)) return new Response(null, { status: 404 });
+const content = markets[market];
+---
+
+<BaseLayout
+  market={market}
+  page="precios"
+  title={`Precios para ${content.country} · Qmenut`}
+  description={`Compara Basic y Business para tu ${content.noun}. ${content.description}`}
+>
+  <section class="container hero">
+    <h1>Un precio fijo cada mes</h1>
+    <PlanCards market={market} />
+    <a class="button" href={content.whatsapp.contact}>
+      Escríbenos por WhatsApp
+    </a>
+  </section>
+  <section class="container section">
+    <h2 id="comparar">Qué incluye cada plan</h2>
+    <div class="table-scroll" role="region" aria-labelledby="comparar" tabindex="0">
+      <table class="compare">
+        <thead>
+          <tr>
+            <td></td>
+            <th scope="col">Basic</th>
+            <th scope="col">Business</th>
+          </tr>
+        </thead>
+        <tbody>
+          {content.rows.map(([feature, basic, business]) => (
+            <tr>
+              <th scope="row">{feature}</th>
+              {[basic, business].map((cell) => (
+                <td data-included={String(cell === "yes")}>{cell === "yes" ? "Incluido" : "—"}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <Faq market={market} />
+</BaseLayout>
