@@ -43,7 +43,7 @@
 }
 
 .reservations-error {
-  color: var(--qm-emph, var(--qm-ink, #1c1815));
+  color: var(--qm-ink, #1c1815);
   font-size: var(--qm-text-sm, 12px);
   font-weight: var(--qm-hw, 700);
 }
@@ -116,7 +116,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--qm-emph, var(--qm-secondary, #555));
+  color: var(--qm-ink, #1c1815);
   font: inherit;
   font-size: var(--qm-text-sm, 12px);
   font-weight: var(--qm-hw, 700);
@@ -157,7 +157,7 @@
 }
 
 .reservations-field input[aria-invalid="true"] {
-  border-color: var(--qm-emph, var(--qm-ink, #1c1815));
+  border-color: var(--qm-ink, #1c1815);
 }
 
 .reservations-phone {

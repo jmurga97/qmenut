@@ -36,7 +36,7 @@
 
 .loyalty-status__cta {
   margin-top: 3px;
-  color: var(--qm-emph, var(--qm-secondary, #555));
+  color: var(--qm-ink, #1c1815);
   font-size: var(--qm-text-sm, 12px);
   font-weight: var(--qm-hw, 700);
   text-decoration: underline;
