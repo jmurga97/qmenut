@@ -1,7 +1,6 @@
 import { QmFeatured } from "@qmenut/ui/components/qm-featured/react";
 import { QmHeading } from "@qmenut/ui/components/qm-heading/react";
 import { ChefHat, Sparkles, Tag } from "@qmenut/ui/icons";
-import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import "~/features/promos/styles.css";
@@ -14,6 +13,7 @@ import { usePublicRouteLayout } from "~/shared/components/public-route-layout/pu
 import { getPhotoLayout } from "~/shared/lib/photo-layout";
 import { responsivePhotoSource } from "~/shared/lib/photo-url";
 import { MenuDishModal } from "~/shared/public-menu/menu-dish-modal";
+import { useDishParam } from "~/shared/public-menu/use-dish-param";
 
 import type { MenuDishViewModel } from "~/shared/public-menu/menu-view-model";
 
@@ -22,23 +22,13 @@ export function HighlightsPage() {
   const { template, tenant, theme } = usePublicRouteLayout();
   const showDishPhotos = tenant.showMenuPhotos;
   const { t } = useTranslation();
-  const dishTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const [selectedDish, setSelectedDish] = useState<MenuDishViewModel | null>(null);
+  const dishParam = useDishParam(content.recommended.dishes);
 
   useTrackPageView("highlights_view");
 
   function handleSelectDish(dish: MenuDishViewModel, trigger: HTMLButtonElement) {
-    dishTriggerRef.current = trigger;
     track("dish_opened", { dish_id: dish.rowKey, dish_name: dish.name, source: "highlights" });
-    setSelectedDish(dish);
-  }
-
-  function handleCloseDish() {
-    const trigger = dishTriggerRef.current;
-    setSelectedDish(null);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => trigger?.focus({ preventScroll: true }));
-    });
+    dishParam.open(dish, trigger);
   }
 
   const hasRecommended = content.recommended.dishes.length > 0;
@@ -103,7 +93,12 @@ export function HighlightsPage() {
           <PromosList content={content.promos} />
         </section>
       ) : null}
-      <MenuDishModal dish={selectedDish} showDishPhoto={showDishPhotos} onClose={handleCloseDish} />
+      <MenuDishModal
+        dish={dishParam.dish}
+        instantClose={dishParam.instantClose}
+        showDishPhoto={showDishPhotos}
+        onClose={dishParam.close}
+      />
     </div>
   );
 }

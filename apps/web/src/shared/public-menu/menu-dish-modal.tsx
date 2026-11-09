@@ -41,14 +41,17 @@ interface MenuDishModalProps {
   dish: MenuDishViewModel | null;
   onClose: () => void;
   showDishPhoto: boolean;
+  /** Unmount at once instead of sliding out: the browser already animated the back navigation. */
+  instantClose?: boolean;
 }
 
-export function MenuDishModal({ dish, onClose, showDishPhoto }: MenuDishModalProps) {
+export function MenuDishModal({ dish, onClose, showDishPhoto, instantClose = false }: MenuDishModalProps) {
   const [Content, setContent] = useState<DishModalContent | null>(null);
   // The last dish stays mounted with `open=false` so the sheet can slide out; it unrenders itself afterwards.
   const [lastDish, setLastDish] = useState(dish);
   if (dish && dish !== lastDish) setLastDish(dish);
-  const shownDish = dish ?? lastDish;
+  if (!dish && instantClose && lastDish) setLastDish(null);
+  const shownDish = dish ?? (instantClose ? null : lastDish);
   const isWaitingForOpen = dish !== null && Content === null;
 
   useEffect(() => {

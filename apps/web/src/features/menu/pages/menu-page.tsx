@@ -1,6 +1,5 @@
 import { QmMenuList } from "@qmenut/ui/components/qm-menu-list/react";
 import { useSearch } from "@tanstack/react-router";
-import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { MenuCategoryNav } from "~/features/menu/components/menu-content/menu-category-nav";
@@ -11,16 +10,17 @@ import { useTrackPageView } from "~/lib/analytics/use-analytics";
 import { usePublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout-context";
 import { useMenuContent } from "~/shared/public-menu/menu-content-context";
 import { MenuDishModal } from "~/shared/public-menu/menu-dish-modal";
+import { useDishParam } from "~/shared/public-menu/use-dish-param";
 
-import type { MenuDishViewModel, SelectDishInput } from "~/shared/public-menu/menu-view-model";
+import type { SelectDishInput } from "~/shared/public-menu/menu-view-model";
 
 export function MenuPage() {
   const { t } = useTranslation();
-  const dishTriggerRef = useRef<HTMLElement | null>(null);
-  const [selectedDish, setSelectedDish] = useState<MenuDishViewModel | null>(null);
   const { scrollContainerRef, template, tenant } = usePublicRouteLayout();
   const { utm_source: utmSource } = useSearch({ from: "/{-$locale}" });
   const content = useMenuContent();
+  const dishes = content ? [content.featured, ...content.sections.flatMap((section) => section.dishes)] : null;
+  const dishParam = useDishParam(dishes?.filter((dish) => dish !== null) ?? null);
 
   useTrackPageView("menu_view", {
     from_qr: utmSource === "qr",
@@ -31,17 +31,8 @@ export function MenuPage() {
   }
 
   function handleSelectDish({ dish, source, trigger }: SelectDishInput) {
-    dishTriggerRef.current = trigger;
     track("dish_opened", { dish_id: dish.rowKey, dish_name: dish.name, source });
-    setSelectedDish(dish);
-  }
-
-  function handleCloseDish() {
-    const trigger = dishTriggerRef.current;
-    setSelectedDish(null);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => trigger?.focus({ preventScroll: true }));
-    });
+    dishParam.open(dish, trigger);
   }
 
   return (
@@ -70,7 +61,12 @@ export function MenuPage() {
           ))}
         </>
       )}
-      <MenuDishModal dish={selectedDish} showDishPhoto={tenant.showDishPhoto} onClose={handleCloseDish} />
+      <MenuDishModal
+        dish={dishParam.dish}
+        instantClose={dishParam.instantClose}
+        showDishPhoto={tenant.showDishPhoto}
+        onClose={dishParam.close}
+      />
     </>
   );
 }

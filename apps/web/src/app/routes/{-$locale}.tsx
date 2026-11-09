@@ -39,6 +39,8 @@ interface LocaleSearch {
    */
   utm_source?: string;
   template?: QmTemplateName;
+  /** The open dish sheet, so the back gesture closes it. Opened only on the client: the edge cache ignores search. */
+  plato?: string;
   themePreview?: typeof QM_THEME_PREVIEW_SEARCH_VALUE;
 }
 
@@ -50,6 +52,7 @@ export const Route = createFileRoute("/{-$locale}")({
   validateSearch: (search: Record<string, unknown>): LocaleSearch => ({
     utm_source: typeof search.utm_source === "string" ? search.utm_source : undefined,
     template: isQmTemplateName(search.template) ? search.template : undefined,
+    plato: typeof search.plato === "string" && search.plato ? search.plato : undefined,
     themePreview: search.themePreview === QM_THEME_PREVIEW_SEARCH_VALUE ? search.themePreview : undefined,
   }),
   beforeLoad: async ({ context, location, params, search }): Promise<LocaleRouteContext> => {
