@@ -15,10 +15,49 @@ interface Props {
 const { title, description, market, page = "", neutral = false, noindex = false } = Astro.props;
 const path = market ? `/${market}/${page}` : "/";
 const url = (path: string) => new URL(path, "https://qmenut.app").href;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "Organization", "@id": url("/#organization"), name: "Qmenut", url: url("/") },
+    {
+      "@type": "WebSite",
+      "@id": url("/#website"),
+      name: "Qmenut",
+      url: url("/"),
+      publisher: { "@id": url("/#organization") },
+    },
+    ...(market && page === "precios"
+      ? [
+          {
+            "@type": "SoftwareApplication",
+            name: "Qmenut",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            description,
+            url: url(path),
+            offers: markets[market].plans.map((plan) => ({
+              "@type": "Offer",
+              name: plan.name,
+              price: plan.price,
+              priceCurrency: markets[market].currency,
+              priceSpecification: {
+                "@type": "UnitPriceSpecification",
+                price: plan.price,
+                priceCurrency: markets[market].currency,
+                unitText: "MONTH",
+                valueAddedTaxIncluded: false,
+              },
+              url: url(path),
+            })),
+          },
+        ]
+      : []),
+  ],
+};
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="es" class="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -26,13 +65,21 @@ const url = (path: string) => new URL(path, "https://qmenut.app").href;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:url" content={url(market || neutral ? path : Astro.url.pathname)} />
+    <meta property="og:image" content={url("/assets/og.png")} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    {market && <meta property="og:locale" content={market === "es" ? "es_ES" : "es_VE"} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#ffffff" />
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, "\\u003c")} />
+    {(noindex || Astro.url.hostname === "landing.dev.qmenut.app") && <meta name="robots" content="noindex" />}
     {(market || neutral) && <link rel="canonical" href={url(path)} />}
-    {market && (
+    {!noindex && (market || neutral) && (
       <>
         <link rel="alternate" hreflang="es-ES" href={url(`/es/${page}`)} />
         <link rel="alternate" hreflang="es-VE" href={url(`/ve/${page}`)} />
-        <link rel="alternate" hreflang="x-default" href={url("/")} />
+        {page === "" && <link rel="alternate" hreflang="x-default" href={url("/")} />}
       </>
     )}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -76,9 +123,6 @@ const url = (path: string) => new URL(path, "https://qmenut.app").href;
       <nav aria-label="Pie de página">
         {market && <a href={`/${market}/precios`}>Precios</a>}
         <a href={adminUrl}>Entrar</a>
-        <a href="/aviso-legal">Aviso legal</a>
-        <a href="/privacidad">Privacidad</a>
-        <a href="/condiciones">Condiciones</a>
       </nav>
     </footer>
   </body>
