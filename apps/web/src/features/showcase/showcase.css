@@ -1,0 +1,32 @@
+/* Landing showcase: the step the landing sent sits on <html>, so these never match a real visit. */
+.showcase-callout {
+  display: block;
+  margin: 12px 16px;
+  padding: 8px 12px;
+  border-inline-start: 1px solid var(--qm-ink);
+  color: var(--qm-ink);
+  font: 12px/1.5 var(--qm-body);
+  text-align: start;
+}
+.showcase-loyalty {
+  padding: 24px 16px;
+}
+.showcase-allergens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 16px;
+  outline: 1px solid var(--qm-ink);
+  outline-offset: -1px;
+}
+.dish-trigger:has([data-sold-out]) qm-dish-row {
+  opacity: 0.5;
+}
+html[data-showcase-step="domain:0"] .menu-section-frame:first-of-type {
+  outline: 1px solid var(--qm-ink);
+  outline-offset: -1px;
+}
+/* The stamps steps show only the card, not the empty menu behind it. */
+html[data-showcase-step^="stamps:"] qm-menu-list {
+  display: none;
+}

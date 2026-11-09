@@ -8,10 +8,10 @@ export function LegalLinksNav() {
 
   return (
     <nav className="legal-links" aria-label={t("legal.navLabel")}>
-      <Link to="/{-$locale}/aviso-legal" params={(prev) => prev}>
+      <Link to="/{-$locale}/aviso-legal" params={(prev) => prev} search={(prev) => prev}>
         {t("legal.legalNoticeLink")}
       </Link>
-      <Link to="/{-$locale}/privacidad" params={(prev) => prev}>
+      <Link to="/{-$locale}/privacidad" params={(prev) => prev} search={(prev) => prev}>
         {t("legal.privacyLink")}
       </Link>
     </nav>

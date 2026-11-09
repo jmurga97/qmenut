@@ -5,6 +5,7 @@ import { getEnvString } from "./env";
 
 import type { AppRouter } from "@qmenut/api/router";
 import type { QueryClient } from "@tanstack/react-query";
+import type { TRPCLink } from "@trpc/client";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type { i18n as I18nInstance } from "i18next";
@@ -12,6 +13,7 @@ import type { i18n as I18nInstance } from "i18next";
 export type RouterInputs = inferRouterInputs<AppRouter>;
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 export type TrpcOptionsProxy = TRPCOptionsProxy<AppRouter>;
+export type TrpcLink = TRPCLink<AppRouter>;
 
 export interface RouterAppContext {
   i18n: I18nInstance;
@@ -78,9 +80,10 @@ async function fetchApi(url: RequestInfo | URL, options?: RequestInit): Promise<
   return fetch(url, options);
 }
 
-function createRawTrpcClient() {
+function createRawTrpcClient(links: TrpcLink[] = []) {
   return createTRPCClient<AppRouter>({
     links: [
+      ...links,
       httpBatchLink({
         url: `${getApiBaseUrl()}/trpc`,
         fetch(url, options) {
@@ -91,9 +94,10 @@ function createRawTrpcClient() {
   });
 }
 
-export function createTrpcOptionsProxy(queryClient: QueryClient): TrpcOptionsProxy {
+/** `links` run before the HTTP link, so one can answer a call itself or pass it on. */
+export function createTrpcOptionsProxy(queryClient: QueryClient, links?: TrpcLink[]): TrpcOptionsProxy {
   return createTRPCOptionsProxy<AppRouter>({
-    client: createRawTrpcClient(),
+    client: createRawTrpcClient(links),
     queryClient,
   });
 }

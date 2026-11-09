@@ -1,3 +1,4 @@
+import { SHOWCASE_PARAM, SHOWCASE_VALUE } from "@qmenut/ui/theme/showcase";
 import { QM_THEME_PREVIEW_SEARCH_PARAM, QM_THEME_PREVIEW_SEARCH_VALUE } from "@qmenut/ui/theme/tenant-theme-config";
 import { env } from "cloudflare:workers";
 
@@ -236,7 +237,7 @@ interface ServeWithEdgeCacheInput {
  * the background. Callers always receive the short browser-cache contract.
  */
 export async function serveWithEdgeCache({ ctx, render, request }: ServeWithEdgeCacheInput): Promise<Response> {
-  if (isThemePreviewRequest(request)) {
+  if (isThemePreviewRequest(request) || new URL(request.url).searchParams.get(SHOWCASE_PARAM) === SHOWCASE_VALUE) {
     const response = await render();
 
     return withCacheStatus({

@@ -1,8 +1,11 @@
 import { TEMPLATES } from "@qmenut/ui/theme/presets";
+import { SHOWCASE_VALUE } from "@qmenut/ui/theme/showcase";
 import { QM_THEME_PREVIEW_SEARCH_VALUE } from "@qmenut/ui/theme/tenant-theme-config";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 
 import { MenuContentProvider } from "~/features/menu/hooks/menu-content-context";
+import { ShowcaseMenuContent } from "~/features/showcase/showcase-menu-content";
+import { ShowcaseProvider } from "~/features/showcase/showcase-provider";
 import { SHORT_NAME_MAX_LENGTH, truncateLabel } from "~/lib/app-label";
 import { DEFAULT_LOCALE, chromeLocale } from "~/lib/i18n/create-i18n";
 import { LOCALE_PATTERN } from "~/lib/i18n/locale-pattern";
@@ -13,6 +16,7 @@ import { DevTemplateSwitcher } from "~/shared/dev/dev-template-switcher";
 import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";
+import type { ReactNode } from "react";
 
 export interface LocaleLanguageOption {
   code: string;
@@ -39,6 +43,7 @@ interface LocaleSearch {
    */
   utm_source?: string;
   template?: QmTemplateName;
+  showcase?: typeof SHOWCASE_VALUE;
   /** The open dish sheet, so the back gesture closes it. Opened only on the client: the edge cache ignores search. */
   plato?: string;
   themePreview?: typeof QM_THEME_PREVIEW_SEARCH_VALUE;
@@ -52,6 +57,7 @@ export const Route = createFileRoute("/{-$locale}")({
   validateSearch: (search: Record<string, unknown>): LocaleSearch => ({
     utm_source: typeof search.utm_source === "string" ? search.utm_source : undefined,
     template: isQmTemplateName(search.template) ? search.template : undefined,
+    showcase: search.showcase === SHOWCASE_VALUE ? SHOWCASE_VALUE : undefined,
     plato: typeof search.plato === "string" && search.plato ? search.plato : undefined,
     themePreview: search.themePreview === QM_THEME_PREVIEW_SEARCH_VALUE ? search.themePreview : undefined,
   }),
@@ -107,7 +113,26 @@ export const Route = createFileRoute("/{-$locale}")({
   component: LocaleLayout,
 });
 
+function ShowcaseMenuContentProvider({ children }: { children: ReactNode }) {
+  return (
+    <MenuContentProvider>
+      <ShowcaseMenuContent>{children}</ShowcaseMenuContent>
+    </MenuContentProvider>
+  );
+}
+
 function LocaleLayout() {
+  const { showcase } = Route.useSearch();
+
+  // The landing's demo frame: everything showcase lives in features/showcase, wrapped around the real menu.
+  if (showcase) {
+    return (
+      <ShowcaseProvider>
+        <PublicRouteLayout contentProvider={ShowcaseMenuContentProvider} />
+      </ShowcaseProvider>
+    );
+  }
+
   return (
     <>
       <PublicRouteLayout contentProvider={MenuContentProvider} />

@@ -1,9 +1,11 @@
+import { SHOWCASE_PARAM, SHOWCASE_VALUE } from "@qmenut/ui/theme/showcase";
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 
 import { RouteNotFound } from "~/app/route-not-found";
 import { routeTree } from "~/app/route-tree.gen";
+import { createShowcaseLink } from "~/features/showcase/showcase-link";
 import { createI18nInstance } from "~/lib/i18n/create-i18n";
 import { LOCALE_PATTERN } from "~/lib/i18n/locale-pattern";
 import { createTrpcOptionsProxy } from "~/lib/trpc-client";
@@ -30,7 +32,12 @@ function createQueryClient() {
 
 export function getRouter() {
   const queryClient = createQueryClient();
-  const trpc = createTrpcOptionsProxy(queryClient);
+  // Landing demo frame only; the link itself stays idle until the landing says hello.
+  const showcase =
+    typeof window !== "undefined" &&
+    window.parent !== window &&
+    new URLSearchParams(window.location.search).get(SHOWCASE_PARAM) === SHOWCASE_VALUE;
+  const trpc = createTrpcOptionsProxy(queryClient, showcase ? [createShowcaseLink(queryClient)] : []);
   // Fresh instance per request/router creation — avoids leaking language state across
   // concurrent SSR requests in the Workers runtime. On the client, seed it from the
   // SSR-rendered `<html lang>` (set in __root.tsx from the resolved `effectiveLocale`) so the

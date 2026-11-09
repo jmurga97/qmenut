@@ -64,6 +64,7 @@ export function MenuSection({ index, onSelectDish, section, showDishPhotos }: Me
                   tag: dish.badge?.compactText,
                 }}
               />
+              {dish.note}
             </button>
           );
         })}

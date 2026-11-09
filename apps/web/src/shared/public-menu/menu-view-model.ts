@@ -1,5 +1,6 @@
 import type { PublicImageVariant } from "@qmenut/db/models/image";
 import type { QmFeaturedValue } from "@qmenut/ui/components/qm-featured/react";
+import type { ReactNode } from "react";
 import type { DishOpenSource } from "~/lib/analytics/event-catalog";
 import type { AllergenCode } from "~/shared/public-menu/allergens";
 
@@ -30,6 +31,8 @@ export interface MenuDishViewModel {
   extras?: MenuDishExtraViewModel[];
   featured: boolean;
   name: string;
+  /** Extra line under the row, set by whoever wraps the content (the landing showcase). */
+  note?: ReactNode;
   oldPrice?: string;
   photoUrl?: string;
   photoVariants?: PublicImageVariant[];
@@ -62,6 +65,8 @@ export interface MenuContentViewModel {
   /** ID estable de la promoción destacada para analítica; null si no hay o es legado. */
   featuredPromoId: string | null;
   heroLabel: string;
+  /** Shown above the menu, set by whoever wraps the content (the landing showcase). */
+  lead?: ReactNode;
   logoLabel: string;
   sections: MenuSectionViewModel[];
 }

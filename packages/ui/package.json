@@ -312,6 +312,10 @@
     "./components/qm-dish-modal/react": {
       "types": "./src/components/organisms/qm-dish-modal/react.ts",
       "import": "./src/components/organisms/qm-dish-modal/react.ts"
+    },
+    "./theme/showcase": {
+      "types": "./src/theme/showcase.ts",
+      "import": "./src/theme/showcase.ts"
     }
   },
   "scripts": {

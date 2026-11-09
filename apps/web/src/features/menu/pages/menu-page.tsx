@@ -37,6 +37,7 @@ export function MenuPage() {
 
   return (
     <>
+      {content.lead}
       {content.sections.length === 0 ? (
         <QmMenuList emptyLabel={t("menu.emptyLabel")} />
       ) : (
