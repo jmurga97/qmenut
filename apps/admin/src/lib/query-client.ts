@@ -7,7 +7,8 @@ export const queryClient = new QueryClient({
   mutationCache: new MutationCache({ onError: notifyError }),
   queryCache: new QueryCache({
     onError: (error, query) => {
-      if (query.state.data === undefined) notifyError(error);
+      // FORBIDDEN on a read either redirects (no active restaurant) or renders RouteErrorState; a toast only duplicates it.
+      if (query.state.data === undefined && !isForbiddenError(error)) notifyError(error);
     },
   }),
   defaultOptions: {
