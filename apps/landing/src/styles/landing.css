@@ -110,9 +110,13 @@
     text-decoration: none;
     text-transform: uppercase;
     white-space: nowrap;
+    transition: scale 100ms ease-out;
   }
   .button:hover {
     background: color-mix(in srgb, var(--primary) 80%, var(--background));
+  }
+  .button:active {
+    scale: 0.97;
   }
   .button--small {
     min-height: 2rem;
@@ -239,6 +243,33 @@
     text-underline-offset: 0.2em;
   }
 
+  /* ---- Proof: copy beside a photo of a live tenant ------------------------------------ */
+  /* Portrait photo: a narrower column keeps it from towering over the copy. */
+  .proof {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: center;
+  }
+  .proof-copy {
+    display: grid;
+    gap: var(--ming-space-5);
+  }
+  .proof-copy p {
+    max-width: var(--landing-measure);
+    color: var(--muted-foreground);
+    font-size: 1.125rem;
+    line-height: 1.55;
+  }
+  .proof-copy a {
+    color: var(--foreground);
+    text-underline-offset: 0.2em;
+  }
+  .proof-image {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    object-fit: cover;
+  }
+
   /* ---- Demos ------------------------------------------------------------------------ */
   .demos {
     margin: 0;
@@ -263,15 +294,12 @@
 
   /* ---- Delivery: the one inverted block, made by remapping tokens ------------------- */
   .delivery {
-    --foreground: var(--primary-foreground);
-    --muted-foreground: color-mix(in srgb, var(--primary-foreground) 70%, var(--primary));
-    --border: color-mix(in srgb, var(--primary-foreground) 25%, var(--primary));
     display: grid;
     justify-items: start;
     gap: var(--ming-space-7);
     padding: clamp(var(--ming-space-5), 6vw, calc(var(--ming-space-6) * 2));
     border-radius: var(--radius);
-    background: var(--primary);
+    background: var(--background);
     color: var(--foreground);
   }
   .delivery-heading {
@@ -286,6 +314,12 @@
     border-radius: var(--ming-radius-control);
     font-size: 0.875rem;
     line-height: 1;
+  }
+
+  /* Ming's .dark only remaps tokens: paint the band with them so text inherits the dark ink. */
+  .ink-band {
+    background: var(--background);
+    color: var(--foreground);
   }
 
   /* ---- Plans ------------------------------------------------------------------------ */
@@ -397,6 +431,12 @@
     }
     .plans {
       --columns: 1;
+    }
+    .proof {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .proof-image {
+      max-width: 28rem;
     }
   }
 }

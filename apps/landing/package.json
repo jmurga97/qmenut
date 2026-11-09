@@ -16,6 +16,7 @@
     "wrangler": "4.156.0"
   },
   "dependencies": {
-    "@jmurga97/components": "2.0.4"
+    "@jmurga97/components": "2.0.4",
+    "@qmenut/ui": "workspace:*"
   }
 }

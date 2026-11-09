@@ -129,6 +129,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@jmurga97/components": "2.0.4",
+        "@qmenut/ui": "workspace:*",
       },
       "devDependencies": {
         "@astrojs/check": "^0.9.12",

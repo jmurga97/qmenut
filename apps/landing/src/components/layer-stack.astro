@@ -1,0 +1,229 @@
+---
+import { HEADER, NAV, STEP_LABELS, showcasePoster, showcaseTenants, stackCaptures, stackFacts } from "../lib/showcase";
+import type { MarketId } from "../lib/markets";
+import type { ShowcaseStep } from "../lib/showcase";
+interface Props {
+  market: MarketId;
+  step: ShowcaseStep;
+  inline?: boolean;
+  /** Today's bolívares per dollar; the rate step raises it by 10% and reprices the dishes. */
+  rate?: number;
+}
+const { market, step, inline = false, rate = 0 } = Astro.props;
+const tenant = showcaseTenants[market][0]!;
+const facts = stackFacts[market];
+const captures = stackCaptures[market];
+const src = (name: ShowcaseStep | "dish") => showcasePoster(tenant.slug, name);
+// Every element tagged data-for is shown only on the listed steps; the controller moves data-step.
+const on = (steps: string) => ({ "data-for": steps, "data-on": steps.split(" ").includes(step) ? "" : undefined });
+const host = tenant.href.replace("https://", "").replace(".dev.", ".");
+const bs = new Intl.NumberFormat("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format;
+const NEW_RATE = 1.1;
+const tags = (steps: string, y: number, x = 0) =>
+  steps.split(" ").map((key) => ({ key, label: STEP_LABELS[key as ShowcaseStep], style: `--x: ${x}%; --y: ${y}%` }));
+// The hero's components, now cut from the real capture: each one its own sheet, printed in top to bottom.
+type Layout = (typeof captures)[number]["layout"];
+type Part = {
+  part: string;
+  label?: string;
+  z: number;
+  band: (layout: Layout) => [number, number] | undefined;
+  tags?: ReturnType<typeof tags>;
+  row?: number;
+};
+const parts: Part[] = [
+  {
+    part: "header",
+    label: "Cabecera",
+    z: 2.9,
+    band: () => HEADER,
+    tags: market === "es" ? tags("language:0 language:1", 4.6, 66) : [],
+  },
+  { part: "featured", label: "Destacado", z: 2.6, band: (layout) => layout.featured, tags: tags("domain:0", 19.4) },
+  {
+    part: "tabs",
+    label: "Categorías",
+    z: 2.3,
+    band: (layout) => layout.tabs,
+    tags: market === "es" ? tags("language:2", 21, 4) : [],
+  },
+  { part: "section", label: "Sección", z: 2, band: (layout) => layout.section },
+  {
+    part: "row",
+    label: "Plato",
+    z: 1.6,
+    row: 0,
+    band: (layout) => layout.rows[0],
+    tags: market === "es" ? tags("language:3", 55, 4) : [],
+  },
+  { part: "row", row: 1, z: 1.3, band: (layout) => layout.rows[1] },
+  { part: "row", row: 2, z: 1, band: (layout) => layout.rows[2] },
+  { part: "nav", label: "Navegación", z: 0.6, band: () => NAV },
+];
+const slices = parts.map((slice, index) => {
+  const items = captures.flatMap((capture) => {
+    const band = slice.band(capture.layout);
+    return band ? [{ ...capture, band }] : [];
+  });
+  return { ...slice, index, items, steps: items.map((item) => item.steps).join(" ") };
+});
+const ROW_Z = [1.6, 1.3];
+const plane = {
+  admin: [
+    ...(facts.rates ? tags("rate:1", facts.rates[0]!.y - 8, -86) : []),
+    ...tags("soldOut:0", facts.soldOut.y - 6, -86),
+    ...tags("soldOut:1", 34, -86),
+    ...tags("views:0", facts.views[0]!.y - 8, -86),
+  ],
+  // The summary card lifts off the admin sheet on views:1, so its tag rides on the card.
+  views: tags("views:1", 0),
+  home: tags("stamps:1", 14),
+  stamps: tags("stamps:0", 22.9),
+  channel: tags("domain:1", -9),
+};
+---
+
+<div class:list={["stack", { "stack--inline": inline }]} data-stack data-step={step} aria-hidden="true">
+  <div class="stack-scene">
+    <div class="stack-model">
+      <div class="plane plane--admin" style="--z: 0; --i: 0">
+        {facts.rates && (
+          <div class="admin-card" style={`top: ${facts.rates[0]!.y - 8}%`} {...on("rate:1")}>
+            <p class="admin-title">Tasa VES</p>
+            <p class="admin-row">
+              <span>1 USD</span>
+              <span class="admin-value admin-rate">
+                <s>{bs(rate)}</s>
+                <span>{bs(rate * NEW_RATE)}</span>
+              </span>
+            </p>
+          </div>
+        )}
+        {facts.rates?.map((row, index) => (
+          <span class="wire-link" style={`--y: ${row.y}%; --x: 9%; --rz: ${ROW_Z[index]}`} {...on("rate:1")} />
+        ))}
+        <div class="admin-card" style={`top: ${facts.soldOut.y - 6}%`} {...on("soldOut:0")}>
+          <p class="admin-title">Disponibilidad de {facts.soldOut.dish}</p>
+          <p class="admin-row">
+            <span>Disponible</span>
+            <span class="admin-switch"></span>
+          </p>
+        </div>
+        <span
+          class="wire-link"
+          style={`--y: ${facts.soldOut.y}%; --x: 5%; --rz: ${ROW_Z[0]}`}
+          {...on("soldOut:0")}
+        ></span>
+        <div class="admin-card" style="top: 34%" {...on("soldOut:1")}>
+          <p class="admin-title">Equipo</p>
+          {["Propietario", "Admin", "Staff"].map((role) => (
+            <p class="admin-row">
+              <span class="admin-wire" />
+              <span class="admin-value">{role}</span>
+            </p>
+          ))}
+        </div>
+        <div class="admin-card admin-views" style={`top: ${facts.views[0]!.y - 8}%`} {...on("views:0 views:1")}>
+          <p class="admin-title">Platos más abiertos</p>
+          {facts.views.map((row) => (
+            <p class="admin-row">
+              <span>{row.dish}</span>
+              <span class="admin-value">{row.opens}</span>
+            </p>
+          ))}
+          {plane.views.map((tag) => (
+            <span class="wire-tag" style={tag.style} {...on(tag.key)}>
+              {tag.label}
+            </span>
+          ))}
+        </div>
+        {facts.views.map((row, index) => (
+          <span class="wire-link" style={`--y: ${row.y}%; --x: 9%; --rz: ${ROW_Z[index]}`} {...on("views:0")} />
+        ))}
+        {plane.admin.map((tag) => (
+          <span class="wire-tag" style={tag.style} {...on(tag.key)}>
+            {tag.label}
+          </span>
+        ))}
+      </div>
+      {slices.map((slice) => (
+        <div
+          class="plane plane--slice"
+          data-part={slice.part}
+          style={`--z: ${slice.z}; --i: ${slice.index + 1}; --t: ${slice.items[0]!.band[0]}; --b: ${slice.items[0]!.band[1]}`}
+          {...on(slice.steps)}
+        >
+          {slice.items.map((item) => (
+            <span class="cut" style={`--t: ${item.band[0]}; --b: ${item.band[1]}`} {...on(item.steps)}>
+              <img src={src(item.image)} width="390" height="700" loading="lazy" decoding="async" alt="" />
+              {item.steps === "rate:1" && slice.row !== undefined && facts.rates?.[slice.row] && (
+                <span
+                  class="ves"
+                  style={`--y: ${((facts.rates[slice.row].y - item.band[0]) / (item.band[1] - item.band[0])) * 100}%`}
+                >
+                  <span>{bs(facts.rates[slice.row].usd * rate)} VES</span>
+                  <span>{bs(facts.rates[slice.row].usd * rate * NEW_RATE)} VES</span>
+                </span>
+              )}
+            </span>
+          ))}
+          {slice.label && <span class="plane-label">{slice.label}</span>}
+          {slice.tags?.map((tag) => (
+            <span class="wire-tag" style={tag.style} {...on(tag.key)}>
+              {tag.label}
+            </span>
+          ))}
+        </div>
+      ))}
+      <div class="plane plane--dish" style="--z: 3.6; --i: 9" {...on("views:0")}>
+        <span class="cut" style="--t: 17.2; --b: 100">
+          <img src={src("dish")} width="390" height="700" loading="lazy" decoding="async" alt="" />
+        </span>
+      </div>
+      <div class="plane plane--home" style="--z: 2.6; --i: 9" {...on("stamps:1")}>
+        <span class="home-tiles">
+          {Array.from({ length: 16 }, (_, index) => (
+            <i data-tenant={index === 5 ? tenant.name[0] : undefined} />
+          ))}
+        </span>
+        {plane.home.map((tag) => (
+          <span class="wire-tag" style={tag.style} {...on(tag.key)}>
+            {tag.label}
+          </span>
+        ))}
+      </div>
+      <div
+        class="plane plane--stamps"
+        style={`--z: 2.6; --i: 9; --card: ${facts.card}; --stamp-x: ${facts.stamp.x}%; --stamp-y: ${facts.stamp.y}%`}
+        {...on("stamps:0 stamps:1")}
+      >
+        <img src={src("stamps:0")} width="390" height="700" loading="lazy" decoding="async" alt="" />
+        <span class="stamp-press"></span>
+        {plane.stamps.map((tag) => (
+          <span class="wire-tag" style={tag.style} {...on(tag.key)}>
+            {tag.label}
+          </span>
+        ))}
+      </div>
+      <div class="plane plane--channel" style="--z: 3.4; --i: 9">
+        <p class="channel-bar">
+          <span {...on("domain:1")} style={`--chars: ${`www.${tenant.slug}.com`.length}`}>
+            www.{tenant.slug}.com
+          </span>
+          <span
+            {...on(
+              "rate:1 domain:0 language:0 language:1 language:2 language:3 stamps:0 stamps:1 soldOut:0 soldOut:1 views:0 views:1",
+            )}
+          >
+            {host}
+          </span>
+        </p>
+        {plane.channel.map((tag) => (
+          <span class="wire-tag" style={tag.style} {...on(tag.key)}>
+            {tag.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>

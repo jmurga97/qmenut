@@ -7,7 +7,8 @@
     "test": "bun run reset && bash scripts/run-tests.sh",
     "test:ui": "bun run reset && bash scripts/run-tests.sh --ui",
     "reset": "bash scripts/reset-local-state.sh",
-    "cleanup": "bun run --cwd ../apps/api db:cleanup:e2e"
+    "cleanup": "bun run --cwd ../apps/api db:cleanup:e2e",
+    "showcase:capture": "bun scripts/capture-showcase.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",

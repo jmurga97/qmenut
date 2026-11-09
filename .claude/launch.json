@@ -9,6 +9,20 @@
       "autoPort": true
     },
     {
+      "name": "web-showcase",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=.dev.qmenut.app",
+        "PORT=5183",
+        "bun",
+        "run",
+        "--cwd",
+        "apps/web",
+        "dev"
+      ],
+      "port": 5183
+    },
+    {
       "name": "api",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "--cwd", "apps/api", "dev"],

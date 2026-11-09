@@ -11,9 +11,32 @@
   "observability": {
     "enabled": true,
   },
+  // The Venezuelan rate animation reads today's BCV rate. Named environments do not inherit services either.
+  "services": [
+    {
+      "binding": "EXCHANGE_RATE_WORKER",
+      "service": "ming-exchange-rate-worker",
+      "entrypoint": "ExchangeRateRpc",
+    },
+  ],
   // Wrangler named environments do not inherit assets or observability. Keep the name
   // unchanged so the apex/www custom domains remain attached to qmenut-landing.
   "env": {
+    "development": {
+      "name": "qmenut-landing-dev",
+      "workers_dev": false,
+      "routes": [{ "pattern": "landing.dev.qmenut.app", "custom_domain": true }],
+      "assets": { "binding": "ASSETS", "directory": "./dist" },
+      "observability": { "enabled": true },
+      "services": [
+        {
+          "binding": "EXCHANGE_RATE_WORKER",
+          "service": "ming-exchange-rate-worker",
+          "entrypoint": "ExchangeRateRpc",
+          "remote": true,
+        },
+      ],
+    },
     "production": {
       "name": "qmenut-landing",
       "assets": {
@@ -23,6 +46,14 @@
       "observability": {
         "enabled": true,
       },
+      "services": [
+        {
+          "binding": "EXCHANGE_RATE_WORKER",
+          "service": "ming-exchange-rate-worker",
+          "entrypoint": "ExchangeRateRpc",
+          "remote": true,
+        },
+      ],
     },
   },
 }

@@ -1,0 +1,1226 @@
+@import "@qmenut/ui/fonts/yeseva-one.css";
+
+/* Tilt of a model into isometric view and the lift of each sheet: 0 is the flat wireframe of the first view. */
+@property --tilt {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --lift {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@layer landing {
+  .print-hero {
+    padding-block: var(--ming-space-7) var(--landing-section);
+    overflow-x: clip;
+  }
+  .print-hero-sticky {
+    display: grid;
+    gap: var(--ming-space-7);
+    align-items: center;
+  }
+  .print-hero-copy {
+    display: grid;
+    gap: var(--ming-space-6);
+  }
+  .print-hero-copy h1 {
+    font-size: clamp(2.75rem, 5.5vw, 5rem);
+    max-width: 13ch;
+  }
+  .print-hero-copy .hero-subtitle {
+    max-width: 30ch;
+  }
+
+  /* Hero: the menu drawn as its components, then taken apart one sheet at a time. */
+  .wire {
+    --tilt: 1;
+    --plane-w: min(11.5rem, 44vw);
+    --gap: calc(var(--plane-w) * 0.15);
+    --ink: color-mix(in srgb, var(--foreground) 45%, transparent);
+    display: grid;
+    place-items: center;
+    height: calc(var(--plane-w) * 2.15);
+    perspective: 2600px;
+  }
+  /* Without scroll timelines the hero shows the model already taken apart. */
+  @supports not (animation-timeline: view()) {
+    .wire {
+      --lift: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wire {
+      --lift: 1;
+    }
+  }
+  .wire-model {
+    position: relative;
+    width: var(--plane-w);
+    aspect-ratio: 390 / 700;
+    transform-style: preserve-3d;
+    transform: translate(calc(var(--tilt) * -4%), calc(var(--tilt) * 22%)) rotateX(calc(var(--tilt) * 56deg))
+      rotateZ(calc(var(--tilt) * -36deg));
+  }
+  .wire-layer {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: translateZ(calc((var(--from) + var(--lift) * (var(--z) - var(--from))) * var(--gap)));
+  }
+  .wire-page {
+    border: 1px solid var(--ink);
+    background: var(--card);
+  }
+  /* Each lifted component keeps the outline of the page it came from. */
+  .wire-layer:not(.wire-page, .wire-layer--card)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px dashed color-mix(in srgb, var(--foreground) 22%, transparent);
+    opacity: var(--lift);
+  }
+  .wire-block {
+    position: absolute;
+    inset: 0;
+  }
+  .wire-block[style],
+  .wire-model i {
+    position: absolute;
+    inset: auto;
+    left: var(--x);
+    top: var(--y);
+    width: var(--w);
+    height: var(--h);
+  }
+  /* The dish card opens out of the first dish row. */
+  .wire-layer--card .wire-block {
+    transform-origin: 0 0;
+    translate: calc((1 - var(--lift)) * -31%) calc((1 - var(--lift)) * 65.4%);
+    scale: calc(1 + (1 - var(--lift)) * 0.107) calc(0.212 + var(--lift) * 0.788);
+    opacity: calc(var(--lift) * 3 - 0.2);
+  }
+  .w-box,
+  .w-photo {
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: var(--card);
+  }
+  .w-photo {
+    background:
+      linear-gradient(to top right, transparent calc(50% - 0.5px), var(--ink) 50%, transparent calc(50% + 0.5px)),
+      linear-gradient(to bottom right, transparent calc(50% - 0.5px), var(--ink) 50%, transparent calc(50% + 0.5px)),
+      var(--card);
+  }
+  .w-line {
+    border-radius: 1px;
+    background: color-mix(in srgb, var(--foreground) 16%, transparent);
+  }
+
+  /*
+   * A tag stands up from a point on its sheet and faces the reader whatever the tilt: the inverse of the
+   * model's rotation. It names what the copy beside it is talking about.
+   */
+  .wire-tag {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    display: block;
+    width: max-content;
+    max-width: 15ch;
+    padding: 0 0.3rem var(--stem, 1.4rem) 0.5rem;
+    border-inline-start: 1px solid var(--foreground);
+    /* Paper behind the words only, so a tag reads over the capture it stands on. */
+    background: linear-gradient(var(--background), var(--background)) no-repeat 0 0 / 100%
+      calc(100% - var(--stem, 1.4rem));
+    color: var(--foreground);
+    font: 500 0.6875rem/1.3 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    transform-origin: 0 0;
+    transform: rotateZ(calc(var(--tilt) * 36deg)) rotateX(calc(var(--tilt) * -56deg))
+      translate3d(0, -100%, calc(var(--tilt) * 3rem));
+    transition: opacity 0.4s var(--ease, ease);
+  }
+  .wire-tag::after {
+    content: "";
+    position: absolute;
+    left: calc(var(--ming-dot) / -2 - 0.5px);
+    bottom: calc(var(--ming-dot) / -2);
+    width: var(--ming-dot);
+    height: var(--ming-dot);
+    border-radius: var(--ming-radius-pill);
+    background: var(--ming-signal);
+  }
+  /* Admin tags stand taller so their words clear the card they name. */
+  .plane--admin .wire-tag {
+    --stem: 3.2rem;
+  }
+  .wire .wire-tag {
+    opacity: calc(var(--lift) * 2 - 1);
+  }
+}
+
+/* Ming exceptions (docs/design/landing-animations.md): flat planes and native scroll timelines. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @layer landing {
+      .print-hero {
+        height: 190svh;
+        padding: 0;
+        view-timeline-name: --print;
+      }
+      .print-hero-sticky {
+        position: sticky;
+        top: var(--landing-nav-height);
+        min-height: calc(100svh - var(--landing-nav-height));
+      }
+      /* The first few pixels of scroll already lift the header; one sheet follows another. */
+      .wire-layer:not(.wire-page) {
+        animation: wire-lift cubic-bezier(0.33, 1, 0.68, 1) both;
+        animation-timeline: --print;
+        animation-range: contain calc(var(--at) * 8%) contain calc(var(--at) * 8% + 26%);
+      }
+      /* The wireframe hands over to the story: it fades and settles back as the printed stack rises below. */
+      .wire {
+        animation: wire-exit linear both;
+        animation-timeline: --print;
+        animation-range: exit 0% exit 40%;
+      }
+    }
+  }
+}
+@media (min-width: 64rem) {
+  @layer landing {
+    .print-hero-sticky {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      gap: var(--ming-space-7);
+    }
+    .wire {
+      --plane-w: min(15rem, (100svh - 13rem) / 2.15);
+    }
+  }
+}
+@media (max-width: 63.999rem) {
+  @layer landing {
+    .print-hero-sticky {
+      gap: var(--ming-space-4);
+      padding-block: var(--ming-space-5);
+    }
+    .print-hero-copy h1 {
+      max-width: 18ch;
+      font-size: clamp(2.25rem, 7vw, 3.5rem);
+    }
+    .print-hero-copy .hero-subtitle {
+      font-size: 1rem;
+      max-width: 40ch;
+    }
+    .print-hero-copy {
+      gap: var(--ming-space-4);
+    }
+    .print-hero-copy .actions {
+      gap: var(--ming-space-3);
+    }
+    .print-hero-copy .button {
+      font-size: 0.6875rem;
+      padding-inline: var(--ming-space-3);
+    }
+    /* The button takes its own row, so both links share the next one instead of one falling alone. */
+    .print-hero-copy .actions .button {
+      flex-basis: 100%;
+    }
+    .wire-tag {
+      --stem: 1rem;
+      font-size: 0.625rem;
+    }
+    /* The tilted stack leans right; on a phone, pull it back so the dish rows stay inside the gutter. */
+    .stack.stack--inline {
+      --shift: 10%;
+    }
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (max-width: 63.999rem) and (prefers-reduced-motion: no-preference) {
+    @layer landing {
+      .print-hero-sticky {
+        position: static;
+        display: block;
+        height: 100%;
+        min-height: 0;
+      }
+      .print-hero-copy {
+        margin-block-end: var(--ming-space-7);
+      }
+      .wire {
+        position: sticky;
+        top: calc((100svh + var(--landing-nav-height) - var(--plane-w) * 2.15) / 2);
+      }
+    }
+  }
+}
+@keyframes wire-lift {
+  from {
+    --lift: 0;
+  }
+  to {
+    --lift: 1;
+  }
+}
+@keyframes wire-exit {
+  to {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+
+/*
+ * Layer stack: the menu taken apart into flat sheets (admin, carta, brand, domain) in
+ * isometric perspective. Wireframes first, then the real 2x captures print in, plane by plane.
+ */
+@property --build {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+@layer landing {
+  .stack {
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --tilt: var(--build);
+    --plane-w: min(9.5rem, 40vw);
+    --shift: 34%;
+    --gap: calc(var(--plane-w) * (0.12 + var(--build) * 0.14));
+    display: grid;
+    justify-items: center;
+    margin: 0;
+  }
+  .stack-scene {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: calc(var(--plane-w) * 1.8);
+    perspective: 2600px;
+  }
+  .stack-model {
+    position: relative;
+    width: var(--plane-w);
+    aspect-ratio: 390 / 700;
+    transform-style: preserve-3d;
+    transform: translate(calc(var(--tilt) * var(--shift)), calc(var(--tilt) * 6%)) rotateX(calc(var(--tilt) * 56deg))
+      rotateZ(calc(var(--tilt) * -36deg));
+  }
+  .plane {
+    /* Print progress of this sheet: they print in one after another, top of the page first. */
+    --p: clamp(0, (var(--build) - var(--i) * 0.065) / 0.35, 1);
+    --reveal: calc(var(--p) * 100%);
+    position: absolute;
+    inset: 0;
+    font-size: calc(var(--plane-w) / 22);
+    transform-style: preserve-3d;
+    transform: translateZ(calc((var(--z) + var(--lift, 0)) * var(--gap))) scale(var(--scale, 1));
+    transition:
+      transform 600ms var(--ease),
+      opacity 300ms var(--ease);
+  }
+  /* The wireframe: a hairline sheet with its baseline grid, visible before the fill prints. */
+  .plane::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid color-mix(in srgb, var(--foreground) 35%, transparent);
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 calc(1.75em - 1px),
+      color-mix(in srgb, var(--foreground) 9%, transparent) calc(1.75em - 1px) 1.75em
+    );
+    opacity: calc(1 - var(--build) * 0.55);
+  }
+  .plane img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    mask: linear-gradient(to bottom, #000 var(--reveal), transparent var(--reveal));
+    transition: opacity 300ms var(--ease);
+  }
+  .stack [data-for]:not([data-on]) {
+    opacity: 0;
+  }
+  /*
+   * A component sheet: its outline is the hero's wireframe until the capture prints into it. Every painted box
+   * is cut to its band (% of the capture), never the whole page: Chrome drops full-page planes that a riser crosses.
+   */
+  .plane--slice::before {
+    inset: calc(var(--t) * 1%) 0 calc(100% - var(--b) * 1%);
+    background: none;
+    opacity: calc(1 - var(--p));
+  }
+  .cut {
+    position: absolute;
+    inset-inline: 0;
+    top: calc(var(--t) * 1%);
+    height: calc((var(--b) - var(--t)) * 1%);
+    overflow: hidden;
+    clip-path: inset(0 0 calc((1 - var(--p)) * 100%) 0);
+    transition: opacity 300ms var(--ease);
+  }
+  .plane .cut img {
+    inset: auto 0;
+    top: calc(var(--t) / (var(--b) - var(--t)) * -100%);
+    height: calc(10000% / (var(--b) - var(--t)));
+    mask: none;
+  }
+  .plane-label {
+    position: absolute;
+    left: 100%;
+    top: calc(var(--t) * 1%);
+    padding-inline-start: 0.6em;
+    color: var(--foreground);
+    font: 500 0.6875rem/1.3 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transform-origin: 0 0;
+    transform: rotateZ(calc(var(--tilt) * 36deg)) rotateX(calc(var(--tilt) * -56deg));
+    opacity: calc(1 - var(--p) * 1.6);
+  }
+  .plane--stamps img {
+    clip-path: inset(var(--card));
+  }
+  /* The dish card slides up out of the menu, the way it opens on the phone. */
+  .plane--dish .cut {
+    translate: 0 30%;
+    transition: translate 600ms var(--ease);
+  }
+  .plane--dish[data-on] .cut {
+    translate: 0;
+  }
+  :is(.plane--stamps, .plane--home, .plane--dish)::before {
+    display: none;
+  }
+
+  /* Channel: the address bar, the only part of the web the restaurant names itself. */
+  .channel-bar {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: -9%;
+    display: grid;
+    padding: 0.7em 0.9em;
+    border: 1px solid var(--foreground);
+    border-radius: var(--radius);
+    background: var(--card);
+    color: var(--foreground);
+    font: 500 0.95em/1 var(--font-mono);
+    mask: linear-gradient(to bottom, #000 var(--reveal), transparent var(--reveal));
+  }
+  .channel-bar > span {
+    grid-area: 1 / 1;
+    transition: opacity 0.4s var(--ease);
+  }
+  .channel-bar > [data-for="domain:1"] {
+    justify-self: start;
+  }
+  .channel-bar > [data-for="domain:1"][data-on] {
+    animation: type-in 600ms steps(var(--chars, 19), end) both;
+  }
+
+  /* Admin: the owner's panel lies beside the menu, joined to the dish it changes. */
+  .admin-card {
+    position: absolute;
+    inset-inline-start: -86%;
+    width: 72%;
+    display: grid;
+    gap: 0.5em;
+    padding: 0.9em 1em;
+    border: 1px solid var(--foreground);
+    border-radius: var(--radius);
+    background: var(--card);
+    color: var(--foreground);
+    font-size: 1em;
+    line-height: 1.3;
+    transform-style: preserve-3d;
+    transition:
+      opacity 300ms var(--ease),
+      transform 600ms var(--ease);
+  }
+  .admin-title {
+    font: 500 0.8em/1.3 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .admin-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75em;
+    padding-block-start: 0.5em;
+    border-block-start: 1px solid var(--border);
+  }
+  .admin-value {
+    display: grid;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .admin-value > span {
+    grid-area: 1 / 1;
+    justify-self: end;
+    transition: opacity 0.4s var(--ease);
+  }
+  /*
+   * Rate: one two-second flow. The old rate is struck (0–0.4s), the new one, 10% higher, arrives (0.4–0.8s),
+   * the hairlines pulse to the dishes (0.8–1.2s) and the dish's bolívar price turns over (1.2–1.5s).
+   * Without the controller (reduced motion, no scroll timelines) the stack shows where the flow ends.
+   */
+  .admin-rate {
+    display: flex;
+    gap: 0.9em;
+  }
+  /* The old rate steps back, so at phone size the struck figure never reads as a bar beside the new one. */
+  .admin-rate s {
+    position: relative;
+    color: var(--muted-foreground);
+    text-decoration: none;
+  }
+  .admin-rate s::after {
+    content: "";
+    position: absolute;
+    inset-inline: -0.1em;
+    top: 50%;
+    border-block-start: 1px solid currentColor;
+    transform-origin: left;
+  }
+  /* The bolívar line baked into the capture, covered with the capture's own paper and repriced live. */
+  .ves {
+    position: absolute;
+    left: calc(12.2% - 0.25em);
+    top: var(--y);
+    translate: 0 -50%;
+    display: grid;
+    padding: 0.2em 0.6em 0.2em 0.25em;
+    background: #f1e7d4;
+    color: #382e1a;
+    font:
+      400 0.79em/1 Spectral,
+      Georgia,
+      serif;
+    white-space: nowrap;
+  }
+  .ves > span {
+    grid-area: 1 / 1;
+  }
+  .ves > span:first-child {
+    opacity: 0;
+  }
+  /* Waiting for the reader: the flow's first frame. */
+  .stack[data-motion]:not([data-live]) .admin-rate s::after {
+    scale: 0 1;
+  }
+  .stack[data-motion]:not([data-live]) .admin-rate > span,
+  .stack[data-motion]:not([data-live]) .ves > span:last-child {
+    opacity: 0;
+  }
+  .stack[data-motion]:not([data-live]) .ves > span:first-child {
+    opacity: 1;
+  }
+
+  .stack[data-motion][data-live][data-step="rate:1"] .admin-rate s::after {
+    animation: rate-strike 400ms var(--ease) both;
+  }
+  .stack[data-motion][data-live][data-step="rate:1"] .admin-rate > span {
+    animation: rate-arrive 400ms 400ms var(--ease) both;
+  }
+  .stack[data-motion][data-live][data-step="rate:1"] .wire-link::before {
+    animation: link-pulse 400ms 800ms var(--ease) both;
+  }
+  .stack[data-motion][data-live][data-step="rate:1"] .ves > span:first-child {
+    animation: price-leave 300ms 1200ms var(--ease) both;
+  }
+  .stack[data-motion][data-live][data-step="rate:1"] .ves > span:last-child {
+    animation: price-arrive 300ms 1200ms var(--ease) both;
+  }
+
+  .admin-wire {
+    flex: 1;
+    height: 0.55em;
+    border-radius: var(--ming-radius-pill);
+    background: var(--muted);
+  }
+  .admin-switch {
+    position: relative;
+    flex: none;
+    width: 2.4em;
+    height: 1.3em;
+    border: 1px solid var(--foreground);
+    border-radius: var(--ming-radius-pill);
+    background: var(--foreground);
+  }
+  .admin-switch::after {
+    content: "";
+    position: absolute;
+    inset-block: 0.15em;
+    inset-inline-start: 1.25em;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--card);
+  }
+  .admin-card[data-on] .admin-switch {
+    animation: switch-off 250ms 300ms var(--ease) both;
+  }
+  .admin-card[data-on] .admin-switch::after {
+    animation: knob-off 250ms 300ms var(--ease) both;
+  }
+  /* A hairline along the admin sheet, then a riser up to the dish on the carta sheet. */
+  .wire-link {
+    position: absolute;
+    inset-inline-start: -14%;
+    inset-block-start: var(--y);
+    width: calc(var(--x) + 14%);
+    border-block-start: 1px solid var(--foreground);
+    transform-style: preserve-3d;
+    transition: opacity 300ms var(--ease);
+  }
+  .wire-link::after {
+    content: "";
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-start: -1px;
+    width: 1px;
+    height: calc(var(--gap) * var(--rz, 1));
+    background: var(--foreground);
+    transform-origin: top;
+    transform: rotateX(90deg);
+  }
+  .wire-link::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: -0.25em;
+    inset-block-start: -0.3em;
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: 50%;
+    background: var(--ming-signal);
+  }
+  .wire-link[data-on] {
+    transition-delay: 300ms;
+  }
+
+  /* Loyalty: a registration ring presses onto the newest stamp, then the card docks home. */
+  .stamp-press {
+    position: absolute;
+    inset-inline-start: var(--stamp-x);
+    inset-block-start: var(--stamp-y);
+    width: 2.6em;
+    aspect-ratio: 1;
+    border: 1px solid var(--ming-signal);
+    border-radius: 50%;
+    translate: -50% -50%;
+    opacity: 0;
+  }
+  .stamp-press::before,
+  .stamp-press::after {
+    content: "";
+    position: absolute;
+    background: var(--ming-signal);
+  }
+  .stamp-press::before {
+    inset-inline: -40%;
+    inset-block-start: 50%;
+    height: 1px;
+  }
+  .stamp-press::after {
+    inset-block: -40%;
+    inset-inline-start: 50%;
+    width: 1px;
+  }
+  .stack[data-step="stamps:0"] .stamp-press {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .stack[data-step="stamps:0"] .stamp-press {
+      animation: stamp-press 700ms 200ms var(--ease) both;
+    }
+  }
+  .home-tiles {
+    position: absolute;
+    inset: 14% 10% 34%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-content: start;
+    gap: 1.2em;
+  }
+  .home-tiles i {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border: 1px solid color-mix(in srgb, var(--foreground) 35%, transparent);
+    border-radius: 24%;
+  }
+  .home-tiles i[data-tenant] {
+    border-color: var(--foreground);
+    background: var(--foreground);
+  }
+  .home-tiles i[data-tenant]::after {
+    content: attr(data-tenant);
+    color: var(--background);
+    font:
+      400 2.2em/1 "Yeseva One",
+      serif;
+  }
+
+  /* ---- Choreography: each feature lifts the component it talks about ------------- */
+  .stack[data-step^="domain"] .plane--channel {
+    --lift: 0.9;
+  }
+  .stack[data-step="domain:0"] :is([data-part="featured"], [data-part="row"]) {
+    --lift: 0.3;
+  }
+  .stack[data-step="domain:1"] [data-part="header"] {
+    --lift: 0.3;
+  }
+  .stack[data-step="domain:1"] :is([data-part="row"], [data-part="section"]) {
+    opacity: 0.4;
+  }
+  .stack[data-step^="language"] .plane--channel {
+    opacity: 0.4;
+  }
+  .stack:is([data-step="language:0"], [data-step="language:1"]) [data-part="header"],
+  .stack[data-step="language:2"] [data-part="tabs"],
+  .stack[data-step="language:3"] [data-part="row"] {
+    --lift: 0.35;
+  }
+  /* Steps with hairlines from the admin keep the dish rows still, so the risers land on them. */
+  .stack:is([data-step^="rate"], [data-step="soldOut:0"], [data-step^="views"])
+    :is([data-part="header"], [data-part="tabs"], [data-part="section"], .plane--channel) {
+    opacity: 0.3;
+  }
+  /* Team: the exploded menu settles back into one page, just above the admin sheet. */
+  .stack[data-step="soldOut:1"] :is(.plane--slice, .plane--channel) {
+    --lift: calc(0.15 - var(--z));
+  }
+  .stack[data-step^="stamps"] :is(.plane--slice, .plane--channel, .plane--admin) {
+    opacity: 0.35;
+  }
+  .stack[data-step="stamps:0"] .plane--stamps {
+    --lift: 0.6;
+  }
+  .stack[data-step="stamps:1"] .plane--stamps {
+    --scale: 0.18;
+    transform-origin: 40% 31%;
+    opacity: 0;
+    transition:
+      transform 600ms var(--ease),
+      opacity 200ms 500ms var(--ease);
+  }
+  .stack[data-step="views:1"] .admin-views {
+    transform: translateZ(calc(var(--gap) * 3.2)) translateY(-30%);
+  }
+
+  /* ---- Story layout --------------------------------------------------------------- */
+  .story-section {
+    padding-block: var(--landing-section);
+    border-block-start: 1px solid var(--border);
+  }
+  .story-features {
+    display: grid;
+    gap: var(--ming-space-6);
+    margin-block: var(--ming-space-6) 0;
+    padding: 0;
+    list-style: none;
+  }
+  .story-features li {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: var(--ming-space-2);
+  }
+  .story-feature {
+    display: grid;
+    justify-items: start;
+    gap: inherit;
+  }
+  .story-features p {
+    color: var(--muted-foreground);
+    max-width: 42ch;
+    text-wrap: pretty;
+  }
+  /* Headroom for the tags, which stand above their sheet. */
+  .story-inline {
+    margin-block-start: var(--ming-space-6);
+    padding-block-start: calc(var(--ming-space-7) * 1.5);
+    overflow-x: clip;
+  }
+  .story-stage {
+    display: none;
+  }
+
+  /* ---- Templates: a contact sheet of five real menus ------------------------------ */
+  .contact-sheet {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(72%, 16rem);
+    gap: var(--ming-space-5);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin: var(--ming-space-6) calc(-1 * var(--landing-gutter)) 0;
+    padding: var(--ming-space-4) var(--landing-gutter);
+    scroll-padding-inline: var(--landing-gutter);
+    list-style: none;
+  }
+  .contact-sheet li {
+    scroll-snap-align: start;
+  }
+  .contact-card {
+    display: grid;
+    gap: var(--ming-space-3);
+    color: var(--foreground);
+    text-decoration: none;
+  }
+  .contact-plane {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--input);
+    border-radius: var(--radius);
+    background: var(--card);
+    transition:
+      transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.3s;
+  }
+  .contact-plane img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .contact-caption {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--ming-space-3);
+    font: 500 0.6875rem/1.4 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .contact-explore {
+    flex: none;
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+  .contact-card:is(:hover, :focus-visible) .contact-plane {
+    border-color: var(--foreground);
+  }
+
+  .demo-dialog {
+    width: min(26rem, 100vw - 2rem);
+    height: min(48rem, 100svh - 2rem);
+    padding: 0;
+    border: 1px solid var(--foreground);
+    border-radius: var(--radius);
+    background: var(--card);
+    color: var(--foreground);
+    opacity: 0;
+    transition:
+      opacity 150ms ease-out,
+      scale 150ms ease-out,
+      overlay 150ms allow-discrete,
+      display 150ms allow-discrete;
+  }
+  .demo-dialog[open] {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    opacity: 1;
+    transition:
+      opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      scale 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      overlay 200ms allow-discrete,
+      display 200ms allow-discrete;
+  }
+  @starting-style {
+    .demo-dialog[open] {
+      opacity: 0;
+    }
+  }
+  .demo-dialog::backdrop {
+    background: color-mix(in srgb, var(--foreground) 60%, transparent);
+    opacity: 0;
+    transition:
+      opacity 150ms ease-out,
+      overlay 150ms allow-discrete,
+      display 150ms allow-discrete;
+  }
+  .demo-dialog[open]::backdrop {
+    opacity: 1;
+  }
+  @starting-style {
+    .demo-dialog[open]::backdrop {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .demo-dialog {
+      scale: 0.96;
+    }
+    .demo-dialog[open] {
+      scale: 1;
+    }
+    @starting-style {
+      .demo-dialog[open] {
+        scale: 0.96;
+      }
+    }
+  }
+  .demo-dialog-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--ming-space-3) var(--ming-space-4);
+    border-block-end: 1px solid var(--border);
+  }
+  .demo-dialog-note {
+    margin: 0;
+    padding: var(--ming-space-2) var(--ming-space-4);
+    border-block-end: 1px solid var(--border);
+    font-size: 0.75rem;
+  }
+  .demo-dialog-bar button {
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .demo-dialog-screen {
+    position: relative;
+    overflow: hidden;
+  }
+  .demo-dialog-screen > * {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    object-fit: cover;
+    object-position: top;
+  }
+  .demo-dialog iframe {
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .demo-dialog[data-ready] iframe {
+    opacity: 1;
+  }
+  /* A neutral menu outline while the demo loads; every template paints its own colours over it. */
+  .demo-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ming-space-3);
+    padding: var(--ming-space-5) var(--ming-space-4);
+  }
+  .demo-skeleton i {
+    flex: none;
+    width: var(--w, 100%);
+    height: var(--h, 0.9em);
+    border-radius: var(--radius);
+    background: var(--muted);
+  }
+  .demo-skeleton-tabs,
+  .demo-skeleton-row {
+    display: flex;
+    gap: var(--ming-space-3);
+    margin-block-start: var(--ming-space-3);
+  }
+  .demo-skeleton-tabs i {
+    flex: 1;
+    height: 2.4em;
+  }
+  .demo-skeleton-row > i {
+    width: 4.5em;
+    height: 4.5em;
+  }
+  .demo-skeleton-row > span {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--ming-space-2);
+    padding-block-start: var(--ming-space-2);
+  }
+  .demo-dialog[data-ready] .demo-skeleton {
+    visibility: hidden;
+    transition: visibility 0s 0.4s;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .demo-skeleton i {
+      animation: skeleton-pulse 1.2s ease-in-out infinite alternate;
+    }
+  }
+
+  .mobile-cta {
+    display: none;
+  }
+}
+
+@media (min-width: 64rem) {
+  @layer landing {
+    .story-features {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--ming-space-7);
+    }
+    .story-templates .story-features {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .contact-sheet {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      overflow: visible;
+      margin-inline: 0;
+      padding: var(--ming-space-7) 0 var(--ming-space-4);
+      perspective: 2400px;
+    }
+    /* Laid flat on the table like a contact sheet; the one you point at stands up. */
+    .contact-plane {
+      transform: translateY(0) rotateX(48deg) rotateZ(-24deg) scale(0.92);
+    }
+    .contact-card:focus-visible .contact-plane {
+      transform: translateY(-4%) rotateX(0deg) rotateZ(0deg) scale(1);
+      transition-duration: 450ms, 0.3s;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .contact-card:hover .contact-plane {
+        transform: translateY(-4%) rotateX(0deg) rotateZ(0deg) scale(1);
+        transition-duration: 450ms, 0.3s;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .contact-card:is(:hover, :focus-visible) .contact-plane {
+        transform: translateY(0) rotateX(48deg) rotateZ(-24deg) scale(0.92);
+      }
+    }
+    /* The tilted sheet is shorter than its box; the caption sits under what you see. */
+    .contact-caption {
+      flex-direction: column;
+      margin-block-start: -3.5rem;
+    }
+    .stack {
+      --plane-w: 12rem;
+      --shift: 18%;
+    }
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @layer landing {
+      main {
+        timeline-scope: --print;
+      }
+      .stack--inline {
+        animation: stack-build linear both;
+        animation-timeline: view();
+        animation-range: entry 30% cover 55%;
+      }
+    }
+  }
+  @media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+    @layer landing {
+      .story-block {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+        gap: var(--ming-space-7);
+      }
+      /* The copy steps, the stack scrubs: each feature holds still on the reading line while its track
+         scrolls past, then the next one takes its place. The page itself scrolls freely. */
+      .story-block .story-section > h2 {
+        position: sticky;
+        top: calc(var(--landing-nav-height) + var(--ming-space-6));
+      }
+      .story-block .story-features {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 0;
+      }
+      .story-block .story-features li {
+        min-height: 60svh;
+        view-timeline-name: --feature;
+      }
+      /* When its 60svh track runs out the feature is pushed up toward the pinned title: it fades on the way.
+         filter, not opacity, so the active/inactive opacity transition keeps working underneath. */
+      .story-block .story-feature {
+        position: sticky;
+        top: 45svh;
+        animation: feature-leave linear both;
+        animation-timeline: --feature;
+        animation-range: cover 104svh cover 114svh;
+        /* Entering: waits for the outgoing feature to clear. */
+        transition:
+          opacity 300ms cubic-bezier(0.16, 1, 0.3, 1) 60ms,
+          translate 300ms cubic-bezier(0.16, 1, 0.3, 1) 60ms;
+      }
+      /* Not reached yet: hidden just below, so the next feature rises into place. Leaving is quick. */
+      .story-block:has([data-active]) .story-features li:not([data-active]) .story-feature {
+        opacity: 0;
+        translate: 0 0.75rem;
+        transition:
+          opacity 150ms cubic-bezier(0.16, 1, 0.3, 1),
+          translate 150ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      /* Already read: leaves upward, with the scroll. */
+      .story-block:has([data-active]) .story-features li:has(~ li[data-active]) .story-feature,
+      .story-block:has([data-active]) .story-section:has(~ .story-section li[data-active]) .story-feature {
+        translate: 0 -0.5rem;
+      }
+      .story-block .story-features li[data-active] .story-feature::before {
+        content: "";
+        position: absolute;
+        top: 0.55em;
+        left: calc(-1 * var(--ming-space-5));
+        width: var(--ming-dot);
+        height: var(--ming-dot);
+        border-radius: var(--ming-radius-pill);
+        background: var(--ming-signal);
+      }
+      .story-inline {
+        display: none;
+      }
+      .story-stage {
+        display: block;
+        border-block-start: 1px solid var(--border);
+      }
+      .story-stage-sticky {
+        position: sticky;
+        top: var(--landing-nav-height);
+        display: grid;
+        place-items: center;
+        height: calc(100svh - var(--landing-nav-height));
+      }
+      /* Already standing at the hero's angle: the sheets print in place of its wireframe. */
+      /* The story prints the hero's components into real captures as it scrolls in. */
+      .story-block {
+        view-timeline-name: --story;
+      }
+      .story-stage .stack {
+        --tilt: 1;
+        --plane-w: min(17rem, (100svh - 11rem) / 2);
+        animation: stack-build linear both;
+        animation-timeline: --story;
+        animation-range: entry 10% entry 90%;
+      }
+    }
+  }
+  @media (max-width: 63.999rem) and (prefers-reduced-motion: no-preference) {
+    @layer landing {
+      main {
+        padding-block-end: 4.5rem;
+      }
+      .mobile-cta {
+        position: fixed;
+        inset-inline: 0;
+        inset-block-end: 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--ming-space-4);
+        padding: var(--ming-space-3) var(--landing-gutter) max(var(--ming-space-3), env(safe-area-inset-bottom));
+        border-block-start: 1px solid var(--border);
+        background: var(--background);
+        animation: cta-in linear both;
+        animation-timeline: --print;
+        animation-range: exit 40% exit 80%;
+      }
+    }
+  }
+}
+
+@keyframes feature-leave {
+  to {
+    filter: opacity(0);
+  }
+}
+@keyframes stack-build {
+  from {
+    --build: 0;
+  }
+  to {
+    --build: 1;
+  }
+}
+@keyframes type-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+@keyframes switch-off {
+  to {
+    background: var(--card);
+  }
+}
+@keyframes knob-off {
+  to {
+    translate: -1.1em 0;
+    background: var(--foreground);
+  }
+}
+@keyframes stamp-press {
+  0% {
+    opacity: 0;
+    scale: 2.4;
+  }
+  45% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes cta-in {
+  from {
+    opacity: 0;
+    translate: 0 100%;
+    visibility: hidden;
+  }
+  to {
+    opacity: 1;
+    translate: 0;
+    visibility: visible;
+  }
+}
+@keyframes skeleton-pulse {
+  to {
+    opacity: 0.45;
+  }
+}
+@keyframes link-pulse {
+  50% {
+    scale: 1.8;
+  }
+}
+@keyframes rate-strike {
+  from {
+    scale: 0 1;
+  }
+}
+@keyframes rate-arrive {
+  from {
+    opacity: 0;
+    translate: 0.4em 0;
+  }
+}
+@keyframes price-leave {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    translate: 0 -0.5em;
+  }
+}
+@keyframes price-arrive {
+  from {
+    opacity: 0;
+    translate: 0 0.5em;
+  }
+}

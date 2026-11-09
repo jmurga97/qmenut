@@ -1,15 +1,19 @@
+import type { ShowcaseStage, ShowcaseStep } from "@qmenut/ui/theme/showcase";
+
 export type MarketId = "es" | "ve";
-// The optional third item tags a feature that only Business includes.
-type Feature = [title: string, body: string, plan?: "Business"];
+type Feature = [title: string, body: string];
 type Cell = "yes" | "no";
 type Market = {
   country: string;
   currency: "EUR" | "USD";
   noun: string;
+  // Says what Qmenut is before the hero sells it; also the page title.
+  eyebrow: string;
   hero: string;
   subtitle: string;
   description: string;
-  sections: { title: string; features: Feature[] }[];
+  // `steps` lets one section play steps from more than one stage, one per feature.
+  sections: { title: string; stage?: ShowcaseStage; steps?: ShowcaseStep[]; features: Feature[] }[];
   delivery: { title: string; body: string };
   whatsapp: { contact: string; waitlist: string };
   plans: { name: string; description: string; price: number; highlights: string[] }[];
@@ -22,41 +26,46 @@ const whatsapp = (phone: string, text: string): string => `https://wa.me/${phone
 
 // Copy is written out per market: "la carta" and "el menú" differ in gender, so templated nouns break agreement.
 const languages = {
+  stage: "language",
   title: "Tu carta habla el idioma de quien la abre",
   features: [
     [
       "Habla su idioma",
       "Un turista con el móvil en inglés abre tu carta y la lee en inglés, sin buscar banderitas ni pedir al camarero que traduzca.",
-      "Business",
     ],
     [
       "Lo escribes una vez, en castellano",
       "Cada plato nuevo y cada cambio se traducen solos a los idiomas que elijas. Si una traducción no te convence, la corriges y se queda así.",
-      "Business",
     ],
     [
       "Las lenguas de aquí, también",
       "Ofrece tu carta en catalán, valenciano o gallego a la vez que en castellano, sin mantener dos cartas.",
-      "Business",
     ],
     [
       "Una alergia no se traduce con gestos",
       "Los 14 alérgenos de la normativa europea, con icono y en el idioma de cada cliente. Quien tiene una alergia lo comprueba antes de pedir.",
-      "Business",
     ],
   ],
 } satisfies Market["sections"][number];
 
+// Venezuela's upkeep story in one place: the rate, then sold-out dishes, then who can change them.
 const exchangeRate = {
+  stage: "rate",
+  // One rate step plays the whole change: the new rate, then every dish price.
+  steps: ["rate:1", "soldOut:0", "soldOut:1"],
   title: "Cambia la tasa una vez y todo tu menú se actualiza",
   features: [
     [
-      "Dólares y bolívares",
-      "Mantén tus precios en dólares y muestra su equivalente en bolívares a la tasa que tú decidas.",
+      "Precios en dólares y bolívares, sin recalcular ni reimprimir",
+      "Mantén tus precios en dólares y muestra su equivalente en bolívares a la tasa que tú decidas. Cuando cambia, la actualizas en el panel y cada plato muestra al momento su nuevo precio.",
     ],
     [
-      "Sin recalcular ni reimprimir",
-      "Cuando cambia la tasa, la actualizas en el panel y cada plato muestra al momento su nuevo precio en bolívares.",
+      "¿Se acabó un plato? Diez segundos y listo",
+      "Márcalo como agotado, o cambia un precio o un horario, y se ve al momento en tu menú.",
+    ],
+    [
+      "Tu equipo y tus locales",
+      "Tu encargado actualiza la tasa y marca los agotados sin acceso a la suscripción ni a los ajustes. Y llevas todos tus locales desde un mismo panel.",
     ],
   ],
 } satisfies Market["sections"][number];
@@ -69,17 +78,20 @@ const es: Market = {
   },
   currency: "EUR",
   noun: "carta",
+  eyebrow: "Carta digital y web para restaurantes",
   hero: "Tu carta y tu web, a la altura de lo que sirves",
-  subtitle: "Con tu marca y tu dominio, en el idioma de cada cliente.",
+  subtitle:
+    "Qmenut crea la web de tu restaurante con tu carta siempre al día: con tu marca y tu dominio, en el idioma de cada cliente.",
   description:
-    "Tu carta y tu web con tu marca, tu dominio y en el idioma de cada cliente. Descubre los planes de Qmenut.",
+    "Qmenut es la plataforma para restaurantes que publica tu carta en tu propia web, con tu marca, tu dominio y en el idioma de cada cliente.",
   sections: [
     {
+      stage: "domain",
       title: "Que te encuentren cuando buscan dónde comer",
       features: [
         [
-          "Google lee tu carta",
-          "Google lee tus platos, precios y horarios directamente de tu web, no de una foto ni de un PDF.",
+          "Google y ChatGPT leen tu carta",
+          "Cuando alguien pregunta a Google, ChatGPT o Claude dónde comer, leen tus platos, precios y horarios directamente de tu web, no de una foto ni de un PDF.",
         ],
         [
           "Tu web con tu nombre",
@@ -89,37 +101,36 @@ const es: Market = {
     },
     languages,
     {
+      stage: "templates",
       title: "Que se vea como tu restaurante, no como el de al lado",
       features: [
         ["Menos preguntas en la mesa", "Fotos, variantes, extras y alérgenos en una carta pensada para el móvil."],
         [
           "Tu marca, sin rastro de Qmenut",
           "Cinco estilos base que adaptas a los colores y las tipografías de tu marca.",
-          "Business",
         ],
         [
           "Vende más de lo que más te deja",
           "Destaca tu especialidad, lo nuevo o lo que más margen te deja, y muestra tus promociones.",
-          "Business",
         ],
       ],
     },
     {
+      stage: "stamps",
       title: "Que vuelvan",
       features: [
         [
           "Premia a los que vuelven",
           "Tus clientes acumulan sellos y los canjean por recompensas, sin app ni tarjeta de cartón.",
-          "Business",
         ],
         [
           "En su pantalla de inicio",
           "Guardan tu web en la pantalla de inicio del móvil, sin descargar nada de una tienda.",
-          "Business",
         ],
       ],
     },
     {
+      stage: "soldOut",
       title: "Tu carta al día, sin depender de nadie",
       features: [
         [
@@ -129,19 +140,18 @@ const es: Market = {
         [
           "Tu equipo y tus locales",
           "Tu equipo marca platos agotados sin acceso a la suscripción ni a los ajustes. Y llevas todos tus locales desde un mismo panel.",
-          "Business",
         ],
       ],
     },
     {
+      stage: "views",
       title: "Descubre qué platos miran antes de venir",
       features: [
         [
           "Qué miran y qué hacen",
           "Qué platos se consultan más, en qué idiomas y cuántos tocan para llamar o ver cómo llegar.",
-          "Business",
         ],
-        ["Un resumen en tu correo", "La actividad de tu web llega a tu correo, sin entrar al panel.", "Business"],
+        ["Un resumen en tu correo", "La actividad de tu web llega a tu correo, sin entrar al panel."],
       ],
     },
   ],
@@ -228,18 +238,21 @@ const ve: Market = {
   },
   currency: "USD",
   noun: "menú",
+  eyebrow: "Menú digital y web para restaurantes",
   hero: "Tu menú y tu web, a la altura de lo que sirves",
-  subtitle: "Con tu marca y tu dominio, en dólares y bolívares. Cambias un precio en diez segundos.",
+  subtitle:
+    "Qmenut crea la web de tu restaurante con tu menú siempre al día: con tu marca y tu dominio, en dólares y bolívares. Cambias un precio en diez segundos.",
   description:
-    "Tu menú y tu web con tu marca, tu dominio y precios en dólares y bolívares. Descubre los planes de Qmenut.",
+    "Qmenut es la plataforma para restaurantes que publica tu menú en tu propia web, con tu marca, tu dominio y precios en dólares y bolívares.",
   sections: [
     exchangeRate,
     {
+      stage: "domain",
       title: "Que te encuentren cuando buscan dónde comer",
       features: [
         [
-          "Google lee tu menú",
-          "Google lee tus platos, precios y horarios directamente de tu web, no de una foto ni de un PDF.",
+          "Google y ChatGPT leen tu menú",
+          "Cuando alguien pregunta a Google, ChatGPT o Claude dónde comer, leen tus platos, precios y horarios directamente de tu web, no de una foto ni de un PDF.",
         ],
         [
           "Tu web con tu nombre",
@@ -248,59 +261,40 @@ const ve: Market = {
       ],
     },
     {
+      stage: "templates",
       title: "Que se vea como tu restaurante, no como el de al lado",
       features: [
         ["Menos preguntas en la mesa", "Fotos, variantes, extras y alérgenos en un menú pensado para el celular."],
         [
           "Tu marca, sin rastro de Qmenut",
           "Cinco estilos base que adaptas a los colores y las tipografías de tu marca.",
-          "Business",
         ],
         [
           "Vende más de lo que más te deja",
           "Destaca tu especialidad, lo nuevo o lo que más margen te deja, y muestra tus promociones.",
-          "Business",
         ],
       ],
     },
     {
+      stage: "stamps",
       title: "Que vuelvan",
       features: [
         [
           "Premia a los que vuelven",
           "Tus clientes acumulan sellos y los canjean por recompensas, sin app ni tarjeta de cartón.",
-          "Business",
         ],
         [
           "En su pantalla de inicio",
           "Guardan tu web en la pantalla de inicio del celular, sin descargar nada de una tienda.",
-          "Business",
         ],
       ],
     },
     {
-      title: "¿Cambió un precio? ¿Se acabó un plato? Diez segundos y listo",
-      features: [
-        [
-          "Cambias tú, cuando quieras",
-          "Edita platos, precios y horarios, y marca lo que se agotó. Se ve al momento, sin reimprimir nada.",
-        ],
-        [
-          "Tu equipo y tus locales",
-          "Tu encargado marca platos agotados y actualiza la tasa sin acceso a la suscripción ni a los ajustes. Y llevas todos tus locales desde un mismo panel.",
-          "Business",
-        ],
-      ],
-    },
-    {
+      stage: "views",
       title: "Descubre qué platos miran antes de venir",
       features: [
-        [
-          "Qué miran y qué hacen",
-          "Qué platos se consultan más y cuántos tocan para llamar o ver cómo llegar.",
-          "Business",
-        ],
-        ["Un resumen en tu correo", "La actividad de tu web llega a tu correo, sin entrar al panel.", "Business"],
+        ["Qué miran y qué hacen", "Qué platos se consultan más y cuántos tocan para llamar o ver cómo llegar."],
+        ["Un resumen en tu correo", "La actividad de tu web llega a tu correo, sin entrar al panel."],
       ],
     },
   ],
@@ -381,11 +375,5 @@ export const marketFromRequest = (request: Request): MarketId | undefined => {
   return undefined;
 };
 
-export const demos = [
-  { name: "Alta cocina", href: "https://fine.dev.qmenut.app" },
-  { name: "Cocina tradicional", href: "https://her.dev.qmenut.app" },
-  { name: "Pizzería", href: "https://fast.dev.qmenut.app" },
-  { name: "Cafetería", href: "https://cafe.dev.qmenut.app" },
-  { name: "Bar de tapas", href: "https://tapas.dev.qmenut.app" },
-];
+export { showcaseTenants as demos } from "./showcase";
 export const adminUrl = "https://admin.qmenut.app";

@@ -1,0 +1,136 @@
+---
+import LayerStack from "./layer-stack.astro";
+import { markets } from "../lib/markets";
+import { finalStep, SHOWCASE_STEPS, sectionSteps, showcasePoster, showcaseTenants } from "../lib/showcase";
+import type { MarketId } from "../lib/markets";
+import type { ShowcaseStep } from "../lib/showcase";
+interface Props {
+  market: MarketId;
+  rate?: number;
+}
+const { market, rate } = Astro.props;
+const tenants = showcaseTenants[market];
+const content = markets[market];
+// One stack carries every feature; the templates close the story once the menu is fully built.
+const templates = content.sections.find((section) => section.stage === "templates")!;
+const sections = content.sections.filter((section) => section !== templates);
+// Mobile stacks show the step that carries their section best: English for languages, the new rate.
+const inlineStep = (stage: keyof typeof SHOWCASE_STEPS): ShowcaseStep =>
+  stage === "language" ? "language:1" : stage === "stamps" ? "stamps:0" : finalStep(stage);
+---
+
+<div class="container story-block" data-story-block>
+  <div class="story-copy">
+    {sections.map((section, index) => (
+      <section class="story-section" id={index === 0 ? "funcionalidades" : undefined} data-stage={section.stage}>
+        <h2>{section.title}</h2>
+        <ul class="story-features">
+          {section.features.map(([title, body], featureIndex) => (
+            <li data-step={sectionSteps(section)[featureIndex]}>
+              <div class="story-feature">
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        {section.stage && (
+          <div class="story-inline">
+            <LayerStack market={market} step={inlineStep(section.stage)} rate={rate} inline />
+          </div>
+        )}
+      </section>
+    ))}
+  </div>
+  <aside class="story-stage" aria-label="Vista previa de la carta">
+    <div class="story-stage-sticky">
+      <LayerStack market={market} step={sectionSteps(sections[0]!)[0]!} rate={rate} />
+    </div>
+  </aside>
+</div>
+<section class="container story-section story-templates" data-stage="templates" data-template-sheet>
+  <div class="story-templates-copy">
+    <h2>{templates.title}</h2>
+    <ul class="story-features">
+      {templates.features.map(([title, body]) => (
+        <li>
+          <h3>{title}</h3>
+          <p>{body}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+  <ul id="demos" class="contact-sheet">
+    {tenants.map((tenant, index) => (
+      <li style={`--i: ${index}`}>
+        <a
+          class="contact-card"
+          href={tenant.href}
+          target="_blank"
+          rel="noopener"
+          data-template-open
+          data-host={tenant.href}
+          data-name={tenant.name}
+          data-step={SHOWCASE_STEPS.templates[index]}
+        >
+          <span class="contact-plane">
+            <img
+              src={showcasePoster(tenant.slug, SHOWCASE_STEPS.templates[index]!)}
+              width="390"
+              height="700"
+              loading="lazy"
+              decoding="async"
+              alt={`Carta de ${tenant.name}`}
+            />
+          </span>
+          <span class="contact-caption">
+            <span>
+              {tenant.name} · {tenant.template}
+            </span>
+            <span class="contact-explore" aria-hidden="true">
+              Explorar ↗
+            </span>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+  <dialog class="demo-dialog" data-template-dialog aria-label="Carta de demostración">
+    <div class="demo-dialog-bar">
+      <a class="text-link" data-dialog-link target="_blank" rel="noopener"></a>
+      <button type="button" class="text-link" data-dialog-close>
+        Cerrar
+      </button>
+    </div>
+    <p class="demo-dialog-note">Es una demo: vale cualquier código de 4 cifras y nada llega al restaurante.</p>
+    <div class="demo-dialog-screen">
+      <div class="demo-skeleton" aria-hidden="true">
+        <i style="--w: 30%"></i>
+        <i style="--w: 70%; --h: 2.4em"></i>
+        <i style="--w: 45%"></i>
+        <span class="demo-skeleton-tabs">
+          <i></i>
+          <i></i>
+        </span>
+        {[0, 1, 2].map(() => (
+          <span class="demo-skeleton-row">
+            <i></i>
+            <span>
+              <i style="--w: 80%"></i>
+              <i style="--w: 60%"></i>
+            </span>
+          </span>
+        ))}
+      </div>
+      <iframe
+        title="Carta de demostración"
+        data-dialog-frame
+        sandbox="allow-scripts allow-same-origin allow-forms"
+      ></iframe>
+    </div>
+  </dialog>
+</section>
+<script>
+  import { initShowcase } from "../lib/showcase-controller";
+  initShowcase();
+</script>

@@ -2,78 +2,95 @@
 import Faq from "../../components/faq.astro";
 import PlanCards from "../../components/plan-cards.astro";
 import BaseLayout from "../../layouts/base-layout.astro";
-import { demos, markets } from "../../lib/markets";
+import HeroWire from "../../components/hero-wire.astro";
+import ShowcaseStory from "../../components/showcase-story.astro";
+import "../../styles/showcase.css";
+import { getUsdRate } from "../../lib/exchange-rate";
+import { markets } from "../../lib/markets";
 import type { MarketId } from "../../lib/markets";
 const market = Astro.params.market as MarketId;
 if (!Object.hasOwn(markets, market)) return new Response(null, { status: 404 });
 const content = markets[market];
+const rate = market === "ve" ? await getUsdRate() : undefined;
 ---
 
-<BaseLayout market={market} title={`${content.hero} · Qmenut`} description={content.description}>
-  <section class="container hero">
-    <hgroup class="hero-copy">
-      <h1>{content.hero}</h1>
-      <p class="hero-subtitle">{content.subtitle}</p>
-    </hgroup>
-    <div class="actions">
-      <a class="button" href={content.whatsapp.contact}>
-        Escríbenos por WhatsApp
-      </a>
-      <a class="text-link" href={`/${market}/precios`}>
-        Ver planes
-      </a>
-      <a class="text-link" href="#demos">
-        Ver demos
-      </a>
-    </div>
-  </section>
-  {content.sections.map((section, index) => (
-    <section class="container section" id={index === 0 ? "funcionalidades" : undefined}>
-      <h2>{section.title}</h2>
-      <ul class="grid">
-        {section.features.map(([title, body, plan]) => (
-          <li>
-            {plan && <span class="tag">{plan}</span>}
-            <h3>{title}</h3>
-            <p>{body}</p>
-          </li>
-        ))}
-      </ul>
-    </section>
-  ))}
-  <section class="container section" id="demos">
-    <h2>Mira cómo se ve</h2>
-    <ul class="demos">
-      {demos.map((demo) => (
-        <li>
-          <a href={demo.href}>
-            {demo.name}
-            <span aria-hidden="true">↗</span>
+<BaseLayout market={market} title={`Qmenut · ${content.eyebrow}`} description={content.description}>
+  <section class="print-hero">
+    <div class="container print-hero-sticky">
+      <div class="print-hero-copy">
+        <hgroup class="hero-copy">
+          <p class="tag">{content.eyebrow}</p>
+          <h1>{content.hero}</h1>
+          <p class="hero-subtitle">{content.subtitle}</p>
+        </hgroup>
+        <div class="actions">
+          <a class="button" href={content.whatsapp.contact}>
+            Escríbenos por WhatsApp
           </a>
-        </li>
-      ))}
-    </ul>
-  </section>
-  <section class="container section">
-    <div class="delivery">
-      <div class="delivery-heading">
-        <span class="tag">En desarrollo</span>
-        <h2>{content.delivery.title}</h2>
+          <a class="text-link" href={`/${market}/precios`}>
+            Ver planes
+          </a>
+          <a class="text-link" href="#demos">
+            Ver demos
+          </a>
+        </div>
       </div>
-      <p>{content.delivery.body}</p>
-      <a class="text-link" href={content.whatsapp.waitlist}>
-        Avísame cuando esté
-      </a>
+      <HeroWire />
     </div>
   </section>
-  <section class="container section">
-    <h2>Planes para tu restaurante</h2>
-    <PlanCards market={market} />
-    <div class="actions">
-      <a class="button" href={`/${market}/precios`}>
-        Comparar planes
-      </a>
+  <ShowcaseStory market={market} rate={rate} />
+  <nav class="mobile-cta" aria-label="Contacto">
+    <a class="button button--small" href={content.whatsapp.contact}>
+      Escríbenos por WhatsApp
+    </a>
+    <a class="text-link" href={`/${market}/precios`}>
+      Ver planes
+    </a>
+  </nav>
+  <section class="dark ink-band">
+    <div class="container section">
+      <div class="delivery">
+        <div class="delivery-heading">
+          <span class="tag">En desarrollo</span>
+          <h2>{content.delivery.title}</h2>
+        </div>
+        <p>{content.delivery.body}</p>
+        <a class="text-link" href={content.whatsapp.waitlist}>
+          Avísame cuando esté
+        </a>
+      </div>
     </div>
+  </section>
+  <section class="dark ink-band">
+    <div class="container section">
+      <h2>Planes para tu restaurante</h2>
+      <PlanCards market={market} />
+      <div class="actions">
+        <a class="button" href={`/${market}/precios`}>
+          Comparar planes
+        </a>
+      </div>
+    </div>
+  </section>
+  <section class="container section proof">
+    <div class="proof-copy">
+      <h2>Ya funciona en Nisia Café + Bocatas, en Valencia</h2>
+      <p>
+        Su menú vive en <a href="https://nisiacafeteria.com">nisiacafeteria.com</a>, y Google lee cada plato, cada
+        precio y cada horario directamente de él.
+      </p>
+    </div>
+    <img
+      class="proof-image"
+      src="/assets/proof/nisia-900.webp"
+      srcset="/assets/proof/nisia-600.webp 600w, /assets/proof/nisia-900.webp 900w"
+      sizes="(max-width: 56rem) min(100vw, 28rem), 40vw"
+      width="900"
+      height="1200"
+      alt="Expositor en la barra de Nisia Café + Bocatas con los QR para dejar una reseña y sumar sellos"
+      loading="lazy"
+      decoding="async"
+    />
   </section>
   <Faq market={market} />
   <section class="container section">
