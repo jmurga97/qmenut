@@ -4,17 +4,25 @@ import { marketFromRequest } from "../lib/markets";
 
 // Visitors from a known market skip the chooser; crawlers and everyone else still see it.
 const market = marketFromRequest(Astro.request);
-if (market) return Astro.redirect(`/${market}/`, 302);
+Astro.response.headers.set("Vary", "CF-IPCountry");
+Astro.response.headers.set("Cache-Control", "private, no-store");
+if (market)
+  return new Response(null, {
+    status: 302,
+    headers: { Location: `/${market}/`, Vary: "CF-IPCountry", "Cache-Control": "private, no-store" },
+  });
 ---
 
 <BaseLayout
   title="Qmenut · Elige tu país"
-  description="Descubre Qmenut para tu restaurante en España o Venezuela."
+  description="Qmenut es la plataforma de carta digital y web para restaurantes, en España y Venezuela."
   neutral
 >
   <section class="container hero">
     <h1>Tu restaurante en Qmenut</h1>
-    <p>Elige tu país para conocer los planes y funcionalidades.</p>
+    <p>
+      Qmenut es la carta digital y la web de tu restaurante. Elige tu país para conocer los planes y funcionalidades.
+    </p>
     <div class="actions">
       <a class="button" href="/es/">
         España

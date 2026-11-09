@@ -1,5 +1,12 @@
 ---
 import { marketFromRequest } from "../lib/markets";
 
-return Astro.redirect(`/${marketFromRequest(Astro.request) ?? "ve"}/precios`, 302);
+return new Response(null, {
+  status: 302,
+  headers: {
+    Location: `/${marketFromRequest(Astro.request) ?? "ve"}/precios`,
+    Vary: "CF-IPCountry",
+    "Cache-Control": "private, no-store",
+  },
+});
 ---
