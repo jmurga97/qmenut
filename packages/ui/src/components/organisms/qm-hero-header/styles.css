@@ -178,6 +178,11 @@ qm-lang[part="lang"] {
   padding-bottom: 0;
 }
 
+.name-heading {
+  margin: 0;
+  font: inherit;
+}
+
 .name {
   --qm-wordmark-size: var(--qm-hero-name-size, var(--qm-text-2xl, 22px));
   --qm-ink: #fff;

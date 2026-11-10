@@ -22,6 +22,7 @@ export const Route = createFileRoute("/{-$locale}/")({
       match,
       path: "/",
       preloadLcpImage: true,
+      titleKey: "menu.seoTitle",
     }),
   headers: () => ({
     "Cache-Control": BROWSER_CACHE_CONTROL,

@@ -34,6 +34,7 @@ export default {
   },
   menu: {
     ...en.menu,
+    seoTitle: "{{name}} – Speisekarte und Preise",
     seoDescription: "Speisekarte von {{name}}: {{categories}}",
     categoryNavigationLabel: "Speisekartenkategorien",
     closeLabel: "Schließen",

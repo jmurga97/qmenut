@@ -5,6 +5,9 @@ import { matchSupportedLocale } from "~/lib/i18n/locale-matcher";
 
 const CHOICE_STORAGE_KEY = "qm-locale-choice";
 const DETECTED_SESSION_KEY = "qm-locale-detected";
+// Crawlers render as en-US with empty storage: redirecting them would index the default URL
+// with another language's content and canonical.
+const CRAWLER_USER_AGENT = /bot|crawl|spider|slurp|lighthouse|google-/i;
 
 /**
  * Client-only, first-visit language detection. Unprefixed URLs are always served in the
@@ -17,7 +20,7 @@ export function LocaleDetector() {
   const { availableLanguages, defaultLanguage, locale } = useRouteContext({ from: "/{-$locale}" });
 
   useEffect(() => {
-    if (locale !== undefined) {
+    if (locale !== undefined || CRAWLER_USER_AGENT.test(navigator.userAgent)) {
       return;
     }
 

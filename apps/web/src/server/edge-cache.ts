@@ -25,6 +25,7 @@ const CACHEABLE_ROUTES = new Set([
   "offline",
   "robots.txt",
   "sitemap.xml",
+  "llms.txt",
   "site.webmanifest",
   "icon.svg",
   "icon-maskable.svg",

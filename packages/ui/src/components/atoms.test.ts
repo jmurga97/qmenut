@@ -120,7 +120,7 @@ describe("display atoms", () => {
     heading.variant = "secondary";
     await update(heading);
     expect(heading.renderRoot.querySelector('[part="rule"]')).toBeNull();
-    expect(shadowQuery(heading, '[part="secondary"] [role="heading"]').textContent).toBe("Degustación");
+    expect(shadowQuery(heading, '[part="secondary"] h2').textContent).toBe("Degustación");
   });
 
   test("renders image fallback content and hides decorative atoms", async () => {

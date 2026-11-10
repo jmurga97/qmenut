@@ -12,6 +12,14 @@ export function pickRecommendedDishes(data: PublicMenuData): PublicMenuDish[] {
   return data.categories.flatMap((category) => category.dishes).filter((dish) => dish.isRecommended);
 }
 
+/** Without promotions or picked dishes the page is an empty shell: kept out of the index and sitemap. */
+export function hasHighlights(data: PublicMenuData): boolean {
+  return (
+    data.promotions.length > 0 ||
+    data.categories.some((category) => category.dishes.some((dish) => dish.isFeatured || dish.isRecommended))
+  );
+}
+
 export function mapRecommendedDish({
   dish,
   formatPrice,

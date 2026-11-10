@@ -7,11 +7,12 @@ import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
 export const Route = createFileRoute("/{-$locale}/aviso-legal")({
-  beforeLoad: ({ params }) => {
+  beforeLoad: ({ context, params }) => {
     const locale = params.locale?.toLowerCase();
 
     if (locale && locale !== "en" && locale !== "es") {
-      redirect({ to: ".", params: { locale: "es" }, throw: true });
+      // Straight to the unprefixed URL when Spanish is the default: `/es/…` would redirect again.
+      redirect({ to: ".", params: { locale: context.defaultLanguage === "es" ? undefined : "es" }, throw: true });
     }
   },
   loader: async ({ context, params }) => {
@@ -34,6 +35,8 @@ export const Route = createFileRoute("/{-$locale}/aviso-legal")({
       descriptionKey: "legal.legalNotice.seoDescription",
       loaderData,
       match,
+      // The same template text on every tenant: indexing it only adds duplicates.
+      noIndex: true,
       path: "/aviso-legal",
       titleKey: "legal.legalNotice.seoTitle",
     }),

@@ -34,6 +34,7 @@ export default {
   },
   menu: {
     ...en.menu,
+    seoTitle: "{{name}} – 菜单和价格",
     seoDescription: "{{name}} 菜单：{{categories}}",
     categoryNavigationLabel: "菜单分类",
     closeLabel: "关闭",

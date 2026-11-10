@@ -1,3 +1,6 @@
+/** `notFound()` payload that tells the not-found boundary the host has no tenant. */
+export const TENANT_NOT_FOUND = "tenant";
+
 export function TenantNotFound() {
   return (
     <div className="home-shell">

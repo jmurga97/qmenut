@@ -32,6 +32,11 @@ export class QmTab extends QmElement {
   @property({ type: String })
   value = "";
 
+  /** Crawlable destination. With it the tab renders a real link; plain clicks still go
+   * through `qm-select` so the host app keeps client-side navigation. */
+  @property({ type: String })
+  href?: string;
+
   /** Fires `qm-select` for this tab. Public so a tab-bar can drive selection programmatically
    * (e.g. arrow-key navigation) — `.click()` on the host wouldn't reach this shadow-DOM
    * button's own click listener. */
@@ -39,25 +44,44 @@ export class QmTab extends QmElement {
     this.postEvent({ name: "qm-select", detail: { value: this.value } });
   }
 
-  private readonly handleClick = () => {
+  private readonly handleClick = (event: MouseEvent) => {
+    // Modified clicks keep the browser's own link behaviour (new tab, download...).
+    if (this.href && (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
+    event.preventDefault();
     this.select();
   };
 
   render() {
-    return html`
-      <button
-        part="button"
-        type="button"
-        role="tab"
-        aria-selected=${this.active}
-        tabindex=${this.active ? 0 : -1}
-        data-active=${this.active}
-        @click=${this.handleClick}
-      >
-        <span class="icon" part="icon"><slot name="icon" aria-hidden="true"></slot></span>
-        <span class="label" part="label"><slot></slot></span>
-      </button>
+    const tabindex = this.active ? 0 : -1;
+    const content = html`
+      <span class="icon" part="icon"><slot name="icon" aria-hidden="true"></slot></span>
+      <span class="label" part="label"><slot></slot></span>
     `;
+
+    return this.href
+      ? html`<a
+          class="tab"
+          part="button"
+          href=${this.href}
+          role="tab"
+          aria-selected=${this.active}
+          tabindex=${tabindex}
+          data-active=${this.active}
+          @click=${this.handleClick}
+          >${content}</a
+        >`
+      : html`<button
+          class="tab"
+          part="button"
+          type="button"
+          role="tab"
+          aria-selected=${this.active}
+          tabindex=${tabindex}
+          data-active=${this.active}
+          @click=${this.handleClick}
+        >
+          ${content}
+        </button>`;
   }
 }
 
@@ -67,7 +91,7 @@ export function defineQmTab() {
   }
 }
 
-export type QmTabArgs = Partial<Pick<QmTab, "active" | "value">>;
+export type QmTabArgs = Partial<Pick<QmTab, "active" | "href" | "value">>;
 
 declare global {
   interface HTMLElementTagNameMap {

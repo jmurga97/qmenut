@@ -14,7 +14,7 @@ export const DEV_DEFAULT_TENANT_TEMPLATE: QmTemplateName = "fine";
 
 const IPV4_HOST_PATTERN = /^(?:\d{1,3}\.){3}\d{1,3}$/;
 
-function isLocalDevelopmentHost(host: string): boolean {
+export function isLocalDevelopmentHost(host: string): boolean {
   const unwrappedHost = host.startsWith("[") && host.endsWith("]") ? host.slice(1, -1) : host;
 
   return unwrappedHost === "localhost" || IPV4_HOST_PATTERN.test(unwrappedHost) || unwrappedHost.includes(":");

@@ -34,6 +34,7 @@ export default {
   },
   menu: {
     ...en.menu,
+    seoTitle: "{{name}} – Carta i preus",
     seoDescription: "Carta de {{name}}: {{categories}}",
     categoryNavigationLabel: "Categories de la carta",
     closeLabel: "Tancar",

@@ -28,6 +28,7 @@ export default {
     },
   },
   menu: {
+    seoTitle: "{{name}} – Menukaart en prijzen",
     seoDescription: "Menukaart van {{name}}: {{categories}}",
     categoryNavigationLabel: "Menucategorieën",
     closeLabel: "Sluiten",

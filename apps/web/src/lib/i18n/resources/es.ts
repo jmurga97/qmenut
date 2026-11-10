@@ -28,6 +28,7 @@ export default {
     },
   },
   menu: {
+    seoTitle: "{{name}} – Carta y precios",
     seoDescription: "Carta de {{name}}: {{categories}}",
     categoryNavigationLabel: "Categorías del menú",
     closeLabel: "Cerrar",

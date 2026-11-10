@@ -36,14 +36,14 @@ export class QmHeading extends LitElement {
         ${this.eyebrow ? html`<span part="eyebrow" class="eyebrow">${this.eyebrow}</span>` : nothing}
         <span part="secondary" class="secondary">
           <span part="icon" class="secondary-icon" aria-hidden="true"><slot name="icon"></slot></span>
-          <span part="title" class="title" role="heading" aria-level="2">${this.text}</span>
+          <h2 part="title" class="title">${this.text}</h2>
         </span>
       `;
     }
 
     return html`
       ${this.eyebrow ? html`<span part="eyebrow" class="eyebrow">${this.eyebrow}</span>` : nothing}
-      <span part="title" class="title" role="heading" aria-level="2">${this.text}</span>
+      <h2 part="title" class="title">${this.text}</h2>
       ${this.divider ? html`<hr part="rule" class="rule" />` : nothing}
     `;
   }

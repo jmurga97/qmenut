@@ -34,6 +34,7 @@ export default {
   },
   menu: {
     ...en.menu,
+    seoTitle: "{{name}} – Menu e preços",
     seoDescription: "Menu de {{name}}: {{categories}}",
     categoryNavigationLabel: "Categorias do menu",
     closeLabel: "Fechar",

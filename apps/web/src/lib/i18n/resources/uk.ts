@@ -34,6 +34,7 @@ export default {
   },
   menu: {
     ...en.menu,
+    seoTitle: "{{name}} – Меню та ціни",
     seoDescription: "Меню {{name}}: {{categories}}",
     categoryNavigationLabel: "Категорії меню",
     closeLabel: "Закрити",

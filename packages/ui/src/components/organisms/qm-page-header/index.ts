@@ -29,8 +29,8 @@ const componentStyles = createComponentStyles(componentStylesText);
  * own `--qm-wordmark-size` extension point), matching `qm-section-header`'s precedent of
  * declining to force a mismatched atom into a shape it wasn't built for.
  *
- * `qm-wordmark` has no native heading tag of its own, so document-outline semantics are
- * added at this organism's own level via `role="heading"`/`aria-level` on a wrapper —
+ * `qm-wordmark` has no native heading tag of its own, so the outline comes from a real
+ * `<h1>`/`<h2>` wrapper at this organism's level (crawlers read tags, not ARIA roles) —
  * never reaching into `qm-wordmark`'s shadow DOM.
  */
 export class QmPageHeader extends LitElement {
@@ -70,7 +70,7 @@ export class QmPageHeader extends LitElement {
   titleSize: "lg" | "md" = "lg";
 
   @property({ type: Number, attribute: "heading-level" })
-  headingLevel = 1;
+  headingLevel: 1 | 2 = 1;
 
   /** Omits the bottom rule when the following content provides its own visual transition. */
   @property({ type: Boolean, attribute: "hide-separator", reflect: true })
@@ -108,6 +108,13 @@ export class QmPageHeader extends LitElement {
   }
 
   render() {
+    const title = html`<qm-wordmark
+      part="title"
+      class="title"
+      data-size=${this.titleSize}
+      .text=${this.title}
+    ></qm-wordmark>`;
+
     return html`
       <div part="topbar" class="topbar">
         <span part="topbar-text" class="topbar-text">${this.renderTopbarText()}</span>
@@ -116,9 +123,11 @@ export class QmPageHeader extends LitElement {
           ${this.renderCurrencySelector()}
         </div>
       </div>
-      <div part="title-wrap" class="title-wrap" role="heading" aria-level=${this.headingLevel}>
-        <qm-wordmark part="title" class="title" data-size=${this.titleSize} .text=${this.title}></qm-wordmark>
-      </div>
+      ${
+        this.headingLevel === 1
+          ? html`<h1 part="title-wrap" class="title-wrap">${title}</h1>`
+          : html`<h2 part="title-wrap" class="title-wrap">${title}</h2>`
+      }
       ${this.subtitle ? html`<p part="subtitle" class="subtitle">${this.subtitle}</p>` : nothing}
       ${this.hideSeparator ? nothing : html`<qm-divider part="rule" class="rule" variant="rule"></qm-divider>`}
     `;

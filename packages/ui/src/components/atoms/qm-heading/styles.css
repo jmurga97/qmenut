@@ -16,6 +16,7 @@
 
 .title {
   display: block;
+  margin: 0;
   font-family: var(--qm-heading, serif);
   /* --qm-heading-size resolves to a --qm-text-* token, which is already fontScale-scaled. */
   font-size: var(--qm-heading-size);

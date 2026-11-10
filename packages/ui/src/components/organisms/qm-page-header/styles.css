@@ -30,7 +30,8 @@ qm-lang[part="lang"] {
 }
 
 .title-wrap {
-  margin-top: 9px;
+  margin: 9px 0 0;
+  font: inherit;
 }
 
 .title {

@@ -6,9 +6,12 @@ import handler from "@tanstack/react-start/server-entry";
 
 import { getEnvString } from "~/lib/env";
 import { serveWithEdgeCache } from "~/server/edge-cache";
+import { isLocalDevelopmentHost } from "~/server/tenant-host";
 
 const LOCAL_API_ORIGIN = "http://localhost:8787";
 const NO_INDEX_ROBOTS_HEADER = "noindex, nofollow";
+// No includeSubDomains: a tenant's other subdomains are not ours to pin to HTTPS.
+const HSTS_HEADER = "max-age=31536000";
 
 function resolveApiProxyUrl(request: Request): URL {
   const configuredOrigin = getEnvString("VITE_API_BASE_URL") ?? LOCAL_API_ORIGIN;
@@ -67,7 +70,16 @@ export default Sentry.withSentry<Cloudflare.Env>(
     // Cloudflare's ExportedHandler contract requires request, env, and execution context.
     // eslint-disable-next-line max-params
     async fetch(request, env, ctx) {
-      if (new URL(request.url).pathname.startsWith("/trpc")) {
+      const url = new URL(request.url);
+      // Tenant dev/E2E hosts are `*.localhost` over plain HTTP.
+      const isLocal = url.hostname.endsWith(".localhost") || isLocalDevelopmentHost(url.hostname);
+
+      if (url.protocol === "http:" && !isLocal) {
+        url.protocol = "https:";
+        return Response.redirect(url.href, 301);
+      }
+
+      if (url.pathname.startsWith("/trpc")) {
         return applyRobotsPolicy(await proxyTrpcRequest(request, env), env.ALLOW_INDEXING === "true");
       }
 
@@ -77,10 +89,12 @@ export default Sentry.withSentry<Cloudflare.Env>(
         render: () => handler.fetch(request),
       });
 
+      // serveWithEdgeCache always hands back a fresh Response, so its headers are mutable.
+      if (!isLocal) response.headers.set("Strict-Transport-Security", HSTS_HEADER);
+
       // TanStack converts SSR errors into responses before the Worker wrapper sees them.
       if (response.status >= 500) {
-        const { pathname } = new URL(request.url);
-        Sentry.captureException(new Error(`SSR responded ${response.status} at ${pathname}`), {
+        Sentry.captureException(new Error(`SSR responded ${response.status} at ${url.pathname}`), {
           tags: { host: request.headers.get("host") ?? "unknown" },
         });
       }

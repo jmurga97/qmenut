@@ -28,6 +28,7 @@ export default {
     },
   },
   menu: {
+    seoTitle: "{{name}} – Menu i ceny",
     seoDescription: "Menu {{name}}: {{categories}}",
     categoryNavigationLabel: "Kategorie menu",
     closeLabel: "Zamknij",

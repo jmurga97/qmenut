@@ -1,9 +1,14 @@
 import { Link } from "@tanstack/react-router";
 
+import { TENANT_NOT_FOUND, TenantNotFound } from "~/shared/components/tenant-not-found";
+
 // Rendered whenever `notFound()` is thrown (unknown paths under `/{-$locale}`, missing
 // assets requested through the router, ...). Without it TanStack falls back to a bare
 // `<p>Not Found</p>` and logs a warning on every hit.
-export function RouteNotFound() {
+// `NotFoundRouteProps` would reference the registered router from inside its own definition.
+export function RouteNotFound({ data }: { data?: unknown }) {
+  if (data === TENANT_NOT_FOUND) return <TenantNotFound />;
+
   return (
     <div className="home-shell">
       <div className="home-column status-column">

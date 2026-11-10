@@ -59,6 +59,7 @@ export function PublicBottomNav({ showHighlights, showLoyalty, showReservations 
       <QmTab
         value="/"
         active={routeId === "/{-$locale}/"}
+        href={router.buildLocation({ to: "/{-$locale}", params: (prev) => prev }).href}
         onQmSelect={() => void navigate({ to: "/{-$locale}", params: (prev) => prev, search })}
       >
         <UtensilsCrossed slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
@@ -71,6 +72,7 @@ export function PublicBottomNav({ showHighlights, showLoyalty, showReservations 
           onPointerEnter={preloadHighlights}
           onFocus={preloadHighlights}
           onTouchStart={preloadHighlights}
+          href={router.buildLocation({ to: "/{-$locale}/destacados", params: (prev) => prev }).href}
           onQmSelect={() => void navigate({ to: "/{-$locale}/destacados", params: (prev) => prev, search })}
         >
           <Tag slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
@@ -84,6 +86,7 @@ export function PublicBottomNav({ showHighlights, showLoyalty, showReservations 
           onPointerEnter={preloadReservations}
           onFocus={preloadReservations}
           onTouchStart={preloadReservations}
+          href={router.buildLocation({ to: "/{-$locale}/reservar", params: (prev) => prev }).href}
           onQmSelect={() => void navigate({ to: "/{-$locale}/reservar", params: (prev) => prev, search })}
         >
           <Calendar slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
@@ -96,6 +99,7 @@ export function PublicBottomNav({ showHighlights, showLoyalty, showReservations 
         onPointerEnter={preloadContact}
         onFocus={preloadContact}
         onTouchStart={preloadContact}
+        href={router.buildLocation({ to: "/{-$locale}/contacto", params: (prev) => prev }).href}
         onQmSelect={() => void navigate({ to: "/{-$locale}/contacto", params: (prev) => prev, search })}
       >
         <Phone slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />
@@ -108,6 +112,7 @@ export function PublicBottomNav({ showHighlights, showLoyalty, showReservations 
           onPointerEnter={preloadLoyalty}
           onFocus={preloadLoyalty}
           onTouchStart={preloadLoyalty}
+          href={router.buildLocation({ to: "/{-$locale}/puntos", params: (prev) => prev }).href}
           onQmSelect={() => void navigate({ to: "/{-$locale}/puntos", params: (prev) => prev, search })}
         >
           <Gift slot="icon" size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE_WIDTH} />

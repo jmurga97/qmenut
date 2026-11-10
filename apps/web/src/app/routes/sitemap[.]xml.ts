@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { buildHreflangAlternates } from "~/features/menu/seo/build-hreflang-alternates";
+import { hasHighlights } from "~/features/promos/mappers/map-recommended-content";
 import { createServerTrpcCaller } from "~/lib/trpc-client";
 import { resolveSsrTenantHost } from "~/server/tenant-host";
 
-const ROUTE_PATHS = ["/", "/contacto", "/destacados", "/puntos", "/reservar", "/aviso-legal", "/privacidad"] as const;
+// Only pages with searchable content; legal pages and the loyalty card are `noindex`.
+const ROUTE_PATHS = ["/", "/contacto", "/destacados", "/reservar"] as const;
 const CONTENT_VERSION_KEY_PREFIX = "menuVersion:";
 
 function escapeXml(value: string): string {
@@ -43,13 +45,12 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         const publicRoutePaths = ROUTE_PATHS.filter(
           (path) =>
-            (path !== "/puntos" || data.publicFeatures.loyalty) &&
             (path !== "/reservar" || data.publicFeatures.reservations) &&
-            (path !== "/destacados" || data.publicFeatures.highlights),
+            (path !== "/destacados" || (data.publicFeatures.highlights && hasHighlights(data))),
         );
-        const urlEntries = publicRoutePaths.map((path) => {
+        // One <url> per language version, each repeating the full alternate set.
+        const urlEntries = publicRoutePaths.flatMap((path) => {
           const alternates = buildHreflangAlternates({ language: data.language, origin, path });
-          const defaultHref = alternates.find((alt) => alt.hreflang === "x-default")?.href ?? origin + path;
           const alternateLinks = alternates
             .map(
               (alt) =>
@@ -57,10 +58,14 @@ export const Route = createFileRoute("/sitemap.xml")({
             )
             .join("\n");
 
-          return `  <url>
-    <loc>${escapeXml(defaultHref)}</loc>
+          return alternates
+            .filter((alt) => alt.hreflang !== "x-default")
+            .map(
+              (alt) => `  <url>
+    <loc>${escapeXml(alt.href)}</loc>
 ${lastModified ? `    <lastmod>${lastModified}</lastmod>\n` : ""}${alternateLinks}
-  </url>`;
+  </url>`,
+            );
         });
 
         const body = `<?xml version="1.0" encoding="UTF-8"?>

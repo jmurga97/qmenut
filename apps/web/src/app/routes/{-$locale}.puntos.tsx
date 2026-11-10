@@ -23,7 +23,8 @@ export const Route = createFileRoute("/{-$locale}/puntos")({
       descriptionKey: "loyalty.seoDescription",
       loaderData,
       match,
-      noIndex: loaderData?.publicFeatures.loyalty === false,
+      // A per-guest utility page with no searchable content.
+      noIndex: true,
       path: "/puntos",
       titleKey: "loyalty.seoTitle",
     }),

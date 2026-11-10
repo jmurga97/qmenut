@@ -107,7 +107,7 @@ export class QmHeroHeader extends LitElement {
         <div part="footer" class="footer">
           <qm-image part="logo" class="logo" label=${this.logoLabel}><slot name="logo"></slot></qm-image>
           <div class="text">
-            <qm-wordmark part="name" class="name" .text=${this.name}></qm-wordmark>
+            <h1 class="name-heading"><qm-wordmark part="name" class="name" .text=${this.name}></qm-wordmark></h1>
             <span part="tagline" class="tagline">${this.tagline}</span>
           </div>
         </div>

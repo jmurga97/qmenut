@@ -34,6 +34,7 @@ export default {
   },
   menu: {
     ...en.menu,
+    seoTitle: "{{name}} – Carta e prezos",
     seoDescription: "Carta de {{name}}: {{categories}}",
     categoryNavigationLabel: "Categorías do menú",
     closeLabel: "Pechar",

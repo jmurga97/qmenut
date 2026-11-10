@@ -2,6 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { buildPageHead } from "~/features/menu/seo/build-page-head";
 import { buildPromotionsJsonLd } from "~/features/menu/seo/build-promotions-json-ld";
+import { hasHighlights } from "~/features/promos/mappers/map-recommended-content";
 import { HighlightsPage } from "~/features/promos/pages/highlights-page";
 import { BROWSER_CACHE_CONTROL } from "~/lib/browser-cache";
 import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
@@ -19,9 +20,10 @@ export const Route = createFileRoute("/{-$locale}/destacados")({
   head: ({ loaderData, match }) =>
     buildPageHead({
       descriptionKey: "destacados.seoDescription",
-      jsonLd: loaderData ? buildPromotionsJsonLd(loaderData) : undefined,
+      jsonLd: loaderData?.promotions.length ? buildPromotionsJsonLd(loaderData) : undefined,
       loaderData,
       match,
+      noIndex: loaderData ? !hasHighlights(loaderData) : false,
       path: "/destacados",
       titleKey: "destacados.seoTitle",
     }),

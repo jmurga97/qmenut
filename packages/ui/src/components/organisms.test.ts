@@ -70,7 +70,7 @@ describe("navigation organisms", () => {
     await update(header);
 
     expect(shadowQuery(header, '[part="topbar-text"]').textContent).toBe("Casa / Murga");
-    expect(shadowQuery(header, '[part="title-wrap"]').getAttribute("aria-level")).toBe("2");
+    expect(shadowQuery(header, '[part="title-wrap"]').tagName).toBe("H2");
     expect(shadowQuery(header, '[part="subtitle"]').textContent).toBe("Cocina de mercado");
     expect(header.renderRoot.querySelectorAll("qm-lang")).toHaveLength(2);
     expect(header.renderRoot.querySelector("qm-divider")).not.toBeNull();

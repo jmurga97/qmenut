@@ -7,16 +7,18 @@ import { MenuContentProvider } from "~/features/menu/hooks/menu-content-context"
 import { ShowcaseMenuContent } from "~/features/showcase/showcase-menu-content";
 import { ShowcaseProvider } from "~/features/showcase/showcase-provider";
 import { SHORT_NAME_MAX_LENGTH, truncateLabel } from "~/lib/app-label";
-import { DEFAULT_LOCALE, chromeLocale } from "~/lib/i18n/create-i18n";
-import { LOCALE_PATTERN } from "~/lib/i18n/locale-pattern";
+import { chromeLocale } from "~/lib/i18n/create-i18n";
+import { LOCALE_PATTERN, isLanguageTag } from "~/lib/i18n/locale-pattern";
 import { AnalyticsBootstrap } from "~/shared/components/analytics-bootstrap";
 import { LocaleDetector } from "~/shared/components/locale-detector";
 import { PublicRouteLayout } from "~/shared/components/public-route-layout/public-route-layout";
+import { TENANT_NOT_FOUND } from "~/shared/components/tenant-not-found";
 import { DevTemplateSwitcher } from "~/shared/dev/dev-template-switcher";
 import { getPublicMenuQueryOptions } from "~/shared/public-menu/public-menu-query-options";
 
 import type { QmTemplateName } from "@qmenut/ui/theme/presets";
 import type { ReactNode } from "react";
+import type { PublicMenuData } from "~/shared/public-menu/public-menu-types";
 
 export interface LocaleLanguageOption {
   code: string;
@@ -49,6 +51,11 @@ interface LocaleSearch {
   themePreview?: typeof QM_THEME_PREVIEW_SEARCH_VALUE;
 }
 
+/** Unknown or deactivated tenant: a real 404 so search engines drop it. */
+function assertTenantFound(data: PublicMenuData | null): asserts data is PublicMenuData {
+  if (!data) notFound({ data: TENANT_NOT_FOUND, throw: true });
+}
+
 function isQmTemplateName(value: unknown): value is QmTemplateName {
   return typeof value === "string" && Object.hasOwn(TEMPLATES, value);
 }
@@ -74,27 +81,39 @@ export const Route = createFileRoute("/{-$locale}")({
       trpc: context.trpc,
     });
     const data = await context.queryClient.query({ ...publicMenuOptions, staleTime: "static" });
-    const language = data?.language;
 
-    // Prefix doesn't map to an active language for this tenant — fall back to the
-    // unprefixed (default-language) URL rather than serving a mismatched locale.
-    if (requested !== undefined && language && language.effective !== requested) {
+    assertTenantFound(data);
+    const { language } = data;
+    const isDefaultPrefix = requested === language.default;
+
+    // `/es/…` on a Spanish-default tenant duplicates `/…`: redirect for good. A prefix that isn't
+    // an active language falls back to the unprefixed URL (temporarily: it may be enabled later),
+    // and one that isn't a language at all is just a wrong path.
+    if (requested !== undefined && (language.effective !== requested || isDefaultPrefix)) {
+      if (!isDefaultPrefix && !isLanguageTag(requested)) {
+        notFound({ throw: true });
+      }
+
       const rest = location.pathname.replace(new RegExp(`^/${requested}`, "i"), "");
       const hash = location.hash ? `#${encodeURI(location.hash)}` : "";
 
-      redirect({ href: `${rest || "/"}${location.searchStr}${hash}`, throw: true });
+      redirect({
+        href: `${rest || "/"}${location.searchStr}${hash}`,
+        statusCode: isDefaultPrefix ? 308 : 307,
+        throw: true,
+      });
     }
 
-    const effectiveLocale = language?.effective ?? requested ?? DEFAULT_LOCALE;
+    const effectiveLocale = language.effective;
 
     if (context.i18n.language !== chromeLocale(effectiveLocale)) {
       await context.i18n.changeLanguage(chromeLocale(effectiveLocale));
     }
 
     return {
-      availableLanguages: language?.available ?? [],
-      branchName: data?.branch.name,
-      defaultLanguage: language?.default ?? DEFAULT_LOCALE,
+      availableLanguages: language.available,
+      branchName: data.branch.name,
+      defaultLanguage: language.default,
       devTemplate: import.meta.env.DEV ? search.template : undefined,
       effectiveLocale,
       locale: requested,

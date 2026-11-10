@@ -3,7 +3,7 @@
   max-width: 100%;
 }
 
-button {
+.tab {
   display: inline-flex;
   align-items: center;
   min-width: 0;
@@ -18,6 +18,7 @@ button {
   font-family: var(--qm-body, sans-serif);
   font-size: max(9px, var(--qm-text-2xs, 10px));
   font-weight: 800;
+  text-decoration: none;
   letter-spacing: 0.4px;
   text-transform: uppercase;
   padding: 5px clamp(4px, 1.6vw, 12px);
@@ -30,7 +31,7 @@ button {
     transform 100ms ease-out;
 }
 
-button[data-active="true"] {
+.tab[data-active="true"] {
   background: var(--qm-nav-active-bg, transparent);
   color: var(--qm-nav-active-color, #1c1815);
   border-bottom: var(--qm-nav-active-bd, 2px solid currentColor);
@@ -47,7 +48,7 @@ button[data-active="true"] {
 }
 
 /* Ming's red signal dot on the current item; only the `signal` nav style turns it on. */
-button[data-active="true"] .label::before {
+.tab[data-active="true"] .label::before {
   display: var(--qm-nav-dot, none);
   flex: none;
   width: 6px;
@@ -65,11 +66,11 @@ button[data-active="true"] .label::before {
   white-space: nowrap;
 }
 
-button:active {
+.tab:active {
   transform: scale(0.96);
 }
 
-button:focus-visible {
+.tab:focus-visible {
   outline: 2px solid currentcolor;
   outline-offset: 1px;
 }
