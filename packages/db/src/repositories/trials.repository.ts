@@ -136,6 +136,7 @@ const subscriptionRow = {
   ownerName: ownerField<string | null>(users.name),
   ownerPhone: ownerField<string | null>(users.phone),
   createdAt: branchSubscriptions.createdAt,
+  expiryNotice: branchSubscriptions.expiryNotice,
 };
 
 export type SubscriptionListRow = Awaited<ReturnType<typeof listSubscriptions>>[number];
@@ -180,6 +181,55 @@ export async function listManualSubscriptionsEnding({
     .all();
 }
 
+export async function expireManualSubscription({ db, row }: { db: DrizzleDb; row: SubscriptionListRow }) {
+  if (row.endsAt === null || (row.status !== "trialing" && row.status !== "active")) return;
+  const match = and(
+    eq(branchSubscriptions.branchId, row.branchId),
+    eq(branchSubscriptions.status, row.status),
+    eq(branchSubscriptions.currentPeriodEnd, row.endsAt),
+    isNull(branchSubscriptions.stripeSubscriptionId),
+  );
+  const now = Date.now();
+  const stillExpired = sql`exists (select 1 from ${branchSubscriptions} where ${match})`;
+  const branchMatches = and(eq(branches.id, row.branchId), stillExpired);
+  await db.batch([
+    db.update(branches).set({ isActive: false, planCode: "basic", updatedAt: now }).where(branchMatches),
+    db
+      .update(branchSubscriptions)
+      .set({
+        status: "canceled",
+        expiryNotice: row.status === "trialing" ? "trial-ended" : "plan-ended",
+        updatedAt: now,
+      })
+      .where(match),
+  ]);
+}
+
+export async function listPendingExpiryNotices(db: DrizzleDb) {
+  return db
+    .select(subscriptionRow)
+    .from(branchSubscriptions)
+    .innerJoin(branches, eq(branches.id, branchSubscriptions.branchId))
+    .innerJoin(restaurants, eq(restaurants.id, branchSubscriptions.restaurantId))
+    .where(and(isNotNull(branchSubscriptions.expiryNotice), isNull(branches.deletedAt)))
+    .all();
+}
+
+export async function clearExpiryNotice({ db, row }: { db: DrizzleDb; row: SubscriptionListRow }) {
+  if (!row.expiryNotice || row.endsAt === null) return;
+  await db
+    .update(branchSubscriptions)
+    .set({ expiryNotice: null })
+    .where(
+      and(
+        eq(branchSubscriptions.branchId, row.branchId),
+        eq(branchSubscriptions.expiryNotice, row.expiryNotice),
+        eq(branchSubscriptions.currentPeriodEnd, row.endsAt),
+        isNull(branchSubscriptions.stripeSubscriptionId),
+      ),
+    );
+}
+
 export interface ManualSubscriptionData {
   restaurantId: string;
   branchId: string;
@@ -199,6 +249,7 @@ export function upsertManualSubscriptionStatement({ db, data }: { db: DrizzleDb;
     stripeSubscriptionId: null,
     stripePriceId: null,
     cancelAtPeriodEnd: false,
+    expiryNotice: null,
     ...(data.founder === undefined ? {} : { founder: data.founder }),
     updatedAt: now,
   };

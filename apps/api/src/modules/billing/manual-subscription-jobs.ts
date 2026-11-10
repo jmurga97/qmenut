@@ -1,11 +1,15 @@
 import { createDb } from "@qmenut/db/client";
+import { getBranch } from "@qmenut/db/repositories/admin-branches.repository";
 import {
+  clearExpiryNotice,
+  expireManualSubscription,
   listManualSubscriptionsEnding,
-  upsertManualSubscriptionStatement,
+  listPendingExpiryNotices,
 } from "@qmenut/db/repositories/trials.repository";
 import * as Sentry from "@sentry/cloudflare";
 
-import { writeBranchPlan } from "./sync-subscription-state";
+import { syncBasicThemeFlag } from "./sync-subscription-state";
+import { bumpPublicContentVersionForBranch } from "../../lib/public-content-version";
 
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { SubscriptionListRow } from "@qmenut/db/repositories/trials.repository";
@@ -46,6 +50,23 @@ async function sendNotice({
   if (!response.ok) throw new Error(`El worker de correo rechazó ${kind} (${response.status})`);
 }
 
+async function finishExpiry({
+  env,
+  db,
+  row,
+}: {
+  env: RuntimeEnv;
+  db: ReturnType<typeof createDb>;
+  row: SubscriptionListRow;
+}) {
+  const branch = await getBranch({ db, restaurantId: row.restaurantId, branchId: row.branchId });
+  if (!branch || !row.expiryNotice) return;
+  if (branch.customDomain) await syncBasicThemeFlag({ env, host: branch.customDomain, planCode: branch.planCode });
+  await bumpPublicContentVersionForBranch({ db, env, restaurantId: row.restaurantId, branchId: row.branchId });
+  await sendNotice({ env, row, kind: row.expiryNotice });
+  await clearExpiryNotice({ db, row });
+}
+
 /**
  * Daily: plans billed outside Stripe (self-serve demos, staff-activated Venezuelan plans) get a reminder
  * five days before they end, and are switched off once they end. Rows and menu stay; paying turns it back on.
@@ -66,26 +87,20 @@ export async function runManualSubscriptionJobs(env: RuntimeEnv): Promise<void> 
     ...ending.map(
       (row) => () => sendNotice({ env, row, kind: row.status === "trialing" ? "trial-ending" : "plan-ending" }),
     ),
-    ...expired.map((row) => async () => {
-      await writeBranchPlan({
-        db,
-        env,
-        restaurantId: row.restaurantId,
-        branchId: row.branchId,
-        planCode: "basic",
-        isActive: false,
-        subscription: upsertManualSubscriptionStatement({
-          db,
-          data: { ...row, status: "canceled", endsAt: row.endsAt },
-        }),
-      });
-      await sendNotice({ env, row, kind: row.status === "trialing" ? "trial-ended" : "plan-ended" });
-    }),
+    ...expired.map((row) => () => expireManualSubscription({ db, row })),
   ];
 
   for (const job of jobs) {
     try {
       await job();
+    } catch (error) {
+      Sentry.captureException(error, { tags: { module: "manual-subscriptions" } });
+    }
+  }
+
+  for (const row of await listPendingExpiryNotices(db)) {
+    try {
+      await finishExpiry({ env, db, row });
     } catch (error) {
       Sentry.captureException(error, { tags: { module: "manual-subscriptions" } });
     }

@@ -24,7 +24,7 @@ const ENVIRONMENT_CONFIGS: Record<Environment, EnvironmentConfig> = {
   development: {
     adminOrigin: "https://admin.dev.qmenut.app",
     // The production landing's sign-up previews templates on the dev tenants (fine.dev.qmenut.app…).
-    landingOrigin: "https://landing.dev.qmenut.app,https://qmenut.app",
+    landingOrigin: "https://landing.dev.qmenut.app,https://qmenut.app,https://www.qmenut.app",
     apiBaseUrl: "https://api.dev.qmenut.app",
     devFixedOtp: "000000",
     turnstileSiteKey: "1x00000000000000000000AA",
@@ -113,18 +113,20 @@ try {
     await run(["bunx", "wrangler", "deploy", "--env", environment], appDirectory("api"));
   });
 
-  // web: @cloudflare/vite-plugin resuelve el entorno en build time vía CLOUDFLARE_ENV y escribe
-  // la config de deploy bajo dist/server. El deploy NO lleva --env.
-  await step("Deploy web", async () => {
+  // La landing de producción previsualiza en los tenants de desarrollo.
+  const deployWeb = async (target: Environment) => {
+    const webConfig = ENVIRONMENT_CONFIGS[target];
     await run(["bun", "run", "build"], appDirectory("web"), {
-      CLOUDFLARE_ENV: environment,
-      VITE_ADMIN_ORIGIN: config.adminOrigin,
-      VITE_LANDING_ORIGIN: config.landingOrigin,
+      CLOUDFLARE_ENV: target,
+      VITE_ADMIN_ORIGIN: webConfig.adminOrigin,
+      VITE_LANDING_ORIGIN: webConfig.landingOrigin,
     });
     await run(["bunx", "wrangler", "deploy"], appDirectory("web"), {
-      CLOUDFLARE_ENV: environment,
+      CLOUDFLARE_ENV: target,
     });
-  });
+  };
+  if (environment === "production") await step("Deploy development web previews", () => deployWeb("development"));
+  await step("Deploy web", () => deployWeb(environment));
 
   await step("Deploy admin", async () => {
     await run(["bun", "run", "build"], appDirectory("admin"), {

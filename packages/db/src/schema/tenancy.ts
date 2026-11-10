@@ -169,6 +169,7 @@ export const branchSubscriptions = sqliteTable(
     cancelAtPeriodEnd: integer("cancel_at_period_end", { mode: "boolean" }).notNull().default(false),
     // One of the first 100 paying Business restaurants: founder price for its first year.
     founder: integer("founder", { mode: "boolean" }).notNull().default(false),
+    expiryNotice: text("expiry_notice", { enum: ["trial-ended", "plan-ended"] }),
   },
   (table) => [
     foreignKey({

@@ -125,7 +125,7 @@ interface SyncBasicThemeFlagInput {
  * custom theme survives untouched for a re-upgrade. Idempotent: it writes only when the flag is
  * out of date, so a webhook retry after a failed write still converges. Returns whether it wrote.
  */
-async function syncBasicThemeFlag({ env, host, planCode }: SyncBasicThemeFlagInput): Promise<boolean> {
+export async function syncBasicThemeFlag({ env, host, planCode }: SyncBasicThemeFlagInput): Promise<boolean> {
   const plan = planCode === "basic" ? "basic" : undefined;
   const theme = await getTheme(env, host);
 

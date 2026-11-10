@@ -1,0 +1,1 @@
+ALTER TABLE `branch_subscriptions` ADD `expiry_notice` text;

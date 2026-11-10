@@ -16,6 +16,7 @@ const STEPS: { id: Step; label: string }[] = [
   { id: "restaurant", label: "Restaurante" },
   { id: "brand", label: "Marca" },
   { id: "account", label: "Cuenta" },
+  { id: "code", label: "Código" },
 ];
 const NEXT_LABEL: Record<Step, string> = {
   restaurant: "Siguiente",
@@ -119,6 +120,7 @@ export function SignupForm({ market }: { market: "es" | "ve" }) {
     if (step === "account") {
       send(async () => {
         await callApi({ path: "signup.requestCode", input: { email: draft.email, turnstileToken: draft.token } });
+        update({ token: null });
         setStep("code");
       });
     }
@@ -136,7 +138,7 @@ export function SignupForm({ market }: { market: "es" | "ve" }) {
   return (
     <form className={`signup signup--${step}`} onSubmit={submit}>
       <ol aria-label="Pasos" className="signup-steps">
-        {STEPS.map((item, index) => (
+        {STEPS.slice(0, 3).map((item, index) => (
           <li aria-current={item.id === step ? "step" : undefined} key={item.id}>
             {`${index + 1}. ${item.label}`}
           </li>

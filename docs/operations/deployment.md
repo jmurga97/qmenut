@@ -175,6 +175,8 @@ Workers **Custom Domains do not accept wildcards** (the Domains tab refuses `*`)
 6. Stripe (Spain only; Venezuela pays the team): coupon `amount_off` 16 EUR, `duration: repeating`, 12 months, applies to the Business product → `STRIPE_COUPON_FOUNDER`.
 7. Deploy `ming-email-worker` (template `trial-notice`) before the API.
 
+The production deploy also updates `qmenut-web-dev` before publishing the landing: its template previews need the landing's allowed origin. The preview tenants and their HTTPS certificates must remain available.
+
 `*.dev.qmenut.app` is a second-level wildcard: Universal SSL does not cover it, so dev demos need an Advanced Certificate. Test sign-up locally or in production.
 
 ## New tenant

@@ -162,6 +162,13 @@
       "when": 1794302068642,
       "tag": "0022_self_serve_trials",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1794308085459,
+      "tag": "0023_retry_demo_expiry",
+      "breakpoints": true
     }
   ]
 }

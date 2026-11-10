@@ -164,6 +164,7 @@ export function upsertBranchSubscriptionStatement({ db, data }: UpsertBranchSubs
         stripePriceId: data.stripePriceId,
         cancelAtPeriodEnd: data.cancelAtPeriodEnd,
         currentPeriodEnd: data.currentPeriodEnd,
+        expiryNotice: null,
         ...(data.founder ? { founder: true } : {}),
         updatedAt: now,
       },
