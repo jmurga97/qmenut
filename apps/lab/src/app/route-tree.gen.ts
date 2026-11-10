@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as LeadsRouteImport } from './routes/leads'
 import { Route as PayoutsRouteImport } from './routes/payouts'
+import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as BatchesBatchIdRouteImport } from './routes/batches.$batchId'
 import { Route as CampaignsIndexRouteImport } from './routes/campaigns.index'
 import { Route as CampaignsCampaignIdRouteImport } from './routes/campaigns.$campaignId'
@@ -37,6 +38,11 @@ const LeadsRoute = LeadsRouteImport.update({
 const PayoutsRoute = PayoutsRouteImport.update({
   id: '/payouts',
   path: '/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionsRoute = SubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BatchesBatchIdRoute = BatchesBatchIdRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/announcements': typeof AnnouncementsRoute
   '/leads': typeof LeadsRoute
   '/payouts': typeof PayoutsRoute
+  '/subscriptions': typeof SubscriptionsRoute
   '/batches/$batchId': typeof BatchesBatchIdRoute
   '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
   '/referrals/$referralId': typeof ReferralsReferralIdRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/announcements': typeof AnnouncementsRoute
   '/leads': typeof LeadsRoute
   '/payouts': typeof PayoutsRoute
+  '/subscriptions': typeof SubscriptionsRoute
   '/batches/$batchId': typeof BatchesBatchIdRoute
   '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
   '/referrals/$referralId': typeof ReferralsReferralIdRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/announcements': typeof AnnouncementsRoute
   '/leads': typeof LeadsRoute
   '/payouts': typeof PayoutsRoute
+  '/subscriptions': typeof SubscriptionsRoute
   '/batches/$batchId': typeof BatchesBatchIdRoute
   '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
   '/referrals/$referralId': typeof ReferralsReferralIdRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/announcements'
     | '/leads'
     | '/payouts'
+    | '/subscriptions'
     | '/batches/$batchId'
     | '/campaigns/$campaignId'
     | '/referrals/$referralId'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/announcements'
     | '/leads'
     | '/payouts'
+    | '/subscriptions'
     | '/batches/$batchId'
     | '/campaigns/$campaignId'
     | '/referrals/$referralId'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/announcements'
     | '/leads'
     | '/payouts'
+    | '/subscriptions'
     | '/batches/$batchId'
     | '/campaigns/$campaignId'
     | '/referrals/$referralId'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   AnnouncementsRoute: typeof AnnouncementsRoute
   LeadsRoute: typeof LeadsRoute
   PayoutsRoute: typeof PayoutsRoute
+  SubscriptionsRoute: typeof SubscriptionsRoute
   BatchesBatchIdRoute: typeof BatchesBatchIdRoute
   CampaignsCampaignIdRoute: typeof CampaignsCampaignIdRoute
   ReferralsReferralIdRoute: typeof ReferralsReferralIdRoute
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/payouts'
       fullPath: '/payouts'
       preLoaderRoute: typeof PayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscriptions': {
+      id: '/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/subscriptions'
+      preLoaderRoute: typeof SubscriptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/batches/$batchId': {
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnnouncementsRoute: AnnouncementsRoute,
   LeadsRoute: LeadsRoute,
   PayoutsRoute: PayoutsRoute,
+  SubscriptionsRoute: SubscriptionsRoute,
   BatchesBatchIdRoute: BatchesBatchIdRoute,
   CampaignsCampaignIdRoute: CampaignsCampaignIdRoute,
   ReferralsReferralIdRoute: ReferralsReferralIdRoute,

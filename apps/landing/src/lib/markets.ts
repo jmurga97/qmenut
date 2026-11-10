@@ -192,8 +192,8 @@ const es: Market = {
       "Un PDF hay que ampliarlo y volver a subirlo cada vez que cambia un precio. En Qmenut cambias el precio en el panel y ya está.",
     ],
     [
-      "¿Quién prepara mi carta?",
-      "Nosotros preparamos la primera versión con tu carta y tu marca. Después la mantienes tú desde el panel.",
+      "¿Quién carga mi carta?",
+      "Tú, desde el panel: empiezas la prueba gratis, cargas tus platos y se publican al momento. Si lo prefieres, te ayudamos por WhatsApp.",
     ],
     [
       "¿Necesito conocimientos técnicos?",
@@ -330,8 +330,8 @@ const ve: Market = {
       "Un PDF hay que ampliarlo y volver a subirlo cada vez que cambia un precio o la tasa. En Qmenut lo cambias en el panel y listo.",
     ],
     [
-      "¿Quién prepara mi menú?",
-      "Nosotros preparamos la primera versión con tu menú y tu marca. Después lo mantienes tú desde el panel.",
+      "¿Quién carga mi menú?",
+      "Tú, desde el panel: empiezas la prueba gratis, cargas tus platos y se publican al momento. Si lo prefieres, te ayudamos por WhatsApp.",
     ],
     [
       "¿Necesito conocimientos técnicos?",

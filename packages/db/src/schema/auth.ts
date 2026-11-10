@@ -6,6 +6,9 @@ export const users = sqliteTable("users", {
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
   image: text("image"),
+  // Self-serve sign-up only: E.164, not verified. Consent is the moment the owner ticked it.
+  phone: text("phone"),
+  marketingConsentAt: integer("marketing_consent_at"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });

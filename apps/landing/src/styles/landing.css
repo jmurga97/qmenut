@@ -448,3 +448,78 @@
     }
   }
 }
+
+/* ---- Sign-up island (/empezar) ------------------------------------------------------ */
+@layer landing {
+  .signup {
+    display: grid;
+    gap: var(--ming-space-5);
+    margin-block: var(--ming-space-6);
+  }
+  .signup-steps {
+    display: flex;
+    gap: var(--ming-space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+  .signup-steps [aria-current="step"] {
+    color: var(--foreground);
+  }
+  .signup-body {
+    display: grid;
+    grid-template-columns: minmax(0, 28rem);
+    gap: var(--ming-space-6);
+  }
+  .signup--brand .signup-body {
+    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+  }
+  .signup-fields {
+    display: grid;
+    gap: var(--ming-space-4);
+    align-content: start;
+  }
+  .signup-slug {
+    display: flex;
+    align-items: center;
+    gap: var(--ming-space-2);
+    font-family: var(--font-mono);
+  }
+  .signup-colors {
+    display: flex;
+    gap: var(--ming-space-5);
+  }
+  .signup-colors input[type="color"] {
+    inline-size: 3rem;
+    block-size: 2.5rem;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--ming-radius-control);
+    background: none;
+  }
+  .signup-note {
+    color: var(--muted-foreground);
+  }
+  .signup-preview {
+    inline-size: 100%;
+    max-inline-size: 26rem;
+    block-size: 40rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+}
+
+@media (max-width: 56rem) {
+  @layer landing {
+    .signup--brand .signup-body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .signup-preview {
+      block-size: 32rem;
+    }
+  }
+}

@@ -230,6 +230,17 @@ export const envSchema = z.object({
       typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",
     "El binding RESERVATION_LIMITER debe implementar limit",
   ),
+  SIGNUP_LIMITER: z.custom<RateLimit>(
+    (value) =>
+      typeof value === "object" && value !== null && typeof (value as { limit?: unknown }).limit === "function",
+    "El binding SIGNUP_LIMITER debe implementar limit",
+  ),
+  // Self-serve demos live on `<slug>` + this suffix (".qmenut.app" in production).
+  TRIAL_HOST_SUFFIX: z.string().trim().startsWith("."),
+  // Missing: self-serve sign-up refuses every request instead of the whole API failing to boot.
+  TURNSTILE_SECRET_KEY: optionalSecret,
+  // Stripe coupon for the founder price (Business, first 12 months). Empty: no founder discount at checkout.
+  STRIPE_COUPON_FOUNDER: optionalSecret,
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
   STRIPE_PRICE_BASIC: z.string().min(1),

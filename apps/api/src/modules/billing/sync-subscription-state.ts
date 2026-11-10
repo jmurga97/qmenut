@@ -3,6 +3,7 @@ import {
   updateBranchPlanStatement,
   upsertBranchSubscriptionStatement,
 } from "@qmenut/db/repositories/billing.repository";
+import { setBranchActiveStatement } from "@qmenut/db/repositories/trials.repository";
 import { buildDefaultTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 
 import { mapStripeStatus } from "./map-stripe-status";
@@ -14,6 +15,7 @@ import { getTheme, putTheme } from "../../lib/theme/tenant-theme-store";
 import type { RuntimeEnv } from "../../config/env/schema";
 import type { DrizzleDb } from "@qmenut/db/client";
 import type { PlanCode } from "@qmenut/db/repositories/billing.repository";
+import type { BatchItem } from "drizzle-orm/batch";
 import type Stripe from "stripe";
 
 interface SyncSubscriptionStateInput {
@@ -45,11 +47,16 @@ export async function syncSubscriptionState({ db, env, subscription }: SyncSubsc
 
   const currentPeriodEnd = subscription.items.data[0]?.current_period_end ?? null;
   const status = mapStripeStatus(subscription.status);
-  const effectivePlanCode = entitledPlanCode(status, planCode);
-  const branch = await getBranch({ db, restaurantId, branchId });
 
-  await db.batch([
-    upsertBranchSubscriptionStatement({
+  await writeBranchPlan({
+    db,
+    env,
+    restaurantId,
+    branchId,
+    planCode: entitledPlanCode(status, planCode),
+    // Paying again brings back the public menu of an expired demo; a Stripe cancellation keeps it on as Basic.
+    isActive: status === "canceled" ? undefined : true,
+    subscription: upsertBranchSubscriptionStatement({
       db,
       data: {
         restaurantId,
@@ -60,22 +67,49 @@ export async function syncSubscriptionState({ db, env, subscription }: SyncSubsc
         stripePriceId: priceId,
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
         currentPeriodEnd: currentPeriodEnd ? currentPeriodEnd * 1000 : null,
+        founder: subscription.metadata.founder === "true" || undefined,
       },
     }),
-    updateBranchPlanStatement({
-      db,
-      restaurantId,
-      branchId,
-      planCode: effectivePlanCode,
-    }),
+  });
+}
+
+interface WriteBranchPlanInput {
+  db: DrizzleDb;
+  env: RuntimeEnv;
+  restaurantId: string;
+  branchId: string;
+  /** Effective plan for entitlements (canceled → basic). */
+  planCode: PlanCode;
+  /** Public menu on/off; undefined leaves it as it is. */
+  isActive?: boolean;
+  subscription: BatchItem<"sqlite">;
+}
+
+/** One write path for Stripe, staff activations and demo expiry: subscription row, branch plan, theme flag, cache. */
+export async function writeBranchPlan({
+  db,
+  env,
+  restaurantId,
+  branchId,
+  planCode,
+  isActive,
+  subscription,
+}: WriteBranchPlanInput): Promise<void> {
+  const branch = await getBranch({ db, restaurantId, branchId });
+
+  await db.batch([
+    subscription,
+    updateBranchPlanStatement({ db, restaurantId, branchId, planCode }),
+    ...(isActive === undefined ? [] : [setBranchActiveStatement({ db, restaurantId, branchId, isActive })]),
   ]);
 
   const themeChanged = branch?.customDomain
-    ? await syncBasicThemeFlag({ env, host: branch.customDomain, planCode: effectivePlanCode })
+    ? await syncBasicThemeFlag({ env, host: branch.customDomain, planCode })
     : false;
 
   // The public menu strips Business content by this branch's plan, so its cached pages must refresh.
-  if (branch?.planCode !== effectivePlanCode || themeChanged) {
+  const activeChanged = isActive !== undefined && branch?.isActive !== isActive;
+  if (branch?.planCode !== planCode || activeChanged || themeChanged) {
     await bumpPublicContentVersionForBranch({ db, env, restaurantId, branchId });
   }
 }

@@ -77,7 +77,7 @@ for (const state of ["empty category", "hidden dishes", "empty menu"]) {
       await expect(diner.locator("button.dish-trigger")).toHaveCount(0);
     }
     await diner.getByRole("tab", { name: "Contacto", exact: true }).click();
-    await expect(diner).toHaveURL(/\/es\/contacto$/);
+    await expect(diner).toHaveURL(/:4011\/contacto$/);
   });
 }
 

@@ -1,6 +1,15 @@
 # Self-serve demos: implementation plan
 
-Status: designed (grilling session 2026-11-03), not started.
+Status: implemented 2026-11-10 on `feat/self-serve-demos`; production setup pending (see [Deployment](../operations/deployment.md#self-serve-demos-qmenutapp)).
+
+Changes from the design below, decided on 2026-11-10:
+
+- No `trial_ends_at` column: `branch_subscriptions.current_period_end` holds the end date of any plan billed outside Stripe (demo or staff-activated). Rules in [Billing](../domains/billing.md#plans-billed-outside-stripe).
+- Reminder 5 days before the end (not day 11), with the landing figures. Staff-activated plans get the same reminder and expiry.
+- Venezuela never uses Stripe: the admin shows WhatsApp, staff activate in Lab › Restaurantes.
+- Founder price: 100 places, Business at 39/month for the first year, live counter on the landing.
+- Lab › Restaurantes lists every sign-up (owner, phone, host, days left) instead of a staff email.
+- Skipped for now: logo upload in the form (done in the admin), noindex for demo branches, legal-data modal before Stripe.
 
 A restaurant signs up from `qmenut.app/empezar` in three steps, gets a 14-day **Business**
 trial on `<slug>.qmenut.app` in **production**, no card. At day 14 the trial ends; the owner

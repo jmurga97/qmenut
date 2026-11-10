@@ -126,6 +126,8 @@ export interface UpsertBranchSubscriptionData {
   stripePriceId: string;
   cancelAtPeriodEnd: boolean;
   currentPeriodEnd: number | null;
+  /** Set once from Checkout metadata; omitted keeps the stored value. */
+  founder?: boolean;
 }
 
 interface UpsertBranchSubscriptionInput {
@@ -149,6 +151,7 @@ export function upsertBranchSubscriptionStatement({ db, data }: UpsertBranchSubs
       stripePriceId: data.stripePriceId,
       cancelAtPeriodEnd: data.cancelAtPeriodEnd,
       currentPeriodEnd: data.currentPeriodEnd,
+      founder: data.founder ?? false,
       createdAt: now,
       updatedAt: now,
     })
@@ -161,6 +164,7 @@ export function upsertBranchSubscriptionStatement({ db, data }: UpsertBranchSubs
         stripePriceId: data.stripePriceId,
         cancelAtPeriodEnd: data.cancelAtPeriodEnd,
         currentPeriodEnd: data.currentPeriodEnd,
+        ...(data.founder ? { founder: true } : {}),
         updatedAt: now,
       },
     });

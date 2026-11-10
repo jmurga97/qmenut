@@ -6,12 +6,16 @@ import HeroWire from "../../components/hero-wire.astro";
 import ShowcaseStory from "../../components/showcase-story.astro";
 import "../../styles/showcase.css";
 import { getUsdRate } from "../../lib/exchange-rate";
+import { getFounderSlotsLeft } from "../../lib/api";
 import { markets } from "../../lib/markets";
 import type { MarketId } from "../../lib/markets";
 const market = Astro.params.market as MarketId;
 if (!Object.hasOwn(markets, market)) return new Response(null, { status: 404 });
 const content = markets[market];
-const rate = market === "ve" ? await getUsdRate() : undefined;
+const [rate, founders] = await Promise.all([
+  market === "ve" ? getUsdRate() : Promise.resolve(undefined),
+  getFounderSlotsLeft(),
+]);
 ---
 
 <BaseLayout market={market} title={`Qmenut · ${content.eyebrow}`} description={content.description}>
@@ -24,8 +28,8 @@ const rate = market === "ve" ? await getUsdRate() : undefined;
           <p class="hero-subtitle">{content.subtitle}</p>
         </hgroup>
         <div class="actions">
-          <a class="button" href={content.whatsapp.contact}>
-            Escríbenos por WhatsApp
+          <a class="button" href={`/${market}/empezar`}>
+            Prueba gratis 14 días
           </a>
           <a class="text-link" href={`/${market}/precios`}>
             Ver planes
@@ -40,8 +44,8 @@ const rate = market === "ve" ? await getUsdRate() : undefined;
   </section>
   <ShowcaseStory market={market} rate={rate} />
   <nav class="mobile-cta" aria-label="Contacto">
-    <a class="button button--small" href={content.whatsapp.contact}>
-      Escríbenos por WhatsApp
+    <a class="button button--small" href={`/${market}/empezar`}>
+      Prueba gratis 14 días
     </a>
     <a class="text-link" href={`/${market}/precios`}>
       Ver planes
@@ -64,9 +68,12 @@ const rate = market === "ve" ? await getUsdRate() : undefined;
   <section class="dark ink-band">
     <div class="container section">
       <h2>Planes para tu restaurante</h2>
-      <PlanCards market={market} />
+      <PlanCards market={market} founders={founders} />
       <div class="actions">
-        <a class="button" href={`/${market}/precios`}>
+        <a class="button" href={`/${market}/empezar`}>
+          Prueba gratis 14 días
+        </a>
+        <a class="text-link" href={`/${market}/precios`}>
           Comparar planes
         </a>
       </div>
@@ -96,11 +103,11 @@ const rate = market === "ve" ? await getUsdRate() : undefined;
   <section class="container section">
     <h2>{content.hero}</h2>
     <div class="actions">
-      <a class="button" href={content.whatsapp.contact}>
-        Escríbenos por WhatsApp
+      <a class="button" href={`/${market}/empezar`}>
+        Prueba gratis 14 días
       </a>
-      <a class="text-link" href={`/${market}/precios`}>
-        Comparar planes
+      <a class="text-link" href={content.whatsapp.contact}>
+        Escríbenos por WhatsApp
       </a>
     </div>
   </section>

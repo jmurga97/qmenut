@@ -32,6 +32,7 @@
     // apps/api/.wrangler/state and would otherwise hide every UI edit until it expires.
     "DISABLE_EDGE_CACHE": "true",
     "SENTRY_DSN": "",
+    "SENTRY_ENVIRONMENT": "local",
   },
   "observability": {
     "enabled": true,
@@ -61,6 +62,7 @@
         "ALLOW_INDEXING": "false",
         "DISABLE_EDGE_CACHE": "true",
         "SENTRY_DSN": "https://69120b8a5d45193dac3ca3acb95fce42@o4511851717394432.ingest.de.sentry.io/4511869342777424",
+        "SENTRY_ENVIRONMENT": "development",
       },
       "observability": {
         "enabled": true,
@@ -86,6 +88,7 @@
       "vars": {
         "ALLOW_INDEXING": "true",
         "SENTRY_DSN": "https://69120b8a5d45193dac3ca3acb95fce42@o4511851717394432.ingest.de.sentry.io/4511869342777424",
+        "SENTRY_ENVIRONMENT": "production",
       },
       "observability": {
         "enabled": true,

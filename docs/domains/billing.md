@@ -32,6 +32,20 @@ sequenceDiagram
 - Billing writes are owner-only (`billing.manage`).
 - Never infer state from the Checkout response.
 
+## Plans billed outside Stripe
+
+Self-serve demos and staff-activated plans share one shape: no `stripe_subscription_id` and an end date in `current_period_end`. Ops-created `trialing` rows keep it `NULL` and never expire.
+
+- **Demo** (`/empezar`, `modules/signup/`): Business, `trialing`, 14 days. One per email (an email with any membership is refused). Its later Checkout gets no Stripe trial.
+- **Manual plan** (Lab › Restaurantes, `modules/lab/lab-subscriptions.ts`): staff record a payment made outside Stripe (Venezuela: Zelle, Binance, Pago Móvil) or extend a demo. `active` or `trialing` until a date.
+- **Daily cron** (`manual-subscription-jobs.ts`): 5 days before the end, email `trial-notice` (`trial-ending` / `plan-ending`). At the end: `canceled`, plan `basic`, `branches.is_active = false` (public menu 404, nothing deleted), email `trial-ended` / `plan-ended`. Paying (Stripe webhook or Lab) turns the branch back on.
+- **Venezuela**: Checkout is refused for `country_code = VEN`; the admin shows a WhatsApp button instead.
+- `writeBranchPlan` (`sync-subscription-state.ts`) is the one write path for Stripe, Lab and expiry.
+
+## Founder price
+
+The first 100 Business restaurants (both markets) pay 39/month for their first year. `branch_subscriptions.founder` marks them; the count is public (`signup.founders`) and drives the landing and admin copy. Spain: Checkout adds `STRIPE_COUPON_FOUNDER` while places remain and the webhook sets the flag from metadata. Venezuela: staff tick "Founder" in Lab. A place is taken when the payment lands, so two simultaneous checkouts can both take the last one.
+
 ## Data
 
 | Table                        | Holds                                                        |

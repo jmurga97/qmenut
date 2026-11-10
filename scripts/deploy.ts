@@ -13,20 +13,29 @@ type Environment = "development" | "production";
 
 interface EnvironmentConfig {
   adminOrigin: string;
+  landingOrigin: string;
   apiBaseUrl: string;
   devFixedOtp: string;
+  // Turnstile widget for the landing sign-up (public site key; the secret lives in the API Worker).
+  turnstileSiteKey: string;
 }
 
 const ENVIRONMENT_CONFIGS: Record<Environment, EnvironmentConfig> = {
   development: {
     adminOrigin: "https://admin.dev.qmenut.app",
+    // The production landing's sign-up previews templates on the dev tenants (fine.dev.qmenut.app…).
+    landingOrigin: "https://landing.dev.qmenut.app,https://qmenut.app",
     apiBaseUrl: "https://api.dev.qmenut.app",
     devFixedOtp: "000000",
+    turnstileSiteKey: "1x00000000000000000000AA",
   },
   production: {
     adminOrigin: "https://admin.qmenut.app",
+    landingOrigin: "https://qmenut.app",
     apiBaseUrl: "https://api.qmenut.app",
     devFixedOtp: "",
+    // Site key of the qmenut.app Turnstile widget (public); the secret is the API's TURNSTILE_SECRET_KEY.
+    turnstileSiteKey: "0x4AAAAAAF7JFM7N4u3p7XwL",
   },
 };
 
@@ -110,6 +119,7 @@ try {
     await run(["bun", "run", "build"], appDirectory("web"), {
       CLOUDFLARE_ENV: environment,
       VITE_ADMIN_ORIGIN: config.adminOrigin,
+      VITE_LANDING_ORIGIN: config.landingOrigin,
     });
     await run(["bunx", "wrangler", "deploy"], appDirectory("web"), {
       CLOUDFLARE_ENV: environment,
@@ -134,7 +144,12 @@ try {
 
   if (environment === "production") {
     await step("Deploy landing", async () => {
-      await run(["bun", "run", "build"], appDirectory("landing"), { CLOUDFLARE_ENV: "production" });
+      if (!config.turnstileSiteKey) throw new Error("Falta turnstileSiteKey de producción en scripts/deploy.ts");
+      await run(["bun", "run", "build"], appDirectory("landing"), {
+        CLOUDFLARE_ENV: "production",
+        PUBLIC_API_URL: config.apiBaseUrl,
+        PUBLIC_TURNSTILE_SITE_KEY: config.turnstileSiteKey,
+      });
       await run(["bunx", "wrangler", "deploy"], appDirectory("landing"), { CLOUDFLARE_ENV: "production" });
     });
   }

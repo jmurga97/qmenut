@@ -1,6 +1,7 @@
 import { expect, test } from "../../fixtures/test";
 
-const ROUTE_PATHS_WITHOUT_LOYALTY = ["/", "/contacto", "/destacados", "/aviso-legal", "/privacidad"];
+// Searchable pages only: legal pages and the loyalty card are noindex and stay out of the sitemap.
+const SITEMAP_PATHS = ["", "/contacto", "/destacados"];
 
 test("serves a development-wide noindex policy and localized sitemap through the edge cache", async ({ request }) => {
   const cacheKey = Date.now();
@@ -22,12 +23,14 @@ test("serves a development-wide noindex policy and localized sitemap through the
   expect(firstSitemap.headers()["content-type"]).toContain("application/xml");
   expect(firstSitemap.headers()["x-robots-tag"]).toBe("noindex, nofollow");
   expect(firstSitemap.headers()["x-qmenut-cache"]).toBe("MISS");
-  expect((sitemap.match(/<url>/g) ?? []).length).toBe(ROUTE_PATHS_WITHOUT_LOYALTY.length);
-  for (const path of ROUTE_PATHS_WITHOUT_LOYALTY) {
-    expect(sitemap).toContain(`https://fine.localhost${path}`);
-    expect(sitemap).toContain(`https://fine.localhost/en${path === "/" ? "/" : path}`);
+  // One <url> per language version (es, en).
+  expect((sitemap.match(/<url>/g) ?? []).length).toBe(SITEMAP_PATHS.length * 2);
+  for (const path of SITEMAP_PATHS) {
+    expect(sitemap).toContain(`<loc>https://fine.localhost${path}</loc>`);
+    expect(sitemap).toContain(`<loc>https://fine.localhost/en${path}</loc>`);
   }
   expect(sitemap).not.toContain("https://fine.localhost/puntos");
+  expect(sitemap).not.toContain("https://fine.localhost/aviso-legal");
   expect(sitemap).toContain('hreflang="x-default"');
   expect((await request.get(sitemapUrl)).headers()["x-qmenut-cache"]).toBe("HIT");
 });

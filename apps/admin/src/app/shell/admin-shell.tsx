@@ -5,6 +5,7 @@ import { Outlet, useLocation, useNavigate, useRouteContext, useRouter } from "@t
 
 import { getListRestaurantsQueryOptions } from "~/features/auth/api";
 import { useSelectRestaurant } from "~/features/auth/hooks/use-select-restaurant";
+import { TrialBanner } from "~/features/billing/components/trial-banner";
 import { NotificationBell } from "~/features/notifications/components/notification-bell";
 import { PushDevicePrompt } from "~/features/notifications/components/push-device-prompt";
 import { signOut } from "~/lib/auth-client";
@@ -216,6 +217,7 @@ export function AdminShell() {
     >
       <div className="admin-main-slot">
         {selectedBranch ? <ImageActivityToasts branchId={selectedBranch.id} /> : null}
+        {can(tenant.roleCode, "billing.manage") ? <TrialBanner /> : null}
         {currentSection && isLocked(currentSection) ? <PlanLockedState /> : <Outlet />}
       </div>
     </AppShell>

@@ -9,6 +9,7 @@ import { jsonResponse } from "@/http/json";
 import { publishPendingImages } from "@/modules/admin-images/image-finalization";
 import { runAnalyticsDailyJob } from "@/modules/analytics/digest/run-analytics-daily-job";
 import { handleStripeWebhook } from "@/modules/billing/handle-stripe-webhook";
+import { runManualSubscriptionJobs } from "@/modules/billing/manual-subscription-jobs";
 import { runReferralJobs } from "@/modules/lab/campaign-jobs";
 import { handleEmailEvents } from "@/modules/lab/email-events";
 import { handleMessagingEvents } from "@/modules/messaging/handle-messaging-events";
@@ -106,9 +107,11 @@ export default Sentry.withSentry(
     },
     // eslint-disable-next-line max-params -- Cloudflare ScheduledHandler contract.
     scheduled(controller: ScheduledController, rawEnv: EnvBindings, ctx: ExecutionContext): void {
-      // Cron diario de producción: sincroniza PostHog → D1 y despacha el digest quincenal.
-      if (controller.cron === "45 4 * * *") ctx.waitUntil(handleScheduledAnalytics(rawEnv));
-      else {
+      // Cron diario de producción: PostHog → D1 y digest quincenal; recordatorios y fin de demos y planes manuales.
+      if (controller.cron === "45 4 * * *") {
+        ctx.waitUntil(handleScheduledAnalytics(rawEnv));
+        ctx.waitUntil(runManualSubscriptionJobs(parseEnv(rawEnv)));
+      } else {
         const env = parseEnv(rawEnv);
         ctx.waitUntil(
           Promise.allSettled([

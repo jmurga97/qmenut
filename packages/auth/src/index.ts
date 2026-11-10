@@ -45,6 +45,8 @@ export interface CreateAuthOptions {
   trustedOrigins?: string[];
   emailOtpSender: EmailOtpSender;
   cookieMode?: AuthCookieMode;
+  /** Only the self-serve sign-up instance creates users; the admin login never does. */
+  allowSignUp?: boolean;
   fixedOtpAccounts?: readonly {
     email: string;
     otp: string;
@@ -172,6 +174,7 @@ export function createAuth({
   trustedOrigins,
   emailOtpSender,
   cookieMode = "same-site",
+  allowSignUp = false,
   fixedOtpAccounts,
 }: CreateAuthOptions) {
   const fixedOtpByEmail = new Map(
@@ -201,7 +204,7 @@ export function createAuth({
     advanced: getAdvancedCookieOptions(cookieMode),
     plugins: [
       emailOTP({
-        disableSignUp: true,
+        disableSignUp: !allowSignUp,
         otpLength: OTP_LENGTH,
         expiresIn: OTP_EXPIRES_IN_SECONDS,
         allowedAttempts: OTP_MAX_ATTEMPTS,

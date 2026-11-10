@@ -1,10 +1,13 @@
 ---
+import { FOUNDER_PRICE } from "../lib/api";
 import type { MarketId } from "../lib/markets";
 import { markets } from "../lib/markets";
 interface Props {
   market: MarketId;
+  // Founder places left; null when the count is unavailable, 0 once the promo is over.
+  founders: number | null;
 }
-const { market } = Astro.props;
+const { market, founders } = Astro.props;
 const content = markets[market];
 const format = new Intl.NumberFormat(market === "es" ? "es-ES" : "es-VE", {
   style: "currency",
@@ -14,18 +17,37 @@ const format = new Intl.NumberFormat(market === "es" ? "es-ES" : "es-VE", {
 ---
 
 <ul class="grid plans">
-  {content.plans.map((plan) => (
-    <li class:list={{ featured: plan.name === "Business" }}>
-      <h3>{plan.name}</h3>
-      <p>{plan.description}</p>
-      <p class="figure">
-        {format.format(plan.price)} <small>/ mes · impuestos aparte</small>
-      </p>
-      <ul>
-        {plan.highlights.map((item) => (
-          <li>{item}</li>
-        ))}
-      </ul>
-    </li>
-  ))}
+  {content.plans.map((plan) => {
+    const founder = plan.name === "Business" && founders !== 0;
+    return (
+      <li class:list={{ featured: plan.name === "Business" }}>
+        <h3>{plan.name}</h3>
+        <p>{plan.description}</p>
+        {founder ? (
+          <>
+            <p class="tag">
+              {founders === null
+                ? "Precio founder · 100 primeros restaurantes"
+                : `Precio founder · quedan ${founders} de 100 plazas`}
+            </p>
+            <p class="figure">
+              {format.format(FOUNDER_PRICE)}{" "}
+              <small>
+                / mes el primer año · luego <s>{format.format(plan.price)}</s>
+              </small>
+            </p>
+          </>
+        ) : (
+          <p class="figure">
+            {format.format(plan.price)} <small>/ mes · impuestos aparte</small>
+          </p>
+        )}
+        <ul>
+          {plan.highlights.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </li>
+    );
+  })}
 </ul>

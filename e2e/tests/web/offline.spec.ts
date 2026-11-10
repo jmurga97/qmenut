@@ -24,7 +24,7 @@ test("reads a previously visited menu while offline", async ({ page, context }) 
   try {
     await page.reload();
     await expect(page.getByText("Croquetas de jamón", { exact: true }).first()).toBeVisible();
-    await expect(page).toHaveURL(/\/es\/?$/);
+    await expect(page).toHaveURL(/:4011\/$/);
   } finally {
     await context.setOffline(false);
   }

@@ -48,7 +48,7 @@ export default Sentry.withSentry<Cloudflare.Env>(
     env.SENTRY_DSN
       ? {
           dsn: env.SENTRY_DSN,
-          environment: "production",
+          environment: env.SENTRY_ENVIRONMENT,
           dataCollection: {
             userInfo: false,
             cookies: false,

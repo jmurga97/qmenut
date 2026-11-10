@@ -8,14 +8,16 @@ import type { DrizzleDb } from "@qmenut/db/client";
 interface CreateAuthInput {
   db: DrizzleDb;
   env: RuntimeEnv;
+  allowSignUp?: boolean;
 }
 
 const DEVELOPMENT_OTP = "000000";
 
-export function createAuth({ db, env }: CreateAuthInput) {
-  const usesDevelopmentOtp =
-    env.DEV_FIXED_OTP === "true" && (env.NODE_ENV === "development" || env.NODE_ENV === "test");
-  const fixedOtpAccounts = usesDevelopmentOtp ? [{ email: FIXED_OTP_WILDCARD, otp: DEVELOPMENT_OTP }] : undefined;
+const usesDevelopmentOtp = (env: RuntimeEnv): boolean =>
+  env.DEV_FIXED_OTP === "true" && (env.NODE_ENV === "development" || env.NODE_ENV === "test");
+
+export function createAuth({ db, env, allowSignUp }: CreateAuthInput) {
+  const fixedOtpAccounts = usesDevelopmentOtp(env) ? [{ email: FIXED_OTP_WILDCARD, otp: DEVELOPMENT_OTP }] : undefined;
 
   return createEmailOtpAuth({
     db,
@@ -28,6 +30,18 @@ export function createAuth({ db, env }: CreateAuthInput) {
       expiresInLabel: OTP_EXPIRES_IN_LABEL,
     }),
     fixedOtpAccounts,
+    allowSignUp,
+  });
+}
+
+/** Sign-up code for an email with no user yet; Better Auth's own send endpoint refuses those. */
+export async function sendSignupCode({ db, env, email }: CreateAuthInput & { email: string }): Promise<void> {
+  const otp = await createAuth({ db, env }).api.createVerificationOTP({ body: { email, type: "sign-in" } });
+  if (usesDevelopmentOtp(env)) return;
+  await createEmailWorkerOtpSender({ worker: env.EMAIL_WORKER, expiresInLabel: OTP_EXPIRES_IN_LABEL })({
+    email,
+    otp,
+    type: "sign-in",
   });
 }
 

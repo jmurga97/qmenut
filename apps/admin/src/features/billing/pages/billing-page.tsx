@@ -1,4 +1,5 @@
 import { Button } from "@jmurga97/components";
+import { buttonVariants } from "@jmurga97/components/button";
 import { PLAN_CODES } from "@qmenut/permissions";
 import { Suspense } from "react";
 
@@ -51,17 +52,45 @@ function planActionLabel({ planCode, subscribed, hadSubscription }: PlanActionIn
   return i18n.t("billing___Probar {{plan}} 14 días", { plan });
 }
 
+// Placeholder until the real sales line exists; same number as the landing's Venezuelan WhatsApp.
+const VENEZUELA_SALES_WHATSAPP = "584120000000";
+const dateFormat = new Intl.DateTimeFormat(i18n.language, { day: "numeric", month: "long", year: "numeric" });
+
+function whatsappActivationUrl(restaurantName: string): string {
+  const text = i18n.t("billing___Hola, quiero activar el plan de {{restaurant}} en QMenut.", {
+    restaurant: restaurantName,
+  });
+  return `https://wa.me/${VENEZUELA_SALES_WHATSAPP}?text=${encodeURIComponent(text)}`;
+}
+
 function BillingBranches() {
   const controller = useBillingController();
+  const { overview } = controller;
   // Basic is a single-location plan; the API refuses it too.
-  const multiBranch = controller.overview.branches.length > 1;
+  const multiBranch = overview.branches.length > 1;
+  // Stripe does not serve Venezuela: the team activates the plan after a direct payment.
+  const paysTeam = overview.countryCode === "VEN";
+  const currency = paysTeam ? "$" : "€";
   return (
     <>
       {multiBranch ? (
         <p className="admin-copy">{i18n.t("billing___Con varias sucursales, cada una necesita el plan Business.")}</p>
       ) : null}
+      {overview.founderSlotsLeft > 0 ? (
+        <p className="admin-copy">
+          {i18n.t(
+            "billing___Precio founder: Business a {{price}} al mes el primer año. Quedan {{count}} de 100 plazas.",
+            { price: `39 ${currency}`, count: overview.founderSlotsLeft },
+          )}
+        </p>
+      ) : null}
+      {paysTeam ? (
+        <p className="admin-copy">
+          {i18n.t("billing___En Venezuela activamos tu plan por WhatsApp: Zelle, Binance o Pago Móvil.")}
+        </p>
+      ) : null}
       <div className="admin-page-grid">
-        {controller.overview.branches.map((branch) => {
+        {overview.branches.map((branch) => {
           const subscribed = branch.hasStripeSubscription && branch.status !== "canceled";
           return (
             <section className="admin-card" key={branch.branchId}>
@@ -73,43 +102,62 @@ function BillingBranches() {
               {branch.cancelAtPeriodEnd ? (
                 <p className="admin-copy">{i18n.t("billing___Cancelación programada.")}</p>
               ) : null}
-              <div className="admin-topbar-actions">
-                {PLAN_CODES.filter((planCode) => !subscribed || planCode !== branch.planCode).map((planCode) => {
-                  const label = planActionLabel({
-                    planCode,
-                    subscribed,
-                    hadSubscription: branch.hasStripeSubscription,
-                  });
-                  return (
-                    <Button
-                      aria-label={i18n.t("billing___{{plan}} para {{branch}}", {
-                        plan: label,
-                        branch: branch.branchName,
-                      })}
-                      disabled={controller.busy || (planCode === "basic" && multiBranch)}
-                      key={planCode}
-                      onClick={() =>
-                        subscribed
-                          ? controller.changePlan(branch.branchId, planCode)
-                          : controller.subscribe(branch.branchId, planCode)
-                      }
-                      variant={planCode === "business" ? "primary" : "secondary"}
-                    >
-                      {label}
-                    </Button>
-                  );
-                })}
-                {subscribed ? (
-                  <Button
-                    aria-label={i18n.t("billing___Gestionar {{branch}} en Stripe", { branch: branch.branchName })}
-                    disabled={controller.busy}
-                    onClick={controller.openPortal}
-                    variant={"ghost"}
+              {!branch.hasStripeSubscription && branch.currentPeriodEnd ? (
+                <p className="admin-copy">
+                  {i18n.t("billing___Hasta el {{date}}", { date: dateFormat.format(branch.currentPeriodEnd) })}
+                </p>
+              ) : null}
+              {paysTeam ? (
+                <div className="admin-topbar-actions">
+                  <a
+                    className={buttonVariants({ variant: "primary" })}
+                    href={whatsappActivationUrl(branch.branchName)}
+                    rel="noreferrer"
+                    target="_blank"
                   >
-                    {i18n.t("billing___Gestionar en Stripe")}
-                  </Button>
-                ) : null}
-              </div>
+                    {i18n.t("billing___Activar por WhatsApp")}
+                  </a>
+                </div>
+              ) : (
+                <div className="admin-topbar-actions">
+                  {PLAN_CODES.filter((planCode) => !subscribed || planCode !== branch.planCode).map((planCode) => {
+                    const label = planActionLabel({
+                      planCode,
+                      subscribed,
+                      // A demo or staff-activated plan already had its free days.
+                      hadSubscription: branch.hasStripeSubscription || branch.currentPeriodEnd !== null,
+                    });
+                    return (
+                      <Button
+                        aria-label={i18n.t("billing___{{plan}} para {{branch}}", {
+                          plan: label,
+                          branch: branch.branchName,
+                        })}
+                        disabled={controller.busy || (planCode === "basic" && multiBranch)}
+                        key={planCode}
+                        onClick={() =>
+                          subscribed
+                            ? controller.changePlan(branch.branchId, planCode)
+                            : controller.subscribe(branch.branchId, planCode)
+                        }
+                        variant={planCode === "business" ? "primary" : "secondary"}
+                      >
+                        {label}
+                      </Button>
+                    );
+                  })}
+                  {subscribed ? (
+                    <Button
+                      aria-label={i18n.t("billing___Gestionar {{branch}} en Stripe", { branch: branch.branchName })}
+                      disabled={controller.busy}
+                      onClick={controller.openPortal}
+                      variant={"ghost"}
+                    >
+                      {i18n.t("billing___Gestionar en Stripe")}
+                    </Button>
+                  ) : null}
+                </div>
+              )}
             </section>
           );
         })}

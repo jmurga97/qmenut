@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import Stripe from "stripe";
 
 import { getOrCreateStripeCustomer } from "./get-or-create-customer";
+import { founderSlotsLeft } from "../../lib/billing/founders";
 import { priceIdFor } from "../../lib/billing/plan-catalog";
 import { StripeProvider } from "../../lib/stripe/stripe-provider";
 import { assertBranchAccess } from "../admin-tenant/assert-branch-access";
@@ -66,6 +67,14 @@ export async function createCheckoutSession({
     throw new TRPCError({ code: "NOT_FOUND", message: "Restaurante no encontrado" });
   }
 
+  // Stripe does not serve Venezuela: those plans are paid to the team and activated from Lab.
+  if (restaurant.countryCode === "VEN") {
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "En Venezuela el plan se activa con el equipo de QMenut",
+    });
+  }
+
   const customer = await getOrCreateStripeCustomer({
     db,
     env,
@@ -76,6 +85,12 @@ export async function createCheckoutSession({
 
   const stripe = StripeProvider.getInstance().getClient(env);
   const priceId = priceIdFor(env, planCode);
+  // A demo or a staff-activated plan already had its free days; only a branch that never tried pays later.
+  const hadTrial = Boolean(existing?.stripeSubscriptionId) || typeof existing?.currentPeriodEnd === "number";
+  // ponytail: a place is taken when the webhook lands, so two checkouts racing for the last one both get it.
+  const founder =
+    planCode === "business" && env.STRIPE_COUPON_FOUNDER !== undefined && (await founderSlotsLeft(db)) > 0;
+  const metadata = { restaurantId, branchId, planCode, ...(founder ? { founder: "true" } : {}) };
 
   let session: Stripe.Checkout.Session;
 
@@ -87,11 +102,12 @@ export async function createCheckoutSession({
         line_items: [{ price: priceId, quantity: 1 }],
         client_reference_id: branchId,
         subscription_data: {
-          metadata: { restaurantId, branchId, planCode },
-          // One free trial per branch: a branch that already had a Stripe subscription pays from day one.
-          trial_period_days: existing?.stripeSubscriptionId ? undefined : TRIAL_DAYS,
+          metadata,
+          // One free trial per branch.
+          trial_period_days: hadTrial ? undefined : TRIAL_DAYS,
         },
-        metadata: { restaurantId, branchId, planCode },
+        ...(founder ? { discounts: [{ coupon: env.STRIPE_COUPON_FOUNDER }] } : {}),
+        metadata,
         success_url: `${env.ADMIN_APP_URL}/billing?checkout=success`,
         cancel_url: `${env.ADMIN_APP_URL}/billing?checkout=canceled`,
       },
@@ -99,7 +115,7 @@ export async function createCheckoutSession({
         // Scoped to branch and plan: plan changes after checkout belong in the Customer Portal.
         // Stripe retains idempotency keys for 24 hours, so repeating the same plan's checkout
         // in that window with different parameters is reported as a conflict.
-        idempotencyKey: `checkout:${branchId}:${planCode}`,
+        idempotencyKey: `checkout:${branchId}:${planCode}:${founder ? "founder" : "list"}`,
       },
     );
   } catch (error) {

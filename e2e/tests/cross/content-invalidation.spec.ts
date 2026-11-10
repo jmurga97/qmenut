@@ -257,7 +257,7 @@ test("derives loyalty availability and invalidates public SEO when the program i
       await expect(
         publicPage.getByRole("heading", { name: /Todavía no hay premios disponibles|There are no rewards yet/ }),
       ).toBeVisible();
-      await expect(publicPage.locator('meta[name="robots"]').first()).toHaveAttribute("content", "noindex,nofollow");
+      await expect(publicPage.locator('meta[name="robots"]').first()).toHaveAttribute("content", /^noindex,/);
     } finally {
       await publicPage.close();
     }

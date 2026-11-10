@@ -8,6 +8,10 @@
       "types": "./src/client.ts",
       "import": "./src/client.ts"
     },
+    "./repositories/trials.repository": {
+      "types": "./src/repositories/trials.repository.ts",
+      "import": "./src/repositories/trials.repository.ts"
+    },
     "./repositories/admin-branches.repository": {
       "types": "./src/repositories/admin-branches.repository.ts",
       "import": "./src/repositories/admin-branches.repository.ts"

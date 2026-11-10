@@ -1,7 +1,8 @@
 import { expect, test } from "../../fixtures/test";
 
 test("renders and edge-caches the seeded default-language tapas menu", async ({ page, request }) => {
-  const cachePath = "/es/";
+  // A fresh query string keeps earlier runs from pre-filling the edge cache.
+  const cachePath = `/?menu-cache=${Date.now()}`;
   const firstResponse = await request.get(cachePath);
   const firstBody = await firstResponse.text();
 
@@ -29,9 +30,10 @@ test("renders and edge-caches the seeded default-language tapas menu", async ({ 
 });
 
 test("renders explicit Spanish and English locale routes", async ({ page }) => {
+  // `/es` duplicates the Spanish-default root, so it redirects there.
   await page.goto("/es/", { waitUntil: "domcontentloaded" });
 
-  await expect(page).toHaveURL(/\/es\/?$/);
+  await expect(page).toHaveURL(/:4011\/$/);
   await expect(page.getByText("Croquetas de jamón", { exact: true }).first()).toBeVisible();
 
   await page.goto("/en/", { waitUntil: "domcontentloaded" });
@@ -43,7 +45,7 @@ test("renders explicit Spanish and English locale routes", async ({ page }) => {
 test("loads the highlights page and leaves the old promotions route unavailable", async ({ page }) => {
   await page.goto("/es/destacados", { waitUntil: "domcontentloaded" });
 
-  await expect(page).toHaveURL(/\/es\/destacados$/);
+  await expect(page).toHaveURL(/:4011\/destacados$/);
   await expect(page.locator("qm-recommended-list")).toBeVisible();
   await expect(page.locator("qm-promo").first()).toBeVisible();
 

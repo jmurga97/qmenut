@@ -239,7 +239,17 @@
     "Cambiar a {{plan}}": "Cambiar a {{plan}}",
     "Con varias sucursales, cada una necesita el plan Business.": "Con varias sucursales, cada una necesita el plan Business.",
     "Probar {{plan}} 14 días": "Probar {{plan}} 14 días",
-    "Suscribir {{plan}}": "Suscribir {{plan}}"
+    "Suscribir {{plan}}": "Suscribir {{plan}}",
+    "Activar plan": "Activar plan",
+    "Tu menú no está publicado": "Tu menú no está publicado",
+    "Terminó tu periodo. Activa tu plan para volver a publicarlo; no hemos borrado nada.": "Terminó tu periodo. Activa tu plan para volver a publicarlo; no hemos borrado nada.",
+    "Te quedan {{count}} días de prueba.": "Te quedan {{count}} días de prueba.",
+    "Tu plan vence en {{count}} días.": "Tu plan vence en {{count}} días.",
+    "Hola, quiero activar el plan de {{restaurant}} en QMenut.": "Hola, quiero activar el plan de {{restaurant}} en QMenut.",
+    "Precio founder: Business a {{price}} al mes el primer año. Quedan {{count}} de 100 plazas.": "Precio founder: Business a {{price}} al mes el primer año. Quedan {{count}} de 100 plazas.",
+    "En Venezuela activamos tu plan por WhatsApp: Zelle, Binance o Pago Móvil.": "En Venezuela activamos tu plan por WhatsApp: Zelle, Binance o Pago Móvil.",
+    "Hasta el {{date}}": "Hasta el {{date}}",
+    "Activar por WhatsApp": "Activar por WhatsApp"
   },
   "branch": {
     "useBranchForm debe usarse dentro de BranchFormProvider": "useBranchForm debe usarse dentro de BranchFormProvider",

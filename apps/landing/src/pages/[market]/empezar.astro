@@ -1,4 +1,5 @@
 ---
+import { SignupForm } from "../../components/signup/signup-form";
 import BaseLayout from "../../layouts/base-layout.astro";
 import { markets } from "../../lib/markets";
 import type { MarketId } from "../../lib/markets";
@@ -11,19 +12,18 @@ const content = markets[market];
   market={market}
   page="empezar"
   noindex
-  title={`Empezar · Qmenut ${content.country}`}
+  title={`Prueba gratis · Qmenut ${content.country}`}
   description={content.description}
 >
   <section class="container hero">
-    <h1>Estamos preparando el alta en línea</h1>
-    <p>Mientras tanto, escríbenos y preparamos contigo la primera versión de tu web.</p>
-    <div class="actions">
-      <a class="button" href={content.whatsapp.contact}>
+    <h1>Tu web en 3 pasos, gratis 14 días</h1>
+    <p>Plan Business completo, sin tarjeta. Al terminar la prueba eliges si sigues.</p>
+    <SignupForm client:only="react" market={market} />
+    <p>
+      ¿Prefieres que lo hagamos contigo?{" "}
+      <a class="text-link" href={content.whatsapp.contact}>
         Escríbenos por WhatsApp
       </a>
-      <a class="text-link" href={`/${market}/#demos`}>
-        Ver demos
-      </a>
-    </div>
+    </p>
   </section>
 </BaseLayout>

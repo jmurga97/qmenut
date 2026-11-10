@@ -40,6 +40,9 @@ body {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+.admin-trial-banner {
+  margin: var(--ming-space-4) clamp(var(--ming-space-4), 2.5vw, var(--ming-space-6)) 0;
+}
 .admin-page {
   min-height: 100%;
 }

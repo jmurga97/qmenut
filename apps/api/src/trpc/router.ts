@@ -20,6 +20,7 @@ import { notificationsRouter } from "../modules/notifications/notifications.rout
 import { publicMenuRouter } from "../modules/public-menu/public-menu.router";
 import { referralsRouter } from "../modules/referrals/referrals.router";
 import { reservationsRouter } from "../modules/reservations/reservations.router";
+import { signupRouter } from "../modules/signup/signup.router";
 import { themeRouter } from "../modules/theme/theme.router";
 
 export const appRouter = router({
@@ -31,6 +32,8 @@ export const appRouter = router({
   // QMenut staff only (Cloudflare Access); restaurant memberships grant nothing here.
   lab: labRouter,
   referrals: referralsRouter,
+  // Self-serve demos from the landing.
+  signup: signupRouter,
   admin: router({
     analytics: adminAnalyticsRouter,
     tenant: adminTenantRouter,

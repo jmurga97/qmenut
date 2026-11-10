@@ -96,6 +96,8 @@ bun run --cwd apps/api wrangler secret put <NAME> --env <environment>
 | `POSTHOG_PROJECT_ID`, `POSTHOG_PERSONAL_API_KEY`         | Nightly analytics materialization.                                                                  |
 | `GOOGLE_PLACES_API_KEY`                                  | Address autocomplete and Google reviews.                                                            |
 | `DEEPL_API_KEY`                                          | Optional; translations degrade without it.                                                          |
+| `TURNSTILE_SECRET_KEY`                                   | Self-serve sign-up (`/empezar`). Without it every sign-up is refused; the rest of the API works.    |
+| `STRIPE_COUPON_FOUNDER`                                  | Optional. Founder coupon for Business checkout (Spain); without it Checkout charges list price.     |
 
 Generate a VAPID pair:
 
@@ -111,10 +113,12 @@ bun -e 'const k=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"
 
 Compiled into bundles; changing one means rebuild + redeploy.
 
-| App   | Variables                                                                                                                     |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Web   | `VITE_SENTRY_DSN`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`. **Never** `VITE_API_BASE_URL` (browser uses same-origin `/trpc`). |
-| Admin | `VITE_API_BASE_URL`, `VITE_SENTRY_DSN`, `VITE_DEV_FIXED_OTP` (dev only).                                                      |
+| App     | Variables                                                                                                                            |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Web     | `VITE_SENTRY_DSN`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`. **Never** `VITE_API_BASE_URL` (browser uses same-origin `/trpc`).        |
+| Admin   | `VITE_API_BASE_URL`, `VITE_SENTRY_DSN`, `VITE_DEV_FIXED_OTP` (dev only).                                                             |
+| Web     | `VITE_ADMIN_ORIGIN`, `VITE_LANDING_ORIGIN` (comma list): parents allowed to drive the theme preview iframe.                          |
+| Landing | `PUBLIC_API_URL`, `PUBLIC_TURNSTILE_SITE_KEY` (production site key in `scripts/deploy.ts`; the landing deploy refuses an empty one). |
 
 Runtime `SENTRY_DSN` for api and web lives in each `wrangler.jsonc` environment.
 
@@ -158,6 +162,20 @@ Cloudflare Images, so the adapter does not provision their bindings.
 
 - Admin and API must share the `qmenut.app` registrable domain (same-site cookies). Moving them apart needs `cookieMode: "cross-site"` in `apps/api/src/auth/create-auth.ts`.
 - Tenant DNS must be on Cloudflare (or Cloudflare for SaaS). The attached hostname must equal `branches.customDomain` after normalization.
+
+## Self-serve demos (`*.qmenut.app`)
+
+Workers **Custom Domains do not accept wildcards** (the Domains tab refuses `*`), and a zone allows at most 100 of them. Demos use a wildcard **route** instead, set once in the dashboard (not in `wrangler.jsonc`: a deploy would sync routes and could drop the tenant custom domains attached by hand).
+
+1. DNS › Add record: `AAAA` `*` → `100::`, **Proxied**.
+2. Workers & Pages › `qmenut-web` › Domains & Routes › Add route: `*.qmenut.app/*`, zone `qmenut.app`.
+3. Routes win over Custom Domains on the same host, so every other `qmenut.app` host needs a route with **Worker: None** (zone qmenut.app › Workers Routes › Add route): `api.qmenut.app/*`, `admin.qmenut.app/*`, `lab.qmenut.app/*`, `referidos.qmenut.app/*`, `email-hooks.qmenut.app/*`, `media.qmenut.app/*`, `www.qmenut.app/*`, `*.dev.qmenut.app/*`. The most specific route wins, and a route with no Worker falls through to the Custom Domain (or R2) behind it. Add one for every new non-tenant subdomain.
+4. Check: `curl https://api.qmenut.app/health` → `{"status":"ok"}`, admin and lab load, a `media.qmenut.app` image loads, and `https://<any-new-slug>.qmenut.app` answers from `qmenut-web` (404 until it exists).
+5. Turnstile › Add widget for `qmenut.app` and `www.qmenut.app` (managed). Site key → `turnstileSiteKey` in `scripts/deploy.ts`; secret → `TURNSTILE_SECRET_KEY`.
+6. Stripe (Spain only; Venezuela pays the team): coupon `amount_off` 16 EUR, `duration: repeating`, 12 months, applies to the Business product → `STRIPE_COUPON_FOUNDER`.
+7. Deploy `ming-email-worker` (template `trial-notice`) before the API.
+
+`*.dev.qmenut.app` is a second-level wildcard: Universal SSL does not cover it, so dev demos need an Advanced Certificate. Test sign-up locally or in production.
 
 ## New tenant
 
@@ -214,7 +232,7 @@ Put the mailboxes in `INSTANTLY_ACCOUNTS_QMENUT` (`wrangler.toml`). In Instantly
 | Schedule     | Env       | Job                                                                                                                              |
 | ------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `* * * * *`  | dev, prod | Image publication outbox, notification maintenance, reservation reminders, referral batch preparation and expired referral links |
-| `45 4 * * *` | prod      | PostHog → D1 aggregates (last 3 days), 15-day owner digest email                                                                 |
+| `45 4 * * *` | prod      | PostHog → D1 aggregates (last 3 days), 15-day owner digest email; demo and manual-plan reminders (5 days left) and expiry        |
 
 The digest is at-least-once (no idempotency in the email worker) and has no unsubscribe yet.
 

@@ -1,6 +1,6 @@
 # Custom domains
 
-A branch **is** its host. `branches.customDomain` holds it; resolution is an exact match. No subdomains, slugs or wildcards. The URL path only carries an optional `{-$locale}`.
+A branch **is** its host. `branches.customDomain` holds it; resolution is an exact match. No slugs; the only wildcard is the Cloudflare route that serves demos. The URL path only carries an optional `{-$locale}`.
 
 ```mermaid
 sequenceDiagram
@@ -40,6 +40,8 @@ sequenceDiagram
 ## Adding a domain
 
 Cloudflare-side, not in code: attach the exact hostname to `qmenut-web` as a custom domain. See [Deployment](../operations/deployment.md#domains).
+
+Self-serve demos are the exception: `<slug>.qmenut.app` is served by the wildcard route `*.qmenut.app/*`, so nothing is attached per demo. The row still stores the exact host, and resolution stays an exact match. See [Deployment](../operations/deployment.md#self-serve-demos-qmenutapp).
 
 ## Key files
 

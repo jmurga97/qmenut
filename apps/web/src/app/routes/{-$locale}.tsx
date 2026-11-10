@@ -71,7 +71,8 @@ export const Route = createFileRoute("/{-$locale}")({
   beforeLoad: async ({ context, location, params, search }): Promise<LocaleRouteContext> => {
     const requested = params.locale?.toLowerCase();
 
-    if (requested !== undefined && !LOCALE_PATTERN.test(requested)) {
+    // Rejects path junk (`/cgi-bin`, `/wp-admin`) before it costs an uncached menu load.
+    if (requested !== undefined && !(LOCALE_PATTERN.test(requested) && isLanguageTag(requested))) {
       notFound({ throw: true });
     }
 
@@ -87,13 +88,8 @@ export const Route = createFileRoute("/{-$locale}")({
     const isDefaultPrefix = requested === language.default;
 
     // `/es/…` on a Spanish-default tenant duplicates `/…`: redirect for good. A prefix that isn't
-    // an active language falls back to the unprefixed URL (temporarily: it may be enabled later),
-    // and one that isn't a language at all is just a wrong path.
+    // an active language falls back to the unprefixed URL (temporarily: it may be enabled later).
     if (requested !== undefined && (language.effective !== requested || isDefaultPrefix)) {
-      if (!isDefaultPrefix && !isLanguageTag(requested)) {
-        notFound({ throw: true });
-      }
-
       const rest = location.pathname.replace(new RegExp(`^/${requested}`, "i"), "");
       const hash = location.hash ? `#${encodeURI(location.hash)}` : "";
 

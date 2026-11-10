@@ -8,11 +8,19 @@ import { useEffect, useState } from "react";
 
 import type { QmTenantThemeConfig } from "@qmenut/ui/theme/tenant-theme-config";
 
-const LOCAL_ADMIN_ORIGIN = "http://localhost:5174";
-const PRODUCTION_ADMIN_ORIGIN = "https://admin.qmenut.app";
+const LOCAL_ORIGINS = { admin: "http://localhost:5174", landing: "http://localhost:4321" };
+const PRODUCTION_ORIGINS = { admin: "https://admin.qmenut.app", landing: "https://qmenut.app" };
 
-function getAllowedAdminOrigin(): string {
-  return import.meta.env.VITE_ADMIN_ORIGIN || (import.meta.env.DEV ? LOCAL_ADMIN_ORIGIN : PRODUCTION_ADMIN_ORIGIN);
+/**
+ * The admin theme editor or a landing sign-up form; the iframe's referrer says which one is the parent.
+ * VITE_LANDING_ORIGIN is a comma-separated list: the production landing previews on the dev template tenants.
+ */
+function getParentOrigin(): string {
+  const fallback = import.meta.env.DEV ? LOCAL_ORIGINS : PRODUCTION_ORIGINS;
+  const admin = import.meta.env.VITE_ADMIN_ORIGIN || fallback.admin;
+  const landings = (import.meta.env.VITE_LANDING_ORIGIN || fallback.landing).split(",");
+  const referrer = document.referrer ? new URL(document.referrer).origin : admin;
+  return landings.includes(referrer) ? referrer : admin;
 }
 
 export function useThemePreview(persistedTheme: QmTenantThemeConfig): QmTenantThemeConfig {
@@ -25,7 +33,7 @@ export function useThemePreview(persistedTheme: QmTenantThemeConfig): QmTenantTh
   useEffect(() => {
     if (!previewEnabled || window.parent === window) return;
 
-    const allowedOrigin = getAllowedAdminOrigin();
+    const allowedOrigin = getParentOrigin();
 
     function handleMessage(event: MessageEvent<unknown>) {
       if (event.origin !== allowedOrigin) return;

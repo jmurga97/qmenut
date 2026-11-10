@@ -1,4 +1,5 @@
 import { listAnnouncements, publishAnnouncement } from "@qmenut/db/repositories/notifications.repository";
+import { PLAN_CODES } from "@qmenut/permissions";
 import { z } from "zod";
 
 import { getDailySchedule, setDailySchedulePaused, startDailySchedule } from "./campaign-schedule";
@@ -29,6 +30,7 @@ import {
   saveNotes,
   searchRestaurants,
 } from "./lab-review";
+import { activateManualPlan, createCheckoutLink, listLabSubscriptions } from "./lab-subscriptions";
 import { labProcedure, router } from "../../trpc/trpc";
 import { MAX_CAMPAIGN_RECIPIENTS, QUALIFYING_PAYMENT_CENTS } from "../referrals/referral-domain";
 
@@ -80,6 +82,21 @@ const markPaidInput = referralInput.extend({
     .trim()
     .regex(/^\d{1,6}(?:\.\d{1,6})?$/, "Usa un número, p. ej. 36.52"),
   reference: z.string().trim().min(3).max(120),
+});
+
+const planBranchInput = z.object({ restaurantId: idSchema, branchId: idSchema, planCode: z.enum(PLAN_CODES) });
+const activateInput = planBranchInput.extend({
+  status: z.enum(["trialing", "active"]),
+  endsAt: z.iso.date(),
+  founder: z.boolean(),
+});
+
+const subscriptionsRouter = router({
+  list: labProcedure.query(({ ctx }) => listLabSubscriptions(ctx)),
+  activate: labProcedure.input(activateInput).mutation(({ ctx, input }) => activateManualPlan({ ...ctx, ...input })),
+  checkoutLink: labProcedure
+    .input(planBranchInput)
+    .mutation(({ ctx, input }) => createCheckoutLink({ ...ctx, ...input })),
 });
 
 const leadsRouter = router({
@@ -161,4 +178,5 @@ export const labRouter = router({
   referrals: referralsRouter,
   payouts: payoutsRouter,
   announcements: announcementsRouter,
+  subscriptions: subscriptionsRouter,
 });

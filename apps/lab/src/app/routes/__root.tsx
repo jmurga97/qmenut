@@ -8,6 +8,7 @@ import { PageState } from "~/shared/page";
 
 const AREAS = [
   { id: "overview", label: "Resumen", href: "/" },
+  { id: "subscriptions", label: "Restaurantes", href: "/subscriptions" },
   { id: "leads", label: "Contactos", href: "/leads" },
   { id: "campaigns", label: "Envíos", href: "/campaigns" },
   { id: "referrals", label: "Referidos", href: "/referrals" },

@@ -180,6 +180,7 @@ export async function fetchMenuLoads({ env, fromDay, toDay }: FetchRangeInput): 
   }));
 }
 
+// `source` is normalised inside the query: mapping it after GROUP BY splits one primary key into two rows.
 export async function fetchDishOpens({ env, fromDay, toDay }: FetchRangeInput): Promise<DishOpenRow[]> {
   const result = await runHogQLQuery(env, {
     query: `
@@ -189,7 +190,7 @@ export async function fetchDishOpens({ env, fromDay, toDay }: FetchRangeInput): 
         properties.restaurant_id AS restaurant_id,
         properties.analytics_day AS day,
         coalesce(nullIf(properties.locale, ''), 'legacy') AS language_code,
-        coalesce(nullIf(properties.source, ''), 'section') AS source,
+        if(properties.source IN ('featured', 'highlights'), 'featured', 'section') AS source,
         count() AS opens,
         uniqExact(nullIf(properties.analytics_visit_id, '')) AS visits_with_open
       FROM events
@@ -214,7 +215,7 @@ export async function fetchDishOpens({ env, fromDay, toDay }: FetchRangeInput): 
     restaurantId: String(row.restaurant_id),
     day: toDayString(row.day),
     languageCode: toDimension(row.language_code, "legacy"),
-    source: row.source === "featured" || row.source === "highlights" ? "featured" : "section",
+    source: row.source === "featured" ? "featured" : "section",
     opens: toFiniteNumber(row.opens),
     visitsWithOpen: toFiniteNumber(row.visits_with_open),
   }));
