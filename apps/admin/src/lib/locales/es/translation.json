@@ -64,7 +64,10 @@
     "Reservas de hoy": "Reservas de hoy",
     "Ver reservas →": "Ver reservas →",
     "Cargando reservas…": "Cargando reservas…",
-    "No se pudieron cargar las reservas.": "No se pudieron cargar las reservas."
+    "No se pudieron cargar las reservas.": "No se pudieron cargar las reservas.",
+    "Clientes con sello": "Clientes con sello",
+    "Veces que un cliente sumó un sello en los últimos 30 días.": "Veces que un cliente sumó un sello en los últimos 30 días.",
+    "Clientes distintos que sellaron en los últimos 30 días.": "Clientes distintos que sellaron en los últimos 30 días."
   },
   "main.tsx": {
     "Unable to find root element": "No se encontró el elemento raíz"
@@ -676,7 +679,11 @@
     "Máximo de sellos por solicitud": "Máximo de sellos por solicitud",
     "Indica un número entre 1 y 10": "Indica un número entre 1 y 10",
     "Aceptar la solicitud de {{email}}": "Aceptar la solicitud de {{email}}",
-    "Solicitud de {{email}} aceptada.": "Solicitud de {{email}} aceptada."
+    "Solicitud de {{email}} aceptada.": "Solicitud de {{email}} aceptada.",
+    "Tarjetas creadas": "Tarjetas creadas",
+    "Clientes que tienen tu tarjeta, desde el primer día.": "Clientes que tienen tu tarjeta, desde el primer día.",
+    "Tasa de repetición (histórica)": "Tasa de repetición (histórica)",
+    "Porcentaje de clientes con dos o más visitas, desde el primer día.": "Porcentaje de clientes con dos o más visitas, desde el primer día."
   },
   "menu": {
     "No se pudo preparar la imagen.": "No se pudo preparar la imagen.",

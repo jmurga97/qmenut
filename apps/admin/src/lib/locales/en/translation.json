@@ -64,7 +64,10 @@
     "Reservas de hoy": "Today's reservations",
     "Ver reservas →": "View reservations →",
     "Cargando reservas…": "Loading reservations…",
-    "No se pudieron cargar las reservas.": "Could not load reservations."
+    "No se pudieron cargar las reservas.": "Could not load reservations.",
+    "Clientes con sello": "Customers with stamps",
+    "Veces que un cliente sumó un sello en los últimos 30 días.": "Times a customer earned a stamp in the last 30 days.",
+    "Clientes distintos que sellaron en los últimos 30 días.": "Different customers who earned a stamp in the last 30 days."
   },
   "main.tsx": {
     "Unable to find root element": "Unable to find root element"
@@ -676,7 +679,11 @@
     "Máximo de sellos por solicitud": "Maximum stamps per request",
     "Indica un número entre 1 y 10": "Enter a number from 1 to 10",
     "Aceptar la solicitud de {{email}}": "Accept the request from {{email}}",
-    "Solicitud de {{email}} aceptada.": "Request from {{email}} accepted."
+    "Solicitud de {{email}} aceptada.": "Request from {{email}} accepted.",
+    "Tarjetas creadas": "Cards created",
+    "Clientes que tienen tu tarjeta, desde el primer día.": "Customers who have your card, since day one.",
+    "Tasa de repetición (histórica)": "Repeat rate (all time)",
+    "Porcentaje de clientes con dos o más visitas, desde el primer día.": "Share of customers with two or more visits, since day one."
   },
   "menu": {
     "No se pudo preparar la imagen.": "Could not prepare image.",

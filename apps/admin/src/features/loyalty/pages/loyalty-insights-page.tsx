@@ -46,7 +46,12 @@ function LoyaltyInsightsContent() {
       <OverviewPanel
         title={i18n.t("loyalty___Indicadores de fidelización")}
         stats={[
-          { id: "cards", label: i18n.t("loyalty___Tarjetas activas"), value: formatNumber(summary.activeCards) },
+          {
+            id: "cards",
+            label: i18n.t("loyalty___Tarjetas creadas"),
+            value: formatNumber(summary.activeCards),
+            description: i18n.t("loyalty___Clientes que tienen tu tarjeta, desde el primer día."),
+          },
           { id: "stamps", label: i18n.t("loyalty___Sellos este mes"), value: formatNumber(summary.stampsThisMonth) },
           {
             id: "redemptions",
@@ -54,7 +59,12 @@ function LoyaltyInsightsContent() {
             value: formatNumber(summary.redemptionsThisMonth),
           },
           { id: "rate", label: i18n.t("loyalty___Tasa de canje"), value: formatPercent(summary.redemptionRate) },
-          { id: "repeat", label: i18n.t("loyalty___Visita repetida"), value: formatPercent(summary.repeatVisitRate) },
+          {
+            id: "repeat",
+            label: i18n.t("loyalty___Tasa de repetición (histórica)"),
+            value: formatPercent(summary.repeatVisitRate),
+            description: i18n.t("loyalty___Porcentaje de clientes con dos o más visitas, desde el primer día."),
+          },
         ]}
       />
       <div aria-busy={loyalty.refreshing || undefined} className={"loyalty-insights-grid"}>

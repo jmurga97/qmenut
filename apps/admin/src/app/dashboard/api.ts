@@ -6,7 +6,6 @@
 export { getExchangeRatesSummaryQueryOptions } from "~/features/exchange-rates/api";
 export { getAnalyticsSnapshotQueryOptions } from "~/features/analytics/api";
 export {
-  getLoyaltySummaryQueryOptions,
   getLoyaltyVisitsQueryOptions,
   getPendingRedemptionsQueryOptions,
   getVenueCodeQueryOptions,

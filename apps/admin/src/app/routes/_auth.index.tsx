@@ -13,20 +13,30 @@ export const Route = createFileRoute("/_auth/")({
   loader: async ({ context, deps }) => {
     const { queryClient, roleCode, trpc } = context;
     const jobs: Array<Promise<unknown>> = [];
-    if (can(roleCode, "analytics.read") && (await hasSelectedFeature(context, "analytics"))) {
-      const range = getVisitsRange(deps.period);
-      jobs.push(
-        queryClient.query({ ...api.getAnalyticsSnapshotQueryOptions({ period: "15d", trpc }), staleTime: "static" }),
-        queryClient.query({ ...api.getAnalyticsSnapshotQueryOptions({ period: "30d", trpc }), staleTime: "static" }),
-        queryClient.query({ ...api.getLoyaltyVisitsQueryOptions({ ...range, trpc }), staleTime: "static" }),
-      );
-    }
     const branch = await getSelectedBranch(context);
     const tenant = await queryClient.query({ ...trpc.admin.tenant.me.queryOptions(), staleTime: "static" });
+    if (can(roleCode, "analytics.read") && (await hasSelectedFeature(context, "analytics"))) {
+      jobs.push(
+        queryClient.query({ ...api.getAnalyticsSnapshotQueryOptions({ period: "15d", trpc }), staleTime: "static" }),
+      );
+      // The loyalty block and its chart only render while the program is on.
+      if (tenant.loyaltyActive) {
+        const range = getVisitsRange(deps.period);
+        jobs.push(
+          queryClient.query({ ...api.getAnalyticsSnapshotQueryOptions({ period: "30d", trpc }), staleTime: "static" }),
+          queryClient.query({ ...api.getLoyaltyVisitsQueryOptions({ ...range, trpc }), staleTime: "static" }),
+        );
+      }
+    }
     if (tenant.restaurant.sourceCurrency === "USD" && can(roleCode, "exchangeRates.write")) {
       jobs.push(queryClient.query({ ...api.getExchangeRatesSummaryQueryOptions({ trpc }), staleTime: "static" }));
     }
-    if (branch && can(roleCode, "loyalty.operate") && (await hasSelectedFeature(context, "loyalty"))) {
+    if (
+      branch &&
+      tenant.loyaltyActive &&
+      can(roleCode, "loyalty.operate") &&
+      (await hasSelectedFeature(context, "loyalty"))
+    ) {
       jobs.push(
         queryClient.query({ ...api.getPendingRedemptionsQueryOptions({ trpc }), staleTime: "static" }),
         queryClient.query({ ...api.getVenueCodeQueryOptions({ branchId: branch.id, trpc }), staleTime: "static" }),
