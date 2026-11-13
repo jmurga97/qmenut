@@ -20,6 +20,7 @@ import { notificationsRouter } from "../modules/notifications/notifications.rout
 import { publicMenuRouter } from "../modules/public-menu/public-menu.router";
 import { referralsRouter } from "../modules/referrals/referrals.router";
 import { reservationsRouter } from "../modules/reservations/reservations.router";
+import { onboardingRouter } from "../modules/signup/onboarding.router";
 import { signupRouter } from "../modules/signup/signup.router";
 import { themeRouter } from "../modules/theme/theme.router";
 
@@ -34,6 +35,7 @@ export const appRouter = router({
   referrals: referralsRouter,
   // Self-serve demos from the landing.
   signup: signupRouter,
+  onboarding: onboardingRouter,
   admin: router({
     analytics: adminAnalyticsRouter,
     tenant: adminTenantRouter,

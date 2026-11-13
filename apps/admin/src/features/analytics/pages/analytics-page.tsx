@@ -365,8 +365,9 @@ export function AnalyticsPage() {
             </div>
             <div className={"analytics-detail-grid analytics-detail-grid--four"}>
               <DetailStat
-                label={i18n.t("analytics___Clientes con visita")}
-                value={formatNumber(current.loyalty.visits)}
+                label={i18n.t("analytics___Visitas con sello")}
+                note={i18n.t("analytics___Veces que un cliente sumó un sello con el código del local.")}
+                value={formatNumber(current.loyalty.stampVisits)}
               />
               <DetailStat
                 label={i18n.t("analytics___Tasa de repetición")}

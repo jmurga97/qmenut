@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
+import { Route as IntakesRouteImport } from './routes/intakes'
 import { Route as LeadsRouteImport } from './routes/leads'
 import { Route as PayoutsRouteImport } from './routes/payouts'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
@@ -28,6 +29,11 @@ const IndexRoute = IndexRouteImport.update({
 const AnnouncementsRoute = AnnouncementsRouteImport.update({
   id: '/announcements',
   path: '/announcements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntakesRoute = IntakesRouteImport.update({
+  id: '/intakes',
+  path: '/intakes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeadsRoute = LeadsRouteImport.update({
@@ -74,6 +80,7 @@ const ReferralsReferralIdRoute = ReferralsReferralIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
+  '/intakes': typeof IntakesRoute
   '/leads': typeof LeadsRoute
   '/payouts': typeof PayoutsRoute
   '/subscriptions': typeof SubscriptionsRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
+  '/intakes': typeof IntakesRoute
   '/leads': typeof LeadsRoute
   '/payouts': typeof PayoutsRoute
   '/subscriptions': typeof SubscriptionsRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
+  '/intakes': typeof IntakesRoute
   '/leads': typeof LeadsRoute
   '/payouts': typeof PayoutsRoute
   '/subscriptions': typeof SubscriptionsRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/announcements'
+    | '/intakes'
     | '/leads'
     | '/payouts'
     | '/subscriptions'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/announcements'
+    | '/intakes'
     | '/leads'
     | '/payouts'
     | '/subscriptions'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/announcements'
+    | '/intakes'
     | '/leads'
     | '/payouts'
     | '/subscriptions'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnnouncementsRoute: typeof AnnouncementsRoute
+  IntakesRoute: typeof IntakesRoute
   LeadsRoute: typeof LeadsRoute
   PayoutsRoute: typeof PayoutsRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/announcements'
       fullPath: '/announcements'
       preLoaderRoute: typeof AnnouncementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/intakes': {
+      id: '/intakes'
+      path: '/intakes'
+      fullPath: '/intakes'
+      preLoaderRoute: typeof IntakesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leads': {
@@ -238,6 +258,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnnouncementsRoute: AnnouncementsRoute,
+  IntakesRoute: IntakesRoute,
   LeadsRoute: LeadsRoute,
   PayoutsRoute: PayoutsRoute,
   SubscriptionsRoute: SubscriptionsRoute,

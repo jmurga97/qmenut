@@ -508,13 +508,16 @@
     inline-size: 100%;
     max-inline-size: 390px;
     aspect-ratio: 390 / 844;
-    container-type: inline-size;
+    position: relative;
+    min-inline-size: 0;
     overflow: hidden;
   }
   .signup-preview {
+    position: absolute;
+    inset: 0 auto auto 0;
     inline-size: 390px;
     block-size: 844px;
-    zoom: calc(100cqw / 390px);
+    transform-origin: top left;
     border: 1px solid var(--border);
     border-radius: var(--radius);
   }

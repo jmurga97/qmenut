@@ -14,3 +14,5 @@ export * from "./referrals";
 export * from "./reservations";
 export * from "./restaurants";
 export * from "./translations";
+
+export * from "./onboarding";

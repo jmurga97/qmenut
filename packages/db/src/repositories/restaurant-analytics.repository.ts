@@ -306,6 +306,7 @@ export async function getEventCounterTotals(input: RestaurantAnalyticsPeriodInpu
 }
 
 export interface LoyaltyPeriodMetrics {
+  stampVisits: number;
   visitors: number;
   repeaters: number;
   /** Mediana de días entre visitas consecutivas dentro del periodo; null sin pares suficientes. */
@@ -327,8 +328,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 export async function getLoyaltyVisitors(input: LoyaltyPeriodInput): Promise<LoyaltyPeriodMetrics> {
   const { db, fromMs, restaurantId, toMs } = input;
-  const [visitorsRow] = await db.all<{ repeaters: number; visitors: number }>(sql`
-    SELECT COUNT(*) AS visitors, SUM(CASE WHEN n >= 2 THEN 1 ELSE 0 END) AS repeaters
+  const [visitorsRow] = await db.all<{ repeaters: number; visitors: number; stamp_visits: number }>(sql`
+    SELECT COUNT(*) AS visitors, SUM(n) AS stamp_visits, SUM(CASE WHEN n >= 2 THEN 1 ELSE 0 END) AS repeaters
     FROM (
       SELECT customer_id, COUNT(*) AS n
       FROM customer_visits
@@ -367,6 +368,7 @@ export async function getLoyaltyVisitors(input: LoyaltyPeriodInput): Promise<Loy
   `);
 
   return {
+    stampVisits: toNumber(visitorsRow?.stamp_visits),
     visitors: toNumber(visitorsRow?.visitors),
     repeaters: toNumber(visitorsRow?.repeaters),
     medianDaysBetweenVisits: toNullableNumber(medianRow?.median_gap_days),

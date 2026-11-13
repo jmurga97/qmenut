@@ -41,6 +41,7 @@ export interface LoyaltyView {
   cardsActiveLast30Days: number;
   cardsInactive: number;
   visits: number;
+  stampVisits: number;
   repeatVisitRate: number | null;
   medianDaysBetweenVisits: number | null;
   recurrence30dRate: number | null;

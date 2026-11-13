@@ -63,9 +63,21 @@ export function Preview({
   name: string;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
+  const wrapper = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
   const [readyOrigin, setReadyOrigin] = useState<string | null>(null);
   const src = previewUrl(template);
   const origin = new URL(src).origin;
+
+  useEffect(() => {
+    const element = wrapper.current;
+    if (!element) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) setScale(entry.contentRect.width / 390);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent<unknown>) => {
@@ -92,10 +104,11 @@ export function Preview({
   }, [readyOrigin, src, template, primary, secondary, origin, name]);
 
   return (
-    <div className="signup-preview-frame">
+    <div className="signup-preview-frame" ref={wrapper}>
       <iframe
         className="signup-preview"
         ref={frame}
+        style={{ transform: `scale(${scale})` }}
         referrerPolicy="origin"
         src={src}
         title={`Vista previa de la plantilla ${template}`}

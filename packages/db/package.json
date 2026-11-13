@@ -227,6 +227,14 @@
     "./schema/images": {
       "types": "./src/schema/images.ts",
       "import": "./src/schema/images.ts"
+    },
+    "./domain/onboarding-intake": {
+      "types": "./src/domain/onboarding-intake.ts",
+      "import": "./src/domain/onboarding-intake.ts"
+    },
+    "./repositories/onboarding.repository": {
+      "types": "./src/repositories/onboarding.repository.ts",
+      "import": "./src/repositories/onboarding.repository.ts"
     }
   },
   "scripts": {
@@ -234,7 +242,8 @@
   },
   "dependencies": {
     "@qmenut/permissions": "workspace:*",
-    "drizzle-orm": "0.45.4"
+    "drizzle-orm": "0.45.4",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261031.1",

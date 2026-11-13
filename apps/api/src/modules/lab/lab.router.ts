@@ -33,6 +33,7 @@ import {
 import { activateManualPlan, createCheckoutLink, listLabSubscriptions } from "./lab-subscriptions";
 import { labProcedure, router } from "../../trpc/trpc";
 import { MAX_CAMPAIGN_RECIPIENTS, QUALIFYING_PAYMENT_CENTS } from "../referrals/referral-domain";
+import { labIntakesRouter } from "../signup/onboarding.router";
 
 const idSchema = z.string().trim().min(1).max(64);
 const searchSchema = z.string().trim().max(100);
@@ -168,6 +169,7 @@ const participantsRouter = router({
 });
 
 export const labRouter = router({
+  intakes: labIntakesRouter,
   me: labProcedure.query(({ ctx }) => ({ email: ctx.staffEmail, delivery: ctx.env.REFERRAL_DELIVERY })),
   overview: labProcedure.query(({ ctx }) => getOverview(ctx)),
   schedule: scheduleRouter,

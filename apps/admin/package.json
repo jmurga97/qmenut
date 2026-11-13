@@ -14,6 +14,7 @@
     "@jmurga97/components": "2.0.4",
     "@qmenut/api": "workspace:*",
     "@qmenut/auth": "workspace:*",
+    "@qmenut/db": "workspace:*",
     "@qmenut/permissions": "workspace:*",
     "@qmenut/ui": "workspace:*",
     "@sentry/react": "^11.10.0",

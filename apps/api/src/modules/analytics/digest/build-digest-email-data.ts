@@ -19,7 +19,7 @@ export type DigestMetricCode =
   | "rewards_validated"
   | "standalone_share";
 
-export type DigestMetricFormat = "count" | "currency" | "percent";
+export type DigestMetricFormat = "count" | "currency" | "multiplier" | "percent";
 
 export interface DigestMetric {
   code: DigestMetricCode;
@@ -65,9 +65,9 @@ function buildTrafficMetrics({
   push({ code: "loads", format: "count", previousValue: previous?.loads ?? null, value: current.loads });
   push({
     code: "dish_opens_per_load",
-    format: "percent",
-    previousValue: previous ? percent(previous.menu.opensPerLoad) : null,
-    value: percent(current.menu.opensPerLoad),
+    format: "multiplier",
+    previousValue: previous?.menu.opensPerLoad ?? null,
+    value: current.menu.opensPerLoad,
   });
   push({
     code: "qr_load_share",
@@ -107,8 +107,8 @@ function buildLoyaltyMetrics({
   push({
     code: "loyalty_visits",
     format: "count",
-    previousValue: previous?.loyalty.visits ?? null,
-    value: current.loyalty.visits,
+    previousValue: previous?.loyalty.stampVisits ?? null,
+    value: current.loyalty.stampVisits,
   });
 
   if (current.loyalty.repeatVisitRate !== null) {
