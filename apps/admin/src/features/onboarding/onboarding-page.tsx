@@ -1,378 +1,246 @@
-import { Button, Field, Input, Select } from "@jmurga97/components";
+import { Button, Field, InlineMessage, Input } from "@jmurga97/components";
 import { onboardingIntakeSchema } from "@qmenut/db/domain/onboarding-intake";
-import {
-  buildDefaultTenantThemeConfig,
-  createThemePreviewUpdateMessage,
-  isThemePreviewReadyMessage,
-} from "@qmenut/ui/theme/tenant-theme-config";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useDeferredValue, useState } from "react";
 
 import { trpc } from "~/lib/trpc";
 
-import type { OnboardingIntake } from "@qmenut/db/domain/onboarding-intake";
+import type { OnboardingIntake, OnboardingIntakeInput } from "@qmenut/db/domain/onboarding-intake";
+import type { FormEvent } from "react";
 
-const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-const templates = ["fine", "her", "fast", "cafe", "tapas"] as const;
-const blank = (countryCode: "ESP" | "VEN", label: string): OnboardingIntake => ({
-  countryCode,
-  restaurantName: label,
-  languages: ["es"],
-  replyEmail: "",
-  vesRate: "",
-  legalName: "",
-  taxId: "",
-  legalAddress: "",
-  privacyEmail: "",
-  branchName: label,
-  subdomain: "",
-  address: "",
-  phone: countryCode === "ESP" ? "+34" : "+58",
-  whatsapp: "",
-  instagram: "",
-  facebook: "",
-  tiktok: "",
-  schedules: [],
-  ownerName: "",
-  ownerEmail: "",
-  template: "her",
-  primary: "#a23a28",
-  secondary: "#3f7a4b",
-  tagline: "",
-  menuUrl: "",
-  menuByEmail: false,
-  menuNotes: "",
-});
+type Draft = {
+  restaurantName: string;
+  subdomain: string;
+  address: string;
+  phone: string;
+  whatsapp: string;
+  instagram: string;
+  ownerName: string;
+  ownerEmail: string;
+  legalName: string;
+  taxId: string;
+  legalAddress: string;
+  privacyEmail: string;
+  menuUrl: string;
+  notes: string;
+};
+type Key = keyof Draft;
+type Country = "ESP" | "VEN";
 
-type TextKey =
-  | "restaurantName"
-  | "replyEmail"
-  | "vesRate"
-  | "legalName"
-  | "taxId"
-  | "legalAddress"
-  | "privacyEmail"
-  | "branchName"
-  | "subdomain"
-  | "address"
-  | "phone"
-  | "whatsapp"
-  | "instagram"
-  | "facebook"
-  | "tiktok"
-  | "ownerName"
-  | "ownerEmail"
-  | "primary"
-  | "secondary"
-  | "tagline"
-  | "menuUrl"
-  | "menuNotes";
-const sections: { title: string; fields: { key: TextKey; label: string; type?: string }[] }[] = [
-  {
-    title: "Restaurante y datos legales",
-    fields: [
-      { key: "restaurantName", label: "Nombre del restaurante" },
-      { key: "replyEmail", label: "Correo de respuesta", type: "email" },
-      { key: "legalName", label: "Razón social" },
-      { key: "taxId", label: "Identificación fiscal" },
-      { key: "legalAddress", label: "Dirección fiscal" },
-      { key: "privacyEmail", label: "Correo de privacidad", type: "email" },
-    ],
-  },
-  {
-    title: "Local y propietario",
-    fields: [
-      { key: "branchName", label: "Nombre del local" },
-      { key: "subdomain", label: "Subdominio deseado" },
-      { key: "address", label: "Dirección del local" },
-      { key: "phone", label: "Teléfono con prefijo", type: "tel" },
-      { key: "whatsapp", label: "WhatsApp con prefijo", type: "tel" },
-      { key: "instagram", label: "Instagram", type: "url" },
-      { key: "facebook", label: "Facebook", type: "url" },
-      { key: "tiktok", label: "TikTok", type: "url" },
-      { key: "ownerName", label: "Nombre del propietario" },
-      { key: "ownerEmail", label: "Correo de acceso al panel", type: "email" },
-    ],
-  },
-  {
-    title: "Marca y carta",
-    fields: [
-      { key: "primary", label: "Color principal", type: "color" },
-      { key: "secondary", label: "Color secundario", type: "color" },
-      { key: "tagline", label: "Eslogan" },
-      { key: "menuUrl", label: "Enlace a la carta", type: "url" },
-      { key: "menuNotes", label: "Notas sobre la carta" },
-    ],
-  },
-];
+const PREFIX: Record<Country, string> = { ESP: "+34", VEN: "+58" };
 
-function Preview({ data }: { data: OnboardingIntake }) {
-  const frame = useRef<HTMLIFrameElement>(null);
-  const wrapper = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-  const [readySrc, setReadySrc] = useState("");
-  const src = import.meta.env.DEV
-    ? `http://${data.template}.localhost:5173/?themePreview=admin`
-    : `https://${data.template}.dev.qmenut.app/?themePreview=admin`;
-  const origin = new URL(src).origin;
-  useEffect(() => {
-    const element = wrapper.current;
-    if (!element) return;
-    const observer = new ResizeObserver(([entry]) => {
-      if (entry) setScale(entry.contentRect.width / 390);
-    });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-  useEffect(() => {
-    const listener = (event: MessageEvent<unknown>) => {
-      if (
-        event.origin === origin &&
-        event.source === frame.current?.contentWindow &&
-        isThemePreviewReadyMessage(event.data)
-      )
-        setReadySrc(src);
+// "La Tasca de Pepe" → "la-tasca-de-pepe", the same rule as the demo signup.
+function slugify(name: string): string {
+  return name
+    .normalize("NFD")
+    .replaceAll(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)
+    .join("-")
+    .slice(0, 40);
+}
+
+// Owners type "600 00 00 00" or "0412-000-0000"; the schema wants "+34600000000" / "+584120000000".
+function withPrefix(value: string, country: Country): string {
+  const digits = value.replaceAll(/\D/g, "");
+  if (!digits) return "";
+  const prefix = PREFIX[country];
+  if (value.trim().startsWith("+")) return `+${digits}`;
+  return `${prefix}${digits.replace(/^0+/, "")}`;
+}
+
+function toInput(draft: Draft, country: Country): OnboardingIntakeInput {
+  const common = {
+    ...draft,
+    subdomain: draft.subdomain || slugify(draft.restaurantName),
+    phone: withPrefix(draft.phone, country),
+    whatsapp: withPrefix(draft.whatsapp, country),
+    legalAddress: draft.legalAddress || draft.address,
+  };
+  // Venezuela has no privacy email: the schema drops the extra key and the export uses the owner's.
+  if (country === "VEN") return { ...common, countryCode: "VEN" };
+  return { ...common, countryCode: "ESP", privacyEmail: draft.privacyEmail || draft.ownerEmail };
+}
+
+function fromSaved({
+  saved,
+  label,
+  contactEmail,
+}: {
+  saved: OnboardingIntake | null;
+  label: string;
+  contactEmail: string;
+}): Draft {
+  if (!saved)
+    return {
+      restaurantName: label,
+      subdomain: "",
+      address: "",
+      phone: "",
+      whatsapp: "",
+      instagram: "",
+      ownerName: "",
+      ownerEmail: contactEmail,
+      legalName: "",
+      taxId: "",
+      legalAddress: "",
+      privacyEmail: "",
+      menuUrl: "",
+      notes: "",
     };
-    window.addEventListener("message", listener);
-    return () => window.removeEventListener("message", listener);
-  }, [origin, src]);
-  useEffect(() => {
-    if (readySrc !== src) return;
-    const defaults = buildDefaultTenantThemeConfig(data.template);
-    frame.current?.contentWindow?.postMessage(
-      createThemePreviewUpdateMessage({
-        template: data.template,
-        primary: data.primary,
-        secondary: data.secondary,
-        tagline: data.tagline,
-        showMenuPhotos: defaults.showMenuPhotos,
-        showDishPhoto: defaults.showDishPhoto,
-        restaurantName: data.restaurantName,
-      }),
-      origin,
-    );
-  }, [readySrc, src, origin, data]);
-  return (
-    <div className="onboarding-preview" ref={wrapper}>
-      <iframe
-        ref={frame}
-        style={{ transform: `scale(${scale})` }}
-        referrerPolicy="origin"
-        src={src}
-        title="Vista previa de tu web"
-      />
-    </div>
-  );
+  return {
+    restaurantName: saved.restaurantName,
+    subdomain: saved.subdomain,
+    address: saved.address,
+    phone: saved.phone,
+    whatsapp: saved.whatsapp,
+    instagram: saved.instagram,
+    ownerName: saved.ownerName,
+    ownerEmail: saved.ownerEmail,
+    legalName: saved.legalName,
+    taxId: saved.taxId,
+    legalAddress: saved.legalAddress,
+    privacyEmail: saved.countryCode === "ESP" ? saved.privacyEmail : "",
+    menuUrl: saved.menuUrl,
+    notes: saved.notes,
+  };
 }
 
-const fmt = (n: number | undefined) =>
-  n === undefined ? "" : `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
-
-function ScheduleEditor({ data, setData }: { data: OnboardingIntake; setData: (data: OnboardingIntake) => void }) {
-  function updateTime({
-    position,
-    key,
-    value,
-  }: {
-    position: number;
-    key: "openMinute" | "closeMinute";
-    value: string;
-  }) {
-    if (!value) return;
-    const [hour, minute] = value.split(":").map(Number);
-    setData({
-      ...data,
-      schedules: data.schedules.map((entry, index) =>
-        index === position ? { ...entry, [key]: hour * 60 + minute } : entry,
-      ),
-    });
-  }
-  return (
-    <div>
-      <h3>Horarios</h3>
-      <p>Añade un horario para cada día que abras.</p>
-      {days.map((day, index) => {
-        const slots = data.schedules
-          .map((slot, position) => ({ slot, position }))
-          .filter(({ slot }) => slot.dayOfWeek === index + 1);
-        return (
-          <div key={day}>
-            <strong>{day}</strong>
-            {slots.length === 0 ? <span> · Cerrado</span> : null}
-            {slots.map(({ slot, position }) => (
-              <div className="onboarding-hours" key={position}>
-                {(["openMinute", "closeMinute"] as const).map((key) => (
-                  <Input
-                    key={key}
-                    type="time"
-                    aria-label={`${day} ${key === "openMinute" ? "apertura" : "cierre"} ${position + 1}`}
-                    value={fmt(slot[key])}
-                    onChange={(event) => updateTime({ position, key, value: event.target.value })}
-                  />
-                ))}
-                <Button
-                  variant="ghost"
-                  onClick={() =>
-                    setData({
-                      ...data,
-                      schedules: data.schedules.filter((_, entryIndex) => entryIndex !== position),
-                    })
-                  }
-                >
-                  Quitar
-                </Button>
-              </div>
-            ))}
-            <Button
-              variant="ghost"
-              onClick={() =>
-                setData({
-                  ...data,
-                  schedules: [...data.schedules, { dayOfWeek: index + 1, openMinute: 540, closeMinute: 1020 }],
-                })
-              }
-            >
-              Añadir horario
-            </Button>
-          </div>
-        );
-      })}
-    </div>
-  );
+/** Live availability of the subdomain, through the demo signup's own check. */
+function SubdomainHint({ slug }: { slug: string }) {
+  const deferred = useDeferredValue(slug);
+  const check = useQuery({
+    ...trpc.signup.checkSubdomain.queryOptions({ slug: deferred }),
+    enabled: deferred.length >= 3,
+  });
+  if (deferred.length < 3) return <>Tu web: {slug || "turestaurante"}.qmenut.app</>;
+  if (check.data?.problem) return <>{check.data.problem}</>;
+  return <>Tu web: {deferred}.qmenut.app</>;
 }
 
-function VenezuelaFields({ data, setData }: { data: OnboardingIntake; setData: (data: OnboardingIntake) => void }) {
-  if (data.countryCode !== "VEN") return null;
-  return (
-    <>
-      <p>Si no indicas un correo de privacidad, usaremos el correo de respuesta.</p>
-      <Field label="Tasa VES por USD (opcional)">
-        <Input
-          inputMode="decimal"
-          value={data.vesRate}
-          onChange={(event) => setData({ ...data, vesRate: event.target.value })}
-        />
-      </Field>
-    </>
-  );
-}
-
-function IntakeForm({ token, initial }: { token: string; initial: OnboardingIntake }) {
-  const [data, setData] = useState(initial);
-  const [step, setStep] = useState(0);
-  const [errors, setErrors] = useState<string[]>([]);
+function IntakeForm({ country, initial, token }: { country: Country; initial: Draft; token: string }) {
+  const [draft, setDraft] = useState(initial);
+  const [problems, setProblems] = useState<Partial<Record<string, string>>>({});
   const [sent, setSent] = useState(false);
   const submit = useMutation(trpc.onboarding.submit.mutationOptions({ onSuccess: () => setSent(true) }));
-  const section = sections[step];
-  const phonePrefix = data.countryCode === "ESP" ? "+34" : "+58";
-  const taxLabel = data.countryCode === "ESP" ? "NIF/CIF" : "RIF";
-  function save() {
-    const result = onboardingIntakeSchema.safeParse(data);
+  const slug = draft.subdomain || slugify(draft.restaurantName);
+
+  const field = (key: Key, options: { label: string; type?: string; hint?: string; required?: boolean }) => (
+    <Field
+      error={problems[key]}
+      hint={options.hint}
+      invalid={Boolean(problems[key])}
+      label={options.label}
+      required={options.required ?? true}
+    >
+      <Input
+        onValueChange={(value) => setDraft((current) => ({ ...current, [key]: value }))}
+        type={options.type ?? "text"}
+        value={draft[key]}
+      />
+    </Field>
+  );
+
+  function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const result = onboardingIntakeSchema.safeParse(toInput(draft, country));
     if (!result.success) {
-      const names = Object.fromEntries(
-        sections.flatMap((part) => part.fields.map((field) => [field.key, field.label])),
-      );
-      setErrors(
-        result.error.issues.map(
-          (issue) => `${names[String(issue.path[0])] ?? String(issue.path[0])}: revisa este dato`,
-        ),
-      );
+      setProblems(Object.fromEntries(result.error.issues.map((issue) => [String(issue.path[0]), "Revisa este dato"])));
       return;
     }
-    setErrors([]);
+    setProblems({});
     submit.mutate({ token, data: result.data });
   }
+
   if (sent)
     return (
-      <div className="ming-page">
-        <h1>Datos enviados</h1>
-        <p>Gracias. Puedes volver a este enlace para corregirlos hasta que demos de alta tu restaurante.</p>
-        <Button onClick={() => setSent(false)}>Editar datos</Button>
-      </div>
+      <main className="ming-page onboarding-page">
+        <h1>¡Gracias!</h1>
+        <p>Hemos recibido tus datos. Te escribiremos cuando tu web esté lista.</p>
+        <p>Puedes volver a este enlace para corregir algo hasta que demos de alta tu restaurante.</p>
+        <Button onClick={() => setSent(false)} variant="secondary">
+          Corregir datos
+        </Button>
+      </main>
     );
+
   return (
     <main className="ming-page onboarding-page">
-      <h1>Alta de {data.restaurantName || "tu restaurante"}</h1>
-      <p>
-        País: {data.countryCode === "ESP" ? "España" : "Venezuela"} · Paso {step + 1} de {sections.length}
-      </p>
-      <h2>{section.title}</h2>
-      <div className="onboarding-grid">
-        <div className="onboarding-fields">
-          {section.fields.map(({ key, label, type }) => (
-            <Field key={key} label={key === "taxId" ? taxLabel : label}>
+      <h1>Alta de {draft.restaurantName || "tu restaurante"} en QMenut</h1>
+      <p>Con estos datos creamos tu web. Te lleva unos 3 minutos; colores, horarios e idiomas los eliges después.</p>
+      <form className="onboarding-form" noValidate onSubmit={save}>
+        <fieldset>
+          <legend>Tu restaurante</legend>
+          {field("restaurantName", { label: "Nombre del restaurante" })}
+          <Field
+            error={problems.subdomain}
+            hint={<SubdomainHint slug={slug} />}
+            invalid={Boolean(problems.subdomain)}
+            label="Dirección de tu web"
+            required
+          >
+            <div className="onboarding-slug">
               <Input
-                type={type ?? "text"}
-                placeholder={key === "whatsapp" ? phonePrefix : undefined}
-                value={data[key]}
-                onChange={(event) => setData({ ...data, [key]: event.target.value })}
+                onValueChange={(value) => setDraft((current) => ({ ...current, subdomain: value.toLowerCase() }))}
+                value={slug}
               />
-            </Field>
-          ))}
-          {step === 0 ? <VenezuelaFields data={data} setData={setData} /> : null}
-          {step === 0 ? (
-            <Field label="Idiomas de la carta (códigos separados por comas)">
-              <Input
-                value={data.languages.join(", ")}
-                onChange={(event) =>
-                  setData({ ...data, languages: event.target.value.split(",").map((value) => value.trim()) })
-                }
-              />
-            </Field>
-          ) : null}
-          {step === 1 ? <ScheduleEditor data={data} setData={setData} /> : null}
-          {step === 2 ? (
-            <>
-              <Field label="Plantilla">
-                <Select
-                  ariaLabel="Plantilla"
-                  value={data.template}
-                  options={templates.map((id) => ({ id, label: id }))}
-                  onValueChange={(value) => {
-                    if (templates.includes(value as typeof data.template))
-                      setData({ ...data, template: value as typeof data.template });
-                  }}
-                />
-              </Field>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={data.menuByEmail}
-                  onChange={(event) => setData({ ...data, menuByEmail: event.target.checked })}
-                />{" "}
-                Enviaré la carta por correo
-              </label>
-            </>
-          ) : null}
-          {errors.length > 0 ? (
-            <div role="alert">
-              <p>Revisa los datos antes de enviar:</p>
-              <ul>
-                {errors.map((error) => (
-                  <li key={error}>{error}</li>
-                ))}
-              </ul>
+              <span>.qmenut.app</span>
             </div>
-          ) : null}
-          {submit.error ? <p role="alert">{submit.error.message}</p> : null}
-          <div className="ming-cluster">
-            {step > 0 ? (
-              <Button variant="secondary" onClick={() => setStep(step - 1)}>
-                Anterior
-              </Button>
-            ) : null}
-            {step < 2 ? (
-              <Button onClick={() => setStep(step + 1)}>Siguiente</Button>
-            ) : (
-              <Button disabled={submit.isPending} onClick={save}>
-                {submit.isPending ? "Enviando…" : "Enviar datos"}
-              </Button>
-            )}
-          </div>
-        </div>
-        {step === 2 ? <Preview data={data} /> : null}
-      </div>
+          </Field>
+          {field("address", { label: "Dirección del local" })}
+          {field("phone", { label: "Teléfono", type: "tel", hint: `Con o sin ${PREFIX[country]}` })}
+          {field("whatsapp", { label: "WhatsApp", type: "tel", required: false, hint: "Si es distinto del teléfono" })}
+          {field("instagram", { label: "Instagram", type: "url", required: false, hint: "https://instagram.com/…" })}
+        </fieldset>
+        <fieldset>
+          <legend>Acceso al panel</legend>
+          {field("ownerName", { label: "Tu nombre" })}
+          {field("ownerEmail", {
+            label: "Correo",
+            type: "email",
+            hint: "Entrarás al panel con un código que llega aquí.",
+          })}
+        </fieldset>
+        <fieldset>
+          <legend>Datos legales</legend>
+          <p className="onboarding-note">Aparecen en el aviso legal y la política de privacidad de tu web.</p>
+          {field("legalName", { label: "Razón social" })}
+          {field("taxId", {
+            label: country === "ESP" ? "NIF / CIF" : "RIF",
+            hint: country === "ESP" ? "Ej.: B12345678" : "Ej.: J-12345678-9",
+          })}
+          {field("legalAddress", {
+            label: "Dirección fiscal",
+            required: false,
+            hint: "Si la dejas vacía, usamos la del local.",
+          })}
+          {country === "ESP"
+            ? field("privacyEmail", {
+                label: "Correo para privacidad",
+                type: "email",
+                required: false,
+                hint: "Si lo dejas vacío, usamos tu correo.",
+              })
+            : null}
+        </fieldset>
+        <fieldset>
+          <legend>Tu carta</legend>
+          {field("menuUrl", {
+            label: "Enlace a tu carta",
+            type: "url",
+            required: false,
+            hint: "Web, PDF en Drive, Instagram… Si no tienes enlace, te la pedimos por WhatsApp.",
+          })}
+          {field("notes", { label: "Algo más que debamos saber", required: false })}
+        </fieldset>
+        {Object.keys(problems).length > 0 ? <InlineMessage message="Revisa los campos marcados." tone="error" /> : null}
+        {submit.error ? <InlineMessage message={submit.error.message} tone="error" /> : null}
+        <Button disabled={submit.isPending} type="submit">
+          {submit.isPending ? "Enviando…" : "Enviar datos"}
+        </Button>
+      </form>
     </main>
   );
 }
@@ -382,16 +250,17 @@ export function OnboardingPage() {
   const query = useQuery({ ...trpc.onboarding.get.queryOptions({ token }), retry: false });
   if (query.isPending)
     return (
-      <main className="ming-page">
-        <p>Cargando ficha…</p>
+      <main className="ming-page onboarding-page">
+        <p>Cargando…</p>
       </main>
     );
   if (query.isError)
     return (
-      <main className="ming-page">
+      <main className="ming-page onboarding-page">
         <h1>Enlace no disponible</h1>
         <p>{query.error.message}</p>
       </main>
     );
-  return <IntakeForm token={token} initial={query.data.data ?? blank(query.data.countryCode, query.data.label)} />;
+  const { countryCode, contactEmail, data, label } = query.data;
+  return <IntakeForm country={countryCode} initial={fromSaved({ saved: data, label, contactEmail })} token={token} />;
 }

@@ -1,9 +1,9 @@
 import { isInternalSupportEmail } from "@qmenut/permissions";
 import { z } from "zod";
 
+// The minimum a restaurant gives us to create its tenant; theme, languages and hours are set later in the panel.
 const name = z.string().trim().min(1).max(120);
 const email = z.email().trim().max(254);
-const optionalEmail = z.union([z.literal(""), email]);
 const optionalUrl = z.union([
   z.literal(""),
   z
@@ -11,136 +11,90 @@ const optionalUrl = z.union([
     .max(500)
     .refine((value) => /^https?:\/\//i.test(value), "Usa un enlace HTTP o HTTPS"),
 ]);
-const esWhatsapp = z.union([z.literal(""), z.string().regex(/^\+34\d{9}$/)]);
-const veWhatsapp = z.union([z.literal(""), z.string().regex(/^\+58\d{10}$/)]);
-const phone = z.union([z.literal(""), z.string().regex(/^\+[1-9]\d{7,14}$/)]);
+// "b-12.345.678" → "B12345678": owners type tax IDs with spaces, dots and dashes.
+const compactTaxId = (value: unknown) =>
+  typeof value === "string" ? value.toUpperCase().replaceAll(/[\s.-]/g, "") : value;
+// "J123456789" → "J-12345678-9"; shorter RIF numbers are zero-padded to eight digits.
+const formatRif = (value: unknown) => {
+  const compact = compactTaxId(value);
+  if (typeof compact !== "string") return compact;
+  const match = /^([JVEGP])(\d{2,9})$/.exec(compact);
+  if (!match) return compact;
+  const [, letter, digits] = match;
+  return `${letter}-${digits.slice(0, -1).padStart(8, "0")}-${digits.slice(-1)}`;
+};
 const fields = {
   restaurantName: z.string().trim().min(1).max(80),
-  languages: z.array(z.string().trim().min(2).max(12)).min(1).max(14),
-  replyEmail: email,
-  vesRate: z
-    .union([
-      z.literal(""),
-      z
-        .string()
-        .regex(/^\d{1,6}(?:\.\d{1,6})?$/)
-        .refine((value) => Number(value) > 0 && Number(value) <= 1_000_000),
-    ])
-    .default(""),
-  legalName: name,
-  taxId: z.string().trim(),
-  legalAddress: z.string().trim().min(1).max(500),
-  privacyEmail: optionalEmail,
-  branchName: name,
   subdomain: z
     .string()
     .trim()
-    .regex(/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/),
+    .regex(/^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])$/),
   address: z.string().trim().min(1).max(500),
-  phone,
-  whatsapp: phone,
   instagram: optionalUrl,
-  facebook: optionalUrl,
-  tiktok: optionalUrl,
-  schedules: z
-    .array(
-      z
-        .object({
-          dayOfWeek: z.number().int().min(1).max(7),
-          openMinute: z.number().int().min(0).max(1439),
-          closeMinute: z.number().int().min(1).max(1439),
-        })
-        .refine((value) => value.openMinute < value.closeMinute),
-    )
-    .max(28),
   ownerName: name,
   ownerEmail: email,
-  template: z.enum(["fine", "her", "fast", "cafe", "tapas"]),
-  primary: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-  secondary: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-  tagline: z.string().trim().max(120),
+  legalName: name,
+  legalAddress: z.string().trim().min(1).max(500),
   menuUrl: optionalUrl,
-  menuByEmail: z.boolean(),
-  menuNotes: z.string().trim().max(3000),
+  notes: z.string().trim().max(3000),
+};
+
+const spanishPhone = z.string().regex(/^\+34\d{9}$/);
+const venezuelanPhone = z.string().regex(/^\+58\d{10}$/);
+const spain = {
+  countryCode: z.literal("ESP"),
+  taxId: z.preprocess(compactTaxId, z.string().regex(/^[A-Z0-9]\d{7}[A-Z0-9]$/)),
+  privacyEmail: email,
+  phone: spanishPhone,
+  whatsapp: z.union([z.literal(""), spanishPhone]),
+};
+const venezuela = {
+  countryCode: z.literal("VEN"),
+  taxId: z.preprocess(formatRif, z.string().regex(/^[JVEGP]-\d{8}-\d$/)),
+  phone: venezuelanPhone,
+  whatsapp: z.union([z.literal(""), venezuelanPhone]),
 };
 
 export const onboardingIntakeSchema = z
-  .discriminatedUnion("countryCode", [
-    z.object({
-      ...fields,
-      countryCode: z.literal("ESP"),
-      taxId: z
-        .string()
-        .trim()
-        .regex(/^[A-Z0-9]\d{7}[A-Z0-9]$/),
-      privacyEmail: email,
-      phone: z.string().regex(/^\+34\d{9}$/),
-      whatsapp: esWhatsapp,
-    }),
-    z.object({
-      ...fields,
-      countryCode: z.literal("VEN"),
-      taxId: z
-        .string()
-        .trim()
-        .regex(/^[JVEGP]-\d{8}-\d$/),
-      phone: z.string().regex(/^\+58\d{10}$/),
-      whatsapp: veWhatsapp,
-    }),
-  ])
+  .discriminatedUnion("countryCode", [z.object({ ...fields, ...spain }), z.object({ ...fields, ...venezuela })])
   .superRefine((value, ctx) => {
-    if (!value.menuUrl && !value.menuByEmail)
-      ctx.addIssue({
-        code: "custom",
-        path: ["menuUrl"],
-        message: "Añade un enlace o indica que enviarás la carta por correo",
-      });
     if (isInternalSupportEmail(value.ownerEmail))
       ctx.addIssue({ code: "custom", path: ["ownerEmail"], message: "Usa el correo del propietario" });
-    if (!value.languages.includes("es"))
-      ctx.addIssue({ code: "custom", path: ["languages"], message: "Incluye español" });
   });
 
 export type OnboardingIntake = z.infer<typeof onboardingIntakeSchema>;
+export type OnboardingIntakeInput = z.input<typeof onboardingIntakeSchema>;
 
-export function toTenantFile(data: OnboardingIntake) {
-  const socialLinks = Object.fromEntries(
-    Object.entries({ instagram: data.instagram, facebook: data.facebook, tiktok: data.tiktok }).filter(
-      ([, value]) => value,
-    ),
-  );
+/** The `qmenut-ops` tenant file; the plan is chosen in Lab when downloading. */
+export function toTenantFile(data: OnboardingIntake, planCode: "basic" | "business") {
+  const spain = data.countryCode === "ESP";
   return {
     restaurant: {
       name: data.restaurantName,
       countryCode: data.countryCode,
       defaultLanguageCode: "es",
-      sourceCurrency: data.countryCode === "ESP" ? "EUR" : "USD",
-      timezone: data.countryCode === "ESP" ? "Europe/Madrid" : "America/Caracas",
-      languages: data.languages,
+      sourceCurrency: spain ? "EUR" : "USD",
+      timezone: spain ? "Europe/Madrid" : "America/Caracas",
+      languages: ["es"],
       legal: {
         legalName: data.legalName,
         taxId: data.taxId,
         legalAddress: data.legalAddress,
-        dataProtectionEmail: data.privacyEmail || data.replyEmail,
+        dataProtectionEmail: spain ? data.privacyEmail : data.ownerEmail,
       },
-      emailReplyTo: data.replyEmail,
+      emailReplyTo: data.ownerEmail,
     },
     branch: {
-      name: data.branchName,
+      name: data.restaurantName,
       customDomain: `${data.subdomain}.qmenut.app`,
       address: data.address,
-      phone: data.phone || undefined,
+      phone: data.phone,
       whatsapp: data.whatsapp || undefined,
-      socialLinks,
-      planCode: "business" as const,
-      schedules: data.schedules,
+      socialLinks: data.instagram ? { instagram: data.instagram } : {},
+      planCode,
+      schedules: [],
     },
     owner: { name: data.ownerName, email: data.ownerEmail },
-    theme: {
-      template: data.template,
-      primary: data.primary,
-      secondary: data.secondary,
-      tagline: data.tagline || undefined,
-    },
+    theme: { template: "her" as const, primary: "#A23A28", secondary: "#3F7A4B" },
   };
 }

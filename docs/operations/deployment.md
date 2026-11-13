@@ -117,7 +117,7 @@ Compiled into bundles; changing one means rebuild + redeploy.
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | Web     | `VITE_SENTRY_DSN`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`. **Never** `VITE_API_BASE_URL` (browser uses same-origin `/trpc`).        |
 | Admin   | `VITE_API_BASE_URL`, `VITE_SENTRY_DSN`, `VITE_DEV_FIXED_OTP` (dev only).                                                             |
-| Web     | `VITE_ADMIN_ORIGIN` and `VITE_LANDING_ORIGIN` (comma-separated lists): parents allowed to drive the theme preview iframe.            |
+| Web     | `VITE_ADMIN_ORIGIN`, `VITE_LANDING_ORIGIN` (comma list): parents allowed to drive the theme preview iframe.                          |
 | Landing | `PUBLIC_API_URL`, `PUBLIC_TURNSTILE_SITE_KEY` (production site key in `scripts/deploy.ts`; the landing deploy refuses an empty one). |
 
 Runtime `SENTRY_DSN` for api and web lives in each `wrangler.jsonc` environment.

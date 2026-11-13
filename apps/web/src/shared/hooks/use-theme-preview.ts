@@ -13,14 +13,14 @@ const PRODUCTION_ORIGINS = { admin: "https://admin.qmenut.app", landing: "https:
 
 /**
  * The admin theme editor or a landing sign-up form; the iframe's referrer says which one is the parent.
- * Both origin lists allow the production signup and onboarding flows to preview on dev template tenants.
+ * VITE_LANDING_ORIGIN is a comma-separated list: the production landing previews on the dev template tenants.
  */
 function getParentOrigin(): string {
   const fallback = import.meta.env.DEV ? LOCAL_ORIGINS : PRODUCTION_ORIGINS;
-  const admins = (import.meta.env.VITE_ADMIN_ORIGIN || fallback.admin).split(",");
+  const admin = import.meta.env.VITE_ADMIN_ORIGIN || fallback.admin;
   const landings = (import.meta.env.VITE_LANDING_ORIGIN || fallback.landing).split(",");
-  const referrer = document.referrer ? new URL(document.referrer).origin : admins[0];
-  return [...admins, ...landings].includes(referrer) ? referrer : admins[0];
+  const referrer = document.referrer ? new URL(document.referrer).origin : admin;
+  return landings.includes(referrer) ? referrer : admin;
 }
 
 export function useThemePreview(persistedTheme: QmTenantThemeConfig): {

@@ -20,35 +20,22 @@ async function copy(url: string) {
 }
 
 const STATUS = { pending: "Pendiente", submitted: "Enviada", used: "Dada de alta" } as const;
-const formatTime = (minute: number) =>
-  `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
-
 function IntakeAnswer({ data }: { data: OnboardingIntake }) {
   const rows = [
     ["Restaurante", data.restaurantName],
-    ["Idiomas", data.languages.join(", ")],
-    ["Correo de respuesta", data.replyEmail],
-    ["Tasa VES por USD", data.vesRate],
-    ["Razón social", data.legalName],
-    ["Identificación fiscal", data.taxId],
-    ["Dirección fiscal", data.legalAddress],
-    ["Correo de privacidad", data.privacyEmail || "Se usará el correo de respuesta"],
-    ["Local", data.branchName],
-    ["Subdominio", `${data.subdomain}.qmenut.app`],
+    ["Web", `${data.subdomain}.qmenut.app`],
     ["Dirección", data.address],
     ["Teléfono", data.phone],
     ["WhatsApp", data.whatsapp],
     ["Instagram", data.instagram],
-    ["Facebook", data.facebook],
-    ["TikTok", data.tiktok],
     ["Propietario", data.ownerName],
     ["Correo del propietario", data.ownerEmail],
-    ["Plantilla", data.template],
-    ["Color principal", data.primary],
-    ["Color secundario", data.secondary],
-    ["Eslogan", data.tagline],
-    ["Carta", data.menuUrl || (data.menuByEmail ? "La enviará por correo" : "")],
-    ["Notas", data.menuNotes],
+    ["Razón social", data.legalName],
+    [data.countryCode === "ESP" ? "NIF / CIF" : "RIF", data.taxId],
+    ["Dirección fiscal", data.legalAddress],
+    ["Correo de privacidad", data.countryCode === "ESP" ? data.privacyEmail : "El del propietario"],
+    ["Carta", data.menuUrl || "Pedirla por WhatsApp"],
+    ["Notas", data.notes],
   ];
   return (
     <>
@@ -61,15 +48,6 @@ function IntakeAnswer({ data }: { data: OnboardingIntake }) {
           </div>
         ))}
       </dl>
-      <h3>Horarios</h3>
-      <ul>
-        {data.schedules.map((slot) => (
-          <li key={`${slot.dayOfWeek}-${slot.openMinute}`}>
-            {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"][slot.dayOfWeek - 1]}:{" "}
-            {formatTime(slot.openMinute)}–{formatTime(slot.closeMinute)}
-          </li>
-        ))}
-      </ul>
     </>
   );
 }
@@ -82,6 +60,7 @@ export function IntakesPage() {
   const [email, setEmail] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [planCode, setPlanCode] = useState<"basic" | "business">("basic");
   const detail = useQuery({
     ...trpc.lab.intakes.get.queryOptions({ token: selected ?? "" }),
     enabled: selected !== null,
@@ -120,9 +99,10 @@ export function IntakesPage() {
   );
   function download() {
     if (!detail.data?.tenantFile) return;
+    const tenantFile = { ...detail.data.tenantFile, branch: { ...detail.data.tenantFile.branch, planCode } };
     const link = document.createElement("a");
     link.href = URL.createObjectURL(
-      new Blob([JSON.stringify(detail.data.tenantFile, null, 2) + "\n"], { type: "application/json" }),
+      new Blob([JSON.stringify(tenantFile, null, 2) + "\n"], { type: "application/json" }),
     );
     link.download = "tenant.json";
     link.click();
@@ -206,9 +186,20 @@ export function IntakesPage() {
                   Enviar por correo
                 </Button>
                 {detail.data.tenantFile ? (
-                  <Button variant="secondary" onClick={download}>
-                    Descargar tenant.json
-                  </Button>
+                  <>
+                    <Select
+                      ariaLabel="Plan"
+                      value={planCode}
+                      options={[
+                        { id: "basic", label: "Basic" },
+                        { id: "business", label: "Business" },
+                      ]}
+                      onValueChange={(value) => setPlanCode(value === "business" ? "business" : "basic")}
+                    />
+                    <Button variant="secondary" onClick={download}>
+                      Descargar tenant.json
+                    </Button>
+                  </>
                 ) : null}
                 {detail.data.status === "submitted" ? (
                   <Button variant="secondary" onClick={() => setConfirming(true)}>

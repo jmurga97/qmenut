@@ -29,6 +29,10 @@ function labUrl(env: RuntimeEnv) {
   target.pathname = "/intakes";
   return target.href;
 }
+// An answer saved under an older form shape reads as "not sent" instead of failing the page.
+function readData(row: IntakeRow) {
+  return row.dataJson ? (onboardingIntakeSchema.safeParse(JSON.parse(row.dataJson)).data ?? null) : null;
+}
 function editable(row: IntakeRow | null): asserts row is IntakeRow {
   if (!row || row.expiresAt <= Date.now() || row.status === "used")
     throw new TRPCError({ code: "NOT_FOUND", message: "Este enlace no está disponible" });
@@ -56,15 +60,11 @@ async function send({
   if (!response.ok) throw new Error(`Onboarding email rejected (${response.status})`);
 }
 export const onboardingRouter = router({
+  // No rate limit: the token is a random UUID and reading it writes nothing.
   get: publicProcedure.input(idInput).query(async ({ ctx, input }) => {
-    await limit(ctx.env, ctx.request);
     const row = await getIntake(ctx.db, input.token);
     editable(row);
-    return {
-      countryCode: row.countryCode,
-      label: row.label,
-      data: row.dataJson ? onboardingIntakeSchema.parse(JSON.parse(row.dataJson)) : null,
-    };
+    return { countryCode: row.countryCode, label: row.label, contactEmail: row.contactEmail, data: readData(row) };
   }),
   submit: publicProcedure.input(idInput.extend({ data: onboardingIntakeSchema })).mutation(async ({ ctx, input }) => {
     await limit(ctx.env, ctx.request);
@@ -103,8 +103,8 @@ export const labIntakesRouter = router({
   get: labProcedure.input(idInput).query(async ({ ctx, input }) => {
     const row = await getIntake(ctx.db, input.token);
     if (!row) throw new TRPCError({ code: "NOT_FOUND" });
-    const data = row.dataJson ? onboardingIntakeSchema.parse(JSON.parse(row.dataJson)) : null;
-    return { ...row, data, tenantFile: data ? toTenantFile(data) : null, url: url(ctx.env, row.id) };
+    const data = readData(row);
+    return { ...row, data, tenantFile: data ? toTenantFile(data, "basic") : null, url: url(ctx.env, row.id) };
   }),
   send: labProcedure.input(idInput).mutation(async ({ ctx, input }) => {
     const row = await getIntake(ctx.db, input.token);

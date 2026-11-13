@@ -22,7 +22,7 @@ interface EnvironmentConfig {
 
 const ENVIRONMENT_CONFIGS: Record<Environment, EnvironmentConfig> = {
   development: {
-    adminOrigin: "https://admin.dev.qmenut.app,https://admin.qmenut.app",
+    adminOrigin: "https://admin.dev.qmenut.app",
     // The production landing's sign-up previews templates on the dev tenants (fine.dev.qmenut.app…).
     landingOrigin: "https://landing.dev.qmenut.app,https://qmenut.app,https://www.qmenut.app",
     apiBaseUrl: "https://api.dev.qmenut.app",

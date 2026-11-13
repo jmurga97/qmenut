@@ -18,13 +18,18 @@ para consultar los recursos y Workers seleccionados por cada ambiente.
 
 ## Ficha desde Lab
 
-En Lab, **Altas** crea un enlace válido durante 30 días para España o Venezuela. El equipo puede enviarlo por correo o copiar el texto para WhatsApp. El restaurante completa la ficha en `/alta/<token>` y puede corregirla hasta que Lab marque la ficha como dada de alta. Lab revisa la respuesta y descarga `tenant.json`.
+En Lab, **Altas** crea un enlace válido durante 30 días para España o Venezuela y lo envía por correo o copia el
+texto para WhatsApp. El restaurante rellena en `/alta/<token>` lo mínimo para crear el tenant: nombre, dirección de
+la web, dirección y teléfono del local, acceso al panel, datos legales y, si lo tiene, un enlace a la carta. Puede
+corregirlo hasta que Lab marque la ficha como dada de alta.
 
-En Venezuela, si el restaurante no indica un correo de privacidad, la exportación usa el correo de respuesta. La tasa VES opcional y la fuente o notas de la carta quedan en la respuesta de Lab: no forman parte de `tenant.json`.
+Lab elige el plan y descarga `tenant.json`. La exportación usa idioma `es`, la plantilla y colores por defecto y
+ningún horario: el propietario los cambia desde el panel. En Venezuela el correo de privacidad es el del propietario.
 
-Para publicar, coloca el `tenant.json` descargado en un directorio de intake de `qmenut-ops` y prepara allí `draft.json` con la carta y los identificadores mediante su flujo de preparación. El comando `bun run onboard <directorio> --local --dry-run` necesita ambos archivos y al menos una categoría con un plato; la ficha no crea ni publica la carta automáticamente. Comprueba el informe y los datos antes de ejecutar el alta real.
+Para publicar, coloca el `tenant.json` en un directorio de intake de `qmenut-ops` y prepara allí `draft.json` con la
+carta. `bun run onboard <directorio> --local --dry-run` necesita ambos archivos y al menos una categoría con un plato.
 
-Para desplegar esta función, publica las plantillas del email worker primero; después aplica la migración D1 y despliega API, web, admin y Lab. El web de desarrollo debe incluir el origen del admin de producción en sus orígenes de preview.
+Despliegue: email worker, migración D1, API, admin y Lab.
 
 ## 1. Datos del restaurante
 
