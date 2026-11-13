@@ -21,8 +21,12 @@ export function PublicRouteLayout({
   contentProvider: ComponentType<{ children: ReactNode }>;
 }) {
   const { theme: persistedTheme } = useTenantContext();
-  const theme = useThemePreview(persistedTheme);
-  const { tenant } = usePublicTenant(theme);
+  const { theme, restaurantName } = useThemePreview(persistedTheme);
+  const { tenant: publicTenant } = usePublicTenant(theme);
+  const tenant = useMemo(
+    () => (publicTenant && restaurantName ? { ...publicTenant, tenantName: restaurantName } : publicTenant),
+    [publicTenant, restaurantName],
+  );
   const { template } = useTemplateSelection(tenant);
   const routeId = useRouterState({ select: (state) => state.matches.at(-1)?.routeId });
   const isMenuRoute = routeId === "/{-$locale}/";

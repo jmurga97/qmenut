@@ -1,6 +1,7 @@
 import { normalizeTenantHost } from "@qmenut/db/domain/tenant";
 import { createTrialTenant, hasAnyMembership, isHostTaken } from "@qmenut/db/repositories/trials.repository";
 import { isInternalSupportEmail } from "@qmenut/permissions";
+import * as Sentry from "@sentry/cloudflare";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -177,6 +178,7 @@ export const signupRouter = router({
     }
 
     const host = trialHost(ctx.env, input.restaurant.slug);
+    const trialEndsAt = Date.now() + TRIAL_DAYS * DAY_MS;
     try {
       await createTrialTenant({
         db: ctx.db,
@@ -187,7 +189,7 @@ export const signupRouter = router({
           ...COUNTRIES[input.restaurant.countryCode],
         },
         host,
-        trialEndsAt: Date.now() + TRIAL_DAYS * DAY_MS,
+        trialEndsAt,
       });
     } catch (error) {
       // The unique index on custom_domain settles a race for the same name.
@@ -205,6 +207,30 @@ export const signupRouter = router({
       console.error(`No se pudo publicar el tema de la demo ${host}`, error);
     }
 
-    return { host, adminUrl: `${ctx.env.ADMIN_APP_URL}/menu` };
+    const adminUrl = `${ctx.env.ADMIN_APP_URL}/menu`;
+    const webUrl = host.endsWith(".localhost") ? `http://${host}:5173/` : `https://${host}/`;
+    ctx.executionCtx.waitUntil(
+      (async () => {
+        const response = await ctx.env.EMAIL_WORKER.fetch("https://email-worker.internal/send?productId=qmenut", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            template: "trial-welcome",
+            fromProfile: "qmenut-default",
+            to: input.email,
+            data: {
+              ownerName: input.owner.name,
+              restaurantName: input.restaurant.name,
+              webUrl,
+              adminUrl,
+              trialEndsAt,
+              countryCode: input.restaurant.countryCode,
+            },
+          }),
+        });
+        if (!response.ok) throw new Error(`Welcome email rejected (${response.status})`);
+      })().catch((error: unknown) => Sentry.captureException(error, { tags: { module: "trial-welcome" } })),
+    );
+    return { host, adminUrl };
   }),
 });

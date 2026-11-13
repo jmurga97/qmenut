@@ -23,12 +23,16 @@ function getParentOrigin(): string {
   return landings.includes(referrer) ? referrer : admin;
 }
 
-export function useThemePreview(persistedTheme: QmTenantThemeConfig): QmTenantThemeConfig {
+export function useThemePreview(persistedTheme: QmTenantThemeConfig): {
+  theme: QmTenantThemeConfig;
+  restaurantName?: string;
+} {
   const previewEnabled = useSearch({
     from: "/{-$locale}",
     select: (search) => search.themePreview === "admin",
   });
   const [previewTheme, setPreviewTheme] = useState(persistedTheme);
+  const [restaurantName, setRestaurantName] = useState<string>();
 
   useEffect(() => {
     if (!previewEnabled || window.parent === window) return;
@@ -42,7 +46,9 @@ export function useThemePreview(persistedTheme: QmTenantThemeConfig): QmTenantTh
       const draft = parseThemePreviewUpdateMessage(event.data);
       if (!draft) return;
 
-      setPreviewTheme(resolveTenantThemeConfig(draft));
+      const { restaurantName: name, ...theme } = draft;
+      setPreviewTheme(resolveTenantThemeConfig(theme));
+      setRestaurantName(name);
     }
 
     window.addEventListener("message", handleMessage);
@@ -51,5 +57,5 @@ export function useThemePreview(persistedTheme: QmTenantThemeConfig): QmTenantTh
     return () => window.removeEventListener("message", handleMessage);
   }, [previewEnabled]);
 
-  return previewEnabled ? previewTheme : persistedTheme;
+  return previewEnabled ? { theme: previewTheme, restaurantName } : { theme: persistedTheme };
 }

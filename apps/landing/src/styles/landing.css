@@ -504,10 +504,17 @@
   .signup-note {
     color: var(--muted-foreground);
   }
-  .signup-preview {
+  .signup-preview-frame {
     inline-size: 100%;
-    max-inline-size: 26rem;
-    block-size: 40rem;
+    max-inline-size: 390px;
+    aspect-ratio: 390 / 844;
+    container-type: inline-size;
+    overflow: hidden;
+  }
+  .signup-preview {
+    inline-size: 390px;
+    block-size: 844px;
+    zoom: calc(100cqw / 390px);
     border: 1px solid var(--border);
     border-radius: var(--radius);
   }
@@ -517,9 +524,6 @@
   @layer landing {
     .signup--brand .signup-body {
       grid-template-columns: minmax(0, 1fr);
-    }
-    .signup-preview {
-      block-size: 32rem;
     }
   }
 }

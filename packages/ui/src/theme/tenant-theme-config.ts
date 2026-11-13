@@ -39,10 +39,12 @@ export interface QmThemePreviewReadyMessage {
   version: typeof QM_THEME_PREVIEW_VERSION;
 }
 
+export type QmThemePreviewPayload = QmTenantThemeEditableConfig & { restaurantName?: string };
+
 export interface QmThemePreviewUpdateMessage {
   type: typeof QM_THEME_PREVIEW_UPDATE;
   version: typeof QM_THEME_PREVIEW_VERSION;
-  payload: QmTenantThemeEditableConfig;
+  payload: QmThemePreviewPayload;
 }
 
 export const DEFAULT_TEMPLATE = "her" satisfies QmTemplateName;
@@ -140,7 +142,7 @@ export function createThemePreviewReadyMessage(): QmThemePreviewReadyMessage {
   return { type: QM_THEME_PREVIEW_READY, version: QM_THEME_PREVIEW_VERSION };
 }
 
-export function createThemePreviewUpdateMessage(payload: QmTenantThemeEditableConfig): QmThemePreviewUpdateMessage {
+export function createThemePreviewUpdateMessage(payload: QmThemePreviewPayload): QmThemePreviewUpdateMessage {
   return { type: QM_THEME_PREVIEW_UPDATE, version: QM_THEME_PREVIEW_VERSION, payload };
 }
 
@@ -151,7 +153,7 @@ export function isThemePreviewReadyMessage(value: unknown): value is QmThemePrev
   return candidate.type === QM_THEME_PREVIEW_READY && candidate.version === QM_THEME_PREVIEW_VERSION;
 }
 
-export function parseThemePreviewUpdateMessage(value: unknown): QmTenantThemeEditableConfig | null {
+export function parseThemePreviewUpdateMessage(value: unknown): QmThemePreviewPayload | null {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
 
   const candidate = value as { payload?: unknown; type?: unknown; version?: unknown };
@@ -159,7 +161,12 @@ export function parseThemePreviewUpdateMessage(value: unknown): QmTenantThemeEdi
 
   const payload = candidate.payload;
   if (payload === null || typeof payload !== "object" || Array.isArray(payload)) return null;
-  const config = payload as Partial<QmTenantThemeEditableConfig>;
+  const config = payload as Partial<QmThemePreviewPayload>;
+  if (
+    config.restaurantName !== undefined &&
+    (typeof config.restaurantName !== "string" || config.restaurantName.length > 80)
+  )
+    return null;
   if (!isTemplateName(config.template)) return null;
   if (typeof config.primary !== "string" || !/^#(?:[\dA-Fa-f]{3}|[\dA-Fa-f]{6})$/.test(config.primary)) {
     return null;
@@ -175,6 +182,7 @@ export function parseThemePreviewUpdateMessage(value: unknown): QmTenantThemeEdi
   if (config.bodyFont !== undefined && !isBodyFontId(config.bodyFont)) return null;
 
   return {
+    restaurantName: config.restaurantName,
     template: config.template,
     primary: config.primary,
     secondary: config.secondary,

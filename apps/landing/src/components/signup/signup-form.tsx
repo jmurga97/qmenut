@@ -165,7 +165,7 @@ export function SignupForm({ market }: { market: "es" | "ve" }) {
           </div>
         </div>
         {step === "brand" ? (
-          <Preview primary={draft.primary} secondary={draft.secondary} template={draft.template} />
+          <Preview name={draft.name} primary={draft.primary} secondary={draft.secondary} template={draft.template} />
         ) : null}
       </div>
     </form>

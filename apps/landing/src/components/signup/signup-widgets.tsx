@@ -51,7 +51,17 @@ function previewUrl(template: Template): string {
 }
 
 /** A template demo repainted with the chosen colors, through the admin's theme-preview messages. */
-export function Preview({ template, primary, secondary }: { template: Template; primary: string; secondary: string }) {
+export function Preview({
+  template,
+  primary,
+  secondary,
+  name,
+}: {
+  template: Template;
+  primary: string;
+  secondary: string;
+  name: string;
+}) {
   const frame = useRef<HTMLIFrameElement>(null);
   const [readyOrigin, setReadyOrigin] = useState<string | null>(null);
   const src = previewUrl(template);
@@ -69,18 +79,27 @@ export function Preview({ template, primary, secondary }: { template: Template; 
     if (readyOrigin !== src) return;
     const { showMenuPhotos, showDishPhoto } = buildDefaultTenantThemeConfig(template);
     frame.current?.contentWindow?.postMessage(
-      createThemePreviewUpdateMessage({ template, primary, secondary, showMenuPhotos, showDishPhoto }),
+      createThemePreviewUpdateMessage({
+        template,
+        primary,
+        secondary,
+        showMenuPhotos,
+        showDishPhoto,
+        restaurantName: name,
+      }),
       origin,
     );
-  }, [readyOrigin, src, template, primary, secondary, origin]);
+  }, [readyOrigin, src, template, primary, secondary, origin, name]);
 
   return (
-    <iframe
-      className="signup-preview"
-      ref={frame}
-      referrerPolicy="origin"
-      src={src}
-      title={`Vista previa de la plantilla ${template}`}
-    />
+    <div className="signup-preview-frame">
+      <iframe
+        className="signup-preview"
+        ref={frame}
+        referrerPolicy="origin"
+        src={src}
+        title={`Vista previa de la plantilla ${template}`}
+      />
+    </div>
   );
 }

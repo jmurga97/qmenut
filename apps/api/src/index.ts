@@ -26,7 +26,15 @@ const TRPC_ENDPOINT = "/trpc";
 const AUTH_PREFIX = "/api/auth";
 const STRIPE_WEBHOOK_PATH = "/webhooks/stripe";
 
-async function handleRequest(request: Request, env: RuntimeEnv): Promise<Response> {
+async function handleRequest({
+  request,
+  env,
+  executionCtx,
+}: {
+  request: Request;
+  env: RuntimeEnv;
+  executionCtx: ExecutionContext;
+}): Promise<Response> {
   if (request.method === "OPTIONS") {
     return createOptionsResponse(request, env);
   }
@@ -52,7 +60,7 @@ async function handleRequest(request: Request, env: RuntimeEnv): Promise<Respons
       endpoint: TRPC_ENDPOINT,
       req: request,
       router: appRouter,
-      createContext: ({ resHeaders }) => createContext({ env, request, resHeaders }),
+      createContext: ({ resHeaders }) => createContext({ env, request, resHeaders, executionCtx }),
       // Reviews are rate-limited per visitor; a batched response containing them must never be cached.
       responseMeta: ({ paths }) =>
         paths?.includes("menu.googleReviews") ? { headers: { "Cache-Control": "no-store" } } : {},
@@ -99,9 +107,10 @@ export default Sentry.withSentry(
     tracesSampleRate: 0,
   }),
   {
-    async fetch(request: Request, rawEnv: EnvBindings): Promise<Response> {
+    // eslint-disable-next-line max-params -- Cloudflare fetch handler contract.
+    async fetch(request: Request, rawEnv: EnvBindings, executionCtx: ExecutionContext): Promise<Response> {
       const env = parseEnv(rawEnv);
-      const response = await handleRequest(request, env);
+      const response = await handleRequest({ request, env, executionCtx });
 
       return applyCorsHeaders({ env, request, response });
     },
