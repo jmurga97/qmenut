@@ -60,7 +60,11 @@
     "Veces que se abrió tu carta (no personas únicas).": "Times your menu was opened (not unique people).",
     "Media de platos que alguien abre cada vez que entra.": "Average number of dishes opened per menu visit.",
     "Porcentaje de visitas que llegaron escaneando tu QR.": "Percentage of visits from scanning your QR code.",
-    "Toques en llamar, WhatsApp, mapa o redes.": "Taps on phone, WhatsApp, map or social links."
+    "Toques en llamar, WhatsApp, mapa o redes.": "Taps on phone, WhatsApp, map or social links.",
+    "Reservas de hoy": "Today's reservations",
+    "Ver reservas →": "View reservations →",
+    "Cargando reservas…": "Loading reservations…",
+    "No se pudieron cargar las reservas.": "Could not load reservations."
   },
   "main.tsx": {
     "Unable to find root element": "Unable to find root element"

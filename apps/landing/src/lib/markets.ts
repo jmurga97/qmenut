@@ -117,7 +117,7 @@ const es: Market = {
     },
     {
       stage: "stamps",
-      title: "Que vuelvan",
+      title: "Que vuelvan, y que reserven",
       features: [
         [
           "Premia a los que vuelven",
@@ -126,6 +126,10 @@ const es: Market = {
         [
           "En su pantalla de inicio",
           "Guardan tu web en la pantalla de inicio del móvil, sin descargar nada de una tienda.",
+        ],
+        [
+          "Reservan sin llamarte",
+          "Tus clientes reservan mesa desde tu web. Tú decides turnos, mesas y cierres, y les llega la confirmación y un recordatorio por correo.",
         ],
       ],
     },
@@ -175,6 +179,7 @@ const es: Market = {
         "Tu carta en 14 idiomas, traducida sola",
         "Tu dominio y tu marca",
         "Fidelización, promociones y estadísticas",
+        "Reservas",
       ],
     },
   ],
@@ -225,6 +230,7 @@ const es: Market = {
     ["Dominio propio", "no", "yes"],
     ["Estilos y colores de marca", "no", "yes"],
     ["Promociones y fidelización", "no", "yes"],
+    ["Reservas", "no", "yes"],
     ["Estadísticas y resumen por correo", "no", "yes"],
     ["Equipo y varios locales", "no", "yes"],
   ],
@@ -277,7 +283,7 @@ const ve: Market = {
     },
     {
       stage: "stamps",
-      title: "Que vuelvan",
+      title: "Que vuelvan, y que reserven",
       features: [
         [
           "Premia a los que vuelven",
@@ -286,6 +292,10 @@ const ve: Market = {
         [
           "En su pantalla de inicio",
           "Guardan tu web en la pantalla de inicio del celular, sin descargar nada de una tienda.",
+        ],
+        [
+          "Reservan sin llamarte",
+          "Tus clientes reservan mesa desde tu web. Tú decides turnos, mesas y cierres, y les llega la confirmación y un recordatorio por correo.",
         ],
       ],
     },
@@ -313,7 +323,13 @@ const ve: Market = {
       name: "Business",
       description: "Tu web completa, con tu dominio y tu marca.",
       price: 55,
-      highlights: ["Todo lo de Basic", "Tu dominio y tu marca", "Fidelización y promociones", "Estadísticas e idiomas"],
+      highlights: [
+        "Todo lo de Basic",
+        "Tu dominio y tu marca",
+        "Fidelización y promociones",
+        "Estadísticas e idiomas",
+        "Reservas",
+      ],
     },
   ],
   faq: [
@@ -359,6 +375,7 @@ const ve: Market = {
     ["Dominio propio", "no", "yes"],
     ["Estilos y colores de marca", "no", "yes"],
     ["Promociones y fidelización", "no", "yes"],
+    ["Reservas", "no", "yes"],
     ["Estadísticas y resumen por correo", "no", "yes"],
     ["Idiomas con traducción automática", "no", "yes"],
     ["Equipo y varios locales", "no", "yes"],

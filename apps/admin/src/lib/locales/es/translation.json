@@ -60,7 +60,11 @@
     "Veces que se abrió tu carta (no personas únicas).": "Veces que se abrió tu carta (no personas únicas).",
     "Media de platos que alguien abre cada vez que entra.": "Media de platos que alguien abre cada vez que entra.",
     "Porcentaje de visitas que llegaron escaneando tu QR.": "Porcentaje de visitas que llegaron escaneando tu QR.",
-    "Toques en llamar, WhatsApp, mapa o redes.": "Toques en llamar, WhatsApp, mapa o redes."
+    "Toques en llamar, WhatsApp, mapa o redes.": "Toques en llamar, WhatsApp, mapa o redes.",
+    "Reservas de hoy": "Reservas de hoy",
+    "Ver reservas →": "Ver reservas →",
+    "Cargando reservas…": "Cargando reservas…",
+    "No se pudieron cargar las reservas.": "No se pudieron cargar las reservas."
   },
   "main.tsx": {
     "Unable to find root element": "No se encontró el elemento raíz"

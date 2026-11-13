@@ -16,7 +16,7 @@ const templates = content.sections.find((section) => section.stage === "template
 const sections = content.sections.filter((section) => section !== templates);
 // Mobile stacks show the step that carries their section best: English for languages, the new rate.
 const inlineStep = (stage: keyof typeof SHOWCASE_STEPS): ShowcaseStep =>
-  stage === "language" ? "language:1" : stage === "stamps" ? "stamps:0" : finalStep(stage);
+  stage === "language" ? "language:1" : finalStep(stage);
 ---
 
 <div class="container story-block" data-story-block>

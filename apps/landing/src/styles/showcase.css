@@ -391,15 +391,36 @@
     clip-path: inset(var(--card));
   }
   /* The dish card slides up out of the menu, the way it opens on the phone. */
-  .plane--dish .cut {
+  .plane--dish .cut,
+  .plane--reserve .cut {
     translate: 0 30%;
     transition: translate 600ms var(--ease);
   }
-  .plane--dish[data-on] .cut {
+  .plane--dish[data-on] .cut,
+  .plane--reserve[data-on] .cut {
     translate: 0;
   }
-  :is(.plane--stamps, .plane--home, .plane--dish)::before {
+  :is(.plane--stamps, .plane--home, .plane--dish, .plane--reserve)::before {
     display: none;
+  }
+
+  .plane--reserve .reserve-tag {
+    transition: opacity 300ms var(--ease);
+  }
+  .plane--reserve[data-on] .reserve-tag:nth-of-type(2) {
+    transition-delay: 300ms;
+  }
+  .plane--reserve[data-on] .reserve-tag:nth-of-type(3) {
+    transition-delay: 370ms;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .plane--reserve .cut {
+      translate: 0;
+      transition: none;
+    }
+    .plane--reserve .reserve-tag {
+      transition: none;
+    }
   }
 
   /* Channel: the address bar, the only part of the web the restaurant names itself. */

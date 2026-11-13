@@ -19,6 +19,7 @@ import { AnalyticsPulseCard } from "../components/analytics-pulse-card";
 import { AvailabilityCard } from "../components/availability-card";
 import { PendingRedemptionsCard } from "../components/pending-redemptions-card";
 import { PromotionsCard } from "../components/promotions-card";
+import { ReservationsTodayCard } from "../components/reservations-today-card";
 import { ServiceMetrics, ServiceMetricsSkeleton } from "../components/service-metrics";
 import { VisitsChartCard } from "../components/visits-chart-card";
 
@@ -28,9 +29,11 @@ export function DashboardPage() {
   const branch = useSelectedBranch();
   const hasAnalytics = useFeature("analytics");
   const hasLoyalty = useFeature("loyalty");
+  const hasReservations = useFeature("reservations");
   const hasPromotions = useFeature("promotions");
   const canInsights = useCan("analytics.read") && hasAnalytics && FEATURES.analytics;
   const canOperate = useCan("loyalty.operate") && hasLoyalty && tenant.loyaltyActive;
+  const canReservations = useCan("reservations.manage") && hasReservations && FEATURES.reservations;
   const canToggleAvailability = useCan("menu.toggleDishAvailability");
   const canExchangeRates = useCan("exchangeRates.write") && tenant.restaurant.sourceCurrency === "USD";
   return (
@@ -81,16 +84,13 @@ export function DashboardPage() {
         </div>
       ) : null}
       <div className="admin-dashboard-split">
+        <DashboardReservations branch={branch} allowed={canReservations} />
         {hasPromotions ? (
           <Suspense fallback={<CardSkeleton rows={3} title={i18n.t("dashboard___Promociones")} />}>
             <PromotionsCard />
           </Suspense>
         ) : null}
-        {canExchangeRates ? (
-          <Suspense fallback={<CardSkeleton rows={2} title={i18n.t("dashboard___Tasa VES")} />}>
-            <ExchangeRatesCard />
-          </Suspense>
-        ) : null}
+        <DashboardExchangeRates allowed={canExchangeRates} />
       </div>
       {canInsights ? <DashboardInsights loyaltyActive={tenant.loyaltyActive} /> : null}
     </div>
@@ -108,5 +108,25 @@ function DashboardInsights({ loyaltyActive }: { loyaltyActive: boolean }) {
       <AnalyticsPulseCard />
       {loyaltyActive ? <VisitsChartCard /> : null}
     </>
+  );
+}
+
+function DashboardReservations({
+  branch,
+  allowed,
+}: {
+  branch: ReturnType<typeof useSelectedBranch>;
+  allowed: boolean;
+}) {
+  if (!branch?.reservationsEnabled || !allowed) return null;
+  return <ReservationsTodayCard branchId={branch.id} />;
+}
+
+function DashboardExchangeRates({ allowed }: { allowed: boolean }) {
+  if (!allowed) return null;
+  return (
+    <Suspense fallback={<CardSkeleton rows={2} title={i18n.t("dashboard___Tasa VES")} />}>
+      <ExchangeRatesCard />
+    </Suspense>
   );
 }

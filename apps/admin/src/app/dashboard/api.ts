@@ -14,3 +14,5 @@ export {
 export { getDishAvailabilityMutationOptions } from "~/features/menu/api";
 export { getMenuCategoriesQueryOptions, getMenuDishesQueryOptions } from "~/shared/api";
 export { getPromotionsQueryOptions } from "~/features/promotions/api";
+
+export { getReservationDayQueryOptions } from "~/features/reservations/api";

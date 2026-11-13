@@ -52,6 +52,7 @@ export const STEP_LABELS: Partial<Record<ShowcaseStep, string>> = {
   "rate:1": "Tasa",
   "stamps:0": "Sellos",
   "stamps:1": "Pantalla de inicio",
+  "stamps:2": "Reservas",
   "soldOut:0": "Agotado",
   "soldOut:1": "Equipo",
   "views:0": "Más vistos",
@@ -64,7 +65,7 @@ export function showcaseLocale(step: ShowcaseStep): string {
   return "";
 }
 
-export function showcasePoster(slug: string, step: ShowcaseStep | "dish"): string {
+export function showcasePoster(slug: string, step: ShowcaseStep | "dish" | "reserve"): string {
   return `/assets/showcase/${slug}-${step.replace(":", "-")}.webp`;
 }
 
@@ -129,7 +130,7 @@ const es = {
 export const stackCaptures: Record<MarketId, { image: ShowcaseStep; steps: string; layout: Layout }[]> = {
   es: [
     { image: "domain:0", steps: "domain:0", layout: es.featured },
-    { image: "domain:1", steps: "domain:1 stamps:0 stamps:1", layout: es.featured },
+    { image: "domain:1", steps: "domain:1 stamps:0 stamps:1 stamps:2", layout: es.featured },
     { image: "language:0", steps: "language:0", layout: es.list },
     { image: "language:1", steps: "language:1", layout: es.list },
     { image: "language:2", steps: "language:2", layout: es.list },
@@ -142,7 +143,7 @@ export const stackCaptures: Record<MarketId, { image: ShowcaseStep; steps: strin
     // The bolívar line is painted over this capture from the live rate, so one capture serves the whole change.
     { image: "rate:0", steps: "rate:1", layout: ve.rate },
     { image: "domain:0", steps: "domain:0", layout: ve.featured },
-    { image: "domain:1", steps: "domain:1 stamps:0 stamps:1", layout: ve.featured },
+    { image: "domain:1", steps: "domain:1 stamps:0 stamps:1 stamps:2", layout: ve.featured },
     { image: "soldOut:0", steps: "soldOut:0", layout: ve.soldOut },
     { image: "soldOut:1", steps: "soldOut:1", layout: ve.soldOut },
     { image: "views:0", steps: "views:0 views:1", layout: ve.prices },

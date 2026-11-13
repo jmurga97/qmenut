@@ -8,7 +8,7 @@ export const SHOWCASE_STEPS = {
   language: ["language:0", "language:1", "language:2", "language:3"],
   rate: ["rate:0", "rate:1"],
   templates: ["templates:0", "templates:1", "templates:2", "templates:3", "templates:4"],
-  stamps: ["stamps:0", "stamps:1"],
+  stamps: ["stamps:0", "stamps:1", "stamps:2"],
   soldOut: ["soldOut:0", "soldOut:1"],
   views: ["views:0", "views:1"],
 } as const;

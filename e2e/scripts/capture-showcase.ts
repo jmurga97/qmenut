@@ -45,10 +45,26 @@ try {
             ]
           : [SHOWCASE_STEPS.templates[index]!];
       for (const step of steps) {
-        await mount({ origin: tenant.href, path: showcaseLocale(step), step });
+        const captureStep = step === "stamps:2" ? "stamps:1" : step;
+        await mount({
+          origin: tenant.href,
+          path: step === "stamps:2" ? "reservar" : showcaseLocale(step),
+          step: captureStep,
+        });
         const iframe = page.locator("iframe");
         const frame = page.frameLocator("iframe");
-        await frame.locator(`[data-showcase-step="${step}"]`).waitFor({ timeout: 30000 });
+        await frame.locator(`[data-showcase-step="${captureStep}"]`).waitFor({ timeout: 30000 });
+        if (step === "stamps:2") {
+          await frame.locator('qm-calendar button.day[data-state="available"]').first().click();
+          await frame.locator(".reservations-option:not(:disabled)").first().click();
+          await frame.locator(".reservations-option:not(:disabled)").first().click();
+          await frame.locator("#reservations-contact-title").waitFor();
+          await settle(tenant.href);
+          const filename = `${tenant.slug}-reserve.png`;
+          await iframe.screenshot({ path: fileURLToPath(new URL(filename, output)), animations: "disabled" });
+          console.log(filename);
+          continue;
+        }
         await settle(tenant.href);
         const filename = `${tenant.slug}-${step.replace(":", "-")}.png`;
         await iframe.screenshot({ path: fileURLToPath(new URL(filename, output)), animations: "disabled" });

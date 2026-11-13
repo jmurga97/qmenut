@@ -13,7 +13,7 @@ const { market, step, inline = false, rate = 0 } = Astro.props;
 const tenant = showcaseTenants[market][0]!;
 const facts = stackFacts[market];
 const captures = stackCaptures[market];
-const src = (name: ShowcaseStep | "dish") => showcasePoster(tenant.slug, name);
+const src = (name: ShowcaseStep | "dish" | "reserve") => showcasePoster(tenant.slug, name);
 // Every element tagged data-for is shown only on the listed steps; the controller moves data-step.
 const on = (steps: string) => ({ "data-for": steps, "data-on": steps.split(" ").includes(step) ? "" : undefined });
 const host = tenant.href.replace("https://", "").replace(".dev.", ".");
@@ -180,6 +180,17 @@ const plane = {
           <img src={src("dish")} width="390" height="700" loading="lazy" decoding="async" alt="" />
         </span>
       </div>
+      <div class="plane plane--reserve" style="--z: 3.6; --i: 9" {...on("stamps:2")}>
+        <span class="cut" style="--t: 0; --b: 100">
+          <img src={src("reserve")} width="390" height="700" loading="lazy" decoding="async" alt="" />
+        </span>
+        <span class="wire-tag reserve-tag" style="--x: 10%; --y: 36%" {...on("stamps:2")}>
+          Confirmación por correo
+        </span>
+        <span class="wire-tag reserve-tag" style="--x: 68%; --y: 65%" {...on("stamps:2")}>
+          Recordatorio 24 h antes
+        </span>
+      </div>
       <div class="plane plane--home" style="--z: 2.6; --i: 9" {...on("stamps:1")}>
         <span class="home-tiles">
           {Array.from({ length: 16 }, (_, index) => (
@@ -212,7 +223,7 @@ const plane = {
           </span>
           <span
             {...on(
-              "rate:1 domain:0 language:0 language:1 language:2 language:3 stamps:0 stamps:1 soldOut:0 soldOut:1 views:0 views:1",
+              "rate:1 domain:0 language:0 language:1 language:2 language:3 stamps:0 stamps:1 stamps:2 soldOut:0 soldOut:1 views:0 views:1",
             )}
           >
             {host}
