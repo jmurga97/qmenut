@@ -85,7 +85,7 @@ async function buildLoyaltyRewards({
 
   const [visitors, cards] = await Promise.all([
     getLoyaltyVisitors(loyaltyInput),
-    getCardsSummary({ activeCutoffMs: toMs - 30 * 24 * 60 * 60 * 1000, db, restaurantId }),
+    getCardsSummary({ activeCutoffMs: toMs - 30 * 24 * 60 * 60 * 1000 + 1, activeUntilMs: toMs, db, restaurantId }),
   ]);
   const [statuses, validatedRedemptions] = await Promise.all([
     getRedemptionStatusCounts(loyaltyInput),

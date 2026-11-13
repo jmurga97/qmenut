@@ -1,4 +1,5 @@
 import { listBranches } from "@qmenut/db/repositories/admin-branches.repository";
+import { getLoyaltyProgram } from "@qmenut/db/repositories/loyalty-admin.repository";
 import { getRestaurantById } from "@qmenut/db/repositories/restaurants.repository";
 import { TRPCError } from "@trpc/server";
 
@@ -11,6 +12,7 @@ import type { RestaurantSummary } from "@qmenut/db/repositories/restaurants.repo
 export interface AdminTenantContext {
   restaurant: RestaurantSummary;
   branches: AdminBranchSummary[];
+  loyaltyActive: boolean;
   membershipId: string;
   roleCode: RestaurantRoleCode;
 }
@@ -21,9 +23,10 @@ interface GetTenantContextInput {
 }
 
 export async function getTenantContext({ db, tenant }: GetTenantContextInput): Promise<AdminTenantContext> {
-  const [restaurant, branches] = await Promise.all([
+  const [restaurant, branches, program] = await Promise.all([
     getRestaurantById({ db, restaurantId: tenant.restaurantId }),
     listBranches({ db, restaurantId: tenant.restaurantId }),
+    getLoyaltyProgram({ db, restaurantId: tenant.restaurantId }),
   ]);
 
   if (!restaurant) {
@@ -33,6 +36,7 @@ export async function getTenantContext({ db, tenant }: GetTenantContextInput): P
   return {
     restaurant,
     branches,
+    loyaltyActive: program?.isActive ?? false,
     membershipId: tenant.membershipId,
     roleCode: tenant.roleCode,
   };

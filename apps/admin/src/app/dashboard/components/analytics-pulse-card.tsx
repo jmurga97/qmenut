@@ -10,10 +10,16 @@ import { Skeleton } from "~/shared/components/state/loading-state";
 import { formatNumber, formatPercent } from "~/shared/services/format";
 
 const LABELS = [
-  i18n.t("dashboard___Cargas de carta"),
-  i18n.t("dashboard___Tráfico QR"),
-  i18n.t("dashboard___Aperturas / carga"),
-  i18n.t("dashboard___Acciones de contacto"),
+  i18n.t("dashboard___Visitas a la carta"),
+  i18n.t("dashboard___Desde el QR"),
+  i18n.t("dashboard___Platos vistos por visita"),
+  i18n.t("dashboard___Contactos"),
+] as const;
+const NOTES = [
+  i18n.t("dashboard___Veces que se abrió tu carta (no personas únicas)."),
+  i18n.t("dashboard___Porcentaje de visitas que llegaron escaneando tu QR."),
+  i18n.t("dashboard___Media de platos que alguien abre cada vez que entra."),
+  i18n.t("dashboard___Toques en llamar, WhatsApp, mapa o redes."),
 ] as const;
 
 /** Labels are static; values are skeletons until the snapshot arrives. */
@@ -22,7 +28,7 @@ function PulseMetrics({ values }: { values?: string[] }) {
     <dl aria-busy={values ? undefined : true} className="admin-dashboard-pulse-metrics">
       {LABELS.map((label, index) => (
         <div className="admin-dashboard-pulse-metric" key={label}>
-          <dt>{label}</dt>
+          <dt title={NOTES[index]}>{label}</dt>
           <dd>{values?.[index] ?? <Skeleton height={"1.5rem"} width={"5rem"} />}</dd>
         </div>
       ))}

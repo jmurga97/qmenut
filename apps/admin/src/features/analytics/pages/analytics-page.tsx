@@ -99,34 +99,28 @@ function AnalyticsSummary({ snapshot }: { snapshot: ReturnType<typeof useAnalyti
       className={"admin-metric-summary analytics-metric-summary"}
     >
       <AnalyticsMetric
-        label={i18n.t("analytics___Cargas de carta")}
-        note={i18n.t("analytics___Páginas cargadas, todas las sucursales")}
+        label={i18n.t("analytics___Visitas a la carta")}
+        note={i18n.t("analytics___Veces que se abrió tu carta (no personas únicas).")}
         primary
         trend={comparison ? getAnalyticsTrend(snapshot, "loads") : undefined}
         value={formatNumber(current.loads)}
       />
       <div className="admin-metric-supporting">
         <AnalyticsMetric
-          label={i18n.t("analytics___Visitas efímeras")}
-          note={i18n.t("analytics___No son clientes únicos")}
-          trend={comparison ? getAnalyticsTrend(snapshot, "ephemeral_visits") : undefined}
-          value={formatNumber(current.ephemeralVisits)}
-        />
-        <AnalyticsMetric
-          label={i18n.t("analytics___Aperturas / carga")}
-          note={i18n.t("analytics___Puede superar 1×")}
+          label={i18n.t("analytics___Platos vistos por visita")}
+          note={i18n.t("analytics___Media de platos que alguien abre cada vez que entra.")}
           trend={comparison ? getAnalyticsTrend(snapshot, "dish_opens_per_load") : undefined}
           value={formatMultiplier(current.menu.opensPerLoad)}
         />
         <AnalyticsMetric
-          label={i18n.t("analytics___Tráfico QR")}
-          note={i18n.t("analytics___Cargas atribuidas al enlace QR")}
+          label={i18n.t("analytics___Desde el QR")}
+          note={i18n.t("analytics___Porcentaje de visitas que llegaron escaneando tu QR.")}
           trend={comparison ? getAnalyticsTrend(snapshot, "qr_load_share") : undefined}
           value={formatPercent(current.qrLoadShare)}
         />
         <AnalyticsMetric
-          label={i18n.t("analytics___Acciones de contacto")}
-          note={i18n.t("analytics___Toques registrados")}
+          label={i18n.t("analytics___Contactos")}
+          note={i18n.t("analytics___Toques en llamar, WhatsApp, mapa o redes.")}
           trend={comparison ? getAnalyticsTrend(snapshot, "contact_actions") : undefined}
           value={formatNumber(current.contactPwa.contactActionsTotal)}
         />
@@ -152,11 +146,6 @@ function AnalyticsTrafficPanel({ current }: { current: AnalyticsSnapshot["curren
           label={i18n.t("analytics___Carta instalada")}
           note={i18n.t("analytics___Uso en modo PWA")}
           value={formatPercent(current.standaloneShare)}
-        />
-        <DetailStat
-          label={i18n.t("analytics___Visitas efímeras")}
-          note={i18n.t("analytics___Sumadas por bloque analítico")}
-          value={formatNumber(current.ephemeralVisits)}
         />
       </div>
       <div className={"analytics-subsection"}>
@@ -216,7 +205,7 @@ function AnalyticsMenuPanel({ current }: { current: AnalyticsSnapshot["current"]
           value={formatNumber(current.menu.dishOpensTotal)}
         />
         <DetailStat
-          label={i18n.t("analytics___Aperturas / carga")}
+          label={i18n.t("analytics___Platos vistos por visita")}
           value={formatMultiplier(current.menu.opensPerLoad)}
         />
         <DetailStat label={i18n.t("analytics___Desde destacados")} value={formatNumber(current.menu.featuredOpens)} />
@@ -240,11 +229,6 @@ function AnalyticsMenuPanel({ current }: { current: AnalyticsSnapshot["current"]
           <InlineStat
             label={i18n.t("analytics___Categorías alcanzadas")}
             value={formatNumber(current.menu.categoriesReached)}
-          />
-          <InlineStat label={i18n.t("analytics___Selecciones")} value={formatNumber(current.menu.categoriesSelected)} />
-          <InlineStat
-            label={i18n.t("analytics___Mayor profundidad")}
-            value={current.menu.maxDepthPosition === null ? "—" : formatNumber(current.menu.maxDepthPosition)}
           />
         </div>
       </div>
@@ -344,14 +328,6 @@ export function AnalyticsPage() {
                 label={i18n.t("analytics___Instalaciones")}
                 value={formatNumber(current.contactPwa.pwaInstalls)}
               />
-              <DetailStat
-                label={i18n.t("analytics___Prompt aceptado")}
-                value={formatNumber(current.contactPwa.pwaPromptAccepted)}
-              />
-              <DetailStat
-                label={i18n.t("analytics___Prompt descartado")}
-                value={formatNumber(current.contactPwa.pwaPromptDismissed)}
-              />
             </div>
             <div className={"analytics-subsection"}>
               <h3>{i18n.t("analytics___Canales de contacto")}</h3>
@@ -393,7 +369,8 @@ export function AnalyticsPage() {
                 value={formatNumber(current.loyalty.visits)}
               />
               <DetailStat
-                label={i18n.t("analytics___Visita repetida")}
+                label={i18n.t("analytics___Tasa de repetición")}
+                note={i18n.t("analytics___Porcentaje de clientes con dos o más visitas en el periodo.")}
                 value={formatNullablePercent(current.loyalty.repeatVisitRate)}
               />
               <DetailStat
@@ -401,7 +378,8 @@ export function AnalyticsPage() {
                 value={formatNullablePercent(current.loyalty.recurrence30dRate)}
               />
               <DetailStat
-                label={i18n.t("analytics___Tarjetas activas")}
+                label={i18n.t("analytics___Tarjetas con uso (30 d)")}
+                note={i18n.t("analytics___Clientes con al menos un sello en los últimos 30 días.")}
                 value={formatNumber(current.loyalty.cardsActiveLast30Days)}
               />
             </div>

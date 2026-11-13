@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_auth/")({
       const range = getVisitsRange(deps.period);
       jobs.push(
         queryClient.query({ ...api.getAnalyticsSnapshotQueryOptions({ period: "15d", trpc }), staleTime: "static" }),
-        queryClient.query({ ...api.getLoyaltySummaryQueryOptions({ trpc }), staleTime: "static" }),
+        queryClient.query({ ...api.getAnalyticsSnapshotQueryOptions({ period: "30d", trpc }), staleTime: "static" }),
         queryClient.query({ ...api.getLoyaltyVisitsQueryOptions({ ...range, trpc }), staleTime: "static" }),
       );
     }

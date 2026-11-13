@@ -1,6 +1,7 @@
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, isNull, sql } from "drizzle-orm";
 
 import { branchPhotos, branchSchedules, branches } from "../schema/branches";
+import { reservationSettings } from "../schema/reservations";
 
 import type { DrizzleDb } from "../client";
 import type { PlanCode } from "@qmenut/permissions";
@@ -12,6 +13,7 @@ export interface AdminBranchSummary {
   customDomain: string | null;
   planCode: PlanCode;
   isActive: boolean;
+  reservationsEnabled: boolean;
 }
 
 interface ListBranchesInput {
@@ -27,8 +29,10 @@ export async function listBranches({ db, restaurantId }: ListBranchesInput): Pro
       customDomain: branches.customDomain,
       planCode: branches.planCode,
       isActive: branches.isActive,
+      reservationsEnabled: sql<boolean>`coalesce(${reservationSettings.isEnabled}, 0)`.mapWith(Boolean),
     })
     .from(branches)
+    .leftJoin(reservationSettings, eq(reservationSettings.branchId, branches.id))
     .where(and(eq(branches.restaurantId, restaurantId), isNull(branches.deletedAt)))
     .orderBy(asc(branches.createdAt))
     .all();

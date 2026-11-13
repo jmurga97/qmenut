@@ -384,15 +384,21 @@ export interface CardsSummary {
 
 interface CardsSummaryInput {
   activeCutoffMs: number;
+  activeUntilMs: number;
   db: DrizzleDb;
   restaurantId: string;
 }
 
-export async function getCardsSummary({ activeCutoffMs, db, restaurantId }: CardsSummaryInput): Promise<CardsSummary> {
+export async function getCardsSummary({
+  activeCutoffMs,
+  activeUntilMs,
+  db,
+  restaurantId,
+}: CardsSummaryInput): Promise<CardsSummary> {
   const [row] = await db.all<{ active_last_30: number; stamps_total: number; total: number }>(sql`
     SELECT
       COUNT(*) AS total,
-      SUM(CASE WHEN last_visit_at IS NOT NULL AND last_visit_at >= ${activeCutoffMs} THEN 1 ELSE 0 END) AS active_last_30,
+      SUM(CASE WHEN EXISTS (SELECT 1 FROM customer_visits v WHERE v.customer_id = customer_restaurants.customer_id AND v.restaurant_id = customer_restaurants.restaurant_id AND v.created_at BETWEEN ${activeCutoffMs} AND ${activeUntilMs}) THEN 1 ELSE 0 END) AS active_last_30,
       SUM(stamps_balance) AS stamps_total
     FROM customer_restaurants
     WHERE restaurant_id = ${restaurantId}

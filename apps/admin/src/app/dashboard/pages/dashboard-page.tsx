@@ -30,7 +30,7 @@ export function DashboardPage() {
   const hasLoyalty = useFeature("loyalty");
   const hasPromotions = useFeature("promotions");
   const canInsights = useCan("analytics.read") && hasAnalytics && FEATURES.analytics;
-  const canOperate = useCan("loyalty.operate") && hasLoyalty;
+  const canOperate = useCan("loyalty.operate") && hasLoyalty && tenant.loyaltyActive;
   const canToggleAvailability = useCan("menu.toggleDishAvailability");
   const canExchangeRates = useCan("exchangeRates.write") && tenant.restaurant.sourceCurrency === "USD";
   return (
@@ -92,15 +92,21 @@ export function DashboardPage() {
           </Suspense>
         ) : null}
       </div>
-      {canInsights ? (
-        <>
-          <Suspense fallback={<ServiceMetricsSkeleton />}>
-            <ServiceMetrics />
-          </Suspense>
-          <AnalyticsPulseCard />
-          <VisitsChartCard />
-        </>
-      ) : null}
+      {canInsights ? <DashboardInsights loyaltyActive={tenant.loyaltyActive} /> : null}
     </div>
+  );
+}
+
+function DashboardInsights({ loyaltyActive }: { loyaltyActive: boolean }) {
+  return (
+    <>
+      {loyaltyActive ? (
+        <Suspense fallback={<ServiceMetricsSkeleton />}>
+          <ServiceMetrics />
+        </Suspense>
+      ) : null}
+      <AnalyticsPulseCard />
+      {loyaltyActive ? <VisitsChartCard /> : null}
+    </>
   );
 }

@@ -1,3 +1,5 @@
+import { getTenantQueryOptions } from "~/shared/api";
+
 import type { QueryClient } from "@tanstack/react-query";
 import type { TrpcOptionsProxy } from "~/lib/trpc";
 
@@ -28,6 +30,12 @@ export function getReservationMutationOptions({ queryClient, trpc }: ApiContext 
     addClosure: trpc.admin.reservations.addClosure.mutationOptions(options),
     cancel: trpc.admin.reservations.cancel.mutationOptions(options),
     removeClosure: trpc.admin.reservations.removeClosure.mutationOptions(options),
-    saveSettings: trpc.admin.reservations.saveSettings.mutationOptions(options),
+    saveSettings: trpc.admin.reservations.saveSettings.mutationOptions({
+      onSettled: () =>
+        Promise.all([
+          options.onSettled(),
+          queryClient.invalidateQueries({ queryKey: getTenantQueryOptions({ trpc }).queryKey }),
+        ]),
+    }),
   };
 }

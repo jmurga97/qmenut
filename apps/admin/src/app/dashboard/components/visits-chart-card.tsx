@@ -19,7 +19,7 @@ export function VisitsChartCard() {
   return (
     <section className={"admin-card admin-visits-card"}>
       <div className="admin-toolbar">
-        <h2>{i18n.t("dashboard___Visitas")}</h2>
+        <h2>{i18n.t("dashboard___Visitas con sello")}</h2>
         <SegmentedToggle
           ariaLabel={i18n.t("dashboard___Periodo de visitas")}
           onChange={(value) => void setPeriod(value)}

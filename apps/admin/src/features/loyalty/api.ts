@@ -1,3 +1,5 @@
+import { getTenantQueryOptions } from "~/shared/api";
+
 import type { QueryClient } from "@tanstack/react-query";
 import type { LoyaltyInsightsSearch } from "~/features/loyalty/types";
 import type { TrpcOptionsProxy } from "~/lib/trpc";
@@ -48,7 +50,13 @@ export function getLoyaltyMutationOptions({ queryClient, trpc }: MutationContext
     declineStampRequest: trpc.admin.loyalty.declineStampRequest.mutationOptions(options),
     deleteReward: trpc.admin.loyalty.deleteReward.mutationOptions(options),
     reject: trpc.admin.loyalty.rejectRedemption.mutationOptions(options),
-    saveProgram: trpc.admin.loyalty.saveProgram.mutationOptions(options),
+    saveProgram: trpc.admin.loyalty.saveProgram.mutationOptions({
+      onSettled: () =>
+        Promise.all([
+          options.onSettled(),
+          queryClient.invalidateQueries({ queryKey: getTenantQueryOptions({ trpc }).queryKey }),
+        ]),
+    }),
     undo: trpc.admin.loyalty.undo.mutationOptions(options),
     undoStampRequest: trpc.admin.loyalty.undoStampRequest.mutationOptions(options),
     updateReward: trpc.admin.loyalty.updateReward.mutationOptions(options),
