@@ -270,7 +270,8 @@ test("derives loyalty availability and invalidates public SEO when the program i
     expect(getTrpcData<{ publicFeatures: { loyalty: boolean } }>(restoredMenu).publicFeatures.loyalty).toBe(true);
     const restoredSitemap = await request.get(sitemapUrl);
     const restoredSitemapBody = await restoredSitemap.text();
-    expect(restoredSitemapBody).toContain("https://tapas.localhost/puntos");
+    expect(restoredSitemap.headers()["x-qmenut-cache"]).toBe("MISS");
+    expect(restoredSitemapBody).not.toContain("https://tapas.localhost/puntos");
   } finally {
     const restoredProgram = await callTrpcQuery(page, "admin.loyalty.getProgram");
     const current = getTrpcData<{

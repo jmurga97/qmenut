@@ -26,7 +26,7 @@ test("serves a development-wide noindex policy and localized sitemap through the
   // One <url> per language version (es, en).
   expect((sitemap.match(/<url>/g) ?? []).length).toBe(SITEMAP_PATHS.length * 2);
   for (const path of SITEMAP_PATHS) {
-    expect(sitemap).toContain(`<loc>https://fine.localhost${path}</loc>`);
+    expect(sitemap).toContain(`<loc>https://fine.localhost${path || "/"}</loc>`);
     expect(sitemap).toContain(`<loc>https://fine.localhost/en${path}</loc>`);
   }
   expect(sitemap).not.toContain("https://fine.localhost/puntos");

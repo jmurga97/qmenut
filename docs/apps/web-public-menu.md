@@ -106,8 +106,8 @@ The related helpers are:
 - `build-promotions-json-ld.ts` emits promotions as schema.org offers.
 - `robots[.]txt.ts` emits the production crawler policy and host-specific sitemap URL, or a
   global restrictive policy in development.
-- `sitemap[.]xml.ts` emits localized alternates for every currently available public route.
-  It omits `/puntos` when the server-derived loyalty capability is disabled. Its `lastmod`
+- `sitemap[.]xml.ts` emits localized alternates for searchable public routes and always omits
+  the noindex loyalty page `/puntos`. Its `lastmod`
   value reads `menuVersion:{host}`, the same KV version used in the edge-cache key; admin
   loyalty writes bump that version so navigation, `/puntos`, and the sitemap converge on
   the current program state.
