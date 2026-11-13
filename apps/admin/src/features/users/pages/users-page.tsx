@@ -18,7 +18,7 @@ import type { AdminUser, CreateUserFormValues } from "~/features/users/types";
 const ROLE_LABELS: Record<AdminUser["roleCode"], string> = {
   owner: i18n.t("users___Propietario"),
   admin: i18n.t("users___Administrador"),
-  staff: i18n.t("users___Equipo"),
+  staff: i18n.t("users___Staff"),
 };
 
 function membershipStatus(user: AdminUser) {
@@ -68,6 +68,17 @@ function UserRowActions({ controller, user }: { controller: ReturnType<typeof us
         ...(user.isActive
           ? []
           : [{ id: "activate", label: i18n.t("users___Reactivar"), onSelect: () => controller.activate(user) }]),
+        ...(!user.isActive && !isOwnMembership
+          ? [
+              {
+                id: "remove",
+                label: i18n.t("users___Eliminar"),
+                onSelect: () => controller.setRemovalTarget(user),
+                separatorBefore: true,
+                tone: "destructive" as const,
+              },
+            ]
+          : []),
         ...(user.isActive
           ? [
               {
@@ -212,6 +223,23 @@ export function UsersPage() {
           rows={controller.rows}
         />
       </section>
+      <ConfirmAction
+        cancelLabel={i18n.t("users___Cancelar")}
+        confirmLabel={i18n.t("users___Eliminar")}
+        message={
+          <>
+            {i18n.t("users___Se eliminará la membresía de")} <strong>{controller.removalTarget?.name}</strong>{" "}
+            {i18n.t("users___de este restaurante.")}
+          </>
+        }
+        onConfirm={controller.confirmRemove}
+        onOpenChange={(open) => {
+          if (!open && !controller.removing) controller.setRemovalTarget(null);
+        }}
+        open={Boolean(controller.removalTarget)}
+        pending={controller.removing}
+        title={i18n.t("users___Eliminar membresía")}
+      />
       <ConfirmAction
         cancelLabel={i18n.t("users___Cancelar")}
         confirmLabel={i18n.t("users___Desactivar")}

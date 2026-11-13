@@ -15,7 +15,7 @@ import type { RestaurantRoleCode } from "@qmenut/permissions";
 const ROLE_LABELS: Record<RestaurantRoleCode, string> = {
   owner: i18n.t("auth___Propietario"),
   admin: i18n.t("auth___Administrador"),
-  staff: i18n.t("auth___Equipo"),
+  staff: i18n.t("auth___Staff"),
 };
 
 export function SelectRestaurantPage() {

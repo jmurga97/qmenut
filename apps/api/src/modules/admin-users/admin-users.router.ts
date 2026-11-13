@@ -1,5 +1,6 @@
 import {
   createRestaurantUser,
+  deleteRestaurantUser,
   getRestaurantUser,
   listRestaurantUsers,
   setRestaurantUserActive,
@@ -200,6 +201,30 @@ export const adminUsersRouter = router({
       restaurantId: ctx.tenant.restaurantId,
     });
     return getRestaurantUser({ db: ctx.db, membershipId: input.membershipId, restaurantId: ctx.tenant.restaurantId });
+  }),
+
+  remove: usersProcedure.input(membershipIdSchema).mutation(async ({ ctx, input }) => {
+    requireUsersManager(ctx);
+    if (input.membershipId === ctx.tenant.membershipId) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "No puedes eliminar tu propia membresía" });
+    }
+    const membership = await getRestaurantUser({
+      db: ctx.db,
+      membershipId: input.membershipId,
+      restaurantId: ctx.tenant.restaurantId,
+    });
+    if (!membership) throw new TRPCError({ code: "NOT_FOUND", message: "Membresía no encontrada" });
+    assertEditableMembership(membership.roleCode, membership.email);
+    if (
+      membership.isActive ||
+      !(await deleteRestaurantUser({
+        db: ctx.db,
+        membershipId: input.membershipId,
+        restaurantId: ctx.tenant.restaurantId,
+      }))
+    ) {
+      throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Desactiva la membresía antes de eliminarla" });
+    }
   }),
 
   resendInvite: usersProcedure.input(membershipIdSchema).mutation(async ({ ctx, input }) => {

@@ -18,11 +18,13 @@ export function useUsersController() {
   const { data: tenant } = useQuery(getTenantQueryOptions({ trpc }));
   const mutationOptions = getUserMutationOptions({ queryClient, trpc });
   const createMutation = useMutation(mutationOptions.create);
+  const removeMutation = useMutation(mutationOptions.remove);
   const resendMutation = useMutation(mutationOptions.resendInvite);
   const activeMutation = useMutation(mutationOptions.setActive);
   const roleMutation = useMutation(mutationOptions.updateRole);
   const [createOpen, setCreateOpen] = useState(false);
   const [deactivationTarget, setDeactivationTarget] = useState<AdminUser | null>(null);
+  const [removalTarget, setRemovalTarget] = useState<AdminUser | null>(null);
   const form = useForm<CreateUserFormValues>({
     defaultValues: { email: "", name: "", roleCode: "staff" },
     resolver: zodResolver(createUserFormSchema),
@@ -90,6 +92,19 @@ export function useUsersController() {
     );
   }
 
+  function confirmRemove() {
+    if (!removalTarget) return;
+    removeMutation.mutate(
+      { membershipId: removalTarget.membershipId },
+      {
+        onSuccess: () => {
+          toast.success(i18n.t("users___Membresía eliminada."));
+          setRemovalTarget(null);
+        },
+      },
+    );
+  }
+
   function resendInvite(user: AdminUser) {
     resendMutation.mutate(
       { membershipId: user.membershipId },
@@ -109,6 +124,7 @@ export function useUsersController() {
 
   function isPending(membershipId: string): boolean {
     return (
+      (removeMutation.isPending && removeMutation.variables.membershipId === membershipId) ||
       (roleMutation.isPending && roleMutation.variables.membershipId === membershipId) ||
       (activeMutation.isPending && activeMutation.variables.membershipId === membershipId) ||
       (resendMutation.isPending && resendMutation.variables.membershipId === membershipId)
@@ -119,6 +135,7 @@ export function useUsersController() {
     activate,
     askToDeactivate,
     confirmDeactivate,
+    confirmRemove,
     create,
     createBusy: createMutation.isPending,
     createOpen,
@@ -128,6 +145,9 @@ export function useUsersController() {
     isPending,
     isLoading: query.isLoading,
     isRefetching: query.isRefetching,
+    removalTarget,
+    removing: removeMutation.isPending,
+    setRemovalTarget,
     resendInvite,
     rows: (query.data ?? []) as AdminUser[],
     tenant,

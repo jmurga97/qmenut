@@ -209,6 +209,25 @@ export async function setRestaurantUserActive({
   return result.meta.changes === 1;
 }
 
+export async function deleteRestaurantUser({
+  db,
+  membershipId,
+  restaurantId,
+}: GetRestaurantUserInput): Promise<boolean> {
+  const result = await db
+    .delete(restaurantUsers)
+    .where(
+      and(
+        eq(restaurantUsers.id, membershipId),
+        eq(restaurantUsers.restaurantId, restaurantId),
+        eq(restaurantUsers.isActive, false),
+        ne(restaurantUsers.roleCode, "owner"),
+      ),
+    )
+    .run();
+  return result.meta.changes === 1;
+}
+
 interface UpdateInviteStatusInput extends RestaurantUsersInput {
   inviteLastAttemptAt: number;
   inviteLastErrorCode: string | null;

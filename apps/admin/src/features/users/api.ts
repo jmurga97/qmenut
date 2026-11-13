@@ -14,6 +14,7 @@ export function getUserMutationOptions({ queryClient, trpc }: ApiContext) {
   const onSuccess = () => queryClient.invalidateQueries({ queryKey: getUsersQueryOptions({ trpc }).queryKey });
   return {
     create: trpc.admin.users.create.mutationOptions({ onSuccess }),
+    remove: trpc.admin.users.remove.mutationOptions({ onSuccess }),
     resendInvite: trpc.admin.users.resendInvite.mutationOptions({ onSuccess }),
     setActive: trpc.admin.users.setActive.mutationOptions({ onSuccess }),
     updateRole: trpc.admin.users.updateRole.mutationOptions({ onSuccess }),
