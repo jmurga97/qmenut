@@ -475,8 +475,9 @@
     grid-template-columns: minmax(0, 28rem);
     gap: var(--ming-space-6);
   }
+  /* The preview is absolutely positioned, so its column needs a width of its own: a phone, at most. */
   .signup--brand .signup-body {
-    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 24rem) minmax(0, 390px);
   }
   .signup-fields {
     display: grid;

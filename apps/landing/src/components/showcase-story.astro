@@ -14,9 +14,10 @@ const content = markets[market];
 // One stack carries every feature; the templates close the story once the menu is fully built.
 const templates = content.sections.find((section) => section.stage === "templates")!;
 const sections = content.sections.filter((section) => section !== templates);
-// Mobile stacks show the step that carries their section best: English for languages, the new rate.
+// Mobile stacks show the step that carries their section best: English for languages, the new rate, and the stamp
+// card, over which the reservation rises once the stack is on screen.
 const inlineStep = (stage: keyof typeof SHOWCASE_STEPS): ShowcaseStep =>
-  stage === "language" ? "language:1" : finalStep(stage);
+  stage === "language" ? "language:1" : stage === "stamps" ? "stamps:0" : finalStep(stage);
 ---
 
 <div class="container story-block" data-story-block>

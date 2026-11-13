@@ -563,6 +563,21 @@
     animation: price-arrive 300ms 1200ms var(--ease) both;
   }
 
+  /* Phone: the stamp card shows first, then the reservation rises over it like the dish card does. */
+  .stack--inline[data-motion][data-live][data-step="stamps:0"] .plane--reserve,
+  .stack--inline[data-motion][data-live][data-step="stamps:0"] .reserve-tag {
+    animation: reserve-show 300ms var(--reserve-at, 1600ms) var(--ease) both;
+  }
+  .stack--inline[data-motion][data-live][data-step="stamps:0"] .plane--reserve .cut {
+    animation: reserve-rise 600ms 1600ms var(--ease) both;
+  }
+  .stack--inline[data-motion][data-live][data-step="stamps:0"] .reserve-tag {
+    --reserve-at: 2300ms;
+  }
+  .stack--inline[data-motion][data-live][data-step="stamps:0"] .reserve-tag + .reserve-tag {
+    --reserve-at: 2370ms;
+  }
+
   .admin-wire {
     flex: 1;
     height: 0.55em;
@@ -1212,6 +1227,22 @@
 @keyframes skeleton-pulse {
   to {
     opacity: 0.45;
+  }
+}
+@keyframes reserve-show {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes reserve-rise {
+  from {
+    translate: 0 30%;
+  }
+  to {
+    translate: 0;
   }
 }
 @keyframes link-pulse {

@@ -55,10 +55,9 @@ try {
         const frame = page.frameLocator("iframe");
         await frame.locator(`[data-showcase-step="${captureStep}"]`).waitFor({ timeout: 30000 });
         if (step === "stamps:2") {
+          // The slot step reads as a reservation at a glance: calendar, chosen day and its free times.
           await frame.locator('qm-calendar button.day[data-state="available"]').first().click();
-          await frame.locator(".reservations-option:not(:disabled)").first().click();
-          await frame.locator(".reservations-option:not(:disabled)").first().click();
-          await frame.locator("#reservations-contact-title").waitFor();
+          await frame.locator(".reservations-option:not(:disabled)").first().waitFor();
           await settle(tenant.href);
           const filename = `${tenant.slug}-reserve.webp`;
           const png = await iframe.screenshot({ animations: "disabled" });
